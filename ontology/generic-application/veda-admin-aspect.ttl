@@ -701,6 +701,11 @@ v-s:NewsBundle
   rdfs:label "Новости"@ru ;
   rdfs:label "News"@en ;
 .
+v-s:UploadTtlBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Загрузка ttl"@ru ;
+  rdfs:label "Upload ttl"@en ;
+.
 
 v-ui:AdministrationAspectTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -721,6 +726,7 @@ v-ui:AdministrationAspectTemplate
     <li role="presentation"><a href="#Modules" aria-controls="Modules" role="tab" data-toggle="tab" about="v-s:ModulesBundle" property="rdfs:label"></a></li>
     <li role="presentation"><a href="#BugReports" aria-controls="BugReports" role="tab" data-toggle="tab" about="v-s:BugReportsBundle" property="rdfs:label"></a></li>
     <li role="presentation"><a href="#News" aria-controls="News" role="tab" data-toggle="tab" about="v-s:NewsBundle" property="rdfs:label"></a></li>
+    <li role="presentation"><a href="#UploadTtl" aria-controls="UploadTtl" role="tab" data-toggle="tab" about="v-s:UploadTtlBundle" property="rdfs:label"></a></li>
   </ul>
   <br>
   <!-- Tab panes -->
@@ -892,6 +898,11 @@ v-ui:AdministrationAspectTemplate
         </div>
         <div class="panel-body" about="v-s:NewsSearch" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
       </div>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="UploadTtl">
+      <h3 about="v-s:UploadTtlBundle" property="rdfs:label"></h3>
+      <div about="@" data-embedded="true" data-template="v-up:UploadTemplate"></div>
     </div>
 
   </div>

@@ -1,0 +1,219 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+
+@prefix v-up: <http://semantic-machines.com/veda/veda-function-upload/> .
+<http://semantic-machines.com/veda/veda-function-upload>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология функции 'Загрузка ttl' системы Веда"@ru ;
+  rdfs:label "Veda system function 'Upload ttl' ontology"@en ;
+#  owl:versionInfo "0.1" ;
+  v-s:loadPriority 9 ;
+.
+
+########## UPLOAD TTL FUNCTION ###########
+
+v-up:FunctionUploadTTL
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Function ;
+  rdfs:label "Функция 'Задачи'"@ru ;
+  rdfs:label "Function 'Tasks'"@en ;
+  v-ui:hasModel v-up:FunctionUploadTTLModel ;
+  v-ui:hasTemplate v-up:UploadTemplate ;
+.
+v-up:FunctionUploadTTLModel
+  rdf:type v-ui:ClassModel ;
+  rdfs:label "Шаблон для класса v-cal:FunctionCalendar"@ru ;
+  rdfs:label "v-cal:FunctionCalendar class template"@en ;
+  v-ui:forClass v-up:FunctionUploadTTL ;
+  v-s:script """
+  """
+.
+v-up:UploadTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-up:FunctionUploadTTL"@ru ;
+  rdfs:label "v-up:FunctionUploadTTL class template"@en ;
+  v-ui:forClass v-up:FunctionUploadTTL ;
+  v-ui:template """
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+      <div class="col-md-10">
+        <input type="checkbox" class="toggle-select scheme">Схема
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="action btn btn-primary btn-block view pull-right" id="upload">Загрузить</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel-body">
+    <em about="v-s:attachment" property="rdfs:label"></em>
+    <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
+    <input type="file" id="files" multiple></input>
+    <div id="fileDisplayArea"></div><br>
+    <div id="fileJson"></div>
+  </div>
+</div>
+<script>
+
+  function handleFileSelect(e) {
+		var fileInput = document.getElementById('files') ;
+		var fileDisplayArea = document.getElementById('fileDisplayArea') ;
+    var file = fileInput.files[0] ;
+    var reader = new FileReader() ;
+    reader.onload = function(e) {
+      fileDisplayArea.innerText = reader.result ;
+      console.log(fileDisplayArea.innerText);
+      var all_quad = [];
+      var parser = new N3.Parser();
+      var obj = {};
+      parser.parse(
+      fileDisplayArea.innerText,
+      (error, quad, prefixes) => {
+        if (quad) {
+          all_quad = all_quad.concat(quad);
+        } else {
+          console.log("# That's all, folks!", prefixes);
+          var masPre = Object.keys(prefixes) ;
+          cutPredicate(all_quad, masPre, prefixes);
+        }
+      });
+    }
+    reader.readAsText(file);
+  }
+  
+  function cutPredicate(all_quad, masPre, prefixes) {
+    console.log("all_quad", all_quad);
+    console.log("keys", masPre);
+    console.log("objects prefixes", prefixes);
+    //var fileDisplayJson = document.getElementById('fileJson') ;
+    var newQuad = [] ;
+    for (var i = 0; i<all_quad.length; i++){
+      newQuad = newQuad.concat( quadCut(all_quad[i], masPre, prefixes) );
+    }
+    var newMas = [] ;
+    var newObject = {} ;
+    for ( var i = 0; i<newQuad.length; i++ ) {
+      if ( newObject['@'] === undefined ){
+        newObject['@'] = newQuad[i].subject ;
+      } else if ( newObject['@'] != newQuad[i].subject ) {
+        newMas = newMas.concat( newObject['@'] = newQuad[i].subject ) ;
+      }
+      if ( ('@' in newObject) && newObject['@'] === newQuad[i].subject ) {
+        if ( newQuad[i].predicate === 'rdfs:label' ) {
+          var at = newQuad[i].object.lastIndexOf("@"),
+              endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+              locale = newQuad[i].object.substring(at, endOfLine);
+          if ( 'rdfs:label' in newObject ) {
+            newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( newQuad[i].object, locale ) );
+          } else {
+            newObject[ newQuad[i].predicate ] = veda.Util.newStr( newQuad[i].object, locale ) ;
+          }
+        } else if ( newQuad[i].object.indexOf("\\") > 0 ) {
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+              predicate = newQuad[i].object.substring(back + 1, endOfLine);
+          if ( predicate === 'xsd:dateTime' ) {
+            var back = newQuad[i].object.lastIndexOf("\\"),
+                date = newQuad[i].object.substring(1, back);
+            newObject[ newQuad[i].predicate ] = veda.Util.newDate( date );
+          }
+          if ( predicate === 'xsd:integer' ) {
+            var back = newQuad[i].object.lastIndexOf("\\"),
+                integer = newQuad[i].object.substring(1, back);
+            newObject[ newQuad[i].predicate ] = veda.Util.newInt( integer );
+          }
+          if ( predicate === 'xsd:decimal' ) {
+            var back = newQuad[i].object.lastIndexOf("\\"),
+                decimal = newQuad[i].object.substring(1, back);
+            newObject[ newQuad[i].predicate ] = veda.Util.newDecimal( decimal );
+          }
+          if ( predicate === 'xsd:boolean' ) {
+            var back = newQuad[i].object.lastIndexOf("\\"),
+                boolean = newQuad[i].object.substring(1, back);
+            newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
+          }
+        } else {
+          newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
+        }
+      }
+    }
+    
+    console.log("this is a new quad!", newQuad);
+    console.log("this is a new object!", newObject);
+    console.log("this is a new mas with objects!", newMas);
+    //fileDisplayJson.innerText = newObject ;
+    //put_individual(ticket, newObject, _event_id);
+    
+  }
+  
+  function quadCut(quad, masPre, prefixes) {
+    for (var i = 0; i<masPre.length; i++){
+      var subjectIndex = quad.subject.lastIndexOf("/"),
+          subjectIndex1 = quad.subject.lastIndexOf("#"),
+          subjectPrefix = quad.subject.substring(0, subjectIndex + 1),
+          
+          predicateIndex = quad.predicate.lastIndexOf("/"),
+          predicateIndex1 = quad.predicate.lastIndexOf("#"),
+          predicatePrefix = quad.predicate.substring(0, predicateIndex + 1),
+          predicatePrefix1 = quad.predicate.substring(0, predicateIndex1 + 1),
+          
+          objectIndex = quad.object.lastIndexOf("/"),
+          objectIndex1 = quad.object.lastIndexOf("#"),
+          objectIndex2 = quad.object.lastIndexOf("^"),
+          objectPrefix = quad.object.substring(0, objectIndex + 1),
+          objectPrefix1 = quad.object.substring(0, objectIndex1 + 1),
+          objectPrefix2 = quad.object.substring(objectIndex2 + 1, objectIndex1 + 1);
+      
+      if ( prefixes[ masPre[i] ] === subjectPrefix ){
+        if ( quad.subject.lastIndexOf("/") ) {
+          var colonIndex = quad.subject.lastIndexOf("/"),
+              colonIndexOfSpace = quad.subject.lastIndexOf("\\n"),
+              prefixForCut = quad.subject.substring(colonIndex + 1, colonIndexOfSpace);
+          quad.subject = masPre[i] + ":" + prefixForCut;
+        }
+      }
+      if ( prefixes[ masPre[i] ] === predicatePrefix && quad.predicate.lastIndexOf("/") ){
+        var colonIndex = quad.predicate.lastIndexOf("/"),
+            colonIndexOfSpace = quad.predicate.lastIndexOf("\\n"),
+            prefixForCut = quad.predicate.substring(colonIndex + 1, colonIndexOfSpace);
+        quad.predicate = masPre[i] + ":" + prefixForCut;
+      } else if ( prefixes[ masPre[i] ] === predicatePrefix1 ){
+        var colonIndex = quad.predicate.lastIndexOf("#"),
+            colonIndexOfSpace = quad.predicate.lastIndexOf("\\n"),
+            prefixForCut = quad.predicate.substring(colonIndex + 1, colonIndexOfSpace);
+        quad.predicate = masPre[i] + ":" + prefixForCut;
+      }
+      if ( prefixes[ masPre[i] ] === objectPrefix && quad.object.lastIndexOf("/") ) {
+        var colonIndex = quad.object.lastIndexOf("/"),
+            colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
+            prefixForCut = quad.object.substring(colonIndex + 1, colonIndexOfSpace);
+        quad.object = masPre[i] + ":" + prefixForCut;
+      } else if ( prefixes[ masPre[i] ] === objectPrefix1 ) {
+        var colonIndex = quad.object.lastIndexOf("#"),
+            colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
+            prefixForCut = quad.object.substring(colonIndex + 1, colonIndexOfSpace);
+        quad.object = masPre[i] + ":" + prefixForCut;
+      }
+      if ( prefixes[ masPre[i] ] === objectPrefix2 ) {
+        var colonIndex = quad.object.lastIndexOf("^"),
+            colonIndexSharp = quad.object.lastIndexOf("#"),
+            colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
+            prefixForCut = quad.object.substring(colonIndexSharp + 1, colonIndexOfSpace),
+            prefixForCut1 = quad.object.substring(0, colonIndex - 2);
+        quad.object = prefixForCut1 + "\\" + masPre[i] + ":" + prefixForCut;
+      }
+    }
+    return quad ;
+  }
+  document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
+  //# sourceURL=Upload_post
+</script>
+  """ ;
+.
