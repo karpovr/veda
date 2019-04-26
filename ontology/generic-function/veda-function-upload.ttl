@@ -201,7 +201,7 @@ v-up:UploadTemplate
             prefixForCut = quad.object.substring(colonIndex + 1, colonIndexOfSpace);
         quad.object = masPre[i] + ":" + prefixForCut;
       }
-      if ( prefixes[ masPre[i] ] === objectPrefix2 ) {
+      if ( prefixes[ masPre[i] ] === objectPrefix2 && objectIndex2 > 0 ) {
         var colonIndex = quad.object.lastIndexOf("^"),
             colonIndexSharp = quad.object.lastIndexOf("#"),
             colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
