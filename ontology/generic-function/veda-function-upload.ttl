@@ -103,45 +103,45 @@ v-up:UploadTemplate
       if ( newObject['@'] === undefined ){
         newObject['@'] = newQuad[i].subject ;
       } else if ( newObject['@'] != newQuad[i].subject ) {
-        newMas = newMas.concat( newObject['@'] = newQuad[i].subject ) ;
+        newMas = newMas.concat( newObject ) ;
+        newObject = {} ;
+        newObject['@'] = newQuad[i].subject ;
       }
-      if ( ('@' in newObject) && newObject['@'] === newQuad[i].subject ) {
-        if ( newQuad[i].predicate === 'rdfs:label' ) {
-          var at = newQuad[i].object.lastIndexOf("@"),
-              endOfLine = newQuad[i].object.lastIndexOf("\\n"),
-              locale = newQuad[i].object.substring(at, endOfLine);
-          if ( 'rdfs:label' in newObject ) {
-            newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( newQuad[i].object, locale ) );
-          } else {
-            newObject[ newQuad[i].predicate ] = veda.Util.newStr( newQuad[i].object, locale ) ;
-          }
-        } else if ( newQuad[i].object.indexOf("\\") > 0 ) {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              endOfLine = newQuad[i].object.lastIndexOf("\\n"),
-              predicate = newQuad[i].object.substring(back + 1, endOfLine);
-          if ( predicate === 'xsd:dateTime' ) {
-            var back = newQuad[i].object.lastIndexOf("\\"),
-                date = newQuad[i].object.substring(1, back);
-            newObject[ newQuad[i].predicate ] = veda.Util.newDate( date );
-          }
-          if ( predicate === 'xsd:integer' ) {
-            var back = newQuad[i].object.lastIndexOf("\\"),
-                integer = newQuad[i].object.substring(1, back);
-            newObject[ newQuad[i].predicate ] = veda.Util.newInt( integer );
-          }
-          if ( predicate === 'xsd:decimal' ) {
-            var back = newQuad[i].object.lastIndexOf("\\"),
-                decimal = newQuad[i].object.substring(1, back);
-            newObject[ newQuad[i].predicate ] = veda.Util.newDecimal( decimal );
-          }
-          if ( predicate === 'xsd:boolean' ) {
-            var back = newQuad[i].object.lastIndexOf("\\"),
-                boolean = newQuad[i].object.substring(1, back);
-            newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
-          }
+      if ( newQuad[i].predicate === 'rdfs:label' ) {
+        var at = newQuad[i].object.lastIndexOf("@"),
+            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+            locale = newQuad[i].object.substring(at, endOfLine);
+        if ( 'rdfs:label' in newObject ) {
+          newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( newQuad[i].object, locale ) );
         } else {
-          newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
+          newObject[ newQuad[i].predicate ] = veda.Util.newStr( newQuad[i].object, locale ) ;
         }
+      } else if ( newQuad[i].object.indexOf("\\") > 0 ) {
+        var back = newQuad[i].object.lastIndexOf("\\"),
+            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+            predicate = newQuad[i].object.substring(back + 1, endOfLine);
+        if ( predicate === 'xsd:dateTime' ) {
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              date = newQuad[i].object.substring(1, back);
+          newObject[ newQuad[i].predicate ] = veda.Util.newDate( date );
+        }
+        if ( predicate === 'xsd:integer' ) {
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              integer = newQuad[i].object.substring(1, back);
+          newObject[ newQuad[i].predicate ] = veda.Util.newInt( integer );
+        }
+        if ( predicate === 'xsd:decimal' ) {
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              decimal = newQuad[i].object.substring(1, back);
+          newObject[ newQuad[i].predicate ] = veda.Util.newDecimal( decimal );
+        }
+        if ( predicate === 'xsd:boolean' ) {
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              boolean = newQuad[i].object.substring(1, back);
+          newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
+        }
+      } else {
+        newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
       }
     }
     
