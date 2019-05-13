@@ -539,6 +539,14 @@ v-s:placeDescription
   rdfs:range xsd:string ;
   rdfs:domain v-s:Spatial ;
 .
+v-s:hasBuildingKind
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Вид сооружения"@ru ;
+  rdfs:label "Building Kind"@en ;
+  rdfs:range v-s:BuildingKind ;
+  rdfs:domain v-s:Spatial ;
+.
+
 ### -------------------------------------------------------
 v-s:Contractual
   rdf:type owl:Class ;

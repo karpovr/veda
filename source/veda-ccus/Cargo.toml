@@ -1,0 +1,21 @@
+[package]
+name = "veda-ccus"
+version = "0.1.0"
+authors = ["Valeriy Bushenev <ValeriyBushenev@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "veda-ccus"
+path = "src/main.rs"
+
+[dependencies]
+actix = "0.8.1"
+actix-web = "1.0.0-alpha.4"
+actix-web-actors = "1.0.0-alpha.3"
+env_logger = "0.6"
+scan_fmt = "0.1.3"
+log = "0.4"
+rust-ini = "0.13"
+nng = "0.4.0"
+v_queue = { path = "../v-queue" }
+v_onto = { path = "../v-onto" }

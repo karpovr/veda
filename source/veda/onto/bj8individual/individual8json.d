@@ -66,23 +66,46 @@ public float getFloat(ref JSONValue src, string key)
     return 0;
 }
 
-JSONValue individual_to_json(Individual individual)
+JSONValue individual_to_json(Individual individual, string[] filters = [])
 {
 //    writeln ("\nINDIVIDUAL->:", individual);
     JSONValue json;
 
     json[ "@" ] = individual.uri;
-    foreach (property_name, property_values; individual.resources)
+
+    if (filters.length > 0)
     {
-        JSONValue[] jsonVals;
+        foreach (property_name; filters)
+        {
+            auto property_values = individual.resources.get(property_name, Resources.init);
+            if (property_values != Resources.init)
+            {
+                JSONValue[] jsonVals;
 
-        foreach (property_value; property_values)
-            jsonVals ~= resource_to_json(cast(Resource)property_value);
+                foreach (property_value; property_values)
+                    jsonVals ~= resource_to_json(cast(Resource)property_value);
 
-        JSONValue resources_json;
-        resources_json.array = jsonVals;
+                JSONValue resources_json;
+                resources_json.array = jsonVals;
 
-        json[ property_name ] = resources_json;
+                json[ property_name ] = resources_json;
+            }
+        }
+    }
+    else
+    {
+        foreach (property_name, property_values; individual.resources)
+        {
+            JSONValue[] jsonVals;
+
+            foreach (property_value; property_values)
+                jsonVals ~= resource_to_json(cast(Resource)property_value);
+
+            JSONValue resources_json;
+            resources_json.array = jsonVals;
+
+            json[ property_name ] = resources_json;
+        }
     }
 //    writeln ("->JSON:", json);
     return json;

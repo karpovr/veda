@@ -163,7 +163,7 @@ var mstorage_ch_Mutex = sync.RWMutex{}
 var mainModuleURL = ""
 var notifyChannelURL = ""
 var queryServiceURL = ""
-var lmdbServiceURL = ""
+var roStorageURL = ""
 var tarantoolURL = ""
 var webserverPort = ""
 var webserverHTTPSPort = ""
@@ -485,7 +485,6 @@ func main() {
 	mifCache = make(map[int]*ModuleInfoFile)
 	//	externalUsersTicketId = make(map[string]bool)
 
-	//go monitorIndividualChanges()
 	go func() {
 		h := fasthttp.Server{
 			Handler:            requestHandler,

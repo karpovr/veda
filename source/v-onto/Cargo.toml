@@ -1,0 +1,18 @@
+[package]
+name = "v_onto"
+version = "0.1.0"
+authors = ["itiu <ValeriyBushenev@gmail.com>"]
+edition = "2018"
+
+[lib]
+path = "src/onto/lib.rs"
+
+[dependencies]
+human-panic = "1.0.1"
+cbor = "0.3"
+rmp = "^0.8"
+rmp-serde = "0.13.7"
+rmp-serialize = "0.8.0"
+serde = "1.0"
+owning_ref = "0.3"
+log = "0.4"

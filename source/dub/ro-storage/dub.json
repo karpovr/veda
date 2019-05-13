@@ -1,6 +1,6 @@
 {
-	"name": "veda-lmdb-srv",
-	"description": "veda-lmdb-srv",
+	"name": "veda-ro-storage",
+	"description": "veda read only storage service",
 	"dependencies": {
 		"d-nanomsg": "0.2.0",
 		"msgpack-d": "1.0.0-beta.6",
@@ -8,8 +8,10 @@
         "versions": ["isModule", "std_socket"],
         "license": "LGPL v3",
         "sourcePaths":[
-            "../../veda/lmdb_srv",
+            "../../veda/ro_storage",
 	    "../../veda/onto/bj8individual",
+            "../../veda/bind/tarantool",
+            "../../veda/storage/tarantool"
 	],
         "sourceFiles":[
     	    "../../lib64/liblmdb.a",
@@ -18,15 +20,17 @@
     	    "../../veda/onto/lang.d",
     	    "../../veda/util/commando.d",
     	    "../../veda/bind/nano.d",
+            "../../veda/bind/msgpuck.d",
     	    "../../veda/util/properd.d",
     	    "../../veda/core/common/define.d",
     	    "../../veda/common/logger.d",
     	    "../../veda/common/type.d",
-	    "../../veda/storage/common.d",
+            "../../veda/storage/common.d",
+            "../../veda/storage/storage.d",
 	    "../../veda/storage/lmdb/lmdb_driver.d",
 	    "../../veda/storage/lmdb/lmdb_header.d"
 	],
-        "libs":["nanomsg"],
+        "libs":["nanomsg", "tarantool"],
 	"configurations": [
 	{
 	    "name": "app",

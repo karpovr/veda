@@ -128,7 +128,7 @@ public struct Individual
         {
             predicate_order_l =
             [
-                "assigned_subsystems", "new_type", "prev_type", "new_state", "prev_state", "user_uri", "rdf:type", "v-s:deleted",
+                "assigned_subsystems", "u_count", "new_type", "prev_type", "new_state", "prev_state", "user_uri", "rdf:type", "v-s:deleted",
                 "v-s:isDraftOf", "v-s:actualVersion", "v-s:previousVersion", "v-s:created", "v-s:runAt"
             ];
 

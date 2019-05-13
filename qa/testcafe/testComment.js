@@ -10,7 +10,7 @@ import { Selector, t } from 'testcafe';
     basic.login('karpovrt', '123');
     basic.createTestUI('Тест комментария', timeStamp);
     await t
-      .expect(Selector('#user-info').innerText).eql('Администратор2 .\n')
+      .expect(Selector('#user-info').innerText).contains('Администратор2 .')
       .navigateTo( pageForNavigateFromConfig )
       .typeText('veda-control#comment', timeStamp)
       .click('button#search-button')

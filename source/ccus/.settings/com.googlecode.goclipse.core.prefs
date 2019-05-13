@@ -1,6 +1,0 @@
-append_projloc_gopath=true
-build_targets=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<build_targets xmlns\="com.googlecode.goclipse.core">\n<target auto_enabled\="false" config\="build" n_enabled\="true" version2\="true"/>\n<target auto_enabled\="false" config\="build-tests" n_enabled\="false" version2\="true"/>\n<target auto_enabled\="false" config\="lint" n_enabled\="false" version2\="true"/>\n<target auto_enabled\="false" config\="[run-tests]" n_enabled\="false" version2\="true"/>\n</build_targets>\n
-com.googlecode.goclipse.gopath=\:\:/home/itiua/go
-com.googlecode.goclipse.goroot=/usr/bin/go
-eclipse.preferences.version=1
-toolchain_prefs.use_project_settings=true

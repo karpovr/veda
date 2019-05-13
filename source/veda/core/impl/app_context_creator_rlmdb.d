@@ -8,7 +8,7 @@ private
     import veda.storage.lmdbsrv.lmdbsrv_r_storage;
 }
 
-public static Context create_new_ctx(string context_name, Logger _log, string _main_module_url, string _lmdb_service_url)
+public static Context create_new_ctx(string context_name, Logger _log, string _main_module_url, string _ro_storage_url)
 {
     PThreadContext ctx = new PThreadContext();
 
@@ -21,7 +21,7 @@ public static Context create_new_ctx(string context_name, Logger _log, string _m
     if (ctx.log is null)
         writefln("context_name [%s] log is null", context_name);
 
-    ctx.storage = new LmdbSrvRStorage(context_name, _lmdb_service_url, ctx.log);
+    ctx.storage = new LmdbSrvRStorage(context_name, _ro_storage_url, ctx.log);
 
     ctx.name = context_name;
 

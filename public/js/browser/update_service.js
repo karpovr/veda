@@ -70,10 +70,13 @@ veda.Module(function (veda) { "use strict";
       uris = uris.split(",");
       for (var i = 0; i < uris.length; i++) {
         try {
-          var tmp = uris[i].split("="),
-              uri = tmp[0],
-              updateCounter = parseInt(tmp[1]),
-              individual = new veda.IndividualModel(uri);
+          var tmp = uris[i].split("=");
+          var uri = tmp[0];
+          if ( !uri ) {
+            continue;
+          }
+          var updateCounter = parseInt(tmp[1]);
+          var individual = new veda.IndividualModel(uri);
           if ( individual.hasValue("v-s:updateCounter", updateCounter) || individual.isDraft() ) { continue; }
           if (self.list[uri]) {
             self.list[uri].updateCounter = updateCounter;

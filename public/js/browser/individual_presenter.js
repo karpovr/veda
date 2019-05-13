@@ -315,7 +315,6 @@ veda.Module(function (veda) { "use strict";
     }
     template.on("recover", recoverHandler);
 
-    // Valid alert
     function validHandler () {
       if ( this.hasValue("v-s:valid", false) && mode === "view" ) {
         if ( container.prop("id") === "main" && !template.hasClass("invalid") ) {
@@ -342,7 +341,7 @@ veda.Module(function (veda) { "use strict";
       individual.off("v-s:valid", validHandler);
     });
     validHandler.call(individual);
-
+    
     // Draft label
     var draftable, showLabel;
 

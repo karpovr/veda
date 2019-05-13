@@ -235,7 +235,7 @@ void main(string[] args)
         auto prepare_batch_queue = new Queue(uris_db_path, "uris-db", Mode.R, log);
         prepare_batch_queue.open();
 
-        if (prepare_batch_queue.isReady)
+        if (prepare_batch_queue.is_ready)
         {
             long count          = 0;
             long count_prepared = 0;

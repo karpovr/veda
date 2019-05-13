@@ -1,0 +1,15 @@
+[package]
+name = "v_queue"
+version = "0.1.0"
+authors = ["itiu <ValeriyBushenev@gmail.com>"]
+edition = "2018"
+
+[lib]
+path = "src/queue/queue.rs"
+
+
+[dependencies]
+human-panic = "1.0.1"
+scan_fmt = "0.1.3"
+crc32fast = "1.1.2"
+log = "0.4"

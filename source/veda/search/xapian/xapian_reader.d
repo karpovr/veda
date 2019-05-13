@@ -196,6 +196,13 @@ class XapianReader : SearchReader
                 {
                     if (key != "not-indexed")
                         db_names ~= key;
+
+                    // при автоопределении баз, если находится база deleted, то другие базы исключаются
+                    if (key == "deleted")
+                    {
+                        db_names = [ key ];
+                        break;
+                    }
                 }
             }
         }

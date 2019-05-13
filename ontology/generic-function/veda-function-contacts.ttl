@@ -164,7 +164,15 @@ v-s:ContactsTemplate
       var isAllowOrg = allowedOrganizations.some(function(org) {
         return org.id === individual['v-s:managedOrganization'][0].id;
       });
-      if (isAllowOrg) {
+      if (  veda.appointment.hasValue('v-s:parentOrganization') &&
+            veda.appointment['v-s:parentOrganization'][0].hasValue('v-s:hasContractorProfileSafety') &&
+            veda.appointment['v-s:parentOrganization'][0]['v-s:hasContractorProfileSafety'][0].hasValue('mnd-s:subContractor')
+      ){
+        var isAllowSubContractor = veda.appointment['v-s:parentOrganization'][0]['v-s:hasContractorProfileSafety'][0]['mnd-s:subContractor'].some(function(orgSubContractor) {
+          return orgSubContractor.id === individual['v-s:managedOrganization'][0].id;
+        });
+      }
+      if (isAllowOrg || isAllowSubContractor) {
         var _department =  new veda.IndividualModel("v-s:Department");
         var canCreateDepartment = _department.rights.hasValue("v-s:canCreate", true);
         if (canCreateDepartment) {

@@ -76,7 +76,7 @@ private int[ string ] get_processes_info(string[] command_patterns, ref ProcessI
 
                     foreach (pt; command_patterns)
                     {
-                        if (_data[ COMMAND ] == pt || _data[ COMMAND ] == "./" ~ pt || _args == pt)
+                        if (_data[ COMMAND ] == pt || _data[ COMMAND ] == app_dir ~ pt || _args == pt)
                         {
                             ProcessInfo pi = ProcessInfo(to!int (_data[ PID ]), _data[ COMMAND ], _args, _data[ STAT ]);
                             processes[ pi.pid ] = pi;
@@ -131,10 +131,23 @@ bool kill_prev_instance(string[] modules)
     return is_found_modules;
 }
 
+string app_dir;
+
 void main(string[] args)
 {
     stderr.writefln("args=%s", args);
     int[][ string ] command_2_pids;
+
+	app_dir = environment.get("APPDIR");
+	if (app_dir is null)
+	{
+		app_dir = "./";
+	} 
+	else
+	{
+		app_dir ~= "/";
+	} 
+	
 
     bool need_remove_ontology = false;
     bool need_reload_ontology = false;
@@ -211,7 +224,7 @@ void main(string[] args)
 
     Module *[ string ] modules;
 
-    modules[ "veda-lmdb-srv" ]      = new Module("veda-lmdb-srv", "veda-lmdb-srv", [], [], false, false, 0);
+    modules[ "veda-lmdb-srv" ]      = new Module("veda-ro-storage", "veda-ro-storage", [], [], false, false, 0);
     modules[ "veda-mstorage" ]      = new Module("veda-mstorage", "veda-mstorage", [], [ "acl_preparer", "subject_manager", "ticket_manager" ], true, true, 1);
     modules[ "veda-ft-indexer" ]    = new Module("veda-ft-indexer", "veda-ft-indexer", [], [ "fulltext_indexer" ], false, false, 2);
     modules[ "veda-ft-query" ]      = new Module("veda-ft-query", "veda-ft-query", [], [], false, false, 3);
@@ -314,11 +327,11 @@ void main(string[] args)
                 string[] sargs;
 
                 if (need_remove_ontology && ml.name == "veda-ttlreader")
-                    sargs = [ "./" ~ ml.exec_file_name, "remove-ontology" ];
+                    sargs = [ app_dir ~ ml.exec_file_name, "remove-ontology" ];
                 else if (need_reload_ontology && ml.name == "veda-ttlreader")
-                    sargs = [ "./" ~ ml.exec_file_name, "reload-ontology" ];
+                    sargs = [ app_dir ~ ml.exec_file_name, "reload-ontology" ];
                 else
-                    sargs = [ "./" ~ ml.exec_file_name ];
+                    sargs = [ app_dir ~ ml.exec_file_name ];
 
                 foreach (arg; ml.args)
                     sargs ~= arg;
@@ -352,7 +365,7 @@ void main(string[] args)
                     {
                         string[] sargs;
 
-                        sargs = [ "./" ~ ml.exec_file_name, "--http_port=" ~ port ];
+                        sargs = [ app_dir ~ ml.exec_file_name, "--http_port=" ~ port ];
 
                         if (ext_user_port_str.length > 0)
                             sargs ~= "--ext_usr_http_port=" ~ ext_user_port_str;
@@ -376,7 +389,7 @@ void main(string[] args)
                 {
                     string[] sargs;
 
-                    sargs = [ "./" ~ ml.exec_file_name ];
+                    sargs = [ app_dir ~ ml.exec_file_name ];
                     sargs ~= "--id=" ~ veda_id;
 
                     auto _logFile = File("logs/" ~ ml.name ~ "-stderr.log", "w");
@@ -431,6 +444,9 @@ void main(string[] args)
                 }
             }
         }
+
+        std.file.write(".pids/veda-bootstrap-pid", text(thisProcessID()));
+
         stderr.writefln("all component started, need_watchdog=%s", need_watchdog);
 
         if (need_remove_ontology == true || need_reload_ontology == true || need_watchdog == false)

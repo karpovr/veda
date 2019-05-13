@@ -790,7 +790,7 @@ class XapianVQL
                 if (err < 0)
                 {
                     if (err == -1)
-						break;
+                        break;
                     else
                         sr.result_code = ResultCode.InternalServerError;
 
@@ -842,9 +842,9 @@ class XapianVQL
 
                 if (authorize_time > 5000)
                 {
-					log.trace("WARN! authorization time > 5 s, break iterator loop, user_uri=[%s]", user_uri);					
-					break;
-				}
+                    log.trace("WARN! authorization time > 5 s, break iterator loop, user_uri=[%s]", user_uri);
+                    break;
+                }
 
                 it.next(&err);
             }

@@ -21,5 +21,5 @@ import { Selector, t } from 'testcafe';
       .wait(5000);
     basic.fullTextSearch(timeFillips, '1');
     await t
-      .expect(Selector('ul.nav.navbar-nav.navbar-right li#user-info').innerText).eql('Администратор2 .\n');
+      .expect(Selector('ul.nav.navbar-nav.navbar-right li#user-info').innerText).contains('Администратор2 .');
   });

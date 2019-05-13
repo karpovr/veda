@@ -10,11 +10,11 @@ import { Selector, t } from 'testcafe';
       //EN
       .click('button[about="v-ui:EN"]')
       .click('button[about="v-ui:RU"]')
-      .expect(Selector('#user-info').innerText).eql('Administrator2 .\n')
+      .expect(Selector('#user-info').innerText).contains('Administrator2 .')
       //RU
       .click('button[about="v-ui:RU"]')
       .click('button[about="v-ui:EN"]')
-      .expect(Selector('#user-info').innerText).eql('Администратор2 .\n');
+      .expect(Selector('#user-info').innerText).contains('Администратор2 .');
   });
 
 

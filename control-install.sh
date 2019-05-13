@@ -136,7 +136,7 @@ go get github.com/gorilla/websocket
 go get github.com/divan/expvarmon
 go get -v gopkg.in/vmihailenco/msgpack.v2
 cp -a ./source/golang-third-party/cbor $GOPATH/src
-ls $HOME/go
+ls $HOME/go/src
 
 ### LIB NANOMSG ###
 

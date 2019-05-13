@@ -54,8 +54,8 @@ func configWebServer() {
 				webserverPort = paramVal
 			case "https_port":
 				webserverHTTPSPort = paramVal
-			case "lmdb_service_url":
-				lmdbServiceURL = paramVal
+			case "ro_storage_url":
+				roStorageURL = paramVal
 			case "ft_query_service_url":
 				queryServiceURL = paramVal
 			case "webserver_trace":

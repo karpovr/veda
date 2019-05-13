@@ -23,8 +23,6 @@ type Connector struct {
 	tt_addr   string
 	tt_client *tarantool.Connection
 
-	//	lmdb_client *nanomsg.Socket
-
 	db_is_open bool
 }
 
@@ -231,28 +229,6 @@ func (conn *Connector) Connect(tt_addr string) {
 		log.Println("INFO! tarantool connect is ok")
 		conn.tt_client = tt_client
 	}
-	//	 else {
-	//		log.Println("INFO! Connect to lmdb service, start")
-	//		conn.lmdb_client, err = nanomsg.NewSocket(nanomsg.AF_SP, nanomsg.REQ)
-	//		if err != nil {
-	//			conn.db_is_open = false
-	//			log.Fatal("ERR! open_dbs: nanomsg.NewSocket")
-	//
-	//		} else {
-	//			conn.db_is_open = true
-	//		}
-
-	//log.Println("use lmdb service url: ", lmdbServiceURL)
-	//		_, err = conn.lmdb_client.Connect(lmdbServiceURL)
-	//		for err != nil {
-	//			log.Println("ERR! Creating lmdb service connection: err=", err)
-	//			log.Println("INFO! sleep")
-	//			time.Sleep(3000 * time.Millisecond)
-	//			log.Println("INFO! retry connect")
-	//			_, err = conn.lmdb_client.Connect(queryServiceURL)
-	//		}
-	//		log.Println("INFO! Connect to lmdb service, socket=", conn.lmdb_client)
-	//	}
 }
 
 //Get sends get request to tarantool, individuals uris passed as data here
@@ -335,9 +311,9 @@ func (conn *Connector) Get(needAuth bool, userUri string, uris []string, trace b
 				return rr
 
 			}
-			_, err = lmdb_client.Connect(lmdbServiceURL)
+			_, err = lmdb_client.Connect(roStorageURL)
 			if err != nil {
-				log.Printf("ERR! Get: fail connect to lmdb service %s, err=%s\n", lmdbServiceURL, err)
+				log.Printf("ERR! Get: fail connect to lmdb service %s, err=%s\n", roStorageURL, err)
 				rr.CommonRC = InternalServerError
 				return rr
 			}
@@ -606,9 +582,9 @@ func (conn *Connector) GetTicket(ticketIDs []string, trace bool) RequestResponse
 			return rr
 
 		}
-		_, err = lmdb_client.Connect(lmdbServiceURL)
+		_, err = lmdb_client.Connect(roStorageURL)
 		if err != nil {
-			log.Printf("ERR! GetTicket: fail connect to lmdb service %s, err=%s\n", lmdbServiceURL, err)
+			log.Printf("ERR! GetTicket: fail connect to lmdb service %s, err=%s\n", roStorageURL, err)
 			rr.CommonRC = InternalServerError
 			return rr
 		}

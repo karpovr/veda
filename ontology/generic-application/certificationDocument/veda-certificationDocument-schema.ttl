@@ -16,7 +16,9 @@
   v-s:loadPriority 20 ;
 .
 
-# ------------------------------------------------------------ КЛАССЫ --
+# ------------------------------------------------------------------- КЛАССЫ --
+
+#------------------------------------------------------------ Удостоверяющий документ --
 
 v-s:CertificationDocument
   rdf:type owl:Class ;
@@ -26,26 +28,53 @@ v-s:CertificationDocument
   rdfs:subClassOf v-s:Embedded ;
   rdfs:label "Удостоверяющий документ"@ru ;
   rdfs:label "Certification document"@en ;
-  v-ui:hasTemplate v-s:CertificationDocumentTemplate ;
+  v-ui:hasTemplate v-s:CertificationDocumentTemplate;
 .
+
+#-----Организация
+#v-s:checkedOrganization
+
+#-----Вид экзамена
+v-s:hasExamType
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:CertificationDocument ;
+  rdfs:label "Вид экзамена"@ru ;
+  rdfs:label "Exam type"@en ;
+  rdfs:range v-s:ExamType;
+.
+
+#-----Тип документа
 v-s:hasCertificationDocumentType
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:CertificationDocument ;
   rdfs:label "Тип документа"^^xsd:string;
   rdfs:range v-s:CertificationDocumentType ;
 .
+#-----Вид документа
 v-s:hasDocumentKind
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:CertificationDocument ;
   rdfs:label "Вид документа"^^xsd:string;
   rdfs:range v-s:DocumentKind ;
 .
-# v-s:registrationNumber
-# v-s:registrationDate
-# v-s:dateFrom
-# v-s:dateTo
-# rdfs:comment
-# v-s:attachment
+#-----Регистрационный номер
+#v-s:registrationNumber
+
+#-----Регистрационная дата
+#v-s:registrationDate
+
+#-----Дата начала
+#v-s:dateFrom
+
+#-----Дата окончания 
+#v-s:dateTo
+
+#-----Вложение 
+#v-s:attachment
+
+#-----Участники
+#v-s:member
+
 
 
 # ------------------------------------------------------------
