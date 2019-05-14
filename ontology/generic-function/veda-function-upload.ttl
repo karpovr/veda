@@ -62,6 +62,7 @@ v-up:UploadTemplate
 </div>
 <script>
 
+  var notify = veda.Notify ? new veda.Notify() : function () {};
   function handleFileSelect(e) {
 		var fileInput = document.getElementById('files') ;
 		var fileDisplayArea = document.getElementById('fileDisplayArea') ;
@@ -87,7 +88,10 @@ v-up:UploadTemplate
     }
     reader.readAsText(file);
   }
-  
+
+  var newMas = [] ;
+  var newObject = {} ;
+
   function cutPredicate(all_quad, masPre, prefixes) {
     console.log("all_quad", all_quad);
     console.log("keys", masPre);
@@ -97,8 +101,6 @@ v-up:UploadTemplate
     for (var i = 0; i<all_quad.length; i++){
       newQuad = newQuad.concat( quadCut(all_quad[i], masPre, prefixes) );
     }
-    var newMas = [] ;
-    var newObject = {} ;
     for ( var i = 0; i<newQuad.length; i++ ) {
       if ( newObject['@'] === undefined ){
         newObject['@'] = newQuad[i].subject ;
@@ -144,33 +146,31 @@ v-up:UploadTemplate
         newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
       }
     }
-    
+
     console.log("this is a new quad!", newQuad);
     console.log("this is a new object!", newObject);
     console.log("this is a new mas with objects!", newMas);
     //fileDisplayJson.innerText = newObject ;
-    //put_individual(ticket, newObject, _event_id);
-    
   }
-  
+
   function quadCut(quad, masPre, prefixes) {
     for (var i = 0; i<masPre.length; i++){
       var subjectIndex = quad.subject.lastIndexOf("/"),
           subjectIndex1 = quad.subject.lastIndexOf("#"),
           subjectPrefix = quad.subject.substring(0, subjectIndex + 1),
-          
+
           predicateIndex = quad.predicate.lastIndexOf("/"),
           predicateIndex1 = quad.predicate.lastIndexOf("#"),
           predicatePrefix = quad.predicate.substring(0, predicateIndex + 1),
           predicatePrefix1 = quad.predicate.substring(0, predicateIndex1 + 1),
-          
+
           objectIndex = quad.object.lastIndexOf("/"),
           objectIndex1 = quad.object.lastIndexOf("#"),
           objectIndex2 = quad.object.lastIndexOf("^"),
           objectPrefix = quad.object.substring(0, objectIndex + 1),
           objectPrefix1 = quad.object.substring(0, objectIndex1 + 1),
           objectPrefix2 = quad.object.substring(objectIndex2 + 1, objectIndex1 + 1);
-      
+
       if ( prefixes[ masPre[i] ] === subjectPrefix ){
         if ( quad.subject.lastIndexOf("/") ) {
           var colonIndex = quad.subject.lastIndexOf("/"),
@@ -212,6 +212,18 @@ v-up:UploadTemplate
     }
     return quad ;
   }
+  $("#upload", template).click(function () {
+    if (newMas.length > 0) {
+      console.log('объект из кнопки', newMas);
+      //put_individuals(veda.ticket, newMas);
+    } else if ( newMas == 0 ) {
+      newMas = newMas.concat( newObject ) ;
+      console.log('только что я собрал массив из кнопки', newMas);
+      //put_individuals(veda.ticket, newMas);
+    } else {
+      notify("danger", {name: "Nothing to send"});
+    }
+  });
   document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
   //# sourceURL=Upload_post
 </script>
