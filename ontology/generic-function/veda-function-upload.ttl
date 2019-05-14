@@ -112,11 +112,12 @@ v-up:UploadTemplate
       if ( newQuad[i].predicate === 'rdfs:label' ) {
         var at = newQuad[i].object.lastIndexOf("@"),
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
-            locale = newQuad[i].object.substring(at, endOfLine);
+            locale = newQuad[i].object.substring(at, endOfLine),
+            label = newQuad[i].object.substring(1, at-2);
         if ( 'rdfs:label' in newObject ) {
-          newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( newQuad[i].object, locale ) );
+          newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( label, locale ) );
         } else {
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( newQuad[i].object, locale ) ;
+          newObject[ newQuad[i].predicate ] = veda.Util.newStr( label, locale ) ;
         }
       } else if ( newQuad[i].object.indexOf("\\") > 0 ) {
         var back = newQuad[i].object.lastIndexOf("\\"),
@@ -154,23 +155,23 @@ v-up:UploadTemplate
   }
 
   function quadCut(quad, masPre, prefixes) {
+    var subjectIndex = quad.subject.lastIndexOf("/"),
+        subjectIndex1 = quad.subject.lastIndexOf("#"),
+        subjectPrefix = quad.subject.substring(0, subjectIndex + 1),
+
+        predicateIndex = quad.predicate.lastIndexOf("/"),
+        predicateIndex1 = quad.predicate.lastIndexOf("#"),
+        predicatePrefix = quad.predicate.substring(0, predicateIndex + 1),
+        predicatePrefix1 = quad.predicate.substring(0, predicateIndex1 + 1),
+
+        objectIndex = quad.object.lastIndexOf("/"),
+        objectIndex1 = quad.object.lastIndexOf("#"),
+        objectIndex2 = quad.object.lastIndexOf("^"),
+        objectPrefix = quad.object.substring(0, objectIndex + 1),
+        objectPrefix1 = quad.object.substring(0, objectIndex1 + 1),
+        objectPrefix2 = quad.object.substring(objectIndex2 + 1, objectIndex1 + 1);
+
     for (var i = 0; i<masPre.length; i++){
-      var subjectIndex = quad.subject.lastIndexOf("/"),
-          subjectIndex1 = quad.subject.lastIndexOf("#"),
-          subjectPrefix = quad.subject.substring(0, subjectIndex + 1),
-
-          predicateIndex = quad.predicate.lastIndexOf("/"),
-          predicateIndex1 = quad.predicate.lastIndexOf("#"),
-          predicatePrefix = quad.predicate.substring(0, predicateIndex + 1),
-          predicatePrefix1 = quad.predicate.substring(0, predicateIndex1 + 1),
-
-          objectIndex = quad.object.lastIndexOf("/"),
-          objectIndex1 = quad.object.lastIndexOf("#"),
-          objectIndex2 = quad.object.lastIndexOf("^"),
-          objectPrefix = quad.object.substring(0, objectIndex + 1),
-          objectPrefix1 = quad.object.substring(0, objectIndex1 + 1),
-          objectPrefix2 = quad.object.substring(objectIndex2 + 1, objectIndex1 + 1);
-
       if ( prefixes[ masPre[i] ] === subjectPrefix ){
         if ( quad.subject.lastIndexOf("/") ) {
           var colonIndex = quad.subject.lastIndexOf("/"),
@@ -214,12 +215,12 @@ v-up:UploadTemplate
   }
   $("#upload", template).click(function () {
     if (newMas.length > 0) {
-      console.log('объект из кнопки', newMas);
-      //put_individuals(veda.ticket, newMas);
-    } else if ( newMas == 0 ) {
+      put_individuals(veda.ticket, newMas);
+      $("#upload", template).hide();
+    } else if ( newObject.keys != undefined ) {
       newMas = newMas.concat( newObject ) ;
-      console.log('только что я собрал массив из кнопки', newMas);
-      //put_individuals(veda.ticket, newMas);
+      put_individuals(veda.ticket, newMas);
+      $("#upload", template).hide();
     } else {
       notify("danger", {name: "Nothing to send"});
     }
