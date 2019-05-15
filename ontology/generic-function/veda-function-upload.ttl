@@ -109,7 +109,37 @@ v-up:UploadTemplate
         newObject = {} ;
         newObject['@'] = newQuad[i].subject ;
       }
-      if ( newQuad[i].predicate === 'rdfs:label' ) {
+      if ( newQuad[i].predicate === 'v-s:middleName' ) {
+        var at = newQuad[i].object.lastIndexOf("@"),
+            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+            locale = newQuad[i].object.substring(at, endOfLine),
+            middleName = newQuad[i].object.substring(1, at-2);
+        if ( 'v-s:middleName' in newObject ) {
+          newObject['v-s:middleName'] = newObject['v-s:middleName'].concat( veda.Util.newStr( middleName, locale ) );
+        } else {
+          newObject[ newQuad[i].predicate ] = veda.Util.newStr( middleName, locale ) ;
+        }
+      } else if ( newQuad[i].predicate === 'v-s:firstName' ) {
+        var at = newQuad[i].object.lastIndexOf("@"),
+            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+            locale = newQuad[i].object.substring(at, endOfLine),
+            firstName = newQuad[i].object.substring(1, at-2);
+        if ( 'v-s:firstName' in newObject ) {
+          newObject['v-s:firstName'] = newObject['v-s:firstName'].concat( veda.Util.newStr( firstName, locale ) );
+        } else {
+          newObject[ newQuad[i].predicate ] = veda.Util.newStr( firstName, locale ) ;
+        }
+      } else if ( newQuad[i].predicate === 'v-s:lastName' ) {
+        var at = newQuad[i].object.lastIndexOf("@"),
+            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
+            locale = newQuad[i].object.substring(at, endOfLine),
+            lastName = newQuad[i].object.substring(1, at-2);
+        if ( 'v-s:lastName' in newObject ) {
+          newObject['v-s:lastName'] = newObject['v-s:lastName'].concat( veda.Util.newStr( lastName, locale ) );
+        } else {
+          newObject[ newQuad[i].predicate ] = veda.Util.newStr( lastName, locale ) ;
+        }
+      } else if ( newQuad[i].predicate === 'rdfs:label' ) {
         var at = newQuad[i].object.lastIndexOf("@"),
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
             locale = newQuad[i].object.substring(at, endOfLine),
@@ -217,7 +247,7 @@ v-up:UploadTemplate
     if (newMas.length > 0) {
       put_individuals(veda.ticket, newMas);
       $("#upload", template).hide();
-    } else if ( newObject.keys != undefined ) {
+    } else if ( !$.isEmptyObject(newObject) ) {
       newMas = newMas.concat( newObject ) ;
       put_individuals(veda.ticket, newMas);
       $("#upload", template).hide();
