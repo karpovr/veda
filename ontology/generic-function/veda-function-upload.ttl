@@ -144,10 +144,16 @@ v-up:UploadTemplate
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
             locale = newQuad[i].object.substring(at, endOfLine),
             label = newQuad[i].object.substring(1, at-2);
-        if ( 'rdfs:label' in newObject ) {
-          newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( label, locale ) );
+        if (at > 0) {
+          if ( 'rdfs:label' in newObject ) {
+            newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( label, locale ) );
+          } else {
+            newObject[ newQuad[i].predicate ] = veda.Util.newStr( label, locale ) ;
+          }
         } else {
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( label, locale ) ;
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              labelSingleLang = newQuad[i].object.substring(1, back);
+          newObject[ newQuad[i].predicate ] = veda.Util.newStr( labelSingleLang ) ;
         }
       } else if ( newQuad[i].object.indexOf("\\") > 0 ) {
         var back = newQuad[i].object.lastIndexOf("\\"),
@@ -177,7 +183,7 @@ v-up:UploadTemplate
         newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
       }
     }
-
+    newMas = newMas.concat( newObject ) ;
     console.log("this is a new quad!", newQuad);
     console.log("this is a new object!", newObject);
     console.log("this is a new mas with objects!", newMas);
