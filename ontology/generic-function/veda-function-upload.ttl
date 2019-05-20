@@ -179,6 +179,11 @@ v-up:UploadTemplate
               boolean = newQuad[i].object.substring(1, back);
           newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
         }
+        if ( predicate === 'xsd:string' ) {
+          var back = newQuad[i].object.lastIndexOf("\\"),
+              boolean = newQuad[i].object.substring(1, back);
+          newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
+        }
       } else {
         newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
       }
