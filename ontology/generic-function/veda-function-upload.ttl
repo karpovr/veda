@@ -45,7 +45,8 @@ v-up:UploadTemplate
   <div class="panel-heading">
     <div class="row">
       <div class="col-md-10">
-        <input type="checkbox" class="toggle-select scheme">Схема
+        <input type="checkbox" class="toggle-select scheme"> Схема<br>
+        <input type="checkbox" class="toggle-select data"> Данные
       </div>
       <div class="col-md-2">
         <button type="submit" class="action btn btn-primary btn-block view pull-right" id="upload">Загрузить</button>
@@ -258,14 +259,30 @@ v-up:UploadTemplate
     if (newMas.length > 0) {
       put_individuals(veda.ticket, newMas);
       $("#upload", template).hide();
+      notify("success", {name: "Success sending"});
     } else if ( !$.isEmptyObject(newObject) ) {
       newMas = newMas.concat( newObject ) ;
       put_individuals(veda.ticket, newMas);
       $("#upload", template).hide();
+      notify("success", {name: "Success sending"});
     } else {
       notify("danger", {name: "Nothing to send"});
     }
-  });
+  });/*
+  function makeTTLFile(){
+    var fileInput = document.getElementById('files');
+
+    //var md5 = CryptoJS.MD5(fileInput.name).toString();
+    //console.log(md5);
+
+    var _class = new veda.IndividualModel("v-s:TTLFile"),
+        TTLFile = new veda.IndividualModel();
+    TTLFile["rdf:type"] = [_class];
+    TTLFile["v-s:created"] = [veda.Util.newDate(new Date())];
+    TTLFile["v-s:hash"] = [];
+    TTLFile["v-s:filePath"] = [];
+    TTLFile["v-s:fileUri"] = [fileInput.name];
+  }*/
   document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
   //# sourceURL=Upload_post
 </script>
