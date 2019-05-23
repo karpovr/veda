@@ -45,8 +45,7 @@ v-up:UploadTemplate
   <div class="panel-heading">
     <div class="row">
       <div class="col-md-10">
-        <input type="checkbox" class="toggle-select scheme"> Схема<br>
-        <input type="checkbox" class="toggle-select data"> Данные
+        <input type="checkbox" class="toggle-select-scheme"> Схема<br>
       </div>
       <div class="col-md-2">
         <button type="submit" class="action btn btn-primary btn-block view pull-right" id="upload">Загрузить</button>
@@ -62,6 +61,14 @@ v-up:UploadTemplate
   </div>
 </div>
 <script>
+
+  $('.toggle-select-scheme').click(function(){
+    if ($(this).is(':checked')){
+      $('.toggle-select-scheme').prop('checked', true);
+    } else {
+      $('.toggle-select-scheme').prop('checked', false);
+    }
+  });
 
   var notify = veda.Notify ? new veda.Notify() : function () {};
   function handleFileSelect(e) {
