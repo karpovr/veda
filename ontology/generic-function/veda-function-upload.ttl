@@ -207,7 +207,11 @@ v-up:UploadTemplate
           newObject[ newQuad[i].predicate ] = veda.Util.newStr( label );
         }
       } else {
-        newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
+        if ( newQuad[i].predicate in newObject ) {
+          newObject[ newQuad[i].predicate ] = newObject[ newQuad[i].predicate ].concat( newUri( newQuad[i].object ) );
+        } else {
+          newObject[ newQuad[i].predicate ] = newUri( newQuad[i].object );
+        }
       }
     }
     newMas = newMas.concat( newObject ) ;
