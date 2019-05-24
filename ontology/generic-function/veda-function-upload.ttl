@@ -118,7 +118,6 @@ v-up:UploadTemplate
     console.log("all_quad", all_quad);
     console.log("keys", masPre);
     console.log("objects prefixes", prefixes);
-    //var fileDisplayJson = document.getElementById('fileJson') ;
     var newQuad = [] ;
     for (var i = 0; i<all_quad.length; i++){
       newQuad = newQuad.concat( quadCut(all_quad[i], masPre, prefixes) );
@@ -199,6 +198,7 @@ v-up:UploadTemplate
         if ( predicate === 'xsd:boolean' ) {
           var back = newQuad[i].object.lastIndexOf("\\"),
               boolean = newQuad[i].object.substring(1, back);
+              boolean = Boolean(boolean);
           newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
         }
         if ( predicate === 'xsd:string' ) {
@@ -214,7 +214,6 @@ v-up:UploadTemplate
     console.log("this is a new quad!", newQuad);
     console.log("this is a new object!", newObject);
     console.log("this is a new mas with objects!", newMas);
-    //fileDisplayJson.innerText = newObject ;
   }
 
   function quadCut(quad, masPre, prefixes) {
