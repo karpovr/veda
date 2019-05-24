@@ -65,8 +65,16 @@ v-up:UploadTemplate
   $('.toggle-select-scheme').click(function(){
     if ($(this).is(':checked')){
       $('.toggle-select-scheme').prop('checked', true);
+      newMas.forEach(function(element){
+        element['rdfs:isDefinedBy'] = [];
+      });
+      console.log("newMas with isDefinedBy", newMas);
     } else {
       $('.toggle-select-scheme').prop('checked', false);
+      newMas.forEach(function(element){
+        delete element['rdfs:isDefinedBy'];
+      });
+      console.log("newMas delete isDefinedBy", newMas);
     }
   });
 
