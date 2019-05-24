@@ -63,18 +63,24 @@ v-up:UploadTemplate
 <script>
 
   $('.toggle-select-scheme').click(function(){
-    if ($(this).is(':checked')){
-      $('.toggle-select-scheme').prop('checked', true);
-      newMas.forEach(function(element){
-        element['rdfs:isDefinedBy'] = [];
-      });
-      console.log("newMas with isDefinedBy", newMas);
+    if (newMas.length > 0){
+      if ($(this).is(':checked')){
+        $('.toggle-select-scheme').prop('checked', true);
+        newMas.forEach(function(element){
+          element['rdfs:isDefinedBy'] = [];
+        });
+        notify("success", {name: "Adding rdfs:isDefinedBy"});
+        console.log("newMas with isDefinedBy", newMas);
+      } else {
+        $('.toggle-select-scheme').prop('checked', false);
+        newMas.forEach(function(element){
+          delete element['rdfs:isDefinedBy'];
+        });
+        notify("danger", {name: "Removing rdfs:isDefinedBy"});
+        console.log("newMas delete isDefinedBy", newMas);
+      }
     } else {
-      $('.toggle-select-scheme').prop('checked', false);
-      newMas.forEach(function(element){
-        delete element['rdfs:isDefinedBy'];
-      });
-      console.log("newMas delete isDefinedBy", newMas);
+      notify("danger", {name: "Massive is empty"});
     }
   });
 
@@ -272,12 +278,6 @@ v-up:UploadTemplate
   }
   $("#upload", template).click(function () {
     if (newMas.length > 0) {
-      put_individuals(veda.ticket, newMas);
-      makeTTLFile();
-      $("#upload", template).hide();
-      notify("success", {name: "Success sending"});
-    } else if ( !$.isEmptyObject(newObject) ) {
-      newMas = newMas.concat( newObject ) ;
       put_individuals(veda.ticket, newMas);
       makeTTLFile();
       $("#upload", template).hide();
