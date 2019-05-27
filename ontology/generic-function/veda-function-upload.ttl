@@ -298,8 +298,6 @@ v-up:UploadTemplate
     TTLFile.id = "d:" + str ;
     TTLFile["rdf:type"] = [_class];
     TTLFile["v-s:created"] = [veda.Util.newDate(new Date())];
-    TTLFile["v-s:hash"] = [];
-    TTLFile["v-s:filePath"] = [];
     TTLFile["v-s:fileUri"] = [str];
     if (newMas.length > 0) {
       newMas.forEach(function(elm){
