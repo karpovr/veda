@@ -17,6 +17,28 @@
   v-s:loadPriority 9 ;
 .
 
+########## UPLOAD TTL BUNDLE ###########
+v-s:UploudBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Загрузить"@ru ;
+  rdfs:label "Uploud"@en ;
+.
+########## UPLOAD TTL FUNCTION SEARCH TTLFILE ###########
+v-s:TTLFileBlank
+  rdf:type v-fc:Blank ;
+  rdfs:label "TTLFile"@ru ;
+  rdfs:label "TTLFile"@en ;
+  v-fc:targetType v-s:TTLFile ;
+.
+v-s:TTLFileSearch
+  rdf:type v-fs:AttributiveSearch ;
+  rdfs:label "TTLFile"@ru ;
+  rdfs:label "TTLFile search"@en ;
+  v-fs:searchBlank v-s:TTLFileBlank ;
+  v-fs:searchBlankTemplate v-s:TTLFileSearchBlankTemplate ;
+  v-fs:searchResultTemplate v-s:TTLFileSearchResultTemplate ;
+  v-fs:searchOnLoad true ;
+.
 ########## UPLOAD TTL FUNCTION ###########
 
 v-up:FunctionUploadTTL
@@ -35,34 +57,38 @@ v-up:FunctionUploadTTLModel
   v-s:script """
   """
 .
+########## UPLOAD TTL TEMPLATES ###########
 v-up:UploadTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-up:FunctionUploadTTL"@ru ;
   rdfs:label "v-up:FunctionUploadTTL class template"@en ;
   v-ui:forClass v-up:FunctionUploadTTL ;
   v-ui:template """
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <div class="row">
-      <div class="col-md-10">
-        <input type="checkbox" class="toggle-select-scheme"> Схема<br>
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="action btn btn-primary btn-block view pull-right" id="upload">Загрузить</button>
+<div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span about="v-s:UploadTtlBundle" property="rdfs:label"></span>
+          <a id="upload" about="v-s:UploudBundle" property="rdfs:label" class="btn btn-xs btn-primary pull-right"></a>
+        </div>
+        <div class="panel-body">
+          <input type="checkbox" class="toggle-select-scheme"> Схема<br>
+          <em about="v-s:attachment" property="rdfs:label"></em>
+          <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
+          <input type="file" id="files" multiple></input>
+          <div id="fileDisplayArea"></div><br>
+          <div id="fileJson"></div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="panel-body">
-    <div class="row">
-      <div class="col-md-6">
-        <em about="v-s:attachment" property="rdfs:label"></em>
-        <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
-        <input type="file" id="files" multiple></input>
-        <div id="fileDisplayArea"></div><br>
-        <div id="fileJson"></div>
-      </div>
-      <div class="col-md-6">
-      </div>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+          <div class="panel-heading">
+            <span about="v-s:TTLFileSearch" property="rdfs:label"></span>
+          </div>
+          <div class="panel-body" about="v-s:TTLFileSearch" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
+        </div>
     </div>
   </div>
 </div>
@@ -316,5 +342,55 @@ v-up:UploadTemplate
   document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
   //# sourceURL=Upload_post
 </script>
+  """ ;
+.
+v-s:TTLFileSearchBlankTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон бланка поиска новостей"@ru ;
+  rdfs:label "News search blank template"@en ;
+  v-ui:template """
+<div>
+  <veda-control property="*" data-type="string"></veda-control>
+</div>
+<script>
+  $("input", template).keydown(function (e) {
+    if (e.which === 13) {
+      var value = this.value;
+      individual.set("*", [value]);
+      container.siblings(".search-button").click();
+    }
+  });
+  //# sourceURL=v-s:NewsSearchBlankTemplate_post
+</script>
+  """ ;
+.
+
+v-s:TTLFileSearchResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения результатов поиска Новостей"@ru ;
+  rdfs:label "News search result template"@en ;
+  v-ui:template """
+<table class="table">
+  <thead class="result-header">
+    <tr>
+      <th width="1%"><input type="checkbox" class="toggle-select-all"></th>
+      <th width="1%">#</th>
+      <th width="85%" class="orderby" data-orderby="v-s:title"><span about="v-s:title" property="rdfs:label"></span></th>
+      <th width="13%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td width="1%"><input type="checkbox" class="toggle-select"></td>
+      <td class="serial-number"></td>
+      <td>
+        <div about="@" property="v-s:title"></div>
+        <small about="@" property="v-s:description"></small>
+        <a href="#/@"><small about="v-s:More" property="rdfs:label"></small></a>
+      </td>
+      <td about="@" property="v-s:created"></td>
+    </tr>
+  </tbody>
+</table>
   """ ;
 .

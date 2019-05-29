@@ -901,7 +901,6 @@ v-ui:AdministrationAspectTemplate
     </div>
 
     <div role="tabpanel" class="tab-pane" id="UploadTtl">
-      <h3 about="v-s:UploadTtlBundle" property="rdfs:label"></h3>
       <div about="@" data-embedded="true" data-template="v-up:UploadTemplate"></div>
     </div>
 
