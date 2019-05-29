@@ -53,11 +53,17 @@ v-up:UploadTemplate
     </div>
   </div>
   <div class="panel-body">
-    <em about="v-s:attachment" property="rdfs:label"></em>
-    <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
-    <input type="file" id="files" multiple></input>
-    <div id="fileDisplayArea"></div><br>
-    <div id="fileJson"></div>
+    <div class="row">
+      <div class="col-md-6">
+        <em about="v-s:attachment" property="rdfs:label"></em>
+        <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
+        <input type="file" id="files" multiple></input>
+        <div id="fileDisplayArea"></div><br>
+        <div id="fileJson"></div>
+      </div>
+      <div class="col-md-6">
+      </div>
+    </div>
   </div>
 </div>
 <script>
@@ -299,6 +305,7 @@ v-up:UploadTemplate
     TTLFile["rdf:type"] = [_class];
     TTLFile["v-s:created"] = [veda.Util.newDate(new Date())];
     TTLFile["v-s:fileUri"] = [str];
+    TTLFile["v-s:origin"] = veda.Util.newStr( 'Client' );
     if (newMas.length > 0) {
       newMas.forEach(function(elm){
         TTLFile["v-s:resource"] = TTLFile["v-s:resource"].concat( newUri( elm['@'] ) );
