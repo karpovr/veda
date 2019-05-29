@@ -35,9 +35,10 @@ v-s:TTLFileSearch
   rdfs:label "TTLFile"@ru ;
   rdfs:label "TTLFile search"@en ;
   v-fs:searchBlank v-s:TTLFileBlank ;
+  v-fs:fullTextQuery "('rdf:type'=='v-s:TTLFile' && 'v-s:origin'=='Client')" ;
   v-fs:searchBlankTemplate v-s:TTLFileSearchBlankTemplate ;
   v-fs:searchResultTemplate v-s:TTLFileSearchResultTemplate ;
-  v-fs:searchOnLoad true ;
+#  v-fs:searchOnLoad true ;
 .
 ########## UPLOAD TTL FUNCTION ###########
 
@@ -313,8 +314,8 @@ v-up:UploadTemplate
   }
   $("#upload", template).click(function () {
     if (newMas.length > 0) {
-      put_individuals(veda.ticket, newMas);
       makeTTLFile();
+      put_individuals(veda.ticket, newMas);
       $("#upload", template).hide();
       notify("success", {name: "Success sending"});
     } else {
@@ -340,7 +341,6 @@ v-up:UploadTemplate
     TTLFile.save();
   }
   document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
-  //# sourceURL=Upload_post
 </script>
   """ ;
 .
@@ -360,7 +360,6 @@ v-s:TTLFileSearchBlankTemplate
       container.siblings(".search-button").click();
     }
   });
-  //# sourceURL=v-s:NewsSearchBlankTemplate_post
 </script>
   """ ;
 .
@@ -375,7 +374,8 @@ v-s:TTLFileSearchResultTemplate
     <tr>
       <th width="1%"><input type="checkbox" class="toggle-select-all"></th>
       <th width="1%">#</th>
-      <th width="85%" class="orderby" data-orderby="v-s:title"><span about="v-s:title" property="rdfs:label"></span></th>
+      <th width="65%" class="orderby" data-orderby="v-s:title"><span about="v-s:title" property="rdfs:label"></span></th>
+      <th width="20%" class="orderby" data-orderby="v-s:resource"><span about="v-s:resource" property="rdfs:label"></span></th>
       <th width="13%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
     </tr>
   </thead>
@@ -388,9 +388,74 @@ v-s:TTLFileSearchResultTemplate
         <small about="@" property="v-s:description"></small>
         <a href="#/@"><small about="v-s:More" property="rdfs:label"></small></a>
       </td>
+      <td about="@" property="v-s:resource"></td>
       <td about="@" property="v-s:created"></td>
     </tr>
   </tbody>
 </table>
+  """ ;
+.
+v-s:TTLFileTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения TTLFile"@ru ;
+  rdfs:label "TTLFile template"@en ;
+  v-ui:template """
+<div>
+  <div class="container sheet">
+    <h3 class="margin-sm">
+      <span about="@" property="rdf:type"></span>
+      <small about="@" property="rdfs:label" class="view edit -search"></small>
+    </h3>
+    <section id="MainProperties">
+      <h4 class="section-header" about="v-s:MainProperties" property="rdfs:label"></h4>
+      <div class="row row-attribute">
+        <div class="col-sm-3 col-xs-5">
+          <label about="v-s:filePath" property="rdfs:label"></label>
+        </div>
+        <div class="col-sm-9 col-xs-7">
+          <div property="v-s:filePath" class="view -edit search"></div>
+        </div>
+      </div>
+      <div class="row row-attribute">
+        <div class="col-sm-3 col-xs-5">
+          <label about="v-s:fileUri" property="rdfs:label"></label>
+        </div>
+        <div class="col-sm-9 col-xs-7">
+          <div property="v-s:fileUri" class="view -edit search"></div>
+        </div>
+      </div>
+      <div class="row row-attribute">
+        <div class="col-sm-3 col-xs-5">
+          <label about="v-s:resource" property="rdfs:label"></label>
+        </div>
+        <div class="col-sm-9 col-xs-7">
+          <div property="v-s:resource" class="view -edit search"></div>
+        </div>
+      </div>
+      <div class="row row-attribute">
+        <div class="col-sm-3 col-xs-5">
+          <button type="button" class="action btn btn-danger view -edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"/>
+        </div>
+        <div class="col-sm-9 col-xs-7">
+        </div>
+      </div>
+    </section>
+    <hr>
+    <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
+  </div>
+</div>
+<script>
+
+  $("#destroy", template).click(function () {
+    if ( individual.hasValue("v-s:resource") ) {
+      individual["v-s:resource"].forEach(function(elm){
+        elm.remove();
+      });
+    }
+    console.log(individual);
+    //individual.remove();
+  });
+//# sourceURL=v-s:TTLFileTemplate
+</script>
   """ ;
 .

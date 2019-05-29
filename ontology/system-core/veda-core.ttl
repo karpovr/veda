@@ -251,6 +251,7 @@ v-s:TTLFile
   rdfs:subClassOf v-s:File ;
   rdfs:label "TTL файл"@ru ;
   rdfs:label "TTL file"@en ;
+  v-ui:hasTemplate v-s:TTLFileTemplate ;
 .
 v-s:hash
   rdf:type owl:DatatypeProperty ;
