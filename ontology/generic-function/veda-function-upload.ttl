@@ -35,10 +35,10 @@ v-s:TTLFileSearch
   rdfs:label "TTLFile"@ru ;
   rdfs:label "TTLFile search"@en ;
   v-fs:searchBlank v-s:TTLFileBlank ;
-  v-fs:fullTextQuery "('rdf:type'=='v-s:TTLFile' && 'v-s:origin'=='Client')" ;
+  v-fs:fulltextQuery "('rdf:type'=='v-s:TTLFile' && 'v-s:origin'=='Client')" ;
   v-fs:searchBlankTemplate v-s:TTLFileSearchBlankTemplate ;
   v-fs:searchResultTemplate v-s:TTLFileSearchResultTemplate ;
-#  v-fs:searchOnLoad true ;
+  v-fs:searchOnLoad true ;
 .
 ########## UPLOAD TTL FUNCTION ###########
 
