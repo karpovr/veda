@@ -453,7 +453,6 @@ v-s:TTLFileTemplate
         elm.remove();
       });
     }
-    console.log(individual);
     individual.remove();
     notify("danger", {name: "Object is destroyed"});
   });
