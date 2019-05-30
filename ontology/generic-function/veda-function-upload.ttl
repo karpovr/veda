@@ -18,10 +18,10 @@
 .
 
 ########## UPLOAD TTL BUNDLE ###########
-v-s:UploudBundle
+v-s:UploadBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Загрузить"@ru ;
-  rdfs:label "Uploud"@en ;
+  rdfs:label "Upload"@en ;
 .
 ########## UPLOAD TTL FUNCTION SEARCH TTLFILE ###########
 v-s:TTLFileBlank
@@ -71,7 +71,7 @@ v-up:UploadTemplate
       <div class="panel panel-default">
         <div class="panel-heading">
           <span about="v-s:UploadTtlBundle" property="rdfs:label"></span>
-          <a id="upload" about="v-s:UploudBundle" property="rdfs:label" class="btn btn-xs btn-primary pull-right"></a>
+          <a id="upload" about="v-s:UploadBundle" property="rdfs:label" class="btn btn-xs btn-primary pull-right"></a>
         </div>
         <div class="panel-body">
           <input type="checkbox" class="toggle-select-scheme"> Схема<br>
@@ -132,12 +132,19 @@ v-up:UploadTemplate
       parser.parse(
       fileDisplayArea.innerText,
       (error, quad, prefixes) => {
-        if (quad) {
-          all_quad = all_quad.concat(quad);
-        } else {
-          console.log("# That's all, folks!", prefixes);
-          var masPre = Object.keys(prefixes) ;
-          cutPredicate(all_quad, masPre, prefixes);
+        try {
+          if (quad) {
+            all_quad = all_quad.concat(quad);
+          } else {
+            console.log("# That's all, folks!", prefixes);
+            var masPre = Object.keys(prefixes) ;
+            cutPredicate(all_quad, masPre, prefixes);
+          }
+        } catch(e) {
+          console.log(e.name);
+          console.log(e.stack);
+          console.log(e.message);
+          notify("danger", {name: "Problem with TTL"});
         }
       });
     }
