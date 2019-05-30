@@ -446,7 +446,7 @@ v-s:TTLFileTemplate
   </div>
 </div>
 <script>
-
+  var notify = veda.Notify ? new veda.Notify() : function () {};
   $("#destroy", template).click(function () {
     if ( individual.hasValue("v-s:resource") ) {
       individual["v-s:resource"].forEach(function(elm){
@@ -454,7 +454,8 @@ v-s:TTLFileTemplate
       });
     }
     console.log(individual);
-    //individual.remove();
+    individual.remove();
+    notify("danger", {name: "Object is destroyed"});
   });
 //# sourceURL=v-s:TTLFileTemplate
 </script>
