@@ -230,9 +230,9 @@ v-up:UploadTemplate
         }
         if ( predicate === 'xsd:boolean' ) {
           var back = newQuad[i].object.lastIndexOf("\\"),
-              boolean = newQuad[i].object.substring(1, back);
-              boolean = Boolean(boolean);
-          newObject[ newQuad[i].predicate ] = veda.Util.newBool( boolean );
+              boolean = newQuad[i].object.substring(1, back),
+              convertToBool = (boolean == 'true');
+          newObject[ newQuad[i].predicate ] = veda.Util.newBool( convertToBool );
         }
         if ( predicate === 'xsd:string' ) {
           var back = newQuad[i].object.lastIndexOf("\\"),
@@ -341,6 +341,7 @@ v-up:UploadTemplate
     TTLFile.save();
   }
   document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
+  //# sourceURL=UploadTTL
 </script>
   """ ;
 .
