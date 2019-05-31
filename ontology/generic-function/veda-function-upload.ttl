@@ -78,8 +78,7 @@ v-up:UploadTemplate
           <em about="v-s:attachment" property="rdfs:label"></em>
           <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
           <input type="file" id="files" multiple></input>
-          <div id="fileDisplayArea"></div><br>
-          <div id="fileJson"></div>
+          <div id="fileDisplayArea"></div>
         </div>
       </div>
     </div>
@@ -170,44 +169,19 @@ v-up:UploadTemplate
         newObject = {} ;
         newObject['@'] = newQuad[i].subject ;
       }
-      if ( newQuad[i].predicate === 'v-s:middleName' ) {
-        var at = newQuad[i].object.lastIndexOf("@"),
-            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
-            locale = newQuad[i].object.substring(at+1, endOfLine),
-            middleName = newQuad[i].object.substring(1, at-1);
-        if ( 'v-s:middleName' in newObject ) {
-          newObject['v-s:middleName'] = newObject['v-s:middleName'].concat( veda.Util.newStr( middleName, locale ) );
-        } else {
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( middleName, locale ) ;
-        }
-      } else if ( newQuad[i].predicate === 'v-s:firstName' ) {
-        var at = newQuad[i].object.lastIndexOf("@"),
-            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
-            locale = newQuad[i].object.substring(at+1, endOfLine),
-            firstName = newQuad[i].object.substring(1, at-1);
-        if ( 'v-s:firstName' in newObject ) {
-          newObject['v-s:firstName'] = newObject['v-s:firstName'].concat( veda.Util.newStr( firstName, locale ) );
-        } else {
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( firstName, locale ) ;
-        }
-      } else if ( newQuad[i].predicate === 'v-s:lastName' ) {
-        var at = newQuad[i].object.lastIndexOf("@"),
-            endOfLine = newQuad[i].object.lastIndexOf("\\n"),
-            locale = newQuad[i].object.substring(at+1, endOfLine),
-            lastName = newQuad[i].object.substring(1, at-1);
-        if ( 'v-s:lastName' in newObject ) {
-          newObject['v-s:lastName'] = newObject['v-s:lastName'].concat( veda.Util.newStr( lastName, locale ) );
-        } else {
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( lastName, locale ) ;
-        }
-      } else if ( newQuad[i].predicate === 'rdfs:label' ) {
+
+      if ( newQuad[i].predicate === 'v-s:middleName'
+          || newQuad[i].predicate === 'v-s:firstName'
+          || newQuad[i].predicate === 'v-s:lastName'
+          || newQuad[i].predicate === 'rdfs:label'
+      ) {
         var at = newQuad[i].object.lastIndexOf("@"),
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
             locale = newQuad[i].object.substring(at+1, endOfLine),
             label = newQuad[i].object.substring(1, at-1);
         if (at > 0) {
-          if ( 'rdfs:label' in newObject ) {
-            newObject['rdfs:label'] = newObject['rdfs:label'].concat( veda.Util.newStr( label, locale ) );
+          if ( newQuad[i].predicate in newObject ) {
+            newObject[ newQuad[i].predicate ] = newObject[ newQuad[i].predicate ].concat( veda.Util.newStr( label, locale ) );
           } else {
             newObject[ newQuad[i].predicate ] = veda.Util.newStr( label, locale ) ;
           }
