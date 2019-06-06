@@ -196,29 +196,24 @@ v-up:UploadTemplate
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
             predicate = newQuad[i].object.substring(back + 1, endOfLine);
         if ( predicate === 'xsd:dateTime' ) {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              date = newQuad[i].object.substring(1, back);
+          var date = newQuad[i].object.substring(1, back);
           newObject[ newQuad[i].predicate ] = veda.Util.newDate( date );
         }
         if ( predicate === 'xsd:integer' ) {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              integer = newQuad[i].object.substring(1, back);
+          var integer = newQuad[i].object.substring(1, back);
           newObject[ newQuad[i].predicate ] = veda.Util.newInt( integer );
         }
         if ( predicate === 'xsd:decimal' ) {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              decimal = newQuad[i].object.substring(1, back);
+          var decimal = newQuad[i].object.substring(1, back);
           newObject[ newQuad[i].predicate ] = veda.Util.newDecimal( decimal );
         }
         if ( predicate === 'xsd:boolean' ) {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              boolean = newQuad[i].object.substring(1, back),
+          var boolean = newQuad[i].object.substring(1, back),
               convertToBool = (boolean == 'true');
           newObject[ newQuad[i].predicate ] = veda.Util.newBool( convertToBool );
         }
         if ( predicate === 'xsd:string' ) {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              label = newQuad[i].object.substring(1, back);
+          var label = newQuad[i].object.substring(1, back);
           newObject[ newQuad[i].predicate ] = veda.Util.newStr( label );
         }
       } else {
