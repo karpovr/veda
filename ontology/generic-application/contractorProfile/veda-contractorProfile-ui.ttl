@@ -593,25 +593,19 @@ v-s:ContractorCategoryRequestTemplate
   v-ui:template """
 <script>
   var hideAndshowsubContractorOf = $("#hideAndshowsubContractorOf", template);
-
   individual.on("v-s:hasContractorInteractionCategory", handler);
   template.one("remove", function () {
     individual.off("v-s:hasContractorInteractionCategory", handler);
   });
   function handler() {
-    if ((individual.hasValue('v-s:hasContractorInteractionCategory') && individual['v-s:hasContractorInteractionCategory'][0].id === 'd:eb16f1abb93f44d89ae0492710ad4631')) {
+    if ( individual.hasValue('v-s:hasContractorInteractionCategory', 'd:eb16f1abb93f44d89ae0492710ad4631') ) {
       hideAndshowsubContractorOf.show();
     } else {
       hideAndshowsubContractorOf.hide();
     }
   }
   handler();
-  //кнопка активна если итоговая оценка отрицательная
-  if ( individual.hasValue("v-s:hasContractorCategoryDecision") && individual["v-s:hasContractorCategoryDecision"][0]["v-s:isOrganizationOk"][0] === false ) {
-    $(".action#save_and_start_process2", template).removeAttr("disabled");
-  } else {
-    $(".action#save_and_start_process2", template).attr("disabled", "disabled");
-  }
+//# sourceURL=v-s:ContractorCategoryRequestTemplate_pre
 </script>
 <div>
   <div class="container sheet">
@@ -656,10 +650,10 @@ v-s:ContractorCategoryRequestTemplate
             <tbody rel="v-s:subContractorOf" >
               <tr>
                 <td>
-                  <div about="@" property="rdfs:label" class="view -edit -search" data-template="v-ui:LabelTemplate"></div>
+                  <div about="@" property="rdfs:label" class="view -edit -search"></div>
                 </td>
                 <td>
-                  <div about="@" property="v-s:taxId" class="view -edit -search" data-template="v-ui:LabelTemplate"></div>
+                  <div about="@" property="v-s:taxId" class="view -edit -search"></div>
                 </td>
                 <td>
                   <div>
@@ -694,7 +688,7 @@ v-s:ContractorCategoryRequestTemplate
       </div>
     </div>
     <hr>
-    <div about="@" rel="v-s:backwardTarget" data-embedded="true" data-template="v-s:DosieEmbeddedTemplate"></div>
+    <div about="@" rel="v-s:backwardTarget" data-embedded="true" data-template="v-s:ContractorProfileEmbeddedTemplate"></div>
     <hr>
     <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
     <br>
@@ -721,8 +715,8 @@ v-s:ContractorCategoryRequestTemplate
         decision = new veda.IndividualModel(),
         tmpl = new veda.IndividualModel("v-s:ContractorCategoryDecisionTemplate");
     decision["rdf:type"] = [_class];
-    decision["v-s:backwardTarget"] = [individual];
-    decision["v-s:backwardProperty"] = [new veda.IndividualModel("v-s:hasContractorCategoryDecision")];
+    decision["v-s:backwardTarget"] = [ individual ];
+    decision["v-s:backwardProperty"] = [ new veda.IndividualModel("v-s:hasContractorCategoryDecision") ];
     decision["v-s:canRead"] = [ true ];
     decision.present(cntr, tmpl, "edit");
     decision.one("beforeReset", function () {
@@ -732,13 +726,16 @@ v-s:ContractorCategoryRequestTemplate
       modal.modal("hide").remove();
     });
   });
+
   var _class = new veda.IndividualModel("v-s:ContractorCategoryDecision");
-  var hasRights = _class.rights.hasValue("v-s:canCreate", true);
-  function handler() {
-    if (!hasRights) {
+  _class.rights.then(function (rights) {
+    if ( !rights.hasValue("v-s:canCreate", true) ) {
       $("#add-ContractorCategoryDecision", template).prop("disabled", true);
     }
-    if(individual.hasValue("v-s:hasContractorCategoryDecision")){
+  });
+
+  function handler() {
+    if ( individual.hasValue("v-s:hasContractorCategoryDecision") ) {
       $("#add-ContractorCategoryDecision", template).hide();
     } else {
       $("#add-ContractorCategoryDecision", template).show();
@@ -791,16 +788,21 @@ v-s:PriceTemplate
 
   function handler(property_uri) {
     if ( (property_uri === "v-s:sum" || property_uri === "v-s:hasCurrency") && (individual.hasValue("v-s:sum") && individual.hasValue("v-s:hasCurrency")) ) {
-      var CER_uri = query({
+      var CER_uri = veda.Backend.query({
         ticket: veda.ticket,
         query: "'rdf:type'==='v-s:CurrencyExchangeRate' && 'v-s:hasCurrencySource'=='" + individual["v-s:hasCurrency"][0].id + "' && 'v-s:hasCurrencyTarget'=='d:currency_rub' && 'v-s:hasCurrencyExchangeRatePurpose'=='v-s:CER_Purpose_current'",
         sort: "'v-s:date' asc",
         top: 1,
         async: true
-      }).then(function (result) {
-        var CER_uri = result.result[0];
+      }).then(function (queryResult) {
+        var CER_uri = queryResult.result[0];
         if (CER_uri) {
-          var CER = new veda.IndividualModel(CER_uri);
+          return new veda.IndividualModel(CER_uri).load();
+        } else {
+          return Promise.resolve();
+        }
+      }).then(function (CER) {
+        if (CER) {
           var rate = CER["v-s:rate"][0];
           individual["v-s:sumRuble"] = [ individual["v-s:sum"][0] * rate ];
           individual["v-s:date"] = [ new Date() ];
@@ -811,13 +813,12 @@ v-s:PriceTemplate
       });
     }
   }
-
   //# sourceURL=v-s:PriceTemplate_post
 </script>
   """ ;
 .
 
-v-s:DosieEmbeddedTemplate
+v-s:ContractorProfileEmbeddedTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Вложенный шаблон для класса v-s:ContractorProfile"@ru ;
   rdfs:label "Template embedded for v-s:ContractorProfile class"@en ;
@@ -947,7 +948,7 @@ v-s:DosieEmbeddedTemplate
     return {state: state, cause: cause};
   }
 
-  //# sourceURL=v-s:DosieEmbeddedTemplate_pre
+  //# sourceURL=v-s:ContractorProfileEmbeddedTemplate_pre
 </script>
 <div>
   <h2>
@@ -1058,7 +1059,7 @@ v-s:DosieEmbeddedTemplate
      veda.Util.send(individual, template, 's-wf:complexRouteTransform');
   });
 
-  //# sourceURL=v-s:DosieEmbeddedTemplate_post
+  //# sourceURL=v-s:ContractorProfileEmbeddedTemplate_post
 </script>
 
     """ ;
@@ -1216,50 +1217,54 @@ v-s:ContractorCategoryDecisionTemplate
       modal.modal("hide").remove();
     });
   });
-
-  var _classSecurity = new veda.IndividualModel("v-s:ContractorCategoryDecisionSecurity");
-  var hasRightsSecurity = _classSecurity.rights.hasValue("v-s:canCreate", true) && individual.rights.hasValue("v-s:canUpdate", true);
-  individual.on("propertyModified", handlerSecurity);
-  template.one("remove", function () {
-    individual.off("propertyModified", handlerSecurity);
-  });
-  function handlerSecurity(property_uri, values) {
-    if (property_uri === "v-s:hasContractorCategoryDecisionSecurity" && (individual.hasValue("v-s:hasContractorCategoryDecisionSecurity") || !hasRightsSecurity)) {
-      $("#add-ContractorCategoryDecisionSecurity", template).remove();
+  var _classSecurity = new veda.IndividualModel('v-s:ContractorCategoryDecisionSecurity');
+  var _classLegal = new veda.IndividualModel('v-s:ContractorCategoryDecisionLegal');
+  var _classFinancial = new veda.IndividualModel('v-s:ContractorCategoryDecisionFinancial');
+  Promise.all([_classSecurity.canCreate(), _classLegal.canCreate(), _classFinancial.canCreate(), individual.canUpdate()]).then(function (rights) {
+    var canCreateSecurity = rights[0],
+        canCreateLegal = rights[1],
+        canCreateFinancial = rights[2],
+        canUpdateIndividual = rights[3],
+        hasRightsSecurity = canCreateSecurity && canUpdateIndividual,
+        hasRightsLegal = canCreateLegal && canUpdateIndividual,
+        hasRightsFinancial = canCreateFinancial && canUpdateIndividual;
+    individual.on("v-s:hasContractorCategoryDecisionSecurity", handlerSecurity);
+    template.one("remove", function () {
+      individual.off("v-s:hasContractorCategoryDecisionSecurity", handlerSecurity);
+    });
+    function handlerSecurity(values) {
+      if (values.length || !hasRightsSecurity) {
+        $("#add-ContractorCategoryDecisionSecurity", template).remove();
+      }
     }
-  }
-  handlerSecurity("v-s:hasContractorCategoryDecisionSecurity", individual["v-s:hasContractorCategoryDecisionSecurity"]);
+    handlerSecurity(individual["v-s:hasContractorCategoryDecisionSecurity"]);
 
-  var _classLegal = new veda.IndividualModel("v-s:ContractorCategoryDecisionLegal");
-  var hasRightsLegal = _classLegal.rights.hasValue("v-s:canCreate", true) && individual.rights.hasValue("v-s:canUpdate", true);
-  individual.on("propertyModified", handlerLegal);
-  template.one("remove", function () {
-    individual.off("propertyModified", handlerLegal);
-  });
-  function handlerLegal(property_uri, values) {
-    if (property_uri === "v-s:hasContractorCategoryDecisionLegal" && (individual.hasValue("v-s:hasContractorCategoryDecisionLegal") || !hasRightsLegal)) {
-      $("#add-ContractorCategoryDecisionLegal", template).remove();
+    individual.on("v-s:hasContractorCategoryDecisionLegal", handlerLegal);
+    template.one("remove", function () {
+      individual.off("v-s:hasContractorCategoryDecisionLegal", handlerLegal);
+    });
+    function handlerLegal(values) {
+      if (values.length || !hasRightsLegal) {
+        $("#add-ContractorCategoryDecisionLegal", template).remove();
+      }
     }
-  }
-  handlerLegal("v-s:hasContractorCategoryDecisionLegal", individual["v-s:hasContractorCategoryDecisionLegal"]);
+    handlerLegal(individual["v-s:hasContractorCategoryDecisionLegal"]);
 
-  var _classFinancial = new veda.IndividualModel("v-s:ContractorCategoryDecisionFinancial");
-  var hasRightsFinancial = _classFinancial.rights.hasValue("v-s:canCreate", true) && individual.rights.hasValue("v-s:canUpdate", true);
-  individual.on("propertyModified", handlerFinancial);
-  template.one("remove", function () {
-    individual.off("propertyModified", handlerFinancial);
-  });
-  function handlerFinancial(property_uri, values) {
-    if (property_uri === "v-s:hasContractorCategoryDecisionFinancial" && (individual.hasValue("v-s:hasContractorCategoryDecisionFinancial") || !hasRightsFinancial)) {
-      $("#add-ContractorCategoryDecisionFinancial", template).remove();
+    individual.on("v-s:hasContractorCategoryDecisionFinancial", handlerFinancial);
+    template.one("remove", function () {
+      individual.off("v-s:hasContractorCategoryDecisionFinancial", handlerFinancial);
+    });
+    function handlerFinancial(values) {
+      if (values.length || !hasRightsFinancial) {
+        $("#add-ContractorCategoryDecisionFinancial", template).remove();
+      }
     }
-  }
-  handlerFinancial("v-s:hasContractorCategoryDecisionFinancial", individual["v-s:hasContractorCategoryDecisionFinancial"]);
+    handlerFinancial(individual["v-s:hasContractorCategoryDecisionFinancial"]);
 
-  if (!(hasRightsSecurity || hasRightsLegal || hasRightsFinancial)){
-    $("#createReport", template).remove();
-  };
-
+    if (!(hasRightsSecurity || hasRightsLegal || hasRightsFinancial)){
+      $("#createReport", template).remove();
+    };
+  });
   //# sourceURL=v-s:ContractorCategoryDecisionTemplate_post
 </script>
    """ ;
@@ -1340,12 +1345,13 @@ v-s:ContractorCategoryDecisionSecurityEmbeddedTemplate
     </div>
   </div>
 </div>
-
 <script>
   var _class = new veda.IndividualModel("v-s:ContractorCategoryDecisionSecurity");
-  if ( !_class.rights.hasValue("v-s:canCreate", true) ) {
-    $("#open-modal", template).remove();
-  }
+  _class.canCreate().then(function (canCreate) {
+    if (!canCreate) {
+      $("#open-modal", template).remove();
+    }
+  });
 </script>
  """ ;
 .
@@ -1408,9 +1414,11 @@ v-s:ContractorCategoryDecisionLegalEmbeddedTemplate
 </div>
 <script>
   var _class = new veda.IndividualModel("v-s:ContractorCategoryDecisionLegal");
-  if ( !_class.rights.hasValue("v-s:canCreate", true) ) {
-    $("#open-modal", template).remove();
-  }
+  _class.canCreate().then(function (canCreate) {
+    if (!canCreate) {
+      $("#open-modal", template).remove();
+    }
+  });
 </script>
  """ ;
 .
@@ -1467,9 +1475,11 @@ v-s:ContractorCategoryDecisionFinancialEmbeddedTemplate
 </div>
 <script>
   var _class = new veda.IndividualModel("v-s:ContractorCategoryDecisionFinancial");
-  if ( !_class.rights.hasValue("v-s:canCreate", true)) {
-    $("#open-modal", template).remove();
-  }
+  _class.canCreate().then(function (canCreate) {
+    if (!canCreate) {
+      $("#open-modal", template).remove();
+    }
+  });
 </script>
   """ ;
 .
@@ -1481,25 +1491,26 @@ v-s:ContractorCategoryDecisionEmbeddedTemplate
   v-ui:template """
 <script>
   var _class = new veda.IndividualModel("v-s:ContractorCategoryDecision");
-  if ( !_class.rights.hasValue("v-s:canCreate", true) ) {
-    $("#AddResolution", template).remove();
-  }
+  _class.canCreate().then(function (canCreate) {
+    if (!canCreate) {
+      $("#AddResolution", template).remove();
+    }
+  });
 
   var decisionContractorCategoryEmbeddedState = $("#decisionContractorCategoryEmbeddedState", template);
-
-  individual.on("propertyModified", handler);
+  individual.on("v-s:isOrganizationOk", handler);
   template.one("remove", function () {
-    individual.off("propertyModified", handler);
+    individual.off("v-s:isOrganizationOk", handler);
   });
-  function handler(property_uri, values) {
-    if (property_uri === "v-s:isOrganizationOk") {
+  function handler(values) {
+    if (values.length) {
       if (values[0] === true) {
         decisionContractorCategoryEmbeddedState.removeClass("panel-danger panel-warning").addClass("panel-success");
-      } else if (values[0] === false) {
-        decisionContractorCategoryEmbeddedState.removeClass("panel-success panel-warning").addClass("panel-danger");
       } else {
-        decisionContractorCategoryEmbeddedState.removeClass("panel-success panel-danger").addClass("panel-warning");
+        decisionContractorCategoryEmbeddedState.removeClass("panel-success panel-warning").addClass("panel-danger");
       }
+    } else {
+      decisionContractorCategoryEmbeddedState.removeClass("panel-success panel-danger").addClass("panel-warning");
     }
   }
   handler("v-s:isOrganizationOk", individual["v-s:isOrganizationOk"]);
@@ -1543,7 +1554,6 @@ v-s:ContractorCategoryDecisionEmbeddedTemplate
 </div>
   """ ;
 .
-
 
 v-s:ContractorCategoryDepartmentDecisionEmbeddedTemplate
   rdf:type v-ui:ClassTemplate ;

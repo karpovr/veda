@@ -1,3 +1,4 @@
+/.pids
 .settings
 .project
 .dub
@@ -50,4 +51,6 @@ veda.properties
 /veda-lmdb-srv
 /veda-input-queue
 /veda-gowebserver
+/veda-ro-storage
 /libauthorization.so
+*.geany

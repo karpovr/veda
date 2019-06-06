@@ -48,6 +48,12 @@ v-ui:preferredLanguage
   rdfs:label "Preferred language"@en ;
   rdfs:range v-ui:Language ;
 .
+v-ui:DefaultDisplayedElements
+  rdf:type rdfs:Resource ;
+  rdf:value 10 ;
+  rdfs:label "Количество отображаемых элементов по-умолчанию"@ru ;
+  rdfs:label "Default displayed elements count"@en ;
+.
 v-ui:forClass
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-ui:ClassTemplate ;
@@ -435,42 +441,23 @@ v-s:TransportKind
 .
 # --------------- System properties template ------------------
 
-v-ui:DraftsIndicatorTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон переключения языка"@ru ;
-  rdfs:label "Language switch template"@en ;
-  v-ui:template """
-<script>
-  $("#drafts-counter", template).text(veda.drafts.length);
-  template.tooltip({
-    container: template,
-    placement: "bottom",
-    trigger: "hover",
-    title: individual["rdfs:label"].join(" ")
-  });
-  //# sourceURL=v-ui:DraftsIndicatorTemplate_pre
-</script>
-<a href="#/drafts" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
-  <span class="fa fa-pencil-square-o fa-lg"></span> <span class="label label-default" id="drafts-counter"></span>
-</a>
-  """
-.
 v-ui:LanguageSwitchTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон переключения языка"@ru ;
   rdfs:label "Language switch template"@en ;
   v-ui:template """
 <div about="@" class="btn-group" rel="rdf:value">
-  <button about="@" property="rdfs:label" class="btn btn-xs btn-default navbar-btn"></button>
+  <button about="@" property="rdfs:label" class="lang btn btn-xs btn-default navbar-btn"></button>
 </div>
 <script>
+  var switchBehavior = container.attr("data-switch-behavior") || "checkbox";
   var switches = $(".btn", template);
   veda.user.preferences.on("v-ui:preferredLanguage", langHandler);
   template.one("remove", function () {
     veda.user.preferences.off("v-ui:preferredLanguage", langHandler);
   });
   langHandler();
-  template.on("click", toggleLanguage);
+  template.on("click", "button.lang", toggleLanguage);
   function langHandler() {
     var preferredLanguage = veda.user.preferences["v-ui:preferredLanguage"].map(function (language) { return language.id; });
     switches.each(function () {
@@ -489,11 +476,19 @@ v-ui:LanguageSwitchTemplate
     var lang_uri = target.attr("resource");
     var lang = new veda.IndividualModel(lang_uri);
     var lang_name = lang["rdf:value"][0].toString();
-    if (lang_name in veda.user.language && Object.keys(veda.user.language).length == 1) return;
-    lang_name in veda.user.language ? delete veda.user.language[lang_name] : veda.user.language[lang_name] = veda.user.availableLanguages[lang_name];
-    veda.user.preferences["v-ui:preferredLanguage"] = Object.keys(veda.user.language).map ( function (lang_name) {
-      return veda.user.language[lang_name];
-    });
+    var hasLanguage = veda.user.preferences.hasValue("v-ui:preferredLanguage", lang);
+    var languageCount = veda.user.preferences["v-ui:preferredLanguage"].length;
+    if ( !hasLanguage ) {
+      if (switchBehavior === "checkbox") {
+        veda.user.preferences.addValue("v-ui:preferredLanguage", lang);
+      } else {
+        veda.user.preferences.set("v-ui:preferredLanguage", [lang]);
+      }
+    } else if ( hasLanguage && languageCount > 1 ) {
+      veda.user.preferences.removeValue("v-ui:preferredLanguage", lang);
+    } else {
+      return;
+    }
   };
   //# sourceURL=v-ui:LanguageSwitchTemplate
 </script>
@@ -593,47 +588,69 @@ v-ui:StandardButtonsTemplate
 <script>
   // var allButtons = "send edit save cancel delete destroy journal journal-dms task rights";
   var defaultButtons = "send edit save cancel delete journal task";
-  var canUpdate = individual.rights && individual.rights.hasValue("v-s:canUpdate", true);
-  var canDelete = individual.rights && individual.rights.hasValue("v-s:canDelete", true);
-  var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
-  enabledButtons.forEach(function (id) {
-    if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
-    if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
-    $("#" + id, template).removeClass("rm");
+  individual.rights.then(function (rights) {
+    var canUpdate = rights.hasValue("v-s:canUpdate", true);
+    var canDelete = rights.hasValue("v-s:canDelete", true);
+    var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
+    enabledButtons.forEach(function (id) {
+      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
+      if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
+      $("#" + id, template).removeClass("rm");
+    });
+    $(".rm", template).remove();
   });
-  $(".rm", template).remove();
+
   template.on("click", "#edit, #save, #cancel, #delete, #destroy", function (e) {
     e.preventDefault();
     var action = this.id;
     if (action === "delete" || action === "destroy") {
-      var warning = new veda.IndividualModel("v-s:AreYouSure")["rdfs:label"].join(" ");
-      if ( !confirm(warning) ) { return; }
+      var warning = new veda.IndividualModel("v-s:AreYouSure");
+      warning.load().then(function (warning) {
+        if ( confirm( warning["rdfs:label"].join(" ") ) ) {
+          template.parent().closest("[resource]").trigger(action);
+        }
+      });
+    } else {
+      template.parent().closest("[resource]").trigger(action);
     }
-    template.parent().closest("[resource]").trigger(action);
   });
+
+  $("#cancel", template).on("click", function () {
+    template.closest(".modal").modal("hide").remove();
+  });
+
   $("#journal", template).on("click", function (e) {
     e.preventDefault();
     var journal_uri = individual.id + "j",
         journal = new veda.IndividualModel(journal_uri);
-    if (journal.hasValue("rdf:type") && journal["rdf:type"][0].id !== "rdfs:Resource") {
-      riot.route("#/" + journal_uri);
-    } else {
-      var journalEmpty = new veda.IndividualModel("v-s:JournalEmpty")["rdfs:label"].join(" ");
-      alert(journalEmpty);
-    }
+    journal.load().then(function (journal) {
+      if ( !journal.isNew() ) {
+        riot.route("#/" + journal_uri);
+      } else {
+        var journalEmpty = new veda.IndividualModel("v-s:JournalEmpty").load().then(function (journalEmpty) {
+          alert(journalEmpty["rdfs:label"].join(" "));
+        });
+      }
+    });
   });
   $("#journal-dms", template).on("click", function (e) {
-    var uri = individual.id.substring(2,100);
-    var journalDMS_url = (new veda.IndividualModel("cfg:JournalDMSUrl"))["rdf:value"][0];
-    if (journalDMS_url) {
-      window.open(journalDMS_url + uri, "journal-dms");
-    }
+    var uri = individual.id.substring(2);
+    var journalDMS_cfg = new veda.IndividualModel("cfg:JournalDMSUrl").load()
+      .then(function (journalDMS_cfg) {
+        return journalDMS_cfg["rdf:value"][0];
+      })
+      .then(function (journalDMS_url) {
+        if (journalDMS_url) {
+          window.open(journalDMS_url + uri, "journal-dms");
+        }
+      });
   });
   $("#send", template).on("click", function (e) {
-    // template.parent().closest("[resource]").trigger("save");
     veda.Util.send(individual, template.parent().closest("[resource]"));
   });
-  $("#rights", template).on("click", function () { veda.Util.showRights(individual); });
+  $("#rights", template).on("click", function () {
+    veda.Util.showRights(individual);
+  });
 
   // Standard tasks
   template.on("click", "ul#standard-tasks a", function (e) {
@@ -642,27 +659,6 @@ v-ui:StandardButtonsTemplate
     veda.Util.send(individual, template, startFormTransform, true);
   });
 
-  // Standart buttons labels change for drafts
-  function isDraftHandler() {
-    if ( individual.isDraft() ) {
-      var continueEdit = new veda.IndividualModel("v-s:ContinueEdit");
-      continueEdit.present($(".action#edit", template).empty());
-      var deleteDraft = new veda.IndividualModel("v-s:DeleteDraft");
-      deleteDraft.present($(".action#cancel", template).empty());
-    } else {
-      var edit = new veda.IndividualModel("v-s:Edit");
-      edit.present($(".action#edit", template).empty());
-      var cancel = new veda.IndividualModel("v-s:Cancel");
-      cancel.present($(".action#cancel", template).empty());
-    }
-  }
-  individual.on("propertyModified afterSave afterReset", isDraftHandler);
-  template.one("remove", function () {
-    individual.off("propertyModified", isDraftHandler);
-    individual.off("afterSave", isDraftHandler);
-    individual.off("afterReset", isDraftHandler);
-  });
-  isDraftHandler();
   //# sourceURL=v-ui:StandardButtonsTemplate_pre
 </script>
 <span>
@@ -670,7 +666,7 @@ v-ui:StandardButtonsTemplate
   <button type="button" class="rm action btn btn-primary view -edit -search" id="edit"><span about="v-s:Edit" property="rdfs:label"></span></button>
   <button type="submit" class="rm action btn btn-success -view edit -search" id="save" about="v-s:Save" property="rdfs:label"></button>
   <button type="button" class="rm action btn btn-default -view edit -search" id="cancel"><span about="v-s:Cancel" property="rdfs:label"></span></button>
-  <button type="button" class="rm action btn btn-link view edit -search" id="delete" about="v-s:Delete" property="rdfs:label"></button>
+  <button type="button" class="rm action btn btn-link view -edit -search" id="delete" about="v-s:Delete" property="rdfs:label"></button>
   <button type="button" class="rm action btn btn-danger view edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"></button>
   <button type="button" class="rm action btn btn-default view -edit -search" id="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
   <button type="button" class="rm action btn btn-default view -edit -search" id="journal-dms" about="v-s:ViewJournalDMS" property="rdfs:label"></button>
@@ -691,7 +687,7 @@ v-ui:StandardButtonsTemplate
       <li><a href="#" about="v-wf:distributionRouteStartForm" property="rdfs:label"></a></li>
     </ul>
   </div>
-  <button type="button" class="btn btn-link view edit -search toggle-actions hidden">
+  <button type="button" class="btn btn-link view edit -search action toggle-actions hidden">
     <span class="glyphicon glyphicon-chevron-left"></span>
   </button>
 </span>
@@ -767,39 +763,44 @@ v-ui:IconButtonsTemplate
   rdfs:label "Template with standard buttons"@en ;
   v-ui:template """
 <script>
-  var canUpdate = individual.rights.hasValue("v-s:canUpdate", true);
-  var canDelete = individual.rights.hasValue("v-s:canDelete", true);
-  if (!canUpdate) {
-    $("#save, #edit, #cancel", template).remove();
-  }
-  if (!canDelete || individual.isNew()) {
-    $("#delete", template).remove();
-  }
+  // var allButtons = "edit save cancel delete";
+  var defaultButtons = "edit save cancel delete";
+  individual.rights.then(function (rights) {
+    var canUpdate = rights.hasValue("v-s:canUpdate", true);
+    var canDelete = rights.hasValue("v-s:canDelete", true);
+    var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
+    enabledButtons.forEach(function (id) {
+      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
+      if ( !canDelete && (id === "delete") ) { return; }
+      $("#" + id, template).removeClass("rm");
+    });
+    $(".rm", template).remove();
+  });
+
   template.on("click", "#edit, #save, #cancel, #delete", function (e) {
     e.preventDefault();
     var action = this.id;
     if (action === "delete") {
-      var warning = new veda.IndividualModel("v-s:AreYouSure")["rdfs:label"].join(" ");
-      if ( !confirm(warning) ) { return; }
-    }
-    template.parent().closest("[resource]").trigger(action);
-  });
-  //# sourceURL=v-ui:IconButtonsTemplate_pre
-</script>
-<span>
-  <button data-toggle="tooltip" data-placement="top" data-title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>
-  <button data-toggle="tooltip" data-placement="top" data-title="v-s:Save" type="button" class="action btn btn-xs btn-success -view edit -search glyphicon glyphicon-ok" id="save"></button>
-  <button data-toggle="tooltip" data-placement="top" data-title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" id="cancel"></button>
-  <button data-toggle="tooltip" data-placement="top" data-title="v-s:Delete" type="button" class="action btn btn-xs btn-default view edit -search glyphicon glyphicon-remove" id="delete"></button>
-</span>
-<script>
-  $('[data-toggle="tooltip"]').tooltip({
-    title: function () {
-      var titleUri = $(this).data("title");
-      return new veda.IndividualModel(titleUri)["rdfs:label"].join(" ");
+      var warning = new veda.IndividualModel("v-s:AreYouSure");
+      warning.load().then(function (warning) {
+        if ( confirm( warning["rdfs:label"].join(" ") ) ) {
+          template.parent().closest("[resource]").trigger(action);
+        }
+      });
+    } else {
+      template.parent().closest("[resource]").trigger(action);
     }
   });
 
+  //# sourceURL=v-ui:IconButtonsTemplate_pre
+</script>
+<span>
+  <button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>
+  <button title="v-s:Save" type="button" class="action btn btn-xs btn-success -view edit -search glyphicon glyphicon-ok" id="save"></button>
+  <button title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" id="cancel"></button>
+  <button title="v-s:Delete" type="button" class="action btn btn-xs btn-default view edit -search glyphicon glyphicon-remove" id="delete"></button>
+</span>
+<script>
   // Respect validation state of parent template
   var closest = template.parent().closest("[resource]");
   closest.on("internal-validated", function (e, validation) {
@@ -841,7 +842,7 @@ v-ui:VersionTemplate
         template.removeClass("hidden").prependTo(sheet.length ? sheet : renderedTemplate);
       }
     });
-  }, 100);
+  }, 300);
 </script>
 """ ;
 .
@@ -940,10 +941,10 @@ v-ui:AppointmentPopoverTemplate
   rdfs:label "Appointment template with photo"@en ;
   v-ui:template """
 <div class="media" style="margin-top:0px;">
-  <span class="close">&times;</span>
-  <div class="media-left" rel="v-s:employee" style="width:128px">
-    <a href="#/@" rel="v-s:hasImage">
-      <div rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></div>
+  <span class="close">&nbsp;&times;</span>
+  <div class="media-left" about="@" rel="v-s:employee" style="width:96px">
+    <a href="#/@" about="@" rel="v-s:hasImage">
+      <div about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></div>
     </a>
   </div>
   <div class="media-body" style="width:auto;">
@@ -953,7 +954,9 @@ v-ui:AppointmentPopoverTemplate
     <hr class="no-margin">
     <div about="@" rel="v-s:occupation">
       <div>
-        <small about="@" property="v-s:title"></small><br>
+        <small about="@" property="v-s:title"></small>
+      </div>
+      <div>
         <small about="@" rel="v-s:parentUnit" data-template="v-ui:LabelTemplate"></small>
       </div>
     </div>
@@ -974,17 +977,11 @@ v-ui:PersonPopoverTemplate
   rdfs:label "Шаблон персоны с фотографией"@ru ;
   rdfs:label "Person template with photo"@en ;
   v-ui:template """
-<script>
-  if (!individual.hasValue("v-s:hasImage")) {
-    $(".media-left", template).hide();
-  }
-//# sourceURL=v-ui:PersonPopoverTemplate_pre
-</script>
 <div class="media" style="margin-top:0px;">
-  <span class="close">&times;</span>
-  <div class="media-left" style="width:128px">
-    <a href="#/@" rel="v-s:hasImage">
-      <div rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></div>
+  <span class="close">&nbsp;&times;</span>
+  <div class="media-left" style="width:96px">
+    <a href="#/@" about="@" rel="v-s:hasImage">
+      <div about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></div>
     </a>
   </div>
   <div class="media-body" style="width:auto">
@@ -1010,7 +1007,7 @@ v-ui:PositionPopoverTemplate
   rdfs:label "Position template"@en ;
   v-ui:template """
 <div class="media" style="margin-top:0px;">
-  <span class="close">&times;</span>
+  <span class="close">&nbsp;&times;</span>
   <div class="media-body" style="width:auto">
     <strong class="media-heading" about="@" property="rdfs:label"></strong>
     <hr class="no-margin">
@@ -1087,31 +1084,44 @@ v-ui:LabelTemplate
     if (!individual.hasValue("rdfs:label")) {
       template.text(individual.id);
     }
-    if (individual.is("v-s:Appointment") || individual.is("v-s:Person") || individual.is("v-s:Position")) {
-      template.popover({
-        trigger: "hover click",
-        delay: { "show": 750, "hide": 100 },
-        placement: "auto top",
-        html: true,
-        container: "body",
-        content: function () {
-          var cntr = $("<div></div>");
-          var content;
-          if (individual.is("v-s:Appointment")) {
-            content = individual.present(cntr, "v-ui:AppointmentPopoverTemplate");
-          } else if (individual.is("v-s:Person")) {
-            content = individual.present(cntr, "v-ui:PersonPopoverTemplate");
-          } else {
-            content = individual.present(cntr, "v-ui:PositionPopoverTemplate");
-          }
-          return content.on("click", ".close", function (e) {
-            e.stopPropagation();
-            template.click();
-          });
-        }
-      });
-      template.one("remove", function () {
+
+    var done;
+    var initPopoverTimeout;
+    var type = individual.hasValue("rdf:type") && individual["rdf:type"][0].id;
+    if ( type === "v-s:Appointment" || type === "v-s:Person" || type === "v-s:Position" ) {
+      template.mouseenter(function () {
+        if (done || initPopoverTimeout) { return; }
+        initPopoverTimeout = setTimeout(initPopover, 750);
+      }).mouseleave(function () {
+        initPopoverTimeout = clearTimeout(initPopoverTimeout);
+      }).one("remove", function () {
         template.popover("destroy");
+      });
+    }
+    var initPopover = function () {
+      var cntr = $("<div></div>");
+      var tmpl;
+      if (type === "v-s:Appointment") {
+        tmpl = "v-ui:AppointmentPopoverTemplate";
+      } else if (type === "v-s:Person") {
+        tmpl = "v-ui:PersonPopoverTemplate";
+      } else {
+        tmpl = "v-ui:PositionPopoverTemplate";
+      }
+      individual.present(cntr, tmpl).then(function () {
+        done = true;
+        template.popover({
+          trigger: "hover click",
+          delay: { "show": 750, "hide": 100 },
+          placement: "auto top",
+          html: true,
+          container: "body",
+          content: cntr
+        }).popover("show");
+        cntr.on("click", ".close", function (e) {
+          e.stopPropagation();
+          template.click();
+        });
       });
     }
     //# sourceURL=v-ui:LabelTemplate
@@ -1163,17 +1173,7 @@ v-ui:IconModalTemplate
     if (!newMode && parentTmpl.attr("resource") === individual.id) {
       newMode = parentTmpl.data("mode");
     }
-    var modal;
-    if(newMode==="view") {
-      if (!individual.rights.hasValue("v-s:canUpdate", true)) {
-        modal = $("#individual-modal-template").html();
-      }
-      else if(individual.rights.hasValue("v-s:canUpdate", true)) {
-        modal = $("#notification-modal-template").html();
-      }
-    } else if (newMode==="edit") {
-      modal = $("#individual-modal-template").html();
-    }
+    var modal = $("#notification-modal-template").html();
     modal = $(modal).modal({"show": false});
     $("body").append(modal);
     modal.modal("show");
@@ -1189,10 +1189,12 @@ v-ui:IconModalTemplate
     ok.attr("disabled", "disabled");
     });
 
-    var tmpl = individual.present(cntr, undefined, newMode);
-    if (newMode === "edit") {
-      $(".actions", tmpl).remove();
-    }
+    individual.present(cntr, undefined, newMode).then(function (tmpl) {
+      if (newMode === "edit") {
+        ok.parent().removeClass("hide");
+        $(".actions", tmpl).remove();
+      }
+    });
     individual.one("beforeReset", function () {
       modal.modal("hide").remove();
     });
@@ -1248,13 +1250,13 @@ v-ui:LabelBlockLinkTemplate
   rdfs:label "Шаблон без имени класса, но с меткой, блочный"@ru ;
   rdfs:label "Template without class name, with label, blocked"@en ;
   v-ui:template """
-  <div><a id="label" href="#/@" property="rdfs:label"></a></div>
-  <script>
-    if (!individual.hasValue("rdfs:label")) {
-      $("#label", template).text(individual.id);
-    }
-    //# sourceURL=v-ui:LabelBlockLinkTemplate
-  </script>
+<div><a id="label" href="#/@" property="rdfs:label"></a></div>
+<script>
+  if (!individual.hasValue("rdfs:label")) {
+    $("#label", template).text(individual.id);
+  }
+  //# sourceURL=v-ui:LabelBlockLinkTemplate
+</script>
   """ ;
 .
 v-ui:ClassNameLabelLinkTemplate
@@ -1262,45 +1264,27 @@ v-ui:ClassNameLabelLinkTemplate
   rdfs:label "Шаблон с именем класса и меткой"@ru ;
   rdfs:label "Template with class name and label"@en ;
   v-ui:template """
-  <a class="label-template" href="#/@"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span id="label" about="@" property="rdfs:label"></span></a>
-  <script>
-    if (!individual.hasValue("rdfs:label")) {
-      $("#label", template).text(individual.id);
-    }
-    //# sourceURL=v-ui:ClassNameLabelLinkTemplate
-  </script>
+<a class="label-template" href="#/@"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span id="label" about="@" property="rdfs:label"></span></a>
+<script>
+  if (!individual.hasValue("rdfs:label")) {
+    $("#label", template).text(individual.id);
+  }
+  //# sourceURL=v-ui:ClassNameLabelLinkTemplate
+</script>
   """ ;
 .
-v-ui:DraftLinkEditTemplate
+v-ui:ClassNameLabelLinkEditTemplate
   rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон черновика со ссылкой"@ru ;
-  rdfs:label "Draft template with link"@en ;
+  rdfs:label "Шаблон с именем класса и меткой"@ru ;
+  rdfs:label "Template with class name and label"@en ;
   v-ui:template """
-  <span>
-    <a class="label-template" style="padding: 0 0 0 20px;" href="#/@///edit" about="@" data-template="v-ui:ClassNameLabelTemplate"></a>
-    <small about="v-s:drafted" property="rdfs:label"></small>
-    <small about="@" property="v-s:drafted"></small>
-  </span>
-  <script>
-    if (!individual.hasValue("rdfs:label")) {
-      $("#label", template).text(individual.id);
-    }
-    //# sourceURL=v-ui:DraftLinkEditTemplate_post
-  </script>
-  """ ;
-.
-v-ui:DraftTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон черновика"@ru ;
-  rdfs:label "Draft template"@en ;
-  v-ui:template """
-  <a class="label-template" style="padding: 0 0 0 20px;" href="#/@"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span id="label" about="@" property="rdfs:label"></span></a>
-  <script>
-    if (!individual.hasValue("rdfs:label")) {
-      $("#label", template).text(individual.id);
-    }
-    //# sourceURL=v-ui:DraftLinkEditTemplate_post
-  </script>
+<a class="label-template" href="#/@///edit"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span id="label" about="@" property="rdfs:label"></span></a>
+<script>
+  if (!individual.hasValue("rdfs:label")) {
+    $("#label", template).text(individual.id);
+  }
+  //# sourceURL=v-ui:ClassNameLabelLinkTemplate
+</script>
   """ ;
 .
 
@@ -1320,30 +1304,32 @@ v-ui:RabbitHole
       individual[property].forEach(function(prop){
         text = "<span title='" + name.title + "'>" + name.label + "</span>";
         visited = [ individual.id ];
-        var wrapper=temp.clone();
-        travel( prop );
-        $("small", wrapper).append(text);
-        template.append(wrapper);
+        var wrapper = temp.clone();
+        travel( prop ).then(function(){
+          $("small", wrapper).append(text);
+          template.append(wrapper);
+        });
       })
       break;
     }
   }
 
-
   function travel(individual) {
     if ( visited.indexOf(individual.id) >= 0 ) {
-      return;
+      return Promise.resolve();
     } else {
       visited.push(individual.id);
     }
-    var name = mkName(individual);
-    text = "<a href='#/" + individual.id + "' title='" + name.title + "'>" + name.label + "</a>" + " / " + text;
-    for (var i = 0, property; (property = allowedProperties[i]); i++ ) {
-      if ( individual.hasValue(property) ) {
-        travel( individual[property][0] );
-        break;
+    return individual.load().then(function() {
+      var name = mkName(individual);
+      text = "<a href='#/" + individual.id + "' title='" + name.title + "'>" + name.label + "</a>" + " / " + text;
+      for (var i = 0, property; (property = allowedProperties[i]); i++ ) {
+        if ( individual.hasValue(property) ) {
+          travel( individual[property][0] );
+          break;
+        }
       }
-    }
+    })
   }
   function mkName(individual) {
     var label = individual["rdf:type"][0].toString() + ": " + individual.toString();
@@ -1372,13 +1358,13 @@ v-ui:ClassNameLabelTemplate
   rdfs:label "Шаблон с именем класса и меткой"@ru ;
   rdfs:label "Template with class name and label"@en ;
   v-ui:template """
-  <span class="label-template"><span about="@" property="rdf:type"></span>: <span id="label" about="@" property="rdfs:label"></span></span>
-  <script>
-    if (!individual.hasValue("rdfs:label")) {
-      $("#label", template).text(individual.id);
-    }
-    //# sourceURL=v-ui:ClassNameLabelTemplate
-  </script>
+<span class="label-template"><span about="@" property="rdf:type"></span>: <span id="label" about="@" property="rdfs:label"></span></span>
+<script>
+  if (!individual.hasValue("rdfs:label")) {
+    $("#label", template).text(individual.id);
+  }
+  //# sourceURL=v-ui:ClassNameLabelTemplate
+</script>
   """ ;
 .
 
@@ -1843,10 +1829,9 @@ v-ui:ModalImageTemplate
   rdfs:label "Шаблон для изображения"@ru ;
   rdfs:label "Image template"@en ;
   v-ui:template """
-<a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a>
 <script>
   if ( !individual.hasValue("v-s:thumbnail") ) {
-    template.remove();
+    template.removeAttr("rel");
   }
   template.click(function (e) {
     e.preventDefault();
@@ -1860,6 +1845,7 @@ v-ui:ModalImageTemplate
   });
   //# sourceURL=v-ui:ModalImageTemplate
 </script>
+<a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a>
   """ ;
 .
 v-ui:SimplifiedJournalTemplate
@@ -1869,6 +1855,7 @@ v-ui:SimplifiedJournalTemplate
   v-ui:forClass v-s:Journal ;
   v-ui:template """
 <script>
+  var renderedCount = 0;
   var tbody = $("#tbody", template);
   var task_template = tbody.html();
   tbody.empty();
@@ -1878,25 +1865,33 @@ v-ui:SimplifiedJournalTemplate
   buildJournal();
 
   function buildJournal() {
+    renderedCount = 0;
     tbody.empty();
-    var tasks = query({
+    var tasks = veda.Backend.query({
       ticket: veda.ticket,
       query: "'rdf:type'=='v-wf:DecisionForm' && 'v-wf:onDocument'=='" + doc_uri + "'",
-      sort: "'v-s:created' asc",
-      async: true
-    }).then(function (query_res) {
+      sort: "'v-s:created' desc"
+    })
+    .then(function (query_res) {
       var tasks_uris = query_res.result;
-      return get_individuals({
-        ticket: veda.ticket,
-        uris: tasks_uris,
-        async: true
-      }).then(function (tasks) {
-        tasks.forEach(function (task, index) {
-          var task_individual = new veda.IndividualModel(task);
-          var renderedTemplate = task_individual.present(tbody, task_template);
-          $(".sequence-number", renderedTemplate).text(index + 1)
+      if (tasks_uris.length) {
+        return veda.Backend.get_individuals({
+          ticket: veda.ticket,
+          uris: tasks_uris
         });
-      });
+      }
+    })
+    .then(renderTasks);
+  };
+
+  function renderTasks(tasksJSONs) {
+    if (!tasksJSONs || !tasksJSONs.length) { return; }
+    var taskJSON = tasksJSONs.pop();
+    var task = new veda.IndividualModel(taskJSON);
+    task.present(tbody, task_template).then(function (renderedTemplate) {
+      $(".sequence-number", renderedTemplate).text(++renderedCount);
+    }).then(function () {
+      renderTasks(tasksJSONs);
     });
   };
 
@@ -1932,11 +1927,72 @@ v-ui:SimplifiedJournalTemplate
           <th width="15%" about="v-wf:from" property="rdfs:label"></th>
           <th width="15%" about="v-wf:to" property="rdfs:label"></th>
           <th width="25%" about="v-s:description" property="rdfs:label"></th>
-          <th width="15%"><span about="v-s:created" property="rdfs:label"></span> <span>&uarr;</span></th>
+          <th width="15%" about="v-s:created" property="rdfs:label"></th>
           <th about="v-wf:takenDecision" property="rdfs:label"></th>
         </tr>
       </thead>
       <tbody id="tbody">
+        <script>
+          if ( this.hasValue("v-wf:isCompleted", true) ) {
+            template.children().first().addClass("success");
+            $(".docflow-buttons", template).remove();
+          } else {
+            var currentEmployee = veda.appointment["v-s:employee"][0];
+            var currentOcuppation = veda.appointment["v-s:occupation"][0];
+            var targetEmployee = individual["v-wf:from"][0];
+            var targetOccupation = individual["v-wf:from"][1]
+
+            var isDirectTask = this.hasValue("v-wf:isDirectTask", true);
+            var canRevoke = currentEmployee === targetEmployee && currentOcuppation === targetOccupation;
+
+            if (!canRevoke) {
+              var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + targetOccupation.id + "' && 'v-s:employee' == '" + currentEmployee.id + "'";
+              veda.Backend.query(veda.ticket, queryString).then(function (queryResult) {
+                canRevoke = queryResult.result.length > 0 ;
+                setupButtons(canRevoke, isDirectTask);
+              });
+            }
+            setupButtons(canRevoke, isDirectTask);
+          }
+
+          function setupButtons(canRevoke, isDirectTask) {
+            if (!canRevoke || !isDirectTask) {
+              $(".docflow-buttons", template).hide();
+            } else {
+              $(".docflow-buttons", template).show();
+              $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
+              $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
+            }
+          }
+
+          function takeDecision(takenDecision, label) {
+            var modal = $("#notification-modal-template").html();
+            modal = $(modal);
+            modal.modal({"show": false});
+            $("body").append(modal);
+            modal.modal("show");
+            template.one("remove", function () {
+              modal.modal("hide").remove();
+            });
+            var cntr = $(".modal-body", modal);
+            var decisionClass = new veda.IndividualModel( takenDecision );
+            var decision = new veda.IndividualModel();
+            decision["rdf:type"] = [ decisionClass ];
+            decision["v-s:backwardTarget"] = [ individual ];
+            decision["rdfs:label"] = [ label ];
+            decision["v-s:backwardProperty"] = [ new veda.IndividualModel("v-wf:takenDecision") ];
+            decision["v-s:canRead"] = [ true ];
+            decision.present(cntr, undefined, "edit");
+
+            decision.one("afterReset", function () {
+              modal.modal("hide").remove();
+            });
+            decision.one("afterSave", function () {
+              modal.modal("hide").remove();
+              $(".docflow-buttons", template).hide();
+            });
+          }
+        </script>
         <tr>
           <td class="sequence-number"></td>
           <td>
@@ -1957,16 +2013,25 @@ v-ui:SimplifiedJournalTemplate
           <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
           <td><a href="#/@" about="@" property="rdfs:label"></a><div about="@" property="v-s:description"></div></td>
           <td about="@" property="v-s:created"></td>
-          <td about="@" rel="v-wf:takenDecision">
-            <div>
-              <strong about="@" property="rdfs:label"></strong>
-              <span about="@" rel="v-wf:to">
-                <span>
-                  <span>&rarr;</span>
-                  <span about="@" data-template="v-ui:LabelTemplate"></span>
+          <td>
+            <div about="@" rel="v-wf:takenDecision">
+              <div>
+                <strong about="@" property="rdfs:label"></strong>
+                <span about="@" rel="v-wf:to">
+                  <span>
+                    <span>&rarr;</span>
+                    <span about="@" data-template="v-ui:LabelTemplate"></span>
+                  </span>
                 </span>
-              </span>
-              <div><i about="@" property="rdfs:comment"></i></div>
+                <div><i about="@" property="rdfs:comment"></i></div>
+                <hr class="margin-sm">
+                <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> &middot; <small aboout="@" property="v-s:created"></small>
+              </div>
+            </div>
+            <div class="docflow-buttons" style="display:none">
+              <button class="btn btn-sm btn-warning redirect" about="v-wf:DecisionRedirect_Bundle" property="rdfs:label"></button>
+              <button class="btn btn-sm btn-info revoke" about="v-wf:DecisionRevoke_Bundle" property="rdfs:label"></button>
+            </div>
               <hr class="margin-sm">
               <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> &middot; <small aboout="@" property="v-s:created"></small>
             </div>
@@ -1976,73 +2041,6 @@ v-ui:SimplifiedJournalTemplate
             <button class="btn btn-info" id="revoke" about="v-wf:DecisionRevoke_Bundle" property="rdfs:label"></button>
           </td>
         </tr>
-        <script>
-          if ( this.hasValue("v-wf:isCompleted", true) ) {
-            template.children().first().addClass("success");
-            $(".docflow-button", template).remove();
-          };
-          if ( this.hasValue("v-wf:isCompleted", false) ) {
-            var currentEmployee = veda.appointment["v-s:employee"][0];
-            var currentOcuppation = veda.appointment["v-s:occupation"][0];
-            var targetEmployee = individual["v-wf:from"][0];
-            var targetOccupation = individual["v-wf:from"][1]
-
-            var canRevoke = currentEmployee == targetEmployee && currentOcuppation == targetOccupation;
-            if (!canRevoke) {
-              var queryString = " 'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='"+ targetOccupation.id +"' && 'v-s:employee' == '"+ currentEmployee.id +"'";
-              canRevoke = query(veda.ticket, queryString).result.length > 0 ;
-            }
-            var notDirect = !this.hasValue("v-wf:isDirectTask", true);
-
-            //------ Для плавного перехода между версиями
-            if (individual.hasValue("v-wf:onWorkOrder")
-                && individual["v-wf:onWorkOrder"][0].hasValue("v-wf:forWorkItem")
-                && individual["v-wf:onWorkOrder"][0]["v-wf:forWorkItem"][0].hasValue("v-wf:forNetElement")) {
-              var netElementId = individual["v-wf:onWorkOrder"][0]["v-wf:forWorkItem"][0]["v-wf:forNetElement"][0].id;
-              if (netElementId == "s-wf:nc_t2") {
-                notDirect = false;
-              }
-            };
-            //------
-
-            if (!canRevoke || notDirect) {
-              $(".docflow-button", template).remove();
-              return;
-            };
-
-            $("[rel='v-wf:takenDecision']", template).remove();
-            $(".docflow-button", template).show();
-
-            function takeDecision(takenDecision) {
-              var modal = $("#notification-modal-template").html();
-              modal = $(modal);
-              modal.modal({"show": false});
-              $("body").append(modal);
-              modal.modal("show");
-              template.one("remove", function () {
-                modal.modal("hide").remove();
-              });
-              var cntr = $(".modal-body", modal);
-              var decisionClass = new veda.IndividualModel( takenDecision );
-              var decision = new veda.IndividualModel();
-              decision["rdf:type"] = [ decisionClass ];
-              decision["v-s:backwardTarget"] = [ individual ];
-              decision["rdfs:label"] = decisionClass["rdfs:label"];
-              decision["v-s:backwardProperty"] = [ new veda.IndividualModel("v-wf:takenDecision") ];
-              decision["v-s:canRead"] = [ true ];
-              decision.present(cntr, undefined, "edit");
-
-              decision.one("afterReset", function () {
-                modal.modal("hide").remove();
-              });
-              decision.one("afterSave", function () {
-                modal.modal("hide").remove();
-              });
-            };
-            $("#redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect"));
-            $("#revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask"));
-          };
-        </script>
       </tbody>
     </table>
     <button class="btn btn-default" id="refresh" about="v-s:RefreshBundle" property="rdfs:label"></button>
@@ -2057,7 +2055,7 @@ v-ui:JournalTemplate
   v-ui:forClass v-s:Journal ;
   v-ui:template """
 <script>
-  individual.prefetch(50, "v-s:onDocument", "v-wf:onProcess", "v-s:childRecord", "v-s:processJournal", "v-s:subJournal", "v-wf:takenDecision", "v-s:actor", "v-s:creator", "v-wf:executor");
+  //individual.prefetch(50, "v-s:onDocument", "v-wf:onProcess", "v-s:childRecord", "v-s:processJournal", "v-s:subJournal", "v-wf:takenDecision", "v-s:actor", "v-s:creator", "v-wf:executor");
 
   var doc_uri = this.id.replace(/.$/, "");
   var doc = new veda.IndividualModel(doc_uri);
@@ -2071,8 +2069,12 @@ v-ui:JournalTemplate
 </script>
 <div class="container journal sheet">
   <style>
-    .journal-record > div > .sub-journal {margin-left: 5px; padding-left: 20px; border-left: 1px solid #ddd;}
-    .journal hr.margin-sm {margin: 10px 0px;}
+    .journal-record > div > .sub-journal {
+      margin-left: 5px; padding-left: 20px;
+    }
+    .journal hr.margin-sm {
+      margin: 10px 0px;
+    }
   </style>
   <br>
   <ul id="box-tabs" class="nav nav-tabs nav-right" role="tablist">
@@ -2211,103 +2213,109 @@ v-ui:DocumentEventTemplate
   <div about="@" rel="v-s:processJournal" data-template="v-ui:SubJournalTemplate"></div>
 </div>
 <script>
-  if (individual.hasValue("rdf:type") && individual["rdf:type"][0].id === 'v-s:ProcessStarted') {
+  if ( individual.hasValue("rdf:type", "v-s:ProcessStarted") ) {
     var process = individual['v-wf:onProcess'][0];
-    if ((!process.hasValue("v-wf:isStopped") || process["v-wf:isStopped"][0] === false) &&
-        (!process.hasValue("v-wf:isCompleted") || process["v-wf:isCompleted"][0] === false)) {
-      $(".stop-process", template).on("click", function (e) {
-        e.preventDefault();
-        var warn = new veda.IndividualModel("v-s:AreYouSure")["rdfs:label"].join(" ");
-        if ( confirm(warn) ) {
-          process['v-wf:isStopped'] = [ true ];
-          process.save();
-          $(this).remove();
-        }
-      });
-    }
-    if (process.hasValue("v-wf:isStopped", true)) {
-      $(".start-process > #exp", template).trigger("click");
-    }
+    process.load().then(function (process) {
+      if (
+        (!process.hasValue("v-wf:isStopped") || process.hasValue("v-wf:isStopped", false)) &&
+        (!process.hasValue("v-wf:isCompleted") || process.hasValue("v-wf:isCompleted", false))
+      ) {
+        $(".stop-process", template).on("click", function (e) {
+          e.preventDefault();
+          var warn = new veda.IndividualModel("v-s:AreYouSure");
+          warn.load().then(function (warn) {
+            warn = warn["rdfs:label"].join(" ");
+            if ( confirm(warn) ) {
+              process['v-wf:isStopped'] = [ true ];
+              process.save();
+              $(this).remove();
+            }
+          });
+        });
+      }
+      if (process.hasValue("v-wf:isStopped", true)) {
+        $(".start-process > #exp", template).trigger("click");
+      }
+    });
   }
   //# sourceURL=v-ui:DocumentEventTemplate_post
 </script>
   """ ;
 .
 
-v-ui:PermissionStatementInlineTemplate
+v-ui:PermissionsTemplate
   rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для класса записи выдачи прав"@ru ;
-  rdfs:label "Document event template"@en ;
+  rdfs:label "Шаблон для отображения прав"@ru ;
+  rdfs:label "Individual rights template"@en ;
   v-ui:forClass v-s:PermissionStatement ;
   v-ui:template """
-<div>
-  <div class="row right-header" style="display:none">
-    <div class="col-md-1">
-      <span about="v-s:canCreate" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="v-s:canRead" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="v-s:canUpdate" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="v-s:canDelete" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-3">
-      <span about="v-s:permissionObject" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-3">
-      <span about="v-s:permissionSubject" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="v-s:startTime" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="v-s:endTime" property="rdfs:label"></span>
-    </div>
-    <div class="col-md-12">
-      <span about="rdfs:comment" property="rdfs:label"></span>
-    </div>
+<script>
+  var rightsContainer = $(".rights", template);
+  var rightsTemplate = rightsContainer.html();
+  rightsContainer.empty();
+  individual.rights.then(function (rights) {
+    rights.present(rightsContainer, rightsTemplate);
+  });
+
+  var descriptionContainer = $("#description", template);
+  var descriptionTemplate = descriptionContainer.html();
+  descriptionContainer.empty();
+
+  var rightsOriginContainer = $(".rightsOrigin", template);
+  var rightsOriginTemplate = rightsOriginContainer.html();
+  rightsOriginContainer.empty();
+  individual.rightsOrigin.then(function (rightsOrigin) {
+    rightsOrigin.forEach(function (origin) {
+      if ( !origin.hasValue("rdfs:comment") ) {
+        origin.present(rightsOriginContainer, rightsOriginTemplate);
+      } else {
+        origin.present(descriptionContainer, descriptionTemplate);
+      }
+    });
+  });
+//# sourceURL=v-ui:PermissionsTemplate_pre
+</script>
+<div class="container">
+  <h3 about="@" data-template="v-ui:ClassNameLabelTemplate"></h3>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr class="active">
+          <th about="v-s:permissionSubject" property="rdfs:label"></th>
+          <th about="v-s:permissionObject" property="rdfs:label"></th>
+          <th about="v-s:canCreate" property="rdfs:label"></th>
+          <th about="v-s:canRead" property="rdfs:label"></th>
+          <th about="v-s:canUpdate" property="rdfs:label"></th>
+          <th about="v-s:canDelete" property="rdfs:label"></th>
+        </tr>
+      </thead>
+      <tbody class="rightsOrigin">
+        <tr>
+          <td about="@" rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate"></td>
+          <td about="@" rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate"></td>
+          <td about="@" property="v-s:canCreate"></td>
+          <td about="@" property="v-s:canRead"></td>
+          <td about="@" property="v-s:canUpdate"></td>
+          <td about="@" property="v-s:canDelete"></td>
+        </tr>
+      </tbody>
+      <tbody class="rights">
+        <tr class="active">
+          <th></th>
+          <th></th>
+          <th about="@" property="v-s:canCreate"></th>
+          <th about="@" property="v-s:canRead"></th>
+          <th about="@" property="v-s:canUpdate"></th>
+          <th about="@" property="v-s:canDelete"></th>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  <hr/>
-  <div class="row">
-    <div class="col-md-1">
-      <span about="@" property="v-s:canCreate"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="@" property="v-s:canRead"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="@" property="v-s:canUpdate"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="@" property="v-s:canDelete"></span>
-    </div>
-    <div class="col-md-3">
-      <span rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate"></span>
-    </div>
-    <div class="col-md-3">
-      <span rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="@" property="v-s:startTime"></span>
-    </div>
-    <div class="col-md-1">
-      <span about="@" property="v-s:endTime"></span>
-    </div>
-    <div class="col-md-12">
-      <pre style="border:none;background-color:#fff;"></pre>
-    </div>
+  <a about="v-s:More" property="rdfs:label" class="btn btn-link" role="button" data-toggle="collapse" href="#description" aria-expanded="false" aria-controls="description"></a>
+  <div class="collapse" id="description">
+    <pre about="@" property="rdfs:comment" style="border:none;background-color:#fff;"></pre>
   </div>
 </div>
-<script>
-  var dd = individual['rdfs:comment'][0];
-  var pre = $("pre", template);
-  var anchored = dd.replace(/([a-z0-9_-]+:[a-z0-9_-]*)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>");
-  pre.html(anchored);
-  //# sourceURL=v-ui:PermissionStatementInlineTemplate_post
-</script>
   """ ;
 .
 
@@ -2418,16 +2426,17 @@ v-ui:TreeTemplate
         thatRow.nextUntil("[data-level=" + thatLvl + "]").show();
       } else {
         getChildren([], value, false).then(function (children) {
-          children.forEach(function (childUri) {
-            var child = new veda.IndividualModel(childUri);
-            renderRow(child, thatRow);
+          var renderedProms = children.map(function (childUri) {
+            return renderRow(childUri, thatRow);
           });
-          var newNextLvl = parseInt(thatRow.next().attr("data-level"));
-          if ( isNaN(newNextLvl) || newNextLvl <= thatLvl ) {
-            that.prev().css("width", 16 * (thatLvl + 1) - 2);
-            that.remove();
-            thatRow.find(".select-deep").remove();
-          }
+          Promise.all(renderedProms).then(function () {
+            var newNextLvl = parseInt(thatRow.next().attr("data-level"));
+            if ( isNaN(newNextLvl) || newNextLvl <= thatLvl ) {
+              that.prev().css("width", 16 * (thatLvl + 1) - 2);
+              that.remove();
+              thatRow.find(".select-deep").remove();
+            }
+          });
         });
       }
     } else {
@@ -2441,46 +2450,46 @@ v-ui:TreeTemplate
     return false;
   });
 
-  function renderRow(value, parentRow) {
-    var parentLvl = parentRow ? parseInt( parentRow.attr("data-level") ) : -1;
-    var cont = $("<div>"),
-        tmpl = $("<tr class='value-row'>").attr("data-level", parentLvl + 1).append(rowTmpl);
-
-    if ( !allowedFilter.call(value) ) {
-      return;
-    }
-
-    $(".spacer", tmpl).css({"width": 16 * (parentLvl + 1) + "px", "display": "inline-block"});
-    tmpl = value.present(cont, tmpl[0].outerHTML);
-
-    // Pre-check children
-    getChildren([], value, false).then(function (children) {
-      if (!children.length) {
-        tmpl.find(".expand").remove();
-        tmpl.find(".select-deep").remove();
+  function renderRow(valueUri, parentRow) {
+    var value = new veda.IndividualModel(valueUri);
+    return value.load().then(function (value) {
+      if ( !allowedFilter.call(value) ) {
+        return;
       }
+      var parentLvl = parentRow ? parseInt( parentRow.attr("data-level") ) : -1;
+      var cont = $("<div>"),
+          tmpl = $("<tr class='value-row'>").attr("data-level", parentLvl + 1).append(rowTmpl);
+      $(".spacer", tmpl).css({"width": 16 * (parentLvl + 1) + "px", "display": "inline-block"});
+      return value.present(cont, tmpl[0].outerHTML).then(function (tmpl) {
+        // Pre-check children
+        getChildren([], value, false).then(function (children) {
+          if (!children.length) {
+            tmpl.find(".expand").remove();
+            tmpl.find(".select-deep").remove();
+          }
+        });
+        var selectRow = $(".select-row", tmpl);
+        var selectDeep = $(".select-deep", tmpl);
+        selectRow.prop("checked", individual.hasValue(rel_uri, value));
+
+        if (value.deepSelected) {
+          selectDeep.removeClass("text-muted").addClass("text-danger");
+        } else {
+          selectDeep.addClass("text-muted").removeClass("text-danger");
+        }
+
+        if ( !selectableFilter.call(value) ) {
+          selectRow.remove();
+        }
+
+        if ( parentRow ) {
+          parentRow.after( tmpl );
+        } else {
+          tbody.append(tmpl);
+        }
+        cont.remove();
+      });
     });
-    var selectRow = $(".select-row", tmpl);
-    var selectDeep = $(".select-deep", tmpl);
-    var hasValue = individual.hasValue(rel_uri, value);
-    selectRow.prop("checked", hasValue);
-
-    if (value.deepSelected) {
-      selectDeep.removeClass("text-muted").addClass("text-danger");
-    } else {
-      selectDeep.addClass("text-muted").removeClass("text-danger");
-    }
-
-    if ( !selectableFilter.call(value) ) {
-      selectRow.remove();
-    }
-
-    if ( parentRow ) {
-      parentRow.after( tmpl );
-    } else {
-      tbody.append(tmpl);
-    }
-    cont.remove();
   }
 
   if (rel_uri) {
@@ -2555,10 +2564,11 @@ v-ui:TreeTemplate
 
   // Render tree
   individual.treeConfig.root.forEach( function (root, index, roots) {
-    renderRow(root);
-    if (roots.length === 1) {
-      tbody.find(".expand").click();
-    }
+    renderRow(root.id).then(function () {
+      if (roots.length === 1) {
+        tbody.find(".expand").click();
+      }
+    });
   });
 
   function getChildren(acc, root, goDeeper) {
@@ -2619,7 +2629,7 @@ v-ui:TreeTemplate
       if (withDeleted) {
         q = "(" + q + ") || (" + q + " && 'v-s:deleted'== true )";
       }
-      query({
+      veda.Backend.query({
         ticket: veda.ticket,
         query: q,
         sort: sort,
@@ -2659,7 +2669,7 @@ v-ui:ttl
   </div>
 </div>
 <script>
-  var list = new veda.IndividualListModel(individual);
+  var list = [individual];
   veda.Util.toTTL(list, function (error, ttl) {
     var pre = $("pre", template),
         anchored = ttl.replace(/([a-z0-9_-]+:[a-z0-9_-]*)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>");
@@ -2929,6 +2939,12 @@ v-ui:generic
   """ ;
 .
 
+v-ui:ExportToTTL
+  rdf:type v-s:Bundle ;
+  rdfs:label "Экспорт в TTL"@ru ;
+  rdfs:label "Export to TTL"@en ;
+.
+
 v-ui:Graph
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон графа"@ru ;
@@ -2936,7 +2952,7 @@ v-ui:Graph
   v-ui:template """
 <div class="container-fluid sheet">
   <button type="button" id="freeze" class="btn btn-success"><i class="glyphicon glyphicon-pause"></i></button>
-  <button type="button" id="export-ttl" class="btn btn-primary"><i class="glyphicon glyphicon-export"></i> Экспорт в ttl</button>
+  <button type="button" id="export-ttl" class="btn btn-primary"><i class="glyphicon glyphicon-export"></i> <span about="v-ui:ExportToTTL" property="rdfs:label"></span></button>
 
   <div id="graph"></div>
 
@@ -3020,77 +3036,77 @@ v-ui:Graph
   </div>
 </div>
 <script>
-  function addNode (individual, opts) {
-    if ( nodes.get(individual.id) === null ) {
-      var node = {
-        id: individual.id,
-        label: individual["rdf:type"][0].toString() + String.fromCharCode(10, 13) + individual.toString(),
-        individual: individual
-      };
-      if (individual["rdf:type"][0]) {
-        switch ( individual["rdf:type"][0].id ) {
-          case "rdfs:Class" :
-          case "owl:Class" :
-            node.group = "_class";
-            break;
-          case "rdf:Property" :
-          case "owl:ObjectProperty" :
-            node.group = "objectProperty";
-            break;
-          case "owl:DatatypeProperty" :
-          case "owl:OntologyProperty" :
-          case "owl:AnnotationProperty" :
-            node.group = "datatypeProperty";
-            break;
-          case "v-ui:ClassTemplate" :
-            node.group = "template";
-            break;
-          case "v-ui:PropertySpecification" :
-          case "v-ui:DatatypePropertySpecification" :
-          case "v-ui:ObjectPropertySpecification" :
-            node.group = "specification";
-            break;
-          case "owl:Ontology" :
-            node.group = "ontology";
-            break;
-          default :
-            node.group = "individual";
-            break;
+  function addNode (individual) {
+    return individual.load().then(function (individual) {
+      if ( nodes.get(individual.id) === null ) {
+        var node = {
+          id: individual.id,
+          label: individual["rdf:type"][0].toString() + String.fromCharCode(10, 13) + individual.toString(),
+          individual: individual
+        };
+        if (individual["rdf:type"][0]) {
+          switch ( individual["rdf:type"][0].id ) {
+            case "rdfs:Class" :
+            case "owl:Class" :
+              node.group = "_class";
+              break;
+            case "rdf:Property" :
+            case "owl:ObjectProperty" :
+              node.group = "objectProperty";
+              break;
+            case "owl:DatatypeProperty" :
+            case "owl:OntologyProperty" :
+            case "owl:AnnotationProperty" :
+              node.group = "datatypeProperty";
+              break;
+            case "v-ui:ClassTemplate" :
+              node.group = "template";
+              break;
+            case "v-ui:PropertySpecification" :
+            case "v-ui:DatatypePropertySpecification" :
+            case "v-ui:ObjectPropertySpecification" :
+              node.group = "specification";
+              break;
+            case "owl:Ontology" :
+              node.group = "ontology";
+              break;
+            default :
+              node.group = "individual";
+              break;
+          }
         }
+        nodes.add ([ node ]);
       }
-      $.extend(node, opts);
-      nodes.add ([ node ]);
-    }
+    });
   }
 
   function addOutLinks (id) {
     var individual = nodes.get(id).individual;
     Object.getOwnPropertyNames(individual.properties).map(function (property_uri) {
-      if(property_uri === "@") { return }
-      var values = individual[property_uri];
-      if (!values) return;
-      values.map(function (value) {
-        if (value instanceof veda.IndividualModel && value.id != individual.id) {
-          addNode(value);
-          var from = individual.id;
-          var to = value.id;
-          var label = (new veda.IndividualModel(property_uri))["rdfs:label"].join(", ");
-          var options = {
-            filter: function (item) {
-              return  item.from == from &&
-                  item.to == to &&
-                  item.label.toString() == label;
-            }
-          };
-          if ( !edges.get(options).length ) {
-            edges.add ([
-              {
-                from: from,
-                to: to,
-                label: label
+      if (property_uri === "@") { return; }
+      individual[property_uri].forEach(function (value) {
+        if (value instanceof veda.IndividualModel && value !== individual) {
+          addNode(value).then(function () {
+            var from = individual.id;
+            var to = value.id;
+            var label = (new veda.IndividualModel(property_uri))["rdfs:label"].join(", ");
+            var options = {
+              filter: function (item) {
+                return  item.from == from &&
+                    item.to == to &&
+                    item.label.toString() == label;
               }
-            ]);
-          }
+            };
+            if ( !edges.get(options).length ) {
+              edges.add ([
+                {
+                  from: from,
+                  to: to,
+                  label: label
+                }
+              ]);
+            }
+          });
         }
       });
     });
@@ -3099,26 +3115,31 @@ v-ui:Graph
   function addInLinks (id, queryStr) {
     var q = queryStr || "'*'=='{id}'";
     q = q.replace("{id}", id);
-    query(veda.ticket, q).result.forEach(function (uri) {
-      var res = new veda.IndividualModel(uri);
-      addNode(res);
-      var to = id;
-      var from = res.id;
-      Object.getOwnPropertyNames(res.properties).map(function (property_uri) {
-        if (property_uri === "@") { return; }
-        if ( res.hasValue(property_uri, id) ) {
-          var label = new veda.IndividualModel(property_uri)["rdfs:label"].join(", ");
-          var options = {
-            filter: function (item) {
-              return  item.from === from &&
-                item.to === to &&
-                item.label.toString() === label;
+    return veda.Backend.query(veda.ticket, q).then(function (queryResult) {
+      var uris = queryResult.result;
+      return veda.Backend.get_individuals(veda.ticket, uris).then(function (individualsJSONs) {
+        individualsJSONs.forEach(function (individualJSON) {
+          var res = new veda.IndividualModel(individualJSON);
+          addNode(res);
+          var to = id;
+          var from = res.id;
+          Object.getOwnPropertyNames(res.properties).map(function (property_uri) {
+            if (property_uri === "@") { return; }
+            if ( res.hasValue(property_uri, id) ) {
+              var label = new veda.IndividualModel(property_uri)["rdfs:label"].join(", ");
+              var options = {
+                filter: function (item) {
+                  return  item.from === from &&
+                    item.to === to &&
+                    item.label.toString() === label;
+                }
+              };
+              if ( !edges.get(options).length ) {
+                edges.add([{from: from, to: to, label: label}]);
+              }
             }
-          };
-          if ( !edges.get(options).length ) {
-            edges.add([{from: from, to: to, label: label}]);
-          }
-        }
+          });
+        });
       });
     });
   }
@@ -3187,22 +3208,7 @@ v-ui:Graph
     $("#main").append(modal);
   }
 
-  var root = individual;
-
-  var nodes = new vis.DataSet(), edges = new vis.DataSet();
-  var body = $("body");
-  var select = {nodes: [], edges: []};
   var graph = $("#graph", template);
-
-  // Buttons
-  var exportBtn = $("#export-ttl", template).click(function () {
-    var list = new veda.IndividualListModel( nodes.get().map(function (item) { return item.individual; }) );
-    veda.Util.exportTTL(list);
-  });
-  var freezeBtn = $("#freeze", template).click(function () {
-    network.freezeSimulation = !network.freezeSimulation;
-    $("i", this).toggleClass("glyphicon-pause glyphicon-play");
-  });
 
   // Context menu for selected node
   graph.contextmenu({
@@ -3262,13 +3268,20 @@ v-ui:Graph
   });
 
   // Create a network
+
+  var root = individual;
+  var nodes = new vis.DataSet(), edges = new vis.DataSet();
+  var body = $("body");
+  var select = {nodes: [], edges: []};
   var data = {
     nodes: nodes,
     edges: edges,
   };
 
-  addNode(root);
-  addOutLinks(root.id);
+  addNode(root).then(function () {
+    addOutLinks(root.id);
+    addInLinks(root.id);
+  });
 
   var height = ( $("#copyright").offset().top - graph.offset().top - 50 ) + "px";
   var options = {
@@ -3372,15 +3385,25 @@ v-ui:Graph
 
   };
 
-  var network = new vis.Network(graph.get(0), data, options);
+  var network;
 
-  // Add event listeners
-  network.on("doubleClick", onDoubleClick);
+  setTimeout(function () {
+    network = new vis.Network(graph.get(0), data, options);
+    network.on("doubleClick", onDoubleClick);
+    network.on("select", onSelect);
+  });
 
-  network.on("select", onSelect);
+  // Buttons
+  var exportBtn = $("#export-ttl", template).click(function () {
+    var list = nodes.get().map(function (item) { return item.individual; });
+    veda.Util.exportTTL(list);
+  });
+  var freezeBtn = $("#freeze", template).click(function () {
+    network.freezeSimulation = !network.freezeSimulation;
+    $("i", this).toggleClass("glyphicon-pause glyphicon-play");
+  });
 
   //# sourceURL=v-ui:Graph
 </script>
   """ ;
 .
-

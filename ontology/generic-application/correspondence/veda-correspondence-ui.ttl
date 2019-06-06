@@ -207,13 +207,9 @@ v-s:LetterTemplate
           <tr class="active">
             <th width="1%"><span class="glyphicon glyphicon-search"></th>
             <th about="v-s:correspondentOrganization" property="rdfs:label"></th>
-            <!--th about="v-s:correspondentDepartmentDescription" property="rdfs:label"></th>
-            <th about="v-s:correspondentPersonDescription" property="rdfs:label"></th-->
             <th about="v-s:registrationNumber" property="rdfs:label"></th>
             <th about="v-s:registrationDate" property="rdfs:label"></th>
             <th about="v-s:correspondentOrganization" property="rdfs:label"></th>
-            <!--th about="v-s:correspondentDepartmentDescription" property="rdfs:label"></th>
-            <th about="v-s:correspondentPersonDescription" property="rdfs:label"></th-->
             <th about="v-s:registrationNumber" property="rdfs:label"></th>
             <th about="v-s:registrationDate" property="rdfs:label"></th>
           </tr>
@@ -221,16 +217,12 @@ v-s:LetterTemplate
         <tbody rel="v-s:hasRelatedLetter">
           <tr>
             <td about="@" data-template="v-ui:IconModalTemplate"></td>
-            <td rel="v-s:sender" ><span property="v-s:correspondentOrganization" data-template="v-ui:LabelTemplate"> </span> </td>
-            <!--th rel="v-s:sender" ><span property="v-s:correspondentDepartmentDescription" data-template="v-ui:LabelTemplate"> </span> </td>
-            <td rel="v-s:sender" ><span property="v-s:correspondentPersonDescription" data-template="v-ui:LabelTemplate"> </span></th-->
-            <td rel="v-s:hasLetterRegistrationRecordSender" ><span property="v-s:registrationNumber" data-template="v-ui:LabelTemplate"> </span></td>
-            <td rel="v-s:hasLetterRegistrationRecordSender" ><span property="v-s:registrationDate" data-template="v-ui:LabelTemplate"> </span></td>
-            <td rel="v-s:recipient" ><span property="v-s:correspondentOrganization" data-template="v-ui:LabelTemplate"> </span></td>
-            <!--th rel="v-s:recipient" ><span property="v-s:correspondentDepartmentDescription" data-template="v-ui:LabelTemplate"> </span></td>
-            <td rel="v-s:recipient" ><span property="v-s:correspondentPersonDescription" data-template="v-ui:LabelTemplate"> </span></th-->
-            <td rel="v-s:hasLetterRegistrationRecordRecipient" ><span property="v-s:registrationNumber" data-template="v-ui:LabelTemplate"> </span></td>
-            <td rel="v-s:hasLetterRegistrationRecordRecipient" ><span property="v-s:registrationDate" data-template="v-ui:LabelTemplate"> </span></td>
+            <td rel="v-s:sender"><span rel="v-s:correspondentOrganization" data-template="v-ui:LabelTemplate"> </span> </td>
+            <td rel="v-s:hasLetterRegistrationRecordSender" ><span property="v-s:registrationNumber"></span></td>
+            <td rel="v-s:hasLetterRegistrationRecordSender" ><span property="v-s:registrationDate"></span></td>
+            <td rel="v-s:recipient"><span rel="v-s:correspondentOrganization" data-template="v-ui:LabelTemplate"></span></td>
+            <td rel="v-s:hasLetterRegistrationRecordRecipient" ><span property="v-s:registrationNumber"></span></td>
+            <td rel="v-s:hasLetterRegistrationRecordRecipient" ><span property="v-s:registrationDate"></span></td>
           </tr>
         </tbody>
         <tfoot class="-view edit search"><tr><td colspan="7">
@@ -286,35 +278,34 @@ v-s:LetterTemplate
 
   // Процессная часть
   function processHandler() {
-    if (individual.hasValue("v-wf:isProcess")
-      && individual["v-wf:isProcess"][0].hasValue("v-wf:instanceOf")
-      && individual["v-wf:isProcess"][0]["v-wf:instanceOf"][0].id === "s-wf:net_complex_route"
-    ) {
-      $('#delete.action', template).remove();
-    } else if (individual.isNew() || individual.rights['v-s:canUpdate'][0] === true) {
-      var complexTemplateUri;
-      if (individual['rdf:type'][0].id === "v-s:IncomingLetter"){
-        complexTemplateUri = 'v-s:IncomingLetter_ComplexRouteStartForm_Template';
+    individual.canUpdate().then(function (canUpdate) {
+      if ( individual.hasValue("v-wf:isProcess") ) {
+        $('#delete.action', template).remove();
+      } else if (individual.isNew() || canUpdate) {
+        var complexTemplateUri;
+        if ( individual.hasValue("rdf:type", "v-s:IncomingLetter") ) {
+          complexTemplateUri = 'v-s:IncomingLetter_ComplexRouteStartForm_Template';
+        }
+        if ( individual.hasValue("rdf:type", "v-s:OutgoingLetter") ) {
+          complexTemplateUri = 'v-s:OutgoingLetter_ComplexRouteStartForm_Template';
+        }
+        $('#send.action', template).off("click");
+        $('#send.action', template).on('click', function () {
+          veda.Util.send(individual, template, 's-wf:complexRouteTransform', undefined, complexTemplateUri);
+        });
+      } else {
+        $('#delete.action', template).remove();
       }
-      if (individual['rdf:type'][0].id === "v-s:OutgoingLetter"){
-        complexTemplateUri = 'v-s:OutgoingLetter_ComplexRouteStartForm_Template';
-      }
-      $('#send.action', template).off("click");
-      $('#send.action', template).on('click', function () {
-        veda.Util.send(individual, template, 's-wf:complexRouteTransform', undefined, complexTemplateUri);
-      });
-    } else {
-      $('#delete.action', template).remove();
-    }
+    });
   }
   individual.on("afterUpdate", processHandler);
   processHandler();
   template.one("remove", function () {
     individual.off("afterUpdate", processHandler);
   });
+
   $("#add-OutgoingLetter", template).click(function () {
-    var cntr = $("<div></div>"),
-        _class = new veda.IndividualModel("v-s:OutgoingLetter"),
+    var _class = new veda.IndividualModel("v-s:OutgoingLetter"),
         OutcomingLetter = new veda.IndividualModel(),
         tmpl = "v-s:LetterTemplate";
     OutcomingLetter["rdf:type"] = [_class];
@@ -338,9 +329,9 @@ v-s:LetterTemplate
     OutcomingLetter["v-s:description"] = individual ["v-s:description"];
     riot.route( ["#", OutcomingLetter.id, "#main", tmpl, "edit"].join("/") );
   });
+
   $("#add-IncomingLetter", template).click(function () {
-    var cntr = $("<div></div>"),
-        _class = new veda.IndividualModel("v-s:IncomingLetter"),
+    var _class = new veda.IndividualModel("v-s:IncomingLetter"),
         IncomingLetter = new veda.IndividualModel(),
         tmpl = "v-s:LetterTemplate";
     IncomingLetter["rdf:type"] = [_class];
@@ -420,23 +411,31 @@ v-s:CorrespondentTemplate
     self.off("v-s:correspondentOrganization", correspondentOrganizationHandler);
   });
   function correspondentOrganizationHandler () {
-    var isOwn = this.hasValue("v-s:correspondentOrganization") && this["v-s:correspondentOrganization"][0].hasValue("v-s:isOwnOrganization", true) || this.hasValue("v-s:correspondentOrganization", veda.appointment.getOrganization());
-    var parentRel = template.parent().attr("rel");
-    if ( isOwn ) {
-      this
-        .clearValue("v-s:correspondentDepartmentDescription")
-        .clearValue("v-s:correspondentPersonDescription");
-      $(".user-organization", template).show();
-      $(".other-organization", template).hide();
-      template.trigger(parentRel + ":own");
-    } else {
-      this
-        .clearValue("v-s:correspondentDepartment")
-        .clearValue("v-s:correspondentPerson");
-      $(".user-organization", template).hide();
-      $(".other-organization", template).show();
-      template.trigger(parentRel + ":foreign");
-    }
+    Promise.all([
+      self.getPropertyChain("v-s:correspondentOrganization", "v-s:isOwnOrganization"),
+      veda.appointment.getOrganization()
+    ]).then(function (resolved) {
+      var isOwnOrganization = resolved[0][0];
+      var userOrganization = resolved[1];
+
+      var isOwn = isOwnOrganization || self.hasValue("v-s:correspondentOrganization", userOrganization);
+      var parentRel = template.parent().attr("rel");
+      if ( isOwn ) {
+        self
+          .clearValue("v-s:correspondentDepartmentDescription")
+          .clearValue("v-s:correspondentPersonDescription");
+        $(".user-organization", template).show();
+        $(".other-organization", template).hide();
+        template.trigger(parentRel + ":own");
+      } else {
+        self
+          .clearValue("v-s:correspondentDepartment")
+          .clearValue("v-s:correspondentPerson");
+        $(".user-organization", template).hide();
+        $(".other-organization", template).show();
+        template.trigger(parentRel + ":foreign");
+      }
+    });
   }
 
   if ( template.parent().attr("rel") === "v-s:sender" ) {
@@ -577,17 +576,17 @@ v-s:LetterRegistrationRecordTemplate
   </div>
 </div>
 <script>
-
-  function date() {
-    if ( individual.is("v-s:LetterRegistrationRecordEnumerated") && !individual.hasValue("v-s:registrationNumber") ) {
+  var self = this;
+  function setRegistrationDate() {
+    if ( this.hasValue("rdf:type", "v-s:LetterRegistrationRecordEnumerated") && !this.hasValue("v-s:registrationNumber") ) {
       var today = new Date();
       today.setHours(0, 0, 0, 0);
       individual["v-s:registrationDate"] = [ today ];
     }
   }
-  individual.on("beforeSave", date);
+  this.on("beforeSave", setRegistrationDate);
   template.one("remove", function () {
-    individual.off("beforeSave", date);
+    self.off("beforeSave", setRegistrationDate);
   });
 
   if ( mode === "edit" || template.data("mode") === "edit" ) {
@@ -599,11 +598,19 @@ v-s:LetterRegistrationRecordTemplate
   }
 
   function typeHandler () {
-    if ( this.is("v-s:LetterRegistrationRecordEnumerated") ) {
-      $("input", template).attr("placeholder", (new veda.IndividualModel("v-s:AutomaticallyBundle"))["rdfs:label"].join(" "));
-    } else {
-      $("input", template).attr("placeholder", (new veda.IndividualModel("v-s:ManuallyBundle"))["rdfs:label"].join(" "));
-    }
+    this.is("v-s:LetterRegistrationRecordEnumerated").then(function (isEnumerated) {
+      if (isEnumerated ) {
+        var autoBundle = new veda.IndividualModel("v-s:AutomaticallyBundle");
+        autoBundle.load().then(function (autoBundle) {
+          $("input", template).attr("placeholder", autoBundle["rdfs:label"].join(" "));
+        });
+      } else {
+        var manualBundle = new veda.IndividualModel("v-s:ManuallyBundle");
+        manualBundle.load().then(function (manualBundle) {
+          $("input", template).attr("placeholder", manualBundle["rdfs:label"].join(" "));
+        });
+      }
+    });
   }
 
   if ( template.parent().attr("rel") === "v-s:hasLetterRegistrationRecordSender" ) {

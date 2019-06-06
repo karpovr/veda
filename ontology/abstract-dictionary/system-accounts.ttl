@@ -1,0 +1,444 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+@prefix cfgb: <http://semantic-machines.com/veda/system-accounts/> .
+<http://semantic-machines.com/veda/system-account>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология Веда. Системные учетные записи"@ru ;
+  rdfs:label "Veda ontology. System accounts"@en ;
+#  owl:versionInfo "1.0" ;
+  v-s:loadPriority 3 ;
+.
+
+cfg:org_Veda
+  a v-s:Organization;
+  v-s:origin "admin"^^xsd:string;
+  rdfs:label "Веда"^^xsd:string;
+  v-s:shortLabel "Veda"^^xsd:string;
+.
+cfg:User_department
+  a v-s:Department;
+  rdfs:label "Подразделение"@ru;
+  rdfs:label "Department"@en;
+  v-s:origin "admin"^^xsd:string;
+  v-s:parentUnit cfg:org_Veda;
+  v-s:parentOrganization cfg:org_Veda;
+.
+cfg:User_position
+  a v-s:Position;
+  v-s:updateCounter "1"^^xsd:integer;
+  v-s:origin "manual"^^xsd:string;
+  rdfs:label "Специалист"@ru;
+  rdfs:label "Specialist"@en;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+.
+
+### -------------------------------------------------------
+cfg:Guest
+  rdf:type v-s:Person ;
+  v-s:author cfg:VedaSystem ;
+  v-s:firstName "Гость"@ru ;
+  v-s:firstName "Guest"@en ;
+  rdfs:label "Гость"@ru ;
+  rdfs:label "Guest"@en ;
+  v-s:hasAccount cfg:GuestAccount ;
+  v-s:hasAppointment cfg:GuestAppointment ;
+  v-s:defaultAppointment cfg:GuestAppointment ;
+  v-s:hasAspect cfg:Guest_aspect ;
+  v-ui:hasPreferences cfg:Guest_pref ;
+  v-s:parentOrganization cfg:org_Veda ;
+  v-s:owner cfg:Guest ;
+.
+cfg:GuestAccount
+  rdf:type v-s:Account ;
+  rdfs:label "Guest. Учетная запись"@ru ;
+  rdfs:label "Guest. Account"@en ;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  v-s:owner cfg:Guest ;
+.
+cfg:GuestAppointment
+  rdf:type v-s:Appointment ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Гость"@ru ;
+  rdfs:label "Guest"@en ;
+  v-s:employee cfg:Guest ;
+  v-s:occupation cfg:User_position;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+  v-s:owner cfg:Guest ;
+.
+cfg:Guest_pref
+  rdf:type v-ui:Preferences ;
+  v-s:author cfg:VedaSystem ;
+  v-s:owner cfg:Guest ;
+  rdfs:label "Guest. Предпочтения"@ru ;
+  rdfs:label "Guest. Preferences"@en ;
+  v-ui:preferredLanguage v-ui:RU ;
+  v-ui:displayedElements 10 ;
+  v-s:owner cfg:Guest ;
+.
+cfg:Guest_aspect
+  rdf:type v-s:PersonalAspect ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Guest. Аспект"@ru ;
+  rdfs:label "Guest. Aspect"@en ;
+  v-s:owner cfg:Guest ;
+.
+
+### -------------------------------------------------------
+cfg:ImportDMSToVeda
+  rdf:type v-s:Person ;
+  v-s:author cfg:VedaSystem ;
+  v-s:firstName "Утилита импорта DMS to Veda"@ru ;
+  v-s:firstName "Import DMS to Veda"@en ;
+  v-s:hasAccount cfg:ImportDMSToVedaAccount ;
+  v-s:hasAppointment cfg:ImportDMSToVedaAppointment ;
+  v-s:parentOrganization cfg:org_Veda;
+  rdfs:label "Утилита DMS to Veda"@ru ;
+  rdfs:label "Import DMS to Veda"@en ;
+.
+cfg:ImportDMSToVedaAccount
+  rdf:type v-s:Account ;
+  v-s:author cfg:VedaSystem ;
+  v-s:owner cfg:ImportDMSToVeda;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  v-s:login "ImportDMSToVeda" ;
+  rdfs:label "ImportDMSToVeda. Учетная запись"@ru ;
+  rdfs:label "ImportDMSToVeda. Account"@en ;
+.
+cfg:ImportDMSToVedaAppointment
+  rdf:type v-s:Appointment ;
+  v-s:author cfg:VedaSystem ;
+  v-s:employee cfg:ImportDMSToVeda ;
+  v-s:occupation cfg:User_position;
+  v-s:official "false"^^xsd:boolean;
+  rdfs:label "Утилита DMS to Veda"@ru ;
+  rdfs:label "Import DMS to Veda"@en ;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+.
+
+### -------------------------------------------------------
+cfg:ImportFromOtherSystemToVeda
+  rdf:type v-s:Person ;
+  v-s:author cfg:VedaSystem ;
+  v-s:firstName "Утилита импорта в Veda"@ru ;
+  v-s:firstName "Import From Other System to Veda"@en ;
+  v-s:hasAccount cfg:ImportFromOtherSystemToVedaAccount ;
+  v-s:hasAppointment cfg:ImportFromOtherSystemToVedaAppointment ;
+  v-s:parentOrganization cfg:org_Veda;
+  rdfs:label "Утилита импорта в Veda"@ru ;
+  rdfs:label "Import DMS to Veda"@en ;
+.
+cfg:ImportFromOtherSystemToVedaAccount
+  rdf:type v-s:Account ;
+  v-s:author cfg:VedaSystem ;
+  v-s:owner cfg:ImportFromOtherSystemToVeda;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  v-s:login "ImportFromOtherSystemToVeda" ;
+  rdfs:label "ImportFromOtherSystemToVeda. Учетная запись"@ru ;
+  rdfs:label "ImportFromOtherSystemToVeda. Account"@en ;
+.
+cfg:ImportFromOtherSystemToVedaAppointment
+  rdf:type v-s:Appointment ;
+  v-s:author cfg:VedaSystem ;
+  v-s:employee cfg:ImportFromOtherSystemToVeda ;
+  v-s:occupation cfg:User_position;
+  v-s:official "false"^^xsd:boolean;
+  rdfs:label "Утилита импорта в Veda"@ru ;
+  rdfs:label "Import From Other System to Veda"@en ;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+.
+### -------------------------------------------------------
+
+cfg:VedaNTLMFilter
+  rdf:type v-s:Person ;
+  v-s:author cfg:VedaSystem ;
+  v-s:firstName "Veda NTLM Фильтр"@ru ;
+  v-s:firstName "Veda NTLM Filter"@en ;
+  v-s:hasAccount cfg:VedaNTLMFilterAccount ;
+  v-s:hasAppointment cfg:VedaNTLMFilterAppointment ;
+  rdfs:label "Veda NTLM Фильтр"@ru ;
+  v-s:parentOrganization cfg:org_Veda;
+  rdfs:label "Veda NTLM Filter"@en ;
+.
+
+cfg:VedaNTLMFilterAccount
+  rdf:type v-s:Account ;
+  v-s:owner cfg:VedaNTLMFilter;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  v-s:login "VedaNTLMFilter" ;
+  rdfs:label "VedaNTLMFilter. Учетная запись"@ru ;
+  rdfs:label "VedaNTLMFilter. Account"@en ;
+.
+
+cfg:VedaNTLMFilterAppointment
+  rdf:type v-s:Appointment ;
+  v-s:author cfg:VedaSystem ;
+  v-s:employee cfg:VedaNTLMFilter ;
+  v-s:occupation cfg:User_position;
+  v-s:official "false"^^xsd:boolean;
+  rdfs:label "Veda NTLM Фильтр"@ru ;
+  rdfs:label "Veda NTLM Filter"@en ;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+.
+
+### -------------------------------------------------------
+cfg:VedaSystem
+  rdf:type v-s:Person ;
+  v-s:author cfg:VedaSystem ;
+  v-s:actualVersion cfg:VedaSystem ;
+  v-s:birthday "2014-03-05"^^xsd:dateTime ;
+#  v-s:firstName "Веда"@ru ;
+#  v-s:firstName "Veda"@en ;
+  v-s:hasAccount cfg:VedaSystemAccount ;
+  v-s:hasAppointment cfg:VedaSystemAppointment ;
+  v-s:parentOrganization cfg:org_Veda;
+  v-s:lastName "Система"@ru ;
+  v-s:lastName "System"@en ;
+  rdfs:label "Система"@ru ;
+  rdfs:label "Veda System"@en ;
+.
+cfg:VedaSystemAccount
+  rdf:type v-s:Account ;
+  v-s:author cfg:VedaSystem ;
+  v-s:login "veda" ;
+  v-s:password "4d1af0e10dab5fe07ae8d23bad5650b46804fb110cfb92f119213bc86aa03d34" ;
+  v-s:owner cfg:VedaSystem ;
+  rdfs:label "VedaSystem. Учетная запись"@ru ;
+  rdfs:label "VedaSystem. Account"@en ;
+.
+cfg:VedaSystemAppointment
+  rdf:type v-s:Appointment ;
+  rdfs:label "Система"@ru ;
+  rdfs:label "Veda System"@en ;
+  v-s:author cfg:VedaSystem ;
+  v-s:employee cfg:VedaSystem ;
+  v-s:occupation cfg:User_position;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+.
+
+### -------------------------------------------------------
+cfg:Administrator
+  rdf:type v-s:Person ;
+  v-s:author cfg:VedaSystem ;
+  v-s:actualVersion cfg:Administrator ;
+  v-s:birthday "2014-03-05"^^xsd:dateTime ;
+  v-s:firstName "Администратор"@ru ;
+  v-s:firstName "Administrator"@en ;
+  v-s:hasAccount cfg:AdministratorAccount ;
+  v-s:hasAppointment cfg:AdministratorAppointment ;
+  v-s:hasAspect cfg:Administrator_aspect ;
+  v-ui:hasPreferences cfg:Administrator_pref ;
+  v-s:parentOrganization cfg:org_Veda;
+  rdfs:label "Администратор"@ru ;
+  rdfs:label "Administrator"@en ;
+.
+cfg:AdministratorAccount
+  rdf:type v-s:Account ;
+  v-s:author cfg:VedaSystem ;
+  v-s:login "admin" ;
+  v-s:usesCredential cfg:AdministratorAccount-crdt ;
+  v-s:owner cfg:Administrator ;
+  rdfs:label "Администратор. Учетная запись"@ru ;
+  rdfs:label "Administrator. Account"@en ;
+  v-s:mailbox "veda@semantic-machines.com"^^xsd:string ;
+.
+cfg:AdministratorAppointment
+  rdf:type v-s:Appointment ;
+  v-s:author cfg:VedaSystem ;
+  v-s:employee cfg:Administrator ;
+  v-s:occupation cfg:User_position;
+  rdfs:label "Администратор"@ru ;
+  rdfs:label "Administrator"@en ;
+  v-s:origin "Internal" ;
+  v-s:parentUnit cfg:User_department;
+  v-s:parentOrganization cfg:org_Veda;
+.
+cfg:Administrator_pref
+  rdf:type v-ui:Preferences ;
+  v-s:author cfg:Administrator ;
+  v-ui:displayedElements 10 ;
+  v-ui:preferredLanguage v-ui:RU ;
+.
+cfg:Administrator_aspect
+  rdf:type v-s:PersonalAspect;
+  v-s:owner cfg:Administrator ;
+.
+
+### -------------------------------------------------------
+
+cfg:Permission_ntlmu_r_tau
+  rdf:type v-s:PermissionStatement ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:permissionObject cfg:VedaNTLMFilter ;
+  v-s:permissionSubject cfg:TrustedAuthenticationUserGroup ;
+.
+
+cfg:Permission_VedaSystem_allRead
+  rdf:type v-s:PermissionStatement ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:permissionObject cfg:VedaSystem ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+.
+
+td:pm_pa_au
+  rdf:type v-s:PermissionStatement ;
+  v-s:canCreate "true"^^xsd:boolean ;
+  v-s:permissionObject v-s:PersonalAspect, v-ui:Preferences, v-s:File, v-s:Version;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+.
+
+### -------------------------------------------------------
+
+cfg:SuperUser
+  rdf:type v-s:Group ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Супер админ"@ru ;
+  rdfs:label "Super admin"@en ;
+.
+
+cfg:TrustedAuthenticationUserGroup
+  rdf:type v-s:Group ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Trusted Authentication Пользователи"@ru ;
+  rdfs:label "Trusted Authentication User"@en ;
+.
+
+cfg:TTLResourcesGroup
+  rdf:type v-s:Group ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Группа всех ресурсов из TTL"@ru ;
+  rdfs:label "TTL resources group"@en ;
+.
+
+cfg:AllUsersGroup
+  rdf:type v-s:Group ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Группа всех пользователей"@ru ;
+  rdfs:label "All users group"@en ;
+.
+
+cfg:OntologyGroup
+  rdf:type v-s:Group ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Группа для индивидов онтологии"@ru ;
+  rdfs:label "Group for Ontology individuals"@en ;
+.
+
+### -------------------------------------------------------
+cfg:Membership_su
+  rdf:type v-s:Membership ;
+  v-s:author cfg:VedaSystem ;
+  v-s:resource cfg:VedaSystem ;
+  v-s:resource cfg:Administrator ;
+  v-s:resource cfg:ImportDMSToVeda ;
+  v-s:resource cfg:ImportFromOtherSystemToVeda ;
+  v-s:memberOf cfg:SuperUser ;
+.
+
+cfg:Membership_tau
+  rdf:type v-s:Membership ;
+  v-s:author cfg:VedaSystem ;
+  v-s:resource cfg:VedaNTLMFilter ;
+  v-s:memberOf cfg:TrustedAuthenticationUserGroup ;
+.
+
+### -------------------------------------------------------
+cfg:Permission_su
+  rdf:type v-s:PermissionStatement ;
+  v-s:author cfg:VedaSystem ;
+  v-s:permissionSubject cfg:SuperUser ;
+  v-s:permissionObject v-s:AllResourcesGroup ;
+  v-s:canCreate "true"^^xsd:boolean ;
+  v-s:canDelete "true"^^xsd:boolean ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:canUpdate "true"^^xsd:boolean ;
+.
+
+cfg:Permission_2
+  rdf:type v-s:PermissionStatement ;
+  v-s:author cfg:VedaSystem ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:permissionObject cfg:TTLResourcesGroup ;
+  v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "Право на чтение всех ресурсов из TTL для всех пользователей"@ru ;
+  rdfs:label "Permissions to read TTL resources for all users"@en ;
+.
+
+cfg:Permission_3
+  rdf:type v-s:PermissionStatement ;
+  v-s:author cfg:VedaSystem ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:permissionObject cfg:OntologyGroup ;
+  v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "Разрешение на чтение онтологии для всех пользователей"@ru ;
+  rdfs:label "Permission to read ontology individuals for all users"@en ;
+.
+
+#cfg:Permission_4
+  #rdf:type v-s:PermissionStatement ;
+  #v-s:author cfg:VedaSystem ;
+  #v-s:permissionSubject cfg:AllUsersGroup ;
+  #v-s:permissionObject v-s:OrganizationUnit_group ;
+  #v-s:canRead "true"^^xsd:boolean ;
+  #rdfs:label "Разрешение на чтение орг. структуры для всех пользователей"@ru ;
+  #rdfs:label "Permission to read org. structure individuals for all users"@en ;
+#.
+
+cfg:Permission_5
+  rdf:type v-s:PermissionStatement ;
+  v-s:author cfg:VedaSystem ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:permissionObject v-s:Journal_group ;
+  v-s:permissionObject v-s:JournalRecord_group ;
+  v-s:permissionObject v-wf:Decision_group ;
+  v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "Разрешение на чтение журналов для всех пользователей"@ru ;
+  rdfs:label "Permission to read journals for all users"@en ;
+.
+
+cfg:Permission_6
+  rdf:type v-s:PermissionStatement ;
+  v-s:author cfg:VedaSystem ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:permissionObject v-s:Dictionary_group ;
+  v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "Разрешение на чтение справочников для всех пользователей"@ru ;
+  rdfs:label "Permission to read dictionaries for all users"@en ;
+.
+cfg:LinkGroupPermissionStatement
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Link_group ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:canRead true ;
+  rdfs:label "Право для всех пользователей на просмотр индивидов класса v-s:Link"@ru ;
+  rdfs:label "Permission for all users to read individuals of v-s:Link class"@en ;
+.
+cfg:LinkCreatePermissionStatement
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Link ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:canCreate true ;
+  rdfs:label "Право для всех пользователей на создание индивидов класса v-s:Link"@ru ;
+  rdfs:label "Permission for all users to create individuals of v-s:Link class"@en ;
+.
+
+cfg:Membership_AllUsersGroup_WorkFlowReadUser
+  rdf:type v-s:Membership ;
+  v-s:author cfg:VedaSystem ;
+  v-s:memberOf v-wf:WorkflowReadUser ;
+  v-s:resource cfg:AllUsersGroup ;
+  rdfs:label "All users group is member of v-wf:WorkflowReadUser" ;
+.

@@ -911,22 +911,24 @@ v-ui:AdministrationAspectTemplate
     let url=$("#moduleUrl",template).val();
     if (url) {
       var Module = new veda.IndividualModel();
-      Module["rdf:type"] = [new veda.IndividualModel("v-s:RequestToModulesManager")];
-      Module["v-s:moduleUrl"]=[url];
+      Module["rdf:type"] = [ new veda.IndividualModel("v-s:RequestToModulesManager") ];
+      Module["v-s:moduleUrl"]=[ url ];
       Module.save();
       $("#moduleUrl",template).val("");
     };
   });
 
-  $("#admin-tabs", template).on("click", "a", function (e) {
-    e.preventDefault();
-    individual.activeTab = $(this).attr("href");
-  });
-  if (individual.activeTab) {
-    $("#admin-tabs a[href='" + individual.activeTab + "']", template).tab("show");
-  } else {
-    $("#admin-tabs a:first", template).tab("show");
-  }
+  setTimeout(function () {
+    $("#admin-tabs", template).on("click", "a", function (e) {
+      e.preventDefault();
+      individual.activeTab = $(this).attr("href");
+    });
+    if (individual.activeTab) {
+      $("#admin-tabs a[href='" + individual.activeTab + "']", template).tab("show");
+    } else {
+      $("#admin-tabs a:first", template).tab("show");
+    }
+  }, 0);
   //# sourceURL=v-ui:AdministrationAspectTemplate_post
 </script>
   """ ;

@@ -86,20 +86,6 @@ v-s:lastEditor
   rdfs:range v-s:Appointment ;
   rdfs:domain v-s:Thing ;
 .
-v-s:isDraft
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Является черновиком"@ru ;
-  rdfs:label "Is draft of"@en ;
-  rdfs:range xsd:boolean ;
-  rdfs:domain v-s:Thing ;
-.
-v-s:drafted
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Дата черновика"@ru ;
-  rdfs:label "Draft date"@en ;
-  rdfs:range xsd:dateTime ;
-  rdfs:domain v-s:Thing ;
-.
 v-s:created
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Дата создания"@ru ;
@@ -1116,6 +1102,13 @@ v-s:hasClassifierMarkOfWorkingDrawingsSet
   rdfs:range v-s:ClassifierMarkOfWorkingDrawingsSet ;
   rdfs:domain v-s:ClassifiedRus ;
 .
+v-s:itemNumber
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Номер пункта"@ru ;
+  rdfs:label "Item number"@en ;
+  rdfs:range xsd:integer ;
+  rdfs:domain v-s:ClassifiedRus ;
+.
 ### ------------------------------------------------------------
 v-s:Maintained
   rdf:type owl:Class ;
@@ -1418,7 +1411,7 @@ v-s:hasMaintainedObjectTemplate
       <tr>
         <td property="rdfs:label" class="view edit search"></td>
         <td property="v-s:shortLabel" class="view edit search"></td>
-        <td property="v-s:hasParentLink" class="view edit search"></td>
+        <td rel="v-s:hasParentLink" data-template="v-ui:LabelTemplate" class="view edit search"></td>
         <td>
           <div about="@" rel="v-s:hasParentLink" class="view edit search">
             <div property="v-s:shortLabel" class="view edit search"></div>

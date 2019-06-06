@@ -11,12 +11,16 @@ then
 fi
 ./tools/update-version-ttl.sh
 
+if [ -z $1 ] || [ $1 == "az" ] || [ $1 == "veda-az" ] ; then
+
     cd source/authorization
     cargo build --release
     cd $BUILD_PATH
     sudo cp ./source/lib64/libauthorization.so $PWD
     sudo cp $PWD/libauthorization.so /usr/local/lib
     sudo ldconfig
+
+fi
 
 if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] ; then
 
@@ -27,8 +31,21 @@ if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] ; then
     cargo build --release
     cd $BUILD_PATH
     cp ./source/veda-ccus/target/release/veda-ccus $PWD
-    
+
     echo end make VEDA-CCUS
+fi
+
+if [ -z $1 ] || [ $1 == "ontologist" ] || [ $1 == "veda-ontologist" ] ; then
+
+    echo start make VEDA-ONTOLOGIST
+    rm ./veda-ontologist
+
+    cd source/veda-ontologist
+    cargo build --release
+    cd $BUILD_PATH
+    cp ./source/veda-ontologist/target/release/veda-ontologist $PWD
+
+    echo end make VEDA-ONTOLOGIST
 fi
 
 if [ -z $1 ] || [ $1 == "bootstrap" ] || [ $1 == "veda" ] ; then
@@ -84,6 +101,7 @@ if [ -z $1 ] || [ $1 == "input-queue" ] || [ $1 == "veda-input-queue" ] ; then
 fi
 
 if [ -z $1 ] || [ $1 == "gowebserver" ] || [ $1 == "veda-gowebserver" ]; then
+
     if [ -z $GOROOT ]; then
 	export GOROOT=/usr/local/go
     else 

@@ -1,0 +1,58 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix cs: <http://company-sales.com/sample/sales/> .
+
+<http://company-sales.com/sample/sales-app>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy cs: ;
+  rdfs:label "Тестовый пример - Продажи. Приложение"@ru ;
+  rdfs:label "Sample - Sales. Application"@en ;
+.
+
+cs:SalesApplication
+  rdf:type v-s:Application ;
+  rdfs:label "Sales"@en ;
+  rdfs:label "Продажи"@ru ;
+  rdfs:comment "Всегда на высоте!"@ru ;
+  rdfs:comment "Always high!"@en ;
+  v-s:shortLabel "Продажи"@ru ;
+  v-s:shortLabel "Sales"@en ;
+  v-s:hasIcon cs:SalesIcon ;
+  v-ui:hasTemplate v-s:ApplicationTemplate ;
+
+  v-s:hasCreate cs:CustomerCreate;
+  v-s:hasCreate cs:OrderCreate;
+  v-s:hasRegistry cs:CustomerRegistry;
+  v-s:hasRegistry cs:OrderRegistry;
+
+  v-s:description """
+Приложение предназначено для работы с заказчиками и заказами.
+
+**Приложение обеспечивает возможность:**
+  - Регистрировать заказчиков и их заказы.
+  """@ru ;
+  v-s:description """
+The application is designed to work with customers & their orders.
+
+**The application allows to:**
+  - Register and track customers and their orders.
+  """@en ;
+.
+
+cs:SalesIcon
+  a v-s:File ;
+  v-s:fileUri "sales.svg"^^xsd:string ;
+  v-s:fileName "sales.svg"^^xsd:string ;
+  v-s:filePath "/sales"^^xsd:string ;
+.
+
+
+# В config.ttl в параметре внести в cfg:Welcome в поле rdf:value внести значение cs:SalesApplication
+# rdf:value cs:SalesApplication;
+# Не забыть объявить префикс cs:
+# @prefix cs: <http://company-sales.com/sample/sales/> .
+

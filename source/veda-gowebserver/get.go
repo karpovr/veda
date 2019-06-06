@@ -53,7 +53,7 @@ func getIndividual(ctx *fasthttp.RequestCtx) {
 		var main_cs *Consumer
 
 		main_queue_name := "individuals-flow"
-		main_queue = NewQueue(main_queue_name, R)
+		main_queue = NewQueue(main_queue_name, R, "")
 		if !main_queue.open(CURRENT) {
 			log.Println("ERR! OPENING QUEUE: ", queueName)
 			ctx.Response.SetStatusCode(int(InvalidIdentifier))

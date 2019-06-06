@@ -34,8 +34,8 @@ func configWebServer() {
 				continue
 			}
 
-			paramName := splitted[0]
-			paramVal := splitted[1]
+			paramName := strings.TrimSpace(splitted[0])
+			paramVal := strings.TrimSpace(splitted[1])
 			switch paramName {
 			case "notify_channel_url":
 				notifyChannelURL = paramVal

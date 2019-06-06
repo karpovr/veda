@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+//	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -72,16 +72,16 @@ func main() {
 	fmt.Println("DIMENSION queue_fanout_sql_np0 'sql_np' absolute 1 1")
 	fmt.Println("DIMENSION queue_fulltext_indexer0 'fulltext_indexer0' absolute 1 1")
 	fmt.Println("DIMENSION queue_fulltext_indexer1 'fulltext_indexer1' absolute 1 1")
-	fmt.Println("DIMENSION queue_CCUS 'CCUS' absolute 1 1")
+	fmt.Println("DIMENSION queue_CCUS 'CCUS1' absolute 1 1")
 
 	fmt.Println("CHART netdata.plugin_veda_users '' 'Veda users' 'count' veda.d '' area 10000 3")
 	fmt.Println("DIMENSION ws_sessions 'ws sessions' absolute 1 1  '' area 10000 3")
 	fmt.Println("DIMENSION ws_hosts 'ws hosts' absolute 1 1 '' area 10000 3")
 
-	req, err := createRequest(config.Ccus_url)
-	if err != nil {
-		log.Println(err)
-	}
+//	req, err := createRequest(config.Ccus_url)
+//	if err != nil {
+//		log.Println(err)
+//	}
 
 	var main_queue *Queue
 
@@ -89,7 +89,7 @@ func main() {
 	main_queue = NewQueue(main_queue_name, R, config.Veda_queue_path)
 	main_queue.open(CURRENT)
 
-	cs_CCUS := NewConsumer(main_queue, "CCUS", R)
+	cs_CCUS := NewConsumer(main_queue, "CCUS1", R)
 	cs_CCUS.open()
 
 	cs_fanout_email := NewConsumer(main_queue, "fanout_email0", R)
@@ -121,6 +121,8 @@ func main() {
 
 	vedaData := make(map[string]interface{})
 	for {
+
+/*
 		respStream, err := httpClient.Do(req)
 		if err != nil {
 			log.Println("Failed to do request: ", err)
@@ -147,6 +149,7 @@ func main() {
 
 			continue
 		}
+*/
 
 //		fmt.Println("BEGIN netdata.plugin_vedad_count_requests")
 //		fmt.Printf("SET count_requests=%v\n", vedaData["count_requests"])
@@ -192,7 +195,7 @@ func main() {
 		fmt.Printf("SET queue_CCUS=%d\n", main_queue.count_pushed - cs_CCUS.count_popped)
 		fmt.Println("END")
 
-		respStream.Body.Close()
+//		respStream.Body.Close()
 		time.Sleep(3000 * time.Millisecond)
 	}
 

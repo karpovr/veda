@@ -58,6 +58,7 @@ td:khvostiaImage
 td:Analyst1
   rdf:type v-s:Position ;
   v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
   rdfs:label "Аналитик"@ru ;
   rdfs:label "Analyst"@en ;
 .
@@ -65,6 +66,7 @@ td:Analyst1
 td:Analyst2
   rdf:type v-s:Position ;
   v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
   rdfs:label "Аналитик"@ru ;
   rdfs:label "Analyst"@en ;
 .
@@ -100,6 +102,7 @@ td:TechnicalDirector
 td:Programmer1
   rdf:type v-s:Position ;
   v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
   rdfs:label "Программист"@ru ;
   rdfs:label "Programmer"@en ;
 .
@@ -337,6 +340,7 @@ td:AndreyBychin-Analyst2
   rdfs:label "Администратор4 : Аналитик"@ru ;
   rdfs:label "Administrator4 : Analyst"@en ;
   v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
   v-s:official "true"^^xsd:boolean ;
   v-s:origin "Internal User" ;
 .
@@ -366,6 +370,7 @@ td:RomanKarpov-Analyst1
   v-s:published "2014-01-30T15:22:33"^^xsd:dateTime ;
   v-s:startTime "2014-01-30T15:22:33"^^xsd:dateTime ;
   v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
   rdfs:label "Администратор2 : Аналитик"@ru ;
   rdfs:label "Administrator2 : Analyst"@en ;
   v-s:official "true"^^xsd:boolean ;
@@ -428,6 +433,7 @@ td:ValeriyBushenev-Programmer1
   rdfs:label "Администратор3 : Программист"@ru ;
   rdfs:label "Administrator3 : Programmer"@en ;
   v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
   v-s:official "true"^^xsd:boolean ;
   v-s:origin "Internal User" ;
 .
@@ -453,6 +459,7 @@ td:ApplicationDevelopmentGroup
   v-s:origin "admin"^^xsd:string;
   v-s:hasChief cfg:AdministratorAppointment;
   v-s:parentUnit cfg:org_Veda;
+  v-s:parentOrganization cfg:org_Veda;
 .
 
 ######################## сеть, пример 1 #######################

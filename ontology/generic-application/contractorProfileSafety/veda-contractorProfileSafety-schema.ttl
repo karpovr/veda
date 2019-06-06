@@ -17,7 +17,7 @@
 
 # ------------------------------------------------------------ КЛАССЫ --
 
-# ------------------------------------------------------------ДОСЬЕ_КОНТРАГЕНТА_ПО_БЕЗОПАСНОСТИ
+# -----------------------------------------------ДОСЬЕ_КОНТРАГЕНТА_ПО_БЕЗОПАСНОСТИ
 v-s:ContractorProfileSafety
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -30,9 +30,101 @@ v-s:ContractorProfileSafety
   rdfs:label "Досье организациип по безопасности"@ru ;
   rdfs:label "Contractor profile safety"@en ;
   v-ui:hasTemplate v-s:ContractorProfileSafetyTemplate ;
-#  v-s:labelPattern "{@.v-s:parent.rdfs:label}" ;
+  #v-s:labelPattern "{@.v-s:parent.rdfs:label}" ;
 .
 # v-s:backwardTarget
+
+v-s:attachSafetyInstruction
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Утвержденный в организации перечень инструкций по охране труда, промышленной и пожарной безопасности."@ru ;
+  rdfs:label "Safety instruction"@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:attachIncidentInformation
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Заверенное подписью руководителя и печатью организации информационное письмо о травматизме, инцидентах, авариях, пожарах, произошедших в компании за последние 5 лет."@ru ;
+  rdfs:label "Incident information"@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:isResponsibleForWorkOfIncreasedDanger
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Pass ;
+  rdfs:label "Есть ответственный за работы повышенной опасности?"@ru ;
+  rdfs:label "Есть ответственный за работы повышенной опасности?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:attachDocumentsForWorkOfIncreasedDanger
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за организацию и проведение работ повышенной опасности, выполняемых по наряду-допуску на территории АО «Монди СЛПК»."@ru ;
+  rdfs:label "Disposal documents for work of increased danger"@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:isResponsibleForTheRightToOrganizeWorksAtHeight
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Pass ;
+  rdfs:label "Есть ответственный за работы на высоте?"@ru ;
+  rdfs:label "Есть ответственный за работы на высоте?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:attachDocumentsForTheRightToOrganizeWorksAtHeight
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за организацию и проведение работ на высоте ."@ru ;
+  rdfs:label "Disposal documents for the right to organize works at height"@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:isResponsibleForTheRightToOrganizeElectricWorks
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Pass ;
+  rdfs:label "Есть ответственный за электрохозяйство?"@ru ;
+  rdfs:label "Есть ответственный за электрохозяйство?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:attachDocumentsForTheRightToOrganizeElectricWorks
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за электрохозяйство в организации. "@ru ;
+  rdfs:label "Disposal documents for the right to organize "@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:isResponsibleForFireSafety
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Pass ;
+  rdfs:label "Есть ответственный за промбезопасность?"@ru ;
+  rdfs:label "Есть ответственный за промбезопасность?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:attachDocumentsForFireSafety
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за организацию и осуществление производственного контроля за соблюдением требований промышленной безопасности при эксплуатации на территории АО «Монди СЛПК» опасных производственных объектов или технических устройств, на которые распространяются федеральные нормы и правила в области промышленной безопасности. "@ru ;
+  rdfs:label "Disposal documents for the right to organize "@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:isResponsibleForIndustrialSafety
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Pass ;
+  rdfs:label "Есть ответственный за пожарную безопасность?"@ru ;
+  rdfs:label "Есть ответственный за пожарную безопасность?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:attachDocumentsForIndustrialSafety
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за соблюдение требований пожарной безопасности на территории АО «Монди СЛПК». "@ru ;
+  rdfs:label "Disposal documents for the right to organize "@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:attachDocumentsForTheRightToOrganizeOtherWorks
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Прочие документы"@ru ;
+  rdfs:label "Disposal documents for the other works"@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
 
 ###----------------------------------Досье сотрудника---------------------
 v-s:EmployeeProfile
@@ -222,4 +314,20 @@ v-s:hasOtherCertificate
   rdfs:range v-s:CertificationDocument ;
 .
 
+v-s:PS_ContractorProfileSafety_Files
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:ContractorProfileSafety ;
+  v-ui:forProperty v-s:attachSafetyInstruction ;
+  v-ui:forProperty v-s:attachIncidentInformation ;
+  v-ui:forProperty v-s:attachDocumentsForWorkOfIncreasedDanger ;
+  v-ui:forProperty v-s:attachDocumentsForTheRightToOrganizeWorksAtHeight ;
+  v-ui:forProperty v-s:attachDocumentsForTheRightToOrganizeElectricWorks ;
+  v-ui:forProperty v-s:attachDocumentsForFireSafety ;
+  v-ui:forProperty v-s:attachDocumentsForIndustrialSafety ;
+  v-ui:forProperty v-s:attachDocumentsForTheRightToOrganizeOtherWorks ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 500 ;
+  rdfs:label "Спецификация файловых свойств для класса v-s:ContractorProfileSafety"@ru ;
+  rdfs:label "Spec for file propertys for class v-s:ContractorProfileSafety"@en ;
+.
 

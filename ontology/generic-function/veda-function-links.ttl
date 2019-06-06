@@ -211,18 +211,17 @@ v-s:LinksListTemplate
     if (isMutual) {
       Link["v-s:mutualMembership"] = [ true ];
     }
-    var newRow = Link.present(cntr, rowTmpl, "edit");
-    Link.one("beforeReset", function () {
-      newRow.remove();
-    });
-    Link.one("afterSave", function () {
-      newRow.remove();
-    });
-    setTimeout(function () {
+    Link.present(cntr, rowTmpl, "edit").then(function (newRow) {
+      Link.one("beforeReset", function () {
+        newRow.remove();
+      });
+      Link.one("afterSave", function () {
+        newRow.remove();
+      });
       if ( individual.isNew() ) {
         newRow.find(".action#save").hide();
       }
-    }, 10);
+    });
   });
 
   individual.on("afterSave", saveHandler);
@@ -259,7 +258,7 @@ v-s:LinksListTemplate
         <th width="10%"></th>
       </tr>
     </thead>
-    <tbody about="@" rel="v-s:hasLink" data-embedded="true">
+    <tbody about="@" rel="v-s:hasLink" data-embedded="true" data-limit="5" data-more="true">
       <script>
         var displayedDoc = container.closest("[resource]").attr("resource");
         if ( this.hasValue("v-s:from", displayedDoc) ) {
@@ -304,9 +303,6 @@ v-s:LinksTreeTemplate
   rdfs:comment "Дерево"@ru ;
   rdfs:label "Tree"@en ;
   v-ui:template """
-<script>
-//# sourceURL=v-s:LinksTreeTemplate_pre
-</script>
 <div>
   <style>
     .links-tree ul {
@@ -359,60 +355,71 @@ v-s:LinksTreeRecursiveTemplate
   var allowedTypesContainer = $(".allowed-types", template);
   var allowedTypesTemplate = allowedTypesContainer.html();
   allowedTypesContainer.empty();
-  allowedTypesUris.forEach(function (allowedTypeUri) {
+  var allowedTypesPromises = allowedTypesUris.map(function (allowedTypeUri) {
     var allowedType = new veda.IndividualModel(allowedTypeUri);
-    allowedType.present(allowedTypesContainer, allowedTypesTemplate);
-  });
-  $(".glyphicon.expand", template).click(function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var $this = $(this);
-
-    if ( $this.hasClass("glyphicon-chevron-right") ) {
-      $this.addClass("glyphicon-chevron-down").removeClass("glyphicon-chevron-right");
-      allowedTypesContainer.removeClass("hidden");
-    } else if ( $this.hasClass("glyphicon-chevron-down") ) {
-      $this.addClass("glyphicon-chevron-right").removeClass("glyphicon-chevron-down");
-      allowedTypesContainer.addClass("hidden");
-    }
+    return allowedType.present(allowedTypesContainer, allowedTypesTemplate);
   });
 
-  $(".glyphicon.expand-type", template).click(function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var $this = $(this);
-    var typeLinksContainer = $this.siblings(".type-links");
-    if ( $this.hasClass("glyphicon-chevron-right") ) {
-      $this.addClass("glyphicon-chevron-down").removeClass("glyphicon-chevron-right");
-      typeLinksContainer.removeClass("hidden");
-      $this.toggleClass("fa fa-spinner fa-pulse fa-lg fa-fw");
-      if ( !typeLinksContainer.children().length ) {
-        var allowedTypeUri = $this.parent().attr("resource");
-        var outLinks = getOutTypeLinks(allowedTypeUri);
-        outLinks.forEach(function (link) {
-          presentTypeLink(link, typeLinksContainer);
-        });
-        getInTypeLinks(allowedTypeUri).then(function (inLinks) {
-          inLinks.forEach(function (link) {
-            presentTypeLink(link, typeLinksContainer);
-          });
-        }).then(function () {
-          $this.toggleClass("fa fa-spinner fa-pulse fa-lg fa-fw");
-        }).then(function () {
-          if ( !typeLinksContainer.children().length ) {
-            $this.parent().hide(350, function () { $(this).remove() });
-          }
-        });
-      } else {
-        $this.toggleClass("fa fa-spinner fa-pulse fa-lg fa-fw");
+  Promise.all(allowedTypesPromises).then(function () {
+    $(".glyphicon.expand", template).click(function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var $this = $(this);
+
+      if ( $this.hasClass("glyphicon-chevron-right") ) {
+        $this.addClass("glyphicon-chevron-down").removeClass("glyphicon-chevron-right");
+        allowedTypesContainer.removeClass("hidden");
+      } else if ( $this.hasClass("glyphicon-chevron-down") ) {
+        $this.addClass("glyphicon-chevron-right").removeClass("glyphicon-chevron-down");
+        allowedTypesContainer.addClass("hidden");
       }
-    } else if ( $this.hasClass("glyphicon-chevron-down") ) {
-      $this.addClass("glyphicon-chevron-right").removeClass("glyphicon-chevron-down");
-      typeLinksContainer.addClass("hidden");
-    }
+    });
+
+    $(".glyphicon.expand-type", template).click(function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var $this = $(this);
+      var typeLinksContainer = $this.siblings(".type-links");
+      if ( $this.hasClass("glyphicon-chevron-right") ) {
+        $this.addClass("glyphicon-chevron-down").removeClass("glyphicon-chevron-right");
+        typeLinksContainer.removeClass("hidden");
+        $this.addClass("fa fa-spinner fa-pulse fa-lg fa-fw");
+        if ( !typeLinksContainer.children().length ) {
+          var allowedTypeUri = $this.parent().attr("resource");
+          var outLinks = getOutTypeLinks(allowedTypeUri);
+          Promise.all(outLinks.map(function (link) {
+            return presentTypeLink(link, typeLinksContainer);
+          }))
+          .then(function () {
+            return getInTypeLinks(allowedTypeUri);
+          })
+          .then(function (inLinks) {
+            var inLinksPromises = inLinks.map(function (link) {
+              return presentTypeLink(link, typeLinksContainer);
+            });
+            return Promise.all(inLinksPromises);
+          })
+          .then(function () {
+            $this.removeClass("fa fa-spinner fa-pulse fa-lg fa-fw");
+            if ( !typeLinksContainer.children().length ) {
+              $this.parent().hide(350, function () { $(this).remove() });
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        } else {
+          $this.toggleClass("fa fa-spinner fa-pulse fa-lg fa-fw");
+        }
+      } else if ( $this.hasClass("glyphicon-chevron-down") ) {
+        $this.addClass("glyphicon-chevron-right").removeClass("glyphicon-chevron-down");
+        typeLinksContainer.addClass("hidden");
+      }
+    });
   });
+
   function presentTypeLink(link, typeLinksContainer) {
-    if ( link.is("v-s:Link") ) {
+    if ( link.hasValue("rdf:type", "v-s:Link") ) {
       if ( link.hasValue("v-s:from", individual) && link.hasValue("v-s:to") ) {
         link = link["v-s:to"][0];
       } else if ( link.hasValue("v-s:to", individual) && link.hasValue("v-s:from") ) {
@@ -442,7 +449,7 @@ v-s:LinksTreeRecursiveTemplate
       return "'" + inPropertyUri + "'==='" + individual.id + "'";
     }).join("||");
     var q = allowedTypeUriQuery + " && (" + inPropertiesUrisQuery + ")";
-    return !inPropertiesUrisQuery || allowedTypeUri === "v-s:Link" ? Promise.resolve([]) : query({
+    return !inPropertiesUrisQuery || allowedTypeUri === "v-s:Link" ? Promise.resolve([]) : veda.Backend.query({
       ticket: veda.ticket,
       query: q,
       limit: 500,
@@ -469,9 +476,6 @@ v-s:LinksTreeRecursiveTemplate
     </ul>
   </li>
 </ul>
-<script>
-//# sourceURL=v-s:LinksTreeRecursiveTemplate_post
-</script>
 """ ;
 .
 
@@ -480,22 +484,22 @@ v-s:TrimmedLinkTemplate
   rdfs:label "Шаблон с именем класса и меткой"@ru ;
   rdfs:label "Template with class name and label"@en ;
   v-ui:template """
-  <a href="#/@"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span about="@" property="rdfs:label"></span></a>
-  <script>
-    var re = new RegExp(".*?:");
-    var label = template.text();
-    template.attr("title", label);
-    if (label.length > 70) {
-      label = label.replace(re, function (typeName) {
-        return typeName.split(" ").reduce(function (abbr, word) {
-          return abbr += word.charAt(0);
-        }, "").toUpperCase() + ":";
-      });
-      label = label.substring(0, 70) + "...";
-      template.text(label);
-    }
-    //# sourceURL=v-s:TrimmedLinkTemplate_post
-  </script>
+<a href="#/@"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span about="@" property="rdfs:label"></span></a>
+<script>
+  var re = new RegExp(".*?:");
+  var label = template.text();
+  template.attr("title", label);
+  if (label.length > 70) {
+    label = label.replace(re, function (typeName) {
+      return typeName.split(" ").reduce(function (abbr, word) {
+        return abbr += word.charAt(0);
+      }, "").toUpperCase() + ":";
+    });
+    label = label.substring(0, 70) + "...";
+    template.text(label);
+  }
+  //# sourceURL=v-s:TrimmedLinkTemplate_post
+</script>
   """ ;
 .
 
@@ -506,10 +510,6 @@ v-s:LinksGraphTemplate
   rdfs:comment "Граф"@ru ;
   rdfs:label "Graph"@en ;
   v-ui:template """
-<script>
-
-//# sourceURL=v-s:LinksGraphTemplate_pre
-</script>
 <div about="@" data-template="v-ui:Graph"></div>
 """ ;
 .

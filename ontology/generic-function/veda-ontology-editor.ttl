@@ -115,35 +115,37 @@ v-ui:ClassClassModel
   v-ui:forClass owl:Class ;
   v-ui:forClass rdfs:Class ;
   v-s:script """
-  var self = this;
   this.addProperty = function (property) {
     if (property instanceof String || typeof property === "string" ) {
       property = new veda.IndividualModel( property.valueOf() );
     }
     if ( !(property instanceof veda.IndividualModel) ) { return; }
-    property.addDomain(self);
-    self.domainProperties[property.id] = property;
-  }
+    property.addDomain(this);
+    this.domainProperties[property.id] = property;
+  };
 
   this.createProperty = function () {
     var property = new veda.IndividualModel();
     property["rdf:type"] = [ new veda.IndividualModel("rdf:Property") ];
     property.addDomain(self);
-    self.domainProperties[property.id] = property;
-  }
+    this.domainProperties[property.id] = property;
+  };
 
   this.isSubClassOf = function (_super) {
-    if (_super === "rdfs:Resource" || _super.id === "rdfs:Resource") {
-      return true;
-    }
-    if (!self.hasValue("rdfs:subClassOf")) return false;
-    if (typeof _super === "string") {
-      _super = new veda.IndividualModel(_super);
-    }
-    return self["rdfs:subClassOf"].reduce(function (acc, item) {
-      return acc || (item.id === _super.id) || item.isSubClassOf(_super);
-    }, false);
-  }
+    return this.getSuperClasses().then(function (superClasses) {
+      var result = false;
+      for (var i = 0, superClass; (superClass = superClasses[i]) && !result; i++) {
+        result = _super === superClass.id;
+      }
+      return result;
+    });
+  };
+
+  this.getSuperClasses = function () {
+    return this.prefetch(Infinity, "rdfs:subClassOf").then(function (superClasses) {
+      return superClasses.slice(1);
+    });
+  };
   //# sourceURL=v-ui:ClassClassModel
   """ ;
 .
@@ -313,14 +315,17 @@ v-ui:ClassClassTemplate
   props.map(function (property_uri) {
     var prop = new veda.IndividualModel(property_uri);
     var li = $("<li></li>").appendTo(propsContainer);
-    prop.present(li, labelTemplate);
-    if ( !prop.hasValue("rdfs:domain", individual) ) {
-      var small = $("<small class='text-muted'></small>").appendTo(li);
-      var origin = prop["rdfs:domain"].filter( function (_super) {
-        return individual.isSubClassOf(_super);
-      })[0];
-      small.text(origin.id)
-    }
+    prop.present(li, labelTemplate).then(function (li) {
+      if ( !prop.hasValue("rdfs:domain", individual) ) {
+        var small = $("<small class='text-muted'></small>").appendTo(li);
+        individual.getSuperClasses().then(function (superClasses) {
+          var origin = prop["rdfs:domain"].filter( function (item) {
+            return superClasses.indexOf(item) >= 0;
+          })[0];
+          small.text(origin.id);
+        });
+      }
+    });
   });
 
   var specs = veda.ontology.getClassSpecifications(this.id);
@@ -328,14 +333,17 @@ v-ui:ClassClassTemplate
     var spec_uri = specs[property_uri];
     var spec = new veda.IndividualModel(spec_uri);
     var li = $("<li>").appendTo(specsContainer);
-    spec.present(li, labelTemplate);
-    if ( !spec.hasValue("v-ui:forClass", individual) ) {
-      var small = $("<small class='text-muted'></small>").appendTo(li);
-      var origin = spec["v-ui:forClass"].filter( function (_super) {
-        return individual.isSubClassOf(_super);
-      })[0];
-      small.text(origin.id)
-    }
+    spec.present(li, labelTemplate).then(function (li) {
+      if ( !spec.hasValue("v-ui:forClass", individual) ) {
+        var small = $("<small class='text-muted'></small>").appendTo(li);
+        individual.getSuperClasses().then(function (superClasses) {
+          var origin = spec["v-ui:forClass"].filter( function (item) {
+            return superClasses.indexOf(item) >= 0;
+          })[0];
+          small.text(origin.id);
+        });
+      }
+    });
   }
 
   template.on("click", "a[href][resource]", function (e) {
@@ -1192,12 +1200,20 @@ v-ui:GroupTemplate
   v-ui:template """
 <script>
   var membershipRegistryBlank = new veda.IndividualModel("v-s:MembershipRegistryBlank");
-  delete membershipRegistryBlank.object;
-  membershipRegistryBlank["v-s:memberOf"] = [this];
+  var membershipRegistryBlankPromise = membershipRegistryBlank.load().then(function (membershipRegistryBlank) {
+    delete membershipRegistryBlank.object;
+    membershipRegistryBlank["v-s:memberOf"] = [ individual ];
+    return membershipRegistryBlank.init();
+  });
 
   var membershipBlank = new veda.IndividualModel("v-s:MembershipBlank");
-  delete membershipBlank.object;
-  membershipBlank["v-s:memberOf"] = [this];
+  var membershipBlankPromise = membershipBlank.load().then(function (membershipBlank) {
+    delete membershipBlank.object;
+    membershipBlank["v-s:memberOf"] = [ individual ];
+    return membershipBlank.init();
+  });
+
+  return Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
   //# sourceURL=v-ui:GroupTemplate_pre
 </script>
 <div class="container sheet">

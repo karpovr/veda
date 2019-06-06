@@ -1,0 +1,122 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+@prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .
+
+<http://semantic-machines.com/meter-reading-collect-app/>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy mrc: ;
+  rdfs:label "Сбор показаний счетчиков. Приложение"@ru ;
+.
+
+mrc:MeterReadingApplication
+  rdf:type v-s:Application ;
+  rdfs:label "Сбор показаний счетчиков"@ru ;
+  rdfs:label "Meters reading"@en ;
+  rdfs:comment "Всегда вовремя!"@ru ;
+  v-s:shortLabel "Сбор показаний счетчиков"@ru ;
+  v-s:shortLabel "Meters reading"@en ;
+  v-ui:hasTemplate mrc:MeterReadingApplicationTemplate ;
+  v-s:description """
+Период передачи показаний с 1 по 25 число каждого месяца.
+  """ ;
+.
+
+mrc:MeterReadingApplicationTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса Приложение"@ru ;
+  rdfs:label "Template for Application class"@en ;
+  v-ui:forClass v-s:Application ;
+  v-ui:template """
+<div about="@" class="container">
+  <div class="sheet">
+    <div class="clearfix">
+      <h2 style="color: #555;">
+        <span href="#/@" property="rdfs:label"></span>
+        <small property="rdfs:comment"></small>
+      </h2>
+    </div>
+    <hr class="margin-md">
+    <div about="@" property="v-s:description" class="markdown"></div>
+  </div>
+  <div class="meters"></div>
+</div>
+<script>
+  var currentUser = veda.user;
+  var cntr = $(".meters", template);
+  var tmpl = "mrc:UserMetersTemplate";
+  currentUser.present(cntr, tmpl);
+</script>
+  """ ;
+.
+
+mrc:UserMetersTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса Прибор учета"@ru ;
+  rdfs:label "Template for Meter class"@en ;
+  v-ui:template """
+<div>
+  <h3 class="text-center margin-lg" style="color:#555;">
+    Лицевой счёт <span about="@" property="v-s:lastName"></span>
+  </h3>
+  <div about="@" rel="mrc:hasAccount">
+    <div class="row" rel="mrc:hasMeterDevice">
+      <div class="col-md-6 col-xs-12 meter">
+        <div class="sheet" style="width:100%;">
+          <h4 about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></h4>
+          № <span property="mrc:id"></span>( <span property="rdfs:label"></span>)
+          <div rel="mrc:previousReading">
+            <div>
+              Предыдущие показания:
+              <strong property="mrc:readingValue"></strong>
+              <span property="mrc:readingDate"></span>
+              <input type="number" step="0.01" class="reading form-control input-lg" style="margin-top: 20px"></input>
+            </div>
+            <script>
+              $(".reading", template).attr("placeholder", veda.Util.formatValue(this["mrc:readingValue"][0]));
+            </script>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="transmit btn btn-lg btn-success">Передать</button>
+  </div>
+</div>
+<script>
+  $(".transmit", template).click(function () {
+    var notify = veda.Notify ? new veda.Notify() : function () {};
+    try {
+      $(".reading", template).each(function () {
+        var input = $(this);
+        if ( input.val() ) {
+          var currentReadingUri = input.closest("[resource]").attr("resource");
+          var currentReading = new veda.IndividualModel(currentReadingUri);
+          var meterUri = input.closest(".meter").attr("resource");
+          var meter = new veda.IndividualModel(meterUri);
+          var newReading = currentReading.clone();
+          newReading["mrc:readingValue"] = [ input.val() ];
+          newReading["mrc:readingDate"] = [ new Date() ];
+          newReading.save();
+        }
+      });
+      notify("success", {name: "Упешно!", message: "Показания переданы."});
+    } catch (error) {
+      notify("danger", {name: "Ошибка!", message: "Произошла ошибка передачи показаний."});
+    }
+  });
+  //# sourceURL=mrc:UserMetersTemplate_post
+</script>
+  """ ;
+.
+
+
+# В config.ttl в параметре внести в cfg:Welcome в поле rdf:value внести значение mrc:MeterReadingApplication
+# rdf:value mrc:MeterReadingApplication;
+# Не забыть объявить префикс mrc:
+# @prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .

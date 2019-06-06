@@ -9,7 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="./css/bootstrap.min.css" rel="stylesheet"/>
-    <!--link href="./css/bootstrap-theme.min.css" rel="stylesheet"/!-->
+    <!--link href="./css/bootstrap-theme.min.css" rel="stylesheet"/-->
 
     <!-- Bootswatch themes (good) -->
     <!--link href="./css/united.bootstrap.min.css" rel="stylesheet"/-->
@@ -37,6 +37,7 @@
     <link href="./css/bootstrap-datetimepicker.min.css" rel="stylesheet"/>
     <link href="./css/veda.css" rel="stylesheet"/>
     <link href="./css/font-awesome.min.css" rel="stylesheet"/>
+    <link rel="shortcut icon" href="./favicon.png"/>
 
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="cache-control" content="no-cache" />
@@ -44,7 +45,7 @@
   <body>
 
     <!-- Login form -->
-    <div class="hidden login-form">
+    <div style="display:none;" class="login-form">
       <form role="form">
         <h3>Войдите / Sign in</h3>
         <fieldset id="enter-login-password">
@@ -54,7 +55,7 @@
           <button type="submit" id="submit-login-password" class="btn btn-lg btn-primary btn-block">Войти / Sign in</button>
           <button type="submit" id="forgot-password" class="btn btn-link btn-block btn-sm">Забыли пароль? / Forgot password?</button>
         </fieldset>
-        <fieldset id="enter-new-password" class="hidden">
+        <fieldset id="enter-new-password" style="display:none;">
           <input class="form-control input-lg" id="new-password" placeholder="Новый пароль / New password" type="password" name="new-password"/>
           <!--input class="form-control input-lg" id="retype-new-password" placeholder="retype new password" type="password" name="retype-new-password"/-->
           <input class="form-control input-lg" id="secret" placeholder="Код из письма / Code from e-mail" type="text" name="secret"/>
@@ -63,23 +64,23 @@
           <button type="submit" id="request-secret" class="btn btn-link btn-block btn-sm">Запросить новый код / Request new code</button>
         </fieldset>
         <br>
-        <div id="login-failed-error" class="hidden alert alert-danger">
+        <div id="login-failed-error" style="display:none;" class="alert alert-danger">
           <p><strong>Ошибка!</strong> Неверное имя пользователя или пароль.</p>
           <p><strong>Error!</strong> Wrong login or password.</p>
         </div>
-        <div id="password-expired-error" class="hidden alert alert-danger">
+        <div id="password-expired-error" style="display:none;" class="alert alert-danger">
           <p><strong>Ошибка!</strong> Истекло время действия пароля.</p>
           <p><strong>Error!</strong> Password expired.</p>
         </div>
-        <div id="invalid-secret-error" class="hidden alert alert-danger">
+        <div id="invalid-secret-error" style="display:none;" class="alert alert-danger">
           <p><strong>Ошибка!</strong> Неверный код. Повторите попытку с новым кодом.</p>
           <p><strong>Error!</strong> Invalid secret code. Try with new secret code.</p>
         </div>
-        <div id="invalid-password-error" class="hidden alert alert-danger">
+        <div id="invalid-password-error" style="display:none;" class="alert alert-danger">
           <p><strong>Ошибка!</strong> Новый пароль не принят. Введите другой пароль.</p>
           <p><strong>Error!</strong> New password was not accepted. Enter another password.</p>
         </div>
-        <div id="secret-request-info" class="hidden alert alert-info">
+        <div id="secret-request-info" style="display:none;" class="alert alert-info">
           <p><strong>Инфо!</strong> Вам выслан новый код для смены пароля.</p>
           <p><strong>Info!</strong> New secret code sent. Try to change password with new secret code.</p>
         </div>
@@ -125,7 +126,7 @@
     <!-- Minimal modal -->
     <script type="html/template" id="minimal-modal-template">
       <div class="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-body">
                <button type="button" class="close" data-dismiss="modal"><span class="fa fa-times"></span></button>
@@ -176,6 +177,9 @@
               <button id="follow" class="close" style="margin-right:20px;"><span class="fa fa-window-maximize"></span></button>
               <button type="button" class="close" data-dismiss="modal"><span class="fa fa-times"></span></button>
               <div class="holder"></div>
+            </div>
+            <div class="modal-footer hide">
+              <button type="button" class="btn btn-primary pull-left" id="ok" data-dismiss="modal">Ok</button>
             </div>
           </div>
         </div>
@@ -423,10 +427,8 @@
     <script type="text/javascript" src="./js/common/util.js"></script>
     <script type="text/javascript" src="./js/common/app_model.js"></script>
     <script type="text/javascript" src="./js/common/individual_model.js"></script>
-    <script type="text/javascript" src="./js/common/individual_list_model.js"></script>
     <script type="text/javascript" src="./js/common/user_model.js"></script>
     <script type="text/javascript" src="./js/common/ontology_model.js"></script>
-    <script type="text/javascript" src="./js/common/drafts_model.js"></script>
     <script type="text/javascript" src="./js/common/numerator.js"></script>
 
     <!-- Veda browser only -->
@@ -435,10 +437,8 @@
     <script type="text/javascript" src="./js/browser/util.js"></script>
     <script type="text/javascript" src="./js/browser/veda_controls.js"></script>
     <script type="text/javascript" src="./js/browser/table-sortable.js"></script>
-    <script type="text/javascript" src="./js/browser/pager.js"></script>
     <script type="text/javascript" src="./js/browser/update_service.js"></script>
     <script type="text/javascript" src="./js/browser/individual_presenter.js"></script>
-    <script type="text/javascript" src="./js/browser/drafts_presenter.js"></script>
     <script type="text/javascript" src="./modules/docflow/js/browser/veda_workflow_editor.js"></script>
     <script type="text/javascript" src="./js/browser/app_presenter.js"></script>
     <script type="text/javascript" src="./js/browser/auth.js"></script>

@@ -1,0 +1,92 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+@prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .
+
+<http://semantic-machines.com/meter-reading-collect-layout/>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy mrc: ;
+  rdfs:label "Сбор показаний счетчиков. Макет"@ru ;
+.
+
+mrc:Layout
+  rdf:type rdfs:Resource ;
+  rdfs:subClassOf v-s:SystemThing ;
+  rdfs:label "Макет"@ru ;
+  rdfs:label "Layout"@en ;
+  v-ui:hasTemplate mrc:LayoutTemplate ;
+.
+
+mrc:LayoutTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для Макета"@ru ;
+  rdfs:label "Layout template"@en ;
+  v-ui:forClass v-s:MainPage ;
+  v-ui:template """
+<div class="page">
+  <style>
+    body { font-size:16px; line-height: 1.7em; }
+  </style>
+  <nav role="navigation" class="navbar navbar-veda">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="btn btn-default navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+          <span class="glyphicon glyphicon-menu-hamburger"></span>
+        </button>
+        <a class="navbar-brand" href="#/"><img src="/img/veda-logo.png"></a>
+      </div>
+      <div class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a id="user-info"></a></li>
+          <li id="menu" class="dropdown" about="mrc:MainMenu" data-template="v-s:MenuTemplate"></li>
+          <li style="padding-left:10px; margin-left:10px; border-left:1px solid #ddd;" about="@" data-template="v-ui:FullWidthSwitchTemplate"></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="main"></div>
+
+  <nav id="copyright" class="navbar-fixed-bottom container clearfix">
+    <div class="text-right text-muted" about="v-s:vedaInfo">
+      <div>
+        <span about="v-s:PoweredBy" property="rdfs:label"></span>
+        <a about="v-s:VedaPlatform" property="rdfs:label"></a>.
+        &copy; <a href="http://www.semantic-machines.com" about="v-s:SemanticMachines" property="rdfs:label"></a>.
+        <span about="v-s:License" property="rdfs:label"></span>
+        <a alt="GNU General Public License version 3 official text" href="http://www.gnu.org/licenses/gpl.html">GPLv3.</a>
+      </div>
+    </div>
+  </nav>
+</div>
+<script>
+  document.title = new veda.IndividualModel("v-s:vedaInfo").toString();
+
+  // Render user
+  var userInfo = $("#user-info", template);
+  var userInfoTmpl = new veda.IndividualModel("v-ui:LabelTemplate");
+  userInfo.empty();
+  veda.user.present(userInfo, userInfoTmpl);
+  //# sourceURL=mrc:LayoutTemplate
+</script>
+  """ ;
+.
+
+mrc:MainMenu
+  rdf:type v-s:Menu ;
+  rdfs:label "Главное меню"@ru ;
+  rdfs:label "Main menu"@en ;
+  v-s:menuItem v-s:Clear ;
+  v-s:menuItem v-s:Exit ;
+.
+
+# В config.ttl в параметре внести в cfg:Layout в поле rdf:value внести значение mrc:Layout
+# rdf:value mrc:Layout;
+# Не забыть объявить префикс mrc:
+# @prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .

@@ -127,6 +127,10 @@ body {
 }
 
 /* Sheets */
+.sheet:empty {
+  display: none;
+}
+
 .sheet {
   position: relative;
   background-color: #fff;
@@ -384,7 +388,7 @@ hr.black {
 }
 
 #main {
-  margin-bottom:120px;
+  margin-bottom: 120px;
 }
 .huge {
   font-size: 32px;
@@ -396,10 +400,11 @@ footer {
 .jumbotron {
   background-color: transparent;
 }
+
 .navbar-veda {
   padding: 9px 0px;
   /*margin-bottom: 15px;*/
-  margin-bottom: 0;
+  margin-bottom: 0px;
   background-image: none;
   /*background-color: #fff;
   border-bottom: 1px solid #ddd;*/
@@ -522,10 +527,13 @@ textarea {
   border: none;
   box-shadow: none;
 }
-.deleted, .deleted *:not(#deleted-alert-msg):not(#deleted-alert-recover),
-.invalid, .invalid *:not(#invalid-alert-msg):not(#invalid-alert-recover) {
+.deleted, .deleted *:not(#deleted-alert-msg):not(#deleted-alert-recover) {
   text-decoration: none!important;
   color: #aaa;
+}
+A.invalid, TR.invalid, SPAN.invalid, DIV.suggestion.invalid {
+  text-decoration: none!important;
+  color: #a94442;
 }
 dl {
   margin-top: 0;
@@ -922,51 +930,6 @@ td > .rel-actions {
   outline: 3px dashed #aaa!important;
   outline-offset: -3px!important;
 }
-
-.is-draft:not(tr) {
-  position: relative;
-}
-.is-draft:not(tr)::before {
-  font: normal normal normal 14px/1 FontAwesome;
-  font-size: 1.1em;
-  line-height: .75em;
-  vertical-align: -15%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  content: "\f14b";
-  opacity: 0.5;
-}
-
-tr.is-draft > td:first-child {
-  position: relative;
-}
-tr.is-draft > td:first-child::before {
-  font: normal normal normal 14px/1 FontAwesome;
-  font-size: 1.1em;
-  line-height: .75em;
-  vertical-align: -15%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  content: "\f14b";
-  opacity: 0.5;
-}
-
-.label-template.is-draft {
-  position: initial;
-}
-.label-template.is-draft::before {
-  position: static;
-  font: normal normal normal 14px/1 FontAwesome;
-  font-size: 1.1em;
-  line-height: .75em;
-  vertical-align: -15%;
-  content: "\f14b";
-  margin-right: 10px;
-  opacity: 0.5;
-}
-
 .sortable-placeholder {
   outline: 3px dashed #aaa!important;
   outline-offset: -3px!important;
@@ -1461,6 +1424,7 @@ svg.process-path-highlight path
 }
 
 /* Background colors from flat-ui */
+.bg-none { background-color: transparent; }
 .bg-white { background-color: #fff; }
 .bg-turquoise { background-color: rgba(26, 188, 156, 1.0); /*#1abc9c;*/ }
 .bg-emerald { background-color: rgba(46, 204, 113, 1.0); /*#2ecc71;*/ }
@@ -1483,7 +1447,8 @@ svg.process-path-highlight path
 .bg-silver { background-color: rgba(189, 195, 199, 1.0); /*#bdc3c7;*/ }
 .bg-asbestos { background-color: rgba(127, 140, 141, 1.0); /*#7f8c8d;*/ }
 
-.bg-white * {  }
+.bg-none h1, .bg-none p { color: #333; }
+.bg-white h1, .bg-white p { color: #333; }
 .bg-turquoise * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-emerald * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-peter-river * { color: #fff; text-shadow: 0px 1px 2px black; }

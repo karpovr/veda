@@ -1,83 +1,119 @@
-use std::collections::HashMap;
-use std::str;
-use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
-use std::time::{Duration, Instant};
-use std::{thread, time};
-
-use actix::prelude::*;
-use actix::Running::Continue;
-use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
-use actix_web_actors::ws;
-
-use crate::v_onto::individual::*;
-use crate::v_onto::msgpack8individual::msgpack2individual;
-use v_queue::*;
-
-extern crate scan_fmt;
-extern crate v_onto;
-extern crate v_queue;
-
-extern crate ini;
-use ini::Ini;
-
-use nng::{Message, Protocol, Socket};
-
 #[macro_use]
 extern crate log;
-use actix_web::middleware::Logger;
 
-const HEARTBEAT_INTERVAL: Duration = Duration::from_millis(1000);
-const CLIENT_TIMEOUT: Duration = Duration::from_secs(60);
+use chrono::Local;
+use env_logger::Builder;
+use log::LevelFilter;
+use std::io::Write;
+use actix::prelude::*;
+use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
+use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, Sender};
+use std::thread;
+use std::time::{Duration, Instant};
+use v_storage::storage::VStorage;
 
-/// do websocket handshake and start `MyWebSocket` actor
-fn ws_index(r: HttpRequest, stream: web::Payload, data: web::Data<AppData>) -> Result<HttpResponse, Error> {
-    let res = ws::start(MyWebSocket::new(data.subscribe_manager_sender.clone()), &r, stream);
-    res
+use ini::Ini;
+use v_onto::individual::Individual;
+
+const HEARTBEAT_INTERVAL: Duration = Duration::from_millis(5000);
+const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
+
+mod server;
+
+/////////////////////////////////////////////
+
+fn ccus_route(req: HttpRequest, stream: web::Payload, srv: web::Data<Addr<server::CCUSServer>>) -> Result<HttpResponse, Error> {
+    ws::start(
+        WsCCUSSession {
+            id: 0,
+            hb: Instant::now(),
+            addr: srv.get_ref().clone(),
+        },
+        &req,
+        stream,
+    )
 }
 
-#[derive(Debug)]
-struct PQMsg {
-    data: String,
-    from: u32,
+struct WsCCUSSession {
+    /// unique session id
+    id: usize,
+    /// Client must send ping at least once per 10 seconds (CLIENT_TIMEOUT),
+    /// otherwise we drop connection.
+    hb: Instant,
+    /// CCUS server
+    addr: Addr<server::CCUSServer>,
 }
 
-impl PQMsg {
-    fn new(data: &str, in_from: u32) -> Self {
-        Self {
-            data: data.to_owned(),
-            from: in_from,
-        }
+impl Drop for WsCCUSSession {
+    fn drop(&mut self) {
+        debug!("Drop WsCCUSSession");
+        self.addr.do_send(server::Disconnect {
+            id: self.id,
+        });
     }
 }
 
-#[derive(Debug)]
-struct MyWebSocket {
-    hb: Instant,
-    counter: u64,
-    subscribe_manager_sender: Sender<(PQMsg, Sender<PQMsg>)>,
-    my_sender: Sender<PQMsg>,
-    my_receiver: Receiver<PQMsg>,
-    id: u32,
-}
-
-impl Actor for MyWebSocket {
+impl Actor for WsCCUSSession {
     type Context = ws::WebsocketContext<Self>;
 
+    /// Method is called on actor start.
+    /// We register ws session with CCUSServer
     fn started(&mut self, ctx: &mut Self::Context) {
+        // we'll start heartbeat process on session start.
         self.hb(ctx);
+
+        // register self in ccus server. `AsyncContext::wait` register
+        // future within context, but context waits until this future resolves
+        // before processing any other events.
+        // HttpContext::state() is instance of WsCCUSSessionState, state is shared
+        // across all routes within application
+        let addr = ctx.address();
+        self.addr
+            .send(server::Connect {
+                addr: addr.recipient(),
+            })
+            .into_actor(self)
+            .then(|res, act, ctx| {
+                match res {
+                    Ok(res) => act.id = res,
+                    // something is wrong with ccus server
+                    _ => ctx.stop(),
+                }
+                fut::ok(())
+            })
+            .wait(ctx);
     }
 
-    fn stopped(&mut self, _ctx: &mut Self::Context) {}
+    fn stopped(&mut self, _: &mut Self::Context) {
+        self.addr.do_send(server::Disconnect {
+            id: self.id,
+        });
+    }
+
+    fn stopping(&mut self, _: &mut Self::Context) -> Running {
+        // notify ccus server
+        self.addr.do_send(server::Disconnect {
+            id: self.id,
+        });
+        Running::Stop
+    }
 }
 
-impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
-    fn started(&mut self, _ctx: &mut Self::Context) {
-        self.id = self.snd_rcv_subsrc("N").from;
-        info!("[{}] Started", self.id);
-    }
+/// Handle messages from ccus server, we simply send it to peer websocket
+impl Handler<server::Msg> for WsCCUSSession {
+    type Result = ();
 
+    fn handle(&mut self, msg: server::Msg, ctx: &mut Self::Context) {
+        ctx.text(msg.0);
+    }
+}
+
+/// WebSocket message handler
+impl StreamHandler<ws::Message, ws::ProtocolError> for WsCCUSSession {
     fn handle(&mut self, msg: ws::Message, ctx: &mut Self::Context) {
+        debug!("WEBSOCKET MESSAGE: {:?}", msg);
         match msg {
             ws::Message::Ping(msg) => {
                 self.hb = Instant::now();
@@ -85,82 +121,42 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
             }
             ws::Message::Pong(_) => {
                 self.hb = Instant::now();
-                self.counter = self.counter + 1;
-
-                if let Ok(_) = self.subscribe_manager_sender.send((PQMsg::new("?", self.id), self.my_sender.clone())) {
-                    if let Ok(msg) = self.my_receiver.recv() {
-                        if msg.data.len() > 0 {
-                            info!("[{}] Send: {}", self.id, msg.data);
-                            ctx.text(msg.data);
-                        }
-                    }
-                }
-
-                //info!("@WS RECV: {:?}", msg);
             }
             ws::Message::Text(text) => {
-                info!("[{}] Receive: {:?}", self.id, text);
+                let m = text.trim();
 
-                if let Ok(_) = self.subscribe_manager_sender.send((PQMsg::new(&text, self.id), self.my_sender.clone())) {
-                    if let Ok(msg) = self.my_receiver.recv() {
-                        if msg.data.len() > 0 {
-                            info!("WS: send to client: {:?}", msg);
-                            ctx.text(msg.data);
-                        }
-                    }
-                }
+                self.addr.do_send(server::ClientMessage {
+                    id: self.id,
+                    msg: m.to_owned(),
+                });
             }
-            ws::Message::Binary(bin) => ctx.binary(bin),
+            ws::Message::Binary(_) => println!("Unexpected binary"),
             ws::Message::Close(_) => {
-                info!("[{}] Close", self.id);
-                self.snd_rcv_subsrc("-*");
                 ctx.stop();
             }
             ws::Message::Nop => (),
         }
     }
 
-    fn error(&mut self, _err: ws::ProtocolError, _ctx: &mut Self::Context) -> Running {
-        error!("[{}] Error", self.id);
-        return Continue;
-    }
-
-    fn finished(&mut self, _ctx: &mut Self::Context) {
-        info!("[{}] Finished", self.id);
-        self.snd_rcv_subsrc("-*");
+    fn finished(&mut self, ctx: &mut Self::Context) {
+        ctx.stop()
     }
 }
 
-impl MyWebSocket {
-    fn new(tx: Sender<(PQMsg, Sender<PQMsg>)>) -> Self {
-        let ch = mpsc::channel();
-
-        Self {
-            hb: Instant::now(),
-            counter: 0,
-            subscribe_manager_sender: tx,
-            my_sender: ch.0,
-            my_receiver: ch.1,
-            id: 0,
-        }
-    }
-
-    fn snd_rcv_subsrc(&self, cmd: &str) -> PQMsg {
-        if let Ok(_) = self.subscribe_manager_sender.send((PQMsg::new(cmd, self.id), self.my_sender.clone())) {
-            if let Ok(msg) = self.my_receiver.recv() {
-                return msg;
-            }
-        }
-
-        PQMsg::new("", 0)
-    }
-
-    fn hb(&self, ctx: &mut <Self as Actor>::Context) {
+impl WsCCUSSession {
+    /// helper method that sends ping to client every second.
+    /// also this method checks heartbeats from client
+    fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
         ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
             // check client heartbeats
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
                 // heartbeat timed out
-                error!("Websocket Client heartbeat failed, disconnecting!");
+                info!("Websocket Client heartbeat failed, disconnecting!");
+
+                // notify ccus server
+                act.addr.do_send(server::Disconnect {
+                    id: act.id,
+                });
 
                 // stop actor
                 ctx.stop();
@@ -168,236 +164,87 @@ impl MyWebSocket {
                 // don't try to send a ping
                 return;
             }
-
             ctx.ping("");
         });
     }
 }
 
-struct AppData {
-    subscribe_manager_sender: Sender<(PQMsg, Sender<PQMsg>)>,
-}
+fn storage_manager(tarantool_addr: String, rx: Receiver<(String, Sender<i64>)>) {
+    info!("Start STORAGE MANAGER");
 
-fn subscribe_manager(rx: Receiver<(PQMsg, Sender<PQMsg>)>, ro_client_addr: String) {
-    info!("Start CCUS");
+    let mut storage: VStorage;
 
-    let mut is_ro_storage_ready = false;
-    let mut ro_storage_client: Socket;
-
-    if let Ok(c) = Socket::new(Protocol::Req0) {
-        ro_storage_client = c;
-        if let Err(e) = ro_storage_client.dial(ro_client_addr.as_str()) {
-            error!("fail dial to ro-storage, [{}], err={}", ro_client_addr, e);
-        }
-
-        let req = Message::from("I,cfg:standart_node".as_bytes());
-
-        ro_storage_client.send(req).unwrap();
-
-        // Wait for the response from the server.
-        let msg = ro_storage_client.recv().unwrap();
-
-        if msg.len() > 0 {
-            is_ro_storage_ready = true;
-        }
+    if tarantool_addr.len() > 0 {
+        storage = VStorage::new_tt(tarantool_addr, "veda6", "123456");
     } else {
-        error!("fail connect to ro-storage, [{}]", ro_client_addr);
+        storage = VStorage::new_lmdb("./data/lmdb-individuals/");
     }
 
-    if is_ro_storage_ready == true {
-        info!("success connect to ro-storage, {}", ro_client_addr);
-    }
+    loop {
+        if let Ok((msg, sender)) = rx.recv() {
+            //info!("main:recv={:?}", msg);
 
-    let mut ws_id_gen = 0;
+            let mut indv = Individual::new_empty();
+            storage.set_binobj(&msg, &mut indv);
+            let out_counter = if let Ok(c) = indv.get_first_integer("v-s:updateCounter") {
+                c
+            } else {
+                0
+            };
 
-    // key:id_ws [key:uri[counter]]
-    let mut idws2uris: HashMap<u32, HashMap<String, u64>> = HashMap::new();
+            //println!("main: {:?}->{}", key, out_counter);
 
-    // key:uri [counter, count_subscribe]
-    let mut uri2counter: HashMap<String, (u64, u64)> = HashMap::new();
-
-    if let Ok(mut consumer) = Consumer::new("ccus", "individuals-flow") {
-        loop {
-            if let Ok(msg) = rx.try_recv() {
-                //info!("@QUEUE PREPARER: RECV: {:?}", msg);
-
-                let from = msg.0.from;
-
-                let mut out_msg = PQMsg::new("", from);
-
-                for item in msg.0.data.split(',') {
-                    let els: Vec<&str> = item.split('=').collect();
-
-                    if els.len() == 2 {
-                        if els[0] == "ccus" {
-                            // Рукопожатие: ccus=Ticket
-                            debug!("[{}]: HANDSHAKE", from);
-                            break;
-                        } else {
-                            // Добавить подписку: +uriN=M[,...]
-                            if let Some(uri) = els[0].get(1..) {
-                                let mut counter = 0;
-                                if let Ok(c) = els[1].parse() {
-                                    counter = c;
-                                };
-
-                                let uris = idws2uris.entry(from).or_default();
-                                if uris.contains_key(uri) == false {
-                                    uris.insert(uri.to_owned(), counter);
-                                }
-
-                                if let Some(counters) = uri2counter.get_mut(uri) {
-                                    debug!("[{}]: ADD (ALREADY EXISTS): uri={}, counters={:?}", from, uri, counters);
-                                    counters.1 = counters.1 + 1;
-                                } else {
-                                    uri2counter.insert(uri.to_owned(), (counter, 0));
-                                    debug!("[{}]: ADD: uri={}, counter={}", from, uri, counter);
-                                }
-                            }
-                        }
-                    } else if els.len() == 1 {
-                        let uris = idws2uris.entry(from).or_default();
-
-                        if els[0] == "N" {
-                            ws_id_gen = ws_id_gen + 1;
-                            out_msg.from = ws_id_gen;
-                        } else if els[0] == "?" {
-                            // есть ли изменения в подписках ?
-                            //info!("@QP[{}]: GET CHANGES", from);
-
-                            let mut changes = String::new();
-
-                            for (uri, ws_counter) in uris.iter_mut() {
-                                if let Some(counters) = uri2counter.get_mut(uri) {
-                                    //info!("@QP[{}]: FOUND IN SUBSCRIPTION: {}{:?}", from, uri, counters);
-
-                                    if &counters.0 != ws_counter {
-                                        if changes.len() > 0 {
-                                            changes.push_str(",");
-                                        }
-
-                                        changes.push_str(&uri.to_owned());
-                                        changes.push_str("=");
-                                        changes.push_str(&counters.0.to_string());
-                                        *ws_counter = counters.0;
-                                    }
-                                } else {
-                                    debug!("[{}]: NOT FOUND IN SUBSCRIPTION: {}", from, uri);
-                                }
-                            }
-
-                            if changes.len() > 0 {
-                                debug!("[{}]: FOUND CHANGES IN SUBSCRIPTION: {:?}", from, changes);
-                            }
-
-                            out_msg.data = changes;
-                        } else {
-                            if let Some(uri) = els[0].get(1..) {
-                                if uri == "*" {
-                                    // Отменить все подписки: -*
-
-                                    for (uri, _ws_counter) in uris.iter() {
-                                        if let Some(counters) = uri2counter.get_mut(uri) {
-                                            debug!("[{}]: REMOVE: uri={}, counters={:?}", from, uri, counters);
-                                            if counters.1 > 0 {
-                                                counters.1 = counters.1 - 1;
-                                            }
-                                        }
-                                    }
-
-                                    uris.clear();
-                                    debug!("[{}]: REMOVE: ALL", from);
-                                } else {
-                                    // Отменить подписку: -uriN[,...]
-                                    if uris.contains_key(uri) == true {
-                                        uris.remove(uri);
-                                        debug!("[{}]: REMOVE: uri={}", from, uri);
-                                    }
-                                    if let Some(counters) = uri2counter.get_mut(uri) {
-                                        debug!("[{}]: REMOVE: uri={}, counters={:?}", from, uri, counters);
-                                        if counters.1 > 0 {
-                                            counters.1 = counters.1 - 1;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if let Err(e) = msg.1.send(out_msg) {
-                    debug!("[{}]: NOT SEND RESPONSE, err={}", from, e);
-                }
+            if let Err(e) = sender.send(out_counter) {
+                error!("NOT SEND RESPONSE, err={}", e);
             }
-
-            // пробуем взять из очереди заголовок сообщения
-            if consumer.pop_header() == false {
-                thread::sleep(time::Duration::from_millis(10));
-                continue;
-            }
-
-            let mut msg = Individual::new(vec![0; (consumer.header.msg_length) as usize]);
-
-            // заголовок взят успешно, занесем содержимое сообщения в структуру Individual
-            if consumer.pop_body(&mut msg.binobj) == false {
-                continue;
-            }
-
-            // запустим ленивый парсинг сообщения в Indidual
-            if msgpack2individual(&mut msg) == false {
-                error!("fail parse, stop");
-                continue;
-            }
-
-            // берем поле [uri]
-            if let Ok(uri_from_queue) = msg.get_first_literal("uri") {
-                // найдем есть ли среди подписанных индивидов, индивид из очереди
-                if let Some(counters) = uri2counter.get_mut(&uri_from_queue) {
-                    debug!("FOUND IN SUBSCRIBE: uri={}, counters={:?}", uri_from_queue, counters);
-                    // берем u_counter
-                    let counter_from_queue = msg.get_first_integer("u_count");
-                    //info!("uri={}, {}", uri_from_queue, counter_from_queue);
-
-                    counters.0 = counter_from_queue as u64;
-                } else {
-                }
-            }
-
-            consumer.commit_and_next();
         }
-    } else {
-        error!("STOP: fail open queue");
     }
 }
 
 fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "info,actix_server=info,actix_web=info");
-    env_logger::init();
+    let env_var = "RUST_LOG";
+    match std::env::var_os(env_var) {
+        Some(val) => println!("use env var: {}: {:?}", env_var, val.to_str()),
+        None => std::env::set_var(env_var, "info,actix_server=info,actix_web=info"),
+    }
 
-    let conf = Ini::load_from_file("veda.properties").expect("File load veda.properties file");
+    Builder::new()
+        .format(|buf, record| writeln!(buf, "{} [{}] - {}", Local::now().format("%Y-%m-%dT%H:%M:%S%.3f"), record.level(), record.args()))
+        .filter(None, LevelFilter::Info)
+        .init();
 
+    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let ccus_port = section.get("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
-    let ro_client_addr = section.get("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties").clone();
 
-    info!("CCUS PORT {:?}", ccus_port);
+    let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
+        p.to_owned()
+    } else {
+        warn!("param [tarantool_url] not found in veda.properties");
+        "".to_owned()
+    };
 
-    // создадим канал приема и передачи с нитью subscriber_manager
-    let (sbscr_tx, sbscr_rx): (Sender<(PQMsg, Sender<PQMsg>)>, Receiver<(PQMsg, Sender<PQMsg>)>) = mpsc::channel();
+    info!("CCUS PORT={:?}, tarantool addr={:?}", ccus_port, tarantool_addr);
 
-    // start queue preparer thread
-    thread::spawn(move || subscribe_manager(sbscr_rx, ro_client_addr));
+    // создадим канал приема и передачи с нитью storage_manager
+    let (sbscr_tx, sbscr_rx): (Sender<(String, Sender<i64>)>, Receiver<(String, Sender<i64>)>) = mpsc::channel();
+    thread::spawn(move || storage_manager(tarantool_addr.clone(), sbscr_rx));
 
+    let sys = System::new("ws-ccus");
+
+    // Start ccus server actor
+    let server = server::CCUSServer::new(sbscr_tx.clone()).start();
+
+    // Create Http server with websocket support
     HttpServer::new(move || {
         App::new()
-            .data(AppData {
-                subscribe_manager_sender: sbscr_tx.clone(),
-            })
-            // enable logger
-            .wrap(Logger::default())
-            // websocket route
-            .service(web::resource("/ccus").route(web::get().to(ws_index)))
+            .data(server.clone())
+            // websocket
+            .service(web::resource("/ccus").to(ccus_route))
     })
     .bind("[::]:".to_owned() + &ccus_port)?
-    .run()
+    //.keep_alive(75)
+    .start();
+
+    sys.run()
 }

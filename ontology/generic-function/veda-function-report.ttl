@@ -137,30 +137,39 @@ v-s:ReportManagementTemplate
     $(".action.save-report", template).remove();
   }
 
-  if ( individual.rights.hasValue("v-s:canUpdate", true) ) {
-    $(".action.update-report", template).click(function () {
-      var reportBlank = individual.hasValue("v-s:reportBlank") ? individual["v-s:reportBlank"][0] : undefined;
-      if (reportBlank && reportBlank.object) {
-        reportBlank.updateBlank();
-        reportBlank.save();
-      }
-      notify("success", { message: new veda.IndividualModel("v-s:ReportSuccessfullyUpdated").toString() });
-    });
-  } else {
-    $(".action.update-report", template).remove();
-  }
-  if ( individual.rights.hasValue("v-s:canDelete", true) ) {
-    $(".action.delete-report", template).click(function () {
-      var aspect = veda.user.aspect;
-      aspect.removeValue("v-s:hasReport", individual);
-      aspect.save();
-      notify("success", { message: new veda.IndividualModel("v-s:ReportSuccessfullyDeleted").toString() });
-      template.trigger("delete");
-      window.history.back();
-    });
-  } else {
-    $(".action.delete-report", template).remove();
-  }
+  individual.rights.then(function (rights) {
+    if ( rights.hasValue("v-s:canUpdate", true) ) {
+      $(".action.update-report", template).click(function () {
+        var reportBlank = individual.hasValue("v-s:reportBlank") ? individual["v-s:reportBlank"][0] : undefined;
+        if (reportBlank && reportBlank.object) {
+          reportBlank.updateBlank();
+          reportBlank.save().then(function () {
+            return new veda.IndividualModel("v-fc:ReportSuccessfullyUpdated").load();
+          }).then(function (message) {
+            notify("success", { message: message});
+          });
+        }
+      });
+    } else {
+      $(".action.update-report", template).remove();
+    }
+    if ( rights.hasValue("v-s:canDelete", true) ) {
+      $(".action.delete-report", template).click(function () {
+        veda.user.aspect.load().then(function (aspect) {
+          aspect.removeValue("v-s:hasReport", individual);
+          return aspect.save();
+        }).then(function () {
+          return new veda.IndividualModel("v-fc:ReportSuccessfullyDeleted").load();
+        }).then(function (message) {
+          notify("success", { message: message });
+          template.trigger("delete");
+          window.history.back();
+        });
+      });
+    } else {
+      $(".action.delete-report", template).remove();
+    }
+  });
 
 //# sourceURL=v-s:ReportManagementTemplate_pre
 </script>
@@ -206,5 +215,5 @@ v-s:Report_permission2
   v-s:permissionObject v-s:PersonalReport ;
   v-s:permissionSubject cfg:AllUsersGroup ;
   v-s:canCreate "true"^^xsd:boolean ;
-  rdfs:label "C. Все пользователи. Класс v-s:Report" ;
+  rdfs:label "C. Все пользователи. Класс v-s:PersonalReport" ;
 .

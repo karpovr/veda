@@ -63,31 +63,37 @@ v-s:NewsTemplate
   var actions = $(".actions", template);
   var scriptBlock = $(".script", template);
   var audience = $(".audience", template);
-  if ( !veda.user.isMemberOf("cfg:SuperUser") ) {
-    actions.remove();
-    scriptBlock.remove();
-    audience.remove();
-  } else {
-    var notify = $(".notify", template);
-    var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
-    if (clientNotification.hasValue("rdf:value", individual) ) {
-      notify.addClass("disabled").attr("disabled", "disabled");
+
+  veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
+    if ( !isSuperUser ) {
+      actions.remove();
+      scriptBlock.remove();
+      audience.remove();
     } else {
-      notify.removeClass("disabled").removeAttr("disabled");
+      var notify = $(".notify", template);
+      var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
+      clientNotification.load().then(function (clientNotification) {
+        if ( clientNotification.hasValue("rdf:value", individual) ) {
+          notify.addClass("disabled").attr("disabled", "disabled");
+        } else {
+          notify.removeClass("disabled").removeAttr("disabled");
+        }
+        notify.click(function () {
+          try {
+            var newsLinks = clientNotification["rdf:value"];
+            newsLinks.unshift(individual);
+            clientNotification["rdf:value"] = newsLinks.slice(0, 5);
+            clientNotification.save();
+            notify.addClass("disabled").attr("disabled", "disabled");
+          } catch (error) {
+            var notification = new veda.Notify();
+            notification("danger", {name: error});
+          }
+        });
+      });
     }
-    notify.click(function () {
-      try {
-        var newsLinks = clientNotification["rdf:value"];
-        newsLinks.unshift(individual);
-        clientNotification["rdf:value"] = newsLinks.slice(0, 5);
-        clientNotification.save();
-        notify.addClass("disabled").attr("disabled", "disabled");
-      } catch (error) {
-        var notification = new veda.Notify();
-        notification("danger", {name: error});
-      }
-    });
-  }
+  });
+
   //# sourceURL=v-s:NewsTemplate_pre
 </script>
 <div class="container">

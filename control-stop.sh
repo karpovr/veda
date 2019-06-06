@@ -52,6 +52,8 @@ if [ $1 == "all" ] ; then
     killall -9 veda-gowebserver
     killall -9 veda-ft-query
     killall -9 veda-lmdb-srv
+    killall -9 veda-ro-storage
+    killall -9 veda-ontologist
 
     #tarantoolctl stop init_tarantool.lua
     pkill tarantool

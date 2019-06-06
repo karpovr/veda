@@ -1,0 +1,46 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix cs: <http://company-sales.com/sample/sales/> .
+
+<http://company-sales.com/sample/sales-create>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy cs: ;
+  rdfs:label "Тестовый пример - Продажи. Создание"@ru ;
+  rdfs:label "Sample - Sales. Create"@en ;
+.
+
+cs:CustomerCreate
+  a v-fc:Create;
+  rdfs:label "Создать заказчика"@ru ;
+  rdfs:label "Create customer"@en ;
+  v-fc:hasBlank cs:CustomerBlank ;
+.
+
+cs:OrderCreate
+  a v-fc:Create;
+  rdfs:label "Создать заказ"@ru ;
+  rdfs:label "Create order"@en ;
+  v-fc:hasBlank cs:OrderBlank ;
+.
+
+cs:CustomerBlank
+  a v-fc:Blank;
+  rdfs:label "Бланк заказчика"@ru ;
+  rdfs:label "Customer blank"@en ;
+  v-fc:targetType cs:Customer ;
+  cs:name "Новый заказчик";
+.
+
+cs:OrderBlank
+  a v-fc:Blank;
+  rdfs:label "Бланк заказа"@ru ;
+  rdfs:label "Order blank"@en ;
+  v-fc:targetType cs:Order ;
+  cs:amount 1;
+.

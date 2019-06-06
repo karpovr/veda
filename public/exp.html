@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head></head>
+  <body id="body">
+    <button id="populate">Populate</button>
+    <button id="clear">Clear</button>
+    <div id="stats"></div>
+    <div id="container"></div>
+    <script type="text/javascript">
+      var body = document.getElementById("body");
+      var container = document.getElementById("container");
+      var populate = document.getElementById("populate");
+      var clear = document.getElementById("clear");
+      var stats = document.getElementById("stats");
+      populate.addEventListener("click", function (e) {
+        var start = performance.now();
+        var str = "";
+        for (var i = 0, btn, content; i < 10000; i++) {
+          str += "<button>" + i + "</button>";
+        }
+        container.innerHTML = str;
+        stats.appendChild( document.createTextNode("total time = " + (performance.now() - start) + " ms") );
+      });
+      container.addEventListener("click", function (e) {
+        if ( e.target && e.target.tagName === "BUTTON" ) {
+          e.stopPropagation();
+          var i = e.target.textContent;
+          alert(i + " clicked!");
+        }
+      });
+      clear.addEventListener("click", function (e) {
+        container.innerHTML = "";
+        stats.innerHTML = "";
+      });
+    </script>
+    <!--script type="text/javascript">
+      var body = document.getElementById("body");
+      var container = document.getElementById("container");
+      var populate = document.getElementById("populate");
+      var clear = document.getElementById("clear");
+      var stats = document.getElementById("stats");
+      populate.addEventListener("click", function (e) {
+        var start = performance.now();
+        body.removeChild(container);
+        for (var i = 0, btn, content; i < 10000; i++) {
+          btn = document.createElement("button");
+          content = document.createTextNode(i);
+          btn.appendChild(content);
+          btn.addEventListener("click", (function (i) {
+            return function () {
+              alert(i + " clicked!");
+            }
+          }(i)) );
+          container.appendChild(btn);
+        }
+        body.appendChild(container);
+        stats.appendChild( document.createTextNode("total time = " + (performance.now() - start) + " ms") );
+      });
+      clear.addEventListener("click", function (e) {
+        container.innerHTML = "";
+        stats.innerHTML = "";
+      });
+    </script-->
+    <!--script type="text/javascript" src="/js/browser/lib/jquery.js"></script>
+    <script type="text/javascript">
+      var body = $("#body");
+      var container = $("#container");
+      var populate = $("#populate");
+      var clear = $("#clear");
+      var stats = $("#stats");
+      populate.on("click", function (e) {
+        var start = performance.now();
+        container.detach();
+        for (var i = 0, btn, content; i < 10000; i++) {
+          btn = $("<button>" + i + "</button>");
+          container.append(btn);
+        }
+        container.appendTo(body);
+        stats.text( "total time = " + (performance.now() - start) + " ms" );
+      });
+      container.on("click", "button", function (e) {
+        var i = this.textContent;
+        alert(i + " clicked!");
+      });
+      clear.on("click", function (e) {
+        container.empty();
+        stats.empty();
+      });
+    </script-->
+  </body>
+</html>

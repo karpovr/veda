@@ -13,7 +13,7 @@ import kaleidic.nanomsg.nano, commando;
 import core.thread, core.atomic;
 import veda.common.logger, veda.util.properd;
 import veda.storage.lmdb.lmdb_driver, veda.storage.tarantool.tarantool_storage, veda.storage.common, veda.common.type, veda.onto.individual,
-       veda.onto.bj8individual.individual8json;
+       veda.onto.bj8individual.individual8json, veda.onto.resource;
 
 const string individuals_db_path = "./data/lmdb-individuals";
 const string tickets_db_path     = "./data/lmdb-tickets";
@@ -41,10 +41,10 @@ private nothrow string req_prepare(string request, KeyValueDB tickets_storage_r,
         string[]  rel      = request.split(",");
         string    response = "[]";
 
-        if (rel.length > 2)
+        if (rel.length > 1)
         {
             string[] filters;
-            if (rel.length > 3)
+            if (rel.length > 2)
             {
                 filters = rel[ 2..$ ];
             }
@@ -57,6 +57,14 @@ private nothrow string req_prepare(string request, KeyValueDB tickets_storage_r,
             else if (rel[ 0 ] == "I")
             {
                 inividuals_storage_r.get_individual(rel[ 1 ], indv);
+            }
+            else if (rel[ 0 ] == "F")
+            {
+                inividuals_storage_r.get_individual(rel[ 1 ], indv);
+                if (filters.length == 1)
+                {
+                    return getAsStringify(indv.getResources(filters[ 0 ]));
+                }
             }
             else if (rel[ 0 ] == "t")
             {
@@ -173,6 +181,8 @@ void main(string[] args)
     }
     log.trace("success bind to %s", bind_url);
 
+    //req_prepare("F,rdf:type,v-s:updateCounter", tickets_storage_r, inividuals_storage_r, log);
+
     while (!f_listen_exit)
     {
         try
@@ -183,18 +193,17 @@ void main(string[] args)
             int  bytes = nn_recv(sock, &buf, NN_MSG, 0);
             if (bytes >= 0)
             {
-                string req = cast(string)buf[ 0..bytes ];
-                //stderr.writefln("RECEIVED [%d](%s) cont=%d", bytes, req, count);
+                string req = cast(string)buf[ 0..bytes ].dup();
+                stderr.writefln("RECEIVED [%d](%s) cont=%d", bytes, req, count);
+                nn_freemsg(buf);
 
                 string rep = req_prepare(req, tickets_storage_r, inividuals_storage_r, log);
-
-                nn_freemsg(buf);
 
                 if (rep is null || rep.length == 0)
                     rep = "\0";
 
                 bytes = nn_send(sock, cast(char *)rep.dup(), rep.length, 0);
-                //stderr.writefln("SENDING (%s) %d bytes", rep, bytes);
+                stderr.writefln("SENDING (%s) %d bytes", rep, bytes);
             }
         }
         catch (Throwable tr)

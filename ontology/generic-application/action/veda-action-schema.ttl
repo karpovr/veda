@@ -259,13 +259,9 @@ v-s:SingleScheduledActionTemplate
 </script>
 <div class="panel panel-default" style="margin-top: 20px">
   <div class="panel-body">
-    <div class="row">
-      <div class="col-md-12">
-        <em about="v-s:description" property="rdfs:label"></em>
-        <div property="v-s:description" class="view -edit -search"></div>
-        <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
-      </div>
-    </div>
+    <em about="v-s:description" property="rdfs:label"></em>
+    <div property="v-s:description" class="view -edit -search"></div>
+    <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
     <div class="row">
       <div class="col-md-5">
         <em about="v-s:responsible" property="rdfs:label"></em>
@@ -281,7 +277,7 @@ v-s:SingleScheduledActionTemplate
           <em about="v-s:TaskPeriodBundle" property="rdfs:label"></em>
           <div rel="v-s:hasPeriod" class="view edit -search" data-template="v-ui:LabelTemplate"></div>
           <veda-control data-type="link" rel="v-s:hasPeriod" class="-view edit search fulltext dropdown"></veda-control>
-        </div>  
+        </div>
         <div class="col-md-5">
           <em about="v-s:TaskDateBundle" property="rdfs:label"></em>
           <div property="v-s:dateToPlan" class="view -edit -search"></div>
@@ -398,39 +394,47 @@ v-s:RecursiveScheduledActionTemplate
   rdfs:label "Template for v-s:ScheduledAction class"@en ;
   v-ui:template """
 <script>
-  var actions = $("#edit-ScheduledAction, #delete", template);
-  if (!individual.rights.hasValue("v-s:canUpdate", true)) {
-    actions.remove();
-  }
+  individual.rights.then(function (rights) {
+    var actions = $("#edit-ScheduledAction, #delete", template);
+    if ( !rights.hasValue("v-s:canUpdate", true) ) {
+      actions.remove();
+    } else {
+      individual.on("v-s:hasScheduledAction", ScheduledActionHandler);
+      template.one("remove", function () {
+        individual.off("v-s:hasComment", ScheduledActionHandler);
+      });
+      ScheduledActionHandler(individual["v-s:hasScheduledAction"]);
+    }
+    function ScheduledActionHandler (values) {
+      values.length ? actions.hide() : actions.show();
+    }
+  });
+
   $(".action", template).click(function (e) {
     e.preventDefault();
-    var warning = new veda.IndividualModel("v-s:AreYouSure")["rdfs:label"].join(" ");
-    if ( this.id === "delete" && !confirm(warning) ) { return; }
-    template.trigger(this.id);
+    var that = this;
+    if ( that.id === "delete" ) {
+      var warning = new veda.IndividualModel("v-s:AreYouSure");
+      warning.load().then(function (warning) {
+        warning = warning["rdfs:label"].join(" ");
+        if ( confirm(warning) ) {
+          template.trigger(that.id);
+        }
+      });
+    } else {
+      template.trigger(that.id);
+    }
   });
 
-  individual.on("v-s:hasScheduledAction", ScheduledActionHandler);
-  template.one("remove", function () {
-    individual.off("v-s:hasComment", ScheduledActionHandler);
-  });
-  ScheduledActionHandler(individual["v-s:hasScheduledAction"]);
-
-  function ScheduledActionHandler (values) {
-    values.length ? actions.hide() : actions.show();
-  }
   //# sourceURL=v-s:RecursiveScheduledActionTemplate
 </script>
 <div class="media" style="overflow:initial;">
   <div class="media-body" style="overflow:initial;">
     <div rel="v-s:backwardTarget" data-template="v-ui:ClassNameLabelLinkTemplate" class="view -edit -search"></div>
     <div id="ScheduledAction-content">
-      <div class="row">
-        <div class="col-md-12">
-          <em about="v-s:description" property="rdfs:label"></em>
-          <div property="v-s:description" class="view -edit -search"></div>
-          <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
-        </div>
-      </div>
+      <em about="v-s:description" property="rdfs:label"></em>
+      <div property="v-s:description" class="view -edit -search"></div>
+      <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
       <div class="row">
         <div class="col-md-6">
           <em about="v-s:responsible" property="rdfs:label"></em>
@@ -482,12 +486,17 @@ v-s:RecursiveScheduledActionTemplate
     e.preventDefault();
     var journal_uri = individual.id + "j",
         journal = new veda.IndividualModel(journal_uri);
-    if (journal.hasValue("rdf:type") && journal["rdf:type"][0].id !== "rdfs:Resource") {
-      riot.route("#/" + journal_uri);
-    } else {
-      var journalEmpty = new veda.IndividualModel("v-s:JournalEmpty")["rdfs:label"].join(" ");
-      alert(journalEmpty);
-    }
+    journal.load().then(function (journal) {
+      if ( !journal.hasValue("rdf:type", "rdfs:Resource") ) {
+        riot.route("#/" + journal_uri);
+      } else {
+        var journalEmpty = new veda.IndividualModel("v-s:JournalEmpty");
+        journalEmpty.load().then(function (journalEmpty) {
+          journalEmpty = journalEmpty.toString();
+          alert(journalEmpty);
+        });
+      }
+    });
   });
 </script>
   """ ;
@@ -566,7 +575,7 @@ for (var i=0; i<result.length; i++){
       print("Skip, because period is unbehavior",result[i]);
       continue;
     }
-    
+
     var targetDate = +deadline-delta;
     //print('targetDate ', targetDate);
     //print('targetDate-lastDate ', targetDate-lastDate);
@@ -578,7 +587,7 @@ for (var i=0; i<result.length; i++){
       isAll = false;
       print("Skip, because too early: ", result[i]);
       continue;
-    } 
+    }
     isAll = false;
     var uri = veda.Util.genUri() + "-tr";
     print(veda.Util.toJson(individ['v-s:description']));
@@ -608,7 +617,7 @@ for (var i=0; i<result.length; i++){
     print("Created: ", uri, ". For document:", result[i]);
   }
   if (isAll) {
-    set_in_document['v-s:scriptHandlered'] = veda.Util.newBool('true');  
+    set_in_document['v-s:scriptHandlered'] = veda.Util.newBool('true');
   }
   set_in_individual(ticket, set_in_document, _event_id);
 }

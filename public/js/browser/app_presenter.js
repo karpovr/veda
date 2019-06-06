@@ -1,4 +1,4 @@
-// Veda application Presenter
+// Veda application presenter
 
 veda.Module(function (veda) { "use strict";
 
@@ -87,6 +87,30 @@ veda.Module(function (veda) { "use strict";
     return ( hash === location.hash ? false : riot.route(hash) );
   });
 
+  // Triggered in veda.start()
+  veda.on("language:changed", function () {
+    var uris = [];
+    $("#app [resource], #app [about]").each(function () {
+      var $this = $(this);
+      var uri = $this.attr("resource") || $this.attr("about");
+      uris.push(uri);
+    });
+    var unique = veda.Util.unique(uris);
+    unique.forEach(localize);
+
+    function localize (uri) {
+      var individual = new veda.IndividualModel(uri);
+      for (var property_uri in individual.properties) {
+        if (property_uri === "@") { continue; }
+        if ( individual.hasValue(property_uri) && individual.properties[property_uri][0].type === "String" ) {
+          individual.trigger("propertyModified", property_uri, individual.get(property_uri));
+          individual.trigger(property_uri, individual.get(property_uri));
+        }
+      }
+    }
+  });
+
+
   // App loading indicator
   var loadIndicator = $("#load-indicator");
   veda.on("starting", function () {
@@ -96,45 +120,70 @@ veda.Module(function (veda) { "use strict";
   });
 
   // Triggered in veda.start()
-  veda.one("started", function () {
-    var welcome;
-    if (veda.user.hasValue("v-s:origin", "ExternalUser")) {
-      welcome = (new veda.IndividualModel("cfg:WelcomeExternal"))["rdf:value"][0];
-    } else {
-      welcome = (new veda.IndividualModel("cfg:Welcome"))["rdf:value"][0];
-    }
-    // Router function
-    riot.route( function (hash) {
-      if ( !hash ) {
-        return riot.route("#/" + welcome.id);
-      }
-      if ( hash.indexOf("#/") < 0 ) { return; }
-      var tokens = decodeURI(hash).slice(2).split("/"),
-          uri = tokens[0],
-          container = tokens[1],
-          template = tokens[2],
-          mode = tokens[3],
-          extra = tokens[4];
-      if (extra) {
-        extra = extra.split("&").reduce(function (acc, pair) {
-          var split = pair.split("="),
-              name  = split[0] || "",
-              value = split[1] || "";
-          acc[name] = acc[name] || [];
-          acc[name].push( parse(value) );
-          return acc;
-        }, {});
-      }
-      if (uri === "drafts") {
-        return veda.trigger("load:drafts");
-      }
-      if (uri) {
-        var individual = new veda.IndividualModel(uri);
-        individual.present(container, template, mode, extra);
-      } else {
-        riot.route("#/" + welcome.id);
-      }
+  veda.on("started", function () {
+    var layout_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:LayoutExternal" : "cfg:Layout" ;
+    var layout_param = new veda.IndividualModel( layout_param_uri );
+    var welcome_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:MainExternal" : "cfg:Main" ;
+    var welcome_param = new veda.IndividualModel( welcome_param_uri );
+
+    layout_param.load()
+
+    .then(function (layout_param) {
+      return layout_param["rdf:value"][0].load();
+    })
+
+    .then(function (layout) {
+      return layout.present("#app");
+    })
+
+    .then(function () {
+      return welcome_param.load();
+    })
+
+    .then(function (welcome_param) {
+      return welcome_param["rdf:value"][0].load();
+    })
+
+    .then(function (welcome) {
+      // Router function
+      riot.route( function (hash) {
+        if ( !hash ) { return welcome.present("#main"); }
+        if ( hash.indexOf("#/") < 0 ) { return; }
+        var tokens = decodeURI(hash).slice(2).split("/"),
+            uri = tokens[0],
+            container = tokens[1] || "#main",
+            template = tokens[2],
+            mode = tokens[3],
+            extra = tokens[4];
+        if (extra) {
+          extra = extra.split("&").reduce(function (acc, pair) {
+            var split = pair.split("="),
+                name  = split[0] || "",
+                value = split[1] || "";
+            acc[name] = acc[name] || [];
+            acc[name].push( parse(value) );
+            return acc;
+          }, {});
+        }
+
+        if (uri) {
+          loadIndicator.show();
+          var individual = new veda.IndividualModel(uri);
+          individual.present(container, template, mode, extra).then(function () {
+            loadIndicator.hide();
+          });
+        } else {
+          riot.route("#/" + welcome.id);
+        }
+      });
+      riot.route(location.hash);
+    })
+
+    .catch( function (err) {
+      var notify = new veda.Notify();
+      notify("danger", err);
     });
+
   });
   function parse (value) {
     if ( !isNaN( value.split(" ").join("").split(",").join(".") ) ) {
@@ -152,61 +201,48 @@ veda.Module(function (veda) { "use strict";
     return value || null;
   }
 
-  veda.on("started", function () {
-    var layout;
-    if (veda.user.hasValue("v-s:origin", "ExternalUser")) {
-      layout = (new veda.IndividualModel("cfg:LayoutExternal"))["rdf:value"][0];
-    } else {
-      layout = (new veda.IndividualModel("cfg:Layout"))["rdf:value"][0];
-    }
-    layout.present("#app");
-    riot.route(location.hash);
-  });
-
   // Listen to client notifications
   veda.on("started", function () {
-    var updateService = new veda.UpdateService();
-    var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
-    updateService.subscribe(clientNotification.id);
-    clientNotification.on("afterReset", checkNotification);
-    checkNotification();
-    function checkNotification() {
-      var browserNotificationList;
-      try {
-        browserNotificationList = JSON.parse(localStorage.clientNotification);
-      } catch (error) {
-        browserNotificationList = [];
-      }
-      var serverNotificationList = clientNotification["rdf:value"].map(function (item) { return item.id; });
-      if ( !veda.Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
-        for (var i = 0, exit = false, notification, notification_uri; (notification_uri = serverNotificationList[i]) && !exit; i++) {
-          if (browserNotificationList.indexOf(notification_uri) >= 0) { continue; }
-          notification = new veda.IndividualModel(notification_uri);
-          if ( notification.hasValue("v-s:newsAudience") ) {
-            notification.properties["v-s:newsAudience"].forEach(function (audience) {
-              audience = audience.data;
-              if ( veda.user.isMemberOf(audience) ) {
-                veda.Util.confirm(notification).then(function (confirmed) {
-                  if ( confirmed ) {
-                    localStorage.clientNotification = JSON.stringify(serverNotificationList);
-                    if (notification.hasValue("v-s:script")) {
-                      var script = notification["v-s:script"][0].toString();
-                      eval(script);
-                    }
-                  }
-                });
-                exit = true;
-              }
-            });
-          }
+    var updateService = new veda.UpdateService().then(function (updateService) {
+      var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
+      updateService.subscribe(clientNotification.id);
+      clientNotification.on("afterReset", checkNotification);
+      checkNotification();
+      function checkNotification() {
+        var browserNotificationList;
+        try {
+          browserNotificationList = JSON.parse(localStorage.clientNotification);
+        } catch (error) {
+          browserNotificationList = [];
         }
-      } else {
-        localStorage.clientNotification = JSON.stringify(serverNotificationList);
+        var serverNotificationList = clientNotification["rdf:value"].map(function (item) { return item.id; });
+        if ( !veda.Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
+          for (var i = 0, exit = false, notification, notification_uri; (notification_uri = serverNotificationList[i]) && !exit; i++) {
+            if (browserNotificationList.indexOf(notification_uri) >= 0) { continue; }
+            notification = new veda.IndividualModel(notification_uri);
+            if ( notification.hasValue("v-s:newsAudience") ) {
+              notification.properties["v-s:newsAudience"].forEach(function (audience) {
+                audience = audience.data;
+                if ( veda.user.isMemberOf(audience) ) {
+                  veda.Util.confirm(notification).then(function (confirmed) {
+                    if ( confirmed ) {
+                      localStorage.clientNotification = JSON.stringify(serverNotificationList);
+                      if (notification.hasValue("v-s:script")) {
+                        var script = notification["v-s:script"][0].toString();
+                        eval(script);
+                      }
+                    }
+                  });
+                  exit = true;
+                }
+              });
+            }
+          }
+        } else {
+          localStorage.clientNotification = JSON.stringify(serverNotificationList);
+        }
       }
-    }
+    });
   });
-
-  // Load ontology
-  veda.init();
 
 });

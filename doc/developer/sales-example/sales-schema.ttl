@@ -2,19 +2,24 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix cs: <http://company-sales.com/sample/sales/> .
 
-<http://company-sales.com/sample/sales>
+<http://company-sales.com/sample/sales-schema>
   rdf:type owl:Ontology ;
   rdfs:isDefinedBy cs: ;
-  rdfs:label "Тестовый пример - Продажи"@ru ;
+  rdfs:label "Тестовый пример - Продажи. Схема"@ru ;
   rdfs:label "Sample - Sales"@en ;
 .
 
 cs:Customer
   rdf:type rdfs:Class ;
+  rdfs:label "Заказчик"@ru ;
   rdfs:label "Customer"@en ;
-  rdfs:label "Покупатель"@ru ;
+  v-ui:hasTemplate cs:CustomerTemplate ;
+  rdfs:subClassOf v-s:Labeled ;
+  v-s:labelPattern "{@.cs:name} {@.cs:email}";
 .
 
 cs:name
@@ -36,11 +41,13 @@ cs:Order
   rdf:type rdfs:Class ;
   rdfs:label "Order"@en ;
   rdfs:label "Заказ"@ru ;
+  v-ui:hasTemplate cs:OrderTemplate ;
 .
 
 cs:hasCustomer
   rdf:type owl:ObjectProperty ;
-  rdfs:label "has customer"@en ;
+  rdfs:label "Заказчик"@ru ;
+  rdfs:label "Customer"@en ;
   rdfs:domain cs:Order ;
   rdfs:range cs:Customer ;
 .

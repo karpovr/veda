@@ -1,0 +1,137 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+@prefix cs: <http://company-sales.com/sample/sales/> .
+
+<http://company-sales.com/sample/sales-search>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy cs: ;
+  rdfs:label "Тестовый пример - Продажи. Поиск"@ru ;
+  rdfs:label "Sample - Sales. Search"@en ;
+.
+
+cs:CustomerRegistryBlank
+  a v-fc:Blank;
+  rdfs:label "Бланк реестра заказчиков"@ru ;
+  rdfs:label "Customer registry blank"@en ;
+  v-fc:targetType cs:Customer ;
+.
+
+cs:OrderRegistryBlank
+  a v-fc:Blank;
+  rdfs:label "Бланк реестра заказов"@ru ;
+  rdfs:label "Order registry blank"@en ;
+  v-fc:targetType cs:Order ;
+.
+
+cs:CustomerRegistry
+  a v-fs:AttributiveSearch;
+  rdfs:label "Реестр заказчиков"@ru ;
+  rdfs:label "Customers registry"@en ;
+  v-fs:searchBlank cs:CustomerRegistryBlank ;
+  v-fs:searchBlankTemplate cs:CustomerTemplate ;
+  v-fs:searchResultTemplate cs:CustomerRegistryResultTemplate ;
+  v-fs:searchOnLoad true ;
+  v-fs:loadAll true ;
+.
+
+cs:OrderRegistry
+  a v-fs:AttributiveSearch;
+  rdfs:label "Реестр заказов"@ru ;
+  rdfs:label "Orders registry"@en ;
+  v-fs:searchBlank cs:OrderRegistryBlank ;
+  v-fs:searchBlankTemplate cs:OrderTemplate ;
+  v-fs:searchResultTemplate cs:OrderRegistryResultTemplate ;
+  v-fs:searchOnLoad true ;
+  v-fs:loadAll true ;
+.
+
+cs:OrdersByCustomerRegistry
+  a v-fs:AttributiveSearch;
+  rdfs:label "Заказы по заказчику"@ru ;
+  rdfs:label "Orders by customer"@en ;
+  v-fs:searchResultTemplate cs:OrdersByCustomerResultTemplate ;
+  v-fs:searchOnLoad true ;
+  v-fs:loadAll true ;
+.
+
+cs:CustomerRegistryResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<table class="table table-condensed table-bordered">
+  <thead>
+    <tr class="active">
+      <th width="1%">#</th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></th>
+      <th about="cs:name" property="rdfs:label"></th>
+      <th about="cs:email" property="rdfs:label"></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td class="serial-number"></td>
+      <td about="@" data-template="v-ui:IconModalTemplate"></td>
+      <td about="@" property="cs:name"></td>
+      <td about="@" property="cs:email"></td>
+    </tr>
+  </tbody>
+</table>
+  """ ;
+.
+
+cs:OrderRegistryResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<table class="table table-condensed table-bordered">
+  <thead>
+    <tr class="active">
+      <th width="1%">#</th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></th>
+      <th about="cs:date" property="rdfs:label"></th>
+      <th about="cs:amount" property="rdfs:label"></th>
+      <th about="cs:hasCustomer" property="rdfs:label"></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td class="serial-number"></td>
+      <td about="@" data-template="v-ui:IconModalTemplate"></td>
+      <td about="@" property="cs:date"></td>
+      <td about="@" property="cs:amount"></td>
+      <td about="@" rel="cs:hasCustomer" data-template="v-ui:LabelLinkTemplate"></td>
+    </tr>
+  </tbody>
+</table>
+  """ ;
+.
+
+cs:OrdersByCustomerResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<table class="table table-condensed table-bordered">
+  <thead>
+    <tr class="active">
+      <th width="1%">#</th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></th>
+      <th about="cs:date" property="rdfs:label"></th>
+      <th about="cs:amount" property="rdfs:label"></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td class="serial-number"></td>
+      <td about="@" data-template="v-ui:IconModalTemplate"></td>
+      <td about="@" property="cs:date"></td>
+      <td about="@" property="cs:amount"></td>
+    </tr>
+  </tbody>
+</table>
+  """ ;
+.
+

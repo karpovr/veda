@@ -345,10 +345,18 @@ veda.Module(function (veda) { "use strict";
 
     if (typeof window === 'undefined') {
       scope['v-s:numerationCommitedInterval'].forEach(function(interval) {
-        interval = get_individual(ticket, interval.data);
-        if (interval['v-s:numerationCommitedIntervalEnd'][0].data > max) {
-          max = interval['v-s:numerationCommitedIntervalEnd'][0].data;
+        var intervalUri = interval.data;
+        try {
+          interval = get_individual(ticket, intervalUri);
+          if (interval['v-s:numerationCommitedIntervalEnd'][0].data > max) {
+            max = interval['v-s:numerationCommitedIntervalEnd'][0].data;
+          }  
+        } catch (err) {
+          print ("ERR! intervalUri = ", intervalUri);
+          //print ("ERR! interval=", intervalUri);
+          print(err.stack);
         }
+        
       });
     } else {
       scope['v-s:numerationCommitedInterval'].forEach(function(interval) {

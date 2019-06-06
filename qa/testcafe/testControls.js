@@ -52,8 +52,8 @@ import { Selector, t } from 'testcafe';
       .expect(Selector('div.container.sheet div[property="v-ui:testDatetime"] span.value-holder').innerText).eql('28.05.1989 12:32')
       .click(checkBox)
       .wait(1000)
-      .expect(Selector('div.container.sheet div[rel="v-ui:testLink"] span#label').innerText).eql('Спецификация тестового объектного свойства ')
+      .expect(Selector('div.container.sheet div[rel="v-ui:testLink"] span#label').innerText).eql('Спецификация тестового объектного свойства')
       .click(radioButton)
       .wait(1000)
-      .expect(Selector('div.container.sheet div[rel="v-ui:testLink"] span#label').innerText).eql('Спецификация тестового календарного свойства ');
+      .expect(Selector('div.container.sheet div[rel="v-ui:testLink"] span#label').innerText).eql('Спецификация тестового календарного свойства');
 });

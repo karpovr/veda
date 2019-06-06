@@ -1,0 +1,89 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+@prefix cs: <http://company-sales.com/sample/sales/> .
+
+<http://company-sales.com/sample/sales-ui>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy cs: ;
+  rdfs:label "Тестовый пример - Продажи. Интерфейс"@ru ;
+  rdfs:label "Sample - Sales"@en ;
+.
+
+cs:CustomerTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Template for cs:Customer class"@en ;
+  rdfs:label "Шаблон для класса cs:Customer"@ru ;
+  v-ui:template """
+<div class="sheet container">
+  <h2 about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></h2>
+
+  <em about="cs:name" property="rdfs:label"></em>
+  <div class="view -edit search" property="cs:name"></div>
+  <veda-control property="cs:name" data-type="string" class="-view edit search"></veda-control>
+
+  <em about="cs:email" property="rdfs:label"></em>
+  <div class="view -edit search" property="cs:email"></div>
+  <veda-control property="cs:email" data-type="string" class="-view edit search"></veda-control>
+
+  <div about="@" class="container sheet view -edit -search" data-template="cs:OrdersByCustomerTemplate"></div>
+  <br>
+  <div class="actions view edit -search">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save edit cancel delete journal task"></span>
+  </div>
+</div>
+  """ ;
+.
+
+cs:OrderTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Template for cs:Order class"@en ;
+  rdfs:label "Шаблон для класса cs:Order"@ru ;
+  v-ui:template """
+<div class="sheet container">
+  <h2 about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></h2>
+
+  <em about="cs:hasCustomer" property="rdfs:label"></em>
+  <div class="view -edit search" rel="cs:hasCustomer" data-template="v-ui:LabelLinkTemplate"></div>
+  <veda-control rel="cs:hasCustomer" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+
+  <em about="cs:date" property="rdfs:label"></em>
+  <div class="view -edit search" property="cs:date"></div>
+  <veda-control property="cs:date" data-type="date" class="-view edit search"></veda-control>
+
+  <em about="cs:amount" property="rdfs:label"></em>
+  <div class="view -edit search" property="cs:amount"></div>
+  <veda-control property="cs:amount" data-type="integer" class="-view edit search"></veda-control>
+  <br>
+  <div class="actions view edit -search">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save edit cancel delete journal task"></span>
+  </div>
+</div>
+  """ ;
+.
+
+cs:OrdersByCustomerTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон реестра заказов для Заказчика"@ru ;
+  rdfs:label "Orders by customer registry template"@en ;
+  v-ui:template """
+<script>
+  var customer_id = this.id;
+  var ordersRegistry = new veda.IndividualModel("cs:OrdersByCustomerRegistry");
+  var queryStr = "'rdf:type' === 'cs:Order' && 'cs:hasCustomer' == '" + customer_id + "'";
+  ordersRegistry["v-fs:fulltextQuery"] = [ queryStr ];
+  //# sourceURL=cs:OrdersByCustomerTemplate
+</script>
+<div>
+  <h3 about="cs:OrdersByCustomerRegistry" property="rdfs:label"></h3>
+  <div about="cs:OrdersByCustomerRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
+</div>
+  """
+.
+

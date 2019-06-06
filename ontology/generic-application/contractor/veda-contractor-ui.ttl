@@ -39,10 +39,10 @@ v-s:ContractorTemplate
       <veda-control data-type="string" property="v-s:taxId" class="-view edit search"></veda-control>
     </div>
     <div class="col-sm-2">
-		<em about="v-s:taxRegistrationCause" property="rdfs:label"></em>
-		<div property="v-s:taxRegistrationCause" class="view -edit -search"></div>
-		<veda-control data-type="string" property="v-s:taxRegistrationCause" class="-view edit search"></veda-control>
-	</div>
+    <em about="v-s:taxRegistrationCause" property="rdfs:label"></em>
+    <div property="v-s:taxRegistrationCause" class="view -edit -search"></div>
+    <veda-control data-type="string" property="v-s:taxRegistrationCause" class="-view edit search"></veda-control>
+  </div>
     <div class="col-md-4">
       <em about="v-s:linkedOrganization" property="rdfs:label"></em>
       <div rel="v-s:linkedOrganization" class="view -edit search" data-template="v-ui:LabelLinkTemplate"></div>
@@ -90,7 +90,7 @@ v-s:ContractorTemplate
     <tbody rel="v-s:hasContractorLock" data-embedded="true">
       <tr>
        <td>
-          <div property="v-s:hasLockedReason" class="view -edit -search"></div>
+          <div rel="v-s:hasLockedReason" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
           <veda-control data-type="link" rel="v-s:hasLockedReason" class="-view edit search fulltext dropdown"></veda-control>
         </td>
         <td>

@@ -1,0 +1,108 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+@prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+td:14084
+  rdf:type v-s:Person ;
+  mrc:hasAccount td:mrc_account_14084 ;
+  v-s:lastName "14084" ;
+  v-s:owner td:14084 ;
+.
+
+td:account_14084
+  rdf:type v-s:Account ;
+  v-s:login "14084"^^xsd:string ;
+  v-s:owner td:14084 ;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  rdfs:label "account 14084" ;
+.
+
+td:mrc_account_14084
+    rdf:type mrc:Account ;
+    mrc:hasPerson td:14084;
+    mrc:hasSupplier td:supl3;
+    mrc:hasMeterDevice  td:md_21851654, td:md_22630393, td:md_99697_100003342, td:md_99697_100003343;
+.
+
+td:supl1
+    rdf:type  mrc:Supplier ;
+    rdfs:label "Поставщик Тепла";
+.
+
+td:supl2
+    rdf:type  mrc:Supplier ;
+    rdfs:label "Поставщик Электричества";
+.
+
+td:supl3
+    rdf:type  mrc:Supplier ;
+    rdfs:label "Поставщик ЖКХУ";
+.
+
+td:md_21851654
+    rdf:type mrc:MeterDevice ;
+    mrc:id "21851654";
+    rdfs:label "ГВС(теплонос)";
+    mrc:calibrationDate "2029-05-17T00:00:00"^^xsd:dateTime;
+    mrc:previousReading td:mdr_21851654_1;
+.
+
+td:md_22630393
+    rdf:type mrc:MeterDevice ;
+    mrc:id "21851654";
+    rdfs:label "Хол. водоснаб";
+    mrc:calibrationDate "2029-05-17T00:00:00"^^xsd:dateTime;
+    mrc:previousReading td:mdr_22630393_1;
+.
+
+td:md_99697_100003342
+    rdf:type mrc:MeterDevice ;
+    mrc:id "99697 100003342";
+    rdfs:label "Эл/энергия (день)";
+    mrc:calibrationDate "2029-05-17T00:00:00"^^xsd:dateTime;
+    mrc:previousReading td:mdr_99697_100003342_1;
+.
+
+td:md_99697_100003343
+    rdf:type mrc:MeterDevice ;
+    mrc:id "99697 100003343";
+    rdfs:label "Эл/энергия (ночь)";
+    mrc:calibrationDate "2029-05-17T00:00:00"^^xsd:dateTime;
+    mrc:previousReading td:mdr_99697_100003343_1;
+.
+
+td:mdr_21851654_1
+    rdf:type mrc:MeterReading ;
+    mrc:readingValue  "232.000"^^xsd:decimal;
+    mrc:readingDate "2019-05-16T00:00:00"^^xsd:dateTime;
+    mrc:hasMeterDevice  td:md_21851654;
+.
+
+td:mdr_22630393_1
+    rdf:type mrc:MeterReading ;
+    mrc:readingValue  "148.000"^^xsd:decimal;
+    mrc:readingDate "2019-02-28T00:00:00"^^xsd:dateTime;
+    mrc:hasMeterDevice  td:md_22630393;
+.
+
+td:mdr_99697_100003342_1
+    rdf:type mrc:MeterReading ;
+    mrc:readingValue  "6792.000"^^xsd:decimal;
+    mrc:readingDate "2019-02-28T00:00:00"^^xsd:dateTime;
+    mrc:hasMeterDevice  td:md_99697_100003342;
+.
+
+td:mdr_99697_100003343_1
+    rdf:type mrc:MeterReading ;
+    mrc:readingValue  "1401.000"^^xsd:decimal;
+    mrc:readingDate "2019-02-28T00:00:00"^^xsd:dateTime;
+    mrc:hasMeterDevice  td:md_99697_100003343;
+.

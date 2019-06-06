@@ -7,11 +7,11 @@ import { Selector, t } from 'testcafe';
   test('testCreatingNetInterface', async t => {
     basic.login('karpovrt', '123');
     await t
+      .setNativeDialogHandler(() => true)
       .click('#menu')
       .click('li[id="menu"] li[resource="v-s:Create"]')
       .typeText('veda-control.fulltext.dropdown', 'Сеть')
       .click('div.suggestion[resource="v-wf:Net"]')
-      .setNativeDialogHandler(() => true)
       .click('.create-task')
       .click('.state-task')
       .click('.copy-net-element')

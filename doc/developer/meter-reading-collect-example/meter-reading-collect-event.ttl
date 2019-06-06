@@ -1,0 +1,53 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+
+@prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .
+
+<http://semantic-machines.com/meter-reading-collect-event/>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy mrc: ;
+  rdfs:label "Сборка показаний коммунальных счетчиков - серверные события"@ru ;
+.
+
+mrc:Event_1
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystem ;
+  rdfs:label "Скрипт добавляет значение счетчика в поле[последнее значение] обьекта счетчик" ;
+  v-s:triggerByType mrc:MeterReading ;
+  v-s:preventByType v-s:Version;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * _event_id = id of the event to prevent cycles in triggers. Must be passed to every function that modifies DB.
+ * parent_script_id = id of the parent script that triggered this event.
+ * parent_document_id = id of the document that triggered this event.
+ * super_classes = super classes of the document.
+ */
+
+var doc_uri = document["@"];
+var meter_uri = veda.Util.getUri (document["mrc:hasMeterDevice"]);
+
+var meter = get_individual (ticket, meter_uri);
+var prev_reading_uri = veda.Util.getUri (meter["mrc:previousReading"]);
+
+meter = {
+  "@" : meter_uri,
+  "mrc:previousReading" : veda.Util.newUri (doc_uri)
+};
+
+document["mrc:previousReading"] = veda.Util.newUri (prev_reading_uri);
+
+set_in_individual (ticket, meter);
+put_individual (ticket, document);
+  """ ;
+.

@@ -1,0 +1,34 @@
+#!/bin/bash
+#APPDIR="./"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$APPDIR/usr/lib"
+
+PID=$$
+echo $PID
+
+if [ -f $PWD/ontology/config.ttl ]; then
+
+    echo START VEDA
+    $APPDIR/veda --id=AI1 no-watchdog
+
+else 
+
+    echo INSTALL VEDA
+    mkdir $PWD/.pids
+    mkdir $PWD/logs
+    mkdir $PWD/data
+    mkdir $PWD/data/tarantool
+
+    cp $APPDIR/control-stop.sh $PWD
+    cp $APPDIR/control-start.sh $PWD
+
+    if ! ldconfig -p | grep libtarantool ; then
+	./$APPDIR/install-tarantool.sh
+    fi
+
+    cp $APPDIR/veda.properties $PWD
+    cp -r $APPDIR/ontology $PWD
+    cp -r $APPDIR/public $PWD
+    cp -r $APPDIR/source $PWD
+
+fi 
+

@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 #[repr(u8)]
 pub enum DataType {
     Uri = 1,
@@ -10,7 +10,7 @@ pub enum DataType {
     Binary = 128,
 }
 
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 #[repr(u8)]
 pub enum Lang {
     NONE = 0,

@@ -22,13 +22,13 @@ before_install:
 # Build
 install:
   - ./control-install.sh
-#&>install.log 
+#&>install.log
 #  - ./tools/send-to-chunk-io.sh
   - source $HOME/.cargo/env
   - npm install --save-dev testcafe
   - go version
-  - dmd --version    
-  - rustc -V          
+  - dmd --version
+  - rustc -V
   - ./build.sh
 
 before_script:
@@ -46,18 +46,18 @@ script:
   - testcafe chromium qa/testcafe/testAttributiveSearch.js
   - testcafe chromium qa/testcafe/testComment.js
   - testcafe chromium qa/testcafe/testCreatingNetInterface.js
-  - testcafe chromium qa/testcafe/testDeleteAndRecovery.js
+  - testcafe chromium qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 0.25
   - testcafe chromium qa/testcafe/testJournal.js
   - testcafe chromium qa/testcafe/testPerson.js
   - testcafe chromium qa/testcafe/testRights.js
   - testcafe chromium qa/testcafe/testSearchRangeOfDates.js
   - testcafe chromium qa/testcafe/testVersionedDocument.js
   - testcafe chromium qa/testcafe/testSimpleNet.js
-  - testcafe chromium qa/testcafe/testSimpleNet2.js  
+  - testcafe chromium qa/testcafe/testSimpleNet2.js
   - testcafe chromium qa/testcafe/testSimpleNet3.js
-  - testcafe chromium qa/testcafe/testSimpleNetLowPriority.js
+  - testcafe chromium qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens
   - testcafe chromium qa/testcafe/testControls.js
-  - testcafe chromium qa/testcafe/testDrafts.js
+#  - testcafe chromium qa/testcafe/testDrafts.js
   - testcafe chromium qa/testcafe/testDropDown.js
 
 after_script:

@@ -4,102 +4,105 @@ veda.Module(function (veda) { "use strict";
 
   veda.UserModel = function (uri) {
 
-    var self = new veda.IndividualModel(uri);
+    var self = veda.IndividualModel.call(this, uri);
 
-    try {
-      if ( self["rdf:type"][0].id !== "v-s:Person" ) { return self; }
-    } catch (err) {
-      localStorage.clear();
-      location.reload();
+    return self;
+
+  };
+
+  veda.UserModel.prototype = Object.create(veda.IndividualModel.prototype);
+
+  veda.UserModel.prototype.constructor = veda.UserModel;
+
+  var proto = veda.UserModel.prototype;
+
+  proto._init = function () {
+    var self = this;
+    return this.load()
+      .then(self.initAspect.bind(self))
+      .then(self.initAppointment.bind(self))
+      .then(self.initPreferences.bind(self))
+      .then(self.initLanguage.bind(self))
+      .then(self.save.bind(self));
+  };
+
+  proto.initAspect = function () {
+    var self = this;
+    if ( self.hasValue("v-s:hasAspect") ) {
+      self.aspect = self["v-s:hasAspect"][0];
+      return self.aspect.load();
+    } else {
+      var aspect_id = self.id + "_aspect";
+      self.aspect = new veda.IndividualModel(aspect_id);
+      self.aspect["rdf:type"] = [ new veda.IndividualModel("v-s:PersonalAspect") ];
+      self.aspect["v-s:owner"] = [ self ];
+      self.aspect["rdfs:label"] = [ "PersonalAspect_" + self.id ];
+      self["v-s:hasAspect"] = [ self.aspect ];
+      return self.aspect.save();
     }
-    veda.user = self;
+  };
 
-    var langs = (new veda.IndividualModel("v-ui:AvailableLanguage"))["rdf:value"];
-    self.availableLanguages = langs.reduce (
-      function (acc, language) {
-        var name = language["rdf:value"][0];
-        acc[name] = language;
-        return acc;
-      }, {});
-    self.defaultLanguage = (new veda.IndividualModel("v-ui:DefaultLanguage"))["rdf:value"][0]["rdf:value"][0].toString();
-
-    if (uri === "cfg:Guest") {
-      self.language = {};
-      self.language[self.defaultLanguage] = self.availableLanguages[self.defaultLanguage];
-      return self;
-    }
-
+  proto.initAppointment = function () {
+    var self = this;
     if (self.hasValue("v-s:defaultAppointment")) {
       veda.appointment = self["v-s:defaultAppointment"][0];
     } else if (self.hasValue("v-s:hasAppointment")) {
       self["v-s:defaultAppointment"] = [ self["v-s:hasAppointment"][0] ];
       veda.appointment = self["v-s:defaultAppointment"][0];
-      self.save();
     } else {
-      veda.appointment = undefined;
+      return veda.appointment = undefined;
     }
+    return veda.appointment.load();
+  };
 
-    self.on("v-s:defaultAppointment", function (values) {
-      if (self.hasValue("v-s:defaultAppointment")) {
-        veda.appointment = self["v-s:defaultAppointment"][0];
-      }
-    });
-
+  proto.initPreferences = function () {
+    var self = this;
     if ( self.hasValue("v-ui:hasPreferences") ) {
       self.preferences = self["v-ui:hasPreferences"][0];
-      if ( !self.preferences.hasValue("v-ui:preferredLanguage") || !self.preferences.hasValue("v-ui:displayedElements")) {
-        self.preferences["v-ui:preferredLanguage"] = [ self.availableLanguages[self.defaultLanguage] ];
-        self.preferences["v-ui:displayedElements"] = [ 10 ];
-        self.preferences.save();
-      }
+      return self.preferences.load();
     } else {
       var preferences_id = self.id + "_pref";
       self.preferences = new veda.IndividualModel(preferences_id);
-      if ( self.preferences.isNew() ) {
-        self.preferences["v-s:author"] = [ self ];
-        self.preferences["rdf:type"] = [ new veda.IndividualModel("v-ui:Preferences") ];
-        self.preferences["rdfs:label"] = [ "Preferences_" + self.id ];
-        self.preferences["v-ui:preferredLanguage"] = [ self.availableLanguages["RU"] ];
-        self.preferences["v-ui:displayedElements"] = [ 10 ];
-        self.preferences.save();
-      }
-      self["v-ui:hasPreferences"] = [ self.preferences ];
-      self.save();
+      self.preferences["v-s:owner"] = [ self ];
+      self.preferences["rdf:type"] = [ new veda.IndividualModel("v-ui:Preferences") ];
+      self.preferences["rdfs:label"] = [ "Preferences_" + self.id ];
+      return self.preferences;
     }
-    self.language = self.preferences["v-ui:preferredLanguage"].reduce( function (acc, lang) {
-      acc[lang["rdf:value"][0]] = self.availableLanguages[lang["rdf:value"][0]];
-      return acc;
-    }, {} );
-    self.displayedElements = self.preferences["v-ui:displayedElements"][0];
+  };
 
-    if ( self.hasValue("v-s:hasAspect") ) {
-      self.aspect = self["v-s:hasAspect"][0];
-    } else {
-      var aspect_id = self.id + "_aspect";
-      self.aspect = new veda.IndividualModel(aspect_id);
-      if ( self.aspect.isNew() ) {
-        self.aspect["rdf:type"] = [ new veda.IndividualModel("v-s:PersonalAspect") ];
-        self.aspect["v-s:owner"] = [ self ];
-        self.aspect["rdfs:label"] = [ "PersonalAspect_" + self.id ];
-        self.aspect.save();
-      }
-      self["v-s:hasAspect"] = [ self.aspect ];
-      self.save();
+  proto.initLanguage = function (preferences) {
+    var self = this;
+    if ( !preferences.hasValue("v-ui:preferredLanguage") || !preferences.hasValue("v-ui:displayedElements")) {
+      var defaultDisplayedElements = new veda.IndividualModel("v-ui:DefaultDisplayedElements");
+      var defaultLanguage = new veda.IndividualModel("v-ui:DefaultLanguage");
+      Promise.all([defaultLanguage.load(), defaultDisplayedElements.load()]).then(function (defaults) {
+        preferences["v-ui:preferredLanguage"] = [ defaults[0]["rdf:value"][0] ];
+        preferences["v-ui:displayedElements"] = [ defaults[1]["rdf:value"][0] ];
+        if (self.id !== "cfg:Guest") {
+          preferences.save();
+        }
+      });
     }
-
-    self.preferences.on("v-ui:displayedElements", function (values) {
-      self.displayedElements = values[0];
-    });
-    self.preferences.on("v-ui:preferredLanguage", function (values) {
-      self.language = values.reduce( function (acc, lang) {
-        acc[lang["rdf:value"][0]] = self.availableLanguages[lang["rdf:value"][0]];
+    preferences.on("v-ui:preferredLanguage", setLanguage);
+    setLanguage();
+    function setLanguage() {
+      preferences.language = preferences["v-ui:preferredLanguage"].reduce( function (acc, lang) {
+        acc[lang.id.substr(lang.id.indexOf(":") + 1)] = lang;
         return acc;
-      }, {} );
-      self.preferences.save();
+      }, {});
+      if ( !preferences.isSync() && self.id !== "cfg:Guest" ) {
+        preferences.save();
+      }
       veda.trigger("language:changed");
-    });
-
-    return self;
+    }
+    preferences.on("v-ui:displayedElements", setDisplayedElements);
+    setDisplayedElements();
+    function setDisplayedElements() {
+      preferences.displayedElements = preferences["v-ui:displayedElements"][0] || 10;
+      if ( !preferences.isSync() && self.id !== "cfg:Guest" ) {
+        preferences.save();
+      }
+    }
   };
 
 });

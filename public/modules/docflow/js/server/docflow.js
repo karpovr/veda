@@ -286,7 +286,7 @@ veda.Module(function (veda) { "use strict";
                                       }
                                       else
                                       {
-                                     veda.Util.getStrings(netElement['rdfs:label'])     // сохраняем результаты в v-wf:outVars в обрабатываемом рабочем задании
+                                     veda.Util.getValues(netElement['rdfs:label'])     // сохраняем результаты в v-wf:outVars в обрабатываемом рабочем задании
                                           task_output_vars = veda.Workflow.create_and_mapping_variables(ticket, net_element['v-wf:completedMapping'], _process, work_item, null, result0, true, trace_journal_uri, 'v-wf:completedMapping');
                                           print("[PWO]completedMapping2, task_output_vars=", veda.Util.toJson(task_output_vars));
                                       }
@@ -640,7 +640,7 @@ veda.Module(function (veda) { "use strict";
                       }
                       else
                       {
-                          if (!split)
+                          if (!split || split == 'v-wf:None')
                           {
                               // условия нет, выполним переход
                               var nextNetElement = get_individual(ticket, veda.Util.getUri(flowsInto));
@@ -732,7 +732,7 @@ veda.Module(function (veda) { "use strict";
               }
           }
 
-          trace_journal_uri = veda.Workflow.create_new_trace_subjournal(forProcess, work_item, netElement['@'] + "' - [" + veda.Util.getStrings(netElement['rdfs:label']) + "] - " + work_item['@'], 'v-wf:WorkItemStarted')
+          trace_journal_uri = veda.Workflow.create_new_trace_subjournal(forProcess, work_item, netElement['@'] + "' - [" + veda.Util.getValues(netElement['rdfs:label']) + "] - " + work_item['@'], 'v-wf:WorkItemStarted')
 
           var f_join = netElement['v-wf:join'];
           if (f_join && veda.Util.getUri(f_join) == "v-wf:AND")
@@ -1365,12 +1365,12 @@ veda.Module(function (veda) { "use strict";
       }
 
       put_individual(ticket, new_process, _event_id);
-      
+
       var jrn_processed_doc_uri = veda.Util.getJournalUri(processedDocumentId)
-      
+
       if (!get_individual(ticket, jrn_processed_doc_uri))
       {
-		var jrn_processed_doc = {
+        var jrn_processed_doc = {
           '@': jrn_processed_doc_uri,
           'rdf:type': veda.Util.newUri('v-s:Journal'),
           'v-s:onDocument': processedDocumentValue,
@@ -1380,7 +1380,7 @@ veda.Module(function (veda) { "use strict";
               type: "Datetime"
           }]
         };
-		put_individual(ticket, jrn_processed_doc, _event_id);		  
+        put_individual(ticket, jrn_processed_doc, _event_id);
       }
 
       veda.Workflow.create_new_journal(ticket, veda.Util.getJournalUri(new_process_uri), jrn_processed_doc_uri, _net['rdfs:label']);

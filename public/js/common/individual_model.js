@@ -12,44 +12,59 @@ veda.Module(function (veda) { "use strict";
    * @param {boolean} init individual with class model at load. If true or not set, then individual will be initialized with class specific model upon load.
    */
   veda.IndividualModel = function (uri, cache, init) {
-
-    var self = riot.observable(this);
-
     // veda.IndividualModel({...})
     if (typeof uri === "object" && !uri["@"]) {
-      cache     = uri.cache;
-      init      = uri.init;
-      uri       = uri.uri;
+      cache = uri.cache;
+      init  = uri.init;
+      uri   = uri.uri;
     }
 
-    // Init data
+    // Define Model data
     this._ = {
       cache: typeof cache === "boolean" ? cache : cache || true,
       init: typeof init !== "undefined" ? init : true,
-      isNew: false,
-      isSync: false
+      isNew: typeof uri === "undefined",
+      isSync: typeof uri === "object",
+      isLoaded: typeof uri === "object",
+      uri: uri
     };
-    this.properties = {};
+    this.properties = typeof uri === "object" ? uri : {};
     this.filtered = {};
 
-    // Attach event handlers
+    if (this._.cache) {
+      var cached;
+      if (typeof uri === "string") {
+        this.id = uri;
+        cached = veda.cache.get(this.id);
+      } else if (typeof uri === "object") {
+        cached = veda.cache.get(this.id);
+        if (cached && !cached.isLoaded()) {
+          cached.properties = uri;
+        }
+      } else if (typeof uri === "undefined") {
+        this.id = veda.Util.genUri();
+      }
+      if (cached) {
+        return cached;
+      } else {
+        veda.cache.set(this, this._.cache);
+      }
+    }
+
+    var self = riot.observable(this);
+
     this.on("rdf:type", this.init);
     this.on("beforeSave", beforeSaveHandler);
 
-    // Load from backend
-    return self.load(uri);
+    return self;
   };
 
   function beforeSaveHandler() {
     var now = new Date();
     var user = veda.appointment ? veda.appointment : veda.user;
-
-    if (
-      !this.hasValue("v-s:creator")
-      || !this.hasValue("v-s:created")
-    ) {
-      this["v-s:creator"] = [ user ];
-      this["v-s:created"] = [ now ];
+    if ( !this.hasValue("v-s:creator") && !this.hasValue("v-s:created") ) {
+      this.set("v-s:creator", [user]);
+      this.set("v-s:created", [now]);
     }
 
     if (veda.user.id === "cfg:Administrator") {
@@ -57,11 +72,11 @@ veda.Module(function (veda) { "use strict";
     } else if (
       !this.hasValue("v-s:lastEditor")
       || !this.hasValue("v-s:edited")
-      || this["v-s:lastEditor"][0].id !== user.id
-      || (now - this["v-s:edited"][0]) > 1000
+      || this.get("v-s:lastEditor")[0].id !== user.id
+      || (now - this.get("v-s:edited")[0]) > 1000
     ) {
-      this["v-s:lastEditor"] = [ user ];
-      this["v-s:edited"] = [ now ];
+      this.set("v-s:edited", [now]);
+      this.set("v-s:lastEditor", [user]);
     }
   }
 
@@ -73,7 +88,7 @@ veda.Module(function (veda) { "use strict";
     self.filtered[property_uri] = [];
     return self.properties[property_uri]
       .filter(function (value) {
-        var condition = !value.lang || value.lang === "NONE" || ( veda.user && veda.user.language && value.lang in veda.user.language ) ;
+        var condition = !value.lang || value.lang === "NONE" || ( veda.user && veda.user.preferences && veda.user.preferences.language && value.lang in veda.user.preferences.language ) ;
         return condition ? condition : ( self.filtered[property_uri].push(value), condition );
       })
       .map( parser );
@@ -128,15 +143,15 @@ veda.Module(function (veda) { "use strict";
   };
 
   function parser(value) {
-    if (value.type === "String" || value.type === 2) {
+    if (value.type === "String") {
       var string = new String(value.data);
       if (value.lang !== "NONE") { string.language = value.lang; }
       return string;
-    } else if (value.type === "Uri" || value.type === 1) {
+    } else if (value.type === "Uri") {
       return new veda.IndividualModel(value.data);
-    } else if (value.type === "Datetime" || value.type === 8) {
+    } else if (value.type === "Datetime") {
       return new Date(Date.parse(value.data));
-    } else if (value.type === "Decimal" || value.type === 32) {
+    } else if (value.type === "Decimal") {
       return parseFloat(value.data);
     } else {
       return value.data;
@@ -187,76 +202,98 @@ veda.Module(function (veda) { "use strict";
         veda.cache.remove(previous);
         veda.cache.set(this, this._.cache);
       }
-      this.trigger("idChanged", value);
     }
   });
 
   Object.defineProperty(proto, "membership", {
     get: function () {
-      if ( this._.membership ) { return this._.membership; }
-      if ( this.isNew() || this.isDraft() ) {
+      var self = this;
+      if (this._.membership) { return Promise.resolve(this._.membership); }
+      if (this.isNew()) {
         this._.membership = new veda.IndividualModel({ cache: false });
-        return this._.membership;
+        return Promise.resolve(this._.membership);
       }
-      try {
-        var membershipJSON = get_membership(veda.ticket, this.id);
-        this._.membership = new veda.IndividualModel({ uri: membershipJSON, cache: false });
-      } catch (e) {
-        this._.membership = new veda.IndividualModel();
-      } finally {
-        return this._.membership;
-      }
+      return veda.Backend.get_membership(veda.ticket, this.id).then(function (membershipJSON) {
+        self._.membership = new veda.IndividualModel({ uri: membershipJSON, cache: false });
+        return self._.membership.load();
+      }).catch(function  (error) {
+        console.log("membership error", self.id, error);
+        self._.membership = new veda.IndividualModel({ cache: false });
+        return self._.membership.load();
+      });
     },
     configurable: false,
     enumerable: false
   });
 
   proto.memberOf = function () {
-    return this.membership.hasValue("v-s:memberOf") ? this.membership.properties["v-s:memberOf"].map(function (group_item) {
-      return group_item.data;
-    }) : [];
+    return this.membership.then(function (membership) {
+      return membership.hasValue("v-s:memberOf") ? this.membership.properties["v-s:memberOf"].map(function (group_item) {
+        return group_item.data;
+      }) : [];
+    })
   };
 
   proto.isMemberOf = function (group_uri) {
-    return this.membership.hasValue("v-s:memberOf", group_uri);
+    return this.membership.then(function (membership) {
+      return membership.hasValue("v-s:memberOf", group_uri);
+    });
   };
 
   Object.defineProperty(proto, "rights", {
     get: function () {
-      if ( this._.rights ) { return this._.rights; }
-      if ( this.isNew() || this.isDraft() ) {
+      var self = this;
+      if (this._.rights) { return Promise.resolve(this._.rights); }
+      if (this.isNew()) {
         this._.rights = new veda.IndividualModel({ cache: false });
+        this._.rights["v-s:canCreate"] = [ true ];
         this._.rights["v-s:canRead"] = [ true ];
         this._.rights["v-s:canUpdate"] = [ true ];
         this._.rights["v-s:canDelete"] = [ true ];
-        return this._.rights;
+        return Promise.resolve(this._.rights);
       }
-      try {
-        var rightsJSON = get_rights(veda.ticket, this.id);
-        this._.rights = new veda.IndividualModel( rightsJSON, false );
-      } catch (e) {
-        this._.rights = new veda.IndividualModel();
-      } finally {
-        return this._.rights;
-      }
+      return veda.Backend.get_rights(veda.ticket, this.id).then(function (rightsJSON) {
+        return self._.rights = new veda.IndividualModel( rightsJSON, false );
+      }).catch(function  (error) {
+        console.log("rights error", self.id, error);
+        return self._.rights = new veda.IndividualModel({ cache: false });
+      });
     },
     configurable: false,
     enumerable: false
   });
 
+  proto.can = function (action) {
+    action = action.charAt(0).toUpperCase() + action.slice(1).toLowerCase();
+    return this.rights.then(function (rights) {
+      return rights.hasValue("v-s:can" + action, true);
+    });
+  };
+  proto.canCreate = function () {
+    return this.can("Create");
+  };
+  proto.canRead = function () {
+    return this.can("Read");
+  };
+  proto.canUpdate = function () {
+    return this.can("Update");
+  };
+  proto.canDelete = function () {
+    return this.can("Delete");
+  };
+
   Object.defineProperty(proto, "rightsOrigin", {
     get: function () {
-      if (this._.rightsOrigin) return this._.rightsOrigin;
-      try {
-        var rightsOriginArr = get_rights_origin(veda.ticket, this.id);
-        this._.rightsOrigin = rightsOriginArr.map(function (item) {
+      var self = this;
+      if (this._.rightsOrigin) { return Promise.resolve(this._.rightsOrigin); }
+      return veda.Backend.get_rights_origin(veda.ticket, this.id).then(function (rightsOriginArr) {
+        return self._.rightsOrigin = Promise.all(rightsOriginArr.map(function (item) {
           return new veda.IndividualModel( item, false );
-        });
-      } catch (e) {
-        this._.rightsOrigin = [];
-      } finally {
-        return this._.rightsOrigin;
-      }
+        }));
+      }).catch(function  (error) {
+        console.log("rights error", self.id, error);
+        return self._.rightsOrigin = [];
+      });
     },
     configurable: false,
     enumerable: false
@@ -267,30 +304,35 @@ veda.Module(function (veda) { "use strict";
    * Load individual specified by uri from database. If cache parameter (from constructor) is true, than try to load individual from browser cache first.
    * @param {String} uri individual uri
    */
-  proto.load = function (uri) {
+  proto.load = function () {
     this.trigger("beforeLoad");
+    if ( this.isLoaded() ) {
+      this.trigger("afterLoad", this);
+      return Promise.resolve( this );
+    } else if ( this.isLoading() ) {
+      return this.isLoading();
+    }
+    var self = this;
+    var uri = this._.uri ;
     if (typeof uri === "string") {
-      this.id = uri;
-      if (this._.cache && veda.cache.get(uri)) {
-        this.trigger("afterLoad", veda.cache.get(uri));
-        return veda.cache.get(uri);
-      }
-      try {
-        this.isNew(false);
-        this.isSync(true);
-        this.properties = get_individual(veda.ticket, uri);
-        // server-side work-around
-        // TODO: harmonize client-side & server-side backend functions
-        if (this.properties === undefined) {
-          var _error =  new Error();
-          _error.code = 422;
-          throw _error;
+      var loadingPromise = veda.Backend.get_individual(veda.ticket, uri).then(function (individualJson) {
+        self.isLoading(false);
+        self.isNew(false);
+        self.isSync(true);
+        self.isLoaded(true);
+        self.properties = individualJson;
+        self.trigger("afterLoad", self);
+        if (self._.init) {
+          return self.init();
         }
-      } catch (error) {
+        return self;
+      }).catch(function (error) {
+        console.log("load individual error", self.id, error);
         if (error.code === 422 || error.code === 404) {
-          this.isNew(true);
-          this.isSync(false);
-          this.properties = {
+          self.isNew(true);
+          self.isSync(false);
+          self.isLoaded(false);
+          self.properties = {
             "@": uri,
             "rdf:type": [{type: "Uri", data: "rdfs:Resource"}],
             "rdfs:label": [
@@ -299,9 +341,10 @@ veda.Module(function (veda) { "use strict";
             ]
           };
         } else if (error.code === 472) {
-          this.isNew(false);
-          this.isSync(true);
-          this.properties = {
+          self.isNew(false);
+          self.isSync(false);
+          self.isLoaded(false);
+          self.properties = {
             "@": uri,
             "rdf:type": [{type: "Uri", data: "rdfs:Resource"}],
             "rdfs:label": [
@@ -310,33 +353,40 @@ veda.Module(function (veda) { "use strict";
             ]
           };
         } else if (error.code === 470 || error.code === 471) {
-          this.isNew(false);
-          this.isSync(true);
-          this.trigger("afterLoad", this);
-          return this;
+          self.isNew(false);
+          self.isSync(false);
+          self.isLoaded(false);
         } else {
-          this.isNew(false);
-          this.isSync(true);
-          this.properties = {
+          self.isNew(false);
+          self.isSync(false);
+          self.isLoaded(false);
+          self.properties = {
             "@": uri,
             "rdf:type": [{type: "Uri", data: "rdfs:Resource"}],
             "rdfs:label": [{type: "String", data: uri, lang: "NONE"}]
           };
         }
-      }
+        self.trigger("afterLoad", self);
+        return self;
+      });
+
+      return this.isLoading(loadingPromise);
+
     } else if (typeof uri === "object") {
       this.isNew(false);
       this.isSync(true);
+      this.isLoaded(true);
       this.properties = uri;
     } else if (typeof uri === "undefined") {
       this.isNew(true);
       this.isSync(false);
-      this.id = veda.Util.genUri();
+      this.isLoaded(false);
     }
-    if (this._.cache) veda.cache.set(this, this._.cache);
-    if (this._.init) this.init();
     this.trigger("afterLoad", this);
-    return this;
+    if (this._.init) {
+      return this.init();
+    }
+    return Promise.resolve(this);
   };
 
   /**
@@ -351,79 +401,36 @@ veda.Module(function (veda) { "use strict";
       return this;
     }
     // Do not save individual to server if nothing changed
-    if (this.isSync()) { return this; }
+    if (this.isSync()) { return Promise.resolve(this); }
     var self = this;
     this.trigger("beforeSave");
     Object.keys(this.properties).reduce(function (acc, property_uri) {
       if (property_uri === "@") return acc;
-      acc[property_uri] = self.properties[property_uri].filter(function (item) {
+      acc[property_uri] = acc[property_uri].filter(function (item) {
         return item && item.data !== "";
       });
       if (!acc[property_uri].length) delete acc[property_uri];
       return acc;
     }, this.properties);
-    try {
-      this.undraft();
-      put_individual(veda.ticket, this.properties);
-      this.isNew(false);
-      this.isSync(true);
-    } catch (error) {
-      var notify = veda.Notify ? new veda.Notify() : console.log;
-      notify("danger", error);
-      if ( this.is("v-s:UserThing") && error.code !== 472 ) { this.draft(); }
-    }
-    this.trigger("afterSave");
-    return this;
-  };
+
+    return veda.Backend.put_individual(veda.ticket, this.properties).then(function () {
+      self.isNew(false);
+      self.isSync(true);
+      self.isLoaded(true);
+      self.trigger("afterSave");
+      return self;
+    });
+  }
 
   /**
    * @method
-   * Check if individual is draft
-   */
-  proto.isDraft = function() {
-    var drafts = new veda.DraftsModel();
-    return drafts.has(this.id);
-  };
-
-  /**
-   * @method
-   * Save current individual to draft
-   */
-  proto.draft = function() {
-    var drafts = new veda.DraftsModel();
-    drafts.set(this.id, this);
-    return this;
-  };
-
-  /**
-   * @method
-   * Remove current individual from drafts
-   */
-  proto.undraft = function() {
-    var drafts = new veda.DraftsModel();
-    if ( this.isDraft() ) {
-      drafts.remove(this.id);
-    }
-    return this;
-  };
-
-  /**
-   * @method
-   * Reset current individual to database
+   * Reset current individual to  database
    */
   proto.reset = function () {
-    this.trigger("beforeReset");
     var self = this;
+    this.trigger("beforeReset");
     self.filtered = {};
-    if ( this.isNew() ) {
-      self.undraft();
-      self.trigger("afterReset");
-      return Promise.resolve(self);
-    }
-    return new Promise(function(resolve, reject) {
-      var got = get_individual(veda.ticket, self.id);
-      got ? resolve(got) : reject(got);
-    }).then(function (original) {
+    return veda.Backend.get_individual(veda.ticket, self.id).then(function (original) {
       var self_property_uris = Object.keys(self.properties);
       var original_property_uris = Object.keys(original);
       var union = veda.Util.unique( self_property_uris.concat(original_property_uris) );
@@ -451,12 +458,11 @@ veda.Module(function (veda) { "use strict";
       });
       self.isNew(false);
       self.isSync(true);
-      self.undraft();
+      self.isLoaded(true);
       self.trigger("afterReset");
       return self;
     }).catch(function (error) {
       console.log("reset individual error", error);
-      self.undraft();
       self.trigger("afterReset");
     });
   };
@@ -467,14 +473,13 @@ veda.Module(function (veda) { "use strict";
    */
   proto.delete = function () {
     this.trigger("beforeDelete");
-    if ( !this.isNew() ) {
-      this["v-s:deleted"] = [ true ];
-      this.save();
-    } else {
-      this.undraft();
+    if ( this.isNew() ) {
+      this.trigger("afterDelete");
+      return Promise.resolve(this);
     }
+    this["v-s:deleted"] = [ true ];
     this.trigger("afterDelete");
-    return this;
+    return this.save();
   };
 
   /**
@@ -482,21 +487,19 @@ veda.Module(function (veda) { "use strict";
    * Remove individual from database
    */
   proto.remove = function () {
+    var self = this;
     this.trigger("beforeRemove");
-    if ( !this.isNew() ) {
-      try {
-        this.undraft();
-        remove_individual(veda.ticket, this.id);
-        if ( this._.cache && veda.cache && veda.cache.get(this.id) ) {
-          veda.cache.remove(this.id);
-        }
-      } catch (error) {
-        var notify = veda.Notify ? new veda.Notify() : console.log;
-        notify("danger", error);
-      }
+    if ( this._.cache && veda.cache && veda.cache.get(this.id) ) {
+      veda.cache.remove(this.id);
     }
-    this.trigger("afterRemove");
-    return this;
+    if ( this.isNew() ) {
+      this.trigger("afterRemove");
+      return Promise.resolve(this);
+    }
+    return veda.Backend.remove_individual(veda.ticket, this.id).then(function () {
+      self.trigger("afterRemove");
+      return self;
+    });
   };
 
   /**
@@ -506,9 +509,8 @@ veda.Module(function (veda) { "use strict";
   proto.recover = function () {
     this.trigger("beforeRecover");
     this["v-s:deleted"] = [];
-    this.save();
     this.trigger("afterRecover");
-    return this;
+    return this.save();
   };
 
   /**
@@ -667,19 +669,40 @@ veda.Module(function (veda) { "use strict";
    * @return {boolean} is individual rdf:type subclass of requested class
    */
   proto.is = function (_class) {
+    var self = this;
     if (typeof _class.valueOf() === "string") {
       _class = new veda.IndividualModel( _class.valueOf() );
     }
-    return this["rdf:type"].reduce(function (acc, item) {
-      return acc || (item.id === _class.id) || isSubClassOf(item, _class);
-    }, false);
+    var types = self.get("rdf:type");
+    var is = eval(
+      types.map(function (type) {
+        return self.hasValue("rdf:type", _class.id);
+      }).join("||")
+    );
+    if (is) {
+      return Promise.resolve(is);
+    } else {
+      return Promise.all(types.map(isSub)).then(function (results) {
+        return eval(results.join("||"));
+      });
+    }
+
+    function isSub(type) {
+      return type.load().then(function (type) {
+        if (is) { return is; }
+        if (!type.hasValue("rdfs:subClassOf")) {
+          return (is = is || false);
+        } else if (type.hasValue("rdfs:subClassOf", _class.id)) {
+          return (is = is || true);
+        } else {
+          var types = type.get("rdfs:subClassOf");
+          return Promise.all(types.map(isSub)).then(function (results) {
+            return eval(results.join("||"));
+          });
+        }
+      });
+    }
   };
-  function isSubClassOf(_class, _super) {
-    if (!_class.hasValue("rdfs:subClassOf")) return false;
-    return _class["rdfs:subClassOf"].reduce(function (acc, item) {
-      return acc || (item.id === _super.id) || isSubClassOf(item, _super);
-    }, false);
-  }
 
   /**
    * @method
@@ -689,23 +712,38 @@ veda.Module(function (veda) { "use strict";
     var self = this;
     var isClass = this.hasValue("rdf:type", "owl:Class") || this.hasValue("rdf:type", "rdfs:Class");
     if ( this.hasValue("v-ui:hasModel") && !isClass ) {
-      var model = this["v-ui:hasModel"][0];
-      if ( !model.modelFn ) {
-        model.modelFn = new Function(model["v-s:script"][0]);
-      }
-      model.modelFn.call(this);
-    } else {
-      self["rdf:type"].map(function (_class) {
-        if ( _class.hasValue("v-ui:hasModel") ) {
-          var model = _class["v-ui:hasModel"][0];
+      return this.get("v-ui:hasModel")[0].load()
+        .then(function (model) {
           if ( !model.modelFn ) {
             model.modelFn = new Function(model["v-s:script"][0]);
           }
           model.modelFn.call(self);
-        }
+          return self;
+        });
+    } else {
+      var types_promises = this.get("rdf:type").map( function (type_promise) {
+        return type_promise.load();
       });
+      return Promise.all( types_promises )
+        .then( function (types) {
+          var models_promises = [];
+          types.map( function (type) {
+            if ( type.hasValue("v-ui:hasModel") ) {
+              models_promises.push( type.get("v-ui:hasModel")[0].load() );
+            }
+          });
+          return Promise.all( models_promises );
+        })
+        .then( function (models) {
+          models.map(function (model) {
+            if ( !model.modelFn ) {
+              model.modelFn = new Function(model["v-s:script"][0]);
+            }
+            model.modelFn.call(self);
+          });
+          return self;
+        });
     }
-    return this;
   };
 
   /**
@@ -719,7 +757,8 @@ veda.Module(function (veda) { "use strict";
     var clone = new veda.IndividualModel(cloneProperties);
     clone.isNew(true);
     clone.isSync(false);
-    return clone;
+    clone.clearValue("v-s:updateCounter");
+    return clone.init();
   };
 
   /**
@@ -742,6 +781,19 @@ veda.Module(function (veda) { "use strict";
 
   /**
    * @method
+   * Check whether individual was loaded from db
+   * @return {boolean}
+   */
+  proto.isLoaded = function (value) {
+    return ( typeof value !== "undefined" ? this._.isLoaded = value : this._.isLoaded );
+  };
+
+  proto.isLoading = function (value) {
+    return ( typeof value !== "undefined" ? this._.isLoading = value : this._.isLoading );
+  };
+
+  /**
+   * @method
    * Serialize to JSON
    * @return {Object} JSON representation of individual.
    */
@@ -756,7 +808,7 @@ veda.Module(function (veda) { "use strict";
    */
   proto.toString = function () {
     //return this["rdf:type"][0]["rdfs:label"].join(", ") + ": " + ( this["rdfs:label"] ? this["rdfs:label"].join(", ") : this.id );
-    return this.hasValue("rdfs:label") ? this["rdfs:label"].join(" ") : this.hasValue("rdf:type") ? this["rdf:type"][0].toString() + ": " + this.id : this.id ;
+    return this.hasValue("rdfs:label") ? this.get("rdfs:label").join(" ") : this.hasValue("rdf:type") ? this.get("rdf:type")[0].toString() + ": " + this.id : this.id ;
   };
 
   /**
@@ -771,40 +823,76 @@ veda.Module(function (veda) { "use strict";
   /**
    * @method
    * Prefetch linked objects. Useful for presenting objects with many links.
+   * @param {property_uri, ...} Property chain to get value.
+   */
+  proto.getPropertyChain = function () {
+    var args = Array.prototype.slice.call(arguments);
+    var property_uri = args.shift();
+    return this.load().then(function (self) {
+      if ( self.hasValue(property_uri) ) {
+        if ( !args.length ) {
+          return self[property_uri];
+        } else {
+          return self.getPropertyChain.apply(self[property_uri][0], args);
+        }
+      }
+      return [];
+    }).catch(function (error) {
+      console.log(error);
+    });
+  };
+
+  /**
+   * @method
+   * Prefetch linked objects. Useful for presenting objects with many links.
    * @param {Number} Depth of the object tree to prefetch.
    * @param {allowed_property_uri, ...} Allowed property uri for links. If defined the tree is formed only for allowed properties.
    */
   proto.prefetch = function (depth) {
-    var allowed_props = [].slice.call(arguments, 1),
-        uris = [],
-        data = this.properties,
-        prefetch = this.prefetch;
-    Object.keys(data).map( function (key) {
-      if ( key === "@" || (allowed_props.length && allowed_props.indexOf(key) < 0) ) return;
-      data[key].map(function (value) {
-        if (value.type !== "Uri") return;
-        if (!veda.cache.get(value.data)) {
-          uris.push(value.data);
-        } else if (depth !== 0) {
-          uris.push( prefetch.apply( veda.cache.get(value.data), [0].concat(allowed_props) ) );
+    var allowed_props = [].slice.call(arguments, 1);
+    depth = depth || 1;
+    return this.load().then(function (self) {
+      return prefetch.apply(self, [[], depth, [self.id]].concat(allowed_props) );
+    });
+  };
+
+  function prefetch(result, depth, uris) {
+    var self = this;
+    var allowed_props = [].slice.call(arguments, 3);
+    uris = veda.Util.unique( uris );
+    var toGet = uris.filter(function (uri) {
+      var cached = veda.cache.get(uri);
+      if ( cached && result.indexOf(cached) < 0 ) {
+        result.push(cached);
+      }
+      return !cached;
+    });
+    return (toGet.length ? veda.Backend.get_individuals(veda.ticket, toGet) : Promise.resolve([])).then(function (got) {
+      var nextUris = [];
+      got.forEach(function (json) {
+        if (json) {
+          var individual = new veda.IndividualModel(json);
+          if ( result.indexOf(individual) < 0 ) {
+            result.push(individual);
+          }
         }
       });
-    });
-    uris = veda.Util.unique( veda.Util.flatten(uris, false) );
-    for (var i = 0; i < depth && uris.length; i++) {
-      var result = get_individuals(veda.ticket, uris),
-        res_map = result.map(function (value) {
-          var obj;
-          if ( !veda.cache.get(value["@"]) ) {
-            obj = new veda.IndividualModel(value);
-          } else {
-            obj = veda.cache.get(value["@"]);
-          }
-          return prefetch.apply( obj, [0].concat(allowed_props) );
+      if (depth - 1 === 0) { return result; }
+      uris.forEach(function (uri) {
+        var individual = new veda.IndividualModel(uri);
+        var data = individual.properties;
+        Object.keys(data).forEach( function (key) {
+          if ( key === "@" || (allowed_props.length && allowed_props.indexOf(key) < 0) ) { return; }
+          data[key].map(function (value) {
+            if (value.type === "Uri") {
+              nextUris.push(value.data);
+            }
+          });
         });
-      uris = veda.Util.unique( veda.Util.flatten(res_map, false) );
-    }
-    return uris;
-  };
+      });
+      if (!nextUris.length) { return result; }
+      return prefetch.apply(self, [result, depth-1, nextUris].concat(allowed_props) );
+    });
+  }
 
 });

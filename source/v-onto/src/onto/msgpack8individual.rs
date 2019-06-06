@@ -20,15 +20,15 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
     cur.set_position(indv.cur);
 
     for _ in indv.cur_predicates..indv.len_predicates {
-        let mut predicate;
+        //let mut predicate;
 
-        match read_string_from_msgpack(&mut cur) {
-            Ok(p) => predicate = p,
-            Err(_) => {
-                error!("@1");
+        let predicate = match read_string_from_msgpack(&mut cur) {
+            Ok(p) => p,
+            Err(e) => {
+                error!("read_string_from_msgpack, err={}", e);
                 return false;
             }
-        }
+        };
 
         //println!("@D predicate = {}", predicate);
 

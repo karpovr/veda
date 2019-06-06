@@ -1,8 +1,12 @@
+use crate::msgpack8individual::parse_to_predicate;
+use crate::resource::{Resource, Value};
 use std::collections::HashMap;
 use std::fmt;
 
-use crate::msgpack8individual::parse_to_predicate;
-use crate::resource::{Resource, Value};
+pub enum IndividualError {
+    None(),
+    ParseError(),
+}
 
 pub struct Individual {
     pub binobj: Vec<u8>,
@@ -33,93 +37,126 @@ impl Individual {
         }
     }
 
+    pub fn new_empty() -> Individual {
+        Individual {
+            uri: "".to_string(),
+            resources: HashMap::new(),
+            binobj: Vec::new(),
+            cur: 0,
+            len_predicates: 0,
+            cur_predicates: 0,
+        }
+    }
+
     pub fn get_predicates(&self) -> Vec<String> {
-        let kk: Vec<String> = self.resources.iter().map(|(key, _)| key.clone()).collect();
-        return kk;
+        return self.resources.iter().map(|(key, _)| key.clone()).collect();
     }
 
-    pub fn get_first_literal(&mut self, predicate: &str) -> Result<String, i64> {
-        match self.resources.get(predicate) {
-            Some(v) => match &v[0].value {
-                Value::Str(s, _l) => {
-                    return Ok(s.to_string());
-                }
-                _ => return Err(-2),
-            },
-            None => {
-                if self.cur < self.binobj.len() as u64 {
-                    // next parse
-                    if parse_to_predicate(predicate, self) == true {
-                        return self.get_first_literal(predicate);
+    pub fn get_first_literal(&mut self, predicate: &str) -> Result<String, IndividualError> {
+        for _ in 0..2 {
+            match self.resources.get(predicate) {
+                Some(v) => match &v[0].value {
+                    Value::Str(s, _l) => {
+                        return Ok(s.to_string());
+                    }
+                    _ => {
+                        return Err(IndividualError::ParseError());
+                    }
+                },
+                None => {
+                    if self.cur < self.binobj.len() as u64 {
+                        // next parse
+                        if parse_to_predicate(predicate, self) == false {
+                            break;
+                        }
                     } else {
-                        println!("@ERR -3");
-                        return Err(-3);
+                        break;
                     }
                 }
             }
         }
-
-        return Ok("".to_string());
+        return Err(IndividualError::None());
     }
 
-    pub fn get_first_binobj(&mut self, predicate: &str) -> Vec<u8> {
-        match self.resources.get(predicate) {
-            Some(v) => match &v[0].value {
-                Value::Binary(s) => {
-                    return s.clone();
-                }
-                _ => {}
-            },
-            None => {
-                if self.cur < self.binobj.len() as u64 {
-                    // next parse
-                    if parse_to_predicate(predicate, self) == true {
-                        return self.get_first_binobj(predicate);
+    pub fn get_first_binobj(&mut self, predicate: &str) -> Result<Vec<u8>, IndividualError> {
+        for _ in 0..2 {
+            match self.resources.get(predicate) {
+                Some(v) => match &v[0].value {
+                    Value::Binary(s) => {
+                        return Ok(s.clone());
+                    }
+                    _ => {
+                        return Err(IndividualError::ParseError());
+                    }
+                },
+                None => {
+                    if self.cur < self.binobj.len() as u64 {
+                        // next parse
+                        if parse_to_predicate(predicate, self) == false {
+                            break;
+                        }
+                    } else {
+                        break;
                     }
                 }
             }
         }
-
-        return "".as_bytes().to_vec();
+        return Err(IndividualError::None());
     }
 
-    pub fn get_first_integer(&mut self, predicate: &str) -> i64 {
-        match self.resources.get(predicate) {
-            Some(v) => match &v[0].value {
-                Value::Int(i) => {
-                    return *i;
-                }
-                _ => {}
-            },
-            None => {
-                if self.cur < self.binobj.len() as u64 {
-                    // next parse
-                    if parse_to_predicate(predicate, self) == true {
-                        return self.get_first_integer(predicate);
+    pub fn get_first_integer(&mut self, predicate: &str) -> Result<i64, IndividualError> {
+        for _ in 0..2 {
+            match self.resources.get(predicate) {
+                Some(v) => match &v[0].value {
+                    Value::Int(i) => {
+                        return Ok(*i);
+                    }
+                    _ => {}
+                },
+                None => {
+                    if self.cur < self.binobj.len() as u64 {
+                        // next parse
+                        if parse_to_predicate(predicate, self) == false {
+                            break;
+                        }
+                    } else {
+                        break;
                     }
                 }
             }
         }
+        return Err(IndividualError::None());
+    }
 
-        return -1;
+    pub fn any_exists(&mut self, predicate: &str, values: &Vec<&str>) -> bool {
+        for _ in 0..2 {
+            match self.resources.get(predicate) {
+                Some(v) => {
+                    for el in v {
+                        match &el.value {
+                            Value::Str(s, _l) => {
+                                for ve in values {
+                                    if *ve == *s {
+                                        return true;
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                None => {
+                    if self.cur < self.binobj.len() as u64 {
+                        // next parse
+                        if parse_to_predicate(predicate, self) == false {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
-
-/*
-    pub fn get_first_value(indv: &mut Individual, predicate: &str) -> Value {
-        match indv.resources.get(predicate) {
-            Some(v) => return v[0].value.clone (),
-            None => {
-                if indv.cur < indv.binobj.len () as u64 {
-                    // next parse
-                    if parse_to_predicate(predicate, indv) == true {
-                        return get_first_value(indv, predicate);
-                    }
-                }
-            },
-        }
-
-        return Value::Bool(false);
-    }
-*/
-//}

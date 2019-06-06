@@ -12,7 +12,6 @@ veda.Module(function (veda) { "use strict";
     if (veda.UpdateService.prototype._singletonInstance) {
       return veda.UpdateService.prototype._singletonInstance;
     }
-    veda.UpdateService.prototype._singletonInstance = this;
 
     this.list = {};
     var buffer = [];
@@ -20,22 +19,25 @@ veda.Module(function (veda) { "use strict";
     var socketTimeout;
     var reconnectDelay = 5000 + Math.round(Math.random() * 5000);
 
-    initSocket();
-
-    return this;
+    return veda.UpdateService.prototype._singletonInstance = initSocket();
 
     function initSocket() {
-      var protocol = location.protocol === "http:" ? "ws:" : "wss:",
-          ccusPortCfg = new veda.IndividualModel("cfg:ClientUpdateServicePort")["rdf:value"][0],
-          address = protocol + "//" + location.hostname + ":" + ( ccusPortCfg || 8088 ) + "/ccus";
+      var ccusPortCfg = new veda.IndividualModel("cfg:ClientUpdateServicePort");
+      return ccusPortCfg.load().then(function (ccusPortCfg) {
+        var ccusPort = ccusPortCfg.hasValue("rdf:value") && ccusPortCfg["rdf:value"][0],
+            protocol = location.protocol === "http:" ? "ws:" : "wss:",
+            port = ccusPort || ( protocol === "ws:" ? 8088 : 443 ),
+            address = protocol + "//" + location.hostname + ":" + port + "/ccus",
+            socket = new WebSocket(address);
 
-      var socket = new WebSocket(address);
-      socket.onopen = openedHandler;
-      socket.onclose = closedHandler;
-      socket.onmessage = messageHandler;
-      socket.receiveMessage = receiveMessage;
-      socket.sendMessage = sendMessage;
-      self.socket = socket;
+        socket.onopen = openedHandler;
+        socket.onclose = closedHandler;
+        socket.onmessage = messageHandler;
+        socket.receiveMessage = receiveMessage;
+        socket.sendMessage = sendMessage;
+        self.socket = socket;
+        return self;
+      });
     }
 
     function sendMessage (msg) {
@@ -77,7 +79,7 @@ veda.Module(function (veda) { "use strict";
           }
           var updateCounter = parseInt(tmp[1]);
           var individual = new veda.IndividualModel(uri);
-          if ( individual.hasValue("v-s:updateCounter", updateCounter) || individual.isDraft() ) { continue; }
+          if ( individual.hasValue("v-s:updateCounter", updateCounter) ) { continue; }
           if (self.list[uri]) {
             self.list[uri].updateCounter = updateCounter;
           }

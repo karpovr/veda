@@ -86,7 +86,7 @@ v-s:PsDelegatorForRequestDelegation
   v-ui:forProperty v-s:delegator ;
   v-ui:minCardinality 0 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type' === 'v-s:Appointment' || 'rdf:type' === 'v-s:Person' || ( 'rdf:type' === 'v-s:Person' && 'v-s:deleted' == true ) ) && 'v-s:hasAccount.isExists'=='true'" ;
+  v-ui:queryPrefix "('rdf:type' === 'v-s:Appointment' || 'rdf:type' === 'v-s:Person') && 'v-s:hasAccount.isExists'=='true'" ;
 .
 v-s:PsDelegatedPositionForRequestDelegation
   rdf:type v-ui:PropertySpecification ;
@@ -94,7 +94,7 @@ v-s:PsDelegatedPositionForRequestDelegation
   v-ui:forProperty v-s:delegatedPosition ;
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 10 ;
-  v-ui:queryPrefix "'rdf:type' === 'v-s:Position' || ( 'rdf:type' === 'v-s:Position' && 'v-s:deleted' == true )" ;
+  v-ui:queryPrefix "'rdf:type' === 'v-s:Position'" ;
 .
 v-s:PsDatesRequestDelegation
   rdf:type v-ui:PropertySpecification ;
@@ -115,7 +115,7 @@ v-s:RequestDelegationTemplate
   rdfs:label "Template for v-s:RequestDelegationUser class"@en ;
   v-ui:template """
 <script>
-  if ( individual.hasValue("rdf:type", new veda.IndividualModel("v-s:RequestDelegationAdmin")) ) {
+  if ( individual.hasValue("rdf:type", "v-s:RequestDelegationAdmin") ) {
     $("#delegator-control", template).removeClass("-edit").addClass("edit");
     $("#delegator-value", template).removeClass("edit").addClass("-edit");
     $("#position-control", template).removeClass("-edit").addClass("edit");
@@ -132,14 +132,14 @@ v-s:RequestDelegationTemplate
       <em about="v-s:delegator" property="rdfs:label"></em>
       <div about="@" id="delegator-value" rel="v-s:delegator" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
       <div rel="v-s:delegator" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
-      <veda-control id="delegator-control" data-type="link" rel="v-s:delegator" class="-view -edit search fulltext"></veda-control>
+      <veda-control id="delegator-control" data-type="link" rel="v-s:delegator" class="-view -edit search fulltext" data-deleted="true"></veda-control>
     </div>
   </div>
   <div class="row">
     <div class="col-md-6 col-xs-12">
       <em about="v-s:delegatedPosition" property="rdfs:label"></em>
       <div rel="v-s:delegatedPosition" data-template="v-ui:LabelTemplate" class="view edit search"></div>
-      <veda-control id="position-control" data-type="link" rel="v-s:delegatedPosition" class="-view -edit search fulltext"></veda-control>
+      <veda-control id="position-control" data-type="link" rel="v-s:delegatedPosition" class="-view -edit search fulltext" data-deleted="true"></veda-control>
       <div id="positions" class="-view edit -search">
         <div class="checkbox">
           <label>
@@ -178,10 +178,13 @@ v-s:RequestDelegationTemplate
   </div>
   <br>
   <div class="view -edit -search">
-    <em about="v-s:createdAppointment" property="rdfs:label"></em>
-    <ul about="@" rel="v-s:createdAppointment">
-      <li><a href="#/@" property="rdfs:label"></a></li>
-    </ul>
+    <hr class="margin-md">
+    <div class="row row-attribute view edit -search">
+      <div class="col-sm-3 col-xs-5">
+        <label about="v-s:createdAppointment" property="rdfs:label"></label>
+      </div>
+      <div class="col-sm-9 col-xs-7" about="@" rel="v-s:createdAppointment" data-template="v-ui:LabelLinkTemplate"></div>
+    </div>
   </div>
   <br>
   <div class="actions view edit -search">
@@ -222,43 +225,53 @@ v-s:RequestDelegationTemplate
     }
   }
   function delegatorDelegateHandler(property_uri, values) {
-    if (values.length && values[0]["rdf:type"][0].id === "v-s:Appointment") {
+    if ( values.length && values[0].hasValue("rdf:type", "v-s:Appointment") ) {
       individual[property_uri] = values[0]["v-s:employee"];
     }
   }
   function delegatorHandler(values) {
     $("#positions", template).empty();
     if (values.length) {
-      var delegator = individual["v-s:delegator"][0];
-      //var appointments_ids = query(veda.ticket, "('rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "') || ('rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "' && 'v-s:deleted' == true)").result;
-      var appointments_ids = query(veda.ticket, "('rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "')").result;
-      var appointments = get_individuals(veda.ticket, appointments_ids);
-      var positions_ids = appointments.map(function (appointment_json) {
-        var appointment = new veda.IndividualModel(appointment_json);
-        return appointment["v-s:occupation"][0].id;
-      });
-      var positions = get_individuals(veda.ticket, positions_ids);
-      positions.map(function (position_json) {
-        var position = new veda.IndividualModel(position_json);
-        var tmpl = $(positionTemplate);
-        var input = tmpl.find(".input");
-        var label = tmpl.find(".position-label");
-        if ( individual.hasValue("v-s:delegatedPosition", position) ) {
-          input.prop("checked", "checked");
-        }
-        input.prop( "id", position.id );
-        if (mode === "view") {
-          input.prop("disabled", "disabled");
-        }
-        label.text( position["rdfs:label"] );
-        tmpl.appendTo( $("#positions", template) );
+      var delegator = values[0];
+      veda.Backend.query(veda.ticket, "('rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "')")
+      .then(function (queryResult) {
+        return queryResult.result;
+      })
+      .then(function (appointments_ids) {
+        return veda.Backend.get_individuals(veda.ticket, appointments_ids);
+      })
+      .then(function (appointments) {
+        var positions_ids = appointments.map(function (appointment_json) {
+          var appointment = new veda.IndividualModel(appointment_json);
+          return appointment["v-s:occupation"][0].id;
+        });
+        return positions_ids;
+      })
+      .then(function (positions_ids) {
+        return veda.Backend.get_individuals(veda.ticket, positions_ids);
+      })
+      .then(function (positions) {
+        positions.map(function (position_json) {
+          var position = new veda.IndividualModel(position_json);
+          var tmpl = $(positionTemplate);
+          var input = tmpl.find(".input");
+          var label = tmpl.find(".position-label");
+          if ( individual.hasValue("v-s:delegatedPosition", position) ) {
+            input.prop("checked", "checked");
+          }
+          input.prop( "id", position.id );
+          if (mode === "view") {
+            input.prop("disabled", "disabled");
+          }
+          label.text( position.toString() );
+          tmpl.appendTo( $("#positions", template) );
+        });
       });
     }
   }
 
-  //if ( mode === "search") { return }
-  if ( mode === "edit" && individual.is("v-s:RequestDelegationUser") && individual.isNew() ) {
-    individual["v-s:delegator"] = [veda.user];
+  if ( mode === "edit" && individual.isNew() ) {
+    individual["v-s:delegator"] = [ veda.user ];
   }
 
   template.on("view edit", function (e) {
@@ -467,7 +480,7 @@ allDelegated["rdf:value"] = allDelegated["rdf:value"] || [];
 position_uris.map(function (position_uri) {
   var uri = "d:" + Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri].join("_").split(":").join("_") ).substring(40);
   var appointment = get_individual(ticket, uri);
-  
+
   /* label calculates on server automatically
   // Compute label
   var appointment_label;

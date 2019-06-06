@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Veda
+Comment=ontology driven platform
+TryExec=veda
+Exec=veda %F
+Icon=veda
+

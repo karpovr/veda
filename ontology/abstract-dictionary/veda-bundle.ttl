@@ -79,11 +79,6 @@ v-s:LeaveComment
   rdfs:label "Комментировать"@ru ;
   rdfs:label "Commment"@en ;
 .
-v-s:Drafts
-  rdf:type v-s:Bundle ;
-  rdfs:label "Черновики"@ru ;
-  rdfs:label "Drafts"@en ;
-.
 v-s:Registries
   rdf:type v-s:Bundle ;
   rdfs:label "Реестры"@ru ;
@@ -129,22 +124,30 @@ v-s:Save
   rdfs:label "Сохранить"@ru ;
   rdfs:label "Save"@en ;
 .
+v-s:SaveSuccess
+  rdf:type v-s:Bundle ;
+  rdfs:label "Успешно сохранено"@ru ;
+  rdfs:label "Successfully saved"@en ;
+.
+v-s:SaveError
+  rdf:type v-s:Bundle ;
+  rdfs:label "Ошибка сохранения"@ru ;
+  rdfs:label "Save error"@en ;
+.
+v-s:SendSuccess
+  rdf:type v-s:Bundle ;
+  rdfs:label "Успешно отправлено"@ru ;
+  rdfs:label "Successfully sent"@en ;
+.
+v-s:SendError
+  rdf:type v-s:Bundle ;
+  rdfs:label "Ошибка отправки"@ru ;
+  rdfs:label "Send error"@en ;
+.
 v-s:Update
   rdf:type v-s:Bundle ;
   rdfs:label "Обновить"@ru ;
   rdfs:label "Update"@en ;
-.
-v-s:Draft
-  rdf:type v-s:Bundle ;
-  rdfs:label "Черновик"@ru ;
-  rdfs:label "Draft"@en ;
-  rdfs:comment "ч"@ru ;
-  rdfs:comment "d"@en ;
-.
-v-s:ToDraft
-  rdf:type v-s:Bundle ;
-  rdfs:label "В черновик"@ru ;
-  rdfs:label "Save to draft"@en ;
 .
 v-s:Find
   rdf:type v-s:Bundle ;
@@ -206,12 +209,7 @@ v-s:InvertSelection
   rdfs:label "Инвертировать"@ru ;
   rdfs:label "Invert"@en ;
 .
-v-s:DeleteDraft
-  rdf:type v-s:Bundle ;
-  rdfs:label "Удалить черновик"@ru ;
-  rdfs:label "Delete draft"@en ;
-.
-v-s:CreateBundle
+v-s:Create
   rdf:type v-s:Bundle ;
   rdfs:label "Создать"@ru ;
   rdfs:label "Create"@en ;
@@ -376,4 +374,9 @@ v-s:CoordinationList
   rdf:type v-s:Bundle ;
   rdfs:label "Лист согласования"@ru ;
   rdfs:label "Coordination list"@en ;
+.
+v-s:CreateBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Создать"@ru ;
+  rdfs:label "Create"@en ;
 .

@@ -30,18 +30,20 @@ v-s:IncomingLetter_ComplexRouteStartForm_Template
   var stages = ['review'];
   var complex = "s-wf:ComplexRouteStartForm_";
   var simple = "s-wf:SimpleRouteStartForm_";
-  if (mode!=="edit") return;
+  if ( mode !== "edit" ) { return; }
+
+  if ( !individual.hasValue('v-wf:processedDocument') ) { return; }
 
   var doc = individual['v-wf:processedDocument'][0];
-  if (!doc) { return; }
 
-  individual.addSimpleStartForm(stages, complex);
+  return doc.getPropertyChain("v-s:recipient", "v-s:correspondentPerson").then(function (correspondentPerson) {
+    individual.addSimpleStartForm(stages, complex);
+    individual[complex+'review'][0][simple+'visible'] = [true];
+    individual[complex+'review'][0][simple+'editable'] = [true];
+    individual[complex+'review'][0][simple+'deadlineDays'] = [10];
+    individual[complex+'review'][0][simple+'participant'] = correspondentPerson;
+  });
 
-  individual[complex+'review'][0][simple+'visible'] = [true];
-  individual[complex+'review'][0][simple+'editable'] = [true];
-  individual[complex+'review'][0][simple+'deadlineDays'] = [10];
-  if (doc.hasValue("v-s:recipient")) individual[complex+'review'][0][simple+'participant'] = doc["v-s:recipient"][0]["v-s:correspondentPerson"];
-  
 //# sourceURL=v-s:IncomingLetter_ComplexRouteStartForm_Template_pre
 </script>
 <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div>
@@ -57,23 +59,25 @@ v-s:OutgoingLetter_ComplexRouteStartForm_Template
   var stages = ['coordination1', 'coordination2', 'sign'];
   var complex = "s-wf:ComplexRouteStartForm_";
   var simple = "s-wf:SimpleRouteStartForm_";
-  if (mode!=="edit") return;
+  if ( mode!=="edit" ) return;
+
+  if ( !individual.hasValue('v-wf:processedDocument') ) { return; }
 
   var doc = individual['v-wf:processedDocument'][0];
-  if (!doc) { return; }
 
-  individual.addSimpleStartForm(stages, complex);
-
-  individual[complex+'coordination1'][0][simple+'visible'] = [true];
-  individual[complex+'coordination1'][0][simple+'editable'] = [true];
-  individual[complex+'coordination1'][0][simple+'deadlineDays'] = [3];
-  individual[complex+'coordination2'][0][simple+'visible'] = [true];
-  individual[complex+'coordination2'][0][simple+'editable'] = [true];
-  individual[complex+'coordination2'][0][simple+'deadlineDays'] = [3];
-  individual[complex+'sign'][0][simple+'visible'] = [true];
-  individual[complex+'sign'][0][simple+'editable'] = [true];
-  individual[complex+'sign'][0][simple+'deadlineDays'] = [3];
-  individual[complex+'sign'][0][simple+'participant'] = doc["v-s:sender"][0]["v-s:correspondentPerson"];
+  return doc.getPropertyChain("v-s:sender", "v-s:correspondentPerson").then(function (correspondentPerson) {
+    individual.addSimpleStartForm(stages, complex);
+    individual[complex+'coordination1'][0][simple+'visible'] = [true];
+    individual[complex+'coordination1'][0][simple+'editable'] = [true];
+    individual[complex+'coordination1'][0][simple+'deadlineDays'] = [3];
+    individual[complex+'coordination2'][0][simple+'visible'] = [true];
+    individual[complex+'coordination2'][0][simple+'editable'] = [true];
+    individual[complex+'coordination2'][0][simple+'deadlineDays'] = [3];
+    individual[complex+'sign'][0][simple+'visible'] = [true];
+    individual[complex+'sign'][0][simple+'editable'] = [true];
+    individual[complex+'sign'][0][simple+'deadlineDays'] = [3];
+    individual[complex+'sign'][0][simple+'participant'] = correspondentPerson;
+  });
 
 //# sourceURL=v-s:OutgoingLetter_ComplexRouteStartForm_Template_pre
 </script>

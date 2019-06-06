@@ -1,0 +1,117 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+@prefix mrc: <http://semantic-machines.com/meter-reading-collect/> .
+
+<http://semantic-machines.com/meter-reading-collect-schema/>
+  rdf:type owl:Ontology ;
+  rdfs:isDefinedBy mrc: ;
+  rdfs:label "Сборка показаний коммунальных счетчиков"@ru ;
+.
+
+mrc:Account
+  rdf:type rdfs:Class ;
+  rdfs:label "Личный счет"@ru ;
+  rdfs:label "Account"@en ;
+.
+
+mrc:Supplier
+  rdf:type rdfs:Class ;
+  rdfs:label "Поставщик услуг"@ru ;
+  rdfs:label "Supplier"@en ;
+.
+
+mrc:MeterDevice
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Прибор учета"@ru ;
+  rdfs:label "Meter device"@en ;
+.
+
+mrc:MeterReading
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Показание прибора учета"@ru ;
+  rdfs:label "Meter reading"@en ;
+.
+
+############ связь счета с человеком
+
+mrc:hasAccount
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Личный счет"@ru ;
+  rdfs:label "Account"@en ;
+  rdfs:domain v-s:Person ;
+  rdfs:range mrc:Account ;
+.
+
+mrc:hasOwner
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Владелец"@ru ;
+  rdfs:label "Owner"@en ;
+  rdfs:domain mrc:Account ;
+  rdfs:range v-s:Person ;
+.
+
+##################
+
+mrc:id
+  rdfs:label "Идентификатор"@ru ;
+  rdfs:label "Identifier"@ru ;
+  rdfs:domain mrc:Account, mrc:MeterDevice ;
+  rdfs:range xsd:string ;
+.
+
+mrc:hasSupplier
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Поставщик"@ru ;
+  rdfs:label "Supplier"@en ;
+  rdfs:domain mrc:Account ;
+  rdfs:range mrc:Supplier ;
+.
+
+mrc:hasMeterDevice
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Счетчик"@ru ;
+  rdfs:label "Meter device"@en ;
+  rdfs:domain mrc:Account, mrc:MeterReading ;
+  rdfs:range mrc:MeterDevice ;
+.
+
+mrc:calibrationDate
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Дата поверки"@ru ;
+  rdfs:label "Calibration date"@en ;
+  rdfs:domain mrc:MeterDevice ;
+  rdfs:range xsd:dateTime ;
+.
+
+mrc:readingValue
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Показания счетчика"@ru ;
+  rdfs:label "Reading value"@en ;
+  rdfs:domain mrc:MeterReading ;
+  rdfs:range xsd:decimal ;
+.
+
+mrc:readingDate
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Дата показния"@ru ;
+  rdfs:label "Reading date"@en ;
+  rdfs:domain mrc:MeterReading ;
+  rdfs:range xsd:dateTime ;
+.
+
+mrc:previousReading
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Предыдущее значение"@ru ;
+  rdfs:label "Previous value"@en ;
+  rdfs:domain mrc:MeterReading, mrc:MeterDevice ;
+  rdfs:range mrc:MeterReading ;
+.

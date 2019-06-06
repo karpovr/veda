@@ -10,6 +10,7 @@ import { Selector, t } from 'testcafe';
     basic.login('karpovrt', '123');
     basic.createTestUI('Тест комментария', timeStamp);
     await t
+      .setNativeDialogHandler(() => true)
       .expect(Selector('#user-info').innerText).contains('Администратор2 .')
       .navigateTo( pageForNavigateFromConfig )
       .typeText('veda-control#comment', timeStamp)
@@ -33,7 +34,6 @@ import { Selector, t } from 'testcafe';
       .expect(Selector('a[id="edit-comment"][style="display: none;"]').count).eql(1)
       .expect(Selector('a[id="delete"][style="display: none;"]').count).eql(1)
       .expect(Selector('a[id="delete"][about="v-s:Delete"]').count).eql(2)
-      .setNativeDialogHandler(() => true)
       .click(Selector('a[id="delete"][about="v-s:Delete"]').nth(1))         //delete reply-comment
       //ccus timeout
       .wait(3000)

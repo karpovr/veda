@@ -313,7 +313,7 @@ func (conn *Connector) Get(needAuth bool, userUri string, uris []string, trace b
 			}
 			_, err = lmdb_client.Connect(roStorageURL)
 			if err != nil {
-				log.Printf("ERR! Get: fail connect to lmdb service %s, err=%s\n", roStorageURL, err)
+				log.Printf("ERR! Get: fail connect to lmdb service, uri=[%s], err=%s\n", roStorageURL, err)
 				rr.CommonRC = InternalServerError
 				return rr
 			}

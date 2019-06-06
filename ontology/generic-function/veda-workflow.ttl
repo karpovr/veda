@@ -322,6 +322,15 @@ v-wf:executorExpression
   rdfs:range xsd:string ;
 .
 
+v-wf:enforceProcessing
+  rdf:type rdf:Property ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Обработать принудительно"@ru ;
+  rdfs:label "Enforce processing"@en ;
+  rdfs:domain v-wf:WorkOrder ;
+  rdfs:range xsd:boolean ;
+.
+
 #------------------------------------------------------
 v-wf:VarDefine
   rdf:type owl:Class ;
@@ -501,11 +510,11 @@ v-wf:SimpleNetTemplate
             #<a href="#/@">
               <span about="@" rel="v-wf:mapToVariable">
                 <span>
-                  <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                  <span about="@" property="v-wf:varDefineName"></span>
                 </span>
               </span> =
-              <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
-              [<span about="@" property="@" data-template="v-ui:LabelTemplateWithEditLink"></span>]
+              <span about="@" property="v-wf:mappingExpression"></span>
+              [<span about="@" property="@"></span>]
             </a>
           <div>
         </div>
@@ -1004,10 +1013,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1026,10 +1035,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1048,10 +1057,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1070,10 +1079,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1092,10 +1101,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1114,10 +1123,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1136,10 +1145,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1158,10 +1167,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1180,10 +1189,10 @@ v-wf:TaskTemplateAsProperties
               #<a href="#/@">
                 <span about="@" rel="v-wf:mapToVariable">
                   <span>
-                    <span about="@" property="v-wf:varDefineName" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                    <span about="@" property="v-wf:varDefineName"></span>
                   </span>
                 </span> =
-                <span about="@" property="v-wf:mappingExpression" data-template="v-ui:LabelTemplateWithEditLink"></span>
+                <span about="@" property="v-wf:mappingExpression"></span>
               </a>
             </p>
           <div>
@@ -1556,7 +1565,7 @@ v-wf:WorkOrderTemplate
     <button id="repeat-workOrder" type="button" class="btn btn-sm margin-sm-h btn-default">
       <span>repeat</span>
     </button>
-    <span about="@" property="@"></span> 
+    <span about="@" property="@"></span>
     <a href="#/@"><i class='glyphicon glyphicon-share-alt'></i></a>
   </strong>
   <div id="executor">
@@ -1583,19 +1592,15 @@ v-wf:WorkOrderTemplate
   <br/>
 </div>
 <script>
-  if (veda.appointment.id=="cfg:AdministratorAppointment" && individual.hasValue("v-wf:forWorkItem") 
-      && individual["v-wf:forWorkItem"][0].hasValue("v-wf:isCompleted", true) ) {
-    $("#repeat-workOrder", template).click(function(){
-      individual.properties["v-wf:enforceProcessing"] = [{"type": "Boolean", "data": true }];
-      var res = put_individual(veda.ticket, individual.toJson());
-      wait_module(2, res.op_id);
-      wait_module(16, res.op_id);      
-      setTimeout(function(){
-        delete individual.properties["v-wf:enforceProcessing"];
-        individual.isSync(false);
-        individual.save();
-      }, 1000)  
-    })
+  if (
+    veda.appointment.id === "cfg:AdministratorAppointment"
+    && individual.hasValue("v-wf:forWorkItem")
+    && individual["v-wf:forWorkItem"][0].hasValue("v-wf:isCompleted", true)
+  ) {
+    $("#repeat-workOrder", template).click(function () {
+      individual["v-wf:enforceProcessing"] = [ true ];
+      individual.save();
+    });
   } else {
     $("#repeat-workOrder", template).remove();
   }
@@ -1619,9 +1624,9 @@ v-wf:DecisionFormTemplate
   v-ui:template """
 <div class="hidden"></div>
 <script>
-  var timeout = setTimeout(function () {
-    if ( ( !individual.hasValue("v-wf:read") || !individual["v-wf:read"][0] ) && individual.rights.hasValue("v-s:canUpdate", true) ) {
-      set_in_individual({
+  individual.canUpdate().then(function (canUpdate) {
+    if ( canUpdate && !individual.hasValue("v-wf:read", true) ) {
+      return veda.Backend.set_in_individual({
         ticket: veda.ticket,
         individual: {
           "@": individual.id,
@@ -1629,13 +1634,9 @@ v-wf:DecisionFormTemplate
             data: true,
             type: "Boolean"
           }]
-        },
-        async: true
+        }
       });
     }
-  }, 250);
-  template.one("remove", function () {
-    clearTimeout(timeout);
   });
   //# sourceURL=v-wf:DecisionFormTemplate
 </script>
@@ -2095,7 +2096,7 @@ v-wf:isDirectTask
   rdf:type rdf:Property ;
   rdfs:isDefinedBy v-wf: ;
   rdfs:label "Прямая задача"@ru ;
-  rdfs:label "Is вшксуе ефыд"@en ;
+  rdfs:label "Is direct task"@en ;
   rdfs:domain v-wf:WorkItem ;
   rdfs:domain v-wf:Process ;
   rdfs:domain v-wf:DecisionForm ;

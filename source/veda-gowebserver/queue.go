@@ -29,7 +29,7 @@ const (
 	CURRENT Mode = 2
 )
 
-const queue_db_path string = "./data/queue"
+//const queue_db_path string = "./data/queue"
 
 type Header struct {
 	start_pos     uint64
@@ -113,7 +113,7 @@ func (ths *Consumer) open() bool {
 		return false
 	}
 
-	ths.file_name_info_pop = queue_db_path + "/" + ths.queue.name + "_info_pop_" + ths.name
+	ths.file_name_info_pop = ths.queue.queue_db_path + "/" + ths.queue.name + "_info_pop_" + ths.name
 
 	var err error
 
@@ -383,12 +383,14 @@ type Queue struct {
 	file_name_info_queue string
 	file_name_queue      string
 
+	queue_db_path string
+	
 	// --- tmp ---
 	header Header
 	hash   hash.Hash32
 }
 
-func NewQueue(_name string, _mode Mode) *Queue {
+func NewQueue(_name string, _mode Mode, _queue_db_path string) *Queue {
 	p := new(Queue)
 
 	p.name = _name
@@ -399,6 +401,13 @@ func NewQueue(_name string, _mode Mode) *Queue {
 	header_buff = make([]uint8, p.header.length())
 
 	p.hash = crc32.NewIEEE()
+	
+	if (_queue_db_path != "") {
+		p.queue_db_path = _queue_db_path
+	} else {
+		p.queue_db_path = "./data/queue"
+	}	
+	
 	return p
 }
 
@@ -407,7 +416,7 @@ func (ths *Queue) set_r_queue_file(part_id uint32) {
         if (ths.id != part_id || ths.ff_queue_r == nil) {
             ths.id = part_id;
 			part := ths.name + "-" + strconv.FormatUint(uint64(ths.id), 10)
-			ths.file_name_queue = queue_db_path + "/" + part + "/" + ths.name + "_queue"
+			ths.file_name_queue = ths.queue_db_path + "/" + part + "/" + ths.name + "_queue"
 
 			ths.ff_queue_r, _ = os.OpenFile(ths.file_name_queue, os.O_RDONLY, 0644)
         }
@@ -494,7 +503,7 @@ func (ths *Queue) get_info_push(part_id uint32) bool {
 
 	ths.ff_info_push_r.Close()
 	part := ths.name + "-" + strconv.FormatUint(uint64(part_id), 10)
-	ths.file_name_info_push = queue_db_path + "/" + part + "/" + ths.name + "_info_push"
+	ths.file_name_info_push = ths.queue_db_path + "/" + part + "/" + ths.name + "_info_push"
 	ths.ff_info_push_r, err = os.OpenFile(ths.file_name_info_push, os.O_RDONLY, 0644)
 	if err != nil {
 		ths.isReady = false
@@ -537,7 +546,7 @@ func (ths *Queue) get_info_push(part_id uint32) bool {
 func (ths *Queue) get_info_queue() bool {
 	var err error
 
-	ths.file_name_info_queue = queue_db_path + "/" + ths.name + "_info_queue"
+	ths.file_name_info_queue = ths.queue_db_path + "/" + ths.name + "_info_queue"
 	ths.ff_info_queue_r.Close()
 	ths.ff_info_queue_r, err = os.OpenFile(ths.file_name_info_queue, os.O_RDONLY, 0644)
 	if err != nil {

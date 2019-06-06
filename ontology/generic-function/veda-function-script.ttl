@@ -510,7 +510,7 @@ v-s:OperationFooterTemplate
     individual.save();
   });
   $(".action#stop", template).click(function () {
-    set_in_individual(veda.ticket, {
+    veda.Backend.set_in_individual(veda.ticket, {
       "@": individual.id,
       "v-s:hasStatus": [{
         type: "Uri",
@@ -581,7 +581,7 @@ v-s:OperationStatusTemplate
     individual.save();
   });
   $(".action#stop", template).click(function () {
-    set_in_individual(veda.ticket, {
+    veda.Backend.set_in_individual(veda.ticket, {
       "@": individual.id,
       "v-s:hasStatus": [{
         type: "Uri",

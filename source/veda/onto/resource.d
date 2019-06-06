@@ -97,19 +97,19 @@ struct Resource
         static if (is (T == bool))
             return m_bool;
         else
-            static if (is (T == decimal))
-                return m_decimal;
-            else
-                static if (is (T == long))
-                    return m_int;
-                else
-                    static if (is (T == ulong))
-                        return cast(ulong)m_int;
-                    else
-                        static if (is (T == string))
-                            return m_string;
-                        else
-                            static assert("Resource can only be casted to (bool, long, double, string. Not " ~ T.stringof ~ ".");
+        static if (is (T == decimal))
+            return m_decimal;
+        else
+        static if (is (T == long))
+            return m_int;
+        else
+        static if (is (T == ulong))
+            return cast(ulong)m_int;
+        else
+        static if (is (T == string))
+            return m_string;
+        else
+            static assert("Resource can only be casted to (bool, long, double, string. Not " ~ T.stringof ~ ".");
     }
 
     // /////////////////////////////////////////
@@ -387,7 +387,12 @@ string getAsStringify(Resources rss)
         if (res.length != 0)
             res ~= "," ~ rs.data;
         else
-            res ~= rs.data;
+        {
+            if (rs.data !is null)
+            {
+                res ~= rs.asString();
+            }
+        }
     }
     return res;
 }

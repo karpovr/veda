@@ -12,7 +12,7 @@
   - Rich browser-side web-client (stateful).
 
 **3. Server components**
-  - Integrated LMDB database library. Key-value memory mapped storage (http://symas.com/mdb).
+  - Tarantool database (https://www.tarantool.io)
   - Integrated Xapian search engine library. Used for data indexing & querying (http://xapian.org).
   - Integrated V8 javascript engine library. Used for workflow execution engine and other server-side logic (https://code.google.com/p/v8).
   - Fasthttp web server.

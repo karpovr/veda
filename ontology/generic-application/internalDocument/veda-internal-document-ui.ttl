@@ -92,8 +92,8 @@ v-s:InternalDocumentTemplate
   rdfs:label "Template for v-s:InternalDocument class"@en ;
   v-ui:template """
 <script>
-  if (mode == "edit" && individual.isNew()) {
-    if (!individual.hasValue("v-s:initiator")){
+  if ( mode == "edit" && individual.isNew() ) {
+    if ( !individual.hasValue("v-s:initiator") ) {
      individual["v-s:initiator"] = [ veda.appointment["v-s:parentUnit"][0] ] ;
     }
   }
@@ -161,8 +161,7 @@ v-s:InternalDocumentTemplate
 </div>
 <script>
   $("#make-copy", template).click(function () {
-    var cntr = $("<div></div>"),
-        _class = new veda.IndividualModel("v-s:InternalDocument"),
+    var _class = new veda.IndividualModel("v-s:InternalDocument"),
         InternalDocument = new veda.IndividualModel(),
         tmpl = "v-s:InternalDocumentTemplate" ;
     InternalDocument["rdf:type"] = [_class] ;
@@ -182,25 +181,20 @@ v-s:InternalDocumentTemplate
   });
 
   function processHandler() {
-    if (individual.hasValue("v-wf:isProcess")
-      && individual["v-wf:isProcess"][0].hasValue("v-wf:instanceOf")
-      && individual["v-wf:isProcess"][0]["v-wf:instanceOf"][0].id === "s-wf:net_complex_route"
-    ) {
-      $('#send.action', template).remove();
-      // $('#save.action', template).remove();
-      // $('#edit.action', template).remove();
-      $('#delete.action', template).remove();
-    } else if (individual.isNew() || individual.rights['v-s:canUpdate'][0] === true) {
-      $('#send.action', template).off("click");
-      $('#send.action', template).on('click', function () {
-        veda.Util.send(individual, template, 's-wf:complexRouteTransform', undefined, 'v-s:InternalDocument_ComplexRouteStartForm_Template');
-      });
-    } else {
-      $('#send.action', template).remove();
-      // $('#save.action', template).remove();
-      // $('#edit.action', template).remove();
-      $('#delete.action', template).remove();
-    }
+    individual.canUpdate().then(function (canUpdate) {
+      if ( individual.hasValue("v-wf:isProcess") ) {
+        $('#send.action', template).remove();
+        $('#delete.action', template).remove();
+      } else if ( individual.isNew() || canUpdate ) {
+        $('#send.action', template).off("click");
+        $('#send.action', template).on('click', function () {
+          veda.Util.send(individual, template, 's-wf:complexRouteTransform', undefined, 'v-s:InternalDocument_ComplexRouteStartForm_Template');
+        });
+      } else {
+        $('#send.action', template).remove();
+        $('#delete.action', template).remove();
+      }
+    });
   }
   processHandler();
 
@@ -209,7 +203,7 @@ v-s:InternalDocumentTemplate
     individual.off("afterReset", processHandler);
   });
 
-  //# sourceURL=v-s:InternalDocumentTemplate
+//# sourceURL=v-s:InternalDocumentTemplate
 </script>
   """
 .
