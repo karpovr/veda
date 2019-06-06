@@ -28,6 +28,7 @@ v-s:TTLFileBlank
   rdf:type v-fc:Blank ;
   rdfs:label "TTLFile"@ru ;
   rdfs:label "TTLFile"@en ;
+  v-s:origin "Client"^^xsd:string ;
   v-fc:targetType v-s:TTLFile ;
 .
 v-s:TTLFileSearch
@@ -35,7 +36,6 @@ v-s:TTLFileSearch
   rdfs:label "TTLFile"@ru ;
   rdfs:label "TTLFile search"@en ;
   v-fs:searchBlank v-s:TTLFileBlank ;
-  v-fs:fulltextQuery "('rdf:type'=='v-s:TTLFile' && 'v-s:origin'=='Client')" ;
   v-fs:searchBlankTemplate v-s:TTLFileSearchBlankTemplate ;
   v-fs:searchResultTemplate v-s:TTLFileSearchResultTemplate ;
   v-fs:searchOnLoad true ;
@@ -307,7 +307,7 @@ v-up:UploadTemplate
     var str = file.name.split(' ').join('');
     TTLFile.id = "d:" + str ;
     TTLFile["rdf:type"] = [_class];
-    TTLFile["v-s:created"] = [veda.Util.newDate(new Date())];
+    TTLFile["v-s:created"] = veda.Util.newDate(new Date());
     TTLFile["v-s:fileUri"] = [str];
     TTLFile["v-s:origin"] = veda.Util.newStr( 'Client' );
     if (newMas.length > 0) {
