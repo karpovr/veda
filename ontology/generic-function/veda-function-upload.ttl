@@ -196,21 +196,23 @@ v-up:UploadTemplate
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
             predicate = newQuad[i].object.substring(back + 1, endOfLine),
             string = newQuad[i].object.substring(1, back);
-        if ( predicate === 'xsd:dateTime' ) {
-          newObject[ newQuad[i].predicate ] = veda.Util.newDate( string );
-        }
-        if ( predicate === 'xsd:integer' ) {
-          newObject[ newQuad[i].predicate ] = veda.Util.newInt( string );
-        }
-        if ( predicate === 'xsd:decimal' ) {
-          newObject[ newQuad[i].predicate ] = veda.Util.newDecimal( string );
-        }
-        if ( predicate === 'xsd:boolean' ) {
-          var convertToBool = (string == 'true');
-          newObject[ newQuad[i].predicate ] = veda.Util.newBool( convertToBool );
-        }
-        if ( predicate === 'xsd:string' ) {
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( string );
+        switch (predicate) {
+          case "xsd:dateTime":
+            newObject[ newQuad[i].predicate ] = veda.Util.newDate( string );
+            break;
+          case "xsd:integer":
+            newObject[ newQuad[i].predicate ] = veda.Util.newInt( string );
+            break;
+          case "xsd:decimal":
+            newObject[ newQuad[i].predicate ] = veda.Util.newDecimal( string );
+            break;
+          case "xsd:boolean":
+            var convertToBool = (string == 'true');
+            newObject[ newQuad[i].predicate ] = veda.Util.newBool( convertToBool );
+            break;
+          case "xsd:string":
+            newObject[ newQuad[i].predicate ] = veda.Util.newStr( string );
+            break;
         }
       } else {
         if ( newQuad[i].predicate in newObject ) {
