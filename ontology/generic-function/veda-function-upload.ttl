@@ -94,7 +94,7 @@ v-up:UploadTemplate
 </div>
 <script>
 
-  $('.toggle-select-scheme').click(function(){
+  $('.toggle-select-scheme', template).click(function(){
     if (newMas.length > 0){
       if ($(this).is(':checked')){
         $('.toggle-select-scheme').prop('checked', true);
@@ -118,34 +118,35 @@ v-up:UploadTemplate
 
   var notify = veda.Notify ? new veda.Notify() : function () {};
   function handleFileSelect(e) {
-		var fileInput = document.getElementById('files') ;
-		var fileDisplayArea = document.getElementById('fileDisplayArea') ;
+    var fileInput = e.target ;
+    var fileDisplayArea = $("#fileDisplayArea", template);
     var file = fileInput.files[0] ;
     var reader = new FileReader() ;
     reader.onload = function(e) {
-      fileDisplayArea.innerText = reader.result ;
-      console.log(fileDisplayArea.innerText);
+      fileDisplayArea.text(reader.result);
+      console.log(reader.result);
       var all_quad = [];
       var parser = new N3.Parser();
       var obj = {};
       parser.parse(
-      fileDisplayArea.innerText,
-      (error, quad, prefixes) => {
-        try {
-          if (quad) {
-            all_quad = all_quad.concat(quad);
-          } else {
-            console.log("# That's all, folks!", prefixes);
-            var masPre = Object.keys(prefixes) ;
-            cutPredicate(all_quad, masPre, prefixes);
+        reader.result,
+        function (error, quad, prefixes) {
+          try {
+            if (quad) {
+              all_quad = all_quad.concat(quad);
+            } else {
+              console.log("# That's all, folks!", prefixes);
+              var masPre = Object.keys(prefixes) ;
+              cutPredicate(all_quad, masPre, prefixes);
+            }
+          } catch(e) {
+            console.log(e.name);
+            console.log(e.stack);
+            console.log(e.message);
+            notify("danger", {name: "Problem with TTL"});
           }
-        } catch(e) {
-          console.log(e.name);
-          console.log(e.stack);
-          console.log(e.message);
-          notify("danger", {name: "Problem with TTL"});
         }
-      });
+      );
     }
     reader.readAsText(file);
   }
@@ -296,7 +297,7 @@ v-up:UploadTemplate
   $("#upload", template).click(function () {
     if (newMas.length > 0) {
       makeTTLFile();
-      put_individuals(veda.ticket, newMas);
+      veda.Backend.put_individuals(veda.ticket, newMas);
       $("#upload", template).hide();
       notify("success", {name: "Success sending"});
     } else {
@@ -321,7 +322,7 @@ v-up:UploadTemplate
     }
     TTLFile.save();
   }
-  document.getElementById('files').addEventListener('change', handleFileSelect, false) ;
+  $("#files", template).on("change", handleFileSelect) ;
   //# sourceURL=UploadTTL
 </script>
   """ ;
