@@ -76,8 +76,7 @@ v-up:UploadTemplate
         <div class="panel-body">
           <input type="checkbox" class="toggle-select-scheme"> Схема<br>
           <em about="v-s:attachment" property="rdfs:label"></em>
-          <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
-          <input type="file" id="files"></input>
+          <input type="file" id="files">
           <div id="fileDisplayArea"></div>
         </div>
       </div>
@@ -118,6 +117,8 @@ v-up:UploadTemplate
 
   var notify = veda.Notify ? new veda.Notify() : function () {};
   function handleFileSelect(e) {
+    newObject = {} ;
+    newMas = [] ;
     var fileInput = e.target ;
     var fileDisplayArea = $("#fileDisplayArea", template);
     var file = fileInput.files[0] ;
