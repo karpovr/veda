@@ -77,7 +77,7 @@ v-up:UploadTemplate
           <input type="checkbox" class="toggle-select-scheme"> Схема<br>
           <em about="v-s:attachment" property="rdfs:label"></em>
           <div rel="v-s:attachment" data-template="v-ui:FileMinTemplate" data-embedded="true"></div>
-          <input type="file" id="files" multiple></input>
+          <input type="file" id="files"></input>
           <div id="fileDisplayArea"></div>
         </div>
       </div>
@@ -229,24 +229,23 @@ v-up:UploadTemplate
   }
 
   function quadCut(quad, masPre, prefixes) {
-    var subjectIndex = quad.subject.lastIndexOf("/"),
-        subjectIndex1 = quad.subject.lastIndexOf("#"),
-        subjectPrefix = quad.subject.substring(0, subjectIndex + 1),
+    var subjectIndexBack = quad.subject.lastIndexOf("/"),
+        subjectPrefixBack = quad.subject.substring(0, subjectIndexBack + 1),
 
-        predicateIndex = quad.predicate.lastIndexOf("/"),
-        predicateIndex1 = quad.predicate.lastIndexOf("#"),
-        predicatePrefix = quad.predicate.substring(0, predicateIndex + 1),
-        predicatePrefix1 = quad.predicate.substring(0, predicateIndex1 + 1),
+        predicateIndexBack = quad.predicate.lastIndexOf("/"),
+        predicateIndexSharp = quad.predicate.lastIndexOf("#"),
+        predicatePrefixBack = quad.predicate.substring(0, predicateIndexBack + 1),
+        predicatePrefixSharp = quad.predicate.substring(0, predicateIndexSharp + 1),
 
-        objectIndex = quad.object.lastIndexOf("/"),
-        objectIndex1 = quad.object.lastIndexOf("#"),
-        objectIndex2 = quad.object.lastIndexOf("^"),
-        objectPrefix = quad.object.substring(0, objectIndex + 1),
-        objectPrefix1 = quad.object.substring(0, objectIndex1 + 1),
-        objectPrefix2 = quad.object.substring(objectIndex2 + 1, objectIndex1 + 1);
+        objectIndexBack = quad.object.lastIndexOf("/"),
+        objectIndexSharp = quad.object.lastIndexOf("#"),
+        objectIndexBitwise = quad.object.lastIndexOf("^"),
+        objectPrefixBack = quad.object.substring(0, objectIndexBack + 1),
+        objectPrefixSharp = quad.object.substring(0, objectIndexSharp + 1),
+        objectPrefixBitwise = quad.object.substring(objectIndexBitwise + 1, objectIndexSharp + 1);
 
     for (var i = 0; i<masPre.length; i++){
-      if ( prefixes[ masPre[i] ] === subjectPrefix ){
+      if ( prefixes[ masPre[i] ] === subjectPrefixBack ){
         if ( quad.subject.lastIndexOf("/") ) {
           var colonIndex = quad.subject.lastIndexOf("/"),
               colonIndexOfSpace = quad.subject.lastIndexOf("\\n"),
@@ -254,29 +253,29 @@ v-up:UploadTemplate
           quad.subject = masPre[i] + ":" + prefixForCut;
         }
       }
-      if ( prefixes[ masPre[i] ] === predicatePrefix && quad.predicate.lastIndexOf("/") ){
+      if ( prefixes[ masPre[i] ] === predicatePrefixBack && quad.predicate.lastIndexOf("/") ){
         var colonIndex = quad.predicate.lastIndexOf("/"),
             colonIndexOfSpace = quad.predicate.lastIndexOf("\\n"),
             prefixForCut = quad.predicate.substring(colonIndex + 1, colonIndexOfSpace);
         quad.predicate = masPre[i] + ":" + prefixForCut;
-      } else if ( prefixes[ masPre[i] ] === predicatePrefix1 ){
+      } else if ( prefixes[ masPre[i] ] === predicatePrefixSharp ){
         var colonIndex = quad.predicate.lastIndexOf("#"),
             colonIndexOfSpace = quad.predicate.lastIndexOf("\\n"),
             prefixForCut = quad.predicate.substring(colonIndex + 1, colonIndexOfSpace);
         quad.predicate = masPre[i] + ":" + prefixForCut;
       }
-      if ( prefixes[ masPre[i] ] === objectPrefix && quad.object.lastIndexOf("/") ) {
+      if ( prefixes[ masPre[i] ] === objectPrefixBack && quad.object.lastIndexOf("/") ) {
         var colonIndex = quad.object.lastIndexOf("/"),
             colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
             prefixForCut = quad.object.substring(colonIndex + 1, colonIndexOfSpace);
         quad.object = masPre[i] + ":" + prefixForCut;
-      } else if ( prefixes[ masPre[i] ] === objectPrefix1 ) {
+      } else if ( prefixes[ masPre[i] ] === objectPrefixSharp ) {
         var colonIndex = quad.object.lastIndexOf("#"),
             colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
             prefixForCut = quad.object.substring(colonIndex + 1, colonIndexOfSpace);
         quad.object = masPre[i] + ":" + prefixForCut;
       }
-      if ( prefixes[ masPre[i] ] === objectPrefix2 && objectIndex2 > 0 ) {
+      if ( prefixes[ masPre[i] ] === objectPrefixBitwise && objectIndexBitwise > 0 ) {
         var colonIndex = quad.object.lastIndexOf("^"),
             colonIndexSharp = quad.object.lastIndexOf("#"),
             colonIndexOfSpace = quad.object.lastIndexOf("\\n"),
