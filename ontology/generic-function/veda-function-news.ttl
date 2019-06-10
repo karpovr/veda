@@ -112,8 +112,8 @@ v-s:NewsTemplate
     <veda-control data-type="date" property="v-s:created" class="-view edit search"></veda-control>
     <div class="script">
       <em about="v-s:script" property="rdfs:label" class="view edit -search"></em>
-      <pre about="@" property="v-s:script" class="markdown view -edit -search"></pre>
-      <veda-control data-type="source" rows="10" property="v-s:script" class="-view edit -search"></veda-control>
+      <div about="@" data-template="v-ui:SourceCodeTemplate" data-property="v-s:script" data-embedded="true"></div>
+      <!--veda-control data-type="source" rows="10" property="v-s:script" class="-view edit -search"></veda-control-->
     </div>
     <div class="audience">
       <em about="v-s:newsAudience" property="rdfs:label" class="view edit search"></em>

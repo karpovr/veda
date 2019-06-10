@@ -3407,3 +3407,80 @@ v-ui:Graph
 </script>
   """ ;
 .
+
+v-ui:SourceCodeTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для отображения исходного кода"@ru ;
+  rdfs:label "Template Source code"@en ;
+  v-ui:template """
+<script>
+
+  var individual = this,
+      property_uri = container.attr("data-property"),
+      value = individual.hasValue(property_uri) ? individual.get(property_uri)[0].toString() : "",
+      sourceMode = property_uri === "v-s:script" ? "javascript" : "htmlmixed",
+      editorEl = template.children().first().get(0);
+
+  function change(value) {
+    individual.set(property_uri, [value]);
+  };
+
+  var editor = CodeMirror(editorEl, {
+    value: value,
+    mode: sourceMode,
+    lineWrapping: true,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    matchTags: true,
+    autoCloseTags: true,
+    lineNumbers: true,
+    extraKeys: {
+      "F9": function(cm) {
+        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+      },
+      "Esc": function(cm) {
+        if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+      },
+      "Tab": function(cm) {
+        var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+        cm.replaceSelection(spaces);
+      }
+    }
+  });
+
+  setTimeout( function () {
+    editor.refresh();
+  }, 100);
+  template.on("view edit search", function (e) {
+    e.stopPropagation();
+    editor.refresh();
+    e.type === "view"   ? ( editor.setOption("readOnly", "nocursor") ) :
+    e.type === "edit"   ? ( editor.setOption("readOnly", false) ) :
+    e.type === "search" ? ( editor.setOption("readOnly", false) ) : true;
+  });
+
+  editor.on("change", function () {
+    var value = editor.doc.getValue() || null;
+    change(value);
+  });
+  function handler(values) {
+    var doc = editor.getDoc();
+    var value = doc.getValue();
+    if (!values.length || values[0].toString() !== value) {
+      var cursor = doc.getCursor();
+      doc.setValue( values.length ? values[0].toString() : "" );
+      doc.setCursor(cursor);
+    }
+  }
+  individual.on(property_uri, handler );
+  template.one("remove", function () {
+    individual.off(property_uri, handler);
+  });
+
+  //# sourceURL=v-ui:SourceCodeTemplate
+</script>
+<div>
+  <div class="panel panel-default codemirror-editor"></div>
+</div>
+  """ ;
+.
