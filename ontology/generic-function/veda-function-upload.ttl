@@ -77,7 +77,7 @@ v-up:UploadTemplate
           <input type="checkbox" class="toggle-select-scheme"> Схема<br>
           <em about="v-s:attachment" property="rdfs:label"></em>
           <input type="file" id="files" multiple>
-          <div id="fileDisplayArea"></div>
+          <pre id="fileDisplayArea" style="background-color: inherit; border: none;"></pre>
         </div>
       </div>
     </div>
@@ -118,14 +118,13 @@ v-up:UploadTemplate
     newObject = {} ;
     newMas = [] ;
     var fileInput = e.target ;
-    var fileDisplayArea = $("#fileDisplayArea", template);
-    //var file = fileInput.files[0] ;
+    var fileDisplayArea = $("#fileDisplayArea", template).empty();
 
-    for (var i = 0; i < fileInput.files.length; i++) {
-      var file = fileInput.files[i];
+    var files = [].slice.call(fileInput.files);
+    files.map(function (file) {
       var reader = new FileReader() ;
       reader.onload = function(e) {
-        fileDisplayArea.text(reader.result);
+        fileDisplayArea.append(reader.result);
         console.log(reader.result);
         var all_quad = [];
         var parser = new N3.Parser();
@@ -151,7 +150,7 @@ v-up:UploadTemplate
         );
       }
       reader.readAsText(file);
-    }
+    });
   }
 
   var newMas = [] ;
