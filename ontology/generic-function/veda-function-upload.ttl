@@ -76,7 +76,7 @@ v-up:UploadTemplate
         <div class="panel-body">
           <input type="checkbox" class="toggle-select-scheme"> Схема<br>
           <em about="v-s:attachment" property="rdfs:label"></em>
-          <input type="file" id="files">
+          <input type="file" id="files" multiple>
           <div id="fileDisplayArea"></div>
         </div>
       </div>
@@ -101,14 +101,12 @@ v-up:UploadTemplate
           element['rdfs:isDefinedBy'] = [];
         });
         notify("success", {name: "Adding rdfs:isDefinedBy"});
-        console.log("newMas with isDefinedBy", newMas);
       } else {
         $('.toggle-select-scheme').prop('checked', false);
         newMas.forEach(function(element){
           delete element['rdfs:isDefinedBy'];
         });
         notify("danger", {name: "Removing rdfs:isDefinedBy"});
-        console.log("newMas delete isDefinedBy", newMas);
       }
     } else {
       notify("danger", {name: "Massive is empty"});
@@ -121,35 +119,39 @@ v-up:UploadTemplate
     newMas = [] ;
     var fileInput = e.target ;
     var fileDisplayArea = $("#fileDisplayArea", template);
-    var file = fileInput.files[0] ;
-    var reader = new FileReader() ;
-    reader.onload = function(e) {
-      fileDisplayArea.text(reader.result);
-      console.log(reader.result);
-      var all_quad = [];
-      var parser = new N3.Parser();
-      var obj = {};
-      parser.parse(
-        reader.result,
-        function (error, quad, prefixes) {
-          try {
-            if (quad) {
-              all_quad = all_quad.concat(quad);
-            } else {
-              console.log("# That's all, folks!", prefixes);
-              var masPre = Object.keys(prefixes) ;
-              cutPredicate(all_quad, masPre, prefixes);
+    //var file = fileInput.files[0] ;
+
+    for (var i = 0; i < fileInput.files.length; i++) {
+      var file = fileInput.files[i];
+      var reader = new FileReader() ;
+      reader.onload = function(e) {
+        fileDisplayArea.text(reader.result);
+        console.log(reader.result);
+        var all_quad = [];
+        var parser = new N3.Parser();
+        var obj = {};
+        parser.parse(
+          reader.result,
+          function (error, quad, prefixes) {
+            try {
+              if (quad) {
+                all_quad = all_quad.concat(quad);
+              } else {
+                console.log("# That's all, folks!", prefixes);
+                var masPre = Object.keys(prefixes) ;
+                cutPredicate(all_quad, masPre, prefixes);
+              }
+            } catch(e) {
+              console.log(e.name);
+              console.log(e.stack);
+              console.log(e.message);
+              notify("danger", {name: "Problem with TTL"});
             }
-          } catch(e) {
-            console.log(e.name);
-            console.log(e.stack);
-            console.log(e.message);
-            notify("danger", {name: "Problem with TTL"});
           }
-        }
-      );
+        );
+      }
+      reader.readAsText(file);
     }
-    reader.readAsText(file);
   }
 
   var newMas = [] ;
@@ -160,7 +162,7 @@ v-up:UploadTemplate
     console.log("keys", masPre);
     console.log("objects prefixes", prefixes);
     var newQuad = [] ;
-    for (var i = 0; i<all_quad.length; i++){
+    for (var i = 0; i<all_quad.length; i++) {
       newQuad = newQuad.concat( quadCut(all_quad[i], masPre, prefixes) );
     }
     for ( var i = 0; i<newQuad.length; i++ ) {
