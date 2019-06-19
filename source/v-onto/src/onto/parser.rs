@@ -1,5 +1,5 @@
-use crate::individual::*;
 use crate::cbor2individual::*;
+use crate::individual::*;
 use crate::msgpack2individual::*;
 
 #[derive(PartialEq, Debug)]

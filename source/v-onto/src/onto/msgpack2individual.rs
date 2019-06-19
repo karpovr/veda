@@ -1,8 +1,8 @@
+extern crate rmp as msgpack;
+
 use msgpack::decode::*;
 use msgpack::Marker;
 use std::io::Cursor;
-
-extern crate rmp as msgpack;
 
 use crate::datatype::*;
 use crate::individual::*;
