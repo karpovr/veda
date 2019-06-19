@@ -25,7 +25,6 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
     Handle<Value>  f_lang  = String::NewFromUtf8(isolate, "lang");
     Handle<Value>  f_type  = String::NewFromUtf8(isolate, "type");
     const char     *binobj = in_str.c_str();
-    //std::cerr << "MSGPACK->JS SRC [" << in_str << "]" << endl;
 
     Element  element;
     string   uri;
@@ -44,21 +43,15 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
         uri  = string(sval, sval_len);
     }
 
-    //std::cerr << "MSGPACK->JS URI [" << uri << "]" << endl;
-
     js_map->Set(String::NewFromUtf8(isolate, "@"), String::NewFromUtf8(isolate, uri.c_str()));
 
     uint32_t map_size = mp_decode_array(&binobj);
-    //std::cerr << "MSGPACK->JS MAP_SIZE " << map_size << endl;
 
     for (int i = 0; i < map_size; i++)
     {
         type = mp_typeof(*binobj);
-        //std::cerr << "MSGPACK->JS TYPE " << type << endl;
         if (type != MP_STR)
         {
-            //std::cerr << "MSGPACK->JS SRC [" << in_str << "]" << endl;
-            //std::cerr << "@ERR! MSGPACK->JS PREDICATE IS NOT STRING!, type=" << type << ", uri=" << uri << endl;
             return Object::New(isolate);
         }
 
@@ -70,13 +63,9 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
         Handle<Value>         predicate_v8 = String::NewFromUtf8(isolate, predicate.c_str());
         v8::Handle<v8::Array> resources_v8 = v8::Array::New(isolate, 1);
 
-        //std::cerr << "MSGPACK->JS predicate= " << predicate << endl;
-
-        //std::cerr << "MSGPACK->JS values_size " << values_size << endl;
         for (int j = 0; j < values_size; j++)
         {
             type = mp_typeof(*binobj);
-            //std::cerr << "MSGPACK->JS ELEMENT TYPE " << type << endl;
 
             switch (type)
             {
@@ -87,14 +76,12 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
                     if (value_struct_size == 2)
                     {
                         uint64_t value_type = mp_decode_uint(&binobj);
-                        //std::cerr << "value_struct_size = 2 TYPE " << type << endl;
 
                         if (value_type == _Datetime)
                         {
                             Handle<Object> rr_v8 = Object::New(isolate);
 
                             type = mp_typeof(*binobj);
-                            //std::cerr << "MSGPACK->JS DATETIME " << type << endl;
 
                             int64_t value;
 
@@ -113,7 +100,6 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
                             Handle<Object> rr_v8 = Object::New(isolate);
 
                             mp_type        value_el_type = mp_typeof(*binobj);
-                            //std::cerr << "string value_el_type=" << value_el_type << endl;
 
                             if (value_el_type == MP_STR)
                             {
@@ -131,7 +117,6 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
                             else
                             {
                                 mp_next(&binobj);
-                                //std::cerr << "@ERR! NOT A STRING IN RESOURCE ARRAY 2" << endl;
                                 return Object::New(isolate);
                             }
 
@@ -153,7 +138,6 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
                             Handle<Object> rr_v8 = Object::New(isolate);
 
                             type = mp_typeof(*binobj);
-                            //std::cerr << "MSGPACK->JS INTEGER " << type << endl;
 
                             int64_t value;
 
@@ -184,7 +168,6 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
                     else if (value_struct_size == 3)
                     {
                         uint64_t value_type = mp_decode_uint(&binobj);
-                        //std::cerr << "value_struct_size = 3 TYPE " << type << endl;
                         if (value_type == _Decimal)
                         {
                             int64_t mantissa, exponent;
@@ -202,8 +185,6 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
                                 exponent = mp_decode_uint(&binobj);
 
                             string ss = exponent_and_mantissa_to_string(mantissa, exponent);
-
-                            //std::cerr << exponent << endl;
 
                             Handle<Object> rr_v8 = Object::New(isolate);
                             rr_v8->Set(f_data, String::NewFromUtf8(isolate, ss.c_str()));
@@ -268,19 +249,14 @@ Handle<Value> msgpack2jsobject(Isolate *isolate, string in_str)
             }
         }
 
-        //cerr << "@SAVING TO RESOURCES" << endl;
         if (resources_v8->Length() > 0)
         {
-            //cerr << "\t@GRATER THAN ZERO" << endl;
             js_map->Set(predicate_v8, resources_v8);
         }
-        //cerr << "@SAVED TO RESOURCES" << endl;
     }
 
     return js_map;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //  JSON -> MSGPACK
 
@@ -312,14 +288,12 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
     else
         type = v_type->ToInteger()->Value();
 
-    //cerr << "\t\t@TYPE " << type << endl;
     if (type == _Uri)
     {
         bptr = mp_encode_array(bptr, 2);
         bptr = mp_encode_uint(bptr, (uint)_Uri);
         string str_data = std::string(*v8::String::Utf8Value(v_data));
         bptr = mp_encode_str(bptr, str_data.c_str(), str_data.size());
-        //cerr << "\t\t\t@STR DATA " << str_data << endl;
     }
     else if (type == _Boolean)
     {
@@ -327,7 +301,6 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
         bptr = mp_encode_uint(bptr, (uint)_Boolean);
         bool bool_data = v_data->ToBoolean()->Value();
         bptr = mp_encode_bool(bptr, bool_data);
-        //cerr << "\t\t\t@BOOL DATA " << bool_data << endl;
     }
     else if (type == _Datetime)
     {
@@ -335,7 +308,6 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
         bptr = mp_encode_uint(bptr, (uint)_Datetime);
         int64_t long_data = v_data->ToInteger()->Value() / 1000;
         bptr = mp_encode_int(bptr, long_data);
-        //cerr << "\t\t\t@DATETIME DATA " << long_data << endl;
     }
     else if (type == _Integer)
     {
@@ -343,7 +315,6 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
         bptr = mp_encode_uint(bptr, (uint)_Integer);
         int64_t long_data = v_data->ToInteger()->Value();
         bptr = mp_encode_int(bptr, long_data);
-        //cerr << "\t\t\t@LONG DATA " << long_data << endl;
     }
     else if (type == _Decimal)
     {
@@ -352,13 +323,10 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
         {
             v8::String::Utf8Value s1_1(v_data);
             std::string           num = std::string(*s1_1);
-            //std::cerr << "@jsobject2individual value=" << num << std::endl;
 
             int pos = num.find('.');
             if (pos < 0)
                 pos = num.find(',');
-
-            //std::cerr << "@pos=" << pos << std::endl;
 
             if (pos > 0)
             {
@@ -386,7 +354,6 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
         bptr = mp_encode_uint(bptr, (uint)_Decimal);
         bptr = mp_encode_int(bptr, decimal_mantissa_data);
         bptr = mp_encode_int(bptr, decimal_exponent_data);
-        //cerr << "\t\t\t@DECIMAL DATA " << "MANT=" << decimal_mantissa_data << " EXP=" << decimal_exponent_data << endl;
     }
     else if (type == _String)
     {
@@ -425,8 +392,6 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
             bptr = mp_encode_uint(bptr, (uint)_String);
             bptr = mp_encode_str(bptr, str_data.c_str(), str_data.size());
         }
-
-        //cerr << "@STR DATA " << str_data << "LANG: " << lang << endl;
     }
 
     return bptr;
@@ -435,9 +400,6 @@ char *js_el_2_msgpack_el(Local<Object> resource_obj, Handle<Value> f_data, Handl
 void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
 {
     cerr << "JS->MSGPACK" << endl;
-
-    //cerr <<"!!START LOGGING!!" << endl;
-    //jsobject_log(value);
 
     char                  *bptr = buf;
 
@@ -455,7 +417,6 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
     {
         v8::Local<v8::Value> js_key        = individual_keys->Get(i);
         std::string          resource_name = std::string(*v8::String::Utf8Value(js_key));
-        //cerr << "@RESOURCE KEY " << resource_name << endl;
         Local<Value>         js_value = obj->Get(js_key);
         if (resource_name == "@")
         {
@@ -474,7 +435,7 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
     {
         v8::Local<v8::Value> js_key        = individual_keys->Get(i);
         std::string          resource_name = std::string(*v8::String::Utf8Value(js_key));
-        //cerr << "@RESOURCE KEY " << resource_name << endl;
+
         Local<Value>         js_value = obj->Get(js_key);
         if (resource_name == "@")
             continue;
@@ -497,11 +458,9 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
             continue;
         }
 
-
-        //cerr << "\t@IS ARRAY " << js_value->IsArray() << endl;
         Local<v8::Array> resources_arr    = Local<v8::Array>::Cast(js_value);
         uint32_t         resources_length = resources_arr->Length();
-        //cerr << "\t@LENGTH " << resources_length << endl;
+
         bptr = mp_encode_array(bptr, resources_length);
 
         for (uint32_t j = 0; j < resources_length; j++)
@@ -510,7 +469,6 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
 
             if (js_value->IsArray())
             {
-                //cerr << "[ [ {} ] ]" << endl;
                 //             [ [ {} ] ]
 
                 Local<v8::Array> resources_in_arr    = Local<v8::Array>::Cast(js_value);
@@ -525,9 +483,7 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
                 }
                 else
                 {
-                    //cerr << "[ [ {} ], [ {} ] ]" << endl;
                     //                  [ [ {} ], [ {} ] ]
-                    //cerr << "ERR! INVALID JS INDIVIDUAL FORMAT " << endl;
                     jsobject_log(value);
                 }
             }
@@ -536,13 +492,11 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
                 if (js_value->IsObject())
                 {
                     //             [ {} ]
-                    //cerr << "[ {} ]" << endl;
                     Local<Object> resource_obj = Local<Object>::Cast(js_value);
                     bptr = js_el_2_msgpack_el(resource_obj, f_data, f_type, f_lang, bptr);
                 }
                 else
                 {
-                    //cerr << "ERR! INVALID JS INDIVIDUAL FORMAT, NULL VALUE, " << endl;
                     //jsobject_log(value);
 
                     bptr = mp_encode_array(bptr, 0);
@@ -552,6 +506,4 @@ void jsobject2msgpack(Local<Value> value, Isolate *isolate, std::vector<char> &o
     }
 
     ou.insert(ou.end(), buf, bptr);
-
-    //cerr << "!!END LOGGING!!" << endl;
 }

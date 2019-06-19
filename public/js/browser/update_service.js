@@ -22,9 +22,8 @@ veda.Module(function (veda) { "use strict";
     return veda.UpdateService.prototype._singletonInstance = initSocket();
 
     function initSocket() {
-      var ccusPortCfg = new veda.IndividualModel("cfg:ClientUpdateServicePort");
-      return ccusPortCfg.load().then(function (ccusPortCfg) {
-        var ccusPort = ccusPortCfg.hasValue("rdf:value") && ccusPortCfg["rdf:value"][0],
+      return veda.Backend.get_individual(veda.ticket, "cfg:ClientUpdateServicePort").then(function (ccusPortCfg) {
+        var ccusPort = ccusPortCfg["rdf:value"] && ccusPortCfg["rdf:value"][0].data,
             protocol = location.protocol === "http:" ? "ws:" : "wss:",
             port = ccusPort || ( protocol === "ws:" ? 8088 : 443 ),
             address = protocol + "//" + location.hostname + ":" + port + "/ccus",
@@ -83,7 +82,11 @@ veda.Module(function (veda) { "use strict";
           if (self.list[uri]) {
             self.list[uri].updateCounter = updateCounter;
           }
-          individual.reset(); // Reset to DB
+          if (self.list[uri].action) {
+            self.list[uri].action.call(individual); // Call action
+          } else {
+            individual.reset(); // Default action
+          }
         } catch (error) {
           console.log("error: individual update service failed", error);
         }
@@ -112,17 +115,23 @@ veda.Module(function (veda) { "use strict";
 
   var proto = veda.UpdateService.prototype;
 
-  proto.subscribe = function (uri) {
+  proto.subscribe = function (uri, action) {
+    var self = this;
     if ( this.list[uri] ) {
       ++this.list[uri].subscribeCounter;
     } else {
       var individual = new veda.IndividualModel(uri);
-      var updateCounter = individual.hasValue("v-s:updateCounter") ? individual.get("v-s:updateCounter")[0] : 0;
-      this.list[uri] = {
-        subscribeCounter: 1,
-        updateCounter: updateCounter
-      };
-      this.socket.sendMessage("+" + uri + "=" + updateCounter);
+      individual.load().then(function (individual) {
+        var updateCounter = individual.hasValue("v-s:updateCounter") ? individual.get("v-s:updateCounter")[0] : 0;
+        self.list[uri] = {
+          subscribeCounter: 1,
+          updateCounter: updateCounter
+        };
+        if (action) {
+          self.list[uri].action = action;
+        }
+        self.socket.sendMessage("+" + uri + "=" + updateCounter);
+      });
     }
   };
 

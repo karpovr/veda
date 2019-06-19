@@ -3,12 +3,8 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
-	//	"errors"
-	//	"fmt"
 	"reflect"
-	//	"strings"
 	"unsafe"
-	//	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
 // #define MP_SOURCE 1

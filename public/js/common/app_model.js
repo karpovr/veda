@@ -46,6 +46,12 @@
         this.expire[ expire_key ] = this.expire[ expire_key ] || [];
         this.expire[ expire_key ].push(obj);
         this.count++;
+        if (typeof window !== "undefined" && expire_key !== 1) {
+          var updateService = new veda.UpdateService();
+          updateService.then(function (updateService) {
+            updateService.subscribe(obj.id);
+          });
+        }
       },
       remove: function (key) {
         var that = this;
@@ -56,12 +62,24 @@
           delete this.expire[expires];
         }
         this.count--;
+        if (typeof window !== "undefined") {
+          var updateService = new veda.UpdateService();
+          updateService.then(function (updateService) {
+            updateService.unsubscribe(key);
+          });
+        }
         return delete this.storage[key];
       },
       clear: function () {
         this.count = 0;
         this.storage = {};
         this.expire = {};
+        if (typeof window !== "undefined") {
+          var updateService = new veda.UpdateService();
+          updateService.then(function (updateService) {
+            updateService.unsubscribe();
+          });
+        }
       }
     };
 

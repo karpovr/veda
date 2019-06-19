@@ -110,7 +110,6 @@ veda.Module(function (veda) { "use strict";
     }
   });
 
-
   // App loading indicator
   var loadIndicator = $("#load-indicator");
   veda.on("starting", function () {
@@ -203,46 +202,60 @@ veda.Module(function (veda) { "use strict";
 
   // Listen to client notifications
   veda.on("started", function () {
-    var updateService = new veda.UpdateService().then(function (updateService) {
-      var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
-      updateService.subscribe(clientNotification.id);
+    var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
+    clientNotification.load().then(function (clientNotification) {
       clientNotification.on("afterReset", checkNotification);
-      checkNotification();
-      function checkNotification() {
-        var browserNotificationList;
-        try {
-          browserNotificationList = JSON.parse(localStorage.clientNotification);
-        } catch (error) {
-          browserNotificationList = [];
-        }
-        var serverNotificationList = clientNotification["rdf:value"].map(function (item) { return item.id; });
-        if ( !veda.Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
-          for (var i = 0, exit = false, notification, notification_uri; (notification_uri = serverNotificationList[i]) && !exit; i++) {
-            if (browserNotificationList.indexOf(notification_uri) >= 0) { continue; }
-            notification = new veda.IndividualModel(notification_uri);
-            if ( notification.hasValue("v-s:newsAudience") ) {
-              notification.properties["v-s:newsAudience"].forEach(function (audience) {
-                audience = audience.data;
-                if ( veda.user.isMemberOf(audience) ) {
-                  veda.Util.confirm(notification).then(function (confirmed) {
-                    if ( confirmed ) {
-                      localStorage.clientNotification = JSON.stringify(serverNotificationList);
-                      if (notification.hasValue("v-s:script")) {
-                        var script = notification["v-s:script"][0].toString();
-                        eval(script);
+      checkNotification.call(clientNotification);
+    });
+    function checkNotification() {
+      var clientNotification = this;
+      var browserNotificationList;
+      try {
+        browserNotificationList = JSON.parse(localStorage.clientNotification);
+      } catch (error) {
+        browserNotificationList = [];
+      }
+      var serverNotificationList = clientNotification.get("rdf:value").map(function (item) { return item.id; });
+      if ( !veda.Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
+        serverNotificationList.reduce(function (p, notification_uri, i) {
+          return p.then(function () {
+            if (browserNotificationList.indexOf(notification_uri) >= 0) { return; }
+            var notification = new veda.IndividualModel(notification_uri);
+            return notification.load().then(function (notification) {
+              return notification.get("v-s:newsAudience").map(function (audience) {
+                return audience.id;
+              });
+            }).then(function (audience) {
+              audience = audience.sort();
+              return veda.user.memberOf().then(function (memberOf) {
+                memberOf = memberOf.sort();
+                var i = 0, j = 0, audience_uri, memberOf_uri;
+                while( (audience_uri = audience[i]) && (memberOf_uri = memberOf[j]) ) {
+                  if (memberOf_uri < audience_uri) {
+                    j++;
+                  } else if (memberOf_uri > audience_uri) {
+                    i++;
+                  } else {
+                    return veda.Util.confirm(notification).then(function (confirmed) {
+                      if ( confirmed ) {
+                        localStorage.clientNotification = JSON.stringify(serverNotificationList);
+                        if (notification.hasValue("v-s:script")) {
+                          var script = notification.get("v-s:script")[0].toString();
+                          eval(script);
+                        }
                       }
-                    }
-                  });
-                  exit = true;
+                    });
+                  }
                 }
               });
-            }
-          }
-        } else {
-          localStorage.clientNotification = JSON.stringify(serverNotificationList);
-        }
+            });
+          });
+        }, Promise.resolve());
+      } else {
+        localStorage.clientNotification = JSON.stringify(serverNotificationList);
       }
-    });
+    }
+
   });
 
 });

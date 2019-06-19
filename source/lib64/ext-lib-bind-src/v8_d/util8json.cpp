@@ -34,8 +34,6 @@ void double_to_mantissa_exponent(double inp, int64_t *mantissa, int64_t *exponen
 
     *mantissa = (int64_t)inp;
     *exponent = power;
-
-    //std::cerr << "@c double_to_mantissa_exponent inp=" << inp << ", mantissa=" << *mantissa << ", exponent=" << *exponent << std::endl;
 }
 
 string exponent_and_mantissa_to_string(long decimal_mantissa_data, long decimal_exponent_data)
@@ -211,25 +209,3 @@ int64_t to_int(char const *s)
      return negate ? result : -result; //-result is positive!
 } 
 
-/*
- /// Stringify V8 value to JSON
-/// return empty string for empty value
-std::string json_str(v8::Isolate* isolate, v8::Handle<v8::Value> value)
-{
-    if (value.IsEmpty())
-    {
-        return std::string();
-    }
- 
-    v8::HandleScope scope(isolate);
- 
-    v8::Local<v8::Object> json = isolate->GetCurrentContext()->
-        Global()->Get(v8::String::NewFromUtf8(isolate, "JSON"))->ToObject();
-    v8::Local<v8::Function> stringify = json->Get(v8::String::NewFromUtf8(isolate, "stringify")).As<v8::Function>();
- 
-    v8::Local<v8::Value> result = stringify->Call(json, 1, &value);
-    v8::String::Utf8Value const str(result);
- 
-    return std::string(*str, str.length());
- }
-*/

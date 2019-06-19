@@ -75,7 +75,7 @@ const (
 	//statistic_data_accumulator module id, gather statistics
 	statistic_data_accumulator Module = 2048
 
-	///commiter module id, saves inmemory data
+	//commiter module id, saves inmemory data
 	commiter Module = 4096
 
 	//print_statistics module id, print statistics

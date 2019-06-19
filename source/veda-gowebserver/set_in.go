@@ -69,5 +69,4 @@ func setInIndividual(ctx *fasthttp.RequestCtx) {
 
 	rc = modifyIndividual("set_in", &ticket, "individuals", []map[string]interface{}{indv.(map[string]interface{})},
 		assignedSubsystems, eventID, time.Now().Unix(), ctx)
-	//trail(ticket.Id, ticket.UserURI, "set_in", jsonData, "", rc, timestamp)
 }

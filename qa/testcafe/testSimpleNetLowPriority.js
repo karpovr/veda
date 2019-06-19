@@ -36,8 +36,7 @@ import { Selector, t } from 'testcafe';
       .wait(2000)
       .click('div.suggestion[resource="v-wf:ToBeSent"]')
       .click('button#save')
-      .wait(2000)
-      .click('button.btn.btn-link.view.edit.-search.toggle-actions')
-      .click('div[rel="v-wf:isProcess"] span#label')
+      .wait(10000)
+      .click('div[rel="v-wf:isProcess"] a')
       .expect(red).eql(1)
 });

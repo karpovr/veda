@@ -4,24 +4,55 @@ use std::io::Cursor;
 
 extern crate rmp as msgpack;
 
-use crate::datatype::{DataType, Lang};
-use crate::individual::Individual;
-use crate::resource::{Resource, Value};
+use crate::datatype::*;
+use crate::individual::*;
+use crate::parser::*;
+use crate::resource::*;
 
-const MSGPACK_MAGIC_HEADER: u8 = 146;
+pub fn parse_msgpack(raw: &mut RawObj) -> Result<String, i8> {
+    if raw.data.len() == 0 || raw.raw_type != RawType::MSGPACK {
+        return Err(-1);
+    }
 
-pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool {
-    if indv.cur >= indv.binobj.len() as u64 {
+    let mut cur = Cursor::new(raw.data.as_slice());
+
+    if let Ok(v) = read_marker(&mut cur) {
+        if let Marker::FixArray(size) = v {
+            if size != 2 {
+                return Err(-1);
+            }
+        } else {
+            return Err(-1);
+        }
+    } else {
+        return Err(-1);
+    }
+
+    // read individual URI
+    let uri = match read_string_from_msgpack(&mut cur) {
+        Ok(p) => p,
+        Err(_) => return Err(-1),
+    };
+
+    if let Ok(size) = read_map_len(&mut cur) {
+        raw.len_predicates = size as u32;
+        raw.cur = cur.position();
+        return Ok(uri);
+    } else {
+        return Err(-1);
+    }
+}
+
+pub fn parse_msgpack_to_predicate(expect_predicate: &str, raw: &mut RawObj, indv: &mut Individual) -> bool {
+    if raw.cur >= raw.data.len() as u64 {
         return false;
     }
 
     let mut is_found = false;
-    let mut cur = Cursor::new(indv.binobj.as_slice());
-    cur.set_position(indv.cur);
+    let mut cur = Cursor::new(raw.data.as_slice());
+    cur.set_position(raw.cur);
 
-    for _ in indv.cur_predicates..indv.len_predicates {
-        //let mut predicate;
-
+    for _ in raw.cur_predicates..raw.len_predicates {
         let predicate = match read_string_from_msgpack(&mut cur) {
             Ok(p) => p,
             Err(e) => {
@@ -30,13 +61,9 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
             }
         };
 
-        //println!("@D predicate = {}", predicate);
-
         if predicate == expect_predicate {
             is_found = true;
         }
-
-        let values = indv.resources.entry(predicate).or_default();
 
         match read_array_len(&mut cur) {
             Ok(size) => {
@@ -60,13 +87,7 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                 if size == 2 {
                                     if v_type == DataType::Boolean as u8 {
                                         match read_bool(&mut cur) {
-                                            Ok(res) => {
-                                                values.push(Resource {
-                                                    rtype: DataType::Boolean,
-                                                    order: i_values as u16,
-                                                    value: Value::Bool(res),
-                                                });
-                                            }
+                                            Ok(res) => indv.add_bool(&predicate, res, i_values),
                                             Err(e) => {
                                                 error!("value: expected {}, err={:?}", v_type, e);
                                                 return false;
@@ -74,13 +95,7 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                         }
                                     } else if v_type == DataType::Datetime as u8 {
                                         match read_int(&mut cur) {
-                                            Ok(res) => {
-                                                values.push(Resource {
-                                                    rtype: DataType::Datetime,
-                                                    order: i_values as u16,
-                                                    value: Value::Int(res),
-                                                });
-                                            }
+                                            Ok(res) => indv.add_datetime(&predicate, res, i_values),
                                             Err(e) => {
                                                 error!("value: expected {}, err={:?}", v_type, e);
                                                 return false;
@@ -88,13 +103,7 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                         }
                                     } else if v_type == DataType::Integer as u8 {
                                         match read_int(&mut cur) {
-                                            Ok(res) => {
-                                                values.push(Resource {
-                                                    rtype: DataType::Integer,
-                                                    order: i_values as u16,
-                                                    value: Value::Int(res),
-                                                });
-                                            }
+                                            Ok(res) => indv.add_integer(&predicate, res, i_values),
                                             Err(e) => {
                                                 error!("value: expected {}, err={:?}", v_type, e);
                                                 return false;
@@ -102,32 +111,21 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                         }
                                     } else if v_type == DataType::Uri as u8 {
                                         match read_string_from_msgpack(&mut cur) {
-                                            Ok(p) => {
-                                                values.push(Resource {
-                                                    rtype: DataType::Uri,
-                                                    order: i_values as u16,
-                                                    value: Value::Str(p, Lang::NONE),
-                                                });
-                                            }
+                                            Ok(res) => indv.add_uri(&predicate, &res, i_values),
                                             Err(e) => {
                                                 error!("value: expected {}, err={:?}", v_type, e);
                                                 return false;
                                             }
                                         }
                                     } else if v_type == DataType::Binary as u8 {
-                                        if read_binobj_into_resources(&mut cur, values) == false {
-                                            error!("value: faile read binobj");
+                                        let values = indv.resources.entry(predicate.to_owned()).or_default();
+                                        if read_raw_into_resources(&mut cur, values) == false {
+                                            error!("value: faile read raw");
                                             return false;
                                         }
                                     } else if v_type == DataType::String as u8 {
                                         match read_string_from_msgpack(&mut cur) {
-                                            Ok(p) => {
-                                                values.push(Resource {
-                                                    rtype: DataType::String,
-                                                    order: i_values as u16,
-                                                    value: Value::Str(p, Lang::NONE),
-                                                });
-                                            }
+                                            Ok(res) => indv.add_string(&predicate, &res, Lang::NONE, i_values),
                                             Err(e) => {
                                                 error!("value: expected {}, err={:?}", v_type, e);
                                                 return false;
@@ -141,13 +139,7 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                     if v_type == DataType::Decimal as u8 {
                                         match read_int(&mut cur) {
                                             Ok(mantissa) => match read_int(&mut cur) {
-                                                Ok(exponent) => {
-                                                    values.push(Resource {
-                                                        rtype: DataType::Decimal,
-                                                        order: i_values as u16,
-                                                        value: Value::Num(mantissa, exponent),
-                                                    });
-                                                }
+                                                Ok(exponent) => indv.add_decimal_d(&predicate, mantissa, exponent, i_values),
                                                 Err(e) => {
                                                     error!("value: fail read exponent, err={:?}", e);
                                                     return false;
@@ -162,7 +154,7 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                         let mut lang = Lang::NONE;
 
                                         match read_string_from_msgpack(&mut cur) {
-                                            Ok(p) => {
+                                            Ok(res) => {
                                                 match read_int(&mut cur) {
                                                     Ok(res) => {
                                                         let r_lang: i64 = res;
@@ -179,11 +171,7 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
                                                     }
                                                 }
 
-                                                values.push(Resource {
-                                                    rtype: DataType::String,
-                                                    order: i_values as u16,
-                                                    value: Value::Str(p, lang),
-                                                });
+                                                indv.add_string(&predicate, &res, lang, i_values);
                                             }
                                             Err(e) => {
                                                 error!("value: expected {}, err={:?}", v_type, e);
@@ -211,67 +199,18 @@ pub fn parse_to_predicate(expect_predicate: &str, indv: &mut Individual) -> bool
             }
         }
 
-        //if indv.cur >= indv.binobj.len() as u64 {
-        //    return true;
-        //}
-
-        //println!("@D values {:?}", values);
-
         if is_found == true {
             //            indv.cur = cur.position();
-            indv.cur = cur.position();
+            raw.cur = cur.position();
             return true;
-        } // else {
-          //println!("@D predicate not found");
-          //}
+        }
     }
 
-    indv.cur = cur.position();
+    raw.cur = cur.position();
     return true;
 }
 
-pub fn msgpack2individual(indv: &mut Individual) -> bool {
-    if indv.binobj.len() == 0 {
-        return false;
-    }
-
-    let binobj: &[u8] = indv.binobj.as_slice();
-    let msg_type = binobj[0];
-
-    if msg_type != MSGPACK_MAGIC_HEADER {
-        return false;
-    }
-
-    let mut cur = Cursor::new(binobj);
-
-    if let Ok(v) = read_marker(&mut cur) {
-        if let Marker::FixArray(size) = v {
-            if size != 2 {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
-
-    // read individual URI
-    match read_string_from_msgpack(&mut cur) {
-        Ok(p) => indv.uri = p,
-        Err(_) => return false,
-    }
-
-    if let Ok(size) = read_map_len(&mut cur) {
-        indv.len_predicates = size as u32;
-        indv.cur = cur.position();
-        return true;
-    } else {
-        return false;
-    }
-}
-
-fn read_binobj_into_resources<'a>(cur: &mut Cursor<&[u8]>, values: &mut Vec<Resource>) -> bool {
+fn read_raw_into_resources<'a>(cur: &mut Cursor<&[u8]>, values: &mut Vec<Resource>) -> bool {
     let m_pos = cur.position();
     let size: u32;
 

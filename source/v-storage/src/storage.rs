@@ -1,6 +1,11 @@
 use crate::lmdb_storage::LMDBStorage;
 use crate::tt_storage::TTStorage;
-use v_onto::individual::Individual;
+use v_onto::individual::*;
+
+pub enum StorageError {
+    None,
+    NotReady,
+}
 
 pub enum EStorage {
     LMDB(LMDBStorage),
@@ -8,7 +13,7 @@ pub enum EStorage {
 }
 
 pub trait Storage {
-    fn set_binobj(&mut self, uri: &str, indv: &mut Individual) -> bool;
+    fn set_binobj(&mut self, uri: &str, raw: &mut RawObj, indv: &mut Individual) -> bool;
 }
 
 pub struct VStorage {
@@ -28,10 +33,10 @@ impl VStorage {
         }
     }
 
-    pub fn set_binobj(&mut self, uri: &str, indv: &mut Individual) -> bool {
+    pub fn set_binobj(&mut self, uri: &str, raw: &mut RawObj, indv: &mut Individual) -> bool {
         return match &mut self.storage {
-            EStorage::TT(s) => s.set_binobj(uri, indv),
-            EStorage::LMDB(s) => s.set_binobj(uri, indv),
+            EStorage::TT(s) => s.set_binobj(uri, raw, indv),
+            EStorage::LMDB(s) => s.set_binobj(uri, raw, indv),
         };
     }
 }

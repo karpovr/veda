@@ -4,7 +4,7 @@ use rusty_tarantool::tarantool::{Client, ClientConfig};
 use std::net::SocketAddr;
 use tokio::runtime::current_thread::Runtime;
 use v_onto::individual::*;
-use v_onto::msgpack8individual::msgpack2individual;
+use v_onto::parser::*;
 
 pub struct TTStorage {
     rt: Runtime,
@@ -18,30 +18,25 @@ impl TTStorage {
         TTStorage {
             rt: Runtime::new().unwrap(),
             space_id: 512,
-            client: ClientConfig::new(addr, login, pass)
-                .set_timeout_time_ms(1000)
-                .set_reconnect_time_ms(10000)
-                .build(),
+            client: ClientConfig::new(addr, login, pass).set_timeout_time_ms(1000).set_reconnect_time_ms(10000).build(),
         }
     }
 }
 
 impl Storage for TTStorage {
-    fn set_binobj(&mut self, uri: &str, indv: &mut Individual) -> bool {
+    fn set_binobj(&mut self, uri: &str, raw: &mut RawObj, indv: &mut Individual) -> bool {
         let key = (uri,);
 
-        let resp = self
-            .client
-            .select(self.space_id, 0, &key, 0, 100, 0)
-            .and_then(move |response| Ok(response.data));
+        let resp = self.client.select(self.space_id, 0, &key, 0, 100, 0).and_then(move |response| Ok(response.data));
 
         if let Ok(v) = self.rt.block_on(resp) {
-            indv.binobj = v[5..].to_vec();
+            raw.data = v[5..].to_vec();
 
-            if msgpack2individual(indv) {
+            if let Ok(uri) = parse_raw(raw) {
+                indv.uri = uri;
                 return true;
             } else {
-                error!("fail parse binobj");
+                error!("TTStorage: fail parse binobj, len={}, uri={}", raw.data.len(), uri);
             }
         }
 

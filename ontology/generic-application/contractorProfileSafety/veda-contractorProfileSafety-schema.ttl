@@ -169,8 +169,8 @@ v-s:hasMedicalCheckupCertificateForDriver
 v-s:hasLaborSafetyCertificate
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:EmployeeProfile ;
-  rdfs:label "Проверка знаний по ОТ (ИТР)"@ru ;
-  rdfs:label "Labor safety certificate (ETW)"@en ;
+  rdfs:label "Проверка знаний по ОТ"@ru ;
+  rdfs:label "Labor safety certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
 .
 v-s:hasLaborSafetyCertificateForWorkers
@@ -183,7 +183,7 @@ v-s:hasLaborSafetyCertificateForWorkers
 v-s:hasWorkAtHighAltitudeCertificate
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:EmployeeProfile ;
-  rdfs:label "Удостоверение/протокол по работам на высоте (без группы)"@ru ;
+  rdfs:label "Удостоверение/протокол по работам на высоте"@ru ;
   rdfs:label "Work at high altitude certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
 .

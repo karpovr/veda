@@ -8,6 +8,8 @@ edition = "2018"
 path = "src/onto/lib.rs"
 
 [dependencies]
+byteorder = ">= 0.5.0"
+cbor-codec = { git = "https://github.com/itiu/cbor-codec.git" }
 serde_json = "1.0"
 human-panic = "1.0.1"
 rmp = "^0.8"

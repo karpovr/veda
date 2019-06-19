@@ -61,8 +61,6 @@ func getIndividual(ctx *fasthttp.RequestCtx) {
 			return
 		}
 
-		// main_queue.open(CURRENT)
-
 		main_cs = NewConsumer(main_queue, queueName, R)
 		if !main_cs.open() {
 			log.Println("ERR! OPENING CONSUMER: ", queueName)
@@ -100,24 +98,6 @@ func getIndividual(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	/*
-		individual, ok := ontologyCache[uri]
-		if ok {
-			log.Println("@get from cache, ", uri);
-			individualJSON, err := json.Marshal(individual)
-			if err != nil {
-				log.Println("ERR! GET_INDIVIDUAL: #2 ENCODING INDIVIDUAL TO JSON ", err)
-				ctx.Response.SetStatusCode(int(InternalServerError))
-				return
-			}
-
-			jsonArgs := map[string]interface{}{"uri": uri}
-			trail(ticket.Id, ticket.UserURI, "get_individual", jsonArgs, string(individualJSON), Ok, timestamp)
-			ctx.Write(individualJSON)
-			ctx.Response.SetStatusCode(int(Ok))
-			return
-		}
-	*/
 	uris := make([]string, 1)
 	uris[0] = uri
 	jsonArgs := map[string]interface{}{"uri": uri}
@@ -210,27 +190,7 @@ func getIndividuals(ctx *fasthttp.RequestCtx) {
 
 	}
 
-	//if len(uris) == 0 {
-	//	log.Println("ERR! GET_INDIVIDUALS: ZERO LENGTH TICKET OR URI")
-	//	log.Println("\t@REQUEST BODY ", string(ctx.Request.Body()))
-	//	ctx.Response.SetStatusCode(int(BadRequest))
-	//	trail(ticket.Id, ticket.UserURI, "get_individuals", jsonArgs, "{}", BadRequest, timestamp)
-	//	return
-	//}
-
 	individuals := make([]map[string]interface{}, 0, len(uris))
-
-	/*
-		urisToGet := make([]string, 0, len(uris))
-		for i := 0; i < len(uris); i++ {
-			individual, ok := ontologyCache[uris[i]]
-			if ok {
-				individuals = append(individuals, individual)
-			} else {
-				urisToGet = append(urisToGet, uris[i])
-			}
-		}
-	*/
 
 	urisToGet := uris
 

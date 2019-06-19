@@ -188,11 +188,7 @@ func files(ctx *fasthttp.RequestCtx, routeParts []string) {
 		//Return file to client
 		eFileName := url.PathEscape(fileName)
 		ctx.Response.Header.Set("Content-Disposition", "attachment; filename*=UTF-8''"+eFileName)
-		//		ctx.Response.Header.SetCanonical([]byte("Content-Disposition"), []byte("attachment; filename=*=UTF-8''"+fileName))
-		//ctx.SendFile(filePathStr)
-		//fasthttp.ServeFileUncompressed(ctx, filePathStr)
 		fasthttp.ServeFileBytesUncompressed(ctx, []byte(filePathStr))
-		//		ctx.Response.Header.SetCanonical([]byte("Content-Type"), []byte("application/octet-stream"))
 		
 		trail1(ticket.Id, ticket.UserURI, "files", uri, "", Ok, timestamp)
 	} else {

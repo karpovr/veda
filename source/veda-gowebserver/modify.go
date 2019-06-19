@@ -35,25 +35,6 @@ func modifyIndividual(cmd string, ticket *ticket, dataKey string, dataJSON inter
 
 	responseJSON := make(map[string]interface{})
 
-/*
-	var mstorage_ch *nanomsg.Socket
-	mstorage_ch, err = nanomsg.NewSocket(nanomsg.AF_SP, nanomsg.REQ)
-	if err != nil {
-		log.Println("ERR! ON CREATING SOCKET to mstorage")
-		return InternalServerError
-	}
-
-	_, err = mstorage_ch.Connect(mainModuleURL)
-	for err != nil {
-		log.Println("ERR! ON CREATING ENDPOINT to mstorage")
-		return InternalServerError
-	}
-
-	NmCSend(mstorage_ch, jsonRequest, 0)
-	responseBuf, err := mstorage_ch.Recv(0)
-
-	mstorage_ch.Close()
-*/
 	mstorage_ch_Mutex.Lock()
 	NmCSend(g_mstorage_ch, jsonRequest, 0)
 	responseBuf, _ := g_mstorage_ch.Recv(0)

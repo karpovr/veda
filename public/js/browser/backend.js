@@ -1,6 +1,8 @@
 // HTTP server functions
 veda.Module(function Backend(veda) { "use strict";
 
+  var localDB = new veda.LocalDB();
+
   veda.Backend = {};
 
   // Check server health
@@ -339,7 +341,7 @@ veda.Module(function Backend(veda) { "use strict";
     return call_server(params);
   };
 
-  veda.Backend.query = function query(ticket, query, sort, databases, reopen, top, limit, from) {
+  veda.Backend.query = function query(ticket, queryStr, sort, databases, reopen, top, limit, from) {
     var arg = arguments[0];
     var isObj = typeof arg === "object";
     var params = {
@@ -348,7 +350,7 @@ veda.Module(function Backend(veda) { "use strict";
       async: isObj ? arg.async : true,
       data: {
         "ticket": isObj ? arg.ticket : ticket,
-        "query": isObj ? arg.query : query,
+        "query": isObj ? arg.query : queryStr,
         "sort": isObj ? arg.sort : sort,
         "databases" : isObj ? arg.databases : databases,
         "reopen" : isObj ? arg.reopen : reopen,
@@ -360,7 +362,7 @@ veda.Module(function Backend(veda) { "use strict";
     if (typeof params.async !== "undefined" ? params.async : true) {
       return call_server(params).catch(function (backendError) {
         if (backendError.code === 999) {
-          return veda.Backend.query(ticket, query, sort, databases, reopen, top, limit, from);
+          return veda.Backend.query(ticket, queryStr, sort, databases, reopen, top, limit, from);
         } else {
           throw backendError;
         }
@@ -371,7 +373,7 @@ veda.Module(function Backend(veda) { "use strict";
         return result;
       } catch (backendError) {
         if (backendError.code === 999) {
-          return veda.Backend.query(ticket, query, sort, databases, reopen, top, limit, from);
+          return veda.Backend.query(ticket, queryStr, sort, databases, reopen, top, limit, from);
         } else {
           throw backendError;
         }
@@ -392,7 +394,37 @@ veda.Module(function Backend(veda) { "use strict";
         "reopen" : (isObj ? arg.reopen : reopen) || false
       }
     };
-    return call_server(params);
+    return localDB.then(function (db) {
+      return db.get(params.data.uri);
+    }).catch(function (err) {
+      return call_server(params).then(function (individual) {
+        localDB.then(function (db) {
+          db.put(individual);
+        }).catch(console.log);
+        return individual;
+      });
+    });
+  };
+
+  veda.Backend.reset_individual = function reset_individual(ticket, uri, reopen) {
+    var arg = arguments[0];
+    var isObj = typeof arg === "object";
+    var params = {
+      method: "GET",
+      url: "get_individual",
+      async: isObj ? arg.async : true,
+      data: {
+        "ticket": isObj ? arg.ticket : ticket,
+        "uri": isObj ? arg.uri : uri,
+        "reopen" : (isObj ? arg.reopen : reopen) || false
+      }
+    };
+    return call_server(params).then(function (individual) {
+      localDB.then(function (db) {
+        db.put(individual);
+      }).catch(console.log);
+      return individual;
+    });
   };
 
   veda.Backend.get_individuals = function get_individuals(ticket, uris) {
@@ -407,7 +439,38 @@ veda.Module(function Backend(veda) { "use strict";
         "uris": isObj ? arg.uris : uris
       }
     };
-    return call_server(params);
+    return localDB.then(function (db) {
+      var results = [];
+      var get_from_server = [];
+      return params.data.uris.reduce(function (p, uri, i) {
+        return p.then(function() {
+          return db.get(uri).then(function (result) {
+            results[i] = result;
+            return results;
+          }).catch(function () {
+            get_from_server.push(uri);
+            return results;
+          });
+        });
+      }, Promise.resolve(results))
+      .then(function (results) {
+        if (get_from_server.length) {
+          params.data.uris = get_from_server;
+          return call_server(params);
+        } else {
+          return [];
+        }
+      })
+      .then(function (results_from_server) {
+        for (var i = 0, j = 0, length = results_from_server.length; i < length; i++) {
+          while(results[j++]); // Fast forward to empty element
+          results[j-1] = results_from_server[i];
+          db.put(results_from_server[i]);
+        }
+        return results;
+      })
+      .catch(console.log);
+    });
   };
 
 //////////////////////////

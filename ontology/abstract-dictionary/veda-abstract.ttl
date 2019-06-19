@@ -452,7 +452,7 @@ v-s:dateOfReceiving
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Дата получения"@ru ;
   rdfs:label "Date of receiving"@en ;
-  rdfs:range xsd:date ;
+  rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Temporal ;
 .
 v-s:year

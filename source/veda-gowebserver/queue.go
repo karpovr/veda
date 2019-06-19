@@ -75,7 +75,6 @@ var buff4 [4]uint8
 var buff8 [8]uint8
 var crc [4]uint8
 
-//////////////////////////////////////////// Consumer //////////////////////////////////////////////
 
 type Consumer struct {
 	isReady bool
@@ -363,7 +362,6 @@ func (ths *Consumer) commit_and_next(is_sync_data bool) bool {
 	return ths.put_info(is_sync_data)
 }
 
-//////////////////////////////////////////// Queue //////////////////////////////////////////////
 
 type Queue struct {
 	isReady bool
@@ -430,10 +428,6 @@ func (ths *Queue) open(_mode Mode) bool {
 		}
 	}
 
-	//var err error
-	//defer log.Printf("ERR! queue, not open: ex: %s", ex.msg);
-
-	//writeln("open ", text (mode));
 	if ths.mode != R {
 		return false
 	}
@@ -441,41 +435,10 @@ func (ths *Queue) open(_mode Mode) bool {
 	ths.isReady = true
 	ths.isReady = ths.get_info_queue()
 
-	//part := ths.name + "-" + strconv.FormatUint(uint64(ths.id), 10)
-	//ths.file_name_info_push = queue_db_path + "/" + part + "/" + ths.name + "_info_push"
-	//ths.file_name_queue = queue_db_path + "/" + part + "/" + ths.name + "_queue"
-
-	//ths.ff_info_push_r, err = os.OpenFile(ths.file_name_info_push, os.O_RDONLY, 0644)
-
-	//if err != nil {
-	//	return false
-	//}
-
-	//ths.ff_queue_r, err = os.OpenFile(ths.file_name_queue, os.O_RDONLY, 0644)
-
-	//if err != nil {
-	//	return false
-	//}
-
-	//ths.get_info_push(ths.id)
-
-//	var queue_r_info os.FileInfo
-
-//	queue_r_info, _ = os.Stat(ths.file_name_queue)
-
-//	if ths.mode == R && queue_r_info.Size() < int64(ths.right_edge) || ths.mode == RW && queue_r_info.Size() != int64(ths.right_edge) {
-//		ths.isReady = false
-//		log.Printf("ERR! queue:open(%v): [%v].size (%d) != right_edge=%v\n", ths.mode, ths.file_name_queue, queue_r_info.Size(), ths.right_edge)
-//	} else {
-//		ths.isReady = true
-		//ths.put_info()
-//	}
-
 	return ths.isReady
 }
 
 func (ths *Queue) reopen_reader() {
-	//var err error
 
 	if ths.ff_queue_r != nil {
 		ths.ff_queue_r.Close()
@@ -483,14 +446,6 @@ func (ths *Queue) reopen_reader() {
 
 	ths.ff_queue_r = nil
 	ths.set_r_queue_file (ths.id)
-
-//	ths.ff_queue_r, err = os.OpenFile(ths.file_name_queue, os.O_RDONLY, 0644)
-//	if err != nil {
-//		log.Printf("ERR! reopen_reader ths.file_name_queue=%s \n", ths.file_name_queue)
-//		ths.isReady = false
-//		return
-//	}
-//	ths.get_info_push(ths.id)
 }
 
 func (ths *Queue) get_info_push(part_id uint32) bool {
@@ -537,7 +492,6 @@ func (ths *Queue) get_info_push(part_id uint32) bool {
 		count_pushed, err = strconv.ParseInt(ch[2], 10, 0)
 
 		ths.count_pushed = uint32(count_pushed)
-		//string hash_hex = ch[ 4 ];
 	}
 
 	return true

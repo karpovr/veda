@@ -5,10 +5,11 @@ authors = ["itiu <ValeriyBushenev@gmail.com>"]
 edition = "2018"
 
 [lib]
-path = "src/queue/queue.rs"
+path = "src/queue/lib.rs"
 
 
 [dependencies]
+fs2 = "0.4.3"
 human-panic = "1.0.1"
 scan_fmt = "0.1.3"
 crc32fast = "1.1.2"

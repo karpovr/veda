@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"log"
-	//"strconv"
 	"time"
 )
 
@@ -27,8 +26,6 @@ func trail(ticketId, userId, action string, args map[string]interface{}, result 
 
 	timestamp := time.Now()
 	jsonArgs, _ := json.Marshal(args)
-//	log.Printf("TRAIL:time=%s;ticket=%s;user=%s;action=%s;\nargs=%s;\nres=%s;\ncode=%s\n\n", strconv.FormatInt(timestamp-startTime, 10), ticketId, userId, action, string(jsonArgs), result,
-//		string(codeToJsonException(resultCode)))
 	delta := timestamp.Sub(startTime)
 	ns_delta := delta.Nanoseconds()/1000000
 		

@@ -15,7 +15,6 @@ func addToIndividual(ctx *fasthttp.RequestCtx) {
 
 	var assignedSubsystems uint64
 	var ticketKey, eventID string
-	// var ticket ticket
 
 	//jsonData is decoded from http request from client
 	var jsonData map[string]interface{}
@@ -72,5 +71,5 @@ func addToIndividual(ctx *fasthttp.RequestCtx) {
 	//send modify request to veda-server
 	rc = modifyIndividual("add_to", &ticket, "individuals", []map[string]interface{}{indv.(map[string]interface{})},
 		assignedSubsystems, eventID, time.Now().Unix(), ctx)
-	//trail(ticket.Id, ticket.UserURI, "add_to", jsonData, "", rc, timestamp)
+
 }

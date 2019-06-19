@@ -1,13 +1,13 @@
 #[macro_use]
 extern crate log;
 
+use actix::prelude::*;
+use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
 use chrono::Local;
 use env_logger::Builder;
 use log::LevelFilter;
 use std::io::Write;
-use actix::prelude::*;
-use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
-use actix_web_actors::ws;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 use v_storage::storage::VStorage;
 
 use ini::Ini;
-use v_onto::individual::Individual;
+use v_onto::individual::{Individual, RawObj};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_millis(5000);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -184,9 +184,11 @@ fn storage_manager(tarantool_addr: String, rx: Receiver<(String, Sender<i64>)>) 
         if let Ok((msg, sender)) = rx.recv() {
             //info!("main:recv={:?}", msg);
 
-            let mut indv = Individual::new_empty();
-            storage.set_binobj(&msg, &mut indv);
-            let out_counter = if let Ok(c) = indv.get_first_integer("v-s:updateCounter") {
+            let mut indv = Individual::new();
+            let mut raw = RawObj::new_empty();
+
+            storage.set_binobj(&msg, &mut raw, &mut indv);
+            let out_counter = if let Ok(c) = indv.get_first_integer(&mut raw, "v-s:updateCounter") {
                 c
             } else {
                 0
@@ -213,7 +215,7 @@ fn main() -> std::io::Result<()> {
         .filter(None, LevelFilter::Info)
         .init();
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
+    let conf = Ini::load_from_file("veda.properties").expect("fail load [veda.properties] file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let ccus_port = section.get("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
 

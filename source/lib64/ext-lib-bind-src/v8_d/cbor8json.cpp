@@ -25,14 +25,12 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
 
     element.pos = read_type_value(src, 0, size, &header);
     int n_resources = header.v_long;
-    // ////cerr << "@MAP LEN" << header.v_long << endl;
 
     //READING @ KEY
     element.pos += read_type_value(src, element.pos, size, &header);
     uint32_t    ep = (uint32_t)(element.pos + header.v_long);
     std::string str(src + element.pos, header.v_long);
     element.pos = ep;
-    ////cerr << "@STR " << str << endl;
 
     //READING URI
     element.pos += read_type_value(src, element.pos, size, &header);
@@ -40,7 +38,6 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
     std::string uri(src + element.pos, header.v_long);
     js_map->Set(String::NewFromUtf8(isolate, "@"), String::NewFromUtf8(isolate, uri.c_str()));
     element.pos = ep;
-    //cerr << "@URI " << uri << endl;
 
     for (int i = 1; i < n_resources; i++)
     {
@@ -49,8 +46,6 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
         uint32_t      ep = (uint32_t)(element.pos + resource_header.v_long);
         std::string   predicate(src + element.pos, resource_header.v_long);
         element.pos = ep;
-        //cerr << "@DECODE PREDICATE" << endl;
-        //cerr << "@PREDICATE " << predicate << endl;
 
         element.pos += read_type_value(src, element.pos, size, &resource_header);
 
@@ -60,33 +55,27 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
         {
             Handle<Object> rr_v8 = Object::New(isolate);
 
-            //cerr << "\t@TEXT STRING" << endl;
             uint32_t    ep = (uint32_t)(element.pos + resource_header.v_long);
             std::string val(src + element.pos, resource_header.v_long);
             rr_v8->Set(f_data, String::NewFromUtf8(isolate, val.c_str()));
             element.pos = ep;
-            //cerr << "\t\t@ VAL " << val << endl;
 
             if (resource_header.tag == TEXT_RU)
             {
-                //cerr << "\t\t@STR RU" << endl;
                 rr_v8->Set(f_type, String::NewFromUtf8(isolate, "String"));
                 rr_v8->Set(f_lang, String::NewFromUtf8(isolate, "RU"));
             }
             else if (resource_header.tag == TEXT_EN)
             {
-                //cerr << "\t\t@STR EN" << endl;
                 rr_v8->Set(f_type, String::NewFromUtf8(isolate, "String"));
                 rr_v8->Set(f_lang, String::NewFromUtf8(isolate, "EN"));
             }
             else if (resource_header.tag == URI)
             {
-                //cerr << "\t\t@STR URI" << endl;
                 rr_v8->Set(f_type, String::NewFromUtf8(isolate, "Uri"));
             }
             else
             {
-                //cerr << "\t\t@STR NONE" << endl;
                 rr_v8->Set(f_type, String::NewFromUtf8(isolate, "String"));
             }
 
@@ -94,7 +83,6 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
         }
         else if (resource_header.type == NEGATIVE_INTEGER || resource_header.type == UNSIGNED_INTEGER)
         {
-            //cerr << "\t@0 INT=" << resource_header.v_long << endl;
             Handle<Object> rr_v8 = Object::New(isolate);
             if (resource_header.tag == EPOCH_DATE_TIME)
             {
@@ -106,13 +94,11 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
                 rr_v8->Set(f_type, String::NewFromUtf8(isolate, "Integer"));
                 rr_v8->Set(f_data, v8::Integer::New(isolate, resource_header.v_long));
             }
-            //cerr << "\t@1 INT=" << resource_header.v_long << endl;
             resources_v8->Set(0, rr_v8);
         }
         else if (resource_header.type == FLOAT_SIMPLE)
         {
             Handle<Object> rr_v8 = Object::New(isolate);
-            //cerr << "\t@FLOAT SIMPLE" << endl;
             if (resource_header.v_long == _TRUE)
                 rr_v8->Set(f_data, v8::Boolean::New(isolate, true));
             else if (resource_header.v_long == _FALSE)
@@ -123,23 +109,15 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
         }
         else if (resource_header.type == ARRAY)
         {
-            // element.pos += read_type_value(src, element.pos, size, &resource_header);
-            //cerr << "\t@ARRAY" << endl;
             if (resource_header.tag == DECIMAL_FRACTION)
             {
-                //cerr << "\t\t@DECIMAL" << endl;
-
                 element.pos += read_type_value(src, element.pos, size, &resource_header);
                 long decimal_mantissa_data = resource_header.v_long;
-                //cerr << "\t\tmant=" << decimal_mantissa_data;
 
                 element.pos += read_type_value(src, element.pos, size, &resource_header);
                 long decimal_exponent_data = resource_header.v_long;
-                //cerr << " exp=" << decimal_exponent_data << endl;
 
                 string ss = exponent_and_mantissa_to_string(decimal_mantissa_data, decimal_exponent_data);
-
-                //cerr << " ss=" << ss << endl;
 
                 Handle<Object> rr_v8 = Object::New(isolate);
                 rr_v8->Set(f_data, String::NewFromUtf8(isolate, ss.c_str()));
@@ -149,43 +127,34 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
             else
             {
                 int n_elems = resource_header.v_long;
-                // element.pos--;
-                //cerr << "\t\t@RESOURCES ARRAY " << n_elems << endl;
                 for (int j = 0; j < n_elems; j++)
                 {
                     element.pos += read_type_value(src, element.pos, size, &resource_header);
-                    ////cerr << "\t\t\tj=" << j << endl;
                     if (resource_header.type == TEXT_STRING)
                     {
                         Handle<Object> rr_v8 = Object::New(isolate);
 
-                        //cerr << "\t\t\t@TEXT STRING" << endl;
                         uint32_t    ep = (uint32_t)(element.pos + resource_header.v_long);
                         std::string val(src + element.pos, resource_header.v_long);
                         rr_v8->Set(f_data, String::NewFromUtf8(isolate, val.c_str()));
                         element.pos = ep;
-                        //cerr << "\t\t\t\t@ VAL " << val << endl;
 
                         if (resource_header.tag == TEXT_RU)
                         {
-                            //cerr << "\t\t@STR RU" << endl;
                             rr_v8->Set(f_type, String::NewFromUtf8(isolate, "String"));
                             rr_v8->Set(f_lang, String::NewFromUtf8(isolate, "RU"));
                         }
                         else if (resource_header.tag == TEXT_EN)
                         {
-                            //cerr << "\t\t@STR EN" << endl;
                             rr_v8->Set(f_type, String::NewFromUtf8(isolate, "String"));
                             rr_v8->Set(f_lang, String::NewFromUtf8(isolate, "EN"));
                         }
                         else if (resource_header.tag == URI)
                         {
-                            //cerr << "\t\t@STR URI" << endl;
                             rr_v8->Set(f_type, String::NewFromUtf8(isolate, "Uri"));
                         }
                         else
                         {
-                            //cerr << "\t\t@STR NONE" << endl;
                             rr_v8->Set(f_type, String::NewFromUtf8(isolate, "String"));
                         }
 
@@ -204,13 +173,11 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
                             rr_v8->Set(f_type, String::NewFromUtf8(isolate, "Integer"));
                             rr_v8->Set(f_data, v8::Integer::New(isolate, resource_header.v_long));
                         }
-                        //cerr << "\t\t\t@INT=" << resource_header.v_long << endl;
                         resources_v8->Set(j, rr_v8);
                     }
                     else if (resource_header.type == FLOAT_SIMPLE)
                     {
                         Handle<Object> rr_v8 = Object::New(isolate);
-                        //cerr << "\t\t\t@FLOAT SIMPLE" << endl;
                         if (resource_header.v_long == _TRUE)
                             rr_v8->Set(f_data, v8::Boolean::New(isolate, true));
                         else if (resource_header.v_long == _FALSE)
@@ -221,19 +188,13 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
                     }
                     else if (resource_header.type == ARRAY)
                     {
-                        // element.pos += read_type_value(src, element.pos, size, &resource_header);
-                        //cerr << "\t@ARRAY" << endl;
                         if (resource_header.tag == DECIMAL_FRACTION)
                         {
-                            //cerr << "\t\t@DECIMAL" << endl;
-
                             element.pos += read_type_value(src, element.pos, size, &resource_header);
                             long decimal_mantissa_data = resource_header.v_long;
-                            //cerr << "\t\tmant=" << resource_header.v_long;
 
                             element.pos += read_type_value(src, element.pos, size, &resource_header);
                             long decimal_exponent_data = resource_header.v_long;
-                            ////cerr << " exp=" << resource_header.v_long << endl;
 
                             string         ss = exponent_and_mantissa_to_string(decimal_mantissa_data, decimal_exponent_data);
 
@@ -247,22 +208,14 @@ Handle<Value> cbor2jsobject(Isolate *isolate, string in_str)
             }
         }
 
-        //cerr << "@SAVING TO RESOURCES" << endl;
         if (resources_v8->Length() > 0)
         {
-            //cerr << "\t@GRATER THAN ZERO" << endl;
             js_map->Set(predicate_v8, resources_v8);
         }
-        //cerr << "@SAVED TO RESOURCES" << endl;
     }
 
-    //cerr << "@FINISH CBOR 2 JS" << endl;
     return js_map;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//  JSON -> CBOR
 
 void js_el_2_cbor_el(Local<Object> resource_obj, Handle<Value> f_data, Handle<Value> f_type, Handle<Value> f_lang, std::vector<char> &ou)
 {
@@ -291,32 +244,27 @@ void js_el_2_cbor_el(Local<Object> resource_obj, Handle<Value> f_data, Handle<Va
     else
         type = v_type->ToInteger()->Value();
 
-    //cerr << "\t\t@TYPE " << type << endl;
     if (type == _Uri)
     {
         string str_data = std::string(*v8::String::Utf8Value(v_data));
         write_type_value(TAG, URI, ou);
         write_string(str_data, ou);
-        //cerr << "\t\t\t@STR DATA " << str_data << endl;
     }
     else if (type == _Boolean)
     {
         bool bool_data = v_data->ToBoolean()->Value();
         write_bool(bool_data, ou);
-        //cerr << "\t\t\t@BOOL DATA " << bool_data << endl;
     }
     else if (type == _Datetime)
     {
         int64_t long_data = v_data->ToInteger()->Value() / 1000;
         write_type_value(TAG, EPOCH_DATE_TIME, ou);
         write_integer(long_data, ou);
-        //cerr << "\t\t\t@DATETIME DATA " << long_data << endl;
     }
     else if (type == _Integer)
     {
         int64_t long_data = v_data->ToInteger()->Value();
         write_integer(long_data, ou);
-        //cerr << "\t\t\t@LONG DATA " << long_data << endl;
     }
     else if (type == _Decimal)
     {
@@ -325,13 +273,10 @@ void js_el_2_cbor_el(Local<Object> resource_obj, Handle<Value> f_data, Handle<Va
         {
             v8::String::Utf8Value s1_1(v_data);
             std::string           num = std::string(*s1_1);
-            //std::cerr << "@jsobject2individual value=" << num << std::endl;
 
             int pos = num.find('.');
             if (pos < 0)
                 pos = num.find(',');
-
-            //std::cerr << "@pos=" << pos << std::endl;
 
             if (pos > 0)
             {
@@ -348,8 +293,6 @@ void js_el_2_cbor_el(Local<Object> resource_obj, Handle<Value> f_data, Handle<Va
                 decimal_mantissa_data = to_int(num.c_str());
                 decimal_exponent_data = 0;
             }
-            //std::cerr << "@jsobject2individual decimal_mantissa_data=" << decimal_mantissa_data << std::endl;
-            //std::cerr << "@jsobject2individual decimal_exponent_data=" << decimal_exponent_data << std::endl;
         }
         else
         {
@@ -361,7 +304,6 @@ void js_el_2_cbor_el(Local<Object> resource_obj, Handle<Value> f_data, Handle<Va
         write_type_value(ARRAY, 2, ou);
         write_integer(decimal_mantissa_data, ou);
         write_integer(decimal_exponent_data, ou);
-        //cerr << "\t\t\t@DECIMAL DATA " << "MANT=" << decimal_mantissa_data << " EXP=" << decimal_exponent_data << endl;
     }
     else if (type == _String)
     {
@@ -389,17 +331,11 @@ void js_el_2_cbor_el(Local<Object> resource_obj, Handle<Value> f_data, Handle<Va
         if (lang != LANG_NONE)
             write_type_value(TAG, lang + 41, ou);
         write_string(str_data, ou);
-
-        //cerr << "@STR DATA " << str_data << "LANG: " << lang << endl;
     }
 }
 
 void jsobject2cbor(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
 {
-    //cerr <<"!!START LOGGING!!" << endl;
-    //jsobject_log(value);
-
-    //cerr << "@IS OBJECT " << value->IsObject() << endl;
     Local<Object>         obj = Local<Object>::Cast(value);
 
     v8::Handle<v8::Array> individual_keys = obj->GetPropertyNames();
@@ -414,14 +350,12 @@ void jsobject2cbor(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
     {
         v8::Local<v8::Value> js_key        = individual_keys->Get(i);
         std::string          resource_name = std::string(*v8::String::Utf8Value(js_key));
-        //cerr << "@RESOURCE KEY " << resource_name << endl;
         Local<Value>         js_value = obj->Get(js_key);
         if (resource_name == "@")
         {
             write_string(resource_name, ou);
             std::string uri = std::string(*v8::String::Utf8Value(js_value));
             write_string(uri, ou);
-            //cerr << "\t@URI DATA " << uri << endl;
             continue;
         }
 
@@ -443,11 +377,8 @@ void jsobject2cbor(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
             continue;
         }
 
-
-        //cerr << "\t@IS ARRAY " << js_value->IsArray() << endl;
         Local<v8::Array> resources_arr    = Local<v8::Array>::Cast(js_value);
         uint32_t         resources_length = resources_arr->Length();
-        //cerr << "\t@LENGTH " << resources_length << endl;
         write_type_value(ARRAY, resources_length, ou);
 
         for (uint32_t j = 0; j < resources_length; j++)
@@ -456,7 +387,6 @@ void jsobject2cbor(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
 
             if (js_value->IsArray())
             {
-                //cerr << "[ [ {} ] ]" << endl;
 //             [ [ {} ] ]
 
                 Local<v8::Array> resources_in_arr    = Local<v8::Array>::Cast(js_value);
@@ -471,7 +401,6 @@ void jsobject2cbor(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
                 }
                 else
                 {
-                    //cerr << "[ [ {} ], [ {} ] ]" << endl;
 //                  [ [ {} ], [ {} ] ]
                     cerr << "ERR! INVALID JS INDIVIDUAL FORMAT " << endl;
                     jsobject_log(value);
@@ -482,20 +411,14 @@ void jsobject2cbor(Local<Value> value, Isolate *isolate, std::vector<char> &ou)
                 if (js_value->IsObject())
                 {
 //             [ {} ]
-                    //cerr << "[ {} ]" << endl;
                     Local<Object> resource_obj = Local<Object>::Cast(js_value);
                     js_el_2_cbor_el(resource_obj, f_data, f_type, f_lang, ou);
                 }
                 else
                 {
-                    //cerr << "ERR! INVALID JS INDIVIDUAL FORMAT, NULL VALUE, " << endl;
-                    //jsobject_log(value);
-
                     write_type_value(ARRAY, 0, ou);
                 }
             }
         }
     }
-
-    //cerr << "!!END LOGGING!!" << endl;
 }

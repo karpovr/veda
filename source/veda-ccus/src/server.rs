@@ -4,8 +4,9 @@ use std::collections::{HashMap, HashSet};
 use std::str;
 use std::time::Duration;
 use v_onto::individual::*;
-use v_onto::msgpack8individual::msgpack2individual;
-use v_queue::*;
+use v_onto::parser::*;
+use v_queue::consumer::*;
+use v_queue::record::*;
 
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
@@ -66,7 +67,7 @@ pub struct CCUSServer {
 
 impl CCUSServer {
     pub fn new(tx: Sender<(String, Sender<i64>)>) -> CCUSServer {
-        let _consumer = Consumer::new("CCUS1", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
+        let _consumer = Consumer::new("./data/queue", "CCUS1", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
         let ch = mpsc::channel();
 
         CCUSServer {
@@ -268,10 +269,10 @@ impl Actor for CCUSServer {
                     break;
                 }
 
-                let mut msg = Individual::new(vec![0; (act.queue_consumer.header.msg_length) as usize]);
+                let mut raw = RawObj::new(vec![0; (act.queue_consumer.header.msg_length) as usize]);
 
                 // заголовок взят успешно, занесем содержимое сообщения в структуру Individual
-                if let Err(e) = act.queue_consumer.pop_body(&mut msg.binobj) {
+                if let Err(e) = act.queue_consumer.pop_body(&mut raw.data) {
                     if e == ErrorQueue::FailReadTailMessage {
                         break;
                     } else {
@@ -280,20 +281,23 @@ impl Actor for CCUSServer {
                     }
                 }
 
+                let mut msg = Individual::new();
                 // запустим ленивый парсинг сообщения в Individual
-                if msgpack2individual(&mut msg) == false {
+                if let Ok(uri) = parse_raw(&mut raw) {
+                    msg.uri = uri;
+                } else {
                     error!("{}: fail parse, retry", act.total_prepared_count);
                     break;
                 }
 
                 // берем поле [uri]
-                if let Ok(uri_from_queue) = msg.get_first_literal("uri") {
+                if let Ok(uri_from_queue) = msg.get_first_literal(&mut raw, "uri") {
                     // найдем есть ли среди uri на которые есть подписки, uri из очереди
                     if let Some(el) = act.uri2sessions.get_mut(&uri_from_queue) {
                         debug!("FOUND CHANGES: uri={}, sessions={:?}", uri_from_queue, el.sessions);
 
                         // берем u_counter
-                        let counter_from_queue = if let Ok(c) = msg.get_first_integer("u_count") {
+                        let counter_from_queue = if let Ok(c) = msg.get_first_integer(&mut raw, "u_count") {
                             c as u64
                         } else {
                             0

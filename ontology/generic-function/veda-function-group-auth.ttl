@@ -795,11 +795,12 @@ return veda.Util.getPropertyChain(this, "v-s:parentUnit");
 
 v-s:GG_AppointmentToOrganization
   rdf:type v-s:GroupGenerator ;
+  rdfs:label "Auth group generator: put appointment to parent organization group" ;
   v-s:authClass v-s:Appointment ;
   v-s:authGroupFunction """
 return veda.Util.getPropertyChain(this, "v-s:parentOrganization");
   """;
-  rdfs:label "Auth group generator: put appointment to parent organization group" ;
+  v-s:keepMembershipOnDelete true ;
 .
 
 v-s:GG_PersonToAllUsersGroup

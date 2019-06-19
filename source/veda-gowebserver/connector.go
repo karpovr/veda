@@ -192,7 +192,6 @@ func (conn *Connector) open_dbs() {
 }
 
 func (conn *Connector) reopen_individual_db() {
-	//var err error
 	if conn.tt_client != nil {
 
 	} else {
@@ -201,8 +200,6 @@ func (conn *Connector) reopen_individual_db() {
 }
 
 func (conn *Connector) reopen_ticket_db() {
-	//var err error
-
 	if conn.tt_client != nil {
 
 	} else {
@@ -256,7 +253,6 @@ func (conn *Connector) Get(needAuth bool, userUri string, uris []string, trace b
 
 	rr.OpRC = make([]ResultCode, 0, len(uris))
 	rr.SetUris(uris)
-	//rr.Indv = make([]Individual, 0, len(uris))
 
 	if conn.tt_client != nil {
 
@@ -502,7 +498,6 @@ func (conn *Connector) Authorize(needAuth bool, userUri string, uri string, oper
 		info_str := C.GoString(C.get_trace(curi, cuser_uri, 15, C.TRACE_GROUP, true))
 
 		rr.Rights = make([]uint8, 1)
-		//rr.Indv = make([]Individual, 1)
 		rr.OpRC = make([]ResultCode, 1)
 
 		parts := strings.Split(info_str, "\n")
@@ -523,7 +518,6 @@ func (conn *Connector) Authorize(needAuth bool, userUri string, uri string, oper
 			"v-s:memberOf": memberOf,
 		}
 
-		//rr.Indv[0] = membershipIndividual
 		rr.AddIndv(membershipIndividual)
 		rr.OpRC[0] = Ok
 
@@ -548,7 +542,6 @@ func (conn *Connector) GetTicket(ticketIDs []string, trace bool) RequestResponse
 	}
 
 	rr.OpRC = make([]ResultCode, 0, len(ticketIDs))
-	//rr.Indv = make([]Individual, 0, len(ticketIDs))
 	rr.SetUris(ticketIDs)
 
 	if conn.tt_client != nil {

@@ -30,7 +30,7 @@ veda.Module(function (veda) { "use strict";
           template = veda.cache.get(uri) ? veda.cache.get(uri) : new veda.IndividualModel({
             "@": uri,
             "v-ui:template": [{data: templateString, type: "String"}]
-          });
+          }, 1);
         }
         return template.load().then(function (template) {
           template = template["v-ui:template"][0].toString();
@@ -112,14 +112,6 @@ veda.Module(function (veda) { "use strict";
         if (post_render) {
           post_render.call(individual, veda, individual, container, processedTemplate, mode, extra);
         }
-
-        // Watch server-side updates
-        var updateService = new veda.UpdateService().then(function (updateService) {
-          updateService.subscribe(individual.id);
-          processedTemplate.one("remove", function () {
-            updateService.unsubscribe(individual.id);
-          });
-        });
 
         return processedTemplate;
 
@@ -421,16 +413,6 @@ veda.Module(function (veda) { "use strict";
             about.off("idChanged", idModifiedHandler);
           });
           return;
-        }
-
-        if ( about !== individual ) {
-          // Watch server-side updates
-          var updateService = new veda.UpdateService().then(function (updateService) {
-            updateService.subscribe(about.id);
-            template.one("remove", function () {
-              updateService.unsubscribe(about.id);
-            });
-          });
         }
 
         // Re-render all property values if model's property was changed

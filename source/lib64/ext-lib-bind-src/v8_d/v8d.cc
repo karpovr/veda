@@ -29,8 +29,7 @@ void FatalErrorCallback_r(const char *location, const char *message)
 }
 }
 
-/////// veda IO section //////////////////////////////////////////////////////////////////////////////////////////////////
-
+// veda IO section 
 /// Stringify V8 value to JSON
 /// return empty string for empty value
 std::string json_str(v8::Isolate *isolate, v8::Handle<v8::Value> value)
@@ -83,9 +82,6 @@ int remove_from_individual(const char *_ticket, int _ticket_length, const char *
 
 void log_trace(const char *_str, int _str_length);
 
-//char *get_resource (int individual_idx, const char* _uri, int _uri_length, int* count_resources, int resource_idx);
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class WrappedContext
 {
@@ -120,7 +116,6 @@ ToCString(const v8::String::Utf8Value& value)
 {
     return *value ? *value : "<string conversion failed>";
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void
 GetEnvStrVariable(const v8::FunctionCallbackInfo<v8::Value>& args)
@@ -141,8 +136,6 @@ GetEnvStrVariable(const v8::FunctionCallbackInfo<v8::Value>& args)
     {
         std::string data(res->data, res->length);
 
-        //std::cerr << "@c:get #3 " << std::endl;
-//        std::cerr << "@c:get #3 [" << vv << "]" << std::endl;
         Handle<Value> oo = String::NewFromUtf8(isolate, data.c_str());
         args.GetReturnValue().Set(oo);
     }
@@ -181,8 +174,6 @@ std::string prepare_str_list_element(std::string data, std::string::size_type b_
         e_p--;
 
     std::string substring(data.substr(b_p, e_p - b_p));
-
-    //std::cerr << "@c:query, ss= " << substring << std::endl;
 
     return substring;
 }
@@ -281,8 +272,6 @@ Query(const v8::FunctionCallbackInfo<v8::Value>& args)
     }
 }
 
-////////////////
-
 void
 NewUrisConsumer(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
@@ -350,7 +339,6 @@ UrisCommitAndNext(const v8::FunctionCallbackInfo<v8::Value>& args)
     args.GetReturnValue().Set(res);
 }
 
-/////////////////////
 void GetFromGHT(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
     Isolate *isolate = args.GetIsolate();
@@ -392,12 +380,9 @@ void PutToGHT(const v8::FunctionCallbackInfo<v8::Value>& args)
     put_to_ght(cname, _name.length(), cvalue, _value.length());
 }
 
-////////////////////
-
 void
 GetIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
-    // cerr << "#START GETINDIVIDUAL#" << endl;
     Isolate *isolate = args.GetIsolate();
 
     if (args.Length() != 2)
@@ -422,12 +407,9 @@ GetIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
     {
         std::string data(doc_as_binobj->data, doc_as_binobj->length);
 
-        //std::cerr << "@c #get_individual uri=" << cstr << std::endl;
-
         Handle<Value> oo;
         if (data[ 0 ] == (char)146)
         {
-            //std::cerr << "@c MSGPACK" << std::endl;
             if (data.size() < 2)
             {
                 isolate->ThrowException(v8::String::NewFromUtf8(isolate, "invalid msgpack, size < 2"));
@@ -438,19 +420,14 @@ GetIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
         else
             oo = cbor2jsobject(isolate, data);
 
-        //jsobject_log(oo);
-
-        //std::cerr << "@c #get_individual #E" << std::endl;
         args.GetReturnValue().Set(oo);
     }
 
-    // cerr << "#END GET INDIVIDUAL#" << endl;
 }
 
 void
 GetIndividuals(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
-    // cerr << "#START GETINDIVIDUALS#" << endl;
     Isolate *isolate = args.GetIsolate();
 
     if (args.Length() != 2)
@@ -485,12 +462,9 @@ GetIndividuals(const v8::FunctionCallbackInfo<v8::Value>& args)
         {
             std::string data(doc_as_binobj->data, doc_as_binobj->length);
 
-            //std::cerr << "@c #get_individual uri=" << cstr << std::endl;
-
             Handle<Value> oo;
             if (data[ 0 ] == (char)146)
             {
-                //std::cerr << "@c MSGPACK" << std::endl;
                 if (data.size() < 2)
                 {
                     isolate->ThrowException(v8::String::NewFromUtf8(isolate, "invalid msgpack, size < 2"));
@@ -507,8 +481,6 @@ GetIndividuals(const v8::FunctionCallbackInfo<v8::Value>& args)
     }
 
     args.GetReturnValue().Set(arr_1);
-
-    // cerr << "#END GET INDIVIDUAL#" << endl;
 }
 
 void
@@ -555,17 +527,13 @@ PutIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
     if (args[ 1 ]->IsObject())
     {
         string jsnstr = json_str(isolate, args[ 1 ]);
-        //std::cerr << "@c #put_individual json=" << jsnstr << std::endl;
 
         v8::String::Utf8Value str_ticket(args[ 0 ]);
         const char            *ticket = ToCString(str_ticket);
 
         std::vector<char>     buff;
-        // std::vector<char>     buff1;
 
         jsobject2cbor(args[ 1 ], isolate, buff);
-        // cerr << "@ORIG " << buff.size() << "[" << std::string(buff.data(), buff.size()) << "]" << endl;
-        // cerr << "@NEW " << buff1.size() << "[" << std::string(buff1.data(), buff1.size()) << "]" << endl;
 
         char *ptr = buff.data();
         res = put_individual(ticket, str_ticket.length(), ptr, buff.size());
@@ -595,11 +563,8 @@ AddToIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
         const char            *ticket = ToCString(str_ticket);
 
         std::vector<char>     buff;
-        // std::vector<char>     buff1;
 
         jsobject2cbor(args[ 1 ], isolate, buff);
-        // cerr << "@ORIG " << buff.size() << "[" << std::string(buff.data(), buff.size()) << "]" << endl;
-        // cerr << "@NEW " << buff1.size() << "[" << std::string(buff1.data(), buff1.size()) << "]" << endl;
 
         jsobject2cbor(args[ 1 ], isolate, buff);
         char *ptr = buff.data();
@@ -628,13 +593,7 @@ SetInIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
     {
         v8::String::Utf8Value str_ticket(args[ 0 ]);
         const char            *ticket = ToCString(str_ticket);
-
         std::vector<char>     buff;
-        // std::vector<char>     buff1;
-
-        jsobject2cbor(args[ 1 ], isolate, buff);
-        // cerr << "@ORIG " << buff.size() << "[" << std::string(buff.data(), buff.size()) << "]" << endl;
-        // cerr << "@NEW " << buff1.size() << "[" << std::string(buff1.data(), buff1.size()) << "]" << endl;
 
         jsobject2cbor(args[ 1 ], isolate, buff);
         char *ptr = buff.data();
@@ -663,13 +622,9 @@ RemoveFromIndividual(const v8::FunctionCallbackInfo<v8::Value>& args)
     {
         v8::String::Utf8Value str_ticket(args[ 0 ]);
         const char            *ticket = ToCString(str_ticket);
-
         std::vector<char>     buff;
-        // std::vector<char>     buff1;
 
         jsobject2cbor(args[ 1 ], isolate, buff);
-        // cerr << "@ORIG " << buff.size() << "[" << std::string(buff.data(), buff.size()) << "]" << endl;
-        // cerr << "@NEW " << buff1.size() << "[" << std::string(buff1.data(), buff1.size()) << "]" << endl;
 
         char *ptr = buff.data();
         res = remove_from_individual(ticket, str_ticket.length(), ptr, buff.size());
@@ -712,7 +667,6 @@ Print(const v8::FunctionCallbackInfo<v8::Value>& args)
     log_trace(sstr.c_str(), sstr.length());
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 WrappedContext::WrappedContext ()
 {
@@ -775,7 +729,6 @@ WrappedScript::~WrappedScript ()
 //  script_.Dispose();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 WrappedContext *
 new_WrappedContext()
@@ -839,14 +792,7 @@ run_WrappedScript(WrappedContext *_context, WrappedScript *ws, _Buff *_res, _Buf
         _res->length = c_length;
     }
 
-//    printf("Script result: %s\n", *utf8);
-
-//  bool finished = false;
-//  for (int i = 0; i < 200 && !finished; i++)
-//  {
-//finished =
     isolate->IdleNotification(1000);
-//  }
 }
 
 void
