@@ -176,6 +176,7 @@ v-up:UploadTemplate
           || newQuad[i].predicate === 'v-s:firstName'
           || newQuad[i].predicate === 'v-s:lastName'
           || newQuad[i].predicate === 'rdfs:label'
+          || newQuad[i].predicate === 'rdfs:comment'
       ) {
         var at = newQuad[i].object.lastIndexOf("@"),
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
