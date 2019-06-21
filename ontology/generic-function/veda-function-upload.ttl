@@ -188,9 +188,15 @@ v-up:UploadTemplate
             newObject[ newQuad[i].predicate ] = veda.Util.newStr( label, locale ) ;
           }
         } else {
-          var back = newQuad[i].object.lastIndexOf("\\"),
-              labelSingleLang = newQuad[i].object.substring(1, back);
-          newObject[ newQuad[i].predicate ] = veda.Util.newStr( labelSingleLang ) ;
+          if ( newQuad[i].object.lastIndexOf("\\") > 0 ) {
+            var back = newQuad[i].object.lastIndexOf("\\"),
+                labelSingleLang = newQuad[i].object.substring(1, back);
+            newObject[ newQuad[i].predicate ] = veda.Util.newStr( labelSingleLang ) ;
+          } else {
+            var back = newQuad[i].object.lastIndexOf("\\n"),
+                labelSingleLang = newQuad[i].object.substring(1, back - 1);
+            newObject[ newQuad[i].predicate ] = veda.Util.newStr( labelSingleLang ) ;
+          }
         }
       } else if ( newQuad[i].predicate === 'v-ui:template' ) {
         var back = newQuad[i].object.lastIndexOf("\\n"),
