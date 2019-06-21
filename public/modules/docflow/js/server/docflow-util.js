@@ -1292,4 +1292,19 @@ veda.Workflow.create_new_journal = function(ticket, new_journal_uri, parent_jour
       return veda.Util.getFirstValue (veda.Workflow.get_properties_chain (systemIndivid, [{$get:'v-wf:appInboxUrl'}]));
   };
 
+  veda.Workflow.isSubUnitOf = function (current, target, depth) {
+      if (current.length == 0) return false;
+      print("@@@@@isSubUnitOf run");
+      depth = depth || 0;
+      var dep = get_individual(ticket, current[0].data);
+      if (!veda.Util.hasValue(dep, "v-s:parentUnit") || depth > 16) {
+        print("@@@@@isSubUnitOf parentUnit empty");
+        return false;
+      } else if (veda.Util.hasValue(dep, "v-s:parentUnit", {data: target, type: "Uri"})) {
+        print("@@@@@isSubUnitOf parentUnit match");
+        return true;
+      } else {
+        return veda.Workflow.isSubUnitOf(dep["v-s:parentUnit"], target, depth + 1);
+      }
+  };
 });

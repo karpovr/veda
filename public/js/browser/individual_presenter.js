@@ -656,6 +656,10 @@ veda.Module(function (veda) { "use strict";
       e.stopPropagation();
       if (mode === "edit") {
         // Merge template validation results with internal validation results
+        validationResult.state = Object.keys(validationResult).reduce( function (acc, property_uri) {
+          if (property_uri === "state") { return acc; }
+          return acc && validationResult[property_uri].state;
+        }, true);
         Object.keys(validationResult).map(function (property_uri) {
           if (property_uri === "state") { return; }
           validation[property_uri] = validationResult[property_uri];

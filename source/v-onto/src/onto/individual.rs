@@ -197,6 +197,15 @@ impl Individual {
         });
     }
 
+    pub fn add_binary(&mut self, predicate: &str, v: Vec<u8>, order: u32) {
+        let values = self.resources.entry(predicate.to_owned()).or_default();
+        values.push(Resource {
+            rtype: DataType::Binary,
+            order: order as u16,
+            value: Value::Binary(v),
+        });
+    }
+
     pub fn add_integer(&mut self, predicate: &str, i: i64, order: u32) {
         let values = self.resources.entry(predicate.to_owned()).or_default();
         values.push(Resource {

@@ -9,6 +9,7 @@ use log::LevelFilter;
 use std::io::Write;
 use std::{thread, time};
 use v_onto::individual::{Individual, RawObj};
+use v_onto::individual2msgpack::*;
 use v_onto::parser::*;
 use v_queue::consumer::*;
 use v_queue::queue::*;
@@ -106,29 +107,9 @@ fn main() -> std::io::Result<()> {
                 }
             }
 
-            let mut msg: Individual = Individual::new();
-            if let Ok(uri) = parse_raw(&mut raw) {
-                msg.uri = uri;
-                if let Ok(new_state) = msg.get_first_binobj(&mut raw, "new_state") {
-                    let mut raw = RawObj::new(new_state);
-                    let mut indv: Individual = Individual::new();
-                    if let Ok(uri) = parse_raw(&mut raw) {
-                        indv.uri = uri;
-
-                        // cmd
-                        // uri
-                        // date
-                        // source_veda
-                        // target_veda
-                        // new_state
-                    }
-                }
-            }
-
-            queue_out.push(&raw.data, MsgType::Object);
+            prepare_queue_element(&mut raw, &mut queue_out);
 
             queue_consumer.commit_and_next();
-
             total_prepared_count += 1;
 
             if total_prepared_count % 1000 == 0 {
@@ -137,5 +118,38 @@ fn main() -> std::io::Result<()> {
         }
 
         thread::sleep(time::Duration::from_millis(5000));
+    }
+
+    fn prepare_queue_element(raw: &mut RawObj, queue_out: &mut Queue) {
+        let mut msg: Individual = Individual::new();
+        if let Ok(uri) = parse_raw(raw) {
+            msg.uri = uri;
+            if let Ok(new_state) = msg.get_first_binobj(raw, "new_state") {
+                let mut raw = RawObj::new(new_state);
+                let mut indv: Individual = Individual::new();
+                if let Ok(uri) = parse_raw(&mut raw) {
+                    indv.uri = uri.clone();
+
+                    let mut new_indv = Individual::new();
+
+                    let mut raw: Vec<u8> = Vec::new();
+                    to_msgpack(&indv, &mut raw);
+
+                    new_indv.add_uri("uri", &uri, 0);
+                    new_indv.add_binary("new_state", raw, 0);
+
+                    // cmd
+                    // date
+                    // source_veda
+                    // target_veda
+                    // new_state
+                    let mut raw1: Vec<u8> = Vec::new();
+                    to_msgpack(&new_indv, &mut raw1);
+
+                    //                        info! ("{:?}", raw);
+                    queue_out.push(&raw1, MsgType::Object);
+                }
+            }
+        }
     }
 }

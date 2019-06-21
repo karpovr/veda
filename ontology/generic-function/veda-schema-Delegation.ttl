@@ -461,10 +461,12 @@ var isActual = requestDateFrom <= now && now <= requestDateTo,
 //print("[cfg:Event_Delegation] ************************** START **************************");
 //print("[cfg:Event_Delegation]", "delegator =", delegator_uri, "| delegate =", delegate_uri, "| from =", dateFrom[0].data.toISOString(), "| to =", dateTo[0].data.toISOString(), "| positions =", JSON.stringify(position_uris), "| isActual =", isActual);
 
-if (request_type === "v-s:RequestDelegationUser" && delegator_uri !== user_uri && !request_deleted) {
-  //print("[cfg:Event_Delegation] ACCESS VIOLATION: delegator_uri !== user_uri");
-  //print("[cfg:Event_Delegation] ************************** END **************************");
-  return;
+if (request_type === "v-s:RequestDelegationUser" && !request_deleted) {
+  if (user_uri !== "cfg:Administrator" && delegator_uri !== user_uri) {
+    //print("[cfg:Event_Delegation] ACCESS VIOLATION: delegator_uri !== user_uri");
+    //print("[cfg:Event_Delegation] ************************** END **************************");
+    return;
+  }
 }
 
 var allDelegated = get_individual(ticket, "cfg:AllDelegatedAppointments");
@@ -535,7 +537,8 @@ position_uris.map(function (position_uri) {
     return item.data !== uri;
   });
 
-  if ( request_deleted ) {
+  if ( 
+   ) {
     appointment["v-s:deleted"] = veda.Util.newBool(true);
     delegate = get_individual(ticket, delegate_uri);
     delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"] || [];

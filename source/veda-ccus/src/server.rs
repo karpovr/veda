@@ -90,7 +90,7 @@ impl CCUSServer {
         if self.uri2sessions.contains_key(&uri.to_owned()) == false {
             if let Ok(_) = self.subscribe_manager_sender.send((uri.to_string(), self.my_sender.clone())) {
                 if let Ok(msg) = self.my_receiver.recv_timeout(Duration::from_millis(1000)) {
-                    if msg > 0 {
+                    if msg >= 0 {
                         info!("from storage: {}, {}", uri, msg);
                         storage_counter = msg as u64;
                     }
@@ -181,7 +181,7 @@ impl CCUSServer {
 
                         let registred_counter = self.subscribe(uri, counter, session_id);
 
-                        if registred_counter > counter {
+                        if registred_counter > counter || registred_counter == 0 {
                             if changes.len() > 0 {
                                 changes.push_str(",");
                             }

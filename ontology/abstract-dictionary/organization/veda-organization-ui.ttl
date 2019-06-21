@@ -617,14 +617,16 @@ v-s:DepartmentTemplate
   rdfs:label "Template for v-s:Department class"@en ;
   v-ui:template """
 <script>
-  var parentOrganization = individual['v-s:parentOrganization'][0];
-  var departmentQueryPrefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='" + parentOrganization.id + "') || ('rdf:type'=='v-s:Organization' && '@'=='" + parentOrganization.id + "')";
-  $('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
+  if (individual.hasValue('v-s:parentOrganization')) {
+    var parentOrganization = individual['v-s:parentOrganization'][0];
+    var departmentQueryPrefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='" + parentOrganization.id + "') || ('rdf:type'=='v-s:Organization' && '@'=='" + parentOrganization.id + "')";
+    $('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 
-  var appointmentQueryPrefix = "'rdf:type'=='v-s:Appointment' && 'v-s:parentOrganization'=='" + parentOrganization.id + "'";
-  $('veda-control[rel="v-s:hasChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
-  $('veda-control[rel="v-s:hasFieldChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
-  $('veda-control[rel="v-s:hasFunctionalChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
+    var appointmentQueryPrefix = "'rdf:type'=='v-s:Appointment' && 'v-s:parentOrganization'=='" + parentOrganization.id + "'";
+    $('veda-control[rel="v-s:hasChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
+    $('veda-control[rel="v-s:hasFieldChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
+    $('veda-control[rel="v-s:hasFunctionalChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
+  };
   template.on('validate', function() {
     var result = {};
     var subjectCode = individual.hasValue("v-s:subjectCode") && individual["v-s:subjectCode"][0].toString();
