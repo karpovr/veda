@@ -152,7 +152,6 @@ v-up:UploadTemplate
     });
   }
 
-
   function cutPredicate(all_quad, masPre, prefixes) {
     console.log("all_quad", all_quad);
     console.log("keys", masPre);
@@ -193,6 +192,10 @@ v-up:UploadTemplate
               labelSingleLang = newQuad[i].object.substring(1, back);
           newObject[ newQuad[i].predicate ] = veda.Util.newStr( labelSingleLang ) ;
         }
+      } else if ( newQuad[i].predicate === 'v-ui:template' ) {
+        var back = newQuad[i].object.lastIndexOf("\\n"),
+            labelSingleLang = newQuad[i].object.substring(1, back - 1);
+        newObject[ newQuad[i].predicate ] = veda.Util.newStr( labelSingleLang ) ;
       } else if ( newQuad[i].object.indexOf("\\") > 0 ) {
         var back = newQuad[i].object.lastIndexOf("\\"),
             endOfLine = newQuad[i].object.lastIndexOf("\\n"),
