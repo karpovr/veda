@@ -52,6 +52,32 @@ if [ -z $1 ] || [ $1 == "ontologist" ] || [ $1 == "veda-ontologist" ] ; then
     echo end make VEDA-ONTOLOGIST
 fi
 
+if [ -z $1 ] || [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] ; then
+
+    echo start make VEDA-GEO-INDEXER
+    rm ./veda-geo-indexer
+
+    cd source/veda-geo-indexer
+    cargo build --release
+    cd $BUILD_PATH
+    cp ./tmp/release/veda-geo-indexer $PWD
+
+    echo end make VEDA-GEO-INDEXER
+fi
+
+if [ -z $1 ] || [ $1 == "webserver" ] || [ $1 == "veda-webserver" ] ; then
+
+    echo start make VEDA-WEBSERVER
+    rm ./veda-webserver
+
+    cd source/veda-webserver
+    cargo build --release
+    cd $BUILD_PATH
+    cp ./tmp/release/veda-webserver $PWD
+
+    echo end make VEDA-WEBSERVER
+fi
+
 if [ -z $1 ] || [ $1 == "bootstrap" ] || [ $1 == "veda" ] ; then
 
     ./tools/build-component.sh veda-bootstrap bootstrap

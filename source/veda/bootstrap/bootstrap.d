@@ -224,7 +224,7 @@ void main(string[] args)
 
     Module *[ string ] modules;
 
-    modules[ "veda-ro-storage" ]      = new Module("veda-ro-storage", "veda-ro-storage", [], [], false, false, 0);
+    modules[ "veda-ro-storage" ]    = new Module("veda-ro-storage", "veda-ro-storage", [], [], false, false, 0);
     modules[ "veda-mstorage" ]      = new Module("veda-mstorage", "veda-mstorage", [], [ "acl_preparer", "subject_manager", "ticket_manager" ], true, true, 1);
     modules[ "veda-ft-indexer" ]    = new Module("veda-ft-indexer", "veda-ft-indexer", [], [ "fulltext_indexer" ], false, false, 2);
     modules[ "veda-ft-query" ]      = new Module("veda-ft-query", "veda-ft-query", [], [], false, false, 3);
@@ -239,6 +239,8 @@ void main(string[] args)
     modules[ "veda-ttlreader" ]     = new Module("veda-ttlreader", "veda-ttlreader", [], [], false, false, 12);
     modules[ "veda-ccus" ]          = new Module("veda-ccus", "veda-ccus", [], [], false, false, 13);
     modules[ "veda-ontologist" ]    = new Module("veda-ontologist", "veda-ontologist", [], [], false, false, 14);
+    modules[ "veda-webserver" ]     = new Module("veda-webserver", "veda-webserver", [], [], false, false, 15);
+    modules[ "veda-geo-indexer" ]   = new Module("veda-geo-indexer", "veda-geo-indexer", [], [], false, false, 16);
     modules[ "veda-gowebserver" ]   = new Module("veda-gowebserver", "veda-gowebserver", [], [], false, false, 99);
 
     string[ string ] properties;
