@@ -1,0 +1,20 @@
+[package]
+name = "veda-webserver"
+version = "0.1.0"
+authors = ["Valeriy Bushenev <ValeriyBushenev@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "veda-webserver"
+path = "src/main.rs"
+
+[dependencies]
+actix = "0.8.3"
+actix-web = "1.0.0"
+actix-web-actors = "1.0.0"
+actix-redis = { git="https://github.com/actix/actix-redis.git" }
+futures = "0.1.23"
+redis-async = "0.4.0"
+serde = "1.0.71"
+serde_derive = "1.0.71"
+env_logger = "0.6"
