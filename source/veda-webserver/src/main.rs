@@ -23,18 +23,22 @@ fn geo_radius(info: web::Json<GeoRadius>, redis: web::Data<Addr<RedisActor>>) ->
         |res: Result<RespValue, ARError>| match &res {
             Ok(RespValue::Array(a)) => {
                 let mut body = String::new();
+                body.push('[');
                 for e in a {
                     if let RespValue::BulkString(v) = e {
                         let s = String::from_utf8_lossy(v).into_owned();
 
-                        if !body.is_empty() {
+                        if body.len() > 1 {
                             body.push(',');
                         }
 
+                        body.push('"');
                         body.push_str(&s);
+                        body.push('"');
                     }
                 }
-                Ok(HttpResponse::Ok().body(body))
+                body.push(']');
+                Ok(HttpResponse::Ok().content_type("application/json").body(body))
             }
             _ => {
                 println!("---->{:?}", res);
