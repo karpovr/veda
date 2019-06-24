@@ -88,22 +88,22 @@ v-s:lastEditor
 .
 v-s:created
   rdf:type owl:DatatypeProperty ;
-  rdfs:label "Дата создания"@ru ;
-  rdfs:label "Creation date"@en ;
+  rdfs:label "Создано"@ru ;
+  rdfs:label "Created"@en ;
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Thing ;
 .
 v-s:published
   rdf:type owl:DatatypeProperty ;
-  rdfs:label "Дата публикации"@ru ;
-  rdfs:label "Date published"@en ;
+  rdfs:label "Опубликовано"@ru ;
+  rdfs:label "Published"@en ;
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Thing ;
 .
 v-s:edited
   rdf:type owl:DatatypeProperty ;
-  rdfs:label "Дата редактирования"@ru ;
-  rdfs:label "Edition date"@en ;
+  rdfs:label "Отредактировано"@ru ;
+  rdfs:label "Edited"@en ;
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Thing ;
 .
