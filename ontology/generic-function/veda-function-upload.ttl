@@ -463,8 +463,6 @@ v-ui:IconModalTemplateUpload
     e.preventDefault();
     var newMode = container.data("mode");
     var parentTmpl = template.parent().closest("[resource]");
-    console.log('newMode', newMode);
-    console.log('parentTmpl', parentTmpl);
     if (!newMode && parentTmpl.attr("resource") === individual.id) {
       newMode = parentTmpl.data("mode");
     }
