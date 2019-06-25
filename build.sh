@@ -18,10 +18,10 @@ if [ -z $1 ] || [ $1 == "az" ] || [ $1 == "veda-az" ] ; then
     cd source/authorization
     cargo build --release
     cd $BUILD_PATH
-    cp ./tmp/release/libauthorization.so ./source/lib64/libauthorization.so
-    cp ./tmp/release/libauthorization.a ./source/lib64/libauthorization.a
-    sudo cp ./tmp/release/libauthorization.so $PWD
-    sudo cp ./tmp/release/libauthorization.so /usr/local/lib
+    cp $CARGO_TARGET_DIR/release/libauthorization.so ./source/lib64/libauthorization.so
+    cp $CARGO_TARGET_DIR/release/libauthorization.a ./source/lib64/libauthorization.a
+    sudo cp $CARGO_TARGET_DIR/release/libauthorization.so $PWD
+    sudo cp $CARGO_TARGET_DIR/release/libauthorization.so /usr/local/lib
     sudo ldconfig
 
 fi
@@ -34,7 +34,7 @@ if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] ; then
     cd source/veda-ccus
     cargo build --release
     cd $BUILD_PATH
-    cp ./tmp/release/veda-ccus $PWD
+    cp $CARGO_TARGET_DIR/release/veda-ccus $PWD
 
     echo end make VEDA-CCUS
 fi
@@ -47,7 +47,7 @@ if [ -z $1 ] || [ $1 == "ontologist" ] || [ $1 == "veda-ontologist" ] ; then
     cd source/veda-ontologist
     cargo build --release
     cd $BUILD_PATH
-    cp ./tmp/release/veda-ontologist $PWD
+    cp $CARGO_TARGET_DIR/release/veda-ontologist $PWD
 
     echo end make VEDA-ONTOLOGIST
 fi
@@ -60,7 +60,7 @@ if [ -z $1 ] || [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] ; then
     cd source/veda-geo-indexer
     cargo build --release
     cd $BUILD_PATH
-    cp ./tmp/release/veda-geo-indexer $PWD
+    cp $CARGO_TARGET_DIR/release/veda-geo-indexer $PWD
 
     echo end make VEDA-GEO-INDEXER
 fi
@@ -73,7 +73,7 @@ if [ -z $1 ] || [ $1 == "webserver" ] || [ $1 == "veda-webserver" ] ; then
     cd source/veda-webserver
     cargo build --release
     cd $BUILD_PATH
-    cp ./tmp/release/veda-webserver $PWD
+    cp $CARGO_TARGET_DIR/release/veda-webserver $PWD
 
     echo end make VEDA-WEBSERVER
 fi

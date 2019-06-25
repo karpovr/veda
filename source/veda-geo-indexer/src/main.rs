@@ -37,10 +37,10 @@ fn main() -> Result<(), i32> {
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
 
     let redis_addr = if let Some(p) = section.get("redis_addr") {
-        p.to_owned()
+        "redis://".to_owned() + &p.to_owned() + "/"
     } else {
         warn!("param [redis_addr] not found in veda.properties");
-        "".to_owned()
+        "redis://127.0.0.1/".to_owned()
     };
     info!("redis addr={:?}", &redis_addr);
 
