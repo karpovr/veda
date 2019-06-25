@@ -379,7 +379,40 @@ veda.Module(function Backend(veda) { "use strict";
         }
       }
     }
-  }
+  };
+
+  veda.Backend.geo_radius = function geo_radius(lat, lon, rad) {
+    var arg = arguments[0];
+    var isObj = typeof arg === "object";
+    var params = {
+      method: "POST",
+      url: "geo_radius",
+      async: isObj ? arg.async : true,
+      data: {
+        "lat": isObj ? arg.lat : lat,
+        "lon": isObj ? arg.lon : lon,
+        "rad": isObj ? arg.rad : rad
+      }
+    };
+    return call_server(params);
+  };
+
+  veda.Backend.geo_radius_query = function geo_radius(lat, lon, rad, query) {
+    var arg = arguments[0];
+    var isObj = typeof arg === "object";
+    var params = {
+      method: "POST",
+      url: "geo_radius_query",
+      async: isObj ? arg.async : true,
+      data: {
+        "lat": isObj ? arg.lat : lat,
+        "lon": isObj ? arg.lon : lon,
+        "rad": isObj ? arg.rad : rad,
+        "query": isObj ? arg.query : query
+      }
+    };
+    return call_server(params);
+  };
 
   veda.Backend.get_individual = function get_individual(ticket, uri, reopen) {
     var arg = arguments[0];
