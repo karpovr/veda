@@ -7,7 +7,7 @@ use chrono::Local;
 use env_logger::Builder;
 use ini::Ini;
 use log::LevelFilter;
-use redis::geo::{Coord, RadiusOptions, RadiusOrder, RadiusSearchResult, Unit};
+use redis::geo::Coord;
 use redis::{Commands, Connection};
 use std::io::Write;
 use std::{thread, time};
@@ -46,15 +46,15 @@ fn main() -> Result<(), i32> {
 
     let client = redis::Client::open(redis_addr.as_str());
 
-    if let Err(_) = client {
-        error!("fail create client redis {}", redis_addr.to_string());
+    if let Err(e) = client {
+        error!("fail create client redis {}, err={:?}", redis_addr.to_string(), e);
         return Err(-1);
     }
 
     let wgeo_index = client.unwrap().get_connection();
 
-    if let Err(_) = wgeo_index {
-        error!("fail connect to redis {}", redis_addr.to_string());
+    if let Err(e) = wgeo_index {
+        error!("fail connect to redis {}, err={:?}", redis_addr.to_string(), e);
         return Err(-1);
     }
 
@@ -159,12 +159,6 @@ fn prepare_queue_element(raw: &mut RawObj, geo_index: &mut Connection) -> Result
                 let r1: () = geo_index.geo_add("my_gis", (Coord::lon_lat(lnt, ltt), &indv.uri)).unwrap();
 
                 info!("index {} {} {:?}", indv.uri, label.unwrap_or_default(), r1);
-                let opts = RadiusOptions::default().with_dist().order(RadiusOrder::Asc);
-                let result: Vec<RadiusSearchResult> = geo_index.geo_radius("my_gis", 50.08, 62.34, 100.00, Unit::Kilometers, opts).unwrap();
-
-                for e in result {
-                    info!("result=[{}][{:?}][{:?}]", e.name, e.coord, e.dist);
-                }
             }
         }
     }

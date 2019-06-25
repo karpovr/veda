@@ -72,53 +72,53 @@ impl FTQuery {
         s.push_str(&self.from.to_string());
         s.push_str("]");
 
-        return s;
+        s
     }
 }
 
 pub struct FTClient {
-    ro_storage_client: Socket,
-    ro_client_addr: String,
-    is_ro_storage_ready: bool,
+    client: Socket,
+    addr: String,
+    is_ready: bool,
 }
 
 impl FTClient {
     pub fn new(_ro_client_addr: String) -> FTClient {
         FTClient {
-            ro_storage_client: Socket::new(Protocol::Req0).unwrap(),
-            ro_client_addr: _ro_client_addr,
-            is_ro_storage_ready: false,
+            client: Socket::new(Protocol::Req0).unwrap(),
+            addr: _ro_client_addr,
+            is_ready: false,
         }
     }
 
     pub fn connect(&mut self) -> bool {
-        if let Err(e) = self.ro_storage_client.dial(self.ro_client_addr.as_str()) {
-            error!("fail dial to ro-storage, [{}], err={}", self.ro_client_addr, e);
+        if let Err(e) = self.client.dial(self.addr.as_str()) {
+            error!("fail dial to ro-storage, [{}], err={}", self.addr, e);
         } else {
-            info!("sucess connect to ro-storage, [{}]", self.ro_client_addr);
-            self.is_ro_storage_ready = true;
+            info!("sucess connect to ro-storage, [{}]", self.addr);
+            self.is_ready = true;
         }
-        self.is_ro_storage_ready
+        self.is_ready
     }
 
     pub fn query(&mut self, query: FTQuery) -> FTResult {
         let mut res = FTResult::default();
 
-        if self.is_ro_storage_ready == false {
+        if !self.is_ready {
             self.connect();
         }
 
-        if self.is_ro_storage_ready == false {
+        if !self.is_ready {
             res.result_code = 474;
             return res;
         }
 
         let req = Message::from(query.as_string().as_bytes());
 
-        self.ro_storage_client.send(req).unwrap();
+        self.client.send(req).unwrap();
 
         // Wait for the response from the server.
-        let msg = self.ro_storage_client.recv().unwrap();
+        let msg = self.client.recv().unwrap();
 
         let reply = String::from_utf8_lossy(&msg);
 
@@ -128,19 +128,21 @@ impl FTClient {
             Value::Null
         };
 
-        res.result_code = *&v["result_code"].as_i64().unwrap_or_default() as i32;
+        res.result_code = v["result_code"].as_i64().unwrap_or_default() as i32;
 
         if res.result_code == 200 {
             let jarray: &Vec<_> = &v["result"].as_array().expect("array");
-            res.result = jarray.into_iter().map(|v| v.as_str().unwrap_or_default().to_owned()).collect();
+            res.result = jarray.iter().map(|v| v.as_str().unwrap_or_default().to_owned()).collect();
 
-            res.count = *&v["count"].as_i64().unwrap_or_default();
-            res.estimated = *&v["estimated"].as_u64().unwrap_or_default();
-            res.processed = *&v["processed"].as_u64().unwrap_or_default();
-            res.cursor = *&v["cursor"].as_u64().unwrap_or_default();
+            res.count = v["count"].as_i64().unwrap_or_default();
+            res.estimated = v["estimated"].as_u64().unwrap_or_default();
+            res.processed = v["processed"].as_u64().unwrap_or_default();
+            res.cursor = v["cursor"].as_u64().unwrap_or_default();
         }
 
         //info!("msg={}", v);
-        return res;
+        res
     }
+
+
 }
