@@ -20,28 +20,39 @@ veda.Module(function (veda) { "use strict";
       password = $("#password", loginForm).val(),
       hash = Sha256.hash(password);
 
-    // Try internal authentication
-    veda.login(login, hash)
-      // Try ntlm authentication
-      .catch(function (error) {
-        console.log(error);
-        if (ntlm) {
-          var params = {
-            type: "POST",
-            url: ntlm + "ad/",
-            data: {
-              "login": login,
-              "password": password
-            },
-            async: true
-          };
-          return $.ajax(params);
-        } else {
-          throw error;
-        }
-      })
-      .then(handleLoginSuccess)
-      .catch(handleLoginError);
+    var authRequired = new veda.IndividualModel("cfg:AuthRequired");
+    authRequired.load().then(function (authRequiredParam) {
+      if ( authRequiredParam && authRequiredParam.hasValue("rdf:value", false) && !login) {
+        veda.trigger("login:success", {
+          ticket: "",
+          user_uri: "cfg:Guest",
+          end_time: 0
+        });
+      } else {
+        // Try internal authentication
+        veda.login(login, hash)
+          // Try ntlm authentication
+          .catch(function (error) {
+            console.log(error);
+            if (ntlm) {
+              var params = {
+                type: "POST",
+                url: ntlm + "ad/",
+                data: {
+                  "login": login,
+                  "password": password
+                },
+                async: true
+              };
+              return $.ajax(params);
+            } else {
+              throw error;
+            }
+          })
+          .then(handleLoginSuccess)
+          .catch(handleLoginError);
+      }
+    });
   });
 
   $("#submit-new-password", loginForm).click( function (e) {
