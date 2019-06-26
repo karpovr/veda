@@ -39,6 +39,9 @@ body {
   .lng-control {
     width: 100%;
   }
+  .hide-lng-control {
+    right: 10px!important;
+  }
 }
 .show-lng-control {
   padding: 5px 7px;
