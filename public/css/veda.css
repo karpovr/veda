@@ -415,9 +415,9 @@ footer {
 #copyright {
   font-size: 0.8em;
   background-color: #fff;
-  position: absolute;
+  position: fixed;
   bottom: 0;
-  padding:5px;
+  padding:3px;
 }
 .navbar .nav {
   margin:2px 0px;
