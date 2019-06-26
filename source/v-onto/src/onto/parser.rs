@@ -17,7 +17,7 @@ pub fn parse_to_predicate(expect_predicate: &str, raw: &mut RawObj, indv: &mut I
         return parse_cbor_to_predicate(expect_predicate, raw, indv);
     }
 
-    return false;
+    false
 }
 
 const MSGPACK_MAGIC_HEADER: u8 = 146;

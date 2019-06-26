@@ -798,10 +798,10 @@
     function evalQueryPrefix () {
       return new Promise(function (resolve, reject) {
         try {
-          queryPrefix = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
+          var result = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
             return eval(match);
           });
-          resolve(queryPrefix);
+          resolve(result);
         } catch (error) {
           console.log("Query prefix evaluation error", error);
           reject(error);
@@ -941,10 +941,10 @@
     function evalQueryPrefix () {
       return new Promise(function (resolve, reject) {
         try {
-          queryPrefix = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
+          var result = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
             return eval(match);
           });
-          resolve(queryPrefix);
+          resolve(result);
         } catch (error) {
           console.log("Query prefix evaluation error", error);
           reject(error);
@@ -1094,10 +1094,10 @@
     function evalQueryPrefix () {
       return new Promise(function (resolve, reject) {
         try {
-          queryPrefix = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
+          var result = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
             return eval(match);
           });
-          resolve(queryPrefix);
+          resolve(result);
         } catch (error) {
           console.log("Query prefix evaluation error", error);
           reject(error);
@@ -1961,10 +1961,10 @@
       var evalQueryPrefix = function () {
         return new Promise(function (resolve, reject) {
           try {
-            queryPrefix = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
-              return eval(match);
-            });
-            resolve(queryPrefix);
+						var result = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
+							return eval(match);
+						});
+						resolve(result);
           } catch (error) {
             console.log("Query prefix evaluation error", error);
             reject(error);

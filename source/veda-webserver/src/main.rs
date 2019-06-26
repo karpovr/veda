@@ -5,8 +5,6 @@ extern crate serde_derive;
 #[macro_use]
 extern crate log;
 
-use std::io::Write;
-use std::collections::HashSet;
 use actix::prelude::*;
 use actix_redis::{Command, Error as ARError, RedisActor};
 use actix_web::{middleware, web, App, Error as AWError, HttpResponse, HttpServer};
@@ -18,6 +16,8 @@ use log::LevelFilter;
 use redis::geo::{RadiusOptions, RadiusOrder, RadiusSearchResult, Unit};
 use redis::{Commands, Connection, RedisError};
 use redis_async::resp::RespValue;
+use std::collections::HashSet;
+use std::io::Write;
 use v_search::{FTClient, FTQuery};
 
 #[derive(Deserialize)]
@@ -33,7 +33,8 @@ pub struct GeoQuery {
     lat: f64,
     rad: f64,
     #[serde(default)]
-    expr: String,
+    query: String,
+    ticket: String
 }
 
 fn geo_query(info: web::Json<GeoQuery>, db: web::Data<Addr<SyncActor>>) -> impl Future<Item = HttpResponse, Error = AWError> {
@@ -43,7 +44,8 @@ fn geo_query(info: web::Json<GeoQuery>, db: web::Data<Addr<SyncActor>>) -> impl 
         lon: info.lon,
         lat: info.lat,
         rad: info.rad,
-        expr: info.expr,
+        query: info.query,
+        ticket: info.ticket
     })
     .map_err(AWError::from)
     .and_then(|res| match &res {
@@ -141,24 +143,23 @@ impl Handler<GeoQuery> for SyncActor {
     type Result = Result<Vec<String>, ()>;
 
     fn handle(&mut self, msg: GeoQuery, _ctx: &mut Self::Context) -> Self::Result {
+        let mut res = Vec::new();
 
-        let mut res = Vec::new ();
-
-        let ft_res = self.ft_client.query(FTQuery::new("cfg:VedaSystem", &msg.expr));
+        let ft_res = self.ft_client.query(FTQuery::new_with_ticket(&msg.ticket, &msg.query));
         if ft_res.count == 0 {
-            return Ok(Vec::new ());
+            return Ok(Vec::new());
         }
 
-        if ft_res.result_code != 200{
+        if ft_res.result_code != 200 {
             return Err(());
         }
 
         let opts = RadiusOptions::default().with_dist().order(RadiusOrder::Asc);
-        let result: Result <Vec<RadiusSearchResult>, RedisError> = self.redis_client.geo_radius("my_gis", msg.lon, msg.lat, msg.rad, Unit::Meters, opts);
+        let result: Result<Vec<RadiusSearchResult>, RedisError> = self.redis_client.geo_radius("my_gis", msg.lon, msg.lat, msg.rad, Unit::Meters, opts);
 
-        let mut geo_res: HashSet <String> = HashSet::new();
+        let mut geo_res: HashSet<String> = HashSet::new();
 
-        if let Ok (res) = result {
+        if let Ok(res) = result {
             for e in res {
                 geo_res.insert(e.name);
             }

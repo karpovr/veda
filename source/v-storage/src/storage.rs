@@ -34,9 +34,9 @@ impl VStorage {
     }
 
     pub fn set_binobj(&mut self, uri: &str, raw: &mut RawObj, indv: &mut Individual) -> bool {
-        return match &mut self.storage {
+        match &mut self.storage {
             EStorage::TT(s) => s.set_binobj(uri, raw, indv),
             EStorage::LMDB(s) => s.set_binobj(uri, raw, indv),
-        };
+        }
     }
 }

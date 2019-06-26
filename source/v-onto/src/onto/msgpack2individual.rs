@@ -207,7 +207,7 @@ pub fn parse_msgpack_to_predicate(expect_predicate: &str, raw: &mut RawObj, indv
     }
 
     raw.cur = cur.position();
-    return true;
+    true
 }
 
 fn read_raw_into_resources(cur: &mut Cursor<&[u8]>, values: &mut Vec<Resource>) -> bool {
@@ -247,7 +247,7 @@ fn read_raw_into_resources(cur: &mut Cursor<&[u8]>, values: &mut Vec<Resource>) 
                 order: 0,
                 value: Value::Binary(v.as_bytes().to_vec()),
             });
-            return true;
+            true
         }
         Err(e) => {
             if let DecodeStringError::InvalidUtf8(buf, _err) = e {
@@ -258,7 +258,7 @@ fn read_raw_into_resources(cur: &mut Cursor<&[u8]>, values: &mut Vec<Resource>) 
                 });
                 return true;
             }
-            return false;
+            false
         }
     }
 }
@@ -299,14 +299,14 @@ fn read_string_from_msgpack(cur: &mut Cursor<&[u8]>) -> Result<String, i64> {
 
     let mut out = vec![0u8; size as usize];
     match read_str(cur, &mut out) {
-        Ok(v) => return Ok(v.to_string()),
+        Ok(v) => Ok(v.to_string()),
         Err(e) => {
             if let DecodeStringError::InvalidUtf8(buf, _err) = e {
                 let res = String::from_utf8_lossy(buf);
                 return Ok(res.to_string());
             }
             error!("fail read str, err={:?}", e);
-            return Err(-1);
+            Err(-1)
         }
     }
 }

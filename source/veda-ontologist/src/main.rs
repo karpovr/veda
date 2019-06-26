@@ -143,10 +143,6 @@ fn main() -> std::io::Result<()> {
                 is_found_onto_changes = is_changes(&mut raw, &onto_types);
             }
 
-            if is_found_onto_changes {
-                info!("found changes in onto");
-            }
-
             queue_consumer.commit_and_next();
 
             total_prepared_count += 1;
@@ -160,7 +156,7 @@ fn main() -> std::io::Result<()> {
             info!("found onto changes from storage");
 
             if let Ok(mut file) = File::create(ontology_file_path) {
-                let res = ft_client.query(FTQuery::new("cfg:VedaSystem", &query));
+                let res = ft_client.query(FTQuery::new_with_user("cfg:VedaSystem", &query));
 
                 if res.result_code == 200 && res.count > 0 {
                     file.write(b"[")?;
@@ -177,7 +173,7 @@ fn main() -> std::io::Result<()> {
 
                             indv.parse_all(&mut raw);
 
-                            file.write(&indv.to_json_str().as_bytes())?;
+                            file.write(&indv.as_json_str().as_bytes())?;
                         }
                     }
                     file.write(b"]")?;

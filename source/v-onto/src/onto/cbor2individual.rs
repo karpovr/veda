@@ -20,7 +20,7 @@ pub enum TagId {
 }
 
 pub fn parse_cbor(raw: &mut RawObj) -> Result<String, i8> {
-    if raw.data.len() == 0 || raw.raw_type != RawType::CBOR {
+    if raw.data.is_empty() || raw.raw_type != RawType::CBOR {
         return Err(-1);
     }
 
@@ -45,7 +45,7 @@ pub fn parse_cbor(raw: &mut RawObj) -> Result<String, i8> {
         }
     }
 
-    return Err(-1);
+    Err(-1)
 }
 
 pub fn parse_cbor_to_predicate(expect_predicate: &str, raw: &mut RawObj, indv: &mut Individual) -> bool {
@@ -66,19 +66,19 @@ pub fn parse_cbor_to_predicate(expect_predicate: &str, raw: &mut RawObj, indv: &
                 if predicate == expect_predicate {
                     is_found = true;
                 }
-                if add_value(&predicate, &mut d, indv, 0) == false {
+                if !add_value(&predicate, &mut d, indv, 0) {
                     return false;
                 }
             }
         }
 
-        if is_found == true {
+        if is_found {
             raw.cur = d.into_reader().position();
             return true;
         }
     }
 
-    return false;
+    false
 }
 
 fn add_value(predicate: &str, d: &mut Decoder<Cursor<&[u8]>>, indv: &mut Individual, order: u32) -> bool {
@@ -110,21 +110,21 @@ fn add_value(predicate: &str, d: &mut Decoder<Cursor<&[u8]>>, indv: &mut Individ
             }
             Type::UInt8 => {
                 if let Ok(i) = d._u8(&type_info) {
-                    indv.add_integer(&predicate, i as i64, order);
+                    indv.add_integer(&predicate, i64::from(i), order);
                 }
             }
             Type::UInt16 => {
                 if let Ok(i) = d._u16(&type_info) {
                     if tag == TagId::EpochDateTime as u64 {
-                        indv.add_datetime(&predicate, i as i64, order);
+                        indv.add_datetime(&predicate, i64::from(i), order);
                     } else {
-                        indv.add_integer(&predicate, i as i64, order);
+                        indv.add_integer(&predicate, i64::from(i), order);
                     }
                 }
             }
             Type::UInt32 => {
                 if let Ok(i) = d._u32(&type_info) {
-                    indv.add_integer(&predicate, i as i64, order);
+                    indv.add_integer(&predicate, i64::from(i), order);
                 }
             }
             Type::Array => {
@@ -142,5 +142,5 @@ fn add_value(predicate: &str, d: &mut Decoder<Cursor<&[u8]>>, indv: &mut Individ
             }
         }
     }
-    return true;
+    true
 }

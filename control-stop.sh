@@ -54,6 +54,7 @@ if [ $1 == "all" ] ; then
     killall -9 veda-lmdb-srv
     killall -9 veda-ro-storage
     killall -9 veda-ontologist
+    killall -9 veda-geo-indexer
 
     #tarantoolctl stop init_tarantool.lua
     pkill tarantool

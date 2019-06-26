@@ -4,12 +4,12 @@ use crate::resource::{Resource, Value};
 use serde::ser::{Serialize, SerializeMap, SerializeStruct, Serializer};
 
 impl Individual {
-    pub fn to_json_str(&mut self) -> String {
+    pub fn as_json_str(&mut self) -> String {
         if let Ok(b) = serde_json::to_value(&self) {
             return b.to_string();
         }
 
-        return "".to_owned();
+        "".to_owned()
     }
 }
 
@@ -46,10 +46,8 @@ impl Serialize for Resource {
             Value::Str(s, l) => {
                 tup.serialize_field("data", &*s)?;
 
-                if self.rtype == DataType::String {
-                    if *l != Lang::NONE {
-                        tup.serialize_field("lang", &*l)?;
-                    }
+                if self.rtype == DataType::String && *l != Lang::NONE {
+                    tup.serialize_field("lang", &*l)?;
                 }
             }
             _ => {}

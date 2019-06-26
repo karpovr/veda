@@ -107,6 +107,7 @@ impl Storage for LMDBStorage {
                 self.db_env = res.1;
             }
         }
-        return false;
+
+        false
     }
 }

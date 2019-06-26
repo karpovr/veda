@@ -5,6 +5,7 @@ use nng::{Message, Protocol, Socket};
 use serde_json::Value;
 
 pub struct FTQuery {
+    ticket: String,
     user: String,
     query: String,
     sort: String,
@@ -38,9 +39,24 @@ impl Default for FTResult {
 }
 
 impl FTQuery {
-    pub fn new(user: &str, query: &str) -> FTQuery {
+    pub fn new_with_user(user: &str, query: &str) -> FTQuery {
         FTQuery {
+            ticket: "".to_owned(),
             user: user.to_owned(),
+            query: query.to_owned(),
+            sort: "".to_owned(),
+            databases: "".to_owned(),
+            reopen: false,
+            top: 10000,
+            limit: 10000,
+            from: 0,
+        }
+    }
+
+    pub fn new_with_ticket(ticket: &str, query: &str) -> FTQuery {
+        FTQuery {
+            ticket: ticket.to_owned(),
+            user: "".to_owned(),
             query: query.to_owned(),
             sort: "".to_owned(),
             databases: "".to_owned(),
@@ -54,8 +70,14 @@ impl FTQuery {
     pub fn as_string(&self) -> String {
         let mut s = String::new();
 
-        s.push_str("[\"UU=");
-        s.push_str(&self.user);
+        if self.ticket.is_empty() {
+            s.push_str("[\"UU=");
+            s.push_str(&self.user);
+        } else {
+            s.push_str("[\"");
+            s.push_str(&self.ticket);
+        }
+
         s.push_str("\",\"");
         s.push_str(&self.query);
         s.push_str("\",\"");
@@ -64,13 +86,13 @@ impl FTQuery {
         s.push_str(&self.databases);
         s.push_str("\",");
         s.push_str(&self.reopen.to_string());
-        s.push_str(",");
+        s.push(',');
         s.push_str(&self.top.to_string());
-        s.push_str(",");
+        s.push(',');
         s.push_str(&self.limit.to_string());
-        s.push_str(",");
+        s.push(',');
         s.push_str(&self.from.to_string());
-        s.push_str("]");
+        s.push(']');
 
         s
     }
@@ -143,6 +165,4 @@ impl FTClient {
         //info!("msg={}", v);
         res
     }
-
-
 }

@@ -93,7 +93,7 @@ fn main() -> Result<(), i32> {
 
         for _it in 0..size_batch {
             // пробуем взять из очереди заголовок сообщения
-            if queue_consumer.pop_header() == false {
+            if !queue_consumer.pop_header() {
                 break;
             }
 
@@ -120,7 +120,7 @@ fn main() -> Result<(), i32> {
             }
         }
 
-        thread::sleep(time::Duration::from_millis(10));
+        thread::sleep(time::Duration::from_millis(100));
     }
 }
 
@@ -130,7 +130,7 @@ fn prepare_queue_element(raw: &mut RawObj, geo_index: &mut Connection) -> Result
         msg.uri = uri;
 
         let new_state = msg.get_first_binobj(raw, "new_state");
-        if let Err(_) = new_state {
+        if new_state.is_err() {
             return Err(-1);
         }
 
@@ -152,13 +152,18 @@ fn prepare_queue_element(raw: &mut RawObj, geo_index: &mut Connection) -> Result
                 info!("found spatial");
 
                 let label = indv.get_first_literal(&mut raw, "rdfs:label");
-                if let Err(_) = label {
+                if label.is_err() {
                     return Err(-1);
                 }
-
-                let r1: () = geo_index.geo_add("my_gis", (Coord::lon_lat(lnt, ltt), &indv.uri)).unwrap();
-
-                info!("index {} {} {:?}", indv.uri, label.unwrap_or_default(), r1);
+                match geo_index.geo_add("my_gis", (Coord::lon_lat(lnt, ltt), &indv.uri)) {
+                    Ok(n) => {
+                        let nn: i32 = n;
+                        info!("index {} {} {}", indv.uri, label.unwrap_or_default(), nn);
+                    }
+                    Err(e) => {
+                        error!("fail index {} {} {:?}", indv.uri, label.unwrap_or_default(), e);
+                    }
+                }
             }
         }
     }

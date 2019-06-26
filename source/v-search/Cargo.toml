@@ -14,5 +14,3 @@ nng = "0.4.0"
 env_logger = "0.6"
 log = "0.4"
 rust-ini = "0.13"
-v_onto = { path = "../v-onto" }
-v_storage = { path = "../v-storage" }

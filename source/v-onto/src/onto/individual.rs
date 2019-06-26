@@ -61,14 +61,14 @@ impl Individual {
     pub fn parse_all(&mut self, raw: &mut RawObj) {
         while raw.cur < raw.data.len() as u64 {
             // next parse
-            if parse_to_predicate("?", raw, self) == false {
+            if !parse_to_predicate("?", raw, self) {
                 break;
             }
         }
     }
 
     pub fn get_predicates(&self) -> Vec<String> {
-        return self.resources.iter().map(|(key, _)| key.clone()).collect();
+        self.resources.iter().map(|(key, _)| key.clone()).collect()
     }
 
     pub fn get_first_literal(&mut self, raw: &mut RawObj, predicate: &str) -> Result<String, IndividualError> {
@@ -85,7 +85,7 @@ impl Individual {
                 None => {
                     if raw.cur < raw.data.len() as u64 {
                         // next parse
-                        if parse_to_predicate(predicate, raw, self) == false {
+                        if !parse_to_predicate(predicate, raw, self) {
                             break;
                         }
                     } else {
@@ -94,7 +94,7 @@ impl Individual {
                 }
             }
         }
-        return Err(IndividualError::None);
+        Err(IndividualError::None)
     }
 
     pub fn get_first_binobj(&mut self, raw: &mut RawObj, predicate: &str) -> Result<Vec<u8>, IndividualError> {
@@ -111,7 +111,7 @@ impl Individual {
                 None => {
                     if raw.cur < raw.data.len() as u64 {
                         // next parse
-                        if parse_to_predicate(predicate, raw, self) == false {
+                        if !parse_to_predicate(predicate, raw, self) {
                             break;
                         }
                     } else {
@@ -120,22 +120,21 @@ impl Individual {
                 }
             }
         }
-        return Err(IndividualError::None);
+        Err(IndividualError::None)
     }
 
     pub fn get_first_integer(&mut self, raw: &mut RawObj, predicate: &str) -> Result<i64, IndividualError> {
         for _ in 0..2 {
             match self.resources.get(predicate) {
-                Some(v) => match &v[0].value {
-                    Value::Int(i) => {
+                Some(v) => {
+                    if let Value::Int(i) = &v[0].value {
                         return Ok(*i);
                     }
-                    _ => {}
-                },
+                }
                 None => {
                     if raw.cur < raw.data.len() as u64 {
                         // next parse
-                        if parse_to_predicate(predicate, raw, self) == false {
+                        if !parse_to_predicate(predicate, raw, self) {
                             break;
                         }
                     } else {
@@ -144,22 +143,21 @@ impl Individual {
                 }
             }
         }
-        return Err(IndividualError::None);
+        Err(IndividualError::None)
     }
 
     pub fn get_first_number(&mut self, raw: &mut RawObj, predicate: &str) -> Result<(i64, i64), IndividualError> {
         for _ in 0..2 {
             match self.resources.get(predicate) {
-                Some(v) => match &v[0].value {
-                    Value::Num(m, e) => {
+                Some(v) => {
+                    if let Value::Num(m, e) = &v[0].value {
                         return Ok((*m, *e));
                     }
-                    _ => {}
-                },
+                }
                 None => {
                     if raw.cur < raw.data.len() as u64 {
                         // next parse
-                        if parse_to_predicate(predicate, raw, self) == false {
+                        if !parse_to_predicate(predicate, raw, self) {
                             break;
                         }
                     } else {
@@ -168,7 +166,7 @@ impl Individual {
                 }
             }
         }
-        return Err(IndividualError::None);
+        Err(IndividualError::None)
     }
 
     pub fn get_first_float(&mut self, raw: &mut RawObj, predicate: &str) -> Result<f64, IndividualError> {
@@ -180,7 +178,7 @@ impl Individual {
                 None => {
                     if raw.cur < raw.data.len() as u64 {
                         // next parse
-                        if parse_to_predicate(predicate, raw, self) == false {
+                        if !parse_to_predicate(predicate, raw, self) {
                             break;
                         }
                     } else {
@@ -189,7 +187,7 @@ impl Individual {
                 }
             }
         }
-        return Err(IndividualError::None);
+        Err(IndividualError::None)
     }
 
     pub fn any_exists(&mut self, raw: &mut RawObj, predicate: &str, values: &[&str]) -> bool {
@@ -197,22 +195,19 @@ impl Individual {
             match self.resources.get(predicate) {
                 Some(v) => {
                     for el in v {
-                        match &el.value {
-                            Value::Str(s, _l) => {
-                                for ve in values {
-                                    if *ve == *s {
-                                        return true;
-                                    }
+                        if let Value::Str(s, _l) = &el.value {
+                            for ve in values {
+                                if *ve == *s {
+                                    return true;
                                 }
                             }
-                            _ => {}
                         }
                     }
                 }
                 None => {
                     if raw.cur < raw.data.len() as u64 {
                         // next parse
-                        if parse_to_predicate(predicate, raw, self) == false {
+                        if !parse_to_predicate(predicate, raw, self) {
                             break;
                         }
                     } else {
@@ -221,7 +216,7 @@ impl Individual {
                 }
             }
         }
-        return false;
+        false
     }
 
     pub fn add_bool(&mut self, predicate: &str, b: bool, order: u32) {
@@ -278,7 +273,7 @@ impl Individual {
         });
     }
 
-    pub fn add_string<'a>(&mut self, predicate: &str, s: &str, lang: Lang, order: u32) {
+    pub fn add_string(&mut self, predicate: &str, s: &str, lang: Lang, order: u32) {
         let values = self.resources.entry(predicate.to_owned()).or_default();
         values.push(Resource {
             rtype: DataType::String,

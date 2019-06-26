@@ -1364,6 +1364,13 @@ v-s:dueDate
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Deliverable2 ;
 .
+v-s:transportOrganization
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Транспортная организация"@ru ;
+  rdfs:label "Transport organization"@en ;
+  rdfs:range v-s:Organization ;
+  rdfs:domain v-s:Deliverable2 ;
+.
 #------------------------------------------------------
 v-s:Document
   rdf:type owl:Class ;

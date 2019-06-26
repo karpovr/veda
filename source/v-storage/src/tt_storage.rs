@@ -40,6 +40,6 @@ impl Storage for TTStorage {
             }
         }
 
-        return false;
+        false
     }
 }
