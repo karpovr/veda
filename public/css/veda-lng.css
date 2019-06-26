@@ -54,5 +54,5 @@ body {
   position: absolute;
   z-index: 5000;
   top: 10px;
-  right: 10px;
+  right: -40px;
 }
