@@ -43,7 +43,6 @@
     <meta http-equiv="cache-control" content="no-cache" />
   </head>
   <body>
-
     <!-- Login form -->
     <div style="display:none;" class="login-form">
       <form role="form">
@@ -89,7 +88,7 @@
 
     <!-- Autocomplete feature -->
     <iframe name="autocomplete-frame" style="display:none" src="about:blank"></iframe>
-    <form target="autocomplete-frame" method="post" action="about:blank" autocomplete="on" onkeypress="return (event.keyCode !== 13 || event.target.tagName === 'TEXTAREA')">
+    <form id="app-form" target="autocomplete-frame" method="post" action="about:blank" autocomplete="on" onkeypress="return (event.keyCode !== 13 || event.target.tagName === 'TEXTAREA')">
       <!-- Application container -->
       <div id="app"></div>
     </form>

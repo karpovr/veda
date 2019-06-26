@@ -1,4 +1,9 @@
+html {
+  height: 100%;
+}
+
 body {
+  height: 100%;
   position: relative;
   font-family:"Ubuntu",Tahoma,"Helvetica Neue",Helvetica,Arial,sans-serif;
   /*color: #334;*/
@@ -6,6 +11,10 @@ body {
   /*background-color: #f8f8fa;*/
   background-color: #f2f2f2;
   /*background: repeating-linear-gradient(-60deg, #fff, #fff 2px, #fefefe 2px, #f0f0f0 4px);*/
+}
+
+#app, #app-form {
+  height: 100%;
 }
 
 .bg-default {
