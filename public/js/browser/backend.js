@@ -78,9 +78,19 @@ veda.Module(function Backend(veda) { "use strict";
   BackendError.prototype = Object.create(Error.prototype);
   BackendError.prototype.constructor = BackendError;
 
+  // Load script on demand
+  veda.Backend.load_script = function(url, appendTo) {
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement("script");
+      script.src = url;
+      script.onload = resolve;
+      script.onreadystatechange = resolve;
+      script.onerror = reject;
+      appendTo.appendChild(script);
+    });
+  };
 
   // Common server call function
-
   function call_server(params) {
     var method = params.method,
         url = params.url,
