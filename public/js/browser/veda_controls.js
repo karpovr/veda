@@ -1020,13 +1020,13 @@
 
     this.on("view edit search", function (e) {
       e.stopPropagation();
-      if (e.type === "view") {
-        $("div.checkbox", control).addClass("disabled");
-        $("input", control).attr("disabled", "true");
-      } else {
-        $("div.checkbox", control).removeClass("disabled");
-        $("input", control).removeAttr("disabled");
-      }
+      // if (e.type === "view") {
+      //   $("div.checkbox", control).addClass("disabled");
+      //   $("input", control).attr("disabled", "true");
+      // } else {
+      //   $("div.checkbox", control).removeClass("disabled");
+      //   $("input", control).removeAttr("disabled");
+      // }
       if (e.type === "search") {
         var dataDeleted = $(this).data("deleted");
         withDeleted = typeof dataDeleted === "boolean" ? dataDeleted : true;
