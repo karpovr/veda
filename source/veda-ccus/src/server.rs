@@ -276,36 +276,9 @@ impl Actor for CCUSServer {
                     }
                 }
 
-                let mut msg = Individual::new();
-                // запустим ленивый парсинг сообщения в Individual
-                if let Ok(uri) = parse_raw(&mut raw) {
-                    msg.uri = uri;
-                } else {
+                if prepare_queue_el(&mut raw, &mut act.uri2sessions, &mut session2uris).is_err() {
                     error!("{}: fail parse, retry", act.total_prepared_count);
                     break;
-                }
-
-                // берем поле [uri]
-                if let Ok(uri_from_queue) = msg.get_first_literal(&mut raw, "uri") {
-                    // найдем есть ли среди uri на которые есть подписки, uri из очереди
-                    if let Some(el) = act.uri2sessions.get_mut(&uri_from_queue) {
-                        debug!("FOUND CHANGES: uri={}, sessions={:?}", uri_from_queue, el.sessions);
-
-                        // берем u_counter
-                        let counter_from_queue = if let Ok(c) = msg.get_first_integer(&mut raw, "u_count") {
-                            c as u64
-                        } else {
-                            0
-                        };
-                        debug!("uri={}, {}", uri_from_queue, counter_from_queue);
-
-                        el.counter = counter_from_queue;
-
-                        for session in el.sessions.iter() {
-                            let urics = session2uris.entry(*session).or_default();
-                            urics.insert(uri_from_queue.clone(), counter_from_queue);
-                        }
-                    }
                 }
 
                 act.queue_consumer.commit_and_next();
@@ -337,6 +310,41 @@ impl Actor for CCUSServer {
             }
         });
     }
+}
+
+fn prepare_queue_el(raw: &mut RawObj, uri2sessions: &mut HashMap<String, SubscribeElement>, session2uris: &mut HashMap<usize, HashMap<String, u64>>) -> Result<(), i32> {
+    let mut msg = Individual::new();
+    // запустим ленивый парсинг сообщения в Individual
+    if let Ok(uri) = parse_raw(raw) {
+        msg.uri = uri;
+    } else {
+        return Err(-1);
+    }
+
+    // берем поле [uri]
+    if let Ok(uri_from_queue) = msg.get_first_literal(raw, "uri") {
+        // найдем есть ли среди uri на которые есть подписки, uri из очереди
+        if let Some(el) = uri2sessions.get_mut(&uri_from_queue) {
+            debug!("FOUND CHANGES: uri={}, sessions={:?}", uri_from_queue, el.sessions);
+
+            // берем u_counter
+            let counter_from_queue = if let Ok(c) = msg.get_first_integer(raw, "u_count") {
+                c as u64
+            } else {
+                0
+            };
+            debug!("uri={}, {}", uri_from_queue, counter_from_queue);
+
+            el.counter = counter_from_queue;
+
+            for session in el.sessions.iter() {
+                let urics = session2uris.entry(*session).or_default();
+                urics.insert(uri_from_queue.clone(), counter_from_queue);
+            }
+        }
+    }
+
+    Ok(())
 }
 
 /// Handler for Connect message. Register new session and assign unique id to this session
