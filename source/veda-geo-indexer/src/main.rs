@@ -153,15 +153,16 @@ fn prepare_queue_element(raw: &mut RawObj, geo_index: &mut Connection) -> Result
 
                 let label = indv.get_first_literal(&mut raw, "rdfs:label");
                 if label.is_err() {
-                    return Err(-1);
-                }
-                match geo_index.geo_add("my_gis", (Coord::lon_lat(lnt, ltt), &indv.uri)) {
-                    Ok(n) => {
-                        let nn: i32 = n;
-                        info!("index {} {} {}", indv.uri, label.unwrap_or_default(), nn);
-                    }
-                    Err(e) => {
-                        error!("fail index {} {} {:?}", indv.uri, label.unwrap_or_default(), e);
+                    error! ("rdfs:label not found, skip");
+                } else {
+                    match geo_index.geo_add("my_gis", (Coord::lon_lat(lnt, ltt), &indv.uri)) {
+                        Ok(n) => {
+                            let nn: i32 = n;
+                            info!("index {} {} {}", indv.uri, label.unwrap_or_default(), nn);
+                        }
+                        Err(e) => {
+                            error!("fail index {} {} {:?}", indv.uri, label.unwrap_or_default(), e);
+                        }
                     }
                 }
             }
