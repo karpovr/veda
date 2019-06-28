@@ -407,7 +407,7 @@ veda.Module(function Backend(veda) { "use strict";
     return call_server(params);
   };
 
-  veda.Backend.geo_radius_query = function geo_radius(lat, lon, rad, query) {
+  veda.Backend.geo_radius_query = function geo_radius(ticket, lat, lon, rad, query) {
     var arg = arguments[0];
     var isObj = typeof arg === "object";
     var params = {
@@ -415,6 +415,7 @@ veda.Module(function Backend(veda) { "use strict";
       url: "geo_radius_query",
       async: isObj ? arg.async : true,
       data: {
+        "ticket": isObj ? arg.ticket : ticket,
         "lat": isObj ? arg.lat : lat,
         "lon": isObj ? arg.lon : lon,
         "rad": isObj ? arg.rad : rad,
