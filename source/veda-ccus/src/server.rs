@@ -1,15 +1,18 @@
 use actix::prelude::*;
+use geo::prelude::*;
+use geo::{Coordinate, LineString, Point, Polygon, Rect};
+use num_traits::Float;
 use rand::{self, rngs::ThreadRng, Rng};
+use rijksdriehoek::*;
 use std::collections::{HashMap, HashSet};
 use std::str;
+use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
 use v_onto::individual::*;
 use v_onto::parser::*;
 use v_queue::consumer::*;
 use v_queue::record::*;
-
-use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
 
 const QUEUE_CHECK_INTERVAL: Duration = Duration::from_millis(300);
 const STAT_INTERVAL: Duration = Duration::from_millis(10000);
@@ -53,9 +56,38 @@ impl Default for SubscribeElement {
     }
 }
 
+#[derive(Hash, Eq, PartialEq)]
+struct Decimal((u64, i16, i8));
+
+impl Decimal {
+    fn new(val: f32) -> Decimal {
+        Decimal(Float::integer_decode(val))
+    }
+}
+
+#[derive(Hash, Eq, PartialEq)]
+struct Square {
+    min: (Decimal, Decimal),
+    max: (Decimal, Decimal),
+}
+
+impl Square {
+    fn new(min: (f32, f32), max: (f32, f32)) -> Self {
+        Square {
+            min: (Decimal(Float::integer_decode(min.0)), Decimal(Float::integer_decode(min.1))),
+            max: (Decimal(Float::integer_decode(max.0)), Decimal(Float::integer_decode(max.1))),
+        }
+    }
+}
+
+fn lonlat_to_xy(lon: f32, lat: f32) -> (f32, f32) {
+    wgs84_to_rijksdriehoek(lat, lon)
+}
+
 pub struct CCUSServer {
     sessions: HashMap<usize, Recipient<Msg>>,
     uri2sessions: HashMap<String, SubscribeElement>,
+    poligon2sessions: HashMap<Square, SubscribeElement>,
     queue_consumer: Consumer,
     total_prepared_count: u64,
     rng: ThreadRng,
@@ -74,6 +106,7 @@ impl CCUSServer {
         CCUSServer {
             sessions: HashMap::new(),
             uri2sessions: HashMap::new(),
+            poligon2sessions: HashMap::new(),
             rng: rand::thread_rng(),
             queue_consumer: _consumer,
             total_prepared_count: 0,
@@ -85,7 +118,51 @@ impl CCUSServer {
         }
     }
 
-    fn subscribe(&mut self, uri: &str, counter: u64, session_id: usize) -> u64 {
+    fn subscribe_geo(&mut self, value: &str, counter: u64, session_id: usize) -> bool {
+        let coords = value.as_bytes();
+        if coords[0] == b'(' && coords[coords.len() as usize] == b')' {
+            let coords: Vec<&str> = value[1..coords.len() - 1].split(',').collect();
+            if coords.len() == 4 {
+                let min_lon: f32 = if let Ok(c) = coords[0].parse() {
+                    c
+                } else {
+                    return false;
+                };
+                let min_lat: f32 = if let Ok(c) = coords[1].parse() {
+                    c
+                } else {
+                    return false;
+                };
+                let max_lon: f32 = if let Ok(c) = coords[2].parse() {
+                    c
+                } else {
+                    return false;
+                };
+                let max_lat: f32 = if let Ok(c) = coords[3].parse() {
+                    c
+                } else {
+                    return false;
+                };
+
+                let sq = Square::new((min_lon, min_lat), (max_lon, max_lat));
+                let el = self.poligon2sessions.entry(sq).or_default();
+
+                if !el.sessions.contains(&session_id) {
+                    el.sessions.insert(session_id);
+                    debug!("[{}]: SUBSCRIBE: coord={}, counter={}, count subscribers={}", session_id, value, counter, el.sessions.len());
+                } else {
+                    debug!("[{}]: SUBSCRIBE (ALREADY EXISTS): coord={}, count subscribers={}", session_id, value, el.sessions.len());
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        true
+    }
+
+    fn subscribe_uri(&mut self, uri: &str, counter: u64, session_id: usize) -> u64 {
         let mut storage_counter = 0;
 
         if !self.uri2sessions.contains_key(&uri.to_owned()) && self.subscribe_manager_sender.send((uri.to_string(), self.my_sender.clone())).is_ok() {
@@ -168,23 +245,30 @@ impl CCUSServer {
                     // Рукопожатие: ccus=Ticket
                     debug!("[{}]: HANDSHAKE", session_id);
                     break;
-                } else if let Some(uri) = els[0].get(1..) {
-                    let mut counter = 0;
-                    if let Ok(c) = els[1].parse() {
-                        counter = c;
+                } else if let Some(value) = els[0].get(1..) {
+                    let counter: u64 = if let Ok(c) = els[1].parse() {
+                        c
+                    } else {
+                        0
                     };
-                    // Добавить подписку: +uriN=M[,...]
 
-                    let registred_counter = self.subscribe(uri, counter, session_id);
+                    // Добавить подписку: [+[type]=value], type=[uri,geo]
+                    if els[0] == "uri" {
+                        // Добавить подписку: [+uri=xxxx]
+                        let registred_counter = self.subscribe_uri(value, counter, session_id);
 
-                    if registred_counter > counter || registred_counter == 0 {
-                        if !changes.is_empty() {
-                            changes.push_str(",");
+                        if registred_counter > counter || registred_counter == 0 {
+                            if !changes.is_empty() {
+                                changes.push_str(",");
+                            }
+
+                            changes.push_str(&value.to_owned());
+                            changes.push_str("=");
+                            changes.push_str(&registred_counter.to_string());
                         }
-
-                        changes.push_str(&uri.to_owned());
-                        changes.push_str("=");
-                        changes.push_str(&registred_counter.to_string());
+                    } else if els[0] == "geo" {
+                        // Добавить подписку: [+geo=(min_lon,min_lat,max_lon,max_lat)]
+                        self.subscribe_geo(value, counter, session_id);
                     }
                 }
             } else if els.len() == 1 {
