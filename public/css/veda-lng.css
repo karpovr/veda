@@ -16,7 +16,7 @@ body {
 }
 .lng-control {
   position: absolute;
-  z-index: 4000;
+  z-index: 2;
   height: 100%;
   padding: 0 15px 20px 15px;
   background-color: #fff;
@@ -46,7 +46,7 @@ body {
   padding: 5px 7px;
   box-shadow: 1px 1px 2px #999;
   position: absolute;
-  z-index: 4000;
+  z-index: 1;
   top: 10px;
   left: 10px;
 }
