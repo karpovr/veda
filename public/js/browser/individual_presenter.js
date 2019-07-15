@@ -33,7 +33,6 @@ veda.Module(function (veda) { "use strict";
           }, 1);
         }
         return template.load().then(function (template) {
-          template = template["v-ui:template"][0].toString();
           return renderTemplate(individual, container, template, mode, extra, toEmpty);
         });
       } else {
@@ -41,7 +40,6 @@ veda.Module(function (veda) { "use strict";
         if ( individual.hasValue("v-ui:hasTemplate") && !isClass ) {
           template = individual["v-ui:hasTemplate"][0];
           return template.load().then(function (template) {
-            template = template["v-ui:template"][0].toString();
             return renderTemplate(individual, container, template, mode, extra, toEmpty);
           });
         } else {
@@ -55,7 +53,6 @@ veda.Module(function (veda) { "use strict";
             return Promise.all(templatesPromises);
           }).then(function (templates) {
             var renderedTemplatesPromises = templates.map( function (template) {
-              template = template["v-ui:template"][0].toString();
               return renderTemplate(individual, container, template, mode, extra, toEmpty);
             });
             return Promise.all(renderedTemplatesPromises);
@@ -73,30 +70,42 @@ veda.Module(function (veda) { "use strict";
   }
 
   function renderTemplate(individual, container, template, mode, extra, toEmpty) {
-    var match,
-        pre_render_src,
-        pre_render,
+    var templateString,
+        match,
+        pre_src,
+        pre,
         pre_result,
-        post_render_src,
-        post_render;
+        post_src,
+        post;
 
-    template = template.trim();
+    if ( !template.template ) {
+      templateString = template["v-ui:template"][0].toString().trim();
 
-    // Extract pre script, template and post script
-    match = template.match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
-    //match = preProcess(template);
-    pre_render_src = match[1];
-    template = $( match[2] );
-    post_render_src = match[3];
+      // Extract pre script, template and post script
+      match = templateString.match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
+      //match = preProcess(template);
+      pre_src = match[1];
+      templateString = match[2];
+      post_src = match[3];
 
-    if (pre_render_src) {
-      pre_render = new Function("veda", "individual", "container", "template", "mode", "extra", "\"use strict\";" + pre_render_src);
+      template.template = templateString;
+
+      if (pre_src) {
+        pre = new Function("veda", "individual", "container", "template", "mode", "extra", "\"use strict\";" + pre_src);
+        template.pre = pre;
+      }
+
+      if (post_src) {
+        post = new Function("veda", "individual", "container", "template", "mode", "extra", "\"use strict\";" + post_src);
+        template.post = post;
+      }
     }
-    if (post_render_src) {
-      post_render = new Function("veda", "individual", "container", "template", "mode", "extra", "\"use strict\";" + post_render_src);
-    }
-    if (pre_render) {
-      pre_result = pre_render.call(individual, veda, individual, container, template, mode, extra);
+    pre = template.pre;
+    post = template.post;
+    template = $(template.template);
+
+    if (pre) {
+      pre_result = pre.call(individual, veda, individual, container, template, mode, extra);
     }
     return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(function () {
 
@@ -109,8 +118,8 @@ veda.Module(function (veda) { "use strict";
         }
         container.append(processedTemplate);
 
-        if (post_render) {
-          post_render.call(individual, veda, individual, container, processedTemplate, mode, extra);
+        if (post) {
+          post.call(individual, veda, individual, container, processedTemplate, mode, extra);
         }
 
         return processedTemplate;
