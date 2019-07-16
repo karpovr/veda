@@ -173,7 +173,7 @@ this.initBlank = function (blankObject) {
     if (blank.object) {
       return resolve(blank.object);
     }
-    blank.object = new veda.IndividualModel({cache: false});
+    blank.object = new veda.IndividualModel();
     blank.object["rdf:type"] = blank["v-fc:targetType"].slice(0);
     blank.object.one("afterSave afterReset", function () {
       delete blank.object;
