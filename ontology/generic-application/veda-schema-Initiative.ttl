@@ -879,7 +879,7 @@ v-s:PsScope
   v-ui:forProperty v-s:scope ;
   v-ui:maxCardinality 1 ;
   v-ui:minCardinality 0 ;
-  v-ui:tooltip "Описание рамок проекта"@ru ;
+  v-ui:tooltip "Необязательно к заполнению, единичное значение"@ru ;
   v-ui:tooltip "non-Required, single Text"@en ;
   rdfs:label "Спецификация описания рамок проекта класса Проект"@ru ;
   rdfs:label "Scope description property specification for Project class"@en ;
@@ -890,7 +890,7 @@ v-s:PsAlternativeScope
   v-ui:forProperty v-s:alternativeScope ;
   v-ui:maxCardinality 1 ;
   v-ui:minCardinality 0 ;
-  v-ui:tooltip ""@ru ;
+  v-ui:tooltip "Необязательно к заполнению, единичное значение"@ru ;
   v-ui:tooltip "non-required, single integer value."@en ;
   rdfs:label "Спецификация альтернативных решений и выводов для класса Проект"@ru ;
   rdfs:label "Alternative decision property specification for Project class"@en ;
