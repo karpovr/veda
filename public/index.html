@@ -211,15 +211,15 @@
     <script type="html/template" id="link-control-template">
       <div class="link-control">
         <div class="input-group">
-          <div class="input-group-addon btn btn-default tree">
+          <div class="input-group-addon btn btn-default tree" tabindex="0">
             <i class="fa fa-sitemap"></i>
           </div>
           <textarea rows="1" class="form-control fulltext"></textarea>
-          <div class="input-group-addon btn btn-default clear">&#10005;</div>
-          <div class="input-group-addon btn btn-default dropdown">
+          <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
+          <div class="input-group-addon btn btn-default dropdown" tabindex="0">
             <i class="caret"></i>
           </div>
-          <div class="input-group-addon btn btn-default create">
+          <div class="input-group-addon btn btn-default create" tabindex="0">
             <i class="glyphicon glyphicon-plus"></i>
           </div>
         </div>
@@ -243,7 +243,7 @@
     <script type="html/template" id="actor-control-template">
       <div class="link-control">
         <div class="input-group">
-          <div class="input-group-addon btn btn-default dropdown" style="padding:0;">
+          <div class="input-group-addon btn btn-default dropdown" style="padding:0;" tabindex="0">
             <span data-toggle="dropdown" id="actor-type-menu" aria-haspopup="true" aria-expanded="true" style="padding:10px;">
               <i class="glyphicon glyphicon-user"></i><i class="caret"></i>
             </span>
@@ -272,7 +272,7 @@
             </div>
           </div>
           <textarea class="form-control fulltext" autocomplete="off" rows="1"></textarea>
-          <div class="input-group-addon btn btn-default clear">
+          <div class="input-group-addon btn btn-default clear" tabindex="0">
             <span>&#10005;</span>
           </div>
         </div>

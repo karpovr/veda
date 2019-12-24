@@ -64,10 +64,15 @@ private nothrow string req_prepare(string request, Context context)
 						if (ticket is null) {
 							context.get_logger.trace("ERR! ticket not fount: ticket_id = %s", _ticket);
 						} else   {
+							if (ticket.result != ResultCode.Ok) {
+								res.result_code = ticket.result;
+							} else {
+							
 							if (ticket.user_uri is null || ticket.user_uri.length == 0)
 								context.get_logger.trace("ERR! ft_query: user not found in ticket object, ticket_id=%s, query=%s", _ticket, _query);
 							else
 								user_uri = ticket.user_uri;
+							}
 						}
 					}
 				} else   {

@@ -214,7 +214,7 @@ fn authorize_obj_group(
                     };
 
                     for i_access in ACCESS_LIST.iter() {
-                        let access = i_access;
+                        let access = *i_access;
                         if (request_access & access & restriction_access) != 0 {
                             calc_bits = access & permission_access;
 

@@ -12,6 +12,7 @@ use nng::{Protocol, Socket};
 use std::io::Write;
 use std::process;
 use std::time::Duration;
+use std::{thread, time};
 use uuid::Uuid;
 use v_api::*;
 use v_onto::datatype::Lang;
@@ -388,4 +389,26 @@ pub fn create_sys_ticket(storage: &mut VStorage) -> Ticket {
     }
 
     ticket
+}
+
+pub fn wait_load_ontology() {
+    loop {
+        let input_onto_info = ModuleInfo::new("./data", "input-onto", true);
+        if input_onto_info.is_err() {
+            error!("fail open info of input-onto, err={:?}", input_onto_info.err());
+            continue;
+        }
+
+        let mut input_onto_info = input_onto_info.unwrap();
+        loop {
+            let (_, committed) = input_onto_info.read_info().unwrap_or((0, 0));
+            if committed > 0 {
+                break;
+            }
+            info!("wait for completed load ontology...");
+            thread::sleep(time::Duration::from_millis(100));
+        }
+
+        break;
+    }
 }

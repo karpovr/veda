@@ -65,6 +65,8 @@ fn main() -> std::io::Result<()> {
     let mut is_found_onto_changes = false;
     let mut last_found_changes = Instant::now();
 
+    wait_load_ontology();
+
     let mut queue_consumer = Consumer::new("./data/queue", "ontologist", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let mut total_prepared_count: u64 = 0;
 

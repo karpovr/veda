@@ -87,18 +87,18 @@ pub fn prepare_right_set(prev_state: &mut Individual, new_state: &mut Individual
         0
     };
 
-    update_right_set(&resource, &in_set, marker, is_deleted, &use_filter, prefix, access, ctx);
+    update_right_set(new_state.get_id(), &resource, &in_set, marker, is_deleted, &use_filter, prefix, access, ctx);
 
     if !removed_resource.is_empty() {
-        update_right_set(&removed_resource, &in_set, marker, true, &use_filter, prefix, access, ctx);
+        update_right_set(new_state.get_id(), &removed_resource, &in_set, marker, true, &use_filter, prefix, access, ctx);
     }
 
     if !removed_in_set.is_empty() {
-        update_right_set(&resource, &removed_in_set, marker, true, &use_filter, prefix, access, ctx);
+        update_right_set(new_state.get_id(), &resource, &removed_in_set, marker, true, &use_filter, prefix, access, ctx);
     }
 }
 
-pub fn update_right_set(resources: &[String], in_set: &[String], marker: u8, is_deleted: bool, filter: &str, prefix: &str, access: u8, ctx: &mut Context) {
+pub fn update_right_set(source_id: &str, resources: &[String], in_set: &[String], marker: u8, is_deleted: bool, filter: &str, prefix: &str, access: u8, ctx: &mut Context) {
     for rs in resources.iter() {
         let key = prefix.to_owned() + filter + rs;
 
@@ -130,6 +130,8 @@ pub fn update_right_set(resources: &[String], in_set: &[String], marker: u8, is_
         if new_record.is_empty() {
             new_record = "X".to_string();
         }
+
+        debug! ("{} {} {:?}", source_id, rs, new_record);
 
         ctx.storage.put_kv(StorageId::Az, &key, &new_record);
     }

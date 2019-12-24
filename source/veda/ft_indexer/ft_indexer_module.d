@@ -7,7 +7,7 @@ private import std.stdio, std.conv, std.utf, std.string, std.file, std.datetime,
 private import veda.bind.xapian_d_header, veda.ft_indexer.xapian_indexer;
 private import veda.common.logger, veda.core.impl.thread_context, veda.search.xapian.xapian_search;
 private import veda.common.type, veda.core.common.define, veda.onto.resource, veda.onto.lang, veda.onto.individual, veda.util.queue;
-private import veda.core.common.context, veda.vmodule.vmodule;
+private import veda.core.common.context, veda.vmodule.vmodule, veda.util.module_info;
 private import properd, veda.core.common.type;
 
 // ////// Logger ///////////////////////////////////////////
@@ -32,6 +32,18 @@ void main(char[][] args)
 		if (carg.length == 2 && carg[ 0 ] == "--indexer_use_db")
 			use_db = carg[ 1 ].strip();
 	}
+
+    auto input_onto_info = new ModuleInfoFile("input-onto", log, OPEN_MODE.READER);
+    if (!input_onto_info.is_ready) {
+	log.trace("%s ModuleInfo not ready, terminated", "input_onto");
+	return;
+    }
+
+    while (input_onto_info.get_info().committed_op_id == 0) {
+	log.trace("wait for load ontology...");
+        Thread.sleep(dur!("seconds")(1));
+    }
+
 
 	auto p_module =
 	    new FTIndexerProcess(SUBSYSTEM.FULL_TEXT_INDEXER, MODULE.fulltext_indexer, use_db, new Logger("veda-core-fulltext_indexer", "log", ""));

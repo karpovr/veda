@@ -20,9 +20,10 @@ use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::time as std_time;
+use std::{time as std_time, thread};
 use std::{fs, io};
 use v_api::*;
+use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::*;
 use v_onto::datatype::Lang;
@@ -48,12 +49,29 @@ fn main() -> NotifyResult<()> {
 
     let mut module = Module::default();
 
+    while module.api.connect() == false {
+        info! ("wait for start main module ...");
+        thread::sleep(std::time::Duration::from_millis(100));
+    }
+
     let onto_path = "ontology".to_owned();
 
     let mut onto = Onto::default();
     info!("load onto start");
     load_onto(&mut module.fts, &mut module.storage, &mut onto);
     info!("load onto end");
+
+    let module_info = ModuleInfo::new("./data", "input-onto", true);
+    if module_info.is_err() {
+        error!("{:?}", module_info.err());
+        return Ok(());
+    }
+    let mut module_info = module_info.unwrap();
+    if module_info.read_info().is_none() {
+        if let Err(e) = module_info.put_info(0, 0) {
+            info!("fail write module info, err={}", e);
+        }
+    }
 
     info!("start prepare files");
 
@@ -123,7 +141,7 @@ fn main() -> NotifyResult<()> {
     }
 
     if !list_candidate_files.is_empty() {
-        processing_files(list_candidate_files, &mut new_hashes_set.data, &mut module, &systicket);
+        processing_files(list_candidate_files, &mut new_hashes_set.data, &mut module, &systicket, &mut module_info);
         store_hash_list(&new_hashes_set, &path_files_hashes);
     }
 
@@ -143,7 +161,7 @@ fn main() -> NotifyResult<()> {
                             EventKind::Create(_) | EventKind::Modify(_) => {
                                 if event.flag().is_some() {
                                     info!("changed: {:?}", event);
-                                    if processing_files(event.paths, &mut new_hashes_set.data, &mut module, &systicket) > 0 {
+                                    if processing_files(event.paths, &mut new_hashes_set.data, &mut module, &systicket, &mut module_info) > 0 {
                                         store_hash_list(&new_hashes_set, &path_files_hashes);
                                     }
                                     prepared_count += 1;
@@ -205,7 +223,19 @@ fn extract_path_and_name(path: &PathBuf) -> Option<(&str, &str)> {
     None
 }
 
-fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, String>, module: &mut Module, systicket: &str) -> i32 {
+fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, String>, module: &mut Module, systicket: &str, module_info: &mut ModuleInfo) -> i32 {
+    let mut committed_op_id = 0;
+    let mut cur_op_id = 0;
+
+    if let Some((_op_id, _c_op_id)) = module_info.read_info() {
+        committed_op_id = _c_op_id;
+        cur_op_id = _op_id;
+    }
+
+    if let Err(e) = module_info.put_info(cur_op_id, cur_op_id) {
+        info!("fail write module info, err={}", e);
+    }
+
     let mut count_prepared_ttl_files = 0;
     let mut file2indv: HashMap<String, HashMap<String, Individual>> = HashMap::new();
     let mut priority_list: Vec<(i64, String, String)> = Vec::new();
@@ -288,10 +318,19 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                         error!("fail update, {}, file={}, uri={}, result_code={:?}", load_priority, path, indv_file.get_id(), res.result);
                     } else {
                         info!("success update, {}, file={}, uri={}", load_priority, path, indv_file.get_id());
+                        cur_op_id = res.op_id;
+                        if let Err(e) = module_info.put_info(cur_op_id, committed_op_id) {
+                            info!("fail write module info, err={}", e);
+                        }
                     }
                 }
             }
         }
+    }
+
+    committed_op_id = cur_op_id;
+    if let Err(e) = module_info.put_info(committed_op_id, committed_op_id) {
+        info!("fail write module info, err={}", e);
     }
 
     info!("end prepare {} files", file2indv.len());

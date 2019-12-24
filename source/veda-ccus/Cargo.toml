@@ -19,6 +19,7 @@ log = "0.4"
 rust-ini = "0.13"
 rand = "0.7"
 tokio = "0.1"
+v_module = { path = "../v-module" }
 v_queue = { path = "../v-queue" }
 v_onto = { path = "../v-onto" }
 v_storage = { path = "../v-storage" }

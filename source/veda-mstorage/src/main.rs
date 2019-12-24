@@ -31,6 +31,8 @@ fn main() -> std::io::Result<()> {
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
 
+    let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
+
     let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
         p.to_owned()
     } else {
@@ -81,8 +83,6 @@ fn main() -> std::io::Result<()> {
         error!("fail listen, {:?}", e);
         return Ok(());
     }
-
-    let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
     let mut tickets_cache: HashMap<String, Ticket> = HashMap::new();
 

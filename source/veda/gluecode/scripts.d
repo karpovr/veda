@@ -7,7 +7,7 @@ private import std.stdio, std.conv, std.utf, std.string, std.file, std.datetime,
 private import std.concurrency;
 private import veda.common.type, veda.core.common.type, veda.core.common.define, veda.onto.resource, veda.onto.lang, veda.onto.individual;
 private import veda.common.logger, veda.core.impl.thread_context, veda.util.queue;
-private import veda.core.common.context, veda.onto.onto;
+private import veda.core.common.context, veda.onto.onto, veda.util.module_info;
 private import veda.vmodule.vmodule, veda.search.common.isearch, veda.search.ft_query.ft_query_client;
 private import veda.gluecode.script, veda.gluecode.v8d_bind;
 
@@ -23,6 +23,31 @@ int main(string[] args){
     process_name = "scripts-" ~ vm_id;
     Logger log = new Logger("veda-core-" ~ process_name, "log", "");
     log.tracec("use VM id=%s", vm_id);
+
+    auto input_onto_info = new ModuleInfoFile("input-onto", log, OPEN_MODE.READER);
+    if (!input_onto_info.is_ready) {
+	log.trace("%s ModuleInfo not ready, terminated", "input_onto");
+	return -1;
+    }
+
+    if (input_onto_info.get_info().committed_op_id == 0) {
+    while (input_onto_info.get_info().committed_op_id == 0) {
+		log.trace("wait for load ontology...");
+        Thread.sleep(dur!("seconds")(1));
+    }
+	auto op_id_input_onto = input_onto_info.get_info().committed_op_id;
+
+    auto fulltext_indexer_info = new ModuleInfoFile("fulltext_indexer", log, OPEN_MODE.READER);
+    if (!fulltext_indexer_info.is_ready) {
+	log.trace("%s ModuleInfo not ready, terminated", "fulltext_indexer");
+	return -1;
+    }
+
+    while (fulltext_indexer_info.get_info().committed_op_id < op_id_input_onto) {
+		log.trace("wait for ft indexed ontology...");
+        Thread.sleep(dur!("seconds")(1));
+    }
+    }
 
     if (vm_id == "main") {
         {

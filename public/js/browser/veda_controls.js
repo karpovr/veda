@@ -111,6 +111,12 @@
     var opts = $.extend( {}, $.fn.veda_generic.defaults, options ),
       control = veda_literal_input.call(this, opts);
 
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     this.append(control);
     return this;
   };
@@ -139,6 +145,13 @@
   $.fn.veda_string = function( options ) {
     var opts = $.extend( {}, $.fn.veda_string.defaults, options ),
       control = veda_literal_input.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     this.append(control);
     return this;
   };
@@ -154,6 +167,13 @@
   $.fn.veda_password = function( options ) {
     var opts = $.extend( {}, $.fn.veda_password.defaults, options ),
       control = veda_literal_input.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     this.append(control);
     return this;
   };
@@ -175,6 +195,13 @@
   $.fn.veda_text = function( options ) {
     var opts = $.extend( {}, $.fn.veda_text.defaults, options ),
       control = veda_literal_input.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     control.attr("rows", this.attr("rows"));
     autosize(control);
     this.on("edit", function () {
@@ -198,6 +225,13 @@
   $.fn.veda_integer = function( options ) {
     var opts = $.extend( {}, $.fn.veda_integer.defaults, options ),
       control = veda_literal_input.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     this.on("view edit search", function (e) {
       e.stopPropagation();
       if (e.type === "search") {
@@ -270,6 +304,13 @@
   $.fn.veda_decimal = function( options ) {
     var opts = $.extend( {}, $.fn.veda_decimal.defaults, options ),
       control = veda_literal_input.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     this.on("view edit search", function (e) {
       e.stopPropagation();
       if (e.type === "search") {
@@ -403,6 +444,13 @@
   $.fn.veda_date = function( options ) {
     var opts = $.extend( {}, $.fn.veda_date.defaults, options ),
       control = veda_dateTime.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.find("input").attr("tabindex", tabindex);
+    }
+
     this.append(control);
     return this;
   };
@@ -428,6 +476,13 @@
   $.fn.veda_time = function( options ) {
     var opts = $.extend( {}, $.fn.veda_time.defaults, options ),
       control = veda_dateTime.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.find("input").attr("tabindex", tabindex);
+    }
+
     this.append(control);
     return this;
   };
@@ -451,6 +506,13 @@
   $.fn.veda_dateTime = function( options ) {
     var opts = $.extend( {}, $.fn.veda_dateTime.defaults, options ),
       control = veda_dateTime.call(this, opts);
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.find("input").attr("tabindex", tabindex);
+    }
+
     this.append(control);
     return this;
   };
@@ -479,6 +541,12 @@
       spec = opts.spec,
       placeholder = spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : "",
       timeout;
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      this.find("input").attr("tabindex", tabindex);
+    }
 
     Object.keys(veda.user.preferences.language).map(function (language_name) {
       var localedInput = $(opts.template);
@@ -659,6 +727,12 @@
       property_uri = opts.property_uri,
       spec = opts.spec;
 
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
+    }
+
     function handler (doc_property_uri) {
       if (individual.hasValue(property_uri)) {
         if (individual.get(property_uri)[0] === true) {
@@ -737,6 +811,12 @@
       chosenActorType,
       fullName;
 
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.find("textarea").attr("tabindex", tabindex);
+    }
+
     // Fulltext search feature
     var fulltext = $(".fulltext", control);
     var fulltextMenu = $(".fulltext-menu", control);
@@ -785,9 +865,11 @@
       }
     });
 
-    $(".clear", control).on("click keyup", function (e) {
+    $(".clear", control).on("click keydown", function (e) {
       if (isSingle) {
-        if (e.type !== "click" && e.which !== 13) { return; }
+        if (e.type !== "click" && e.which !== 13 && e.which !== 32) { return; }
+        e.preventDefault();
+        e.stopPropagation();
         individual.clearValue(rel_uri);
         if ( complex ) {
           individual.clearValue(rel_uri + ".v-s:employee");
@@ -797,7 +879,7 @@
       fulltextMenu.hide();
       $(document).off("click", clickOutsideMenuHandler);
       $(document).off("keydown", arrowHandler);
-      fulltext.val("");
+      fulltext.val("").focus();
     });
 
     if (placeholder instanceof veda.IndividualModel) {
@@ -863,28 +945,30 @@
       }
     });
 
-    var keyupHandler = (function () {
+    var inputHandler = (function () {
       var timeout;
       var minLength = 3;
       var nav_keys = [37, 38, 39, 40, 9, 16]; // Arrows, shift, tab
       return function (e) {
         if (timeout) { clearTimeout(timeout); }
         if (nav_keys.indexOf(e.which) >= 0) { return; }
-        var value = e.target.value;
-        if (value.length >= minLength) {
-          timeout = setTimeout(performSearch, 750, value);
-        } else if (!value.length) {
-          if (isSingle) {
-            individual.clearValue(rel_uri);
+        timeout = setTimeout(function () {
+          var value = e.target.value;
+          if (value.length >= minLength) {
+            performSearch(value);
+          } else if (!value.length) {
+            if (isSingle) {
+              individual.clearValue(rel_uri);
+            }
+            suggestions.empty();
+            fulltextMenu.hide();
+            $(document).off("click", clickOutsideMenuHandler);
+            $(document).off("keydown", arrowHandler);
           }
-          suggestions.empty();
-          fulltextMenu.hide();
-          $(document).off("click", clickOutsideMenuHandler);
-          $(document).off("keydown", arrowHandler);
-        }
+        }, 750);
       };
     }());
-    fulltext.on("keyup", keyupHandler);
+    fulltext.on("keydown", inputHandler);
 
     function performSearch(value) {
       if ( fullName ) {
@@ -940,6 +1024,8 @@
     var suggestions = $(".suggestions", control);
     var dblTimeout;
     suggestions.on("click", ".suggestion", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       if (!e.originalEvent) {
         clickHandler(e);
       } else if (dblTimeout) {
@@ -947,10 +1033,14 @@
       } else {
         clickHandler(e);
       }
-    }).on("keyup", ".suggestion", function (e) {
+    }).on("keydown", ".suggestion", function (e) {
       if (e.which === 32) {
+        e.preventDefault();
+        e.stopPropagation();
         clickHandler(e);
       } else if (e.which === 13) {
+        e.preventDefault();
+        e.stopPropagation();
         dblclickHandler(e);
       }
     }).on("dblclick", ".suggestion", function (e) {
@@ -993,6 +1083,7 @@
       dblTimeout = setTimeout(function () {
         dblTimeout = undefined;
       }, 300);
+      fulltext.focus();
     }
 
     function dblclickHandler(e) {
@@ -1005,6 +1096,7 @@
       fulltextMenu.hide();
       $(document).off("click", clickOutsideMenuHandler);
       $(document).off("keydown", arrowHandler);
+      fulltext.focus();
     }
 
     function clickOutsideMenuHandler(e) {
@@ -1098,11 +1190,6 @@
       } else {
         fulltext.val("");
       }
-      if (values) {
-        setTimeout(function () {
-          fulltext.focus();
-        }, 100);
-      }
     }
     individual.on( [rel_uri, rel_uri + ".v-s:employee", rel_uri + ".v-s:occupation"].join(" ") , propertyModifiedHandler);
     control.one("remove", function () {
@@ -1146,6 +1233,12 @@
       });
     } else {
       populate();
+    }
+
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.attr("tabindex", tabindex);
     }
 
     control.on("mousedown", function (e) {
@@ -1693,6 +1786,12 @@
       input = $(".form-control", control),
       button = $(".get-numeration-value", control);
 
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.find(".form-control").attr("tabindex", tabindex);
+    }
+
     input.attr({
       "placeholder": placeholder,
       "name": (individual.hasValue("rdf:type") ? individual["rdf:type"].pop().id + "_" + property_uri : property_uri).toLowerCase().replace(/[-:]/g, "_")
@@ -1977,13 +2076,19 @@
     if (!isSingle) { fileInput.attr("multiple", "multiple"); }
     if (accept) { fileInput.attr("accept", accept); }
 
-    browseButton.click(function (e) {
+    browseButton.on("click", function (e) {
       fileInput.click();
+    }).on("keyup", function (e) {
+      if ( e.which === 13 ) {
+        $(this).click();
+      }
     });
 
     var notify = new veda.Notify();
 
-    fileInput.change(function (e) {
+    fileInput.click(function (e) {
+      e.stopPropagation();
+    }).change(function (e) {
       var that = this;
       var fileIndividualPromises = [];
       for (var i = 0, n = this.files.length, file; (file = this.files && this.files[i]); i++) {
@@ -2084,6 +2189,12 @@
       isSingle = this.data("single") || ( spec && spec.hasValue("v-ui:maxCardinality") ? spec["v-ui:maxCardinality"][0] === 1 : true ),
       withDeleted = false || this.attr("data-deleted");
 
+    var tabindex = this.attr("tabindex");
+    if (tabindex) {
+      this.removeAttr("tabindex");
+      control.find("textarea").attr("tabindex", tabindex);
+    }
+
     this.removeAttr("data-template");
     function renderTemplate (individual) {
       return template.replace(/{\s*.*?\s*}/g, function (match) {
@@ -2125,8 +2236,10 @@
           create.addClass("disabled");
           create.off("click keyup");
         } else {
-          create.on("click keyup", function (e) {
-            if (e.type !== "click" && e.which !== 13) { return; }
+          create.on("click keydown", function (e) {
+            if (e.type !== "click" && e.which !== 13 && e.which !== 32) { return; }
+            e.preventDefault();
+            e.stopPropagation();
             var newVal = createValue();
             if ( inModal ) {
               var modal = $("#individual-modal-template").html();
@@ -2209,8 +2322,10 @@
 
       var treeTmpl = new veda.IndividualModel("v-ui:TreeTemplate");
       var modal = $("#individual-modal-template").html();
-      tree.on("click keyup", function (e) {
-        if (e.type !== "click" && e.which !== 13) { return; }
+      tree.on("click keydown", function (e) {
+        if (e.type !== "click" && e.which !== 13 && e.which !== 32) { return; }
+        e.preventDefault();
+        e.stopPropagation();
         var $modal = $(modal);
         var cntr = $(".modal-body", $modal);
         $modal.on('hidden.bs.modal', function (e) {
@@ -2325,29 +2440,30 @@
         });
       };
 
-      var keyupHandler = (function () {
+      var inputHandler = (function () {
         var timeout;
         var minLength = 3;
         var nav_keys = [37, 38, 39, 40, 9, 16]; // Arrows, shift, tab
         return function (e) {
           if (timeout) { clearTimeout(timeout); }
           if (nav_keys.indexOf(e.which) >= 0) { return; }
-          var value = e.target.value;
-          if (value.length >= minLength) {
-            timeout = setTimeout(performSearch, 750, value);
-          } else if (!value.length) {
-            if (isSingle) {
-              individual.clearValue(rel_uri);
+          timeout = setTimeout(function () {
+            var value = e.target.value;
+            if (value.length >= minLength) {
+              performSearch(value);
+            } else if (!value.length) {
+              if (isSingle) {
+                individual.clearValue(rel_uri);
+              }
+              suggestions.empty();
+              fulltextMenu.hide();
+              $(document).off("click", clickOutsideMenuHandler);
+              $(document).off("keydown", arrowHandler);
             }
-            suggestions.empty();
-            fulltextMenu.hide();
-            $(document).off("click", clickOutsideMenuHandler);
-            $(document).off("keydown", arrowHandler);
-          }
+          }, 750);
         };
       }());
-
-      fulltext.on("keyup", keyupHandler);
+      fulltext.on("keydown", inputHandler);
 
       var selected = [];
 
@@ -2386,6 +2502,8 @@
       var suggestions = $(".suggestions", control);
       var dblTimeout;
       suggestions.on("click", ".suggestion", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         if (!e.originalEvent) {
           clickHandler(e);
         } else if (dblTimeout) {
@@ -2393,10 +2511,14 @@
         } else {
           clickHandler(e);
         }
-      }).on("keyup", ".suggestion", function (e) {
+      }).on("keydown", ".suggestion", function (e) {
         if (e.which === 32) {
+          e.preventDefault();
+          e.stopPropagation();
           clickHandler(e);
         } else if (e.which === 13) {
+          e.preventDefault();
+          e.stopPropagation();
           dblclickHandler(e);
         }
       }).on("dblclick", ".suggestion", function (e) {
@@ -2438,6 +2560,7 @@
         dblTimeout = setTimeout(function () {
           dblTimeout = undefined;
         }, 300);
+        fulltext.focus();
       };
 
       var dblclickHandler = function (e) {
@@ -2450,6 +2573,7 @@
         fulltextMenu.hide();
         $(document).off("click", clickOutsideMenuHandler);
         $(document).off("keydown", arrowHandler);
+        fulltext.focus();
       };
 
       var clickOutsideMenuHandler = function (e) {
@@ -2466,7 +2590,6 @@
       var arrowHandler = function(e) {
         if ( e.which === 40 ) { // Down
           e.preventDefault();
-          e.stopPropagation();
           var active = suggestions.find(".active").removeClass("active");
           var next = active.next();
           if ( next.length ) {
@@ -2476,7 +2599,6 @@
           }
         } else if ( e.which === 38 ) { // Up
           e.preventDefault();
-          e.stopPropagation();
           var active = suggestions.find(".active").removeClass("active");
           var prev = active.prev();
           if ( prev.length ) {
@@ -2501,11 +2623,6 @@
         } else {
           fulltext.val("");
         }
-        if (value) {
-          setTimeout(function () {
-            fulltext.focus();
-          }, 100);
-        }
       };
 
       individual.on(rel_uri, propertyModifiedHandler);
@@ -2521,12 +2638,14 @@
 
     // Clear feature
     if (isSingle && opts.mode !== "search" && ( this.hasClass("fulltext") || this.hasClass("full") ) ) {
-      $(".clear", control).on("click keyup", function (e) {
-        if (e.type !== "click" && e.which !== 13) { return; }
+      $(".clear", control).on("click keydown", function (e) {
+        if (e.type !== "click" && e.which !== 13 && e.which !== 32) { return; }
+        e.preventDefault();
+        e.stopPropagation();
         selected = [];
         suggestions.empty();
         individual.clearValue(rel_uri);
-        fulltext.val("");
+        fulltext.val("").focus();
       });
       this.on("view edit search", function (e) {
         e.stopPropagation();
@@ -2545,7 +2664,8 @@
     var dropdown = $(".dropdown", control);
     if ( this.hasClass("dropdown") && this.hasClass("fulltext") || this.hasClass("full") ) {
       dropdown.on("click keydown", function (e) {
-        if (e.type !== "click" && e.which !== 13) { return; }
+        if (e.type !== "click" && e.which !== 13 && e.which !== 32) { return; }
+        e.preventDefault();
         e.stopPropagation();
         if ( suggestions.is(":empty") ) {
           performSearch();

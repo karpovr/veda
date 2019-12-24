@@ -714,6 +714,10 @@ impl IndividualObj {
                 });
             }
         }
+
+        if values.is_empty() {
+            self.resources.remove(predicate);
+        }
     }
 
     pub fn add_bool(&mut self, predicate: &str, b: bool) {

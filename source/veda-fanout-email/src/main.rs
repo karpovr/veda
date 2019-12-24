@@ -30,6 +30,8 @@ pub struct Context {
 fn main() -> Result<(), i32> {
     init_log();
 
+    wait_load_ontology();
+
     let mut queue_consumer = Consumer::new("./data/queue", "fanout_email0", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
 
     let module_info = ModuleInfo::new("./data", "fanout_email0", true);

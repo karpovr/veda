@@ -10,6 +10,7 @@ use v_queue::record::*;
 
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
+use v_module::module::wait_load_ontology;
 
 const QUEUE_CHECK_INTERVAL: Duration = Duration::from_millis(300);
 const STAT_INTERVAL: Duration = Duration::from_millis(10000);
@@ -71,6 +72,9 @@ pub struct CCUSServer {
 
 impl CCUSServer {
     pub fn new(tx: Sender<CMessage>) -> CCUSServer {
+
+	wait_load_ontology();
+
         let _consumer = Consumer::new("./data/queue", "CCUS1", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
         let ch = mpsc::channel();
 
