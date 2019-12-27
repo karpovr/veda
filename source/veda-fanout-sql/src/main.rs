@@ -2,22 +2,22 @@
 extern crate log;
 extern crate mysql;
 
-use std::collections::HashMap;
-use std::{thread, time, process};
 use chrono::NaiveDateTime;
+use std::collections::HashMap;
+use std::{process, thread, time};
 
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::load_onto;
+use v_onto::datatype::DataType;
+use v_onto::datatype::Lang;
 use v_onto::individual::*;
 use v_onto::onto::Onto;
 use v_onto::resource::Resource;
 use v_onto::resource::Value;
-use v_onto::datatype::DataType;
-use v_onto::datatype::Lang;
 use v_queue::consumer::*;
 
-pub struct Context{
+pub struct Context {
     onto: Onto,
     pool: mysql::Pool,
     tables: HashMap<String, bool>,
@@ -26,7 +26,9 @@ pub struct Context{
 fn main() {
     init_log();
 
-    wait_load_ontology();
+    if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
+        wait_module("fulltext_indexer", wait_load_ontology());
+    }
 
     let mut queue_consumer = Consumer::new("./data/queue", "fanout_sql", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new("./data", "fanout_sql", true);
@@ -94,7 +96,7 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     Ok(())
 }
 
-fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec<String>, is_new: bool, ctx: &mut Context) -> Result<(), PrepareError> {
+fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &[String], is_new: bool, ctx: &mut Context) -> Result<(), PrepareError> {
     let uri = new_state.get_id().to_string();
 
     let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
@@ -110,7 +112,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         Err(e) => {
             error!("Get connection failed. {:?}", e);
             return Err(PrepareError::Recoverable);
-        },
+        }
         Ok(conn) => conn,
     };
 
@@ -118,7 +120,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         Err(e) => {
             error!("Transaction start failed. {:?}", e);
             return Err(PrepareError::Recoverable);
-        },
+        }
         Ok(transaction) => transaction,
     };
 
@@ -130,7 +132,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
             prev_state.get_resources(&predicate).unwrap().iter().for_each(|resource| {
                 if resource.order == 0 {
                     // Check or create table before delete
-                    if let Err(_) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
+                    if check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
                         error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
                         tr_error = true;
                     }
@@ -148,18 +150,21 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         Some(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(timestamp, 0).to_string()),
         None => String::from("NULL"),
     };
-    let deleted = match is_deleted { true => "1", _ => "NULL" };
+    let deleted = if is_deleted {
+        "1"
+    } else {
+        "NULL"
+    };
 
     classes.iter().for_each(|class| {
         new_state.get_predicates().iter().for_each(|predicate| {
             new_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
                 // Check or create table before insert
-                if resource.order == 0 {
-                    if let Err(_) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
-                        tr_error = true;
-                    }
+                if resource.order == 0 && check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
+                    error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
+                    tr_error = true;
                 }
+
                 let uri = new_state.get_id();
                 let value = match &resource.value {
                     Value::Bool(true) => String::from("1"),
@@ -173,10 +178,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
                 };
                 let lang = match &resource.get_lang() {
                     Lang::NONE => String::from("NULL"),
-                    lang=> format!("'{}'", lang.to_string()),
+                    lang => format!("'{}'", lang.to_string()),
                 };
-                let query = format!("INSERT INTO `{}` (doc_id, doc_type, created, value, lang, deleted) VALUES ('{}', '{}', {}, {}, {}, {})",
-                                    predicate, uri, class, created, value, lang, deleted
+                let query = format!(
+                    "INSERT INTO `{}` (doc_id, doc_type, created, value, lang, deleted) VALUES ('{}', '{}', {}, {}, {}, {})",
+                    predicate, uri, class, created, value, lang, deleted
                 );
                 //info!("Query: {}", query);
                 if let Err(e) = transaction.query(query) {
@@ -194,19 +200,25 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         }
         return Err(PrepareError::Fatal);
     }
-    return match transaction.commit() {
+
+    match transaction.commit() {
         Ok(_) => {
             info!("`{}` Ok", uri);
             Ok(())
-        },
+        }
         Err(e) => {
             error!("Transaction commit failed for `{}`. {:?}", uri, e);
             Err(PrepareError::Fatal)
-        },
-    };
+        }
+    }
 }
 
-fn check_create_property_table(tables: &mut HashMap<String, bool>, property: &str, resource: &Resource, transaction: &mut mysql::Transaction) -> Result<(), &'static str> {
+fn check_create_property_table(
+    tables: &mut HashMap<String, bool>,
+    property: &str,
+    resource: &Resource,
+    transaction: &mut mysql::Transaction,
+) -> Result<(), &'static str> {
     if let Some(true) = tables.get(property) {
         return Ok(());
     }
@@ -220,31 +232,32 @@ fn check_create_property_table(tables: &mut HashMap<String, bool>, property: &st
         DataType::String => {
             sql_type = "TEXT";
             sql_value_index = "";
-        },
+        }
         DataType::Uri => sql_type = "CHAR(128)",
         _unsupported => error!("Unsupported property value type: {:#?}", _unsupported),
     }
     let query = format!(
         "CREATE TABLE `{}` ( \
-            `ID` BIGINT NOT NULL AUTO_INCREMENT, \
-            `doc_id` CHAR(128) NOT NULL, \
-            `doc_type` CHAR(128) NOT NULL, \
-            `created` DATETIME NULL, \
-            `value` {} NULL, \
-            `lang` CHAR(2) NULL, \
-            `deleted` BOOL NULL, \
-             PRIMARY KEY (`ID`), \
-             INDEX c1(`doc_id`), INDEX c2(`doc_type`), INDEX c3 (`created`), INDEX c4(`lang`) {} \
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
+         `ID` BIGINT NOT NULL AUTO_INCREMENT, \
+         `doc_id` CHAR(128) NOT NULL, \
+         `doc_type` CHAR(128) NOT NULL, \
+         `created` DATETIME NULL, \
+         `value` {} NULL, \
+         `lang` CHAR(2) NULL, \
+         `deleted` BOOL NULL, \
+         PRIMARY KEY (`ID`), \
+         INDEX c1(`doc_id`), INDEX c2(`doc_type`), INDEX c3 (`created`), INDEX c4(`lang`) {} \
+         ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
         property, sql_type, sql_value_index
     );
-    return match transaction.query(query) {
+
+    match transaction.query(query) {
         Ok(_) => {
             tables.insert(property.to_owned(), true);
             Ok(())
-        },
+        }
         Err(_) => Err("Unable to create table"),
-    };
+    }
 }
 
 fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str> {
@@ -276,21 +289,17 @@ fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mys
                             let db = connection.get_first_literal("v-s:sql_database").unwrap();
                             info!("Trying to connect to mysql, host: {}, port: {}, login: {}, pass: {}, db: {}", host, port, login, pass, db);
                             let mut builder = mysql::OptsBuilder::new();
-                            builder.ip_or_hostname(Some(host))
-                                .tcp_port(port)
-                                .user(Some(login))
-                                .pass(Some(pass))
-                                .db_name(Some(db));
+                            builder.ip_or_hostname(Some(host)).tcp_port(port).user(Some(login)).pass(Some(pass)).db_name(Some(db));
                             let opts: mysql::Opts = builder.into();
-                            match mysql::Pool::new(opts.clone()) {
+                            match mysql::Pool::new(opts) {
                                 Ok(pool) => {
                                     info!("Connection to MySQL established successfully");
                                     return Ok(pool);
-                                },
+                                }
                                 Err(e) => {
                                     error!("Connection to MySQL failed. {:?}", e);
                                     return Err("Connection to MySQL failed");
-                                },
+                                }
                             }
                         }
                     }

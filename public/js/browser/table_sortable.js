@@ -1,5 +1,5 @@
 // Pagination plugin
-(function( $ ) { "use strict";
+(function( $, moment ) { "use strict";
   $.fn.tableSortable = function (clicked) {
     return this.each(function() {
       var table = $(this);
@@ -45,9 +45,9 @@
             if ( !isNaN(valueA) ) {
               valueA = parseFloat(valueA);
               valueB = parseFloat(valueB);
-            } else if ( !isNaN( Date.parse( valueA.split(".").reverse().join("-") ) ) ) {
-              valueA = Date.parse( valueA.split(".").reverse().join("-") );
-              valueB = Date.parse( valueB.split(".").reverse().join("-") );
+            } else if ( moment(valueA, ["DD.MM.YYYY HH:mm:ss", "DD.MM.YYYY", "YYYY-MM-DDTHH:mm:ss.SSSZ", "YYYY-MM-DD"]).isValid() ) {
+              valueA = moment(valueA, ["DD.MM.YYYY HH:mm:ss", "DD.MM.YYYY", "YYYY-MM-DDTHH:mm:ss.SSSZ", "YYYY-MM-DD"]).valueOf();
+              valueB = moment(valueB, ["DD.MM.YYYY HH:mm:ss", "DD.MM.YYYY", "YYYY-MM-DDTHH:mm:ss.SSSZ", "YYYY-MM-DD"]).valueOf();
             }
             if ( compare(valueA, valueB) ) {
               return -1;
@@ -65,4 +65,4 @@
 
     });
   };
-})(jQuery );
+})(jQuery, moment);

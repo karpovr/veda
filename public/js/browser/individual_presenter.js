@@ -173,13 +173,12 @@ veda.Module(function (veda) { "use strict";
     // Get properties specifications
     var ontology = new veda.OntologyModel();
     var specs = $.extend.apply (
-      {}, [].concat(
+      this, [{}].concat(
         individual["rdf:type"].map( function (_class) {
           return ontology.getClassSpecifications(_class.id);
         })
       )
     );
-
     template.attr({
       "resource": individual.id,
       "typeof": individual["rdf:type"].map(function (item) { return item.id; }).join(" ")

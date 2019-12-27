@@ -166,11 +166,11 @@ fn get_ticket_trusted(tr_ticket_id: Option<&str>, login: Option<&str>, systicket
                             continue;
                         }
 
-                        create_new_ticket(login, &user_id, DEFAULT_DURATION, &mut tr_ticket, &mut module.storage);
+                        let mut ticket = Ticket::default();
+                        create_new_ticket(login, &user_id, DEFAULT_DURATION, &mut ticket, &mut module.storage);
+                        info!("trusted authenticate, result ticket={:?}", ticket);
 
-                        info!("trusted authenticate, result ticket={:?}", tr_ticket);
-
-                        return tr_ticket;
+                        return ticket;
                     }
                 }
             }
@@ -206,14 +206,7 @@ fn authenticate(
     pass_lifetime: i64,
     suspicious: &mut HashMap<String, (i32, i64)>,
 ) -> Ticket {
-    let mut ticket = Ticket {
-        id: String::default(),
-        user_uri: String::default(),
-        user_login: String::default(),
-        result: ResultCode::AuthenticationFailed,
-        start_time: 0,
-        end_time: 0,
-    };
+    let mut ticket = Ticket::default();
 
     let login = login.unwrap_or_default();
     let password = password.unwrap_or_default();

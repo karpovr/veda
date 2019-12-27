@@ -52,7 +52,7 @@ impl Consumer {
 
                 if let Some(line) = BufReader::new(&lock).lines().next() {
                     if let Ok(ll) = line {
-                        if let Some(pid_owner) = scan_fmt!(&ll.to_owned(), "{}", i32) {
+                        if let Some(pid_owner) = scan_fmt!(&ll, "{}", i32) {
                             let mut system = sysinfo::System::new();
                             system.refresh_all();
                             let processes = system.get_process_list();
@@ -157,7 +157,7 @@ impl Consumer {
 
         if let Some(line) = BufReader::new(&self.ff_info_pop_w).lines().next() {
             if let Ok(ll) = line {
-                let (queue_name, consumer_name, position, count_popped, id) = scan_fmt!(&ll.to_owned(), "{};{};{};{};{}", String, String, u64, u32, u32);
+                let (queue_name, consumer_name, position, count_popped, id) = scan_fmt!(&ll, "{};{};{};{};{}", String, String, u64, u32, u32);
 
                 if let Some(q) = queue_name {
                     if q != self.queue.name {
