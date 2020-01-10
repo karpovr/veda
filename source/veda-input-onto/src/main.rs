@@ -23,7 +23,6 @@ use std::path::{Path, PathBuf};
 use std::{time as std_time, thread};
 use std::{fs, io};
 use v_api::*;
-use v_api::app::ResultCode;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::*;

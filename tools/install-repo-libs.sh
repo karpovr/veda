@@ -35,3 +35,33 @@ done
 
 sudo apt-get install build-essential
 
+### TARANTOOL SERVER ###
+
+if [ "$1" = tarantool ] || [ "$1" = force ] || ! tarantool -V | grep $TARANTOOL_VER ; then
+echo "--- INSTALL TARANTOOL ---"
+curl http://download.tarantool.org/tarantool/2x/gpgkey | sudo apt-key add -
+release=`lsb_release -c -s`
+
+# install https download transport for APT
+sudo apt-get -y install apt-transport-https
+
+# append two lines to a list of source repositories
+sudo rm -f /etc/apt/sources.list.d/*tarantool*.list
+sudo tee /etc/apt/sources.list.d/tarantool_1_0.list <<- EOF
+deb http://download.tarantool.org/tarantool/2x/ubuntu/ $release main
+deb-src http://download.tarantool.org/tarantool/2x/ubuntu/ $release main
+EOF
+
+# install
+sudo apt-get update
+sudo apt-get remove tarantool
+sudo apt-get remove tarantool-dev
+sudo apt-get -y install tarantool
+sudo apt-get -y install tarantool-dev
+
+tarantool -V
+
+else
+    echo "--- TARANTOOL INSTALLED ---"
+fi
+

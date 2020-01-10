@@ -8,7 +8,7 @@ use lettre_email::mime::IMAGE_JPEG;
 use lettre_email::{Email, Mailbox};
 use std::collections::HashMap;
 use std::path::Path;
-use v_api::app::ResultCode;
+use v_api::ResultCode;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::load_onto;
