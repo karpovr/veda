@@ -12,6 +12,8 @@ ft-query
 
 fanout-email
 
+search-index
+
 fanout-sql
 
 #fanout-sql-lp

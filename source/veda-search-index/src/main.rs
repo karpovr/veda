@@ -17,7 +17,7 @@ use v_onto::datatype::DataType;
 use v_onto::datatype::Lang;
 use v_queue::consumer::*;
 
-pub struct Context{
+pub struct Context {
     onto: Onto,
     pool: mysql::Pool,
     tables: HashMap<String, bool>,
@@ -25,6 +25,10 @@ pub struct Context{
 
 fn main() {
     init_log();
+
+    if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
+        wait_module("fulltext_indexer", wait_load_ontology());
+    }
 
     let mut queue_consumer = Consumer::new("./data/queue", "search_index", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new("./data", "search_index", true);
@@ -34,14 +38,14 @@ fn main() {
     }
     let mut module = Module::default();
 
-    let pool = match connect_to_mysql(&mut module, 5, 20000) {
+    let mut pool= match connect_to_manticore(&mut module, 5, 20000) {
         Err(_) => process::exit(101),
         Ok(pool) => pool,
     };
 
-    let tables = match read_tables(&pool) {
-        Err(_) => process::exit(101),
+    let tables = match read_tables(&mut pool) {
         Ok(tables) => tables,
+        Err(e) => process::exit(101)
     };
 
     let mut ctx = Context {
@@ -82,13 +86,13 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
-    if let Some(classes) = new_state.get_literals("rdf:type") {
+    /*if let Some(classes) = new_state.get_literals("rdf:type") {
         for class in &classes {
             if ctx.onto.is_some_entered(&class, &["v-s:Exportable"]) {
                 return export(&mut new_state, &mut prev_state, &classes, is_new, ctx);
             }
         }
-    }
+    }*/
     Ok(())
 }
 
@@ -106,9 +110,9 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
 
     let mut conn = match ctx.pool.get_conn() {
         Err(e) => {
-            error!("Get connection failed. {:?}", e);
+            error!("Get connection from pool failed. {:?}", e);
             return Err(PrepareError::Recoverable);
-        },
+        }
         Ok(conn) => conn,
     };
 
@@ -122,14 +126,30 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
 
     let mut tr_error = false;
 
-    // Remove previous item from DB
+    // Remove previous item from class table
+    if !is_new {
+        prev_state.get_literals("rdf:type").unwrap().iter().for_each(|class| {
+            // Check or create table before delete
+            if let Err(e) = check_create_class_table(&mut ctx.tables, class, &mut transaction) {
+                error!("Unable to create table for class: `{}`, export aborted for individual: `{}`. {}", class, uri, e);
+                tr_error = true;
+            }
+            let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", class, uri);
+            if let Err(e) = transaction.query(query) {
+                error!("Delete individual `{}` from class table `{}` failed. {:?}", uri, class, e);
+                tr_error = true;
+            }
+        });
+    }
+
+    // Remove previous item from property table
     if !is_new {
         prev_state.get_predicates().iter().for_each(|predicate| {
             prev_state.get_resources(&predicate).unwrap().iter().for_each(|resource| {
                 if resource.order == 0 {
                     // Check or create table before delete
-                    if let Err(_) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
+                    if let Err(e) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
+                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`. {}", predicate, uri, e);
                         tr_error = true;
                     }
                     let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", predicate, uri);
@@ -149,12 +169,21 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
     let deleted = match is_deleted { true => "1", _ => "NULL" };
 
     classes.iter().for_each(|class| {
+        // Insert to class table
+        let query = format!("INSERT INTO `{}` (doc_id, created) VALUES ('{}', '{}')", class, uri, created);
+        //info!("Query: {}", query);
+        if let Err(e) = transaction.query(query) {
+            error!("Insert individual `{}` to class table `{}` failed. {:?}", uri, class, e);
+            tr_error = true;
+        }
+
+        // Insert to property table
         new_state.get_predicates().iter().for_each(|predicate| {
             new_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
                 // Check or create table before insert
                 if resource.order == 0 {
-                    if let Err(_) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
+                    if let Err(e) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
+                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`. {}", predicate, uri, e);
                         tr_error = true;
                     }
                 }
@@ -204,7 +233,29 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
     };
 }
 
-fn check_create_property_table(tables: &mut HashMap<String, bool>, property: &str, resource: &Resource, transaction: &mut mysql::Transaction) -> Result<(), &'static str> {
+fn check_create_class_table(tables: &mut HashMap<String, bool>, class: &str, transaction: &mut mysql::Transaction) -> Result<(), mysql::Error> {
+    if let Some(true) = tables.get(class) {
+        return Ok(());
+    }
+    let query = format!(
+        "CREATE TABLE `{}` ( \
+            `ID` BIGINT NOT NULL AUTO_INCREMENT, \
+            `doc_id` CHAR(128) NOT NULL, \
+            `created` DATETIME NULL, \
+             PRIMARY KEY (`ID`) \
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
+        class
+    );
+    return match transaction.query(query) {
+        Ok(_) => {
+            tables.insert(class.to_owned(), true);
+            Ok(())
+        },
+        Err(e) => Err(e),
+    };
+}
+
+fn check_create_property_table(tables: &mut HashMap<String, bool>, property: &str, resource: &Resource, transaction: &mut mysql::Transaction) -> Result<(), mysql::Error> {
     if let Some(true) = tables.get(property) {
         return Ok(());
     }
@@ -241,53 +292,60 @@ fn check_create_property_table(tables: &mut HashMap<String, bool>, property: &st
             tables.insert(property.to_owned(), true);
             Ok(())
         },
-        Err(_) => Err("Unable to create table"),
+        Err(e) => Err(e),
     };
 }
 
-fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str> {
+fn read_tables(pool: &mut mysql::Pool) -> Result<HashMap<String, bool>, mysql::Error> {
     let mut tables: HashMap<String, bool> = HashMap::new();
-    if let Ok(result) = pool.prep_exec("SELECT TABLE_NAME FROM information_schema.tables;", ()) {
-        result.for_each(|row| {
-            if let Some(name) = row.unwrap().get(0) {
-                tables.insert(name, true);
-            }
-        });
-        return Ok(tables);
-    }
-    Err("Read existing tables error")
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(e) => {
+            error!("Get connection from pool failed. {:?}", e);
+            return Err(e);
+        }
+    };
+    return match conn.query("SHOW TABLES") {
+        Ok(result) => {
+            result.for_each(|row| {
+                if let Some(name) = row.unwrap().get(0) {
+                    tables.insert(name, true);
+                }
+            });
+            info!("Tables: {:#?}", tables);
+            Ok(tables)
+        },
+        Err(e) => {
+            error!("Read tables failed. {}", e);
+            Err(e)
+        }
+    };
 }
 
-fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mysql::Pool, &'static str> {
+fn connect_to_manticore(module: &mut Module, tries: i64, timeout: u64) -> Result<mysql::Pool, &'static str> {
     if let Some(node) = module.get_individual("cfg:standart_node", &mut Individual::default()) {
         if let Some(v) = node.get_literals("v-s:push_individual_by_event") {
             for el in v {
                 let mut connection = Individual::default();
                 if module.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:deleted", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
-                        if transport == "mysql" {
-                            info!("Found configuration to connect to MySQL: {}", connection.get_id());
-                            let host = connection.get_first_literal("v-s:host").unwrap_or_default();
-                            let port = connection.get_first_integer("v-s:port").unwrap_or(3306) as u16;
-                            let login = connection.get_first_literal("v-s:login").unwrap();
-                            let pass = connection.get_first_literal("v-s:password").unwrap();
-                            let db = connection.get_first_literal("v-s:sql_database").unwrap();
-                            info!("Trying to connect to mysql, host: {}, port: {}, login: {}, pass: {}, db: {}", host, port, login, pass, db);
+                        if transport == "manticore" {
+                            info!("Found configuration to connect to Manticore: {}", connection.get_id());
+                            let host = connection.get_first_literal("v-s:host").unwrap_or(String::from("127.0.0.1"));
+                            let port = connection.get_first_integer("v-s:port").unwrap_or(9306) as u16;
+                            info!("Trying to connect to Manticore, host: {}, port: {}", host, port);
                             let mut builder = mysql::OptsBuilder::new();
                             builder.ip_or_hostname(Some(host))
-                                .tcp_port(port)
-                                .user(Some(login))
-                                .pass(Some(pass))
-                                .db_name(Some(db));
+                                .tcp_port(port);
                             let opts: mysql::Opts = builder.into();
                             match mysql::Pool::new(opts.clone()) {
                                 Ok(pool) => {
-                                    info!("Connection to MySQL established successfully");
+                                    info!("Connection to Manticore established successfully");
                                     return Ok(pool);
                                 },
                                 Err(e) => {
-                                    error!("Connection to MySQL failed. {:?}", e);
-                                    return Err("Connection to MySQL failed");
+                                    error!("Connection to Manticore failed. {:?}", e);
+                                    return Err("Connection to Manticore failed");
                                 },
                             }
                         }
@@ -300,9 +358,9 @@ fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mys
         let tries = tries - 1;
         thread::sleep(time::Duration::from_millis(timeout));
         error!("Configuration not found yet, retry.");
-        connect_to_mysql(module, tries, timeout)
+        connect_to_manticore(module, tries, timeout)
     } else {
-        error!("Configuration to connect to mysql not found");
-        Err("Configuration to connect to mysql not found")
+        error!("Configuration to connect to Manticore not found");
+        Err("Configuration to connect to Manticore not found")
     }
 }
