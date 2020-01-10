@@ -14,6 +14,7 @@ use std::process;
 use std::time::Duration;
 use std::{thread, time};
 use uuid::Uuid;
+use v_api::app::ResultCode;
 use v_api::*;
 use v_onto::datatype::Lang;
 use v_onto::individual::*;

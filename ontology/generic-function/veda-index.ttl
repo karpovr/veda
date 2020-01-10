@@ -70,13 +70,13 @@ vdi:indexed_to
 
 #---------------------------------------------
 
-vdi:index_00
-  rdf:type vdi:ClassIndex ;
-  vdi:forClass v-s:Membership ;
-  vdi:forClass v-s:PermissionStatement ;
-  rdfs:label "az indexed" ;
-  vdi:indexed_to "az" ;
-.
+#vdi:index_00
+#  rdf:type vdi:ClassIndex ;
+#  vdi:forClass v-s:Membership ;
+#  vdi:forClass v-s:PermissionStatement ;
+#  rdfs:label "az indexed" ;
+#  vdi:indexed_to "az" ;
+#.
 
 vdi:index_01
   rdf:type vdi:ClassIndex ;
@@ -94,6 +94,8 @@ vdi:index_02
   vdi:forClass v-wf:WorkOrder ;
   vdi:forClass v-wf:WorkItem ;
   vdi:forClass v-wf:Variable ;
+  vdi:forClass v-s:Membership ;
+  vdi:forClass v-s:PermissionStatement ;
   rdfs:label "not indexed" ;
   vdi:indexed_to "not-indexed" ;
 .
