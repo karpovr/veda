@@ -14,7 +14,6 @@ use std::process;
 use std::time::Duration;
 use std::{thread, time};
 use uuid::Uuid;
-use v_api::app::ResultCode;
 use v_api::*;
 use v_onto::datatype::Lang;
 use v_onto::individual::*;
@@ -392,52 +391,24 @@ pub fn create_sys_ticket(storage: &mut VStorage) -> Ticket {
     ticket
 }
 
-pub fn get_info_of_module(module_name: &str) -> Option<(i64, i64)> {
-    let module_info = ModuleInfo::new("./data", module_name, false);
-    if module_info.is_err() {
-        error!("fail open info of [{}], err={:?}", module_name, module_info.err());
-        return None;
-    }
-
-    let mut info = module_info.unwrap();
-    info.read_info()
-}
-
-pub fn wait_load_ontology() -> i64 {
-    wait_module("input-onto", 1)
-}
-
-pub fn wait_module(module_name: &str, wait_op_id: i64) -> i64 {
-    if wait_op_id < 0 {
-        error!("wait module [{}] to complete op_id={}", module_name, wait_op_id);
-        return -1;
-    }
-
-    info!("wait module [{}] to complete op_id={}", module_name, wait_op_id);
+pub fn wait_load_ontology() {
     loop {
-        let module_info = ModuleInfo::new("./data", module_name, false);
-        if module_info.is_err() {
-            error!("fail open info of [{}], err={:?}", module_name, module_info.err());
-            thread::sleep(time::Duration::from_millis(300));
+        let input_onto_info = ModuleInfo::new("./data", "input-onto", true);
+        if input_onto_info.is_err() {
+            error!("fail open info of input-onto, err={:?}", input_onto_info.err());
             continue;
         }
 
-        let mut info = module_info.unwrap();
+        let mut input_onto_info = input_onto_info.unwrap();
         loop {
-            if let Some((_, committed)) = info.read_info() {
-                if committed >= wait_op_id {
-                    return committed;
-                }
-                info!("wait module [{}] to complete op_id={}, found commited_op_id={}", module_name, wait_op_id, committed);
-            } else {
-                error!("fail read info for module [{}]", module_name);
-                //break;
+            let (_, committed) = input_onto_info.read_info().unwrap_or((0, 0));
+            if committed > 0 {
+                break;
             }
-            thread::sleep(time::Duration::from_millis(300));
+            info!("wait for completed load ontology...");
+            thread::sleep(time::Duration::from_millis(100));
         }
 
-        //break;
+        break;
     }
-
-    //-1
 }

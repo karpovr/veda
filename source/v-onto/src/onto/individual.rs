@@ -284,10 +284,13 @@ impl Individual {
             match self.obj.resources.get(predicate) {
                 Some(v) => {
                     for el in v {
-                        if let Value::Bool(v) = &el.value {
-                            if bool::eq(&value, v) {
-                                return true;
+                        match &el.value {
+                            Value::Bool(v) => {
+                                if bool::eq(&value, v) {
+                                    return true;
+                                }
                             }
+                            _ => {}
                         }
                     }
                 }

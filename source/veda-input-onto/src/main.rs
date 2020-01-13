@@ -23,7 +23,6 @@ use std::path::{Path, PathBuf};
 use std::{time as std_time, thread};
 use std::{fs, io};
 use v_api::*;
-use v_api::app::ResultCode;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::*;
@@ -48,13 +47,6 @@ fn main() -> NotifyResult<()> {
         .filter(None, LevelFilter::Info)
         .init();
 
-    let module_info = ModuleInfo::new("./data", "input-onto", true);
-    if module_info.is_err() {
-        error!("{:?}", module_info.err());
-        return Ok(());
-    }
-    let mut module_info = module_info.unwrap();
-
     let mut module = Module::default();
 
     while module.api.connect() == false {
@@ -68,6 +60,18 @@ fn main() -> NotifyResult<()> {
     info!("load onto start");
     load_onto(&mut module.fts, &mut module.storage, &mut onto);
     info!("load onto end");
+
+    let module_info = ModuleInfo::new("./data", "input-onto", true);
+    if module_info.is_err() {
+        error!("{:?}", module_info.err());
+        return Ok(());
+    }
+    let mut module_info = module_info.unwrap();
+    if module_info.read_info().is_none() {
+        if let Err(e) = module_info.put_info(0, 0) {
+            info!("fail write module info, err={}", e);
+        }
+    }
 
     info!("start prepare files");
 
@@ -309,8 +313,6 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
                 if is_need_store {
                     let res = module.api.update(systicket, IndvOp::Put, &indv_file);
-
-                    // thread::sleep(std::time::Duration::from_millis(100));
 
                     if res.result != ResultCode::Ok {
                         error!("fail update, {}, file={}, uri={}, result_code={:?}", load_priority, path, indv_file.get_id(), res.result);

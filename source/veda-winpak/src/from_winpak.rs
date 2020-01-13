@@ -10,7 +10,6 @@ use v_api::*;
 use v_module::module::*;
 use v_onto::datatype::Lang;
 use v_onto::individual::*;
-use v_api::app::ResultCode;
 
 pub fn sync_data_from_winpak(module: &mut Module, systicket: &str, conn_str: &str, indv: &mut Individual) -> ResultCode {
     let card_number = indv.get_first_literal(CARD_NUMBER_FIELD_NAME);

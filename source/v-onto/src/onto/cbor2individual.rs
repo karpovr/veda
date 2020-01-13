@@ -27,7 +27,7 @@ pub fn parse_cbor(raw: &mut RawObj) -> Result<String, i8> {
     let input = Cursor::new(raw.data.to_owned());
 
     let mut config = Config::default();
-    if raw.data.len() > 200_000 {
+    if raw.data.len() > 200000 {
         config.max_len_array = 10000;
     }
 
@@ -65,7 +65,7 @@ pub fn parse_cbor_to_predicate(expect_predicate: &str, iraw: &mut Individual) ->
 
     let mut config = Config::default();
     let len = iraw.raw.data.len();
-    if len > 200_000 {
+    if len > 200000 {
         config.max_len_array = 10000;
     }
     let mut d = Decoder::new(config, cur);

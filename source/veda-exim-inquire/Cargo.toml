@@ -9,7 +9,6 @@ name = "veda-exim-inquire"
 path = "src/main.rs"
 
 [dependencies]
-nng = "0.5.1"
 chrono = "0.4"
 serde_json = "1.0"
 env_logger = "0.6"

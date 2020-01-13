@@ -12,8 +12,7 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use uuid::*;
-use v_api::*;
-use v_api::app::ResultCode;
+use v_api::{IndvOp, ResultCode};
 use v_authorization::Trace;
 use v_az_lmdb::_authorize;
 use v_module::module::{create_new_ticket, create_sys_ticket, get_ticket_from_db, init_log, Module};
@@ -167,11 +166,11 @@ fn get_ticket_trusted(tr_ticket_id: Option<&str>, login: Option<&str>, systicket
                             continue;
                         }
 
-                        let mut ticket = Ticket::default();
-                        create_new_ticket(login, &user_id, DEFAULT_DURATION, &mut ticket, &mut module.storage);
-                        info!("trusted authenticate, result ticket={:?}", ticket);
+                        create_new_ticket(login, &user_id, DEFAULT_DURATION, &mut tr_ticket, &mut module.storage);
 
-                        return ticket;
+                        info!("trusted authenticate, result ticket={:?}", tr_ticket);
+
+                        return tr_ticket;
                     }
                 }
             }
@@ -207,7 +206,14 @@ fn authenticate(
     pass_lifetime: i64,
     suspicious: &mut HashMap<String, (i32, i64)>,
 ) -> Ticket {
-    let mut ticket = Ticket::default();
+    let mut ticket = Ticket {
+        id: String::default(),
+        user_uri: String::default(),
+        user_login: String::default(),
+        result: ResultCode::AuthenticationFailed,
+        start_time: 0,
+        end_time: 0,
+    };
 
     let login = login.unwrap_or_default();
     let password = password.unwrap_or_default();

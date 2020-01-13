@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use v_api::app::ResultCode;
+use v_api::ResultCode;
 use v_onto::individual::Individual;
 
 #[derive(Debug, Clone)]

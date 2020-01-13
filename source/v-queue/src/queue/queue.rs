@@ -202,9 +202,9 @@ impl Queue {
         let ipp = self.base_path.to_owned() + "/" + &self.name + "-" + &part_id.to_string() + "/" + &self.name + "_info_push";
 
         let ffiq = if self.mode == Mode::ReadWrite {
-            OpenOptions::new().read(true).write(true).create(true).open(ipp)
+            OpenOptions::new().read(true).write(true).create(true).open(ipp.to_owned())
         } else {
-            OpenOptions::new().read(true).open(ipp)
+            OpenOptions::new().read(true).open(ipp.to_owned())
         };
 
         if let Ok(ff) = ffiq {
@@ -229,9 +229,9 @@ impl Queue {
 
         let qpp = self.base_path.to_owned() + "/" + &self.name + "-" + &part_id.to_string() + "/" + &self.name + "_queue";
         let ffq = if self.mode == Mode::ReadWrite {
-            OpenOptions::new().read(true).write(true).create(true).open(qpp)
+            OpenOptions::new().read(true).write(true).create(true).open(qpp.to_owned())
         } else {
-            OpenOptions::new().read(true).open(qpp)
+            OpenOptions::new().read(true).open(qpp.to_owned())
         };
 
         if let Ok(f) = ffq {
@@ -261,7 +261,7 @@ impl Queue {
         if let Some(line) = BufReader::new(&self.ff_info_queue).lines().next() {
             res = true;
             if let Ok(ll) = line {
-                let (queue_name, _id, _crc) = scan_fmt!(&ll, "{};{};{}", String, u32, String);
+                let (queue_name, _id, _crc) = scan_fmt!(&ll.to_owned(), "{};{};{}", String, u32, String);
 
                 match queue_name {
                     Some(q) => {
@@ -309,7 +309,7 @@ impl Queue {
 
         if let Some(line) = BufReader::new(&self.ff_info_push).lines().next() {
             if let Ok(ll) = line {
-                let (queue_name, position, pushed, _crc) = scan_fmt!(&ll, "{};{};{};{}", String, u64, u32, String);
+                let (queue_name, position, pushed, _crc) = scan_fmt!(&ll.to_owned(), "{};{};{};{}", String, u64, u32, String);
 
                 match queue_name {
                     Some(q) => {

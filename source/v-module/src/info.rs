@@ -31,36 +31,15 @@ impl ModuleInfo {
 
         let file_name_info = info_path + info_name + "_info";
 
-        let ff = if is_writer {
-            match OpenOptions::new().read(true).write(is_writer).create(true).open(file_name_info) {
-                Ok(ff) => Ok(ff),
-                Err(e) => Err(e),
-            }
-        } else {
-            match OpenOptions::new().read(true).open(file_name_info) {
-                Ok(ff) => Ok(ff),
-                Err(e) => Err(e),
-            }
-        };
-
-        if let Ok(f) = ff {
-            let mut mi = ModuleInfo {
+        match OpenOptions::new().read(true).write(is_writer).create(true).open(file_name_info) {
+            Ok(ff) => Ok(ModuleInfo {
                 _base_path: base_path.to_owned(),
                 name: info_name.to_owned(),
-                ff_info: f,
+                ff_info: ff,
                 is_ready: true,
                 is_writer,
-            };
-
-            if mi.read_info().is_none() {
-                if let Err(e) = mi.put_info(0, 0) {
-                    info!("fail write module info, err={}", e);
-                }
-            }
-
-            return Ok(mi);
-        } else {
-            Err(ff.err().unwrap())
+            }),
+            Err(e) => Err(e),
         }
     }
 
@@ -104,7 +83,7 @@ impl ModuleInfo {
         if let Some(line) = BufReader::new(&self.ff_info).lines().next() {
             res = true;
             if let Ok(ll) = line {
-                let (module_name, _op_id, _committed_op_id, _crc) = scan_fmt!(&ll, "{};{};{};{}", String, i64, i64, String);
+                let (module_name, _op_id, _committed_op_id, _crc) = scan_fmt!(&ll.to_owned(), "{};{};{};{}", String, i64, i64, String);
 
                 match module_name {
                     Some(q) => {

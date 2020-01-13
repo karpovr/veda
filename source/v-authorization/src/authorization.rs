@@ -625,7 +625,7 @@ fn get_path(mopc: &mut HashMap<String, String>, el: String) -> String {
     if mopc.contains_key(&el) {
         let parent = mopc[&el].clone();
         mopc.remove(&el);
-        let prev = get_path(mopc, parent);
+        let prev = get_path(mopc, parent.to_string());
 
         prev + "->" + &el
     } else {
