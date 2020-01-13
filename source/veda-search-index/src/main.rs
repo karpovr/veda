@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate log;
-extern crate mysql;
+
+use clickhouse_rs::{Pool, errors::Error, ClientHandle};
+use futures::executor::block_on;
+use tokio;
 
 use std::collections::HashMap;
 use std::{thread, time, process};
@@ -19,11 +22,11 @@ use v_queue::consumer::*;
 
 pub struct Context {
     onto: Onto,
-    pool: mysql::Pool,
-    tables: HashMap<String, bool>,
+    pool: Pool,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() ->  Result<(), Error> {
     init_log();
 
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
@@ -38,20 +41,16 @@ fn main() {
     }
     let mut module = Module::default();
 
-    let mut pool= match connect_to_manticore(&mut module, 5, 20000) {
+    let mut pool = match connect_to_clickhouse(&mut module) {
         Err(_) => process::exit(101),
         Ok(pool) => pool,
     };
 
-    let tables = match read_tables(&mut pool) {
-        Ok(tables) => tables,
-        Err(e) => process::exit(101)
-    };
+    init_clickhouse(&mut pool).await?;
 
     let mut ctx = Context {
         onto: Onto::default(),
         pool,
-        tables,
     };
 
     load_onto(&mut module.fts, &mut module.storage, &mut ctx.onto);
@@ -64,6 +63,7 @@ fn main() {
         &mut (process as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual) -> Result<(), PrepareError>),
         &mut (void as fn(&mut Module, &mut Context)),
     );
+    Ok(())
 }
 
 fn void(_module: &mut Module, _ctx: &mut Context) {}
@@ -86,20 +86,18 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
-    /*if let Some(classes) = new_state.get_literals("rdf:type") {
-        for class in &classes {
-            if ctx.onto.is_some_entered(&class, &["v-s:Exportable"]) {
-                return export(&mut new_state, &mut prev_state, &classes, is_new, ctx);
-            }
+    return match block_on(export(&mut new_state, &mut prev_state, is_new, &ctx)) {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            error!("Export error: {}", e);
+            Err(PrepareError::Recoverable)
         }
-    }*/
-    Ok(())
+    };
 }
 
-fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec<String>, is_new: bool, ctx: &mut Context) -> Result<(), PrepareError> {
-    let uri = new_state.get_id().to_string();
-
-    let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
+async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new: bool, ctx: &Context) -> Result<(), Error> {
+    let uri = new_state.get_id().to_owned();
+    info!("Export individual: {}", uri);
 
     let actual_version = new_state.get_first_literal("v-s:actual_version").unwrap_or_default();
 
@@ -108,259 +106,154 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         return Ok(());
     }
 
-    let mut conn = match ctx.pool.get_conn() {
-        Err(e) => {
-            error!("Get connection from pool failed. {:?}", e);
-            return Err(PrepareError::Recoverable);
-        }
-        Ok(conn) => conn,
-    };
-
-    let mut transaction = match conn.start_transaction(true, Some(mysql::IsolationLevel::ReadCommitted), None) {
-        Err(e) => {
-            error!("Transaction start failed. {:?}", e);
-            return Err(PrepareError::Recoverable);
-        },
-        Ok(transaction) => transaction,
-    };
-
-    let mut tr_error = false;
-
-    // Remove previous item from class table
+    // Remove previous state from individuals table
     if !is_new {
-        prev_state.get_literals("rdf:type").unwrap().iter().for_each(|class| {
-            // Check or create table before delete
-            if let Err(e) = check_create_class_table(&mut ctx.tables, class, &mut transaction) {
-                error!("Unable to create table for class: `{}`, export aborted for individual: `{}`. {}", class, uri, e);
-                tr_error = true;
-            }
-            let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", class, uri);
-            if let Err(e) = transaction.query(query) {
-                error!("Delete individual `{}` from class table `{}` failed. {:?}", uri, class, e);
-                tr_error = true;
-            }
-        });
+        delete_individual(&uri, ctx).await?
     }
 
-    // Remove previous item from property table
-    if !is_new {
-        prev_state.get_predicates().iter().for_each(|predicate| {
-            prev_state.get_resources(&predicate).unwrap().iter().for_each(|resource| {
-                if resource.order == 0 {
-                    // Check or create table before delete
-                    if let Err(e) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`. {}", predicate, uri, e);
-                        tr_error = true;
-                    }
-                    let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", predicate, uri);
-                    if let Err(e) = transaction.query(query) {
-                        error!("Delete individual `{}` from property table `{}` failed. {:?}", uri, predicate, e);
-                        tr_error = true;
-                    }
+    let mut predicates: Vec<String> = vec![String::from("`@`")];
+
+    let mut values: Vec<String> = vec![format!("'{}'", uri)];
+
+    let mut export_error= true;
+
+    let mut predicate_values: Vec<String>;
+
+    for predicate in new_state.get_predicates() {
+
+        predicate_values = vec![];
+
+        predicates.push(format!("`{}`", predicate));
+
+        for resource in new_state.get_resources(&predicate).unwrap_or(vec![]) {
+            /*if predicate == "v-s:updateCounter" {
+                if let Value::Int(counter) = &resource.value {
+                    predicate_values.push(format!("{}", counter));
+                } else {
+                    predicate_values.push(String::from("0"));
                 }
-            });
-        });
-    }
-
-    let created = match new_state.get_first_datetime("v-s:created") {
-        Some(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(timestamp, 0).to_string()),
-        None => String::from("NULL"),
-    };
-    let deleted = match is_deleted { true => "1", _ => "NULL" };
-
-    classes.iter().for_each(|class| {
-        // Insert to class table
-        let query = format!("INSERT INTO `{}` (doc_id, created) VALUES ('{}', '{}')", class, uri, created);
-        //info!("Query: {}", query);
-        if let Err(e) = transaction.query(query) {
-            error!("Insert individual `{}` to class table `{}` failed. {:?}", uri, class, e);
-            tr_error = true;
-        }
-
-        // Insert to property table
-        new_state.get_predicates().iter().for_each(|predicate| {
-            new_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
-                // Check or create table before insert
+                break;
+            } else {*/
                 if resource.order == 0 {
-                    if let Err(e) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`. {}", predicate, uri, e);
-                        tr_error = true;
-                    }
+                    create_property_column(&predicate, &resource, &ctx).await?
                 }
-                let uri = new_state.get_id();
                 let value = match &resource.value {
                     Value::Bool(true) => String::from("1"),
                     Value::Bool(_) => String::from("0"),
                     Value::Int(int_value) => int_value.to_string(),
-                    Value::Str(str_value, _lang) => format!("'{}'", str_value.replace("'", "\\'")),
+                    Value::Str(str_value, _lang) => {
+                        let lang = match &resource.get_lang() {
+                            Lang::NONE => String::from(""),
+                            lang => format!("@{}", lang.to_string()),
+                        };
+                        format!("'{}{}'", str_value.replace("'", "\\'"), lang)
+                    },
                     Value::Uri(uri_value) => format!("'{}'", uri_value.replace("'", "\\'")),
                     Value::Num(_m, _e) => resource.get_float().to_string(),
                     Value::Datetime(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(*timestamp, 0)),
                     _ => String::from("NULL"),
                 };
-                let lang = match &resource.get_lang() {
-                    Lang::NONE => String::from("NULL"),
-                    lang=> format!("'{}'", lang.to_string()),
-                };
-                let query = format!("INSERT INTO `{}` (doc_id, doc_type, created, value, lang, deleted) VALUES ('{}', '{}', {}, {}, {}, {})",
-                                    predicate, uri, class, created, value, lang, deleted
-                );
-                //info!("Query: {}", query);
-                if let Err(e) = transaction.query(query) {
-                    error!("Insert individual `{}` to property table `{}` failed. {:?}", uri, predicate, e);
-                    tr_error = true;
-                }
-            });
-        });
-    });
-
-    if tr_error {
-        match transaction.rollback() {
-            Ok(_) => info!("Transaction rolled back for `{}`", uri),
-            Err(e) => error!("Transaction rolled back failed for `{}`. {:?}", uri, e),
+                predicate_values.push(value);
+            /*}*/
         }
-        return Err(PrepareError::Fatal);
+
+        let predicate_values_joined = predicate_values.join(", ");
+
+        values.push(format!("[{}]", predicate_values_joined));
     }
-    return match transaction.commit() {
-        Ok(_) => {
-            info!("`{}` Ok", uri);
-            Ok(())
-        },
-        Err(e) => {
-            error!("Transaction commit failed for `{}`. {:?}", uri, e);
-            Err(PrepareError::Fatal)
-        },
-    };
+
+    let predicates = predicates.join(", ");
+
+    let values = values.join(", ");
+
+    let query = format!("INSERT INTO veda.individuals ({}) VALUES ({})", predicates, values);
+
+    let mut client = ctx.pool.get_handle().await?;
+    client.execute(query).await?;
+
+    info!("Export done: {}", new_state.get_id());
+
+    Ok(())
 }
 
-fn check_create_class_table(tables: &mut HashMap<String, bool>, class: &str, transaction: &mut mysql::Transaction) -> Result<(), mysql::Error> {
-    if let Some(true) = tables.get(class) {
+async fn create_property_column(property: &str, resource: &Resource, ctx: &Context) -> Result<(), Error> {
+    if property == "rdf:type" || property == "v-s:created" {
         return Ok(());
     }
-    let query = format!(
-        "CREATE TABLE `{}` ( \
-            `ID` BIGINT NOT NULL AUTO_INCREMENT, \
-            `doc_id` CHAR(128) NOT NULL, \
-            `created` DATETIME NULL, \
-             PRIMARY KEY (`ID`) \
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
-        class
-    );
-    return match transaction.query(query) {
-        Ok(_) => {
-            tables.insert(class.to_owned(), true);
-            Ok(())
-        },
-        Err(e) => Err(e),
-    };
-}
-
-fn check_create_property_table(tables: &mut HashMap<String, bool>, property: &str, resource: &Resource, transaction: &mut mysql::Transaction) -> Result<(), mysql::Error> {
-    if let Some(true) = tables.get(property) {
-        return Ok(());
-    }
-    let mut sql_type = "";
-    let mut sql_value_index = ", INDEX civ(`value`)";
+    let mut client = ctx.pool.get_handle().await?;
+    let mut column_type= "";
     match &resource.rtype {
-        DataType::Boolean => sql_type = "BOOL",
-        DataType::Datetime => sql_type = "DATETIME",
-        DataType::Decimal => sql_type = "DECIMAL (14,4)",
-        DataType::Integer => sql_type = "INTEGER",
-        DataType::String => {
-            sql_type = "TEXT";
-            sql_value_index = "";
-        },
-        DataType::Uri => sql_type = "CHAR(128)",
-        _unsupported => error!("Unsupported property value type: {:#?}", _unsupported),
+        DataType::Boolean => column_type = "UInt8",
+        DataType::Datetime => column_type = "DateTime",
+        DataType::Decimal => column_type = "Decimal (14,4)",
+        DataType::Integer => column_type = "Int64",
+        DataType::String => column_type = "String",
+        DataType::Uri => column_type = "String",
+        _unsupported => error!("Unsupported property value type: {:#?}", _unsupported)
     }
     let query = format!(
-        "CREATE TABLE `{}` ( \
-            `ID` BIGINT NOT NULL AUTO_INCREMENT, \
-            `doc_id` CHAR(128) NOT NULL, \
-            `doc_type` CHAR(128) NOT NULL, \
-            `created` DATETIME NULL, \
-            `value` {} NULL, \
-            `lang` CHAR(2) NULL, \
-            `deleted` BOOL NULL, \
-             PRIMARY KEY (`ID`), \
-             INDEX c1(`doc_id`), INDEX c2(`doc_type`), INDEX c3 (`created`), INDEX c4(`lang`) {} \
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
-        property, sql_type, sql_value_index
+        "ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{}` Array({})",
+        property, column_type
     );
-    return match transaction.query(query) {
-        Ok(_) => {
-            tables.insert(property.to_owned(), true);
-            Ok(())
-        },
-        Err(e) => Err(e),
-    };
+    client.execute(query).await?;
+    Ok(())
 }
 
-fn read_tables(pool: &mut mysql::Pool) -> Result<HashMap<String, bool>, mysql::Error> {
-    let mut tables: HashMap<String, bool> = HashMap::new();
-    let mut conn = match pool.get_conn() {
-        Ok(conn) => conn,
-        Err(e) => {
-            error!("Get connection from pool failed. {:?}", e);
-            return Err(e);
-        }
-    };
-    return match conn.query("SHOW TABLES") {
-        Ok(result) => {
-            result.for_each(|row| {
-                if let Some(name) = row.unwrap().get(0) {
-                    tables.insert(name, true);
-                }
-            });
-            info!("Tables: {:#?}", tables);
-            Ok(tables)
-        },
-        Err(e) => {
-            error!("Read tables failed. {}", e);
-            Err(e)
-        }
-    };
+async fn delete_individual(uri: &str, ctx: &Context) -> Result<(), Error> {
+    let mut client = ctx.pool.get_handle().await?;
+    let query = format!("DELETE FROM veda.individuals WHERE `@` = '{}'", uri);
+    client.execute(query).await?;
+    Ok(())
 }
 
-fn connect_to_manticore(module: &mut Module, tries: i64, timeout: u64) -> Result<mysql::Pool, &'static str> {
+fn connect_to_clickhouse(module: &mut Module) -> Result<Pool, &'static str> {
     if let Some(node) = module.get_individual("cfg:standart_node", &mut Individual::default()) {
         if let Some(v) = node.get_literals("v-s:push_individual_by_event") {
             for el in v {
                 let mut connection = Individual::default();
                 if module.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:deleted", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
-                        if transport == "manticore" {
-                            info!("Found configuration to connect to Manticore: {}", connection.get_id());
+                        if transport == "clickhouse" {
+                            info!("Found configuration to connect to Clickhouse: {}", connection.get_id());
                             let host = connection.get_first_literal("v-s:host").unwrap_or(String::from("127.0.0.1"));
-                            let port = connection.get_first_integer("v-s:port").unwrap_or(9306) as u16;
-                            info!("Trying to connect to Manticore, host: {}, port: {}", host, port);
-                            let mut builder = mysql::OptsBuilder::new();
-                            builder.ip_or_hostname(Some(host))
-                                .tcp_port(port);
-                            let opts: mysql::Opts = builder.into();
-                            match mysql::Pool::new(opts.clone()) {
-                                Ok(pool) => {
-                                    info!("Connection to Manticore established successfully");
-                                    return Ok(pool);
-                                },
-                                Err(e) => {
-                                    error!("Connection to Manticore failed. {:?}", e);
-                                    return Err("Connection to Manticore failed");
-                                },
-                            }
+                            let port = connection.get_first_integer("v-s:port").unwrap_or(9000) as u16;
+                            let user = connection.get_first_literal("v-s:login").unwrap_or(String::from("default"));
+                            let pass = connection.get_first_literal("v-s:password").unwrap_or(String::from(""));
+                            let url = format!("tcp://{}:{}@{}:{}/", user, pass, host, port);
+                            info!("Trying to connect to Clickhouse, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
+                            info!("Connection url: {}", url);
+                            let pool = Pool::new(url);
+                            return Ok(pool);
                         }
                     }
                 }
             }
         }
     }
-    if tries != 0 {
-        let tries = tries - 1;
-        thread::sleep(time::Duration::from_millis(timeout));
-        error!("Configuration not found yet, retry.");
-        connect_to_manticore(module, tries, timeout)
-    } else {
-        error!("Configuration to connect to Manticore not found");
-        Err("Configuration to connect to Manticore not found")
-    }
+    Err("Configuration to connect to Clickhouse not found")
+}
+
+async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
+    let init_db = "CREATE DATABASE IF NOT EXISTS veda";
+    /*let init_prop_table = r"
+        CREATE TABLE IF NOT EXISTS veda.individuals (
+            `@` String,
+            `sign` Int8,
+            `v-s:updateCounter` UInt32
+        ) ENGINE = VersionedCollapsingMergeTree(`sign`, `v-s:updateCounter`)";*/
+    let init_prop_table = r"
+        CREATE TABLE IF NOT EXISTS veda.individuals (
+            `@` String,
+            `rdf:type` Array(String),
+            `v-s:created` Array(DateTime)
+        )
+        ENGINE = MergeTree()
+        PRIMARY KEY `@`
+        ORDER BY `@`
+        PARTITION BY (arrayElement(`rdf:type`, 1), arrayElement(`v-s:created`, 1))
+    ";
+    let mut client = pool.get_handle().await?;
+    client.execute(init_db).await?;
+    client.execute(init_prop_table).await?;
+    Ok(())
 }
