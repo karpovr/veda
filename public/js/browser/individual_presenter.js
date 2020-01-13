@@ -173,12 +173,13 @@ veda.Module(function (veda) { "use strict";
     // Get properties specifications
     var ontology = new veda.OntologyModel();
     var specs = $.extend.apply (
-      this, [{}].concat(
+      {}, [].concat(
         individual["rdf:type"].map( function (_class) {
           return ontology.getClassSpecifications(_class.id);
         })
       )
     );
+
     template.attr({
       "resource": individual.id,
       "typeof": individual["rdf:type"].map(function (item) { return item.id; }).join(" ")
@@ -763,7 +764,7 @@ veda.Module(function (veda) { "use strict";
         var valueHolder = $("<span class='value-holder'></span>");
         propertyContainer.append(valueHolder.text( veda.Util.formatValue(value) ));
         var btnGroup = $("<div class='prop-actions btn-group btn-group-xs' role='group'></div>");
-        var btnRemove = $("<button class='btn btn-default' tabindex='-1'><span class='glyphicon glyphicon-remove'></span></button>");
+        var btnRemove = $("<button class='btn btn-default'><span class='glyphicon glyphicon-remove'></span></button>");
         btnGroup.append(btnRemove);
 
         template.on("view edit search", function (e) {
@@ -799,8 +800,8 @@ veda.Module(function (veda) { "use strict";
       }
       if (!isAbout) {
         var btnGroup = $("<div class='rel-actions btn-group btn-group-xs -view edit search' role='group'></div>");
-        var btnDrag = $("<button class='btn btn-default button-drag' tabindex='-1'><span class='glyphicon glyphicon-move'></span></button>");
-        var btnRemove = $("<button class='btn btn-default button-delete' tabindex='-1'><span class='glyphicon glyphicon-remove'></span></button>");
+        var btnDrag = $("<button class='btn btn-default button-drag'><span class='glyphicon glyphicon-move'></span></button>");
+        var btnRemove = $("<button class='btn btn-default button-delete'><span class='glyphicon glyphicon-remove'></span></button>");
         btnGroup.append(btnDrag, btnRemove);
         template.on("view edit search", function (e) {
           if (e.type === "view") btnGroup.hide();

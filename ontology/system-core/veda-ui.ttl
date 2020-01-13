@@ -1271,7 +1271,7 @@ v-ui:IconModalTemplate
   rdfs:label "Шаблон с меткой и ссылкой"@ru ;
   rdfs:label "Template with label & link"@en ;
   v-ui:template """
-<a href="#" class="glyphicon glyphicon-zoom-in" tabindex="-1"></a>
+<a href="#" class="glyphicon glyphicon-zoom-in"></a>
 <script>
   template.on("click", function (e) {
     e.preventDefault();
@@ -2612,7 +2612,7 @@ v-ui:TreeTemplate
         var addButton = drawAddButton(row);
         row.children().last().append(addButton);
       }
-
+      
       if (isSingle) {
         target.set(rel_uri, [value]);
       } else {
