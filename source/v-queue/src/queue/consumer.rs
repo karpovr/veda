@@ -9,6 +9,7 @@ use std::process;
 use sysinfo::SystemExt;
 
 pub struct Consumer {
+    mode: Mode,
     pub name: String,
     pub queue: Queue,
     pub count_popped: u32,
@@ -16,7 +17,7 @@ pub struct Consumer {
 
     is_ready: bool,
     pos_record: u64,
-    ff_info_pop_w: File,
+    ff_info_pop: File,
     base_path: String,
 
     // tmp
@@ -35,55 +36,68 @@ impl Drop for Consumer {
 
 impl Consumer {
     pub fn new(base_path: &str, consumer_name: &str, queue_name: &str) -> Result<Consumer, ErrorQueue> {
+        Consumer::new_with_mode(base_path, consumer_name, queue_name, Mode::ReadWrite)
+    }
+
+    pub fn new_with_mode(base_path: &str, consumer_name: &str, queue_name: &str, mode: Mode) -> Result<Consumer, ErrorQueue> {
         let info_name = base_path.to_owned() + "/" + queue_name + "_info_pop_" + consumer_name;
-        let info_name_lock = base_path.to_owned() + "/" + queue_name + "_info_pop_" + consumer_name + ".lock";
 
         match Queue::new(base_path, queue_name, Mode::Read) {
             Ok(q) => {
-                let wlock = OpenOptions::new().read(true).write(true).create(true).open(info_name_lock);
+                if mode == Mode::ReadWrite {
+                    let info_name_lock = base_path.to_owned() + "/" + queue_name + "_info_pop_" + consumer_name + ".lock";
+                    let wlock = OpenOptions::new().read(true).write(true).create(true).open(info_name_lock);
 
-                if wlock.is_err() {
-                    return Err(ErrorQueue::NotReady);
-                }
+                    if wlock.is_err() {
+                        return Err(ErrorQueue::NotReady);
+                    }
 
-                let mut lock = wlock.unwrap();
+                    let mut lock = wlock.unwrap();
 
-                let my_pid = process::id();
+                    let my_pid = process::id();
 
-                if let Some(line) = BufReader::new(&lock).lines().next() {
-                    if let Ok(ll) = line {
-                        if let Some(pid_owner) = scan_fmt!(&ll, "{}", i32) {
-                            let mut system = sysinfo::System::new();
-                            system.refresh_all();
-                            let processes = system.get_process_list();
+                    if let Some(line) = BufReader::new(&lock).lines().next() {
+                        if let Ok(ll) = line {
+                            if let Some(pid_owner) = scan_fmt!(&ll, "{}", i32) {
+                                let mut system = sysinfo::System::new();
+                                system.refresh_all();
+                                let processes = system.get_process_list();
 
-                            if let Some(pid) = processes.get(&pid_owner) {
-                                error!("queue:{}:{}:{} block process, pid={:?}", q.name, q.id, consumer_name, pid);
-                                return Err(ErrorQueue::AlreadyOpen);
+                                if let Some(pid) = processes.get(&pid_owner) {
+                                    error!("queue:{}:{}:{} block process, pid={:?}", q.name, q.id, consumer_name, pid);
+                                    return Err(ErrorQueue::AlreadyOpen);
+                                }
                             }
                         }
                     }
+
+                    if lock.set_len(0).is_err() {
+                        return Err(ErrorQueue::NotReady);
+                    }
+
+                    if lock.seek(SeekFrom::Start(0)).is_err() {
+                        return Err(ErrorQueue::NotReady);
+                    }
+
+                    if lock.write_all(my_pid.to_string().as_bytes()).is_err() {
+                        error!("queue:{}:{}:{} write to lock, pid={}", q.name, q.id, consumer_name, my_pid);
+                        return Err(ErrorQueue::FailWrite);
+                    }
                 }
 
-                if lock.set_len(0).is_err() {
-                    return Err(ErrorQueue::NotReady);
-                }
+                let open_with_option = if mode == Mode::ReadWrite {
+                    OpenOptions::new().read(true).write(true).create(true).open(info_name)
+                } else {
+                    OpenOptions::new().read(true).open(info_name)
+                };
 
-                if lock.seek(SeekFrom::Start(0)).is_err() {
-                    return Err(ErrorQueue::NotReady);
-                }
-
-                if lock.write_all(my_pid.to_string().as_bytes()).is_err() {
-                    error!("queue:{}:{}:{} write to lock, pid={}", q.name, q.id, consumer_name, my_pid);
-                    return Err(ErrorQueue::FailWrite);
-                }
-
-                match OpenOptions::new().read(true).write(true).create(true).open(info_name) {
+                match open_with_option {
                     Ok(ff) => Ok({
                         let mut consumer = Consumer {
+                            mode,
                             is_ready: true,
                             name: consumer_name.to_owned(),
-                            ff_info_pop_w: ff,
+                            ff_info_pop: ff,
                             queue: q,
                             count_popped: 0,
                             pos_record: 0,
@@ -138,8 +152,14 @@ impl Consumer {
 
         let info_pop_file_name = self.queue.base_path.to_owned() + "/" + &self.queue.name + "_info_pop_" + &self.name;
 
-        if let Ok(ff) = OpenOptions::new().read(true).write(true).truncate(true).create(is_new).open(&info_pop_file_name) {
-            self.ff_info_pop_w = ff;
+        let open_with_option = if self.mode == Mode::ReadWrite {
+            OpenOptions::new().read(true).write(true).truncate(true).create(is_new).open(&info_pop_file_name)
+        } else {
+            OpenOptions::new().read(true).open(&info_pop_file_name)
+        };
+
+        if let Ok(ff) = open_with_option {
+            self.ff_info_pop = ff;
         } else {
             error!("Consumer open: fail open file [{}], set consumer.ready = false", info_pop_file_name);
             self.is_ready = false;
@@ -151,11 +171,11 @@ impl Consumer {
     pub fn get_info(&mut self) -> bool {
         let mut res = true;
 
-        if self.ff_info_pop_w.seek(SeekFrom::Start(0)).is_err() {
+        if self.ff_info_pop.seek(SeekFrom::Start(0)).is_err() {
             return false;
         }
 
-        if let Some(line) = BufReader::new(&self.ff_info_pop_w).lines().next() {
+        if let Some(line) = BufReader::new(&self.ff_info_pop).lines().next() {
             if let Ok(ll) = line {
                 let (queue_name, consumer_name, position, count_popped, id) = scan_fmt!(&ll, "{};{};{};{};{}", String, String, u64, u32, u32);
 
@@ -331,11 +351,11 @@ impl Consumer {
     }
 
     pub fn put_info(&mut self) {
-        if self.ff_info_pop_w.seek(SeekFrom::Start(0)).is_err() {
+        if self.ff_info_pop.seek(SeekFrom::Start(0)).is_err() {
             error!("fail put info, set consumer.ready = false");
             self.is_ready = false;
         }
-        if self.ff_info_pop_w.write(format!("{};{};{};{};{}\n", self.queue.name, self.name, self.pos_record, self.count_popped, self.id).as_bytes()).is_err() {
+        if self.ff_info_pop.write(format!("{};{};{};{};{}\n", self.queue.name, self.name, self.pos_record, self.count_popped, self.id).as_bytes()).is_err() {
             error!("fail put info, set consumer.ready = false");
             self.is_ready = false;
         }
@@ -348,11 +368,11 @@ impl Consumer {
         }
 
         self.count_popped += 1;
-        if self.ff_info_pop_w.seek(SeekFrom::Start(0)).is_err() {
+        if self.ff_info_pop.seek(SeekFrom::Start(0)).is_err() {
             return false;
         }
 
-        if self.ff_info_pop_w.write(format!("{};{};{};{};{}\n", self.queue.name, self.name, self.pos_record, self.count_popped, self.id).as_bytes()).is_ok() {
+        if self.ff_info_pop.write(format!("{};{};{};{};{}\n", self.queue.name, self.name, self.pos_record, self.count_popped, self.id).as_bytes()).is_ok() {
             return true;
         };
 
