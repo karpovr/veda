@@ -127,10 +127,13 @@ public int msgpack2individual(ref Individual individual, string in_str){
                                             resources ~= Resource(decimal(mantissa,
                                                                           cast(byte)exponent));
                                         }else if (type == DataType.String) {
-                                            long lang = arr[ 2 ].via.uinteger;
-                                            resources ~= Resource(DataType.String,
-                                                                  (cast(string)arr[ 1 ].via.raw).dup, cast(LANG)lang);
-                                        }else  {
+                                           long lang = arr[ 2 ].via.uinteger;
+
+                                            if (arr[ 1 ].type == Value.type.raw)
+                                                resources ~= Resource(DataType.String, (cast(string)arr[ 1 ].via.raw).dup, cast(LANG)lang);
+                                            else if (arr[ 1 ].type == Value.type.nil)
+                                                resources ~= Resource(DataType.String, "", cast(LANG)lang);
+                                         }else  {
                                             stderr.writeln("ERR! msgpack2individual: [0][1][3] unknown type [%d]", type);
                                             return -1;
                                         }

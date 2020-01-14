@@ -24,6 +24,7 @@ before_install:
 
 # Build
 install:
+  - ./tools/install-tarantool.sh
   - ./control-install.sh
 #&>install.log
 #  - ./tools/send-to-chunk-io.sh

@@ -20,6 +20,7 @@ use v_queue::{consumer::*, record::*};
 use crate::from_winpak::sync_data_from_winpak;
 use crate::insert_to_winpak::insert_to_winpak;
 use crate::update_to_winpak::update_to_winpak;
+use v_api::app::ResultCode;
 
 fn main() -> std::io::Result<()> {
     let env_var = "RUST_LOG";

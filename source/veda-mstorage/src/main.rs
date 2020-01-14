@@ -261,11 +261,7 @@ fn operation_prepare(
     my_info: &mut ModuleInfo,
     sys_ticket: &Ticket,
 ) -> Response {
-    let is_need_authorize = if sys_ticket.user_uri == ticket.user_uri {
-        false
-    } else {
-        true
-    };
+    let is_need_authorize = !(sys_ticket.user_uri == ticket.user_uri);
 
     if new_indv.get_id().is_empty() || new_indv.get_id().len() < 2 {
         return Response::new(new_indv.get_id(), ResultCode::InvalidIdentifier, -1, -1);

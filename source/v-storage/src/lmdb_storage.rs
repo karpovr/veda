@@ -29,7 +29,7 @@ impl LMDBStorage {
             tickets_db_env: Err(MdbError::Panic),
             az_db_handle: Err(MdbError::Panic),
             az_db_env: Err(MdbError::Panic),
-            mode: mode.clone(),
+            mode,
         }
     }
 
