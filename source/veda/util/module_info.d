@@ -108,7 +108,7 @@ class ModuleInfoFile
         }
         catch (Throwable tr)
         {
-            log.trace("ERR! ModuleInfoFile:open_reader, %s", tr.msg);
+            log.trace("ERR! ModuleInfoFile:open_writer, %s", tr.msg);
         }
 
         return false;

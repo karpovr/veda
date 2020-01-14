@@ -31,15 +31,36 @@ impl ModuleInfo {
 
         let file_name_info = info_path + info_name + "_info";
 
-        match OpenOptions::new().read(true).write(is_writer).create(true).open(file_name_info) {
-            Ok(ff) => Ok(ModuleInfo {
+        let ff = if is_writer {
+            match OpenOptions::new().read(true).write(is_writer).create(true).open(file_name_info) {
+                Ok(ff) => Ok(ff),
+                Err(e) => Err(e),
+            }
+        } else {
+            match OpenOptions::new().read(true).open(file_name_info) {
+                Ok(ff) => Ok(ff),
+                Err(e) => Err(e),
+            }
+        };
+
+        if let Ok(f) = ff {
+            let mut mi = ModuleInfo {
                 _base_path: base_path.to_owned(),
                 name: info_name.to_owned(),
-                ff_info: ff,
+                ff_info: f,
                 is_ready: true,
                 is_writer,
-            }),
-            Err(e) => Err(e),
+            };
+
+            if mi.read_info().is_none() {
+                if let Err(e) = mi.put_info(0, 0) {
+                    info!("fail write module info, err={}", e);
+                }
+            }
+
+            return Ok(mi);
+        } else {
+            return Err(ff.err().unwrap());
         }
     }
 
