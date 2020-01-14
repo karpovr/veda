@@ -42,11 +42,18 @@ async fn main() ->  Result<(), Error> {
     let mut module = Module::default();
 
     let mut pool = match connect_to_clickhouse(&mut module) {
-        Err(_) => process::exit(101),
+        Err(e) => {
+            error!("Failed to connect to clickhouse: {}", e);
+            process::exit(101)
+        },
         Ok(pool) => pool,
     };
 
+    info!("Rusty search-index: init started");
+
     init_clickhouse(&mut pool).await?;
+
+    info!("Rusty search-index: inited");
 
     let mut ctx = Context {
         onto: Onto::default(),
@@ -54,6 +61,8 @@ async fn main() ->  Result<(), Error> {
     };
 
     load_onto(&mut module.fts, &mut module.storage, &mut ctx.onto);
+
+    info!("Rusty search-index: start listening to queue");
 
     module.listen_queue(
         &mut queue_consumer,
@@ -166,10 +175,10 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
 
     let values = values.join(", ");
 
-    let query = format!("INSERT INTO veda.individuals ({}) VALUES ({})", predicates, values);
+    /*let query = format!("INSERT INTO veda.individuals ({}) VALUES ({})", predicates, values);
 
     let mut client = ctx.pool.get_handle().await?;
-    client.execute(query).await?;
+    client.execute(query).await?;*/
 
     info!("Export done: {}", new_state.get_id());
 
