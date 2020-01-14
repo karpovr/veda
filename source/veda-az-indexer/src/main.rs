@@ -2,12 +2,12 @@
 extern crate log;
 
 use crate::common::*;
+use v_authorization::Access;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_onto::individual::*;
 use v_queue::consumer::*;
 use v_storage::storage::*;
-use v_authorization::Access;
 
 mod common;
 
@@ -93,7 +93,7 @@ fn prepare(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
         return Err(PrepareError::Fatal);
     }
 
-    Ok (())
+    Ok(())
 }
 
 fn prepare_permission_statement(prev_state: &mut Individual, new_state: &mut Individual, ctx: &mut Context) {

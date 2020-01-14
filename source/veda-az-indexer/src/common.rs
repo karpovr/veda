@@ -1,18 +1,18 @@
 use std::collections::HashMap;
+use v_authorization::Access;
 use v_onto::individual::Individual;
 use v_storage::storage::{StorageId, VStorage};
-use v_authorization::Access;
 
 pub const PERMISSION_PREFIX: &str = "P";
 pub const MEMBERSHIP_PREFIX: &str = "M";
 pub const FILTER_PREFIX: &str = "F";
-pub const M_IS_EXCLUSIVE: u8 = b'X';
-pub const M_IGNORE_EXCLUSIVE: u8 = b'N';
+const M_IS_EXCLUSIVE: char = 'X';
+const M_IGNORE_EXCLUSIVE: char = 'N';
 
 pub struct Right {
     pub id: String,
     pub access: u8,
-    pub marker: u8,
+    pub marker: char,
     pub is_deleted: bool,
 }
 
@@ -84,7 +84,7 @@ pub fn prepare_right_set(prev_state: &mut Individual, new_state: &mut Individual
     } else if ignore_exclusive {
         M_IGNORE_EXCLUSIVE
     } else {
-        0
+        0 as char
     };
 
     update_right_set(new_state.get_id(), &resource, &in_set, marker, is_deleted, &use_filter, prefix, access, ctx);
@@ -98,7 +98,17 @@ pub fn prepare_right_set(prev_state: &mut Individual, new_state: &mut Individual
     }
 }
 
-pub fn update_right_set(source_id: &str, resources: &[String], in_set: &[String], marker: u8, is_deleted: bool, filter: &str, prefix: &str, access: u8, ctx: &mut Context) {
+pub fn update_right_set(
+    source_id: &str,
+    resources: &[String],
+    in_set: &[String],
+    marker: char,
+    is_deleted: bool,
+    filter: &str,
+    prefix: &str,
+    access: u8,
+    ctx: &mut Context,
+) {
     for rs in resources.iter() {
         let key = prefix.to_owned() + filter + rs;
 
@@ -131,7 +141,7 @@ pub fn update_right_set(source_id: &str, resources: &[String], in_set: &[String]
             new_record = "X".to_string();
         }
 
-        debug! ("{} {} {:?}", source_id, rs, new_record);
+        debug!("{} {} {:?}", source_id, rs, new_record);
 
         ctx.storage.put_kv(StorageId::Az, &key, &new_record);
     }
@@ -159,38 +169,52 @@ pub fn get_disappeared(a: &[String], b: &[String]) -> Vec<String> {
 }
 
 pub fn rights_from_string(src: &str, new_rights: &mut RightSet) -> bool {
-    let tokens: Vec<&str> = src.split(';').collect();
-
-    if tokens.len() <= 2 {
+    if src.is_empty() {
         return false;
     }
 
-    let mut idx = 0;
-    while idx < tokens.len() {
-        if let Some(key) = tokens.get(idx) {
-            if let Some(tmk) = tokens.get(idx + 1) {
-                let marker = if tmk.len() > 1 {
-                    tmk.as_bytes()[0]
-                } else {
-                    0
-                };
+    let tokens: Vec<&str> = src.split(';').collect();
 
-                if let Some(s_access) = tokens.get(idx + 1) {
-                    if let Ok(access) = u8::from_str_radix(&s_access, 16) {
-                        new_rights.insert(
-                            key.to_string(),
-                            Right {
-                                id: key.to_string(),
-                                access,
-                                marker,
-                                is_deleted: false,
-                            },
-                        );
+    let mut idx = 0;
+    loop {
+        if idx + 1 < tokens.len() {
+            let key = tokens[idx];
+            let mut access = 0;
+            let mut shift = 0;
+            let mut marker = 0 as char;
+
+            for c in tokens[idx + 1].chars() {
+                if c == M_IS_EXCLUSIVE || c == M_IGNORE_EXCLUSIVE {
+                    marker = c;
+                } else {
+                    match c.to_digit(16) {
+                        Some(v) => access |= v << shift,
+                        None => {
+                            eprintln!("ERR! rights_from_string, fail parse, access is not hex digit {}", src);
+                            continue;
+                        }
                     }
+                    shift += 4;
                 }
             }
+
+            new_rights.insert(
+                key.to_string(),
+                Right {
+                    id: key.to_string(),
+                    access: access as u8,
+                    marker,
+                    is_deleted: false,
+                },
+            );
+        } else {
+            break;
         }
+
         idx += 2;
+        if idx >= tokens.len() {
+            break;
+        }
     }
 
     true
@@ -206,8 +230,8 @@ fn rights_as_string(new_rights: RightSet) -> String {
                 outbuff.push(';');
                 outbuff.push_str(&format!("{:X}", right.access));
 
-                if right.marker > 0 {
-                    outbuff.push(right.marker as char);
+                if right.marker == M_IS_EXCLUSIVE || right.marker == M_IGNORE_EXCLUSIVE {
+                    outbuff.push(right.marker);
                 }
                 outbuff.push(';');
             }
