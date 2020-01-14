@@ -391,9 +391,13 @@ pub fn create_sys_ticket(storage: &mut VStorage) -> Ticket {
     ticket
 }
 
-pub fn wait_load_ontology() {
+pub fn wait_load_ontology() -> i64 {
+    wait_module("input-onto", 1)
+}
+
+pub fn wait_module(module_name: &str, wait_op_id: i64) -> i64 {
     loop {
-        let input_onto_info = ModuleInfo::new("./data", "input-onto", true);
+        let input_onto_info = ModuleInfo::new("./data", module_name, true);
         if input_onto_info.is_err() {
             error!("fail open info of input-onto, err={:?}", input_onto_info.err());
             continue;
@@ -401,8 +405,11 @@ pub fn wait_load_ontology() {
 
         let mut input_onto_info = input_onto_info.unwrap();
         loop {
-            let (_, committed) = input_onto_info.read_info().unwrap_or((0, 0));
-            if committed > 0 {
+            if let Some((_, committed)) = input_onto_info.read_info() {
+                if committed >= wait_op_id {
+                    return committed;
+                }
+            } else {
                 break;
             }
             info!("wait for completed load ontology...");
@@ -411,4 +418,6 @@ pub fn wait_load_ontology() {
 
         break;
     }
+
+    0
 }

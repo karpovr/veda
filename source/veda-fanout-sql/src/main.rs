@@ -26,7 +26,7 @@ pub struct Context{
 fn main() {
     init_log();
 
-    wait_load_ontology();
+    wait_module("fulltext_indexer", wait_load_ontology());
 
     let mut queue_consumer = Consumer::new("./data/queue", "fanout_sql", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new("./data", "fanout_sql", true);
