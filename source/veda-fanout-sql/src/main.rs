@@ -96,7 +96,7 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     Ok(())
 }
 
-fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec<String>, is_new: bool, ctx: &mut Context) -> Result<(), PrepareError> {
+fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &[String], is_new: bool, ctx: &mut Context) -> Result<(), PrepareError> {
     let uri = new_state.get_id().to_string();
 
     let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
@@ -132,7 +132,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
             prev_state.get_resources(&predicate).unwrap().iter().for_each(|resource| {
                 if resource.order == 0 {
                     // Check or create table before delete
-                    if let Err(_) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
+                    if check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
                         error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
                         tr_error = true;
                     }
@@ -150,21 +150,21 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         Some(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(timestamp, 0).to_string()),
         None => String::from("NULL"),
     };
-    let deleted = match is_deleted {
-        true => "1",
-        _ => "NULL",
+    let deleted = if is_deleted {
+        "1"
+    } else {
+        "NULL"
     };
 
     classes.iter().for_each(|class| {
         new_state.get_predicates().iter().for_each(|predicate| {
             new_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
                 // Check or create table before insert
-                if resource.order == 0 {
-                    if let Err(_) = check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction) {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
-                        tr_error = true;
-                    }
+                if resource.order == 0 && check_create_property_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
+                    error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
+                    tr_error = true;
                 }
+
                 let uri = new_state.get_id();
                 let value = match &resource.value {
                     Value::Bool(true) => String::from("1"),
@@ -200,7 +200,8 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
         }
         return Err(PrepareError::Fatal);
     }
-    return match transaction.commit() {
+
+    match transaction.commit() {
         Ok(_) => {
             info!("`{}` Ok", uri);
             Ok(())
@@ -209,7 +210,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &Vec
             error!("Transaction commit failed for `{}`. {:?}", uri, e);
             Err(PrepareError::Fatal)
         }
-    };
+    }
 }
 
 fn check_create_property_table(
@@ -249,13 +250,14 @@ fn check_create_property_table(
          ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;",
         property, sql_type, sql_value_index
     );
-    return match transaction.query(query) {
+
+    match transaction.query(query) {
         Ok(_) => {
             tables.insert(property.to_owned(), true);
             Ok(())
         }
         Err(_) => Err("Unable to create table"),
-    };
+    }
 }
 
 fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str> {
@@ -289,7 +291,7 @@ fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mys
                             let mut builder = mysql::OptsBuilder::new();
                             builder.ip_or_hostname(Some(host)).tcp_port(port).user(Some(login)).pass(Some(pass)).db_name(Some(db));
                             let opts: mysql::Opts = builder.into();
-                            match mysql::Pool::new(opts.clone()) {
+                            match mysql::Pool::new(opts) {
                                 Ok(pool) => {
                                     info!("Connection to MySQL established successfully");
                                     return Ok(pool);
