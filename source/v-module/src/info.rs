@@ -60,7 +60,7 @@ impl ModuleInfo {
 
             return Ok(mi);
         } else {
-            return Err(ff.err().unwrap());
+            Err(ff.err().unwrap())
         }
     }
 
@@ -104,7 +104,7 @@ impl ModuleInfo {
         if let Some(line) = BufReader::new(&self.ff_info).lines().next() {
             res = true;
             if let Ok(ll) = line {
-                let (module_name, _op_id, _committed_op_id, _crc) = scan_fmt!(&ll.to_owned(), "{};{};{};{}", String, i64, i64, String);
+                let (module_name, _op_id, _committed_op_id, _crc) = scan_fmt!(&ll, "{};{};{};{}", String, i64, i64, String);
 
                 match module_name {
                     Some(q) => {

@@ -87,7 +87,7 @@ impl Onto {
     pub fn is_some_entered(&mut self, el: &str, subs: &[&str]) -> bool {
         for sub in subs {
             if self.relations.contains_key(*sub) {
-                let onto_el = self.relations.entry(sub.to_string()).or_default();
+                let onto_el = self.relations.entry((*sub).to_string()).or_default();
                 if let Some(rtype) = onto_el.get(el) {
                     if *rtype == RelType::Sub {
                         return true;
