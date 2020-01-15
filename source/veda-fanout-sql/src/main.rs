@@ -60,12 +60,13 @@ fn main() {
         &mut queue_consumer,
         &mut module_info.unwrap(),
         &mut ctx,
-        &mut (void as fn(&mut Module, &mut Context)),
+        &mut (before_bath as fn(&mut Module, &mut Context, size_batch: u32)-> Option<u32>),
         &mut (process as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual) -> Result<(), PrepareError>),
         &mut (void as fn(&mut Module, &mut Context)),
     );
 }
 
+fn before_bath(_module: &mut Module, _ctx: &mut Context, _size_batch: u32)->Option<u32> {None}
 fn void(_module: &mut Module, _ctx: &mut Context) {}
 
 fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual) -> Result<(), PrepareError> {

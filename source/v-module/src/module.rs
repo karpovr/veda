@@ -181,7 +181,7 @@ impl Module {
         queue_consumer: &mut Consumer,
         module_info: &mut ModuleInfo,
         module_context: &mut T,
-        before_batch: &mut fn(&mut Module, &mut T),
+        before_batch: &mut fn(&mut Module, &mut T, batch_size: u32) -> Option<u32>,
         prepare: &mut fn(&mut Module, &mut ModuleInfo, &mut T, &mut Individual) -> Result<(), PrepareError>,
         after_batch: &mut fn(&mut Module, &mut T),
     ) {
@@ -213,8 +213,6 @@ impl Module {
 
             let mut size_batch = 0;
 
-            before_batch(self, module_context);
-
             // read queue current part info
             if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
                 error!("{} get_info_of_part {}: {}", self.queue_prepared_count, queue_consumer.id, e.as_str());
@@ -236,11 +234,15 @@ impl Module {
                 }
             }
 
+            let mut max_size_batch = size_batch;
             if size_batch > 0 {
                 debug!("queue: batch size={}", size_batch);
+                if let Some(new_size) = before_batch(self, module_context, size_batch) {
+                    max_size_batch = new_size;
+                }
             }
 
-            for _it in 0..size_batch {
+            for _it in 0..max_size_batch {
                 // пробуем взять из очереди заголовок сообщения
                 if !queue_consumer.pop_header() {
                     break;
@@ -273,11 +275,14 @@ impl Module {
                     info!("get from queue, count: {}", self.queue_prepared_count);
                 }
             }
-            after_batch(self, module_context);
+
+            if size_batch > 0 {
+                after_batch(self, module_context);
+            }
 
             let wmsg = soc.recv();
             if let Err(e) = wmsg {
-                error!("fail recv from queue notify channel, err={:?}", e);
+                debug!("fail recv from queue notify channel, err={:?}", e);
 
                 if count_timeout_error > 0 && size_batch > 0 {
                     warn!("queue changed but we not received notify message, need reconnect...");
