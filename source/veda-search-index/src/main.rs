@@ -106,7 +106,7 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
 }
 
 fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) -> Block {
-    let predicate = format!("`{}`", predicate);
+    let predicate = predicate.replace(":", "__").replace("-", "_");
     match &resources[0].rtype {
         DataType::Integer => {
             let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_int()).collect();
@@ -128,7 +128,7 @@ fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) ->
             block.column(&predicate, vec![column_value])
         },
         DataType::Boolean => {
-            let column_value: Vec<i8> = resources.iter().map(|resource| {
+            let column_value: Vec<u8> = resources.iter().map(|resource| {
                 match resource.value {
                     Value::Bool(true) => 1,
                     _ => 0
@@ -171,7 +171,7 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
 
     for predicate in new_state.get_predicates() {
         if let Some(resources) = new_state.get_resources(&predicate) {
-            create_property_column(&predicate, &resources[0], &ctx).await?;
+            create_predicate_column(&predicate, &resources[0], &ctx).await?;
             insert_block = set_column_value(insert_block, &predicate, &resources);
         }
     }
@@ -185,8 +185,8 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
     Ok(())
 }
 
-async fn create_property_column(property: &str, resource: &Resource, ctx: &Context) -> Result<(), Error> {
-    if property == "rdf:type" || property == "v-s:created" {
+async fn create_predicate_column(predicate: &str, resource: &Resource, ctx: &Context) -> Result<(), Error> {
+    if predicate == "rdf:type" || predicate == "v-s:created" {
         return Ok(());
     }
     let mut client = ctx.pool.get_handle().await?;
@@ -202,7 +202,7 @@ async fn create_property_column(property: &str, resource: &Resource, ctx: &Conte
     }
     let query = format!(
         "ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{}` Array({})",
-        property, column_type
+        predicate.replace(":", "__").replace("-", "_"), column_type
     );
     client.execute(query).await?;
     Ok(())
@@ -247,14 +247,45 @@ async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
     let init_individuals_table = r"
         CREATE TABLE IF NOT EXISTS veda.individuals (
             id String,
-            `rdf:type` Array(String),
-            `v-s:created` Array(DateTime)
+            rdf__type Array(String),
+            v_s__created Array(DateTime)
         )
         ENGINE = MergeTree()
         PRIMARY KEY id
         ORDER BY id
-        PARTITION BY (arrayElement(`rdf:type`, 1), arrayElement(`v-s:created`, 1))
+        PARTITION BY (arrayElement(rdf__type, 1), arrayElement(v_s__created, 1))
     ";
+    /*let init_individuals_table = r"
+        CREATE TABLE IF NOT EXISTS veda.individuals (
+            id String,
+            rdf__type Nested
+            (
+                Uri String,
+                String String,
+                Integer Int64,
+                Datetime Datetime,
+                Decimal Float64,
+                Bool UInt8,
+                Binary String,
+                lang String
+            ),
+            v_s__created Nested
+            (
+                Uri String,
+                String String,
+                Integer Int64,
+                Datetime Datetime,
+                Decimal Float64,
+                Bool UInt8,
+                Binary String,
+                lang String
+            )
+        )
+        ENGINE = MergeTree()
+        PRIMARY KEY id
+        ORDER BY id
+        PARTITION BY (rdf__type.Uri, v_s__created.Datetime)
+    ";*/
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
     client.execute(init_individuals_table).await?;
