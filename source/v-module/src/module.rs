@@ -183,7 +183,7 @@ impl Module {
         module_context: &mut T,
         before_batch: &mut fn(&mut Module, &mut T, batch_size: u32) -> Option<u32>,
         prepare: &mut fn(&mut Module, &mut ModuleInfo, &mut T, &mut Individual) -> Result<(), PrepareError>,
-        after_batch: &mut fn(&mut Module, &mut T),
+        after_batch: &mut fn(&mut Module, &mut T, prepared_batch_size: u32),
     ) {
         let mut soc = Socket::new(Protocol::Sub0).unwrap();
         let mut is_ready_notify_channel = false;
@@ -242,6 +242,7 @@ impl Module {
                 }
             }
 
+            let mut prepared_batch_size = 0;
             for _it in 0..max_size_batch {
                 // пробуем взять из очереди заголовок сообщения
                 if !queue_consumer.pop_header() {
@@ -274,10 +275,11 @@ impl Module {
                 if self.queue_prepared_count % 1000 == 0 {
                     info!("get from queue, count: {}", self.queue_prepared_count);
                 }
+                prepared_batch_size += 1;
             }
 
             if size_batch > 0 {
-                after_batch(self, module_context);
+                after_batch(self, module_context, prepared_batch_size);
             }
 
             let wmsg = soc.recv();

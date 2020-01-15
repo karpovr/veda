@@ -63,14 +63,14 @@ fn main() -> Result<(), i32> {
         &mut ctx,
         &mut (before_batch as fn(&mut Module, &mut Context, size_batch: u32)-> Option<u32>),
         &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual) -> Result<(), PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut Context)),
+        &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32)),
     );
     Ok(())
 }
 
 fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32)-> Option<u32> {None}
 
-fn after_batch(_module: &mut Module, _ctx: &mut Context) {}
+fn after_batch(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) {}
 
 fn prepare(module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual) -> Result<(), PrepareError> {
     let cmd = get_cmd(queue_element);
