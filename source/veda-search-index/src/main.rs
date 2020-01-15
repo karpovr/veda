@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate log;
 
-use clickhouse_rs::{Pool, errors::Error, ClientHandle};
+use clickhouse_rs::{Pool, errors::Error, ClientHandle, Block};
 use futures::executor::block_on;
 use tokio;
 
@@ -19,6 +19,7 @@ use v_onto::resource::Value;
 use v_onto::datatype::DataType;
 use v_onto::datatype::Lang;
 use v_queue::consumer::*;
+use v_onto::resource::Value::Int;
 
 pub struct Context {
     onto: Onto,
@@ -104,6 +105,52 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     };
 }
 
+fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) -> Block {
+    let predicate = format!("`{}`", predicate);
+    match &resources[0].rtype {
+        DataType::Integer => {
+            let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_int()).collect();
+            block.column(&predicate, vec![column_value])
+        },
+        DataType::String => {
+            let column_value: Vec<String> = resources.iter().map(|resource| {
+                let str_value = resource.get_str();
+                let lang = match resource.get_lang() {
+                    Lang::NONE => String::from(""),
+                    lang => format!("@{}", lang.to_string()),
+                };
+                format!("{}{}", str_value.replace("'", "\\'"), lang)
+            }).collect();
+            block.column(&predicate, vec![column_value])
+        },
+        DataType::Uri => {
+            let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri().to_string()).collect();
+            block.column(&predicate, vec![column_value])
+        },
+        DataType::Boolean => {
+            let column_value: Vec<i8> = resources.iter().map(|resource| {
+                match resource.value {
+                    Value::Bool(true) => 1,
+                    _ => 0
+                }
+            }).collect();
+            block.column(&predicate, vec![column_value])
+        },
+        DataType::Decimal => {
+            let column_value: Vec<f64> = resources.iter().map(|resource| resource.get_float()).collect();
+            block.column(&predicate, vec![column_value])
+        },
+        DataType::Datetime => {
+            let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_datetime()).collect();
+            block.column(&predicate, vec![column_value])
+        },
+        _ => {
+            error!("Value type is not supported");
+            block
+        }
+    }
+}
+
 async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new: bool, ctx: &Context) -> Result<(), Error> {
     let uri = new_state.get_id().to_owned();
     info!("Export individual: {}", uri);
@@ -116,69 +163,22 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
     }
 
     // Remove previous state from individuals table
-    if !is_new {
+    /*if !is_new {
         delete_individual(&uri, ctx).await?
-    }
+    }*/
 
-    let mut predicates: Vec<String> = vec![String::from("`@`")];
-
-    let mut values: Vec<String> = vec![format!("'{}'", uri)];
-
-    let mut export_error= true;
-
-    let mut predicate_values: Vec<String>;
+    let mut insert_block = Block::new().column("id", vec![uri]);
 
     for predicate in new_state.get_predicates() {
-
-        predicate_values = vec![];
-
-        predicates.push(format!("`{}`", predicate));
-
-        for resource in new_state.get_resources(&predicate).unwrap_or(vec![]) {
-            /*if predicate == "v-s:updateCounter" {
-                if let Value::Int(counter) = &resource.value {
-                    predicate_values.push(format!("{}", counter));
-                } else {
-                    predicate_values.push(String::from("0"));
-                }
-                break;
-            } else {*/
-                if resource.order == 0 {
-                    create_property_column(&predicate, &resource, &ctx).await?
-                }
-                let value = match &resource.value {
-                    Value::Bool(true) => String::from("1"),
-                    Value::Bool(_) => String::from("0"),
-                    Value::Int(int_value) => int_value.to_string(),
-                    Value::Str(str_value, _lang) => {
-                        let lang = match &resource.get_lang() {
-                            Lang::NONE => String::from(""),
-                            lang => format!("@{}", lang.to_string()),
-                        };
-                        format!("'{}{}'", str_value.replace("'", "\\'"), lang)
-                    },
-                    Value::Uri(uri_value) => format!("'{}'", uri_value.replace("'", "\\'")),
-                    Value::Num(_m, _e) => resource.get_float().to_string(),
-                    Value::Datetime(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(*timestamp, 0)),
-                    _ => String::from("NULL"),
-                };
-                predicate_values.push(value);
-            /*}*/
+        if let Some(resources) = new_state.get_resources(&predicate) {
+            create_property_column(&predicate, &resources[0], &ctx).await?;
+            insert_block = set_column_value(insert_block, &predicate, &resources);
         }
-
-        let predicate_values_joined = predicate_values.join(", ");
-
-        values.push(format!("[{}]", predicate_values_joined));
     }
 
-    let predicates = predicates.join(", ");
-
-    let values = values.join(", ");
-
-    /*let query = format!("INSERT INTO veda.individuals ({}) VALUES ({})", predicates, values);
-
     let mut client = ctx.pool.get_handle().await?;
-    client.execute(query).await?;*/
+
+    client.insert("veda.individuals", insert_block).await?;
 
     info!("Export done: {}", new_state.get_id());
 
@@ -243,26 +243,20 @@ fn connect_to_clickhouse(module: &mut Module) -> Result<Pool, &'static str> {
 }
 
 async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
-    let init_db = "CREATE DATABASE IF NOT EXISTS veda";
-    /*let init_prop_table = r"
+    let init_veda_db = "CREATE DATABASE IF NOT EXISTS veda";
+    let init_individuals_table = r"
         CREATE TABLE IF NOT EXISTS veda.individuals (
-            `@` String,
-            `sign` Int8,
-            `v-s:updateCounter` UInt32
-        ) ENGINE = VersionedCollapsingMergeTree(`sign`, `v-s:updateCounter`)";*/
-    let init_prop_table = r"
-        CREATE TABLE IF NOT EXISTS veda.individuals (
-            `@` String,
+            id String,
             `rdf:type` Array(String),
             `v-s:created` Array(DateTime)
         )
         ENGINE = MergeTree()
-        PRIMARY KEY `@`
-        ORDER BY `@`
+        PRIMARY KEY id
+        ORDER BY id
         PARTITION BY (arrayElement(`rdf:type`, 1), arrayElement(`v-s:created`, 1))
     ";
     let mut client = pool.get_handle().await?;
-    client.execute(init_db).await?;
-    client.execute(init_prop_table).await?;
+    client.execute(init_veda_db).await?;
+    client.execute(init_individuals_table).await?;
     Ok(())
 }
