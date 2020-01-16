@@ -220,9 +220,10 @@ fn check_create_property_table(
     resource: &Resource,
     transaction: &mut mysql::Transaction,
 ) -> Result<(), &'static str> {
-    if let Some(true) = tables.get(property) {
+    if tables.contains_key(property.to_lowercase().as_str()) {
         return Ok(());
     }
+
     let mut sql_type = "";
     let mut sql_value_index = ", INDEX civ(`value`)";
     match &resource.rtype {
@@ -257,7 +258,10 @@ fn check_create_property_table(
             tables.insert(property.to_owned(), true);
             Ok(())
         }
-        Err(_) => Err("Unable to create table"),
+        Err(e) => {
+            error!("Error creating property table: {}", e);
+            Err("Unable to create table")
+        },
     }
 }
 
@@ -269,6 +273,7 @@ fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str
                 tables.insert(name, true);
             }
         });
+        debug!("Existing tables: {:?}", tables);
         return Ok(tables);
     }
     Err("Read existing tables error")
