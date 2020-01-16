@@ -244,6 +244,7 @@ fn connect_to_clickhouse(module: &mut Module) -> Result<Pool, &'static str> {
 
 async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
     let init_veda_db = "CREATE DATABASE IF NOT EXISTS veda";
+/*
     let init_individuals_table = r"
         CREATE TABLE IF NOT EXISTS veda.individuals (
             id String,
@@ -255,37 +256,32 @@ async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
         ORDER BY id
         PARTITION BY (arrayElement(rdf__type, 1), arrayElement(v_s__created, 1))
     ";
-    /*let init_individuals_table = r"
+*/
+    let init_individuals_table = r"
         CREATE TABLE IF NOT EXISTS veda.individuals (
             id String,
             rdf__type Nested
             (
-                Uri String,
-                String String,
-                Integer Int64,
-                Datetime Datetime,
-                Decimal Float64,
-                Bool UInt8,
-                Binary String,
-                lang String
+                str Nullable(String),
+                int Nullable(Int64),
+                date Nullable(Datetime),
+                num Nullable(Float64),
+                lang Nullable(String)
             ),
             v_s__created Nested
             (
-                Uri String,
-                String String,
-                Integer Int64,
-                Datetime Datetime,
-                Decimal Float64,
-                Bool UInt8,
-                Binary String,
-                lang String
+                str Nullable(String),
+                int Nullable(Int64),
+                date Nullable(Datetime),
+                num Nullable(Float64),
+                lang Nullable(String)
             )
         )
         ENGINE = MergeTree()
         PRIMARY KEY id
         ORDER BY id
-        PARTITION BY (rdf__type.Uri, v_s__created.Datetime)
-    ";*/
+        PARTITION BY (rdf__type.str, v_s__created.date)
+    ";
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
     client.execute(init_individuals_table).await?;
