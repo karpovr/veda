@@ -10,7 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 chrono = "0.4"
-time = "0.1.42"
+time = "0.2.2"
 env_logger = "0.6"
 scan_fmt = "0.2"
 log = "0.4"
