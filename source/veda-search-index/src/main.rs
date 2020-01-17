@@ -106,13 +106,23 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
 }
 
 fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) -> Block {
-    let predicate = predicate.replace(":", "__").replace("-", "_");
+    let mut predicate = predicate.replace(":", "__").replace("-", "_");
+    if predicate == "rdf__type" {
+        let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri()).collect();
+        return block.column(&predicate, column_value);
+    }
+    if predicate == "v_s__created" {
+        let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_datetime()).collect();
+        return block.column(&predicate, column_value);
+    }
     match &resources[0].rtype {
         DataType::Integer => {
+            predicate.push_str(".int");
             let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_int()).collect();
             block.column(&predicate, vec![column_value])
         },
         DataType::String => {
+            predicate.push_str(".str");
             let column_value: Vec<String> = resources.iter().map(|resource| {
                 let str_value = resource.get_str();
                 let lang = match resource.get_lang() {
@@ -124,11 +134,13 @@ fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) ->
             block.column(&predicate, vec![column_value])
         },
         DataType::Uri => {
+            predicate.push_str(".str");
             let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri().to_string()).collect();
             block.column(&predicate, vec![column_value])
         },
         DataType::Boolean => {
-            let column_value: Vec<u8> = resources.iter().map(|resource| {
+            predicate.push_str(".int");
+            let column_value: Vec<i64> = resources.iter().map(|resource| {
                 match resource.value {
                     Value::Bool(true) => 1,
                     _ => 0
@@ -137,10 +149,12 @@ fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) ->
             block.column(&predicate, vec![column_value])
         },
         DataType::Decimal => {
+            predicate.push_str(".num");
             let column_value: Vec<f64> = resources.iter().map(|resource| resource.get_float()).collect();
             block.column(&predicate, vec![column_value])
         },
         DataType::Datetime => {
+            predicate.push_str(".date");
             let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_datetime()).collect();
             block.column(&predicate, vec![column_value])
         },
@@ -171,7 +185,7 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
 
     for predicate in new_state.get_predicates() {
         if let Some(resources) = new_state.get_resources(&predicate) {
-            create_predicate_column(&predicate, &resources[0], &ctx).await?;
+            create_predicate_column(&predicate, &ctx).await?;
             insert_block = set_column_value(insert_block, &predicate, &resources);
         }
     }
@@ -185,25 +199,12 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
     Ok(())
 }
 
-async fn create_predicate_column(predicate: &str, resource: &Resource, ctx: &Context) -> Result<(), Error> {
+async fn create_predicate_column(predicate: &str, ctx: &Context) -> Result<(), Error> {
     if predicate == "rdf:type" || predicate == "v-s:created" {
         return Ok(());
     }
+    let query = format!("ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{predicate}` Nested ( `{predicate}.str` Nullable(String), `{predicate}.int` Nullable(Int64), `{predicate}.date` Nullable(Datetime), `{predicate}.num` Nullable(Float64) )", predicate = predicate.replace(":", "__").replace("-", "_"));
     let mut client = ctx.pool.get_handle().await?;
-    let mut column_type= "";
-    match &resource.rtype {
-        DataType::Boolean => column_type = "UInt8",
-        DataType::Datetime => column_type = "DateTime",
-        DataType::Decimal => column_type = "Decimal (14,4)",
-        DataType::Integer => column_type = "Int64",
-        DataType::String => column_type = "String",
-        DataType::Uri => column_type = "String",
-        _unsupported => error!("Unsupported property value type: {:#?}", _unsupported)
-    }
-    let query = format!(
-        "ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{}` Array({})",
-        predicate.replace(":", "__").replace("-", "_"), column_type
-    );
     client.execute(query).await?;
     Ok(())
 }
@@ -244,43 +245,14 @@ fn connect_to_clickhouse(module: &mut Module) -> Result<Pool, &'static str> {
 
 async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
     let init_veda_db = "CREATE DATABASE IF NOT EXISTS veda";
-/*
     let init_individuals_table = r"
         CREATE TABLE IF NOT EXISTS veda.individuals (
             id String,
             rdf__type Array(String),
-            v_s__created Array(DateTime)
+            v_s__created Datetime
         )
         ENGINE = MergeTree()
-        PRIMARY KEY id
-        ORDER BY id
-        PARTITION BY (arrayElement(rdf__type, 1), arrayElement(v_s__created, 1))
-    ";
-*/
-    let init_individuals_table = r"
-        CREATE TABLE IF NOT EXISTS veda.individuals (
-            id String,
-            rdf__type Nested
-            (
-                str Nullable(String),
-                int Nullable(Int64),
-                date Nullable(Datetime),
-                num Nullable(Float64),
-                lang Nullable(String)
-            ),
-            v_s__created Nested
-            (
-                str Nullable(String),
-                int Nullable(Int64),
-                date Nullable(Datetime),
-                num Nullable(Float64),
-                lang Nullable(String)
-            )
-        )
-        ENGINE = MergeTree()
-        PRIMARY KEY id
-        ORDER BY id
-        PARTITION BY (rdf__type.str, v_s__created.date)
+        ORDER BY (rdf__type, v_s__created)
     ";
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
