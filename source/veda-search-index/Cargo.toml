@@ -10,6 +10,7 @@ futures = "0.3.1"
 tokio = "0.2.0-alpha.6"
 log = "0.4"
 chrono = "0.4.9"
+chrono-tz = "0.5"
 
 v_queue = { path = "../v-queue" }
 v_search = { path = "../v-search" }

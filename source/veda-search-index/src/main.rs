@@ -7,7 +7,8 @@ use tokio;
 
 use std::collections::HashMap;
 use std::{thread, time, process};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc, TimeZone};
+use chrono_tz::Tz;
 
 use v_module::info::ModuleInfo;
 use v_module::module::*;
@@ -21,9 +22,15 @@ use v_onto::datatype::Lang;
 use v_queue::consumer::*;
 use v_onto::resource::Value::Int;
 
+//struct Table {
+//    table
+//}
+
 pub struct Context {
     onto: Onto,
     pool: Pool,
+//    columns: HashMap<String, String>,
+//    flat_block: Block,
 }
 
 #[tokio::main]
@@ -41,6 +48,10 @@ async fn main() ->  Result<(), Error> {
         process::exit(101);
     }
     let mut module = Module::default();
+
+    /*let ontology = Onto::default();
+    load_onto(&mut module.fts, &mut module.storage, &mut ctx.onto);
+    info!("Ontology = {:?}", ontology);*/
 
     let mut pool = match connect_to_clickhouse(&mut module) {
         Err(e) => {
@@ -108,8 +119,8 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
 fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) -> Block {
     let mut predicate = predicate.replace(":", "__").replace("-", "_");
     if predicate == "rdf__type" {
-        let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri()).collect();
-        return block.column(&predicate, column_value);
+        let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri().to_string()).collect();
+        return block.column(&predicate, vec![column_value]);
     }
     if predicate == "v_s__created" {
         let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_datetime()).collect();
@@ -155,7 +166,8 @@ fn set_column_value(block: Block, predicate: &str, resources: &Vec<Resource>) ->
         },
         DataType::Datetime => {
             predicate.push_str(".date");
-            let column_value: Vec<i64> = resources.iter().map(|resource| resource.get_datetime()).collect();
+            //let column_value: Vec<NaiveDateTime> = resources.iter().map(|resource| NaiveDateTime::from_timestamp(*resource.get_datetime(), 0)).collect();
+            let column_value: Vec<DateTime<Tz>> = resources.iter().map(|resource| Tz::UTC.timestamp(resource.get_datetime(), 0)).collect();
             block.column(&predicate, vec![column_value])
         },
         _ => {
@@ -190,6 +202,8 @@ async fn export(new_state: &mut Individual, prev_state: &mut Individual, is_new:
         }
     }
 
+    info!("Block = {:?}", insert_block);
+
     let mut client = ctx.pool.get_handle().await?;
 
     client.insert("veda.individuals", insert_block).await?;
@@ -203,7 +217,8 @@ async fn create_predicate_column(predicate: &str, ctx: &Context) -> Result<(), E
     if predicate == "rdf:type" || predicate == "v-s:created" {
         return Ok(());
     }
-    let query = format!("ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{predicate}` Nested ( `{predicate}.str` Nullable(String), `{predicate}.int` Nullable(Int64), `{predicate}.date` Nullable(Datetime), `{predicate}.num` Nullable(Float64) )", predicate = predicate.replace(":", "__").replace("-", "_"));
+    //let query = format!("ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{}` Nested ( str Nullable(String), int Nullable(Int64), date Nullable(Datetime), num Nullable(Float64) )", predicate.replace(":", "__").replace("-", "_"));
+    let query = format!("ALTER TABLE veda.individuals ADD COLUMN IF NOT EXISTS `{}` Nested ( str String, int Int64, date Datetime, num Float64 )", predicate.replace(":", "__").replace("-", "_"));
     let mut client = ctx.pool.get_handle().await?;
     client.execute(query).await?;
     Ok(())
@@ -252,10 +267,24 @@ async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
             v_s__created Datetime
         )
         ENGINE = MergeTree()
-        ORDER BY (rdf__type, v_s__created)
+        ORDER BY (rdf__type[1], v_s__created)
+        PARTITION BY (rdf__type[1], toStartOfMonth(v_s__created))
     ";
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
     client.execute(init_individuals_table).await?;
+    Ok(())
+}
+
+async fn read_columns(pool: &mut Pool) -> Result<(), Error> {
+    let read_columns = "DESCRIBE veda.individuals";
+    let mut columns: HashMap<String, String> = HashMap::new();
+    let mut client = pool.get_handle().await?;
+    let block = client.query("DESCRIBE veda.individuals").fetch_all().await?;
+    for row in block.rows() {
+        let name: String      = row.get("name")?;
+        let data_type: String = row.get("type")?;
+        columns.insert(name, data_type);
+    }
     Ok(())
 }
