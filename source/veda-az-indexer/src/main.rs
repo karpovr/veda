@@ -2,12 +2,12 @@
 extern crate log;
 
 use crate::common::*;
+use v_authorization::Access;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_onto::individual::*;
 use v_queue::consumer::*;
 use v_storage::storage::*;
-use v_authorization::Access;
 
 mod common;
 
@@ -48,16 +48,18 @@ fn main() -> Result<(), i32> {
         &mut queue_consumer,
         &mut module_info.unwrap(),
         &mut ctx,
-        &mut (before_batch as fn(&mut Module, &mut Context)),
+        &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
         &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual) -> Result<(), PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut Context)),
+        &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32)),
     );
     Ok(())
 }
 
-fn before_batch(_module: &mut Module, _ctx: &mut Context) {}
+fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
+    None
+}
 
-fn after_batch(_module: &mut Module, ctx: &mut Context) {
+fn after_batch(_module: &mut Module, ctx: &mut Context, _prepared_batch_size: u32) {
     if (ctx.permission_statement_counter + ctx.membership_counter) % 100 == 0 {
         info!("count prepared: permissions={}, memberships={}", ctx.permission_statement_counter, ctx.membership_counter);
     }
@@ -93,7 +95,7 @@ fn prepare(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
         return Err(PrepareError::Fatal);
     }
 
-    Ok (())
+    Ok(())
 }
 
 fn prepare_permission_statement(prev_state: &mut Individual, new_state: &mut Individual, ctx: &mut Context) {

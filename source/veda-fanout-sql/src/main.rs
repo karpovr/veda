@@ -60,13 +60,14 @@ fn main() {
         &mut queue_consumer,
         &mut module_info.unwrap(),
         &mut ctx,
-        &mut (void as fn(&mut Module, &mut Context)),
+        &mut (before_bath as fn(&mut Module, &mut Context, size_batch: u32)-> Option<u32>),
         &mut (process as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual) -> Result<(), PrepareError>),
-        &mut (void as fn(&mut Module, &mut Context)),
+        &mut (void as fn(&mut Module, &mut Context, prepared_batch_size: u32)),
     );
 }
 
-fn void(_module: &mut Module, _ctx: &mut Context) {}
+fn before_bath(_module: &mut Module, _ctx: &mut Context, _size_batch: u32)->Option<u32> {None}
+fn void(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) {}
 
 fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual) -> Result<(), PrepareError> {
     let cmd = get_cmd(queue_element);
@@ -219,9 +220,10 @@ fn check_create_property_table(
     resource: &Resource,
     transaction: &mut mysql::Transaction,
 ) -> Result<(), &'static str> {
-    if let Some(true) = tables.get(property) {
+    if tables.contains_key(property.to_lowercase().as_str()) {
         return Ok(());
     }
+
     let mut sql_type = "";
     let mut sql_value_index = ", INDEX civ(`value`)";
     match &resource.rtype {
@@ -253,10 +255,13 @@ fn check_create_property_table(
 
     match transaction.query(query) {
         Ok(_) => {
-            tables.insert(property.to_owned(), true);
+            tables.insert(property.to_lowercase(), true);
             Ok(())
         }
-        Err(_) => Err("Unable to create table"),
+        Err(e) => {
+            error!("Error creating property table: {}", e);
+            Err("Unable to create table")
+        },
     }
 }
 
@@ -268,6 +273,7 @@ fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str
                 tables.insert(name, true);
             }
         });
+        debug!("Existing tables: {:?}", tables);
         return Ok(tables);
     }
     Err("Read existing tables error")

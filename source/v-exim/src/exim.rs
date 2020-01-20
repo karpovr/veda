@@ -255,7 +255,7 @@ pub fn processing_message_contains_changes(recv_msg: Vec<u8>, systicket: &str, m
                 indv.parse_all();
                 indv.add_uri("sys:source", &source_veda);
 
-                let res = module.api.update(systicket, cmd, &mut indv);
+                let res = module.api.update(systicket, cmd, &indv);
 
                 if res.result != ResultCode::Ok {
                     error!("fail update, uri={}, result_code={:?}", recv_indv.get_id(), res.result);
@@ -344,7 +344,7 @@ pub fn create_db_id(module: &mut Module) -> Option<String> {
     new_indv.set_id("cfg:system");
     new_indv.add_string("sys:id", &uuid1, Lang::NONE);
 
-    let res = module.api.update(&systicket, IndvOp::Put, &mut new_indv);
+    let res = module.api.update(&systicket, IndvOp::Put, &new_indv);
 
     if res.result != ResultCode::Ok {
         error!("fail update, uri={}, result_code={:?}", new_indv.get_id(), res.result);

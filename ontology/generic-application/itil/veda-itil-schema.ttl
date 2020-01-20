@@ -1,0 +1,56 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+
+<http://semantic-machines.com/veda/veda-itil-schema/>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Инфраструктура ИТ. Схема."@ru ;
+  rdfs:label "Veda system ontology. Infrastructure IT. Schema."@en ;
+  v-s:loadPriority 11 ;
+.
+
+# ------------------------------------------------------------ КЛАССЫ --
+
+#------------------------------------------------------- Инфраструктура ИТ --
+v-s:IT_InfrastructureObjects 
+  rdf:type owl:Class ;
+  rdfs:label "Инфраструктура ИТ"@ru ;
+  rdfs:label "Infrastructure IT"@en ;
+  rdfs:subClassOf v-s:UserThing;
+  #v-ui:hasTemplate v-s:IT_InfrastructureObjectsTemplate;
+.
+
+#--------------------------------------------------- Программное обеспечение --
+v-s:IT_InfrastructureObjectsSoftware
+  rdf:type owl:Class ;
+  rdfs:label "Программное обеспечение"@ru ;
+  rdfs:label "Software"@en ;
+  rdfs:subClassOf v-s:IT_InfrastructureObjects, v-s:Labeled;
+  v-s:labelPattern "{@.v-s:title} - {@.v-s:hasMaintenanceObjectKind.rdfs:label}"^^xsd:string;
+  #v-ui:hasTemplate v-s:IT_InfrastructureObjectsTemplate;
+.
+
+#--------------------------------------------------- Техническое обеспечение --
+v-s:IT_InfrastructureObjectsHardware
+  rdf:type owl:Class ;
+  rdfs:label "Техническое обеспечение"@ru ;
+  rdfs:label "Hardware"@en ;
+  rdfs:subClassOf v-s:IT_InfrastructureObjects, v-s:Labeled;
+  v-s:labelPattern "{@.v-s:title} - {@.v-s:hasMaintenanceObjectKind.rdfs:label}"^^xsd:string;
+  #v-ui:hasTemplate v-s:IT_InfrastructureObjectsTemplate;
+.
+
+#-------------------------------------------------------- Базы данных --
+v-s:IT_InfrastructureObjectsDataBase
+  rdf:type owl:Class ;
+  rdfs:label "База данных"@ru ;
+  rdfs:label "Database"@en ;
+  rdfs:subClassOf v-s:IT_InfrastructureObjects, v-s:Labeled;
+  v-s:labelPattern "{@.v-s:title} - {@.v-s:hasMaintenanceObjectKind.rdfs:label}"^^xsd:string;
+  #v-ui:hasTemplate v-s:IT_InfrastructureObjectsTemplate;
+.

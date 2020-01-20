@@ -59,7 +59,7 @@ if [ -z $1 ] || [ $1 == "az-indexer" ] || [ $1 == "veda-az-indexer" ] || [ $1 ==
 
 fi
 
-if [ $1 == "exim-inquire" ] || [ $1 == "veda-exim-inquire" ] ; then
+if [ $1 == "exim-inquire" ] || [ $1 == "veda-exim-inquire" ] || [ $1 == "exim" ]; then
 
     rm ./veda-exim-inquire
 
@@ -70,7 +70,7 @@ if [ $1 == "exim-inquire" ] || [ $1 == "veda-exim-inquire" ] ; then
 
 fi
 
-if [ $1 == "exim-respond" ] || [ $1 == "veda-exim-respond" ] ; then
+if [ $1 == "exim-respond" ] || [ $1 == "veda-exim-respond" ] || [ $1 == "exim" ]; then
 
     rm ./veda-exim-respond
 
@@ -81,7 +81,7 @@ if [ $1 == "exim-respond" ] || [ $1 == "veda-exim-respond" ] ; then
 
 fi
 
-if [ $1 == "extractor" ] || [ $1 == "veda-extractor" ] ; then
+if [ $1 == "extractor" ] || [ $1 == "veda-extractor" ] || [ $1 == "exim" ]; then
 
     echo start make VEDA-EXTRACTOR
     rm ./veda-extractor
@@ -210,11 +210,6 @@ if [ -z $1 ] || [ $1 == "search-index" ] || [ $1 == "veda-search-index" ] || [ $
     cargo build --release
     cd $BUILD_PATH
     cp $CARGO_TARGET_DIR/release/veda-search-index $PWD
-fi
-
-if [ -z $1 ] || [ $1 == "fanout-sql-np" ] || [ $1 == "veda-fanout-sql-lp" ] || [ $1 == "mv1" ]; then
-    ./tools/build-component.sh veda-fanout-sql-np fanout-sql-np
-    ./tools/build-component.sh veda-fanout-sql-lp fanout-sql-lp
 fi
 
 if [ -z $1 ] || [ $1 == "scripts" ] || [ $1 == "veda-scripts" ] || [ $1 == "mv1" ]; then
