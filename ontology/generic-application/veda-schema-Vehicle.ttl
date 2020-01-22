@@ -7,7 +7,7 @@
 @prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
 @prefix cfg: <http://semantic-machines.com/veda/config/> .
 
-<http://semantic-machines.com/veda/mondi-schema-Vehicle/>
+<http://semantic-machines.com/veda/veda-schema-Vehicle/>
   rdf:type owl:Ontology ;
   rdfs:label "Онтология системы Veda. Транспортное средство"@ru ;
   rdfs:label "Veda system ontology. Vehicle"@en ;

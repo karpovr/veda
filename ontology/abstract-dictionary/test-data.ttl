@@ -48,12 +48,6 @@ td:script_find_long_terms
 .
 
 
-td:khvostiaImage
-  rdf:type v-s:File ;
-  v-s:fileUri "Khvostia" ;
-  v-s:fileName "Khvostia" ;
-  v-s:filePath "/mondi" ;
-.
 
 td:Analyst1
   rdf:type v-s:Position ;
