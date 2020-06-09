@@ -653,6 +653,33 @@ v-ui:SystemPropertiesTemplate
 """ ;
 .
 
+v-ui:SystemPropertiesTemplate2
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон с набором системных свойств"@ru ;
+  rdfs:label "Template with system properties"@en ;
+  rdfs:comment "Системные свойства"@ru ;
+  rdfs:comment "System properties"@en ;
+  v-ui:template """
+<script>
+  if ( individual.isNew() && veda.appointments.length > 1 ) {
+    var control = $("veda-control", template);
+    control.data("source", veda.appointments);
+  } else {
+    template.empty();
+  }
+</script>
+<div>
+  <h3 about="v-ui:SystemPropertiesTemplate2" property="rdfs:comment"></h3>
+  <div class="row">
+    <div class="col-md-3 col-xs-6">
+      <em about="v-s:creator" property="rdfs:label"></em>
+      <veda-control data-type="radio" rel="v-s:creator" class="-view edit -search"></veda-control>
+    </div>
+  </div>
+</div>
+""" ;
+.
+
 v-s:CreatedBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Создано"@ru ;

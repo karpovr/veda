@@ -21,6 +21,7 @@ veda.Module(function (veda) { "use strict";
     return this.load()
       .then(self.initAspect.bind(self))
       .then(self.initAppointment.bind(self))
+      .then(self.initAppointments.bind(self))
       .then(self.initPreferences.bind(self))
       .then(self.initLanguage.bind(self))
       .then(self.save.bind(self));
@@ -52,7 +53,30 @@ veda.Module(function (veda) { "use strict";
     } else {
       return veda.appointment = undefined;
     }
+    this.on("v-s:defaultAppointment", setAppointment);
+    function setAppointment() {
+      veda.appointment = this["v-s:defaultAppointment"][0];
+    }
     return veda.appointment.load();
+  };
+
+  proto.initAppointments = function () {
+    var self = this;
+    return veda.Backend.query({
+      ticket: veda.ticket,
+      query: "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='" + self.id + "'",
+    }).then(function (result) {
+      var appointments_uris = result.result;
+      return Promise.all(
+        appointments_uris.map(function (appointment_uri) {
+          var appointment = new veda.IndividualModel(appointment_uri);
+          return appointment.load();
+        })
+      )
+    }).then(function (appointments) {
+      self.set("v-s:hasAppointment", appointments);
+      return veda.appointments = appointments;
+    });
   };
 
   proto.initPreferences = function () {

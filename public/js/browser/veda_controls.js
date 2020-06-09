@@ -1659,9 +1659,9 @@
       spec = opts.spec,
       rangeRestriction = spec && spec.hasValue("v-ui:rangeRestriction") ? spec["v-ui:rangeRestriction"][0] : undefined,
       range = rangeRestriction ? [ rangeRestriction ] : (new veda.IndividualModel(property_uri))["rdfs:range"],
-      queryPrefix = this.attr("data-query-prefix") || ( spec && spec.hasValue("v-ui:queryPrefix") ? spec["v-ui:queryPrefix"][0] : range.map(function (item) { return "'rdf:type'==='" + item.id + "'"; }).join(" || ") ),
-      source = this.attr("data-source") || undefined,
-      template = this.attr("data-template") || undefined,
+      queryPrefix = this.data("query-prefix") || ( spec && spec.hasValue("v-ui:queryPrefix") ? spec["v-ui:queryPrefix"][0] : range.map(function (item) { return "'rdf:type'==='" + item.id + "'"; }).join(" || ") ),
+      source = this.data("source") || undefined,
+      template = this.data("template") || undefined,
       options = [],
       withDeleted = false || this.data("deleted");
 
@@ -1707,11 +1707,7 @@
         options = spec["v-ui:optionValue"];
         return renderOptions(options);
       } else if (source) {
-        return Promise.resolve(eval(source))
-          .then(renderOptions)
-          .catch(function (error) {
-            console.log("Source error", source);
-          });
+        return renderOptions(source);
       } else if (queryPrefix) {
         return interpolate(queryPrefix)
           .then(function (queryPrefix) {
