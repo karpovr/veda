@@ -1,6 +1,16 @@
 // Veda application authentication
 
-veda.Module(function (veda) { "use strict";
+"use strict";
+
+import veda from "../common/veda";
+
+import Backend from "./backend";
+
+import IndividualModel from "../common/individual_model";
+
+import Sha256 from "../common/lib/sha256";
+
+export default function Auth() {
 
   var storage = typeof localStorage !== "undefined" && localStorage !== null ? localStorage : {
     clear: function () {
@@ -29,7 +39,7 @@ veda.Module(function (veda) { "use strict";
       hash = Sha256.hash(password);
       passwordInput.val("");
 
-    var ntlmProvider = new veda.IndividualModel("cfg:NTLMAuthProvider", true, false);
+    var ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
     return ntlmProvider.load().then(function (ntlmProvider) {
       var ntlm = !ntlmProvider.hasValue("v-s:deleted", true) && ntlmProvider.hasValue("rdf:value") && ntlmProvider.get("rdf:value")[0];
       if (ntlm) {
@@ -125,7 +135,7 @@ veda.Module(function (veda) { "use strict";
   var captchaRendered = false;
   function reCAPTCHA(onSuccess, onExpired, onError) {
     if (!captchaRendered) {
-      var reCAPTCHA_key = new veda.IndividualModel("cfg:reCAPTCHA_client_key");
+      var reCAPTCHA_key = new IndividualModel("cfg:reCAPTCHA_client_key");
       reCAPTCHA_key.load().then(function (reCAPTCHA_key) {
         window.captchaCallback = function() {
           grecaptcha.render("recaptcha", {
@@ -331,7 +341,7 @@ veda.Module(function (veda) { "use strict";
     }
 
     // NTLM auth using iframe
-    var ntlmProvider = new veda.IndividualModel("cfg:NTLMAuthProvider", true, false);
+    var ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
     ntlmProvider.load().then(function (ntlmProvider) {
       var ntlm = !ntlmProvider.hasValue("v-s:deleted", true) && ntlmProvider.hasValue("rdf:value") && ntlmProvider.get("rdf:value")[0];
       if (ntlm) {
@@ -411,7 +421,7 @@ veda.Module(function (veda) { "use strict";
           user_uri = storage.user_uri,
           end_time = ( new Date() < new Date(parseInt(storage.end_time)) ) && storage.end_time;
       if (ticket && user_uri && end_time) {
-        return veda.Backend.is_ticket_valid(ticket);
+        return Backend.is_ticket_valid(ticket);
       } else {
         return false;
       }
@@ -424,7 +434,7 @@ veda.Module(function (veda) { "use strict";
           end_time: storage.end_time
         });
       } else {
-        var authRequired = new veda.IndividualModel("cfg:AuthRequired");
+        var authRequired = new IndividualModel("cfg:AuthRequired");
         authRequired.load().then(function (authRequiredParam) {
           if ( authRequiredParam && authRequiredParam.hasValue("rdf:value", false) ) {
             veda.trigger("login:success", {
@@ -441,4 +451,5 @@ veda.Module(function (veda) { "use strict";
     .then(function () {
       $("#load-indicator").hide();
     });
-});
+
+}

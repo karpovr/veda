@@ -1,6 +1,8 @@
 // Veda server utility functions
 
-veda.Module(function (veda) { "use strict";
+import Module from "../common/veda_spa";
+
+export default Module(function (veda) { "use strict";
 
   veda.Util = veda.Util || {};
 

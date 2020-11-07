@@ -1,7 +1,11 @@
 /* Riot 1.0.4, @license MIT, (c) 2014 Muut Inc + contributors */
-(function(riot) { "use strict";
+
+var riot = {};
 
 riot.observable = function(el) {
+
+  if (el.on && el.one && el.off && el.trigger) { return el; }
+
   var callbacks = {}, slice = [].slice;
 
   el.on = function(events, fn) {
@@ -54,6 +58,7 @@ riot.observable = function(el) {
   return el;
 
 };
+
 var FN = {}, // Precompiled templates (JavaScript functions)
   template_escape = {"\\": "\\\\", "\n": "\\n", "\r": "\\r", "'": "\\'"},
   render_escape = {'&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;'};
@@ -116,4 +121,5 @@ riot.render = function(tmpl, data, escape_fn) {
     if (!prevent) pop(to);
   };
 })();
-})( typeof window === 'object' ? window.riot = {} : this.riot = {} );
+
+export default riot

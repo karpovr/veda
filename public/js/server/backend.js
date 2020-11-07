@@ -1,5 +1,8 @@
 // HTTP server functions
-veda.Module(function Backend(veda) { "use strict";
+
+import Module from "../common/veda_spa";
+
+export default Module(function Backend(veda) { "use strict";
 
   veda.Backend = {};
 

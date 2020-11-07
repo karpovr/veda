@@ -6,6 +6,8 @@
 
 var Sha256 = {};  // Sha256 namespace
 
+export default Sha256;
+
 /**
  * Generates SHA-256 hash of string
  *

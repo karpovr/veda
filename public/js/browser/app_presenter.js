@@ -1,6 +1,18 @@
 // Veda application presenter
 
-veda.Module(function (veda) { "use strict";
+"use strict";
+
+import veda from "../common/veda";
+
+import riot from "../common/lib/riot";
+
+import IndividualModel from "../common/individual_model";
+
+import Notify from "../browser/notify";
+
+import Util from "../common/util";
+
+export default function AppPresenter() {
 
   // View resource using special templates:
   // "v-ui:ttl" on Ctrl + Alt + Click
@@ -62,9 +74,9 @@ veda.Module(function (veda) { "use strict";
       var $this = $(this);
       return $this.attr("about") || $this.attr("resource");
     }).get();
-    resources = veda.Util.unique(resources);
+    resources = Util.unique(resources);
     resources.forEach(function (resource_uri) {
-      var resource = new veda.IndividualModel(resource_uri);
+      var resource = new IndividualModel(resource_uri);
       for (var property_uri in resource.properties) {
         if (property_uri === "@") { continue; }
         if ( resource.properties[property_uri] && resource.properties[property_uri].length && resource.properties[property_uri][0].type === "String" ) {
@@ -134,7 +146,7 @@ veda.Module(function (veda) { "use strict";
       }
 
       if (uri) {
-        var individual = new veda.IndividualModel(uri);
+        var individual = new IndividualModel(uri);
         $(container).empty();
         individual.present(container, template, mode, extra).then(function () {
           $("#load-indicator").hide();
@@ -159,10 +171,10 @@ veda.Module(function (veda) { "use strict";
     var start_url = veda.manifest.start_url;
     $("#app").empty();
     if (layout_uri && main_uri && start_url) {
-      var layout = new veda.IndividualModel(layout_uri);
+      var layout = new IndividualModel(layout_uri);
       layout.present("#app")
         .then(function () {
-          var main = new veda.IndividualModel(main_uri);
+          var main = new IndividualModel(main_uri);
           return main.load();
         })
         .then(installRouter)
@@ -172,9 +184,9 @@ veda.Module(function (veda) { "use strict";
     } else {
       console.log("Incomplete layout params in manifest");
       var layout_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:LayoutExternal" : "cfg:Layout" ;
-      var layout_param = new veda.IndividualModel( layout_param_uri );
+      var layout_param = new IndividualModel( layout_param_uri );
       var main_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:MainExternal" : "cfg:Main" ;
-      var main_param = new veda.IndividualModel( main_param_uri );
+      var main_param = new IndividualModel( main_param_uri );
       layout_param.load()
       .then(function (layout_param) {
         return layout_param["rdf:value"][0].load();
@@ -190,7 +202,7 @@ veda.Module(function (veda) { "use strict";
       })
       .then(installRouter)
       .catch( function (error) {
-        var notify = new veda.Notify();
+        var notify = new Notify();
         notify("danger", error);
       })
       .then(function () {
@@ -208,7 +220,7 @@ veda.Module(function (veda) { "use strict";
     } else if ( value === "false" ) {
       return false;
     } else {
-      var individ = new veda.IndividualModel(value);
+      var individ = new IndividualModel(value);
       if ( individ.isSync() && !individ.isNew() ) { return individ; }
     }
     return value || null;
@@ -218,7 +230,7 @@ veda.Module(function (veda) { "use strict";
   if (typeof localStorage !== "undefined" && localStorage !== null) {
     // Listen to client notifications
     veda.on("started", function () {
-      var clientNotification = new veda.IndividualModel("cfg:ClientNotification");
+      var clientNotification = new IndividualModel("cfg:ClientNotification");
       clientNotification.load().then(function (clientNotification) {
         clientNotification.on("afterReset", checkNotification);
         checkNotification.call(clientNotification);
@@ -232,11 +244,11 @@ veda.Module(function (veda) { "use strict";
           browserNotificationList = [];
         }
         var serverNotificationList = clientNotification.get("rdf:value").map(function (item) { return item.id; });
-        if ( !veda.Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
+        if ( !Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
           serverNotificationList.reduce(function (p, notification_uri, i) {
             return p.then(function () {
               if (browserNotificationList.indexOf(notification_uri) >= 0) { return; }
-              var notification = new veda.IndividualModel(notification_uri);
+              var notification = new IndividualModel(notification_uri);
               return notification.load().then(function (notification) {
                 return (notification.properties["v-s:newsAudience"] || []).map(function (audience) {
                   return audience.data;
@@ -252,7 +264,7 @@ veda.Module(function (veda) { "use strict";
                     } else if (memberOf_uri > audience_uri) {
                       i++;
                     } else {
-                      return veda.Util.confirm(notification).then(function (confirmed) {
+                      return Util.confirm(notification).then(function (confirmed) {
                         if ( confirmed ) {
                           localStorage.clientNotification = JSON.stringify(serverNotificationList);
                           if (notification.hasValue("v-s:script")) {
@@ -335,4 +347,5 @@ veda.Module(function (veda) { "use strict";
       }
     });
   }
-});
+
+}
