@@ -44,82 +44,27 @@
     <meta name="description" content=""/>
     <meta name="author" content=""/>
     <link rel="manifest" href="./manifest">
+
+    <link href="/css/bootstrap.min.css?v=6" rel="stylesheet"/>
+    <!--link href="/css/bootstrap-theme.min.css?v=6" rel="stylesheet"/-->
+    <link href="/css/codemirror/codemirror.css?v=6" rel="stylesheet"/>
+    <link href="/css/codemirror/fullscreen.css?v=6" rel="stylesheet"/>
+    <!--link href="/css/fullcalendar.min.css?v=6" rel="stylesheet"/-->
+    <link href="/css/bootstrap-datetimepicker.min.css?v=6" rel="stylesheet"/>
+    <link href="/css/veda.css?v=6" rel="stylesheet"/>
+    <link href="/css/font-awesome.min.css?v=6" rel="stylesheet"/>
+    <link href="/css/cropper.min.css?v=6" rel="stylesheet"/>
+
     <link rel="shortcut icon" href="/favicon.ico"/>
-
-    <script type="systemjs-importmap">
-      {
-        "imports": {
-          "main": "/dist/main.js",
-          "bootstrap/":"/node_modules/bootstrap/dist/"
-        }
-      }
-    </script>
-    <script src="/node_modules/systemjs/dist/system.min.js"></script>
-    <script src="/node_modules/systemjs/dist/extras/amd.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function (e) {
-        System.import("main");
-      });
-    </script>
-
-    <script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="/node_modules/jquery-ui-dist/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-
-    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="/dist/css/veda.css"/>
-
-    <link rel="stylesheet" href="/node_modules/cropperjs/dist/cropper.min.css" />
-    <script type="text/javascript" src="/node_modules/cropperjs/dist/cropper.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/moment/min/moment-with-locales.min.js"></script>
-
-    <link rel="stylesheet" href="/node_modules/fullcalendar/dist/fullcalendar.min.css"/>
-    <script type="text/javascript" src="/node_modules/fullcalendar/dist/fullcalendar.min.js"></script>
-    <script type="text/javascript" src="/node_modules/fullcalendar/dist/locale/ru.js"></script>
-
-    <link rel="stylesheet" href="/node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css"/>
-    <script type="text/javascript" src="/node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/file-saver/dist/FileSaver.min.js" ></script>
-
-    <script type="text/javascript" src="/node_modules/autosize/dist/autosize.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js"></script>
-
-    <script type="text/javascript" src="/node_modules/jquery-touchswipe/jquery.touchSwipe.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/jszip/dist/jszip.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/marked/marked.min.js"></script>
-
-    <link rel="stylesheet" href="/node_modules/codemirror/lib/codemirror.css"/>
-    <link rel="stylesheet" href="/node_modules/codemirror/addon/display/fullscreen.css"/>
-    <script type="text/javascript" src="/node_modules/codemirror/lib/codemirror.js" type="text/javascript"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/mode/xml/xml.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/mode/javascript/javascript.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/mode/css/css.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/mode/turtle/turtle.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/mode/htmlmixed/htmlmixed.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/addon/edit/closebrackets.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/addon/edit/closetag.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/addon/edit/matchbrackets.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/addon/edit/matchtags.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/addon/fold/xml-fold.js?v=6"></script>
-    <script type="text/javascript" src="/node_modules/codemirror/addon/display/fullscreen.js?v=6"></script>
-
-    <script type="text/javascript" src="/node_modules/vis-network/dist/vis-network.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/jsplumb/dist/js/jsPlumb-1.7.9-min.js"></script>
-
-    <script type="text/javascript" src="/dist/js/browser/lib/promise.js"></script>
-
-    <script type="text/javascript" src="/dist/js/browser/lib/n3-browser.min.js"></script>
 
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private" />
     <!--meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src https://www.google.com:443 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src https://www.google.com:443 https://www.gstatic.com:443 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: wss:;" /-->
+
+    <!-- BPMN -->
+    <link href="/js/bpmn/diagram-js.css" rel="stylesheet"/>
+    <link href="/js/bpmn/bpmn-font/css/bpmn-embedded.css" rel="stylesheet"/>
+    <script src="/js/bpmn/veda-bpmn.bundle.js"></script>
   </head>
   <body>
 
@@ -552,5 +497,84 @@
       </button><input type="file" style="display:none"/>
     </script>
 
+    <!-- Javascript -->
+
+    <!-- Utils & UI -->
+    <script type="text/javascript" src="/js/browser/lib/promise.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/jquery.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/jquery-ui.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/bootstrap.min.js?v=6"></script>
+    <script type="text/javascript" src="/modules/docflow/js/browser/lib/jsplumb.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/vis.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/bootstrap-contextmenu.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/n3-browser.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/FileSaver.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/autosize.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/moment-with-locales.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/bootstrap-datetimepicker.min.js?v=6"></script>
+    <!--script type="text/javascript" src="/js/browser/lib/fullcalendar.min.js?v=6"></script-->
+    <script type="text/javascript" src="/js/browser/lib/locale/ru.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/jquery.touchSwipe.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/jszip.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/marked.min.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/cropper.min.js?v=6"></script>
+
+    <!-- CodeMirror -->
+    <script type="text/javascript" src="/js/browser/lib/codemirror/codemirror.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/mode/xml/xml.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/mode/javascript/javascript.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/mode/css/css.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/mode/turtle/turtle.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/mode/htmlmixed/htmlmixed.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/addon/edit/closebrackets.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/addon/edit/closetag.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/addon/edit/matchbrackets.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/addon/edit/matchtags.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/addon/fold/xml-fold.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/lib/codemirror/addon/display/fullscreen.js?v=6"></script>
+
+    <!-- Veda browser & server -->
+    <script type="text/javascript" src="/js/common/lib/riot.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/lib/sha256.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/veda_spa.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/util.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/app_model.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/individual_model.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/user_model.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/ontology_model.js?v=6"></script>
+    <script type="text/javascript" src="/js/common/numerator.js?v=6"></script>
+
+    <!-- Veda browser only -->
+    <script type="text/javascript" src="/js/browser/update_service.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/notify.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/local_db.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/backend.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/util.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/veda_controls.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/table_sortable.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/individual_presenter.js?v=6"></script>
+    <script type="text/javascript" src="/modules/docflow/js/browser/veda_workflow_editor.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/app_presenter.js?v=6"></script>
+    <script type="text/javascript" src="/js/browser/auth.js?v=6"></script>
+
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function (event) {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function (e) {
+          var loadIndicator = document.getElementById("load-indicator");
+          loadIndicator.style.display = "none";
+          if (this.status == 200) {
+            var manifest = JSON.parse(xhr.response);
+            veda.Module(manifest);
+          } else {
+            console.log(e);
+          }
+        };
+        xhr.onerror = console.log;
+        xhr.ontimeout = console.log;
+        xhr.open("GET", "./manifest");
+        xhr.send();
+      });
+    </script>
   </body>
 </html>

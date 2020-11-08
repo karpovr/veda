@@ -10,6 +10,11 @@ import Auth from "./js/browser/auth.js";
 
 import "./js/browser/individual_presenter.js";
 
+//import "../node_modules/bootstrap/dist/js/bootstrap.js";
+//import bootstrap_styles from "../node_modules/bootstrap/dist/css/bootstrap.css";
+//import veda_styles from "./css/veda.css";
+//document.adoptedStyleSheets = [...document.adoptedStyleSheets, bootstrap_styles, veda_styles];
+
 var xhr = new XMLHttpRequest();
 xhr.onload = function (e) {
   var loadIndicator = document.getElementById("load-indicator");
