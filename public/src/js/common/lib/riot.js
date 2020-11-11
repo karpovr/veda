@@ -2,6 +2,8 @@
 
 var riot = {};
 
+export default riot;
+
 riot.observable = function(el) {
 
   if (el.on && el.one && el.off && el.trigger) { return el; }
@@ -121,5 +123,3 @@ riot.render = function(tmpl, data, escape_fn) {
     if (!prevent) pop(to);
   };
 })();
-
-export default riot
