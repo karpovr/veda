@@ -8,6 +8,8 @@ import IndividualModel from "../common/individual_model.js";
 
 import Util from "../common/util.js";
 
+import riot from "../common/lib/riot.js";
+
 import Notify from "./notify.js";
 
 IndividualModel.prototype.present = IndividualPresenter;
@@ -102,10 +104,8 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
 function renderTemplate(individual, container, template, mode, extra, toAppend) {
   var match,
       pre_render_src,
-      pre_render,
       pre_result,
-      post_render_src,
-      post_render;
+      post_render_src;
 
   template = template.trim();
 
@@ -117,14 +117,9 @@ function renderTemplate(individual, container, template, mode, extra, toAppend) 
   post_render_src = match[3];
 
   if (pre_render_src) {
-    pre_render = new Function("veda", "individual", "container", "template", "mode", "extra", "\"use strict\";" + pre_render_src);
+    pre_result = eval("(function (){ 'use strict'; " + pre_render_src + "}).call(individual);");
   }
-  if (post_render_src) {
-    post_render = new Function("veda", "individual", "container", "template", "mode", "extra", "\"use strict\";" + post_render_src);
-  }
-  if (pre_render) {
-    pre_result = pre_render.call(individual, veda, individual, container, template, mode, extra);
-  }
+
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(function () {
 
     return processTemplate(individual, container, template, mode).then(function (processedTemplate) {
@@ -135,10 +130,9 @@ function renderTemplate(individual, container, template, mode, extra, toAppend) 
         container.append(processedTemplate);
       }
 
-      if (post_render) {
-        post_render.call(individual, veda, individual, container, processedTemplate, mode, extra);
+      if (post_render_src) {
+        eval("(function (){ 'use strict'; " + post_render_src + "}).call(individual);");
       }
-
       return processedTemplate;
 
     });

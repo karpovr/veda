@@ -46,22 +46,6 @@
     <link rel="manifest" href="./manifest">
     <link rel="shortcut icon" href="/favicon.ico"/>
 
-    <script type="systemjs-importmap">
-      {
-        "imports": {
-          "main": "/dist/main.js",
-          "bootstrap/":"/node_modules/bootstrap/dist/"
-        }
-      }
-    </script>
-    <script src="/node_modules/systemjs/dist/system.min.js"></script>
-    <script src="/node_modules/systemjs/dist/extras/amd.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function (e) {
-        System.import("main");
-      });
-    </script>
-
     <script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="/node_modules/jquery-ui-dist/jquery-ui.min.js"></script>
     <script type="text/javascript" src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -116,6 +100,22 @@
     <script type="text/javascript" src="/dist/js/browser/lib/promise.js"></script>
 
     <script type="text/javascript" src="/dist/js/browser/lib/n3-browser.min.js"></script>
+
+    <script type="systemjs-importmap">
+      {
+        "imports": {
+          "main": "/dist/main.js",
+          "bootstrap/":"/node_modules/bootstrap/dist/"
+        }
+      }
+    </script>
+    <script src="/node_modules/systemjs/dist/system.min.js"></script>
+    <script src="/node_modules/systemjs/dist/extras/amd.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function (e) {
+        System.import("main");
+      });
+    </script>
 
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private" />
