@@ -12,6 +12,8 @@ import riot from "../common/lib/riot.js";
 
 import Notify from "./notify.js";
 
+import "./veda_controls.js";
+
 IndividualModel.prototype.present = IndividualPresenter;
 
 export default IndividualPresenter;
