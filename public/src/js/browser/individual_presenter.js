@@ -12,6 +12,10 @@ import riot from "../common/lib/riot.js";
 
 import Notify from "./notify.js";
 
+import $ from "jquery";
+
+import "jquery-ui";
+
 import "./veda_controls.js";
 
 IndividualModel.prototype.present = IndividualPresenter;

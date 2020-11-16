@@ -174,7 +174,7 @@ v-s:ClearBundle
   rdfs:label "Clear"@en ;
 .
 
-v-s:TS_UserScript 
+v-s:TS_UserScript
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:UserScriptTemplate;
@@ -223,7 +223,6 @@ v-s:UserScriptTemplate
       <pre about="@" property="v-s:output" class="view edit -search" style="height:300px; overflow:auto"></pre>
     </div>
   </div>
-
   <hr>
   <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
   <br>
@@ -234,7 +233,6 @@ v-s:UserScriptTemplate
       <button type="button" class="action btn btn-default -view edit -search" id="clear" about="v-s:ClearBundle" property="rdfs:label"/>
     </div>
   </div>
-
 </div>
 <script>
   // Clear output on save
@@ -451,37 +449,37 @@ v-s:StopBundle
   rdfs:label "Stop"@en ;
 .
 
-v-s:TS_Operation 
+v-s:TS_Operation
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-ui:forClass v-s:Operation
 .
-v-s:TS_GenericOperation 
+v-s:TS_GenericOperation
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-ui:forClass v-s:GenericOperation
 .
-v-s:TS_OperationDelete 
+v-s:TS_OperationDelete
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-ui:forClass v-s:OperationDelete
 .
-v-s:TS_OperationRemove 
+v-s:TS_OperationRemove
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-ui:forClass v-s:OperationRemove
 .
-v-s:TS_OperationRestore 
+v-s:TS_OperationRestore
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-ui:forClass v-s:OperationRestore
 .
-v-s:TS_OperationUpdate 
+v-s:TS_OperationUpdate
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "10"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;

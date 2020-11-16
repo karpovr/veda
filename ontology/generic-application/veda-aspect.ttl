@@ -163,13 +163,13 @@ v-s:RemoveFromFavorites
 .
 
 # Templates-------------------------
-v-s:TS_Aspect 
+v-s:TS_Aspect
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:AspectTemplate;
   v-ui:forClass v-s:Aspect
 .
-v-s:TS_PersonalAspect 
+v-s:TS_PersonalAspect
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:PersonalAspectTemplate;
@@ -288,7 +288,7 @@ v-s:PersonalImageTemplate
   <div rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></div>
   <br>
   <div class="text-center" style="margin-top: auto;">
-    <veda-control rel="v-s:hasImage" data-type="file" class="view edit search"></veda-control>
+    <veda-control rel="v-s:hasImage" data-type="file" data-ratio="1" class="view edit search"></veda-control>
   </div>
 </div>
   """ ;

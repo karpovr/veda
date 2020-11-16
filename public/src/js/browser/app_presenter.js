@@ -12,6 +12,8 @@ import Notify from "../browser/notify.js";
 
 import Util from "../common/util.js";
 
+import $ from "jquery";
+
 export default function AppPresenter() {
 
   // View resource using special templates:

@@ -46,37 +46,9 @@
     <link rel="manifest" href="./manifest">
     <link rel="shortcut icon" href="/favicon.ico"/>
 
-    <script type="text/javascript" src="/node_modules/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="/node_modules/jquery-ui-dist/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-
     <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/dist/css/veda.css"/>
-
-    <link rel="stylesheet" href="/node_modules/cropperjs/dist/cropper.min.css" />
-    <script type="text/javascript" src="/node_modules/cropperjs/dist/cropper.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/moment/min/moment-with-locales.min.js"></script>
-
-    <link rel="stylesheet" href="/node_modules/fullcalendar/dist/fullcalendar.min.css"/>
-    <script type="text/javascript" src="/node_modules/fullcalendar/dist/fullcalendar.min.js"></script>
-    <script type="text/javascript" src="/node_modules/fullcalendar/dist/locale/ru.js"></script>
-
-    <link rel="stylesheet" href="/node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css"/>
-    <script type="text/javascript" src="/node_modules/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/file-saver/dist/FileSaver.min.js" ></script>
-
-    <script type="text/javascript" src="/node_modules/autosize/dist/autosize.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js"></script>
-
-    <script type="text/javascript" src="/node_modules/jquery-touchswipe/jquery.touchSwipe.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/jszip/dist/jszip.min.js"></script>
-
-    <script type="text/javascript" src="/node_modules/marked/marked.min.js"></script>
 
     <link rel="stylesheet" href="/node_modules/codemirror/lib/codemirror.css"/>
     <link rel="stylesheet" href="/node_modules/codemirror/addon/display/fullscreen.css"/>
@@ -101,7 +73,22 @@
       {
         "imports": {
           "main": "/dist/main.js",
-          "bootstrap/":"/node_modules/bootstrap/dist/"
+          "jquery": "/node_modules/jquery/dist/jquery.min.js",
+          "jquery-ui": "/node_modules/jquery-ui-dist/jquery-ui.min.js",
+          "bootstrap":"/node_modules/bootstrap/dist/js/bootstrap.min.js",
+          "cropper/":"/node_modules/cropperjs/dist/",
+          "moment":"/node_modules/moment/min/moment-with-locales.min.js",
+          "datetimepicker/":"/node_modules/eonasdan-bootstrap-datetimepicker/build/",
+          "fullcalendar/":"/node_modules/fullcalendar/dist/",
+          "contextmenu":"/node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js",
+          "touchswipe":"/node_modules/jquery-touchswipe/jquery.touchSwipe.min.js",
+          "autosize":"/node_modules/autosize/dist/autosize.min.js",
+          "filesaver":"/node_modules/file-saver/FileSaver.min.js",
+          "jszip":"/node_modules/jszip/dist/jszip.min.js",
+          "marked":"/node_modules/marked/marked.min.js",
+          "codeflask":"/node_modules/codeflask/build/codeflask.min.js",
+          "codejar":"/node_modules/codejar/codejar.js",
+          "prism":"/node_modules/prismjs/prism.js"
         }
       }
     </script>
@@ -442,7 +429,7 @@
     <script type="html/template" id="multilingual-text-control-template">
       <div class="input-group">
         <div class="input-group-addon"><small class="language-tag"></small></div>
-        <textarea class="form-control" lang="" rows="1" />
+        <textarea class="form-control" lang="" rows="1"></textarea>
       </div>
     </script>
 

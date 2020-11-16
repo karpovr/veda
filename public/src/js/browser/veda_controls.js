@@ -2,6 +2,22 @@
 
 import veda from "../common/veda.js";
 
+import "cropper/cropper.min.css";
+
+import Cropper from "cropper/cropper.min.js";
+
+import moment from "moment";
+
+import $ from "jquery";
+
+import autosize from "autosize";
+
+//import CodeFlask from "codeflask";
+
+import "datetimepicker/css/bootstrap-datetimepicker.min.css";
+
+import datetimepicker from "datetimepicker/js/bootstrap-datetimepicker.min.js";
+
 ;(function( $ ) { "use strict";
 
   // INPUT CONTROLS
@@ -812,7 +828,7 @@ import veda from "../common/veda.js";
       e.stopPropagation();
       if (e.type === "view") {
         control.attr("disabled", "disabled");
-        control.parents("label").tooltip("destroy");
+        //control.parents("label").tooltip("destroy");
       } else {
         if ( control.closest(".checkbox.disabled").length ) {
           control.attr("disabled", "disabled");
@@ -2038,6 +2054,13 @@ import veda from "../common/veda.js";
     opts.change = function (value) {
       individual.set(property_uri, [value]);
     };
+
+    //~ var flask = new CodeFlask(editorEl, { language: 'js' });
+    //~ flask.updateCode(opts.value);
+    //~ flask.onUpdate(function (value) {
+      //~ console.log(value);
+    //~ });
+
     if (typeof self.attr('data-mode') !== "undefined") opts.sourceMode = self.attr('data-mode');
     if (property_uri === "v-s:script") opts.sourceMode = "javascript";
     if (property_uri === "v-ui:template") opts.sourceMode = "htmlmixed";
