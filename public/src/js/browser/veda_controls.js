@@ -16,6 +16,8 @@ import "datetimepicker/css/bootstrap-datetimepicker.min.css";
 
 import datetimepicker from "datetimepicker/js/bootstrap-datetimepicker.min.js";
 
+import ace from "ace";
+
 ;(function( $ ) { "use strict";
 
   // INPUT CONTROLS
@@ -2054,54 +2056,33 @@ import datetimepicker from "datetimepicker/js/bootstrap-datetimepicker.min.js";
     };
 
     if (typeof self.attr('data-mode') !== "undefined") opts.sourceMode = self.attr('data-mode');
-    if (property_uri === "v-s:script") opts.sourceMode = "javascript";
-    if (property_uri === "v-ui:template") opts.sourceMode = "htmlmixed";
-    var editor = CodeMirror(editorEl, {
-      value: opts.value,
+    if (property_uri === "v-s:script") opts.sourceMode = "ace/mode/javascript";
+    if (property_uri === "v-ui:template") opts.sourceMode = "ace/mode/html";
+
+    var editor = ace.edit(editorEl, {
       mode: opts.sourceMode,
-      lineWrapping: true,
-      matchBrackets: true,
-      autoCloseBrackets: true,
-      matchTags: true,
-      autoCloseTags: true,
-      lineNumbers: true,
-      extraKeys: {
-        "F9": function(cm) {
-          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-        },
-        "Esc": function(cm) {
-          if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
-        },
-        "Tab": function(cm) {
-          var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-          cm.replaceSelection(spaces);
-        }
-      }
+      selectionStyle: "text",
+      fontSize: 14,
+      value: opts.value
     });
 
-    setTimeout( function () {
-      editor.refresh();
-    }, 100);
     this.on("view edit search", function (e) {
       e.stopPropagation();
-      editor.refresh();
-      e.type === "view"   ? ( editor.setOption("readOnly", "nocursor") ) :
-      e.type === "edit"   ? ( editor.setOption("readOnly", false) ) :
-      e.type === "search" ? ( editor.setOption("readOnly", false) ) :
+      e.type === "view"   ? ( editor.setReadOnly(true) ) :
+      e.type === "edit"   ? ( editor.setReadOnly(false) ) :
+      e.type === "search" ? ( editor.setReadOnly(false) ) :
       true;
     });
 
-    editor.on("change", function () {
-      var value = opts.parser( editor.doc.getValue() );
+    editor.session.on("change", function(delta) {
+      var value = opts.parser( editor.session.getValue() );
       opts.change(value);
     });
+
     function handler(values) {
-      var doc = editor.getDoc();
-      var value = doc.getValue();
+      var value = opts.parser( editor.session.getValue() );
       if (!values.length || values[0].toString() !== value) {
-        var cursor = doc.getCursor();
-        doc.setValue( values.length ? values[0].toString() : "" );
-        doc.setCursor(cursor);
+        editor.setValue( values.length ? values[0].toString() : "" );
       }
     }
     individual.on(property_uri, handler );
