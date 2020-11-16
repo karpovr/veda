@@ -22,7 +22,6 @@
     "autosize": "^4.0.2",
     "bootstrap": "^3.4.1",
     "bootstrap-contextmenu": "^1.0.0",
-    "codemirror": "^5.28.0",
     "cropperjs": "^1.5.9",
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
     "file-saver": "^1.3.8",
