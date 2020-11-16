@@ -1,5 +1,9 @@
 // Main
 
+import "jquery";
+
+import "bootstrap";
+
 import veda from "./js/common/veda.js";
 
 import AppModel from "./js/common/app_model.js";
@@ -9,10 +13,6 @@ import AppPresenter from "./js/browser/app_presenter.js";
 import Auth from "./js/browser/auth.js";
 
 import "./js/browser/individual_presenter.js";
-
-import "jquery";
-
-import "bootstrap";
 
 var xhr = new XMLHttpRequest();
 xhr.onload = function (e) {

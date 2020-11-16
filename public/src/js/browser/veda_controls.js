@@ -12,8 +12,6 @@ import $ from "jquery";
 
 import autosize from "autosize";
 
-//import CodeFlask from "codeflask";
-
 import "datetimepicker/css/bootstrap-datetimepicker.min.css";
 
 import datetimepicker from "datetimepicker/js/bootstrap-datetimepicker.min.js";
@@ -2054,12 +2052,6 @@ import datetimepicker from "datetimepicker/js/bootstrap-datetimepicker.min.js";
     opts.change = function (value) {
       individual.set(property_uri, [value]);
     };
-
-    //~ var flask = new CodeFlask(editorEl, { language: 'js' });
-    //~ flask.updateCode(opts.value);
-    //~ flask.onUpdate(function (value) {
-      //~ console.log(value);
-    //~ });
 
     if (typeof self.attr('data-mode') !== "undefined") opts.sourceMode = self.attr('data-mode');
     if (property_uri === "v-s:script") opts.sourceMode = "javascript";
