@@ -1,9 +1,5 @@
 // Main
 
-import "jquery";
-
-import "bootstrap";
-
 import veda from "./js/common/veda.js";
 
 import AppModel from "./js/common/app_model.js";
@@ -14,20 +10,28 @@ import Auth from "./js/browser/auth.js";
 
 import "./js/browser/individual_presenter.js";
 
-var xhr = new XMLHttpRequest();
-xhr.onload = function (e) {
-  var loadIndicator = document.getElementById("load-indicator");
-  loadIndicator.style.display = "none";
-  if (this.status == 200) {
-    var manifest = JSON.parse(xhr.response);
-    AppModel.call(veda, manifest);
-    Auth();
-    AppPresenter();
-  } else {
-    console.log(e);
-  }
-};
-xhr.onerror = console.log;
-xhr.ontimeout = console.log;
-xhr.open("GET", "./manifest");
-xhr.send();
+System.import("jquery").then(function () {
+
+  System.import("bootstrap").then(function () {
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function (e) {
+      var loadIndicator = document.getElementById("load-indicator");
+      loadIndicator.style.display = "none";
+      if (this.status == 200) {
+        var manifest = JSON.parse(xhr.response);
+        AppModel.call(veda, manifest);
+        Auth();
+        AppPresenter();
+      } else {
+        console.log(e);
+      }
+    };
+    xhr.onerror = console.log;
+    xhr.ontimeout = console.log;
+    xhr.open("GET", "./manifest");
+    xhr.send();
+
+  });
+
+});

@@ -6,15 +6,9 @@ import "cropper/cropper.min.css";
 
 import Cropper from "cropper/cropper.min.js";
 
-import moment from "moment";
-
-import $ from "jquery";
+import jQuery from "jquery";
 
 import autosize from "autosize";
-
-import "datetimepicker/css/bootstrap-datetimepicker.min.css";
-
-import datetimepicker from "datetimepicker/js/bootstrap-datetimepicker.min.js";
 
 import ace from "ace";
 
@@ -144,8 +138,8 @@ import ace from "ace";
     parser: function (input) {
       if (!input || !input.trim()) {
         return null;
-      } else if ( moment(input, ["DD.MM.YYYY HH:mm", "DD.MM.YYYY", "YYYY-MM-DD", "HH:mm"], true).isValid() ) {
-        return moment(input, ["DD.MM.YYYY HH:mm", "DD.MM.YYYY", "YYYY-MM-DD", "HH:mm"], true).toDate();
+      } else if ( Date.parse(input) && (/^\d{4}-\d{2}-\d{2}.*$/).test(input) ) {
+        return new Date(input);
       } else if ( !isNaN( input.split(" ").join("").split(",").join(".") ) ) {
         return parseFloat( input.split(" ").join("").split(",").join(".") );
       } else if ( input === "true" ) {
@@ -387,207 +381,217 @@ import ace from "ace";
     }
   };
 
-  // Datetime control
-  var veda_dateTime = function (options) {
-    var opts = $.extend( {}, veda_dateTime.defaults, options ),
-      control = $(opts.template),
-      format = opts.format,
-      spec = opts.spec,
-      placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : ""),
-      property_uri = opts.property_uri,
-      individual = opts.individual,
-      isSingle = spec && spec.hasValue("v-ui:maxCardinality") ? spec["v-ui:maxCardinality"][0] === 1 : true,
-      input = $("input", control),
-      change;
-
-    input.attr({
-      "placeholder": placeholder,
-      "name": (individual.hasValue("rdf:type") ? individual["rdf:type"].pop().id + "_" + property_uri : property_uri).toLowerCase().replace(/[-:]/g, "_")
-    });
-
-    var singleValueHandler = function (values) {
-      if (values.length) {
-        input.val( moment(values[0]).format(format) );
-      } else {
-        input.val("");
-      }
-    };
-
-    if (isSingle) {
-      change = function (value) {
-        individual.set(property_uri, [value]);
-      };
-      if (individual.hasValue(property_uri)) {
-        input.val( moment(individual.get(property_uri)[0]).format(format) );
-      }
-      individual.on(property_uri, singleValueHandler);
-      control.one("remove", function () {
-        individual.off(property_uri, singleValueHandler);
+  System.import("moment").then(function (module) {
+    var moment = module.default;
+    System.import("datetimepicker/js/bootstrap-datetimepicker.min.js").then(function () {
+      System.import("datetimepicker/css/bootstrap-datetimepicker.min.css").then(function (module) {
+        var styleSheet = module.default;
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
       });
-    } else {
-      change = function (value) {
-        individual.set(property_uri, individual.get(property_uri).concat(value));
-        input.val("");
-      };
-    }
 
-    if (spec && spec.hasValue("v-ui:tooltip")) {
-      control.tooltip({
-        title: spec["v-ui:tooltip"].join(", "),
-        placement: "auto left",
-        container: "body",
-        trigger: "manual",
-        animation: false
-      });
-      control.one("remove", function () {
-        control.tooltip("destroy");
-      });
-      input.on("focusin", function () {
-        control.tooltip("show");
-      }).on("focusout change", function () {
-        control.tooltip("hide");
-      });
-    }
+      // Datetime control
+      var veda_dateTime = function (options) {
+        var opts = $.extend( {}, veda_dateTime.defaults, options ),
+          control = $(opts.template),
+          format = opts.format,
+          spec = opts.spec,
+          placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : ""),
+          property_uri = opts.property_uri,
+          individual = opts.individual,
+          isSingle = spec && spec.hasValue("v-ui:maxCardinality") ? spec["v-ui:maxCardinality"][0] === 1 : true,
+          input = $("input", control),
+          change;
 
-    control.datetimepicker({
-      locale: Object.keys(veda.user.preferences.language).length === 1 ? Object.keys(veda.user.preferences.language)[0] : 'EN',
-      allowInputToggle: true,
-      format: format,
-      sideBySide: true,
-      useCurrent: true,
-      widgetPositioning: {
-        horizontal: "auto",
-        vertical: "bottom"
-      }
-    });
+        input.attr({
+          "placeholder": placeholder,
+          "name": (individual.hasValue("rdf:type") ? individual["rdf:type"].pop().id + "_" + property_uri : property_uri).toLowerCase().replace(/[-:]/g, "_")
+        });
 
-    input.on("change focusout", function () {
-      var value = opts.parser( this.value );
-      change(value);
-    });
-
-    this.on("view edit search", function (e) {
-      e.stopPropagation();
-      if (e.type === "search") {
-        change = function (value) {
-          individual.set(property_uri, individual.get(property_uri).concat(value));
-          input.val("");
+        var singleValueHandler = function (values) {
+          if (values.length) {
+            input.val( moment(values[0]).format(format) );
+          } else {
+            input.val("");
+          }
         };
-      }
+
+        if (isSingle) {
+          change = function (value) {
+            individual.set(property_uri, [value]);
+          };
+          if (individual.hasValue(property_uri)) {
+            input.val( moment(individual.get(property_uri)[0]).format(format) );
+          }
+          individual.on(property_uri, singleValueHandler);
+          control.one("remove", function () {
+            individual.off(property_uri, singleValueHandler);
+          });
+        } else {
+          change = function (value) {
+            individual.set(property_uri, individual.get(property_uri).concat(value));
+            input.val("");
+          };
+        }
+
+        if (spec && spec.hasValue("v-ui:tooltip")) {
+          control.tooltip({
+            title: spec["v-ui:tooltip"].join(", "),
+            placement: "auto left",
+            container: "body",
+            trigger: "manual",
+            animation: false
+          });
+          control.one("remove", function () {
+            control.tooltip("destroy");
+          });
+          input.on("focusin", function () {
+            control.tooltip("show");
+          }).on("focusout change", function () {
+            control.tooltip("hide");
+          });
+        }
+
+        control.datetimepicker({
+          locale: Object.keys(veda.user.preferences.language).length === 1 ? Object.keys(veda.user.preferences.language)[0] : 'EN',
+          allowInputToggle: true,
+          format: format,
+          sideBySide: true,
+          useCurrent: true,
+          widgetPositioning: {
+            horizontal: "auto",
+            vertical: "bottom"
+          }
+        });
+
+        input.on("change focusout", function () {
+          var value = opts.parser( this.value );
+          change(value);
+        });
+
+        this.on("view edit search", function (e) {
+          e.stopPropagation();
+          if (e.type === "search") {
+            change = function (value) {
+              individual.set(property_uri, individual.get(property_uri).concat(value));
+              input.val("");
+            };
+          }
+        });
+
+        this.val = function (value) {
+          if (!value) return input.val();
+          return input.val(value);
+        };
+
+        this.one("remove", function () {
+          control.data("DateTimePicker").destroy();
+        });
+
+        return control;
+      };
+      veda_dateTime.defaults = {
+        template: $("#datetime-control-template").html(),
+        parser: function (input) {
+          if (input) {
+            var timestamp = moment(input, "DD.MM.YYYY HH:mm").toDate();
+            return new Date(timestamp);
+          }
+          return null;
+        },
+        format: "DD.MM.YYYY HH:mm"
+      };
+
+      // Date control
+      $.fn.veda_date = function( options ) {
+        var opts = $.extend( {}, $.fn.veda_date.defaults, options ),
+          control = veda_dateTime.call(this, opts);
+
+        var tabindex = this.attr("tabindex");
+        if (tabindex) {
+          this.removeAttr("tabindex");
+          control.find("input").attr("tabindex", tabindex);
+        }
+
+        this.append(control);
+        return this;
+      };
+      $.fn.veda_date.defaults = {
+        template: $("#datetime-control-template").html(),
+        parser: function (input) {
+          if (input) {
+            var timestamp = moment(input, "DD.MM.YYYY").toDate();
+            var symbolicDate = new Date(timestamp);
+            var d = symbolicDate.getDate();
+            var m = symbolicDate.getMonth();
+            var y = symbolicDate.getFullYear();
+            symbolicDate.setUTCFullYear(y, m ,d);
+            symbolicDate.setUTCHours(0, 0, 0, 0);
+            return symbolicDate;
+          }
+          return null;
+        },
+        format: "DD.MM.YYYY"
+      };
+
+      // Time control
+      $.fn.veda_time = function( options ) {
+        var opts = $.extend( {}, $.fn.veda_time.defaults, options ),
+          control = veda_dateTime.call(this, opts);
+
+        var tabindex = this.attr("tabindex");
+        if (tabindex) {
+          this.removeAttr("tabindex");
+          control.find("input").attr("tabindex", tabindex);
+        }
+
+        this.append(control);
+        return this;
+      };
+      $.fn.veda_time.defaults = {
+        template: $("#datetime-control-template").html(),
+        parser: function (input) {
+          if (input) {
+            var timestamp = moment(input, "HH:mm").toDate();
+            var result = new Date(timestamp);
+            result.setFullYear(1970);
+            result.setMonth(0);
+            result.setDate(1);
+            return result;
+          }
+          return null;
+        },
+        format: "HH:mm"
+      };
+
+      // Date-Time control
+      $.fn.veda_dateTime = function( options ) {
+        var opts = $.extend( {}, $.fn.veda_dateTime.defaults, options ),
+          control = veda_dateTime.call(this, opts);
+
+        var tabindex = this.attr("tabindex");
+        if (tabindex) {
+          this.removeAttr("tabindex");
+          control.find("input").attr("tabindex", tabindex);
+        }
+
+        this.append(control);
+        return this;
+      };
+      $.fn.veda_dateTime.defaults = {
+        template: $("#datetime-control-template").html(),
+        parser: function (input) {
+          if (input) {
+            var timestamp = moment(input, "DD.MM.YYYY HH:mm").toDate();
+            var absolutDate = new Date(timestamp);
+            absolutDate.setMilliseconds(1);
+            return absolutDate;
+          }
+          return null;
+        },
+        format: "DD.MM.YYYY HH:mm"
+      };
     });
-
-    this.val = function (value) {
-      if (!value) return input.val();
-      return input.val(value);
-    };
-
-    this.one("remove", function () {
-      control.data("DateTimePicker").destroy();
-    });
-
-    return control;
-  };
-  veda_dateTime.defaults = {
-    template: $("#datetime-control-template").html(),
-    parser: function (input) {
-      if (input) {
-        var timestamp = moment(input, "DD.MM.YYYY HH:mm").toDate();
-        return new Date(timestamp);
-      }
-      return null;
-    },
-    format: "DD.MM.YYYY HH:mm"
-  };
-
-  // Date control
-  $.fn.veda_date = function( options ) {
-    var opts = $.extend( {}, $.fn.veda_date.defaults, options ),
-      control = veda_dateTime.call(this, opts);
-
-    var tabindex = this.attr("tabindex");
-    if (tabindex) {
-      this.removeAttr("tabindex");
-      control.find("input").attr("tabindex", tabindex);
-    }
-
-    this.append(control);
-    return this;
-  };
-  $.fn.veda_date.defaults = {
-    template: $("#datetime-control-template").html(),
-    parser: function (input) {
-      if (input) {
-        var timestamp = moment(input, "DD.MM.YYYY").toDate();
-        var symbolicDate = new Date(timestamp);
-        var d = symbolicDate.getDate();
-        var m = symbolicDate.getMonth();
-        var y = symbolicDate.getFullYear();
-        symbolicDate.setUTCFullYear(y, m ,d);
-        symbolicDate.setUTCHours(0, 0, 0, 0);
-        return symbolicDate;
-      }
-      return null;
-    },
-    format: "DD.MM.YYYY"
-  };
-
-  // Time control
-  $.fn.veda_time = function( options ) {
-    var opts = $.extend( {}, $.fn.veda_time.defaults, options ),
-      control = veda_dateTime.call(this, opts);
-
-    var tabindex = this.attr("tabindex");
-    if (tabindex) {
-      this.removeAttr("tabindex");
-      control.find("input").attr("tabindex", tabindex);
-    }
-
-    this.append(control);
-    return this;
-  };
-  $.fn.veda_time.defaults = {
-    template: $("#datetime-control-template").html(),
-    parser: function (input) {
-      if (input) {
-        var timestamp = moment(input, "HH:mm").toDate();
-        var result = new Date(timestamp);
-        result.setFullYear(1970);
-        result.setMonth(0);
-        result.setDate(1);
-        return result;
-      }
-      return null;
-    },
-    format: "HH:mm"
-  };
-
-  // Date-Time control
-  $.fn.veda_dateTime = function( options ) {
-    var opts = $.extend( {}, $.fn.veda_dateTime.defaults, options ),
-      control = veda_dateTime.call(this, opts);
-
-    var tabindex = this.attr("tabindex");
-    if (tabindex) {
-      this.removeAttr("tabindex");
-      control.find("input").attr("tabindex", tabindex);
-    }
-
-    this.append(control);
-    return this;
-  };
-  $.fn.veda_dateTime.defaults = {
-    template: $("#datetime-control-template").html(),
-    parser: function (input) {
-      if (input) {
-        var timestamp = moment(input, "DD.MM.YYYY HH:mm").toDate();
-        var absolutDate = new Date(timestamp);
-        absolutDate.setMilliseconds(1);
-        return absolutDate;
-      }
-      return null;
-    },
-    format: "DD.MM.YYYY HH:mm"
-  };
+  });
 
   // MULTILINGUAL INPUT CONTROLS
 
