@@ -50,15 +50,14 @@
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/dist/css/veda.css"/>
 
-    <script type="text/javascript" src="/node_modules/vis-network/dist/vis-network.min.js"></script>
     <script type="text/javascript" src="/node_modules/jsplumb/dist/js/jsPlumb-1.7.9-min.js"></script>
-    <script type="text/javascript" src="/src/js/browser/lib/promise.js"></script>
-    <script type="text/javascript" src="/src/js/browser/lib/n3-browser.min.js"></script>
 
-
+    <!-- Polyfills-->
+    <script type="text/javascript" src="/node_modules/promis/promise.js"></script>
     <script type="text/javascript" src="/node_modules/symbol-es6/dist/symbol-es6.min.js"></script>
     <script type="text/javascript" src="/node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js"></script>
 
+    <!-- SystemJS-->
     <script type="systemjs-importmap">
       {
         "imports": {
@@ -76,7 +75,8 @@
           "filesaver":"/node_modules/file-saver/FileSaver.min.js",
           "jszip":"/node_modules/jszip/dist/jszip.min.js",
           "marked":"/node_modules/marked/marked.min.js",
-          "ace":"/node_modules/ace-builds/src-min/ace.js"
+          "ace":"/node_modules/ace-builds/src-min/ace.js",
+          "vis":"/node_modules/vis-network/standalone/umd/vis-network.min.js"
         }
       }
     </script>

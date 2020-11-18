@@ -10,6 +10,8 @@ import Backend from "./backend.js";
 
 import Notify from "./notify.js";
 
+import N3 from "./lib/n3-browser.min.js";
+
 var Util = veda.Util || {};
 
 export default veda.Util = Util;

@@ -8,6 +8,8 @@ import IndividualModel from "../common/individual_model.js";
 
 import Util from "../common/util.js";
 
+import "./util.js";
+
 import riot from "../common/lib/riot.js";
 
 import Notify from "./notify.js";
