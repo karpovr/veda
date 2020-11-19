@@ -3,5 +3,7 @@ lib/synchronous-promise.js
 backend.js
 util.js
 nano_bpmn.js
-$modules
+codelets.js
+docflow-util.js
+docflow.js
 veda_init.js
