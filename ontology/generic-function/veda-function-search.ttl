@@ -652,12 +652,20 @@ v-fs:AttributiveSearchTemplate
     var resultTable = $(".search-result table").clone();
     resultTable.find(".hidden").remove();
 
-    var filesPromises = $("[typeof='v-s:File']", resultTable).map(function () {
-      var link = $("a", this);
-      var fileName = link.text().trim();
-      var fileUrl = link.attr("href");
-      return filePromise(fileUrl, fileName);
-    });
+    var filesEls = $("[typeof='v-s:File']", resultTable);
+
+    var filesPromises;
+
+    if (filesEls.length) {
+      filesPromises = filesEls.map(function () {
+        var link = $("a", this);
+        var fileName = link.text().trim();
+        var fileUrl = link.attr("href");
+        return filePromise(fileUrl, fileName);
+      });
+    } else {
+      filesPromises = [];
+    }
 
     Promise.all(filesPromises).then(function (files) {
       System.import("jszip").then(function (module) {
