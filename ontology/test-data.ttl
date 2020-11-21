@@ -1,0 +1,696 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-search/> .
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+
+<http://semantic-machines.com/veda/test-data>
+  rdf:type owl:Ontology ;
+  rdfs:label "данные для тестов"@ru ;
+  rdfs:label "data tests"@en ;
+.
+
+td:arg1
+  rdf:type v-s:Variable ;
+  v-s:variableName "rename_template" ;
+  v-s:variableValue "v-wf:*,v-s:*";
+.
+
+td:res1
+  rdf:type v-s:Variable ;
+  v-s:variableName "res" ;
+.
+
+td:run-script
+  rdf:type v-s:ExecuteScript0;
+  v-s:argument td:arg1;
+  v-s:result td:res1 ;
+  v-s:isSuccess false;
+  v-s:useScript td:script_find_long_terms;
+  v-s:priority 16;
+.
+
+td:script_find_long_terms
+  rdf:type v-s:Codelet ;
+  v-s:script
+  """
+    veda.Codelet.find_long_terms (ticket, uri, execute_script);
+  """;
+.
+
+td:Analyst1
+  rdf:type v-s:Position ;
+  v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
+  rdfs:label "Аналитик"@ru ;
+  rdfs:label "Analyst"@en ;
+.
+
+td:Analyst2
+  rdf:type v-s:Position ;
+  v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
+  rdfs:label "Аналитик"@ru ;
+  rdfs:label "Analyst"@en ;
+.
+
+td:CommercialDirector
+  rdf:type v-s:Position ;
+  v-s:parentUnit d:org_RU1121001280 ;
+  rdfs:label "Коммерческий директор"@ru ;
+  rdfs:label "Commercial director"@en ;
+.
+
+td:CommercialDirector2
+  rdf:type v-s:Position ;
+  v-s:parentUnit d:org_RU1121001280 ;
+  rdfs:label "Коммерческий директор"@ru ;
+  rdfs:label "Commercial director"@en ;
+.
+
+td:ExecutiveDirector
+  rdf:type v-s:Position ;
+  v-s:parentUnit d:org_RU1121001280 ;
+  rdfs:label "Исполнительный директор"@ru ;
+  rdfs:label "Executive director"@en ;
+.
+
+td:TechnicalDirector
+  rdf:type v-s:Position ;
+  v-s:parentUnit d:org_RU1121001280 ;
+  rdfs:label "Технический директор"@ru ;
+  rdfs:label "Technical director"@en ;
+.
+
+td:Programmer1
+  rdf:type v-s:Position ;
+  v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
+  rdfs:label "Программист"@ru ;
+  rdfs:label "Programmer"@en ;
+.
+
+td:BB-semantic_machines
+  rdf:type v-s:Account ;
+  v-s:login "semantic_machines"^^xsd:string ;
+  v-s:password "123"^^xsd:string ;
+  rdfs:label "BB sm account" ;
+.
+
+td:BushenevVT
+  rdf:type v-s:Account ;
+  v-s:login "BushenevVT"^^xsd:string ;
+  v-s:owner td:ValeriyBushenev ;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  rdfs:label "BushenevVT" ;
+.
+
+td:BychinAT
+  rdf:type v-s:Account ;
+  v-s:login "BychinAT"^^xsd:string ;
+  v-s:owner td:AndreyBychin ;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  rdfs:label "BychinAT" ;
+.
+td:KarpovRT
+  rdf:type v-s:Account ;
+  v-s:login "KarpovRT"^^xsd:string ;
+  v-s:owner td:RomanKarpov ;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  rdfs:label "KarpovRT" ;
+.
+
+td:KhvostiAT
+  rdf:type v-s:Account ;
+  v-s:login "KhvostiAT"^^xsd:string ;
+  v-s:owner td:AleksandraKhvostikova ;
+  v-s:password "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"^^xsd:string ;
+  rdfs:label "KhvostiAT" ;
+.
+
+td:UserGroup_1
+  rdf:type v-s:Group ;
+  rdfs:label "Тестовая пользовательская группа 1"@ru ;
+  rdfs:label "Test user group 1"@en ;
+.
+
+td:UserGroup_2
+  rdf:type v-s:Group ;
+  rdfs:label "Тестовая пользовательская группа 2"@ru ;
+  rdfs:label "Test user group 2"@en ;
+.
+
+td:ResGroup_1
+  rdf:type v-s:Group ;
+  rdfs:label "Тестовая группа для ресуров 1"@ru ;
+  rdfs:label "Test resource group 1"@en ;
+.
+td:ResGroup_2
+  rdf:type v-s:Group ;
+  rdfs:label "Тестовая группа для ресуров 2"@ru ;
+  rdfs:label "Test resource group 2"@en ;
+.
+
+td:Membership_1
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:UserGroup_2 ;
+  v-s:resource td:AndreyBychin ;
+  rdfs:label "Членство_1"@ru ;
+  rdfs:label "Membership_1"@en ;
+.
+
+td:Membership_4
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:UserGroup_1 ;
+  v-s:resource td:ValeriyBushenev ;
+  rdfs:label "Членство_4"@ru ;
+  rdfs:label "Membership_4"@en ;
+.
+
+td:Membership_50_su
+  rdf:type v-s:Membership ;
+  v-s:memberOf cfg:SuperUser ;
+  v-s:resource td:RomanKarpov ;
+  rdfs:label "Членство_50"@ru ;
+  rdfs:label "Membership_50"@en ;
+.
+td:Membership_51_su
+  rdf:type v-s:Membership ;
+  v-s:memberOf cfg:SuperUser ;
+  v-s:resource td:AleksandraKhvostikova ;
+  rdfs:label "Членство_51"@ru ;
+  rdfs:label "Membership_51"@en ;
+.
+
+td:Membership_6
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:ResGroup_1 ;
+  v-s:resource td:AdministrativeDocument_2 ;
+  rdfs:label "Членство_6"@ru ;
+  rdfs:label "Membership_6"@en ;
+.
+
+td:Membership_7
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:ResGroup_1 ;
+  v-s:resource cfg:Event_1 ;
+  rdfs:label "Членство_7"@ru ;
+  rdfs:label "Membership_7"@en ;
+.
+
+td:Membership_9
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:ResGroup_2 ;
+  v-s:resource td:AndreyBychin ;
+  rdfs:label "Членство_9"@ru ;
+  rdfs:label "Membership_9"@en ;
+.
+
+td:Membership_10
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:ResGroup_1 ;
+  v-s:resource td:ValeriyBushenev ;
+  rdfs:label "Членство_10"@ru ;
+  rdfs:label "Membership_10"@en ;
+.
+
+td:Membership_11_1
+  rdf:type v-s:Membership ;
+  v-s:memberOf v-wf:WorkflowReadUser ;
+  v-s:resource td:ValeriyBushenev ;
+  rdfs:label "Membership_11_1" ;
+.
+
+td:Membership_13
+  rdf:type v-s:Membership ;
+  v-s:memberOf td:ResGroup_2 ;
+  v-s:resource td:PersonTemplate1 ;
+  rdfs:label "Членство_12"@ru ;
+  rdfs:label "Membership_12"@en ;
+.
+
+td:Permission_2
+  rdf:type v-s:PermissionStatement ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:created "2014-01-30T16:45:33"^^xsd:dateTime ;
+  v-s:permissionObject td:ResGroup_1 ;
+  v-s:permissionSubject td:UserGroup_1 ;
+  v-s:published "2014-01-30T16:45:33"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T16:45:33"^^xsd:dateTime ;
+  rdfs:label "Запись о выдаче прав_2"@ru ;
+  rdfs:label "Permissions record_2"@en ;
+.
+
+td:Permission_2_vb
+  rdf:type v-s:PermissionStatement ;
+  v-s:canCreate "true"^^xsd:boolean ;
+  v-s:permissionObject v-s:AllResourcesGroup ;
+  v-s:permissionSubject td:ValeriyBushenev ;
+.
+
+td:Permission_3
+  rdf:type v-s:PermissionStatement ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:created "2014-01-30T16:45:33"^^xsd:dateTime ;
+  v-s:permissionObject td:ResGroup_2 ;
+  v-s:permissionSubject td:UserGroup_2 ;
+  v-s:published "2014-01-30T16:45:33"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T16:45:33"^^xsd:dateTime ;
+  rdfs:label "Запись о выдаче прав_3"@ru ;
+  rdfs:label "Permissions record_3"@en ;
+.
+
+td:AndreyBychin_pref
+  rdf:type v-ui:Preferences ;
+  v-s:owner td:AndreyBychin ;
+  v-ui:preferredLanguage v-ui:RU ;
+  rdfs:label "Предпочтения (Администратор4)"@ru ;
+  rdfs:label "Preferences (Administrator4)"@en ;
+.
+td:RomanKarpov_pref
+  rdf:type v-ui:Preferences ;
+  v-s:owner td:RomanKarpov ;
+  v-ui:preferredLanguage v-ui:RU ;
+  v-ui:displayedElements "10"^^xsd:nonNegativeInteger ;
+  rdfs:label "Предпочтения (Администратор2)"@ru ;
+  rdfs:label "Preferences (Administrator2)"@en ;
+.
+td:AleksandraKhvostikova_pref
+  rdf:type v-ui:Preferences ;
+  v-s:owner td:AleksandraKhvostikova ;
+  v-ui:preferredLanguage v-ui:RU ;
+  v-ui:displayedElements "10"^^xsd:nonNegativeInteger ;
+  rdfs:label "Предпочтения (Администратор1)"@ru ;
+  rdfs:label "Preferences (Administrator1)"@en ;
+.
+td:ValeriyBushenev_pref
+  rdf:type v-ui:Preferences ;
+  v-s:author td:ValeriyBushenev-Programmer1 ;
+  v-s:owner td:ValeriyBushenev ;
+  v-ui:preferredLanguage v-ui:RU ;
+  rdfs:label "Предпочтения (Администратор3)"@ru ;
+  rdfs:label "Preferences (Administrator3)"@en ;
+.
+
+td:AndreyBychin
+  rdf:type v-s:Person ;
+  v-s:actualVersion td:AndreyBychin ;
+  v-s:birthday "1976-05-03"^^xsd:dateTime ;
+  v-s:hasAccount td:BychinAT ;
+  v-s:lastName "Администратор4"@ru ;
+  v-s:lastName "Administrator4"@en ;
+  v-ui:hasPreferences td:AndreyBychin_pref ;
+  v-s:hasAppointment td:AndreyBychin-Analyst2 ;
+  rdfs:label "Администратор4"@ru ;
+  rdfs:label "Administrator4"@en ;
+  v-s:parentOrganization cfg:org_Veda;
+  v-s:owner td:AndreyBychin ;
+.
+td:AndreyBychin-Analyst2
+  rdf:type v-s:Appointment ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:created "2014-01-30T15:35:11"^^xsd:dateTime ;
+  v-s:employee td:AndreyBychin ;
+  v-s:occupation td:Analyst2 ;
+  v-s:published "2014-01-30T15:35:11"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T15:35:11"^^xsd:dateTime ;
+  rdfs:label "Администратор4 : Аналитик"@ru ;
+  rdfs:label "Administrator4 : Analyst"@en ;
+  v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
+  v-s:official "true"^^xsd:boolean ;
+  v-s:origin "Internal User" ;
+.
+
+td:RomanKarpov
+  rdf:type v-s:Person ;
+  v-s:actualVersion td:RomanKarpov ;
+  v-s:birthday "1981-01-09T00:00:00Z"^^xsd:dateTime ;
+  v-s:hasAccount td:KarpovRT ;
+  v-s:lastName "Администратор2"@ru ;
+  v-s:lastName "Administrator2"@en ;
+  v-ui:hasPreferences td:RomanKarpov_pref ;
+  rdfs:label "Администратор2"@ru ;
+  rdfs:label "Administrator2"@en ;
+  v-s:hasAppointment td:RomanKarpov-Analyst1 ;
+  v-s:hasAspect v-s:PersonalAspectKarpovr ;
+  v-s:parentOrganization cfg:org_Veda;
+  v-s:owner td:RomanKarpov ;
+.
+
+td:RomanKarpov-Analyst1
+  rdf:type v-s:Appointment ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:created "2014-01-30T15:22:33"^^xsd:dateTime ;
+  v-s:employee td:RomanKarpov ;
+  v-s:occupation td:Analyst1 ;
+  v-s:published "2014-01-30T15:22:33"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T15:22:33"^^xsd:dateTime ;
+  v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
+  rdfs:label "Администратор2 : Аналитик"@ru ;
+  rdfs:label "Administrator2 : Analyst"@en ;
+  v-s:official "true"^^xsd:boolean ;
+  v-s:origin "Internal User" ;
+.
+
+td:RomanKarpov-CommercialDirector
+  rdf:type v-s:Appointment ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:created "2014-01-30T15:35:11"^^xsd:dateTime ;
+  v-s:employee td:RomanKarpov ;
+  v-s:occupation td:CommercialDirector ;
+  v-s:official "true"^^xsd:boolean ;
+  v-s:published "2014-01-30T15:35:11"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T15:35:11"^^xsd:dateTime ;
+  rdfs:label "Администратор2 : Коммерческий директор"@ru ;
+  rdfs:label "Administrator2 : CommercialDirector"@en ;
+  v-s:parentUnit d:org_RU1121001280 ;
+  v-s:origin "Internal User" ;
+.
+
+td:AleksandraKhvostikova
+  rdf:type v-s:Person ;
+  v-s:actualVersion td:AleksandraKhvostikova ;
+  v-s:birthday "1984-04-28"^^xsd:dateTime ;
+  v-s:hasAccount td:KhvostiAT ;
+  v-s:lastName "Администратор1"@ru ;
+  v-s:lastName "Administrator1"@en ;
+  v-ui:hasPreferences td:AleksandraKhvostikova_pref ;
+  rdfs:label "Администратор1"@ru ;
+  rdfs:label "Administrator1"@en ;
+  v-s:hasImage td:khvostiaImage;
+  v-s:owner td:AleksandraKhvostikova ;
+.
+
+
+td:ValeriyBushenev
+  rdf:type v-s:Person ;
+  v-s:actualVersion td:ValeriyBushenev ;
+  v-s:birthday "1973-05-09"^^xsd:dateTime ;
+  v-s:hasAccount td:BushenevVT ;
+  v-s:lastName "Администратор3"@ru ;
+  v-s:lastName "Administrator3"@en ;
+  v-s:hasAccount td:BushenevV ;
+  v-ui:hasPreferences td:ValeriyBushenev_pref ;
+  rdfs:label "Администратор3"@ru ;
+  rdfs:label "Administrator3"@en ;
+  v-s:parentOrganization cfg:org_Veda;
+  v-s:owner td:ValeriyBushenev ;
+.
+
+td:ValeriyBushenev-Programmer1
+  rdf:type v-s:Appointment ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:created "2014-01-30T15:12:15"^^xsd:dateTime ;
+  v-s:employee td:ValeriyBushenev ;
+  v-s:occupation td:Programmer1 ;
+  v-s:published "2014-01-30T15:12:15"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T15:12:15"^^xsd:dateTime ;
+  rdfs:label "Администратор3 : Программист"@ru ;
+  rdfs:label "Administrator3 : Programmer"@en ;
+  v-s:parentUnit td:ApplicationDevelopmentGroup ;
+  v-s:parentOrganization cfg:org_Veda ;
+  v-s:official "true"^^xsd:boolean ;
+  v-s:origin "Internal User" ;
+.
+
+td:ValeriyBushenev-TechnicalDirector
+  rdf:type v-s:Appointment ;
+  v-s:author td:RomanKarpov-Analyst1 ;
+  v-s:created "2014-01-30T15:30:21"^^xsd:dateTime ;
+  v-s:employee td:ValeriyBushenev ;
+  v-s:occupation td:TechnicalDirector ;
+  v-s:published "2014-01-30T15:30:21"^^xsd:dateTime ;
+  v-s:startTime "2014-01-30T15:30:21"^^xsd:dateTime ;
+  rdfs:label "Администратор3 : Технический директор"@ru ;
+  rdfs:label "Administrator3 : Technical director"@en ;
+  v-s:parentUnit d:org_RU1121001280 ;
+  v-s:official "true"^^xsd:boolean ;
+  v-s:origin "Internal User" ;
+.
+td:ApplicationDevelopmentGroup
+  a v-s:Department;
+  rdfs:label "Подразделение (Тест)"@ru;
+  rdfs:label "Department (Test)"@en;
+  v-s:origin "admin"^^xsd:string;
+  v-s:hasChief cfg:AdministratorAppointment;
+  v-s:parentUnit cfg:org_Veda;
+  v-s:parentOrganization cfg:org_Veda;
+.
+
+######################## сеть, пример 1 #######################
+
+td:start-form1
+  a v-wf:StartForm;
+  v-wf:hasStatusWorkflow v-wf:DoNotSend;
+  rdfs:label "Тест стартовой формы 1"@ru;
+  v-wf:forNet td:net1 ;
+.
+
+td:net1
+  v-wf:consistsOf td:net1-ic, td:net1-oc, td:net1-fl1;
+  rdfs:label "Сеть, пример 1"^^xsd:string;
+  a v-wf:Net.
+
+td:net1-ic
+  v-wf:hasFlow td:net1-fl1;
+  v-wf:locationX "0"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:InputCondition;
+  rdfs:label "С1"^^xsd:string.
+
+td:net1-oc
+  v-wf:locationX "376"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:OutputCondition;
+  rdfs:label "С2"^^xsd:string.
+
+td:net1-fl1
+  v-wf:flowsInto td:net1-oc;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+######################## сеть, пример 2 #######################
+
+td:start-form2
+  a v-wf:StartForm;
+  v-wf:hasStatusWorkflow v-wf:DoNotSend;
+  rdfs:label "Тест стартовой формы 2"@ru;
+  v-wf:forNet td:net2 ;
+.
+
+td:net2
+  v-wf:consistsOf td:net2-ic, td:net2-oc, td:net2-fl1, td:net2-t1, td:net2-fl2;
+  rdfs:label "Сеть, пример 2"^^xsd:string;
+  a v-wf:Net.
+
+td:net2-ic
+  v-wf:hasFlow td:net2-fl1;
+  v-wf:locationX "0"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:InputCondition;
+  rdfs:label "С1"^^xsd:string.
+
+td:net2-fl1
+  v-wf:flowsInto td:net2-t1;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+td:net2-t1
+  v-wf:hasFlow td:net2-fl2;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:Task;
+  rdfs:label "Задача 1"^^xsd:string;
+  v-wf:locationX "164"^^xsd:integer.
+
+td:net2-fl2
+  v-wf:flowsInto td:net2-oc;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+td:net2-oc
+  v-wf:locationX "376"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:OutputCondition;
+  rdfs:label "С2"^^xsd:string.
+
+######################## сеть, пример 3 #######################
+
+td:start-form3
+  a v-wf:StartForm;
+  v-wf:hasStatusWorkflow v-wf:DoNotSend;
+  rdfs:label "Тест стартовой формы 3"@ru;
+  v-wf:forNet td:net3 ;
+.
+
+td:net3
+  v-wf:consistsOf td:net3-ic, td:net3-oc, td:net3-fl1, td:net3-t1, td:net3-fl2;
+  rdfs:label "Сеть, пример 3"^^xsd:string;
+  a v-wf:Net.
+
+td:net3-ic
+  v-wf:hasFlow td:net3-fl1;
+  v-wf:locationX "0"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:InputCondition;
+  rdfs:label "С1"^^xsd:string.
+
+td:net3-fl1
+  v-wf:flowsInto td:net3-t1;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+td:net3-t1
+  v-wf:hasFlow td:net3-fl2;
+  v-wf:executor td:AndreyBychin-Analyst2;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:Task;
+  rdfs:label "Задача 1"^^xsd:string;
+  v-wf:locationX "164"^^xsd:integer.
+
+td:net3-fl2
+  v-wf:flowsInto td:net3-oc;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+td:net3-oc
+  v-wf:locationX "376"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:OutputCondition;
+  rdfs:label "С2"^^xsd:string.
+
+######################## сеть, пример 4 #######################
+
+td:start-form4
+  a v-wf:StartForm;
+  v-wf:hasStatusWorkflow v-wf:DoNotSend;
+  rdfs:label "Тест стартовой формы 4"@ru;
+  v-wf:forNet td:net4 ;
+.
+
+td:net4
+  v-wf:consistsOf td:net4-ic, td:net4-oc, td:net4-fl1, td:net4-t1, td:net4-fl2;
+  rdfs:label "Сеть, пример 4"^^xsd:string;
+  a v-wf:Net.
+
+td:net4-ic
+  v-wf:hasFlow td:net4-fl1;
+  v-wf:locationX "0"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:InputCondition;
+  rdfs:label "С1"^^xsd:string.
+
+td:net4-fl1
+  v-wf:flowsInto td:net4-t1;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+td:net4-t1
+  v-wf:hasFlow td:net4-fl2;
+  v-wf:executor td:AndreyBychin-Analyst2;
+  v-wf:startDecisionTransform td:net4-tr1;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:Task;
+  rdfs:label "Задача 1"^^xsd:string;
+  v-wf:locationX "164"^^xsd:integer.
+
+td:net4-fl2
+  v-wf:flowsInto td:net4-oc;
+  a v-wf:Flow;
+  rdfs:label ""^^xsd:string.
+
+td:net4-oc
+  v-wf:locationX "376"^^xsd:integer;
+  v-wf:locationY "0"^^xsd:integer;
+  a v-wf:OutputCondition;
+  rdfs:label "С2"^^xsd:string.
+
+td:net4-tr1
+  rdf:type v-wf:Transform ;
+  rdfs:label "Создание формы ответа на задачу, net4"^^xsd:string;
+  v-wf:transformRule td:net4-tr1-r1 ;
+.
+
+td:net4-tr1-r1
+  rdf:type v-wf:Rule ;
+  v-wf:segregateElement "contentName('@')" ;
+  v-wf:aggregate "putUri ('rdf:type', 'v-wf:DecisionForm')";
+  v-wf:aggregate "putUri ('rdf:type', 's-wf:UserTaskForm')";
+  v-wf:aggregate "putString ('rdfs:label', 'задание')";
+  v-wf:aggregate "putBoolean ('v-wf:isCompleted', false)";
+  v-wf:aggregate "putExecutor ('v-wf:to')";
+  v-wf:aggregate "putWorkOrder ('v-wf:onWorkOrder')";
+  v-wf:aggregate "putUri ('v-wf:possibleDecisionClass', 'v-wf:DecisionAchieved')";
+  v-wf:aggregate "putUri ('v-wf:possibleDecisionClass', 'v-wf:DecisionNotPerformed')";
+.
+
+##############################################################################################
+
+v-s:PersonalAspectKarpovr
+  rdf:type v-s:PersonalAspect ;
+  v-s:owner td:RomanKarpov ;
+  rdfs:label "Персональный аспект 1"@ru ;
+  rdfs:label "Personal aspect 1"@en ;
+.
+
+v-wf:UserTaskForm1
+  rdf:type s-wf:UserTaskForm ;
+  rdfs:label "Экземпляр"@ru ;
+  rdfs:label "Example"@en ;
+  v-wf:possibleDecisionClass v-wf:DecisionApprove ;
+  v-wf:possibleDecisionClass v-wf:DecisionRemake ;
+  v-wf:possibleDecisionClass v-wf:DecisionRejected ;
+  v-wf:possibleDecisionClass v-wf:DecisionBreak ;
+  v-wf:from td:RomanKarpov-Analyst1 ;
+.
+
+#d:khvostia_dismantlingProjectSpecialist
+#  a v-s:Appointment;
+#  v-s:occupation d:dismantlingProjectSpecialist;
+#  v-s:employee td:AleksandraKhvostikova;
+#  v-s:official "true"^^xsd:boolean;
+#  v-s:valid "true"^^xsd:boolean;
+#  rdfs:label "Хвостикова : Специалист по проектам демонтажа"@ru
+#.
+
+#d:khvostia_financialController
+#  a v-s:Appointment;
+#  v-s:occupation d:financialController;
+#  v-s:employee td:AleksandraKhvostikova;
+#  v-s:official "true"^^xsd:boolean;
+#  v-s:valid "true"^^xsd:boolean;
+#  rdfs:label "Хвостикова : Финансовый контролер"@ru
+#.
+
+d:Bychina_create_Person
+  rdf:type v-s:PermissionStatement ;
+  v-s:author cfg:VedaSystemAppointment ;
+  v-s:permissionSubject td:AndreyBychin ;
+  v-s:permissionObject v-s:Person, v-ui:Preferences, v-s:Appointment ;
+  v-s:canCreate "true"^^xsd:boolean ;
+.
+
+d:test-field-v-s:classFrom
+  rdf:type v-s:Variable ;
+  v-s:classFrom cfg:VedaSystem;
+  rdfs:label "этот индивид служит для добавления в поиск поля v-s:classFrom, нужно для тестов" ;
+.
+
+s-wf:RouteTest
+  rdf:type v-wf:StartForm ;
+  rdfs:label "Тестовый шаблон маршрута lowPriority"@ru ;
+  rdfs:label "lowPriority test template"@en ;
+  v-wf:StartForm_canEdit "false"^^xsd:boolean ;
+  v-wf:StartForm_setStatus "false"^^xsd:boolean ;
+  v-s:runAt "V8.LowPriority1"^^xsd:string ;
+.

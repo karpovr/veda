@@ -1,4 +1,4 @@
-// HTTP server functions
+"use strict";
 
 import veda from "../common/veda.js";
 
@@ -6,15 +6,144 @@ import Util from "../common/util.js";
 
 import LocalDB from "../browser/local_db.js";
 
-var Backend = {};
+var serverBackend = {};
 
-export default veda.Backend = Backend;
+var browserBackend = {};
+
+export default veda.Backend = (veda.env === "server" ? serverBackend : browserBackend);
+
+//////////////// SERVER ////////////////
+
+serverBackend.status = "limited";
+
+serverBackend.query = function (ticket, queryStr, sort, databases, top, limit, from) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    queryStr = arg.query;
+    sort = arg.sort;
+    databases = arg.databases;
+    top = arg.top;
+    limit = arg.limit;
+    from = arg.from;
+  }
+  try {
+    return Promise.resolve( query(ticket, queryStr, sort, databases, top, limit, from) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.get_individual = function (ticket, uri) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    uri = arg.uri;
+  }
+  try {
+    return Promise.resolve( get_individual(ticket, uri) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.reset_individual = serverBackend.get_individual;
+
+serverBackend.get_individuals = function (ticket, uris) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    uris = arg.uris;
+  }
+  try {
+    return Promise.resolve( get_individuals(ticket, uris) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.remove_individual = function (ticket, uri) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    uri = arg.uri;
+  }
+  try {
+    return Promise.resolve( remove_individual(ticket, uri) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.put_individual = function (ticket, individual) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    individual = arg.individual;
+  }
+  try {
+    return Promise.resolve( put_individual(ticket, individual) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.add_to_individual = function (ticket, individual) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    individual = arg.individual;
+  }
+  try {
+    return Promise.resolve( add_to_individual(ticket, individual) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.set_in_individual = function (ticket, individual) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    individual = arg.individual;
+  }
+  try {
+    return Promise.resolve( set_in_individual(ticket, individual) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+serverBackend.remove_from_individual = function (ticket, individual) {
+  var arg = arguments[0];
+  var isObj = typeof arg === "object";
+  if (isObj) {
+    ticket = arg.ticket;
+    individual = arg.individual;
+  }
+  try {
+    return Promise.resolve( remove_from_individual(ticket, individual) );
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+
+//////////////// BROWSER ////////////////
+
 
 var default_timeout = 15000;
 var query_timeout = default_timeout * 10;
 
 // Check server health
-Backend.ping = function () {
+browserBackend.ping = function () {
   return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
     xhr.onload = function () {
@@ -33,30 +162,30 @@ Backend.ping = function () {
   });
 };
 
-Backend.status = "offline";
+browserBackend.status = "offline";
 var status = {};
 function setStatus(state) {
   status.line = state === "online" ? 1 : state === "offline" ? 0 : status.line;
   status.ccus = state === "ccus-online" ? 1 : state === "ccus-offline" ? 0 : status.ccus;
   if (status.line && status.ccus) {
-    Backend.status = "online";
+    browserBackend.status = "online";
   } else if (status.line && !status.ccus) {
-    Backend.status = "limited";
+    browserBackend.status = "limited";
   } else {
-    Backend.status = "offline";
+    browserBackend.status = "offline";
   }
-  this.trigger("status", Backend.status);
+  this.trigger("status", browserBackend.status);
 }
 veda.on("online offline ccus-online ccus-offline", setStatus);
 
 var interval;
 var duration = default_timeout;
-Backend.check = function () {
+browserBackend.check = function () {
   if (interval) { return; }
   interval = setInterval(check, duration);
   if (!arguments.length) { check(); }
   function check() {
-    Backend.ping().then(function () {
+    browserBackend.ping().then(function () {
       interval = clearInterval(interval);
       veda.trigger("online");
     }).catch(function () {
@@ -64,13 +193,13 @@ Backend.check = function () {
     });
   }
 };
-window.addEventListener("online", Backend.check);
-window.addEventListener("offline", Backend.check);
-veda.on("ccus-online", Backend.check);
-veda.on("ccus-offline", Backend.check);
+window.addEventListener("online", browserBackend.check);
+window.addEventListener("offline", browserBackend.check);
+veda.on("ccus-online", browserBackend.check);
+veda.on("ccus-offline", browserBackend.check);
 
 // Server errors
-function BackendError (result) {
+function browserBackendError (result) {
   var errorCodes = {
        0: "Server unavailable",
      200: "Ok",
@@ -115,14 +244,14 @@ function BackendError (result) {
   this.stack = (new Error()).stack;
   if (result.status === 0 || result.status === 503 || result.status === 4000) {
     veda.trigger("offline");
-    Backend.check();
+    browserBackend.check();
   }
   if (result.status === 470 || result.status === 471) {
     veda.trigger("login:failed");
   }
 }
-BackendError.prototype = Object.create(Error.prototype);
-BackendError.prototype.constructor = BackendError;
+browserBackendError.prototype = Object.create(Error.prototype);
+browserBackendError.prototype.constructor = browserBackendError;
 
 // Common server call function
 function call_server(params) {
@@ -139,14 +268,14 @@ function call_server(params) {
       if (this.status == 200) {
         resolve( JSON.parse(this.response, Util.decimalDatetimeReviver) );
       } else {
-        reject( new BackendError(this) );
+        reject( new browserBackendError(this) );
       }
     };
     xhr.onerror = function () {
-      reject( new BackendError(this) );
+      reject( new browserBackendError(this) );
     };
     xhr.ontimeout = function () {
-      reject( new BackendError(this) );
+      reject( new browserBackendError(this) );
     };
     if (ticket) { queryParams.push("ticket=" + ticket); }
     if (method === "GET") {
@@ -170,7 +299,7 @@ function call_server(params) {
   });
 }
 
-Backend.get_rights = function (ticket, uri) {
+browserBackend.get_rights = function (ticket, uri) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -182,8 +311,8 @@ Backend.get_rights = function (ticket, uri) {
       "uri": isObj ? arg.uri : uri
     }
   };
-  return call_server(params).catch(function (backendError) {
-    if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  return call_server(params).catch(function (browserBackendError) {
+    if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       return {
         "@":"_",
         "rdf:type":[{"data":"v-s:PermissionStatement", "type":"Uri"}],
@@ -193,12 +322,12 @@ Backend.get_rights = function (ticket, uri) {
         "v-s:canUpdate":[{"data":true, "type":"Boolean"}]
       };
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   });
 };
 
-Backend.get_rights_origin = function (ticket, uri) {
+browserBackend.get_rights_origin = function (ticket, uri) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -210,16 +339,16 @@ Backend.get_rights_origin = function (ticket, uri) {
       "uri": isObj ? arg.uri : uri
     }
   };
-  return call_server(params).catch(function (backendError) {
-    if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  return call_server(params).catch(function (browserBackendError) {
+    if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       return [];
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   });
 };
 
-Backend.get_membership = function (ticket, uri) {
+browserBackend.get_membership = function (ticket, uri) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -231,8 +360,8 @@ Backend.get_membership = function (ticket, uri) {
       "uri": isObj ? arg.uri : uri
     }
   };
-  return call_server(params).catch(function (backendError) {
-    if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  return call_server(params).catch(function (browserBackendError) {
+    if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       return {
         "@":"_",
         "rdf:type":[{"data":"v-s:Membership", "type":"Uri"}],
@@ -240,13 +369,13 @@ Backend.get_membership = function (ticket, uri) {
         "v-s:resource":[{"data": isObj ? arg.uri : uri, "type":"Uri"}]
       };
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   });
 };
 
 
-Backend.authenticate = function (login, password, secret) {
+browserBackend.authenticate = function (login, password, secret) {
   if (login == "VedaNTLMFilter")
       login = "cfg:Guest";
   var arg = arguments[0];
@@ -271,7 +400,7 @@ Backend.authenticate = function (login, password, secret) {
   });
 };
 
-Backend.get_ticket_trusted = function (ticket, login) {
+browserBackend.get_ticket_trusted = function (ticket, login) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -286,7 +415,7 @@ Backend.get_ticket_trusted = function (ticket, login) {
   return call_server(params);
 };
 
-Backend.is_ticket_valid = function (ticket) {
+browserBackend.is_ticket_valid = function (ticket) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -296,16 +425,16 @@ Backend.is_ticket_valid = function (ticket) {
     timeout: default_timeout,
     data: {}
   };
-  return call_server(params).catch(function (backendError) {
-    if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  return call_server(params).catch(function (browserBackendError) {
+    if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       return true;
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   });
 };
 
-Backend.get_operation_state = function (module_id, wait_op_id) {
+browserBackend.get_operation_state = function (module_id, wait_op_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -320,11 +449,11 @@ Backend.get_operation_state = function (module_id, wait_op_id) {
   return call_server(params);
 };
 
-Backend.wait_module = function (module_id, in_op_id) {
+browserBackend.wait_module = function (module_id, in_op_id) {
   var timeout = 1;
   var op_id_from_module;
   for (var i = 0; i < 100; i++) {
-    op_id_from_module = Backend.get_operation_state (module_id, in_op_id);
+    op_id_from_module = browserBackend.get_operation_state (module_id, in_op_id);
     if (op_id_from_module >= in_op_id) { break; }
     var endtime = new Date().getTime() + timeout;
     while (new Date().getTime() < endtime);
@@ -332,7 +461,7 @@ Backend.wait_module = function (module_id, in_op_id) {
   }
 };
 
-Backend.query = function (ticket, queryStr, sort, databases, reopen, top, limit, from, sql) {
+browserBackend.query = function (ticket, queryStr, sort, databases, reopen, top, limit, from, sql) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -351,17 +480,17 @@ Backend.query = function (ticket, queryStr, sort, databases, reopen, top, limit,
       "sql": isObj ? arg.sql : sql
     }
   };
-  return call_server(params).catch(function (backendError) {
-    if (backendError.code === 999) {
-      return Backend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
-    } else if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  return call_server(params).catch(function (browserBackendError) {
+    if (browserBackendError.code === 999) {
+      return browserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
+    } else if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       params.ticket = undefined;
       var localDB = new LocalDB();
       return localDB.then(function (db) {
         return db.get(JSON.stringify(params));
       });
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   }).then(function (result) {
     if (result) {
@@ -384,7 +513,7 @@ Backend.query = function (ticket, queryStr, sort, databases, reopen, top, limit,
   });
 };
 
-Backend.get_individual = function (ticket, uri, reopen) {
+browserBackend.get_individual = function (ticket, uri, reopen) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -397,7 +526,7 @@ Backend.get_individual = function (ticket, uri, reopen) {
       "reopen" : (isObj ? arg.reopen : reopen) || false
     }
   };
-  if (Backend.status === "online" || Backend.status === "offline") {
+  if (browserBackend.status === "online" || browserBackend.status === "offline") {
     // Cache first
     var localDB = new LocalDB();
     return localDB.then(function (db) {
@@ -414,11 +543,11 @@ Backend.get_individual = function (ticket, uri, reopen) {
     });
   } else {
     // Fetch second
-    return Backend.reset_individual(ticket, uri, reopen);
+    return browserBackend.reset_individual(ticket, uri, reopen);
   }
 };
 
-Backend.reset_individual = function (ticket, uri, reopen) {
+browserBackend.reset_individual = function (ticket, uri, reopen) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -438,8 +567,8 @@ Backend.reset_individual = function (ticket, uri, reopen) {
       db.put(individual["@"], individual);
     });
     return individual;
-  }).catch(function (backendError) {
-    if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  }).catch(function (browserBackendError) {
+    if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       // Cache second
       var localDB = new LocalDB();
       return localDB.then(function (db) {
@@ -448,16 +577,16 @@ Backend.reset_individual = function (ticket, uri, reopen) {
         if (result) {
           return result;
         } else {
-          throw backendError;
+          throw browserBackendError;
         }
       });
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   });
 };
 
-Backend.get_individuals = function (ticket, uris) {
+browserBackend.get_individuals = function (ticket, uris) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -469,7 +598,7 @@ Backend.get_individuals = function (ticket, uris) {
       "uris": isObj ? arg.uris : uris
     }
   };
-  if (Backend.status === "online" || Backend.status === "offline") {
+  if (browserBackend.status === "online" || browserBackend.status === "offline") {
     // Cache first
     var localDB = new LocalDB();
     return localDB.then(function (db) {
@@ -520,8 +649,8 @@ Backend.get_individuals = function (ticket, uris) {
         }, Promise.resolve());
       });
       return results;
-    }).catch(function (backendError) {
-      if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+    }).catch(function (browserBackendError) {
+      if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
         // Cache fallback
         var localDB = new LocalDB();
         return localDB.then(function (db) {
@@ -533,7 +662,7 @@ Backend.get_individuals = function (ticket, uris) {
           });
         });
       } else {
-        throw backendError;
+        throw browserBackendError;
       }
     });
   }
@@ -542,8 +671,8 @@ Backend.get_individuals = function (ticket, uris) {
 ////////////////////////////////////////////////////////////////////////
 
 function call_server_put(params) {
-  return call_server(params).catch(function (backendError) {
-    if (backendError.code === 0 || backendError.code === 503 || backendError.code === 4000 ) {
+  return call_server(params).catch(function (browserBackendError) {
+    if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
       return enqueueCall(params).then(function (queue) {
         console.log("Offline operation added to queue, queue length = ", queue.length);
         return {
@@ -552,12 +681,12 @@ function call_server_put(params) {
         };
       });
     } else {
-      throw backendError;
+      throw browserBackendError;
     }
   });
 }
 
-Backend.remove_individual = function (ticket, uri, assigned_subsystems, event_id, transaction_id) {
+browserBackend.remove_individual = function (ticket, uri, assigned_subsystems, event_id, transaction_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -582,7 +711,7 @@ Backend.remove_individual = function (ticket, uri, assigned_subsystems, event_id
   });
 };
 
-Backend.put_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+browserBackend.put_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -607,7 +736,7 @@ Backend.put_individual = function (ticket, individual, assigned_subsystems, even
   });
 };
 
-Backend.add_to_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+browserBackend.add_to_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -626,7 +755,7 @@ Backend.add_to_individual = function (ticket, individual, assigned_subsystems, e
   return call_server_put(params);
 };
 
-Backend.set_in_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+browserBackend.set_in_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -645,7 +774,7 @@ Backend.set_in_individual = function (ticket, individual, assigned_subsystems, e
   return call_server_put(params);
 };
 
-Backend.remove_from_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+browserBackend.remove_from_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -664,7 +793,7 @@ Backend.remove_from_individual = function (ticket, individual, assigned_subsyste
   return call_server_put(params);
 };
 
-Backend.put_individuals = function (ticket, individuals, assigned_subsystems, event_id, transaction_id) {
+browserBackend.put_individuals = function (ticket, individuals, assigned_subsystems, event_id, transaction_id) {
   var arg = arguments[0];
   var isObj = typeof arg === "object";
   var params = {
@@ -694,7 +823,7 @@ Backend.put_individuals = function (ticket, individuals, assigned_subsystems, ev
 
 ////////////////////////////////////////////////////////////////////////
 
-Backend.uploadFile = function (params, tries) {
+browserBackend.uploadFile = function (params, tries) {
   tries = typeof tries === "number" ? tries : 5;
   return new Promise(function (resolve, reject) {
     var file     = params.file,
@@ -732,13 +861,13 @@ Backend.uploadFile = function (params, tries) {
   })
   .catch(function (error) {
     if (tries > 0) {
-      return Backend.uploadFile(params, --tries);
+      return browserBackend.uploadFile(params, --tries);
     }
     throw error;
   });
 };
 
-Backend.loadFile = function (url) {
+browserBackend.loadFile = function (url) {
   return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);

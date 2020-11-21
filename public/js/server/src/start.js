@@ -1,1 +1,0 @@
-System.import("./main.js");

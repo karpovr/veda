@@ -8,13 +8,13 @@ function newUri(uri)
   }];
 }
 
-import veda from "./veda.js";
+import veda from "../common/veda.js";
 
-import IndividualModel from "./individual_model.js";
+import IndividualModel from "../common/individual_model.js";
 
-import OntologyModel from "./ontology_model.js";
+import OntologyModel from "../common/ontology_model.js";
 
-import Backend from "../browser/backend.js";
+import Backend from "../common/backend.js";
 
 var Util = veda.Util || {};
 

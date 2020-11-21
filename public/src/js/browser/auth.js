@@ -4,7 +4,7 @@
 
 import veda from "../common/veda.js";
 
-import Backend from "./backend.js";
+import Backend from "../common/backend.js";
 
 import IndividualModel from "../common/individual_model.js";
 
@@ -59,7 +59,7 @@ export default function Auth() {
       }
     })
     .catch(function () {
-      return veda.login(login, hash)
+      return Backend.authenticate(login, hash);
     })
     .then(handleLoginSuccess)
     .catch(handleLoginError)
@@ -111,7 +111,7 @@ export default function Auth() {
       secret = $("#secret", loginForm).val(),
       hash = Sha256.hash(password);
 
-    veda.login(login, hash, secret)
+    Backend.authenticate(login, hash, secret)
       .then(handleLoginSuccess)
       .catch(handleLoginError)
       .then(function () {
@@ -127,7 +127,7 @@ export default function Auth() {
     var login = $("#login", loginForm).val(),
       secret = "?";
 
-    veda.login(login, undefined, secret)
+    Backend.authenticate(login, undefined, secret)
       .then(handleLoginSuccess)
       .catch(handleLoginError);
   });
@@ -267,6 +267,7 @@ export default function Auth() {
           secretRequestInfo.show();
         }
         break;
+      case 472: // Not authorized
       case 473: // Authentication failed
         loginFailedError.show();
         reCAPTCHA(onSuccess, onExpired, onSuccess);
@@ -403,7 +404,7 @@ export default function Auth() {
   });
 
   // Logout handler
-  veda.on("logout", function () {
+  $(document).on("click", "#logout, .logout", function () {
     delete storage.ticket;
     delete storage.user_uri;
     delete storage.end_time;

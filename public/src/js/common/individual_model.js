@@ -2,13 +2,11 @@
 
 "use strict";
 
-import veda from "./veda.js";
+import veda from "../common/veda.js";
 
-import riot from "./lib/riot.js";
+import riot from "../common/lib/riot.js";
 
-import Backend from "../browser/backend.js";
-
-import Notify from "../browser/notify.js";
+import Backend from "../common/backend.js";
 
 import Util from "../common/util.js";
 
@@ -464,12 +462,6 @@ proto.save = function() {
   if (this.isSync()) { return Promise.resolve(this); }
   if ( this.isSaving() && this.isSync() && typeof window !== "undefined" ) {
     return this.isSaving();
-  }
-  // Do not save rdfs:Resource
-  if ( this.hasValue("rdf:type", "rdfs:Resource") ) {
-    var notify = Notify ? new Notify() : console.log;
-    notify("danger", { message: "Не могу сохранить объект типа rdfs:Resource" });
-    return this;
   }
   var self = this;
   this.trigger("beforeSave");

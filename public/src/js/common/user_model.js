@@ -1,10 +1,10 @@
 // User Model
 
-import veda from "./veda.js";
+import veda from "../common/veda.js";
 
 import Util from "../common/util.js";
 
-import IndividualModel from "./individual_model.js";
+import IndividualModel from "../common/individual_model.js";
 
 export default veda.UserModel = UserModel;
 

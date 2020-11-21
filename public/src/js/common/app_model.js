@@ -1,16 +1,14 @@
 // Veda application Model
 
-import veda from "./veda.js";
+import veda from "../common/veda.js";
 
-import riot from "./lib/riot.js";
+import riot from "../common/lib/riot.js";
 
-import OntologyModel from "./ontology_model.js";
+import OntologyModel from "../common/ontology_model.js";
 
-import UserModel from "./user_model.js";
+import UserModel from "../common/user_model.js";
 
 import UpdateService from "../browser/update_service.js";
-
-import Backend from "../browser/backend.js";
 
 export default function AppModel(manifest) {
 
@@ -91,24 +89,6 @@ export default function AppModel(manifest) {
         });
       }
     }
-  };
-
-  // Define Model functions
-  self.login = function (username, password, secret) {
-    return Backend.authenticate(username, password, secret).then(function (auth) {
-      veda.ticket = auth.id;
-      veda.user_uri = auth.user_uri;
-      veda.end_time = Math.floor((auth.end_time - 621355968000000000) / 10000 );
-      return {
-        ticket: veda.ticket,
-        user_uri: veda.user_uri,
-        end_time: veda.end_time
-      };
-    });
-  };
-
-  self.logout = function() {
-    self.trigger("logout");
   };
 
   // Load ontology

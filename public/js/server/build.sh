@@ -1,1 +1,0 @@
-npx babel src --ignore "src/system.min.js" --ignore "src/start.js" --ignore "src/synchronous-promise.js" --out-dir . --copy-files

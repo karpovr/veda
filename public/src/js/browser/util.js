@@ -6,11 +6,11 @@ import veda from "../common/veda.js";
 
 import IndividualModel from "../common/individual_model.js";
 
-import Backend from "./backend.js";
+import Backend from "../common/backend.js";
 
-import Notify from "./notify.js";
+import Notify from "../browser/notify.js";
 
-import N3 from "./lib/n3-browser.min.js";
+//import N3 from "./lib/n3-browser.min.js";
 
 var Util = veda.Util || {};
 

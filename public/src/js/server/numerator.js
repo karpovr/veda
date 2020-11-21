@@ -25,11 +25,9 @@
  * Numbers are stored in v-s:enumeratedProperty.
  */
 
-import veda from "./veda.js";
+import veda from "../common/veda.js";
 
-import Util from "./util.js";
-
-import IndividualModel from "./individual_model.js";
+import Util from "../common/util.js";
 
 var Numerator = {};
 
@@ -335,11 +333,7 @@ function revokeValue(ticket, scope, value, _event_id) {
 Numerator.getNextValueSimple = function (ticket, scope, FIRST_VALUE) {
   if (typeof scope === 'string') {
     try {
-      if (typeof window === 'undefined') {
-        scope = get_individual(ticket, scope);
-      } else {
-        scope = new IndividualModel(scope, false);
-      }
+      scope = get_individual(ticket, scope);
     } catch (e) {
       return ''+FIRST_VALUE;
     }
@@ -348,48 +342,19 @@ Numerator.getNextValueSimple = function (ticket, scope, FIRST_VALUE) {
     return ''+FIRST_VALUE;
   }
   var max = 0;
-
-  if (typeof window === 'undefined') {
-    scope['v-s:numerationCommitedInterval'].forEach(function(interval) {
-      var intervalUri = interval.data;
-      try {
-        interval = get_individual(ticket, intervalUri);
-        if (interval['v-s:numerationCommitedIntervalEnd'][0].data > max) {
-          max = interval['v-s:numerationCommitedIntervalEnd'][0].data;
-        }
-      } catch (err) {
-        print ("ERR! intervalUri = ", intervalUri);
-        //print ("ERR! interval=", intervalUri);
-        print(err.stack);
+  scope['v-s:numerationCommitedInterval'].forEach(function(interval) {
+    var intervalUri = interval.data;
+    try {
+      interval = get_individual(ticket, intervalUri);
+      if (interval['v-s:numerationCommitedIntervalEnd'][0].data > max) {
+        max = interval['v-s:numerationCommitedIntervalEnd'][0].data;
       }
+    } catch (err) {
+      print ("ERR! intervalUri = ", intervalUri);
+      //print ("ERR! interval=", intervalUri);
+      print(err.stack);
+    }
 
-    });
-  } else {
-    scope['v-s:numerationCommitedInterval'].forEach(function(interval) {
-      interval = new IndividualModel(interval.id, false);
-      if (interval['v-s:numerationCommitedIntervalEnd'][0] > max) {
-        max = interval['v-s:numerationCommitedIntervalEnd'][0];
-      }
-    });
-  }
+  });
   return ''+(max + 1);
 }
-
-Numerator.isNumerationValueAvailable = function (scope, value) {
-  if (typeof window === 'undefined') {
-    throw "not implemented";
-  }
-  if (typeof scope === 'string') {
-    scope = new IndividualModel(scope, false);
-  }
-  if (typeof scope === 'undefined' || typeof scope['v-s:numerationCommitedInterval'] === 'undefined') { return true; }
-  for (var i = 0; i < scope['v-s:numerationCommitedInterval'].length; i++) {
-    var interval = new IndividualModel(scope['v-s:numerationCommitedInterval'][i].id, false);
-    if (interval['v-s:numerationCommitedIntervalBegin'][0] <= value && value <= interval['v-s:numerationCommitedIntervalEnd'][0]) {
-      return false;
-      //max = interval['v-s:numerationCommitedIntervalEnd'][0];
-    }
-  }
-  return true;
-}
-

@@ -1,6 +1,6 @@
 // Application instance
 
-import riot from "./lib/riot.js";
+import riot from "../common/lib/riot.js";
 
 var veda = riot.observable({});
 

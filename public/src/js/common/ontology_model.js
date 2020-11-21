@@ -1,14 +1,12 @@
 // Ontology Model
 
-import veda from "./veda.js";
+import veda from "../common/veda.js";
 
-import riot from "./lib/riot.js";
+import riot from "../common/lib/riot.js";
 
-import IndividualModel from "./individual_model.js";
+import IndividualModel from "../common/individual_model.js";
 
-import Backend from "../browser/backend.js";
-
-import Notify from "../browser/notify.js";
+import Backend from "../common/backend.js";
 
 import Util from "../common/util.js";
 
@@ -45,8 +43,7 @@ proto.init = function () {
       return self.processOntology();
     })
     .catch(function (error) {
-      var notify = Notify();
-      notify("danger", {code: "Ontology load error.", name: error});
+      console.log("Ontology load error.", error);
       return error;
     });
   } else {

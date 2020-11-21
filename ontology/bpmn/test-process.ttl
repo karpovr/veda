@@ -1,0 +1,43 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+<http://semantic-machines.com/veda/test-process>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+############# Test data
+
+td:test-process-start-form1
+  a bpmn:StartForm ;
+  bpmn:startProcessId "TestProcess" ;
+  bpmn:hasStatus bpmn:ToBeStarted ;
+  v-wf:onDocument td:AleksandraKhvostikova ;
+  s-wf:ComplexRouteStartForm_coordination1 td:test-process-start-form1-subform1 ;
+  rdfs:label "Тест стартовой формы комплексного процесса"@ru ;
+.
+
+td:test-process-start-form1-subform1
+  a s-wf:SimpleRouteStartForm ;
+  s-wf:SimpleRouteStartForm_editable true ;
+  s-wf:SimpleRouteStartForm_participant td:RomanKarpov-Analyst1 ;
+  s-wf:SimpleRouteStartForm_participant td:ValeriyBushenev-Programmer1 ;
+  s-wf:SimpleRouteStartForm_task_label "Согласовать"@ru, "Coordinate"@en ;
+  s-wf:SimpleRouteStartForm_visible true ;
+  v-s:parent td:test-process-start-form1 ;
+  v-s:sum 10 ;
+  v-wf:StartForm_canEdit false ;
+.

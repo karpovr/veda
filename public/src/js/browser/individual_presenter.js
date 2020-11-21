@@ -8,17 +8,17 @@ import IndividualModel from "../common/individual_model.js";
 
 import Util from "../common/util.js";
 
-import "./util.js";
+import "../browser/util.js";
 
 import riot from "../common/lib/riot.js";
 
-import Notify from "./notify.js";
+import Notify from "../browser/notify.js";
+
+import "../browser/veda_controls.js";
 
 import $ from "jquery";
 
 import "jquery-ui";
-
-import "./veda_controls.js";
 
 IndividualModel.prototype.present = IndividualPresenter;
 

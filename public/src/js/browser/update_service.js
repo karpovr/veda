@@ -6,7 +6,7 @@ import veda from "../common/veda.js";
 
 import IndividualModel from "../common/individual_model.js";
 
-import Backend from "./backend.js";
+import Backend from "../common/backend.js";
 
 export default UpdateService;
 

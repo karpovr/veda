@@ -1,14 +1,16 @@
 // Main
 
-import veda from "./js/common/veda.js";
+import veda from "../common/veda.js";
 
-import AppModel from "./js/common/app_model.js";
+import AppModel from "../common/app_model.js";
 
-import AppPresenter from "./js/browser/app_presenter.js";
+import AppPresenter from "../browser/app_presenter.js";
 
-import Auth from "./js/browser/auth.js";
+import Auth from "../browser/auth.js";
 
-import "./js/browser/individual_presenter.js";
+import "../browser/individual_presenter.js";
+
+veda.env = "browser";
 
 System.import("jquery").then(function () {
 
