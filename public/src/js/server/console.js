@@ -1,4 +1,4 @@
-;(function () {
+;(function (global) {
   var console = {
     log: logger("LOG"),
     error: logger("ERROR"),
@@ -13,8 +13,9 @@
   };
   function logger(NAME) {
     return function () {
-      print.apply(global, [NAME + ":"].concat(arguments));
+      var args = [].slice.call(arguments);
+      print.apply(global, [NAME + ":"].concat(args));
     }
   };
-  this.console = console;
-})();
+  global.console = console;
+})(this);

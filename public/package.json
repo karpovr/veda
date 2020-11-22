@@ -44,6 +44,6 @@
     "vis-network": "^8.5.2"
   },
   "scripts": {
-    "build": "rm -Rf ./dist && babel src --ignore \"src/**/test\" --ignore \"src/**/server\" --out-dir dist --source-maps --copy-files && rm -Rf ./dist/js/server && rollup -c"
+    "build": "rm -Rf ./dist && babel src --ignore \"src/**/test\" --ignore \"src/**/server\" --out-dir dist --source-maps --copy-files && rm -Rf ./dist/js/server && rollup -c && cp src/js/server/console.js dist/js/server/ && mkdir -p js/server && cp -f dist/js/server/* js/server/ && cd .. && rm -Rf logs && ./control-stop.sh && ./control-start.sh"
   }
 }

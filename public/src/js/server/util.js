@@ -4,23 +4,23 @@
 
 import veda from "../common/veda.js";
 
-veda.Util = veda.Util || {};
+var Util = veda.Util || {};
 
-export default veda.Util;
+export default veda.Util = Util;
 
-veda.Util.getJournalUri = function (object_uri)
+Util.getJournalUri = function (object_uri)
 {
     return object_uri + "j";
 };
 
-veda.Util.getTraceJournalUri = function (object_uri)
+Util.getTraceJournalUri = function (object_uri)
 {
     return object_uri + "t";
 };
 
-veda.Util.newJournalRecord = function (journal_uri)
+Util.newJournalRecord = function (journal_uri)
 {
-    var new_journal_record_uri = veda.Util.genUri() + "-jr";
+    var new_journal_record_uri = Util.genUri() + "-jr";
 
     var new_journal_record = {
         '@': new_journal_record_uri,
@@ -43,10 +43,10 @@ veda.Util.newJournalRecord = function (journal_uri)
     return new_journal_record;
 };
 
-veda.Util.logToJournal = function (ticket, journal_uri, journal_record, jr_type)
+Util.logToJournal = function (ticket, journal_uri, journal_record, jr_type)
 {
     //if (!jr_type)
-    //  print("@@@ logToJournal, new_journal_record=" + veda.Util.toJson(journal_record));
+    //  print("@@@ logToJournal, new_journal_record=" + Util.toJson(journal_record));
 
     put_individual(ticket, journal_record, _event_id);
 
@@ -60,21 +60,21 @@ veda.Util.logToJournal = function (ticket, journal_uri, journal_record, jr_type)
     };
 
     //if (!jr_type)
-    //  print("@@@ logToJournal, add_to_journal = " + veda.Util.toJson(add_to_journal));
+    //  print("@@@ logToJournal, add_to_journal = " + Util.toJson(add_to_journal));
 
     //var before = get_individual(ticket, journal_uri);
-    //print('BEFORE : '+veda.Util.toJson(before))
+    //print('BEFORE : '+Util.toJson(before))
 
     add_to_individual(ticket, add_to_journal, _event_id);
 
     //var after = get_individual(ticket, journal_uri);
-    //print('AFTER : '+veda.Util.toJson(after))
+    //print('AFTER : '+Util.toJson(after))
 };
 
-veda.Util.traceToJournal = function (ticket, journal_uri, label, _data)
+Util.traceToJournal = function (ticket, journal_uri, label, _data)
 {
     //print("@@@ traceToJournal, journal_uri=" + journal_uri + " #1");
-    var journal_record = veda.Util.newJournalRecord(journal_uri);
+    var journal_record = Util.newJournalRecord(journal_uri);
 
     journal_record['rdf:type'] = [
     {
@@ -92,14 +92,14 @@ veda.Util.traceToJournal = function (ticket, journal_uri, label, _data)
         type: "String"
     }];
 
-    veda.Util.logToJournal(ticket, journal_uri, journal_record, true);
+    Util.logToJournal(ticket, journal_uri, journal_record, true);
 
-    //print("@@@ traceToJournal, journal_uri=" + journal_uri + ", " + veda.Util.toJson(journal_record));
+    //print("@@@ traceToJournal, journal_uri=" + journal_uri + ", " + Util.toJson(journal_record));
 };
 
 
 // DEPRECATED
-veda.Util.isTecnicalChange = function (newdoc, olddoc)
+Util.isTecnicalChange = function (newdoc, olddoc)
 {
     if (newdoc['v-s:actualVersion'] && newdoc['v-s:actualVersion'][0].data != newdoc['@'])
     {
@@ -122,7 +122,7 @@ veda.Util.isTecnicalChange = function (newdoc, olddoc)
             (newdoc[key].length !== olddoc[key].length) // изменили количество
         )
         {
-            if (!veda.Util.isTechnicalAttribute(key, olddoc[key]))
+            if (!Util.isTechnicalAttribute(key, olddoc[key]))
             {
                 // в нетехническом атрибуте
                 //print (newdoc['@']+' x '+olddoc[key]+' >1> '+newdoc[key]+' : '+key);
@@ -133,10 +133,10 @@ veda.Util.isTecnicalChange = function (newdoc, olddoc)
         {
             for (var item in newdoc[key])
             {
-                if (newdoc[key][item].data.valueOf() != olddoc[key][item].data.valueOf() && !veda.Util.isTechnicalAttribute(key, olddoc[key][item].data))
+                if (newdoc[key][item].data.valueOf() != olddoc[key][item].data.valueOf() && !Util.isTechnicalAttribute(key, olddoc[key][item].data))
                 { // поменялось одно из значений в нетехническом атрибуте
-                    //print ('2 old:', veda.Util.toJson(olddoc));
-                    //print ('2 new:', veda.Util.toJson(newdoc));
+                    //print ('2 old:', Util.toJson(olddoc));
+                    //print ('2 new:', Util.toJson(newdoc));
                     //print (newdoc['@']+' x '+olddoc[key][item].data+' >2> '+newdoc[key][item].data+' : '+key);
                     return false;
                 }
@@ -149,7 +149,7 @@ veda.Util.isTecnicalChange = function (newdoc, olddoc)
 
 
 // DEPRECATED
-veda.Util.isTechnicalAttribute = function (attName, oldvalue)
+Util.isTechnicalAttribute = function (attName, oldvalue)
 {
     if (!oldvalue && attName === 'v-s:actualVersion') return true;
     if (!oldvalue && attName === 'v-s:previousVersion') return true;
@@ -158,7 +158,7 @@ veda.Util.isTechnicalAttribute = function (attName, oldvalue)
     return false;
 };
 
-veda.Util.loadVariablesUseField = function (ticket, field)
+Util.loadVariablesUseField = function (ticket, field)
 {
     var res = {};
     for (var idx in field)
@@ -168,10 +168,10 @@ veda.Util.loadVariablesUseField = function (ticket, field)
         {
             var indv = get_individual(ticket, uri);
 
-            if ( veda.Util.hasValue(indv, "rdf:type", {data: "v-s:Variable", type: "Uri"}) )
+            if ( Util.hasValue(indv, "rdf:type", {data: "v-s:Variable", type: "Uri"}) )
             {
-                var varName = veda.Util.getFirstValue(indv['v-s:variableName']);
-                var varValue = veda.Util.getValues(indv['v-s:variableValue']);
+                var varName = Util.getFirstValue(indv['v-s:variableName']);
+                var varValue = Util.getValues(indv['v-s:variableValue']);
                 res[varName] = varValue;
             }
         }
@@ -179,7 +179,7 @@ veda.Util.loadVariablesUseField = function (ticket, field)
     return res;
 };
 
-veda.Util.isAlphaNumeric = function (src)
+Util.isAlphaNumeric = function (src)
 {
     if (!src)
         return false;
@@ -190,7 +190,7 @@ veda.Util.isAlphaNumeric = function (src)
         return false;
 };
 
-veda.Util.replace_word = function (src, from, to)
+Util.replace_word = function (src, from, to)
 {
     var trace = true;
 
@@ -215,7 +215,7 @@ veda.Util.replace_word = function (src, from, to)
             pos_w_b += from.length;
             var pos_w_e = pos_w_b;
             var ch = src.charAt(pos_w_e);
-            while (veda.Util.isAlphaNumeric(ch))
+            while (Util.isAlphaNumeric(ch))
             {
                 pos_w_e++;
                 ch = src.charAt(pos_w_e);
@@ -253,7 +253,7 @@ veda.Util.replace_word = function (src, from, to)
                 if (trace)
                     print('$replace_word #2 last_ch=[' + last_ch + ']');
 
-                if (last_ch && veda.Util.isAlphaNumeric(last_ch) == false)
+                if (last_ch && Util.isAlphaNumeric(last_ch) == false)
                 {
                     if (trace)
                     {
@@ -282,7 +282,7 @@ veda.Util.replace_word = function (src, from, to)
  * @param user_uri Initiator
  * @param _event_id
  */
-veda.Util.create_version = function (ticket, document, prev_state, user_uri, _event_id) {
+Util.create_version = function (ticket, document, prev_state, user_uri, _event_id) {
   // Only if we save actual version of document (or it is first save of versioned document)
   if (
     !document['v-s:actualVersion']
@@ -305,12 +305,12 @@ veda.Util.create_version = function (ticket, document, prev_state, user_uri, _ev
     )
   ) {
     var user = get_individual(ticket, user_uri);
-    var appointment_uri = veda.Util.getUri(user["v-s:defaultAppointment"]) || veda.Util.getUri(user["v-s:hasAppointment"]);
+    var appointment_uri = Util.getUri(user["v-s:defaultAppointment"]) || Util.getUri(user["v-s:hasAppointment"]);
     var actor_uri = appointment_uri || user_uri;
 
     if (!prev_state) prev_state = document;
     var actualId = document['@'];
-    var versionId = veda.Util.genUri() + "-vr";
+    var versionId = Util.genUri() + "-vr";
 
     // Create new version
     var version = get_individual(ticket, document['@']);
@@ -336,7 +336,7 @@ veda.Util.create_version = function (ticket, document, prev_state, user_uri, _ev
     );
     version['v-s:created'] = [{data: new Date(), type: "Datetime"}];
     version['v-s:edited'] = [];
-    version['v-s:creator'] = veda.Util.newUri(actor_uri);
+    version['v-s:creator'] = Util.newUri(actor_uri);
     version['v-s:lastEditor'] = [];
 
     put_individual(ticket, version, _event_id);
@@ -345,17 +345,17 @@ veda.Util.create_version = function (ticket, document, prev_state, user_uri, _ev
     var membership_uri = 'd:membership_' + versionId.split(':').join('_') + '_' + actualId.split(':').join('_');
     var membership = {
       '@' : membership_uri,
-      'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-      'v-s:memberOf' : veda.Util.newUri(actualId),
-      'v-s:resource' : veda.Util.newUri(versionId),
-      'rdfs:comment' : veda.Util.newStr('создано: server script veda.Util.create_version ()'),
-      'v-s:canRead'  : veda.Util.newBool(true)
+      'rdf:type'     : Util.newUri('v-s:Membership'),
+      'v-s:memberOf' : Util.newUri(actualId),
+      'v-s:resource' : Util.newUri(versionId),
+      'rdfs:comment' : Util.newStr('создано: server script Util.create_version ()'),
+      'v-s:canRead'  : Util.newBool(true)
     };
     put_individual (ticket, membership, _event_id);
 
     // Update previous version
     if (document['v-s:previousVersion']) {
-      var previous = get_individual(ticket, veda.Util.getUri(document['v-s:previousVersion']));
+      var previous = get_individual(ticket, Util.getUri(document['v-s:previousVersion']));
       previous['v-s:nextVersion'] = [{
         data: versionId,
         type: "Uri"
@@ -374,14 +374,14 @@ veda.Util.create_version = function (ticket, document, prev_state, user_uri, _ev
     }];
     document['v-s:nextVersion'] = [];
     document['v-s:edited'] = [{data: new Date(), type: "Datetime"}];
-    document['v-s:lastEditor'] = veda.Util.newUri(actor_uri);
+    document['v-s:lastEditor'] = Util.newUri(actor_uri);
     put_individual(ticket, document, _event_id);
   }
 };
 
-veda.Util.recursiveCall = function (elem, path, ticket, _event_id) {
+Util.recursiveCall = function (elem, path, ticket, _event_id) {
   if (path[elem['@']]) {
-    print('WARNING! Recursive path '+veda.Util.toJson(path)+' > '+elem['a']);
+    print('WARNING! Recursive path '+Util.toJson(path)+' > '+elem['a']);
     return;
   }
 
@@ -390,8 +390,8 @@ veda.Util.recursiveCall = function (elem, path, ticket, _event_id) {
     elem['v-wf:decisionFormList'].forEach(function(dfae) {
       var df = get_individual(ticket, dfae.data)
       if (!df['v-wf:isCompleted'] || df['v-wf:isCompleted'][0].data == false) {
-        df['v-s:deleted'] = veda.Util.newBool(true);
-        df['v-wf:isStopped'] = veda.Util.newBool(true);
+        df['v-s:deleted'] = Util.newBool(true);
+        df['v-wf:isStopped'] = Util.newBool(true);
         put_individual(ticket, df, _event_id);
       }
     });
@@ -399,13 +399,13 @@ veda.Util.recursiveCall = function (elem, path, ticket, _event_id) {
 
   if (elem['v-wf:workItemList']) {
     elem['v-wf:workItemList'].forEach(function(wi) {
-      veda.Util.recursiveCall(get_individual(ticket, wi.data), path, ticket, _event_id);
+      Util.recursiveCall(get_individual(ticket, wi.data), path, ticket, _event_id);
     });
   }
 
   if (elem['v-wf:workOrderList']) {
     elem['v-wf:workOrderList'].forEach(function(wo) {
-      veda.Util.recursiveCall(get_individual(ticket, wo.data), path, ticket, _event_id);
+      Util.recursiveCall(get_individual(ticket, wo.data), path, ticket, _event_id);
     });
   }
 
@@ -413,36 +413,36 @@ veda.Util.recursiveCall = function (elem, path, ticket, _event_id) {
     elem['v-wf:isProcess'].forEach(function(p) {
       var df = get_individual(ticket, p.data);
       if (!df['v-wf:isCompleted'] || df['v-wf:isCompleted'][0].data == false) {
-        df['v-wf:isStopped'] = veda.Util.newBool(true);
+        df['v-wf:isStopped'] = Util.newBool(true);
         put_individual(ticket, df, _event_id);
       }
-      veda.Util.recursiveCall(df, path, ticket, _event_id);
+      Util.recursiveCall(df, path, ticket, _event_id);
     });
   }
 };
 
-veda.Util.set_err_on_indv = function (msg, indv, src)
+Util.set_err_on_indv = function (msg, indv, src)
 {
     var bugreport = {
-      '@' : veda.Util.genUri () + '-err',
-      'rdf:type'     : veda.Util.newUri('v-s:BugReport'),
-      'v-s:created'  : veda.Util.newDate (new Date()),
-      'rdfs:comment' : veda.Util.newStr(src),
-      'v-s:errorMessage' : veda.Util.newStr (msg),
-      'v-s:resource': veda.Util.newUri (indv['@'])
+      '@' : Util.genUri () + '-err',
+      'rdf:type'     : Util.newUri('v-s:BugReport'),
+      'v-s:created'  : Util.newDate (new Date()),
+      'rdfs:comment' : Util.newStr(src),
+      'v-s:errorMessage' : Util.newStr (msg),
+      'v-s:resource': Util.newUri (indv['@'])
     };
     put_individual(ticket, bugreport, _event_id);
 
     var add_to_indv = {
         '@': indv['@'],
-        'v-s:hasError': veda.Util.newUri (bugreport['@'])
+        'v-s:hasError': Util.newUri (bugreport['@'])
         };
     add_to_individual(ticket, add_to_indv, _event_id);
 
     print("ERR! " + src + ':' +  msg);
 };
 
-veda.Util.set_field_to_document = function (field_name, value, doc_id)
+Util.set_field_to_document = function (field_name, value, doc_id)
 {
     var set_in_document = {
     '@': doc_id
@@ -462,7 +462,7 @@ veda.Util.set_field_to_document = function (field_name, value, doc_id)
  * @param work_order контекст рабочего задания
  * @returns {Array}
  */
-veda.Util.transformation = function (ticket, individuals, transform, executor, work_order, process)
+Util.transformation = function (ticket, individuals, transform, executor, work_order, process)
 {
   try
   {
@@ -480,14 +480,14 @@ veda.Util.transformation = function (ticket, individuals, transform, executor, w
 
     //print ("@B start transform");
     var tmp_rules = [];
-    //print ("rules_in=", veda.Util.toJson (rules));
-    //print ("individuals=", veda.Util.toJson (individuals));
+    //print ("rules_in=", Util.toJson (rules));
+    //print ("individuals=", Util.toJson (individuals));
     for (var i in rules)
     {
       var rul = get_individual(ticket, rules[i].data);
       if (!rul)
       {
-        print("not read rule [", veda.Util.toJson(rul), "]");
+        print("not read rule [", Util.toJson(rul), "]");
         continue;
       }
       else
@@ -502,7 +502,7 @@ veda.Util.transformation = function (ticket, individuals, transform, executor, w
     {
       return function(name, field)
       {
-        var rr = get_individual(ticket, veda.Util.getUri(element));
+        var rr = get_individual(ticket, Util.getUri(element));
         if (!rr)
           return;
 
@@ -893,7 +893,7 @@ veda.Util.transformation = function (ticket, individuals, transform, executor, w
             var element_uri;
 
             if (Array.isArray(element) === true)
-              element_uri = veda.Util.getUri (element);
+              element_uri = Util.getUri (element);
             else
               element_uri = element.data ? element.data : element;
 
@@ -1041,7 +1041,7 @@ veda.Util.transformation = function (ticket, individuals, transform, executor, w
           if (!grouping)
           {
             out_data0_el = {};
-            out_data0_el['@'] = veda.Util.genUri() + "-tr";
+            out_data0_el['@'] = Util.genUri() + "-tr";
           }
           else
           {
@@ -1062,7 +1062,7 @@ veda.Util.transformation = function (ticket, individuals, transform, executor, w
               if (useExistsUid)
                 out_data0_el['@'] = individual['@'];
               else
-                out_data0_el['@'] = veda.Util.genUri() + "-tr";
+                out_data0_el['@'] = Util.genUri() + "-tr";
             }
           }
 

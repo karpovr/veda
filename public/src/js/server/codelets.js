@@ -4,27 +4,27 @@
 
 import veda from "../common/veda.js";
 
-veda.Codelet = {};
+var Codelet = {};
 
-export default veda.Codelet;
+export default veda.Codelet = Codelet;
 
-veda.Codelet.down_right_and_store = function (process, task)
+Codelet.down_right_and_store = function (process, task)
 {
-    return veda.Codelet.change_rights(process, task, [
+    return Codelet.change_rights(process, task, [
     {
         "data": "-r--"
     }]);
 };
 
-veda.Codelet.change_rights = function (process, task, rightset)
+Codelet.change_rights = function (process, task, rightset)
 {
-    return veda.Codelet.change_rights_actor(process, task, [
+    return Codelet.change_rights_actor(process, task, [
     {
         "data": "-r--"
     }], 'actor');
 };
 
-veda.Codelet.change_rights_actor = function (process, task, rightset, actor, docId, executors)
+Codelet.change_rights_actor = function (process, task, rightset, actor, docId, executors)
 {
     try
     {
@@ -118,7 +118,7 @@ veda.Codelet.change_rights_actor = function (process, task, rightset, actor, doc
     }
 };
 
-veda.Codelet.restore_right = function (task)
+Codelet.restore_right = function (task)
 {
     try
     {
@@ -135,17 +135,17 @@ veda.Codelet.restore_right = function (task)
     }
 };
 
-veda.Codelet.complete_process = function (ticket, process, _event_id)
+Codelet.complete_process = function (ticket, process, _event_id)
 {
-    veda.Codelet.change_process_status(ticket, process, 'v-wf:Completed', _event_id);
+    Codelet.change_process_status(ticket, process, 'v-wf:Completed', _event_id);
 };
 
-veda.Codelet.interrupt_process = function (ticket, process, _event_id)
+Codelet.interrupt_process = function (ticket, process, _event_id)
 {
-    veda.Codelet.change_process_status(ticket, process, 'v-wf:Interrupted', _event_id);
+    Codelet.change_process_status(ticket, process, 'v-wf:Interrupted', _event_id);
 };
 
-veda.Codelet.change_process_status = function (ticket, process, status, _event_id)
+Codelet.change_process_status = function (ticket, process, status, _event_id)
 {
     //print('>>> '+veda.Util.toJson(process));
     var vars = process['v-wf:inVars'];
@@ -172,7 +172,7 @@ veda.Codelet.change_process_status = function (ticket, process, status, _event_i
     }
 };
 
-veda.Codelet.change_document_workflow_status = function (process, status)
+Codelet.change_document_workflow_status = function (process, status)
 {
     //status: InProcess, InReworking
     var doc_id = process.getInputVariable('docId');
@@ -188,7 +188,7 @@ veda.Codelet.change_document_workflow_status = function (process, status)
     return [veda.Workflow.get_new_variable('workflowStatus', veda.Util.newStr(status))];
 };
 
-veda.Codelet.change_document_status = function (process, status)
+Codelet.change_document_status = function (process, status)
 {
 
     // print ("@JS setStatus=", veda.Util.toJson(process.getInputVariable('setStatus')));
@@ -212,9 +212,9 @@ veda.Codelet.change_document_status = function (process, status)
     return [veda.Workflow.get_new_variable('status', veda.Util.newStr(status))];
 };
 
-veda.Codelet.createPermissionStatement = function(process, stage)
+Codelet.createPermissionStatement = function(process, stage)
 {
-    print("###### Start veda.Codelet.createPermissionStatement ######");
+    print("###### Start Codelet.createPermissionStatement ######");
     var docId = process.getInputVariable("docId");
     print("docId:", veda.Util.toJson(docId));
     var subjectAppointmentUri;
@@ -247,13 +247,13 @@ veda.Codelet.createPermissionStatement = function(process, stage)
     } else {
       print("Error create_permission_statement_executor: not found local variable 'responsible'");
     }
-    print("###### Finish veda.Codelet.createPermissionStatement ######");
+    print("###### Finish Codelet.createPermissionStatement ######");
     return veda.Util.newStr(statementUri);
 };
 
-veda.Codelet.deletePermissionStatement = function(process, stage)
+Codelet.deletePermissionStatement = function(process, stage)
 {
-    print("###### Start veda.Codelet.deletePermissionStatement ######");
+    print("###### Start Codelet.deletePermissionStatement ######");
     var docId = process.getInputVariable("docId");
     print("docId:", veda.Util.toJson(docId));
     var statementUri;
@@ -267,11 +267,11 @@ veda.Codelet.deletePermissionStatement = function(process, stage)
       'v-s:deleted': veda.Util.newBool('true')
     }
     set_in_individual(ticket, set_in_statement);
-    print("###### Finish veda.Codelet.deletePermissionStatement ######");
+    print("###### Finish Codelet.deletePermissionStatement ######");
     return veda.Util.newStr("empty");
 };
 
-veda.Codelet.is_exists_net_executor = function (process)
+Codelet.is_exists_net_executor = function (process)
 {
     try
     {
@@ -284,7 +284,7 @@ veda.Codelet.is_exists_net_executor = function (process)
     }
 };
 
-veda.Codelet.get_type_of_docId = function (task)
+Codelet.get_type_of_docId = function (task)
 {
     try
     {
@@ -314,7 +314,7 @@ veda.Codelet.get_type_of_docId = function (task)
 
 };
 
-veda.Codelet.is_in_docflow_and_set_if_true = function (task)
+Codelet.is_in_docflow_and_set_if_true = function (task)
 {
 
     // # 322
@@ -383,10 +383,10 @@ veda.Codelet.is_in_docflow_and_set_if_true = function (task)
 
 };
 
-veda.Codelet.distribution = function (process, task)
+Codelet.distribution = function (process, task)
 {};
 
-veda.Codelet.add_value_to_document = function (process, task)
+Codelet.add_value_to_document = function (process, task)
 {
     try
     {
@@ -428,7 +428,7 @@ veda.Codelet.add_value_to_document = function (process, task)
     }
 };
 
-veda.Codelet.set_value_to_document = function (process, task)
+Codelet.set_value_to_document = function (process, task)
 {
     try
     {
@@ -462,7 +462,7 @@ veda.Codelet.set_value_to_document = function (process, task)
     }
 };
 
-veda.Codelet.create_use_transformation = function (process, task)
+Codelet.create_use_transformation = function (process, task)
 {
     try
     {
@@ -507,7 +507,7 @@ veda.Codelet.create_use_transformation = function (process, task)
 };
 
 // скрипт поиска в документе uri > 64
-veda.Codelet.find_long_terms = function (ticket, uri, execute_script)
+Codelet.find_long_terms = function (ticket, uri, execute_script)
 {
     var event_id = '';
     var cid = get_from_ght('cid');
@@ -605,7 +605,7 @@ veda.Codelet.find_long_terms = function (ticket, uri, execute_script)
 };
 
 // скрипт переименования онтологии
-veda.Codelet.onto_rename = function (ticket, document, execute_script)
+Codelet.onto_rename = function (ticket, document, execute_script)
 {
     //    print ('$$$$$$$$$$$$$$ script_onto_rename:doc= ' + document['@']);
     try

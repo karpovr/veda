@@ -4,13 +4,11 @@
 
 import veda from "../common/veda.js";
 
-veda.Workflow = veda.Workflow || {};
+var Workflow = veda.Workflow || {};
 
-export default veda.Workflow;
+export default veda.Workflow = Workflow;
 
-veda.Workflow = veda.Workflow || {};
-
-veda.Workflow.create_work_item = function (ticket, process_uri, net_element_uri, parent_uri, _event_id, isTrace)
+Workflow.create_work_item = function (ticket, process_uri, net_element_uri, parent_uri, _event_id, isTrace)
 {
     try
     {
@@ -71,7 +69,7 @@ veda.Workflow.create_work_item = function (ticket, process_uri, net_element_uri,
 
 };
 
-veda.Workflow.WorkItemResult = function (_work_item_result)
+Workflow.WorkItemResult = function (_work_item_result)
 {
     this.work_item_result = _work_item_result;
 
@@ -187,7 +185,7 @@ veda.Workflow.WorkItemResult = function (_work_item_result)
 
 };
 
-veda.Workflow.is_some_content_value = function (src, b)
+Workflow.is_some_content_value = function (src, b)
 {
     for (var i = 0; i < src.length; i++)
     {
@@ -206,7 +204,7 @@ veda.Workflow.is_some_content_value = function (src, b)
 };
 
 
-veda.Workflow.Context = function (_src_data, _ticket)
+Workflow.Context = function (_src_data, _ticket)
 {
     this.src_data = _src_data;
     this.ticket = _ticket;
@@ -378,7 +376,7 @@ veda.Workflow.Context = function (_src_data, _ticket)
     };
 };
 
-veda.Workflow.get_new_variable = function (variable_name, value) {
+Workflow.get_new_variable = function (variable_name, value) {
   try {
     var new_uri = veda.Util.genUri() + "-var";
     var new_variable = {
@@ -405,7 +403,7 @@ veda.Workflow.get_new_variable = function (variable_name, value) {
   }
 };
 
-veda.Workflow.store_items_and_set_minimal_rights = function (ticket, data)
+Workflow.store_items_and_set_minimal_rights = function (ticket, data)
 {
     try
     {
@@ -438,14 +436,14 @@ veda.Workflow.store_items_and_set_minimal_rights = function (ticket, data)
     }
 };
 
-veda.Workflow.generate_variable = function (ticket, def_variable, value, _process, _task, _task_result)
+Workflow.generate_variable = function (ticket, def_variable, value, _process, _task, _task_result)
 {
     try
     {
         var variable_name = veda.Util.getFirstValue(def_variable['v-wf:varDefineName']);
 
         //print("[WORKFLOW][generate_variable]: variable_define_name=" + variable_name);
-        var new_variable = veda.Workflow.get_new_variable(variable_name, value)
+        var new_variable = Workflow.get_new_variable(variable_name, value)
 
         var variable_scope = veda.Util.getUri(def_variable['v-wf:varDefineScope']);
         if (variable_scope)
@@ -506,7 +504,7 @@ veda.Workflow.generate_variable = function (ticket, def_variable, value, _proces
                     //print("[WORKFLOW][generate_variable]: переменная [", variable_name, "] не, найдена, привязать новую к процессу:" + _process['@']);
 
                     // если не нашли то сделать копию и привязать ее переменную к процессу
-                    var new_variable_for_local = veda.Workflow.get_new_variable(variable_name, value)
+                    var new_variable_for_local = Workflow.get_new_variable(variable_name, value)
                     put_individual(ticket, new_variable_for_local, _event_id);
 
                     var add_to_document = {
@@ -540,7 +538,7 @@ veda.Workflow.generate_variable = function (ticket, def_variable, value, _proces
 
 };
 
-veda.Workflow.create_and_mapping_variables = function (ticket, mapping, _process, _task, _order, _task_result, f_store, trace_journal_uri, trace_comment)
+Workflow.create_and_mapping_variables = function (ticket, mapping, _process, _task, _order, _task_result, f_store, trace_journal_uri, trace_comment)
 {
     try
     {
@@ -555,16 +553,16 @@ veda.Workflow.create_and_mapping_variables = function (ticket, mapping, _process
         var task_result;
 
         if (_process)
-            process = new veda.Workflow.Context(_process, ticket);
+            process = new Workflow.Context(_process, ticket);
 
         if (_task)
-            task = new veda.Workflow.Context(_task, ticket);
+            task = new Workflow.Context(_task, ticket);
 
         if (_order)
-            order = new veda.Workflow.Context(_order, ticket);
+            order = new Workflow.Context(_order, ticket);
 
         if (_task_result)
-            task_result = new veda.Workflow.WorkItemResult(_task_result);
+            task_result = new Workflow.WorkItemResult(_task_result);
 
         // print("[WORKFLOW][create_and_mapping_variables]: process=" + veda.Util.toJson (process));
         // print("[WORKFLOW][create_and_mapping_variables]: task=" + veda.Util.toJson (task));
@@ -594,7 +592,7 @@ veda.Workflow.create_and_mapping_variables = function (ticket, mapping, _process
                     var def_variable = get_individual(ticket, mapToVariable_uri);
                     if (!def_variable) continue;
 
-                    var new_variable = veda.Workflow.generate_variable(ticket, def_variable, res1, _process, _task, _task_result);
+                    var new_variable = Workflow.generate_variable(ticket, def_variable, res1, _process, _task, _task_result);
                     if (new_variable)
                     {
                         if (f_store == true)
@@ -646,7 +644,7 @@ veda.Workflow.create_and_mapping_variables = function (ticket, mapping, _process
 
 //////////////////////////////////////////////////////////////////////////
 
-veda.Workflow.find_in_work_item_tree = function (ticket, _process, compare_field, compare_value)
+Workflow.find_in_work_item_tree = function (ticket, _process, compare_field, compare_value)
 {
     try
     {
@@ -655,7 +653,7 @@ veda.Workflow.find_in_work_item_tree = function (ticket, _process, compare_field
         var f_workItemList = _process['v-wf:workItemList'];
 
         if (f_workItemList)
-            veda.Workflow.rsffiwit(ticket, f_workItemList, compare_field, compare_value, res, _process);
+            Workflow.rsffiwit(ticket, f_workItemList, compare_field, compare_value, res, _process);
 
         return res;
     }
@@ -665,7 +663,7 @@ veda.Workflow.find_in_work_item_tree = function (ticket, _process, compare_field
     }
 };
 
-veda.Workflow.rsffiwit = function (ticket, work_item_list, compare_field, compare_value, res, _parent)
+Workflow.rsffiwit = function (ticket, work_item_list, compare_field, compare_value, res, _parent)
 {
     try
     {
@@ -687,7 +685,7 @@ veda.Workflow.rsffiwit = function (ticket, work_item_list, compare_field, compar
                 var f_workItemList = i_work_item['v-wf:workItemList'];
 
                 if (f_workItemList)
-                    veda.Workflow.rsffiwit(ticket, f_workItemList, compare_field, compare_value, res, i_work_item);
+                    Workflow.rsffiwit(ticket, f_workItemList, compare_field, compare_value, res, i_work_item);
             }
 
         }
@@ -701,7 +699,7 @@ veda.Workflow.rsffiwit = function (ticket, work_item_list, compare_field, compar
 };
 
 ///////////////////////////////////////////// JOURNAL //////////////////////////////////////////////////
-veda.Workflow.create_new_journal = function(ticket, new_journal_uri, parent_journal_uri, label, is_trace)
+Workflow.create_new_journal = function(ticket, new_journal_uri, parent_journal_uri, label, is_trace)
 {
   try
   {
@@ -725,7 +723,7 @@ veda.Workflow.create_new_journal = function(ticket, new_journal_uri, parent_jour
 
           if (parent_journal_uri)
           {
-              veda.Workflow.create_new_journal(ticket, parent_journal_uri, null, "", is_trace)
+              Workflow.create_new_journal(ticket, parent_journal_uri, null, "", is_trace)
               new_journal['v-s:parentJournal'] = veda.Util.newUri(parent_journal_uri);
           }
 
@@ -752,7 +750,7 @@ veda.Workflow.create_new_journal = function(ticket, new_journal_uri, parent_jour
 
 };
 
-veda.Workflow.mapToJournal = function (map_container, ticket, _process, _task, _order, msg, journal_uri, trace_journal_uri, trace_comment)
+Workflow.mapToJournal = function (map_container, ticket, _process, _task, _order, msg, journal_uri, trace_journal_uri, trace_comment)
 {
     try
     {
@@ -766,7 +764,7 @@ veda.Workflow.mapToJournal = function (map_container, ticket, _process, _task, _
             if (_task && msg)
                 _task['rdfs:label'] = msg;
 
-            journalVars = veda.Workflow.create_and_mapping_variables(ticket, map_container, _process, _task, _order, null, false, trace_journal_uri, trace_comment);
+            journalVars = Workflow.create_and_mapping_variables(ticket, map_container, _process, _task, _order, null, false, trace_journal_uri, trace_comment);
             if (journalVars)
             {
                 var new_journal_record = veda.Util.newJournalRecord(journal_uri);
@@ -802,20 +800,20 @@ veda.Workflow.mapToJournal = function (map_container, ticket, _process, _task, _
  *      v-s:notificationBody   - шаблон для тела
  */
 
-veda.Workflow.getAppName = function () {
+Workflow.getAppName = function () {
   var appInfo = get_individual(ticket, "v-s:vedaInfo");
   var appName = appInfo ? veda.Util.getFirstValue(appInfo["rdfs:label"]) : "";
   return appName;
 };
 
-veda.Workflow.mapToMessage = function (map_container, ticket, _process, _task, _order, msg, journal_uri, trace_journal_uri, trace_comment) {
+Workflow.mapToMessage = function (map_container, ticket, _process, _task, _order, msg, journal_uri, trace_journal_uri, trace_comment) {
   try {
     if (journal_uri && map_container) {
       var process_uri = _process['@'];
 
       //* выполнить маппинг для сообщения
       var messageVars = [];
-      messageVars = veda.Workflow.create_and_mapping_variables(ticket, map_container, _process, _task, _order, null, false, trace_journal_uri, trace_comment);
+      messageVars = Workflow.create_and_mapping_variables(ticket, map_container, _process, _task, _order, null, false, trace_journal_uri, trace_comment);
 
 
       if (messageVars) {
@@ -862,7 +860,7 @@ veda.Workflow.mapToMessage = function (map_container, ticket, _process, _task, _
             lang = 'RU';
           }
           var view = {
-            "app_name": veda.Workflow.getAppName
+            "app_name": Workflow.getAppName
           };
 
           for (var idx = 0; idx < messageVars.length; idx++) {
@@ -921,12 +919,12 @@ veda.Workflow.mapToMessage = function (map_container, ticket, _process, _task, _
 };
 
 
-veda.Workflow.create_new_subjournal = function (parent_uri, el_uri, label, jtype)
+Workflow.create_new_subjournal = function (parent_uri, el_uri, label, jtype)
 {
-    return veda.Workflow._create_new_subjournal(false, parent_uri, el_uri, label, jtype)
+    return Workflow._create_new_subjournal(false, parent_uri, el_uri, label, jtype)
 };
 
-veda.Workflow.create_new_trace_subjournal = function (parent_uri, net_element_impl, label, jtype)
+Workflow.create_new_trace_subjournal = function (parent_uri, net_element_impl, label, jtype)
 {
     var new_sub_journal_uri;
     var isTrace;
@@ -938,7 +936,7 @@ veda.Workflow.create_new_trace_subjournal = function (parent_uri, net_element_im
 
     var el_uri = net_element_impl['@'];
 
-    new_sub_journal_uri = veda.Workflow._create_new_subjournal(true, parent_uri, el_uri, label, jtype)
+    new_sub_journal_uri = Workflow._create_new_subjournal(true, parent_uri, el_uri, label, jtype)
 
     var set_journal_to_element;
     set_journal_to_element = {
@@ -955,7 +953,7 @@ veda.Workflow.create_new_trace_subjournal = function (parent_uri, net_element_im
     return new_sub_journal_uri;
 };
 
-veda.Workflow._create_new_subjournal = function (is_trace, parent_uri, el_uri, label, jtype)
+Workflow._create_new_subjournal = function (is_trace, parent_uri, el_uri, label, jtype)
 {
     var new_sub_journal_uri;
     var parent_journal_uri;
@@ -978,7 +976,7 @@ veda.Workflow._create_new_subjournal = function (is_trace, parent_uri, el_uri, l
         return new_sub_journal_uri;
     }
     else
-        veda.Workflow.create_new_journal(ticket, new_sub_journal_uri, parent_journal_uri, label, is_trace);
+        Workflow.create_new_journal(ticket, new_sub_journal_uri, parent_journal_uri, label, is_trace);
 
     var journal_record = veda.Util.newJournalRecord(parent_journal_uri);
     journal_record['rdf:type'] = [
@@ -1009,7 +1007,7 @@ veda.Workflow._create_new_subjournal = function (is_trace, parent_uri, el_uri, l
     return new_sub_journal_uri;
 };
 
-veda.Workflow.get_trace_journal = function (document, process)
+Workflow.get_trace_journal = function (document, process)
 {
     var isTrace = document['v-wf:isTrace'];
     if (isTrace && veda.Util.getFirstValue(isTrace) == true)
@@ -1024,7 +1022,7 @@ veda.Workflow.get_trace_journal = function (document, process)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-veda.Workflow.create_new_subprocess = function (ticket, f_useSubNet, f_executor, parent_net, f_inVars, document, parent_trace_journal_uri)
+Workflow.create_new_subprocess = function (ticket, f_useSubNet, f_executor, parent_net, f_inVars, document, parent_trace_journal_uri)
 {
     try
     {
@@ -1040,7 +1038,7 @@ veda.Workflow.create_new_subprocess = function (ticket, f_useSubNet, f_executor,
         if (parent_trace_journal_uri)
             veda.Util.traceToJournal(ticket, parent_trace_journal_uri, "[WO2.4] executor= " + veda.Util.getUri(f_executor) + " used net", veda.Util.getUri(use_net));
 
-        //var ctx = new veda.Workflow.Context(work_item, ticket);
+        //var ctx = new Workflow.Context(work_item, ticket);
         //ctx.print_variables ('v-wf:inVars');
         var _started_net = get_individual(ticket, veda.Util.getUri(use_net));
         if (_started_net)
@@ -1093,13 +1091,13 @@ veda.Workflow.create_new_subprocess = function (ticket, f_useSubNet, f_executor,
                 var trace_journal_uri = veda.Util.getTraceJournalUri(new_process_uri);
                 if (trace_journal_uri)
                 {
-                    veda.Workflow.create_new_journal(ticket, trace_journal_uri, null, _started_net['rdfs:label']);
+                    Workflow.create_new_journal(ticket, trace_journal_uri, null, _started_net['rdfs:label']);
                     new_process['v-wf:traceJournal'] = veda.Util.newUri(trace_journal_uri);
                 }
             }
             put_individual(ticket, new_process, _event_id);
 
-            veda.Workflow.create_new_subjournal(parent_process_uri, new_process_uri, 'запущен подпроцесс', 'v-wf:SubProcessStarted');
+            Workflow.create_new_subjournal(parent_process_uri, new_process_uri, 'запущен подпроцесс', 'v-wf:SubProcessStarted');
 
             document['v-wf:isProcess'] = [
             {
@@ -1118,7 +1116,7 @@ veda.Workflow.create_new_subprocess = function (ticket, f_useSubNet, f_executor,
 };
 
 
-veda.Workflow.get_properties_chain = function (var1, query, result_if_fail_search)
+Workflow.get_properties_chain = function (var1, query, result_if_fail_search)
 {
     var res = [];
 
@@ -1132,7 +1130,7 @@ veda.Workflow.get_properties_chain = function (var1, query, result_if_fail_searc
     doc = get_individual(ticket, veda.Util.getUri(var1));
 
     if (doc)
-        veda.Workflow.traversal(doc, query, 0, res);
+        Workflow.traversal(doc, query, 0, res);
 
         //print('@@@get_properties_chain #2 res=', veda.Util.toJson(res));
 
@@ -1149,7 +1147,7 @@ veda.Workflow.get_properties_chain = function (var1, query, result_if_fail_searc
     return res;
 };
 
-veda.Workflow.traversal = function (indv, query, pos_in_path, result)
+Workflow.traversal = function (indv, query, pos_in_path, result)
 {
     var condition = query[pos_in_path];
 
@@ -1180,7 +1178,7 @@ veda.Workflow.traversal = function (indv, query, pos_in_path, result)
             //print('@@@ traversal#2 ffs[i]=', ffs[i].data);
             var doc = get_individual(ticket, ffs[i].data);
             //print('@@@ traversal#4 doc=', veda.Util.toJson(doc));
-            veda.Workflow.traversal(doc, query, pos_in_path + 1, result);
+            Workflow.traversal(doc, query, pos_in_path + 1, result);
         }
     }
 
@@ -1239,7 +1237,7 @@ veda.Workflow.traversal = function (indv, query, pos_in_path, result)
 
 };
 
-veda.Workflow.remove_empty_branches_from_journal = function (journal_uri)
+Workflow.remove_empty_branches_from_journal = function (journal_uri)
 {
     var jrn = get_individual(ticket, journal_uri);
     if (jrn && !jrn["v-s:childRecord"])
@@ -1278,27 +1276,27 @@ veda.Workflow.remove_empty_branches_from_journal = function (journal_uri)
     }
 };
 
-veda.Workflow.getSystemUrl = function (var_to) {
+Workflow.getSystemUrl = function (var_to) {
     var userTo = get_individual(ticket, var_to[0].data);
     var isExternal = false;
     if (userTo["v-s:origin"] && userTo["v-s:origin"][0].data ==="ExternalUser") {
         isExternal = true;
     };
     var systemIndivid = isExternal ? veda.Util.newUri ('cfg:SystemInfoExternal') : veda.Util.newUri ('v-s:vedaInfo');
-    return veda.Util.getFirstValue (veda.Workflow.get_properties_chain (systemIndivid, [{$get:'v-s:appUrl'}]));
+    return veda.Util.getFirstValue (Workflow.get_properties_chain (systemIndivid, [{$get:'v-s:appUrl'}]));
 };
 
-veda.Workflow.getInboxUrl = function (var_to) {
+Workflow.getInboxUrl = function (var_to) {
     var userTo = get_individual(ticket, var_to[0].data);
     var isExternal = false;
     if (userTo["v-s:origin"] && userTo["v-s:origin"][0].data ==="ExternalUser") {
         isExternal = true;
     };
     var systemIndivid = isExternal ? veda.Util.newUri ('cfg:SystemInfoExternal') : veda.Util.newUri ('v-s:vedaInfo');
-    return veda.Util.getFirstValue (veda.Workflow.get_properties_chain (systemIndivid, [{$get:'v-wf:appInboxUrl'}]));
+    return veda.Util.getFirstValue (Workflow.get_properties_chain (systemIndivid, [{$get:'v-wf:appInboxUrl'}]));
 };
 
-veda.Workflow.isSubUnitOf = function (current, target, depth) {
+Workflow.isSubUnitOf = function (current, target, depth) {
     if (current.length == 0) return false;
     print("@@@@@isSubUnitOf run");
     depth = depth || 0;
@@ -1310,6 +1308,6 @@ veda.Workflow.isSubUnitOf = function (current, target, depth) {
       print("@@@@@isSubUnitOf parentUnit match");
       return true;
     } else {
-      return veda.Workflow.isSubUnitOf(dep["v-s:parentUnit"], target, depth + 1);
+      return Workflow.isSubUnitOf(dep["v-s:parentUnit"], target, depth + 1);
     }
 };
