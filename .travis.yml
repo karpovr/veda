@@ -55,6 +55,7 @@ jobs:
         - "export DISPLAY=:99.0"
         - fluxbox >/dev/null 2>&1 &
         - "cp -R ./qa/onto/* ./ontology 2>/dev/null || :"
+        - cd ./public && npm install && npm run build && cd ..
         - ./control-start.sh
     #    - ./tools/tarantool-start.sh
     #    - ./veda
