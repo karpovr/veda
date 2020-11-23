@@ -62,9 +62,9 @@ cfg:Layout
   rdf:type rdfs:Resource ;
   rdfs:label "Макет"@ru ;
   rdfs:label "Layout"@en ;
-  rdf:value v-s:Layout ;
+#  rdf:value v-s:Layout ;
 #  rdf:value mnd-s:Layout ;
-#  rdf:value ras:Layout ;
+  rdf:value ras:Layout ;
 #  rdf:value kat:Layout ;
 #  rdf:value mnd-s:CheckEmployeeProfileLayout ;
 .
@@ -72,9 +72,9 @@ cfg:Main
   rdf:type rdfs:Resource ;
   rdfs:label "Главная"@ru ;
   rdfs:label "Main"@en ;
-  rdf:value v-s:Main ;
+#  rdf:value v-s:Main ;
 #  rdf:value mnd-s:Main ;
-#  rdf:value ras:Main ;
+  rdf:value ras:Main ;
 #  rdf:value kat:Main ;
 #  rdf:value mnd-s:CheckEmployeeProfileMain ;
 .

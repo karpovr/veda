@@ -13,6 +13,6 @@
 v-s:vedaInfo 
     rdf:type rdfs:Resource; 
     rdfs:label "Veda";
-    v-s:appBuildVersion "4402a5c77"; 
+    v-s:appBuildVersion "bc0748a22"; 
     v-s:appBuildDate "2020-11-23"^^xsd:dateTime; 
 .

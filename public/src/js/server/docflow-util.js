@@ -4,6 +4,8 @@
 
 import veda from "../common/veda.js";
 
+import mustache from "mustache";
+
 var Workflow = veda.Workflow || {};
 
 export default veda.Workflow = Workflow;
@@ -902,8 +904,8 @@ Workflow.mapToMessage = function (map_container, ticket, _process, _task, _order
             view[name] = araa;
           }
           //print("@@@50 view=", veda.Util.toJson(view));
-          var output_subject = Mustache.render(subject, view).replace (/&#x2F;/g, '/');
-          var output_body = Mustache.render(body, view).replace (/&#x2F;/g, '/');
+          var output_subject = mustache.render(subject, view).replace (/&#x2F;/g, '/');
+          var output_body = mustache.render(body, view).replace (/&#x2F;/g, '/');
           new_message['v-s:subject'] = veda.Util.newStr (output_subject, lang);
           new_message['v-s:messageBody'] = veda.Util.newStr (output_body, lang);
           new_message['v-wf:onWorkOrder'] = veda.Util.newUri (_order['@']);

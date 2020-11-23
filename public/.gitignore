@@ -2,3 +2,4 @@ node_modules
 dist
 *.fasthttp.gz
 ontology.json
+/package-lock.json
