@@ -1,5 +1,10 @@
-// Pagination plugin
-(function( $, moment ) { "use strict";
+// Sortable table plugin
+
+import jQuery from "jquery";
+
+System.import("moment").then(function (module) {
+  var moment = module.default;
+
   $.fn.tableSortable = function (clicked) {
     return this.each(function() {
       var table = $(this);
@@ -65,4 +70,4 @@
 
     });
   };
-})(jQuery, moment);
+});

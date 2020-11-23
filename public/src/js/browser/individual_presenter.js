@@ -20,6 +20,8 @@ import $ from "jquery";
 
 import "jquery-ui";
 
+import "tablesortable";
+
 IndividualModel.prototype.present = IndividualPresenter;
 
 export default IndividualPresenter;
