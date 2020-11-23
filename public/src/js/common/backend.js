@@ -10,13 +10,9 @@ var serverBackend = {};
 
 var browserBackend = {};
 
-export default veda.Backend = (veda.env === "server" ? serverBackend : browserBackend);
+export default veda.Backend = ( veda.env === "server" ? serverBackend : browserBackend );
 
-/////////////////////////////////////////
-//////////////            ///////////////
 //////////////   SERVER   ///////////////
-//////////////            ///////////////
-/////////////////////////////////////////
 
 serverBackend.status = "limited";
 
@@ -139,11 +135,7 @@ serverBackend.remove_from_individual = function (ticket, individual) {
   }
 };
 
-/////////////////////////////////////////
-//////////////             //////////////
 //////////////   BROWSER   //////////////
-//////////////             //////////////
-/////////////////////////////////////////
 
 var default_timeout = 15000;
 var query_timeout = default_timeout * 10;
@@ -199,10 +191,12 @@ browserBackend.check = function () {
     });
   }
 };
-window.addEventListener("online", browserBackend.check);
-window.addEventListener("offline", browserBackend.check);
-veda.on("ccus-online", browserBackend.check);
-veda.on("ccus-offline", browserBackend.check);
+if (typeof window !== "undefined") {
+  window.addEventListener("online", browserBackend.check);
+  window.addEventListener("offline", browserBackend.check);
+  veda.on("ccus-online", browserBackend.check);
+  veda.on("ccus-offline", browserBackend.check);
+}
 
 // Server errors
 function browserBackendError (result) {
@@ -674,8 +668,6 @@ browserBackend.get_individuals = function (ticket, uris) {
   }
 };
 
-////////////////////////////////////////////////////////////////////////
-
 function call_server_put(params) {
   return call_server(params).catch(function (browserBackendError) {
     if (browserBackendError.code === 0 || browserBackendError.code === 503 || browserBackendError.code === 4000 ) {
@@ -826,8 +818,6 @@ browserBackend.put_individuals = function (ticket, individuals, assigned_subsyst
   });
 
 };
-
-////////////////////////////////////////////////////////////////////////
 
 browserBackend.uploadFile = function (params, tries) {
   tries = typeof tries === "number" ? tries : 5;
