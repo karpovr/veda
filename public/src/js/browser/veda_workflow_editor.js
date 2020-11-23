@@ -8,7 +8,7 @@
  * [1]: http://github.com/hemantsshetty/jsWorkflow
  */
 
-import jsPlumb from "jsplumb";
+import "jsplumb";
 
 var jsWorkflow = {};
 
@@ -16,7 +16,6 @@ export default jsWorkflow;
 
 // Leveraging the ready function of jsPlumb.
 jsWorkflow.ready = jsPlumb.ready;
-
 
 // No API call should be made until the DOM has been initialized.
 jsWorkflow.ready(function() {
