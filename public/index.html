@@ -84,7 +84,9 @@
     <script src="/node_modules/systemjs/dist/extras/amd.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function (e) {
-        System.import("main");
+        System.import("main").then(function (module) {
+          window.veda = module.default;
+        });
       });
     </script>
 

@@ -10,7 +10,7 @@ import Auth from "../browser/auth.js";
 
 import "../browser/individual_presenter.js";
 
-veda.env = "browser";
+export default veda;
 
 System.import("jquery").then(function () {
 
