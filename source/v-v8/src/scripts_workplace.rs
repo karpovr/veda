@@ -1,6 +1,7 @@
 use crate::callback::init_context_with_callback;
 use crate::callback::G_VARS;
-use crate::common::{collect_js_files, collect_module_dirs, str_2_v8, HashVec};
+use crate::common::*;
+use crate::common::{collect_js_files, collect_module_dirs, str_2_v8};
 use crate::session_cache::CallbackSharedData;
 use rusty_v8 as v8;
 use rusty_v8::{Context, HandleScope, Isolate, Local};
@@ -10,14 +11,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 use v_module::module::Module;
-
-pub struct ScriptInfo<'a, T> {
-    pub id: String,
-    pub str_script: String,
-    pub compiled_script: Option<v8::Local<'a, v8::Script>>,
-    pub dependency: HashVec<String>,
-    pub context: T,
-}
 
 pub fn script_origin<'a>(s: &mut v8::HandleScope<'a>, resource_name: v8::Local<'a, v8::String>) -> v8::ScriptOrigin<'a> {
     let resource_line_offset = v8::Integer::new(s, 0);

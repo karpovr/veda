@@ -50,6 +50,7 @@ sudo apt-get install build-essential
 if [ "$1" = force ] || ! rustc -V ; then
     echo "--- INSTALL RUST ---"
     curl https://sh.rustup.rs -sSf | sh -s -- -y
+    rustup update nightly
     source $HOME/.cargo/env
 else
     echo "--- UPDATE RUST ---"

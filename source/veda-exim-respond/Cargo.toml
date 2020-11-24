@@ -9,8 +9,12 @@ name = "veda-exim-respond"
 path = "src/main.rs"
 
 [dependencies]
-nng = "0.5.1"
 log = "0.4"
+serde_derive = "1.0"
+rocket = "0.4.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+lazy_static = "1.4.0"
 
 v_queue = { path = "../v-queue" }
 v_onto = { path = "../v-onto" }
@@ -19,3 +23,8 @@ v_storage = { path = "../v-storage" }
 v_module = { path = "../v-module" }
 v_api = { path = "../v-api" }
 v_exim = { path = "../v-exim" }
+
+[dependencies.rocket_contrib]
+version = "0.4.6"
+default-features = false
+features = ["json"]

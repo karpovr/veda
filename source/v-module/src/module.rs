@@ -44,9 +44,7 @@ pub struct Module {
 }
 
 impl Default for Module {
-    fn default() -> Self {
-        Module::new(StorageMode::ReadOnly, false)
-    }
+    fn default() -> Self { Module::new(StorageMode::ReadOnly, false) }
 }
 
 impl Module {
@@ -160,9 +158,7 @@ impl Module {
         Err(-1)
     }
 
-    pub fn get_sys_ticket_id(&mut self) -> Result<String, i32> {
-        Module::get_sys_ticket_id_from_db(&mut self.storage)
-    }
+    pub fn get_sys_ticket_id(&mut self) -> Result<String, i32> { Module::get_sys_ticket_id_from_db(&mut self.storage) }
 
     pub fn get_literal_of_link(&mut self, indv: &mut Individual, link: &str, field: &str, to: &mut Individual) -> Option<String> {
         if let Some(v) = indv.get_literals(link) {
@@ -312,10 +308,10 @@ impl Module {
                                 //process::exit(e as i32);
                                 return;
                             }
-                        }
+                        },
                         Ok(b) => {
                             need_commit = b;
-                        }
+                        },
                     }
                 }
 
@@ -394,17 +390,25 @@ pub fn get_cmd(queue_element: &mut Individual) -> Option<IndvOp> {
     Some(IndvOp::from_i64(wcmd.unwrap_or_default()))
 }
 
-pub fn init_log(module_name: &str) {
+pub fn init_log(module_name: &str) { init_log_with_filter(module_name, None) }
+
+pub fn init_log_with_filter(module_name: &str, filter: Option<&str>) {
     let var_log_name = module_name.to_owned() + "_LOG";
     match std::env::var_os(var_log_name.to_owned()) {
         Some(val) => println!("use env var: {}: {:?}", var_log_name, val.to_str()),
         None => std::env::set_var(var_log_name.to_owned(), "info"),
     }
 
+    let filters_str = if let Some(f) = filter {
+        f.to_owned()
+    } else {
+        env::var(var_log_name).unwrap_or_default()
+    };
+
     Builder::new()
         .format(|buf, record| writeln!(buf, "{} [{}] - {}", Local::now().format("%Y-%m-%dT%H:%M:%S%.3f"), record.level(), record.args()))
-        .parse_filters(&env::var(var_log_name).unwrap_or_default())
-        .init();
+        .parse_filters(&filters_str)
+        .init()
 }
 
 pub fn create_new_ticket(login: &str, user_id: &str, duration: i64, ticket: &mut Ticket, storage: &mut VStorage) {
@@ -480,9 +484,7 @@ pub fn get_info_of_module(module_name: &str) -> Option<(i64, i64)> {
     info.read_info()
 }
 
-pub fn wait_load_ontology() -> i64 {
-    wait_module("input-onto", 1)
-}
+pub fn wait_load_ontology() -> i64 { wait_module("input-onto", 1) }
 
 pub fn wait_module(module_name: &str, wait_op_id: i64) -> i64 {
     if wait_op_id < 0 {

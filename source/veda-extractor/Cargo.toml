@@ -10,7 +10,14 @@ path = "src/main.rs"
 
 [dependencies]
 log = "0.4"
+lazy_static = "1.4.0"
+rusty_v8 = "0.13.0"
+serde = { version = "1.0", features = [ "derive" ] }
+serde_derive = "1.0"
+serde_json = "^1.0"
 
+v_ft_xapian = { path = "../v-ft-xapian" }
+v_v8 = { path = "../v-v8" }
 v_queue = { path = "../v-queue" }
 v_onto = { path = "../v-onto" }
 v_search = { path = "../v-search" }

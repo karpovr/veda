@@ -20,8 +20,8 @@ use v_queue::record::Mode;
 use v_search::common::FTQuery;
 use v_storage::remote_indv_r_storage::inproc_storage_manager;
 use v_v8::callback::*;
-use v_v8::common::HashVec;
-use v_v8::scripts_workplace::{ScriptInfo, ScriptsWorkPlace};
+use v_v8::common::{is_filter_pass, HashVec, ScriptInfo, ScriptInfoContext};
+use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::{commit, CallbackSharedData, Transaction};
 
 const MAX_COUNT_LOOPS: i32 = 100;
@@ -62,28 +62,6 @@ fn get_storage_init_param() -> String {
         info!("tarantool addr={}", &tarantool_addr);
     }
     tarantool_addr
-}
-
-pub(crate) struct ScriptInfoContext {
-    pub trigger_by_type: HashVec<String>,
-    pub prevent_by_type: HashVec<String>,
-    pub trigger_by_uid: HashVec<String>,
-    pub run_at: String,
-    pub disallow_changing_source: bool,
-    pub is_unsafe: bool,
-}
-
-impl Default for ScriptInfoContext {
-    fn default() -> Self {
-        Self {
-            trigger_by_type: Default::default(),
-            prevent_by_type: Default::default(),
-            trigger_by_uid: Default::default(),
-            run_at: "".to_string(),
-            disallow_changing_source: false,
-            is_unsafe: false,
-        }
-    }
 }
 
 pub struct MyContext<'a> {
@@ -440,7 +418,7 @@ pub(crate) fn load_event_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, x
     let res = xr.query(FTQuery::new_with_user("cfg:VedaSystem", "'rdf:type' === 'v-s:Event'"), &mut wp.module.storage);
 
     if res.result_code == ResultCode::Ok && res.count > 0 {
-            for id in &res.result {
+        for id in &res.result {
             if let Some(ev_indv) = wp.module.get_individual(id, &mut Individual::default()) {
                 prepare_script(wp, ev_indv);
             }
@@ -505,44 +483,4 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
     } else {
         error!("v-s:script no found");
     }
-}
-
-pub(crate) fn is_filter_pass(script: &ScriptInfo<ScriptInfoContext>, individual_id: &str, indv_types: &Vec<String>, onto: &mut Onto) -> bool {
-    let mut is_pass = false;
-
-    if !script.context.prevent_by_type.vec.is_empty() {
-        for indv_type in indv_types.iter() {
-            if script.context.prevent_by_type.hash.contains(indv_type) {
-                return false;
-            }
-
-            if onto.is_some_entered_it(indv_type, script.context.prevent_by_type.vec.iter()) {
-                return false;
-            }
-        }
-    }
-
-    if script.context.trigger_by_uid.vec.is_empty() && script.context.trigger_by_type.vec.is_empty() {
-        return true;
-    }
-
-    if !script.context.trigger_by_uid.vec.is_empty() && script.context.trigger_by_uid.hash.contains(individual_id) {
-        is_pass = true;
-    }
-
-    if !is_pass && !script.context.trigger_by_type.vec.is_empty() {
-        for indv_type in indv_types.iter() {
-            if script.context.trigger_by_type.hash.contains(indv_type) {
-                is_pass = true;
-                break;
-            }
-
-            if onto.is_some_entered_it(indv_type, script.context.trigger_by_type.vec.iter()) {
-                is_pass = true;
-                break;
-            }
-        }
-    }
-
-    return is_pass;
 }

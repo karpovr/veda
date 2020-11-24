@@ -9,7 +9,7 @@ chrono = "0.4"
 redis = "0.12.0"
 env_logger = "0.6"
 log = "0.4"
-rust-ini = "0.15"
+rust-ini = "0.16"
 
 v_queue = { path = "../v-queue" }
 v_onto = { path = "../v-onto" }

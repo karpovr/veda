@@ -2,11 +2,18 @@
 extern crate enum_primitive_derive;
 #[macro_use]
 extern crate log;
+extern crate base64;
 
-use nng::{Message, Socket};
+pub mod configuration;
+
+use crate::configuration::Configuration;
+use base64::{decode, encode};
 use num_traits::{FromPrimitive, ToPrimitive};
+use serde_json::json;
+use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
-use std::str::*;
+use std::error::Error;
+use std::io::ErrorKind;
 use std::{thread, time};
 use uuid::*;
 use v_api::app::ResultCode;
@@ -21,7 +28,7 @@ use v_queue::record::*;
 
 const TRANSMIT_FAILED: i64 = 32;
 
-#[derive(Primitive, PartialEq, Debug, Clone)]
+#[derive(Primitive, PartialEq, Debug, Clone, Serialize, Deserialize)]
 #[repr(i64)]
 pub enum ExImCode {
     Unknown = 0,
@@ -73,13 +80,13 @@ impl ExImCode {
     }
 }
 
-pub fn send_changes_to_node(queue_consumer: &mut Consumer, soc: &mut Socket, node_id: &str, node_addr: &str) {
+pub fn send_changes_to_node(queue_consumer: &mut Consumer, resp_api: &Configuration, node_id: &str) -> ExImCode {
     let mut size_batch = 0;
 
     // read queue current part info
     if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
         error!("get_info_of_part {}: {}", queue_consumer.id, e.as_str());
-        return;
+        return ExImCode::InvalidMessage;
     }
 
     if queue_consumer.queue.count_pushed - queue_consumer.count_popped == 0 {
@@ -119,19 +126,29 @@ pub fn send_changes_to_node(queue_consumer: &mut Consumer, soc: &mut Socket, nod
                 }
             }
 
-            let mut indv = &mut Individual::new_raw(raw);
+            let mut queue_element = &mut Individual::new_raw(raw);
 
-            loop {
-                let out_obj = create_out_obj(&mut indv, node_id);
+            for attempt_count in 0..10 {
+                let msg = create_export_message(&mut queue_element, node_id);
 
-                if out_obj.is_ok() {
-                    if let Err(e) = send_out_obj(&mut out_obj.unwrap(), soc, node_addr) {
-                        error!("fail prepare queue element, err={}", e.as_string());
-                        if e != ExImCode::TransmitFailed {
+                match msg {
+                    Ok(mut msg) => {
+                        if let Err(e) = send_export_message(&mut msg, resp_api) {
+                            error!("fail send export message, err={:?}, attempt_count={}", e, attempt_count);
+
+                            if attempt_count == 10 {
+                                return ExImCode::SendFailed;
+                            }
+                        } else {
                             break;
                         }
-                    } else {
-                        break;
+                    }
+                    Err(e) => {
+                        if e == ExImCode::Ok {
+                            break;
+                        }
+                        error!("fail create export message, err={:?}", e);
+                        return ExImCode::InvalidMessage;
                     }
                 }
 
@@ -145,11 +162,15 @@ pub fn send_changes_to_node(queue_consumer: &mut Consumer, soc: &mut Socket, nod
             }
         }
     }
+    return ExImCode::Ok;
 }
 
-pub fn create_out_obj(msg: &mut Individual, node_id: &str) -> Result<Individual, ExImCode> {
-    if parse_raw(msg).is_ok() {
-        let target_veda = msg.get_first_literal("target_veda");
+pub fn create_export_message(queue_element: &mut Individual, node_id: &str) -> Result<Individual, ExImCode> {
+    if parse_raw(queue_element).is_ok() {
+
+
+
+        let target_veda = queue_element.get_first_literal("target_veda");
         if target_veda.is_none() {
             return Err(ExImCode::InvalidMessage);
         }
@@ -159,23 +180,23 @@ pub fn create_out_obj(msg: &mut Individual, node_id: &str) -> Result<Individual,
             return Err(ExImCode::Ok);
         }
 
-        let wcmd = msg.get_first_integer("cmd");
+        let wcmd = queue_element.get_first_integer("cmd");
         if wcmd.is_none() {
             return Err(ExImCode::InvalidMessage);
         }
         let cmd = IndvOp::from_i64(wcmd.unwrap_or_default());
 
-        let new_state = msg.get_first_binobj("new_state");
+        let new_state = queue_element.get_first_binobj("new_state");
         if cmd != IndvOp::Remove && new_state.is_none() {
             return Err(ExImCode::InvalidMessage);
         }
 
-        let source_veda = msg.get_first_literal("source_veda");
+        let source_veda = queue_element.get_first_literal("source_veda");
         if source_veda.is_none() {
             return Err(ExImCode::InvalidMessage);
         }
 
-        let date = msg.get_first_integer("date");
+        let date = queue_element.get_first_integer("date");
         if date.is_none() {
             return Err(ExImCode::InvalidMessage);
         }
@@ -203,116 +224,113 @@ pub fn create_out_obj(msg: &mut Individual, node_id: &str) -> Result<Individual,
     Err(ExImCode::InvalidMessage)
 }
 
-fn send_out_obj(out_obj: &mut Individual, soc: &mut Socket, node_addr: &str) -> Result<(), ExImCode> {
+pub fn encode_message(out_obj: &mut Individual) -> Result<JSONValue, Box<dyn Error>> {
+    out_obj.parse_all();
+
     let mut raw1: Vec<u8> = Vec::new();
-    if to_msgpack(&out_obj, &mut raw1).is_ok() {
-        info!("send {} to {}", out_obj.get_id(), node_addr);
-        let req = Message::from(raw1.as_slice());
-        if let Err(e) = soc.send(req) {
-            error!("fail send to slave node, err={:?}", e);
-            return Err(ExImCode::TransmitFailed);
-        }
+    to_msgpack(&out_obj, &mut raw1)?;
+    let msg_base64 = encode(raw1.as_slice());
 
-        // Wait for the response from the server (slave).
-        let wmsg = soc.recv();
-        if let Err(e) = wmsg {
-            error!("fail recv from slave node, err={:?}", e);
-            return Err(ExImCode::TransmitFailed);
-        }
-        let msg = wmsg.unwrap();
-
-        let res = dec_slave_resp(msg.as_ref());
-        if res.0 != out_obj.get_id() {
-            error!("recv message invalid, expected uri={}, recv uri={}", out_obj.get_id(), res.0);
-            return Err(ExImCode::TransmitFailed);
-        }
-
-        if res.1 != ExImCode::Ok {
-            error!("recv error, uri={}, error={}", res.0, res.1.as_string());
-            return Err(ExImCode::TransmitFailed);
-        }
-
-        //info!("success send {} to {}", uri, node_addr);
-    }
-
-    // info! ("{:?}", raw);
-
-    Ok(())
+    Ok(json!({ "msg": &msg_base64 }))
 }
 
-pub fn processing_message_contains_one_change(my_node_id: &str, recv_msg: Vec<u8>, systicket: &str, module: &mut Module) -> (String, ExImCode) {
-    let mut recv_indv = Individual::new_raw(RawObj::new(recv_msg));
-
-    if parse_raw(&mut recv_indv).is_ok() {
-        let wcmd = recv_indv.get_first_integer("cmd");
-        if wcmd.is_none() {
-            return (recv_indv.get_id().to_owned(), ExImCode::InvalidCmd);
-        }
-        let cmd = IndvOp::from_i64(wcmd.unwrap_or_default());
-
-        let source_veda = recv_indv.get_first_literal("source_veda");
-        if source_veda.is_none() {
-            return (recv_indv.get_id().to_owned(), ExImCode::InvalidTarget);
-        }
-
-        let source_veda = source_veda.unwrap_or_default();
-        if source_veda.len() < 32 {
-            return (recv_indv.get_id().to_owned(), ExImCode::InvalidTarget);
-        }
-
-        let target_veda = recv_indv.get_first_literal("target_veda");
-        if target_veda.is_none() {
-            return (recv_indv.get_id().to_owned(), ExImCode::InvalidTarget);
-        }
-        let target_veda = target_veda.unwrap();
-
-        if target_veda != "*" && my_node_id != target_veda {
-            return (recv_indv.get_id().to_owned(), ExImCode::InvalidTarget);
-        }
-
-        let new_state = recv_indv.get_first_binobj("new_state");
-        if cmd != IndvOp::Remove && new_state.is_some() {
-            let mut indv = Individual::new_raw(RawObj::new(new_state.unwrap_or_default()));
-            if parse_raw(&mut indv).is_ok() {
-                indv.parse_all();
-                indv.add_uri("sys:source", &source_veda);
-
-                let res = module.api.update(systicket, cmd, &indv);
-
-                if res.result != ResultCode::Ok {
-                    error!("fail update, uri={}, result_code={:?}", recv_indv.get_id(), res.result);
-                    return (recv_indv.get_id().to_owned(), ExImCode::FailUpdate);
-                } else {
-                    info!("get form {}, success update, uri={}", source_veda, recv_indv.get_id());
-                    return (recv_indv.get_id().to_owned(), ExImCode::Ok);
+pub fn decode_message(src: &JSONValue) -> Result<Individual, Box<dyn Error>> {
+    if let Some(props) = src.as_object() {
+        if let Some(msg) = props.get("msg") {
+            if let Some(m) = msg.as_str() {
+                let mut recv_indv = Individual::new_raw(RawObj::new(decode(&m)?));
+                if parse_raw(&mut recv_indv).is_ok() {
+                    return Ok(recv_indv);
                 }
             }
         }
     }
 
-    (recv_indv.get_id().to_owned(), ExImCode::FailUpdate)
+    return Err(Box::new(std::io::Error::new(ErrorKind::Other, format!("fail decode import message"))));
 }
 
-pub fn enc_slave_resp(uri: &str, code: ExImCode) -> String {
-    let q: i64 = code.into();
-    uri.to_owned() + "," + &q.to_string()
+fn send_export_message(out_obj: &mut Individual, resp_api: &Configuration) -> Result<IOResult, Box<dyn Error>> {
+    let uri_str = format!("{}/import_delta", resp_api.base_path);
+
+    let res = resp_api.client.put(&uri_str).json(&encode_message(out_obj)?).send()?;
+
+    let jj: IOResult = res.json()?;
+    info!("sucess send export message: res={:?}, id={}", jj.res_code, out_obj.get_id());
+
+    Ok(jj)
 }
 
-pub fn dec_slave_resp(msg: &[u8]) -> (&str, ExImCode) {
-    let mut iter = msg.split(|ch| *ch == b',');
+pub fn recv_import_message(importer_id: &str, resp_api: &Configuration) -> Result<JSONValue, Box<dyn Error>> {
+    let uri_str = format!("{}/export_delta/{}", resp_api.base_path, importer_id);
+    let msg: JSONValue = resp_api.client.get(&uri_str).send()?.json()?;
+    Ok(msg)
+}
 
-    if let Some(wuri) = iter.next() {
-        if let Ok(uri) = from_utf8(wuri) {
-            if let Some(wcode) = iter.next() {
-                if let Ok(s) = from_utf8(wcode) {
-                    if let Ok(code) = s.parse::<i64>() {
-                        return (uri, code.into());
-                    }
-                }
+#[macro_use]
+extern crate serde_derive;
+
+#[derive(Serialize, Deserialize)]
+pub struct IOResult {
+    pub id: String,
+    pub res_code: ExImCode,
+}
+
+impl IOResult {
+    pub fn new(id: &str, res_code: ExImCode) -> Self {
+        IOResult {
+            id: id.to_owned(),
+            res_code,
+        }
+    }
+}
+
+pub fn processing_imported_message(my_node_id: &str, recv_indv: &mut Individual, systicket: &str, veda_api: &mut APIClient) -> IOResult {
+    let wcmd = recv_indv.get_first_integer("cmd");
+    if wcmd.is_none() {
+        return IOResult::new(recv_indv.get_id(), ExImCode::InvalidCmd);
+    }
+    let cmd = IndvOp::from_i64(wcmd.unwrap_or_default());
+
+    let source_veda = recv_indv.get_first_literal("source_veda");
+    if source_veda.is_none() {
+        return IOResult::new(recv_indv.get_id(), ExImCode::InvalidTarget);
+    }
+
+    let source_veda = source_veda.unwrap_or_default();
+    if source_veda.len() < 32 {
+        return IOResult::new(recv_indv.get_id(), ExImCode::InvalidTarget);
+    }
+
+    let target_veda = recv_indv.get_first_literal("target_veda");
+    if target_veda.is_none() {
+        return IOResult::new(recv_indv.get_id(), ExImCode::InvalidTarget);
+    }
+    let target_veda = target_veda.unwrap();
+
+    if target_veda != "*" && my_node_id != target_veda {
+        return IOResult::new(recv_indv.get_id(), ExImCode::InvalidTarget);
+    }
+
+    let new_state = recv_indv.get_first_binobj("new_state");
+    if cmd != IndvOp::Remove && new_state.is_some() {
+        let mut indv = Individual::new_raw(RawObj::new(new_state.unwrap_or_default()));
+        if parse_raw(&mut indv).is_ok() {
+            indv.parse_all();
+            indv.add_uri("sys:source", &source_veda);
+
+            let res = veda_api.update(systicket, cmd, &indv);
+
+            if res.result != ResultCode::Ok {
+                error!("fail update, uri={}, result_code={:?}", recv_indv.get_id(), res.result);
+                return IOResult::new(recv_indv.get_id(), ExImCode::FailUpdate);
+            } else {
+                info!("get from {}, success update, uri={}", source_veda, recv_indv.get_id());
+                return IOResult::new(recv_indv.get_id(), ExImCode::Ok);
             }
         }
     }
-    ("?", ExImCode::Unknown)
+
+    IOResult::new(recv_indv.get_id(), ExImCode::FailUpdate)
 }
 
 pub fn load_linked_nodes(module: &mut Module, node_upd_counter: &mut i64, link_node_addresses: &mut HashMap<String, String>) {
@@ -328,7 +346,7 @@ pub fn load_linked_nodes(module: &mut Module, node_upd_counter: &mut i64, link_n
 
                         if module.storage.get_individual(&el, &mut link_node) && !link_node.is_exists("v-s:delete") {
                             if let Some(addr) = link_node.get_first_literal("rdf:value") {
-                                link_node_addresses.insert(el, addr);
+                                link_node_addresses.insert(link_node.get_first_literal("cfg:node_id").unwrap_or_default(), addr);
                             }
                         }
                     }

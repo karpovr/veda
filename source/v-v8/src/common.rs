@@ -9,6 +9,7 @@ use std::sync::Mutex;
 use std::{fs, io};
 use v_onto::datatype::Lang;
 use v_onto::individual::Individual;
+use v_onto::onto::Onto;
 use v_onto::resource::Value;
 use v_search::common::QueryResult;
 
@@ -31,6 +32,36 @@ impl HashVec<String> {
         Self {
             hash: src.iter().cloned().collect(),
             vec: src,
+        }
+    }
+}
+
+pub struct ScriptInfo<'a, T> {
+    pub id: String,
+    pub str_script: String,
+    pub compiled_script: Option<v8::Local<'a, v8::Script>>,
+    pub dependency: HashVec<String>,
+    pub context: T,
+}
+
+pub struct ScriptInfoContext {
+    pub trigger_by_type: HashVec<String>,
+    pub prevent_by_type: HashVec<String>,
+    pub trigger_by_uid: HashVec<String>,
+    pub run_at: String,
+    pub disallow_changing_source: bool,
+    pub is_unsafe: bool,
+}
+
+impl Default for ScriptInfoContext {
+    fn default() -> Self {
+        Self {
+            trigger_by_type: Default::default(),
+            prevent_by_type: Default::default(),
+            trigger_by_uid: Default::default(),
+            run_at: "".to_string(),
+            disallow_changing_source: false,
+            is_unsafe: false,
         }
     }
 }
@@ -369,4 +400,44 @@ pub fn collect_js_files(in_path: &str, res: &mut Vec<String>) {
     } else {
         visit_dirs(Path::new(&in_path), res, &prepare_dir).unwrap_or_default();
     }
+}
+
+pub fn is_filter_pass(script: &ScriptInfo<ScriptInfoContext>, individual_id: &str, indv_types: &Vec<String>, onto: &mut Onto) -> bool {
+    let mut is_pass = false;
+
+    if !script.context.prevent_by_type.vec.is_empty() {
+        for indv_type in indv_types.iter() {
+            if script.context.prevent_by_type.hash.contains(indv_type) {
+                return false;
+            }
+
+            if onto.is_some_entered_it(indv_type, script.context.prevent_by_type.vec.iter()) {
+                return false;
+            }
+        }
+    }
+
+    if script.context.trigger_by_uid.vec.is_empty() && script.context.trigger_by_type.vec.is_empty() {
+        return true;
+    }
+
+    if !script.context.trigger_by_uid.vec.is_empty() && script.context.trigger_by_uid.hash.contains(individual_id) {
+        is_pass = true;
+    }
+
+    if !is_pass && !script.context.trigger_by_type.vec.is_empty() {
+        for indv_type in indv_types.iter() {
+            if script.context.trigger_by_type.hash.contains(indv_type) {
+                is_pass = true;
+                break;
+            }
+
+            if onto.is_some_entered_it(indv_type, script.context.trigger_by_type.vec.iter()) {
+                is_pass = true;
+                break;
+            }
+        }
+    }
+
+    return is_pass;
 }

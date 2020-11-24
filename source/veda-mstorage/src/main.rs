@@ -91,12 +91,14 @@ fn main() -> std::io::Result<()> {
         error!("not found param {} in properties file", param_name);
         return Ok(());
     }
+    let main_module_url = main_module_url.unwrap();
 
     let server = Socket::new(Protocol::Rep0)?;
-    if let Err(e) = server.listen(&main_module_url.unwrap()) {
+    if let Err(e) = server.listen(&main_module_url) {
         error!("fail listen, {:?}", e);
         return Ok(());
     }
+    info! ("listen {}", main_module_url);
 
     let mut tickets_cache: HashMap<String, Ticket> = HashMap::new();
 

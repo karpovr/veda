@@ -19,8 +19,10 @@
 v-s:ClassSpecification
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Labeled ;
   rdfs:label "Спецификация класса"@ru ;
   rdfs:label "Class specification"@en ;
+  v-s:labelPattern "{@.v-s:hasClass}" ;
 .
 
 
@@ -30,6 +32,17 @@ v-s:hasClass
   rdfs:label "Класс"@ru ;
   rdfs:label "Class"@en ;
   rdfs:range owl:Class ;
+  rdfs:domain v-s:ClassSpecification;
+.
+#-----Шаблон по умолчанию
+#v-ui:defaultTemplate
+
+#-----Список полей
+v-s:listProperties
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Список полей"@ru ;
+  rdfs:label "LIst properties"@en ;
+  rdfs:range owl:ObjectProperty ;
   rdfs:domain v-s:ClassSpecification;
 .
 

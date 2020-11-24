@@ -9,8 +9,8 @@ name = "veda-exim-inquire"
 path = "src/main.rs"
 
 [dependencies]
-nng = "0.5.1"
 log = "0.4"
+#reqwest = { version = "0.10", features = ["blocking", "json"] }
 
 v_queue = { path = "../v-queue" }
 v_onto = { path = "../v-onto" }

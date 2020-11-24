@@ -208,6 +208,8 @@ impl APIClient {
 
         let msg = wmsg.unwrap();
 
+        debug!("recv msg = {}", &String::from_utf8_lossy(&msg));
+
         let reply = serde_json::from_str(&String::from_utf8_lossy(&msg));
 
         if let Err(e) = reply {

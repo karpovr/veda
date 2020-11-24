@@ -1,12 +1,19 @@
 /*
- * Извлекает из текущей очереди [individuals-flow] и производит проверку следует ли выгружать в другую систему.
- * Проверка производится методом is_exportable, если ответ успешный, то происходит запись в очередь  ./data/out/extract
-*/
+ * Извлекает из текущей очереди [individuals-flow] и производит проверку
+ * следует ли выгружать в другую систему. Проверка производится методом
+ * is_exportable, если ответ успешный, то происходит запись в очередь
+ * ./data/out/extract
+ */
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate lazy_static;
 
+use crate::v8_script::{is_exportable, load_exim_filter_scripts};
+use std::{thread, time};
 use v_api::IndvOp;
 use v_exim::*;
+use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::*;
@@ -17,26 +24,47 @@ use v_onto::onto::*;
 use v_queue::consumer::*;
 use v_queue::queue::*;
 use v_queue::record::*;
+use v_v8::common::ScriptInfoContext;
+use v_v8::jsruntime::JsRuntime;
+use v_v8::scripts_workplace::ScriptsWorkPlace;
 
-pub struct Context {
-    onto: Onto,
+mod v8_script;
+
+pub struct Context<'a> {
+    sys_ticket: String,
     db_id: String,
     queue_out: Queue,
+    workplace: ScriptsWorkPlace<'a, ScriptInfoContext>,
+    xr: XapianReader,
+    onto: Onto,
 }
 
 fn main() -> Result<(), i32> {
     init_log("EXTRACTOR");
+    //    thread::spawn(move || inproc_storage_manager(get_storage_init_param()));
+
+    let mut js_runtime = JsRuntime::new();
+    listen_queue(&mut js_runtime)
+}
+
+fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
+    let module_info = ModuleInfo::new("./data", "extract", true);
+    if module_info.is_err() {
+        error!("{:?}", module_info.err());
+        return Err(-1);
+    }
 
     let mut module = Module::default();
-
-    let mut db_id = get_db_id(&mut module);
-    if db_id.is_none() {
-        db_id = create_db_id(&mut module);
-
-        if db_id.is_none() {
-            error!("fail create Database Identification");
-            return Ok(());
-        }
+    while !module.api.connect() {
+        error!("main module not ready, sleep and repeat");
+        thread::sleep(time::Duration::from_millis(1000));
+    }
+    let sys_ticket;
+    if let Ok(t) = module.get_sys_ticket_id() {
+        sys_ticket = t;
+    } else {
+        error!("fail get sys_ticket");
+        return Ok(());
     }
 
     let mut onto = Onto::default();
@@ -45,32 +73,43 @@ fn main() -> Result<(), i32> {
     load_onto(&mut module.storage, &mut onto);
     info!("load onto end");
 
-    let module_info = ModuleInfo::new("./data", "extract", true);
-    if module_info.is_err() {
-        error!("{:?}", module_info.err());
-        return Err(-1);
-    }
+    let mut my_node_id = get_db_id(&mut module);
+    if my_node_id.is_none() {
+        my_node_id = create_db_id(&mut module);
 
-    //wait_load_ontology();
+        if my_node_id.is_none() {
+            error!("fail create Database Identification");
+            return Ok(());
+        }
+    }
+    let my_node_id = my_node_id.unwrap();
+    info!("my node_id={}", my_node_id);
 
     let queue_out = Queue::new("./data/out", "extract", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
     let mut queue_consumer = Consumer::new("./data/queue", "extract", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
 
-    let mut ctx = Context {
-        onto,
-        db_id: db_id.unwrap(),
-        queue_out,
-    };
+    if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
+        let mut ctx = Context {
+            sys_ticket,
+            queue_out,
+            db_id: my_node_id,
+            workplace: ScriptsWorkPlace::new(js_runtime.v8_isolate()),
+            xr,
+            onto,
+        };
 
-    module.listen_queue(
-        &mut queue_consumer,
-        &mut module_info.unwrap(),
-        &mut ctx,
-        &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
-        &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> bool),
-        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context)),
-    );
+        load_exim_filter_scripts(&mut ctx.workplace, &mut ctx.xr);
+
+        module.listen_queue(
+            &mut queue_consumer,
+            &mut module_info.unwrap(),
+            &mut ctx,
+            &mut (before_batch as fn(&mut Module, &mut Context<'a>, batch_size: u32) -> Option<u32>),
+            &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context<'a>, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context<'a>, prepared_batch_size: u32) -> bool),
+            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context<'a>)),
+        );
+    }
     Ok(())
 }
 
@@ -97,100 +136,33 @@ fn prepare(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
+    let user_id = queue_element.get_first_literal("user_uri").unwrap_or_default();
+
     let date = queue_element.get_first_integer("date");
     //    if date.is_none() {
     //        return Ok(());
     //    }
 
-    let exportable = is_exportable(module, ctx, &mut prev_state, &mut new_state);
-    if exportable.is_none() {
+    let mut exportable = is_exportable(module, ctx, &mut prev_state, &mut new_state, &user_id);
+    if exportable.is_empty() {
         return Ok(true);
     }
-    let exportable = exportable.unwrap();
 
-    if let Err(e) = add_to_queue(&mut ctx.queue_out, cmd.unwrap(), &mut new_state, &queue_element.get_id(), &ctx.db_id, &exportable, date.unwrap_or_default()) {
-        error!("fail prepare message, err={:?}", e);
-        return Err(PrepareError::Fatal);
-    }
+    let cmd = cmd.unwrap();
+    for el in exportable.iter_mut() {
+        let res = if let Some(i) = &mut el.indv {
+            add_to_queue(&mut ctx.queue_out, cmd.clone(), i, &queue_element.get_id(), &ctx.db_id, &el.target, date.unwrap_or_default())
+        } else {
+            add_to_queue(&mut ctx.queue_out, cmd.clone(), &mut new_state, &queue_element.get_id(), &ctx.db_id, &el.target, date.unwrap_or_default())
+        };
 
-    Ok(true)
-}
-
-fn is_exportable(module: &mut Module, ctx: &mut Context, _prev_state_indv: &mut Individual, new_state_indv: &mut Individual) -> Option<String> {
-    if new_state_indv.get_first_literal("sys:source").is_some() {
-        return None;
-    }
-
-    if let Some(types) = new_state_indv.get_literals("rdf:type") {
-        for itype in types {
-            // для всех потребителей выгружаем элемент орг струкутры не имеющий поля [sys:source]
-            if ctx.onto.is_some_entered(&itype, &["v-s:OrganizationUnit"]) {
-                return Some("*".to_owned());
-            }
-
-            // выгрузка person
-            if itype == "v-s:Person" {
-                return Some("*".to_owned());
-            }
-
-            // выгрузка прав если они содержат ссылку на внешнего индивида
-            if itype == "v-s:PermissionStatement" {
-                if let Some(src) = module.get_literal_of_link(new_state_indv, "v-s:permissionSubject", "sys:source", &mut Individual::default()) {
-                    return Some(src);
-                }
-            }
-
-            // выгрузка формы решения у которого в поле [v-wf:to] находится индивид из другой системы
-            // и в поле [v-wf:onDocument] должен находится документ типа gen:InternalDocument
-            if itype == "v-wf:DecisionForm" {
-                if let Some(d) = new_state_indv.get_first_literal("v-wf:onDocument") {
-                    let mut doc = Individual::default();
-
-                    if !module.storage.get_individual(&d, &mut doc) {
-                        error!("fail read {} (v-wf:onDocument)", d);
-                        return None;
-                    }
-
-                    if let Some(t) = doc.get_first_literal("rdf:type") {
-                        if t == "gen:InternalDocument" || t == "gen:Contract" || t == "gen:RequestIT" {
-                            if let Some(src) = module.get_literal_of_link(new_state_indv, "v-wf:to", "sys:source", &mut Individual::default()) {
-                                for predicate in doc.get_predicates_of_type(DataType::Uri) {
-                                    if predicate == "v-s:lastEditor" || predicate == "v-s:creator" || predicate == "v-s:initiator" {
-                                        continue;
-                                    }
-                                    let mut linked_doc = Individual::default();
-                                    if let Some(p) = module.get_literal_of_link(&mut doc, &predicate, "v-s:parent", &mut linked_doc) {
-                                        if p == doc.get_id() {
-                                            if let Err(e) = add_to_queue(&mut ctx.queue_out, IndvOp::Put, &mut linked_doc, "?", &ctx.db_id, &src, 0) {
-                                                error!("fail add to queue, err={:?}", e);
-                                                return None;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if let Err(e) = add_to_queue(&mut ctx.queue_out, IndvOp::Put, &mut doc, "?", &ctx.db_id, &src, 0) {
-                                    error!("fail add to queue, err={:?}", e);
-                                    return None;
-                                }
-
-                                return Some(src);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // выгрузка принятого решения у которого в поле [v-s:lastEditor] находится индивид из другой системы
-            if ctx.onto.is_some_entered(&itype, &["v-wf:Decision"]) {
-                if let Some(src) = module.get_literal_of_link(new_state_indv, "v-s:backwardTarget", "sys:source", &mut Individual::default()) {
-                    return Some(src);
-                }
-            }
+        if let Err(e) = res {
+            error!("fail prepare message, err={:?}", e);
+            return Err(PrepareError::Fatal);
         }
     }
 
-    None
+    Ok(true)
 }
 
 fn add_to_queue(queue_out: &mut Queue, cmd: IndvOp, new_state_indv: &mut Individual, msg_id: &str, source: &str, target: &str, date: i64) -> Result<(), i32> {

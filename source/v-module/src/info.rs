@@ -111,7 +111,7 @@ impl ModuleInfo {
                         if q != self.name {
                             res = false;
                         }
-                    }
+                    },
                     None => res = false,
                 }
 
