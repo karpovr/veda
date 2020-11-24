@@ -103,9 +103,12 @@ Util.toTTL = function (individualList, callback) {
 };
 
 Util.exportTTL = function (individualList) {
-  Util.toTTL(individualList, function (error, result) {
-    var blob = new Blob([result], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, "exported_graph.ttl");
+  System.import("filesaver").then(function (module) {
+    var saveAs = module.default;
+    Util.toTTL(individualList, function (error, result) {
+      var blob = new Blob([result], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, "exported_graph.ttl");
+    });
   });
 };
 
