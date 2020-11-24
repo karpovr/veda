@@ -10,8 +10,6 @@ import Backend from "../common/backend.js";
 
 import Notify from "../browser/notify.js";
 
-//import N3 from "./lib/n3-browser.min.js";
-
 var Util = veda.Util || {};
 
 export default veda.Util = Util;
@@ -30,103 +28,76 @@ Util.escape4$ = function (str) {
 };
 
 Util.toTTL = function (individualList, callback) {
-  var all_prefixes = {},
-      prefixes = {},
-      triples = [],
-      writer = N3.Writer();
-
-  all_prefixes["dc"] = "http://purl.org/dc/elements/1.1/";
-  all_prefixes["grddl"] = "http://www.w3.org/2003/g/data-view#";
-
-  Backend.query(veda.ticket, "'rdf:type'=='owl:Ontology'")
-    .then(function (queryResult) {
-      var ontologies_uris = queryResult.result;
-      var ontologiesPromises = ontologies_uris.map(function (ontology_uri) {
-        var ontology = new IndividualModel(ontology_uri);
-        return ontology.load();
-      });
-      return Promise.all(ontologiesPromises);
-    })
-    .then(function (ontologies) {
-      ontologies.forEach(function (ontology) {
-        var prefix = ontology.id.slice(0, -1);
-        if (ontology.hasValue("v-s:fullUrl")) {
-          all_prefixes[prefix] = ontology["v-s:fullUrl"][0].toString();
-        }
-      });
-    })
-    .then(function () {
-      individualList.forEach(function (individual) {
-        var subject = prefixer(individual.id);
-        // Type first
-        individual.properties["rdf:type"].map(function (value) {
-          var type_triple = {};
-          type_triple.subject = subject;
-          type_triple.predicate = prefixer("rdf:type");
-          type_triple.object = prefixer(value.data);
-          triples.push(type_triple);
-        });
-        // Other properties
-        Object.getOwnPropertyNames(individual.properties).sort().map(function (property_uri) {
-          if (property_uri === "@" || property_uri === "rdf:type") { return; }
-          individual.properties[property_uri].map(function (item) {
-            var triple = {};
-            triple.subject = subject;
-            triple.predicate = prefixer(property_uri);
-            var value = item.data,
-                type = item.type,
-                lang = item.lang;
-            switch (type) {
-              case 4:
-              case "Integer":
-                triple.object = '"' + value + '"^^' + prefixer("xsd:integer");
-                break;
-              case 32:
-              case "Decimal":
-                triple.object = '"' + value + '"^^' + prefixer("xsd:decimal");
-                break;
-              case 64:
-              case "Boolean":
-                triple.object = '"' + value + '"^^' + prefixer("xsd:boolean");
-                break;
-              case 2:
-              case "String":
-                triple.object = lang && lang !== "NONE" ? '"' + value + '"@' + lang.toLowerCase() : '"' + value + '"^^' + prefixer("xsd:string");
-                break;
-              case 8:
-              case "Datetime":
-                triple.object = '"' + ( value instanceof Date ? value.toISOString() : value ) + '"^^' + prefixer("xsd:dateTime");
-                break;
-              case 1:
-              case "Uri":
-                triple.object = prefixer(value);
-                break;
-            }
-            triples.push(triple);
-          });
-        });
-      });
-      writer.addPrefixes(prefixes);
-      writer.addTriples(triples);
-      writer.end(callback);
-    });
-
-  function prefixer(uri) {
-    try {
-      var colonIndex = uri.indexOf(":"),
-          prefix = uri.substring(0, colonIndex);
-      if ( !prefixes[prefix] ) {
-        prefixes[prefix] = all_prefixes[prefix];
-      }
-      if ( colonIndex === uri.length-1 ) {
-        return prefixes[prefix];
+  var prefixes = {};
+  var ttl = individualList.map(function (individual) {
+    var individual_ttl = "";
+    for ( var property in individual.properties ) {
+      var resources = individual.properties[property];
+      if (property === "@") {
+        individual_ttl = resources + "\n" + individual_ttl;
+        prefixer(resources, prefixes);
       } else {
-        return N3.Util.expandPrefixedName(uri, prefixes);
+        var values = resources.reduce(function (acc, resource) {
+          var value;
+          switch (resource.type) {
+            case "Boolean":
+            case "Integer":
+            case "Decimal":
+              value = resource.data;
+              break;
+            case "Uri":
+              value = prefixer(resource.data, prefixes);
+              break;
+            case "Datetime":
+              value = "\"" + resource.data + "\"^^xsd:dateTime";
+              prefixer("xsd:", prefixes);
+              break;
+            case "String":
+              if (/("|\n)/.test(resource.data)) {
+                value = "\"\"\"" + resource.data + "\"\"\"";
+              } else {
+                value = "\"" + resource.data + "\"";
+              }
+              if (resource.lang !== undefined && resource.lang !== "NONE") {
+                value += "@" + resource.lang.toLowerCase();
+              }
+              break;
+          }
+          return acc.length ? acc + ", " + value : value ;
+        }, "");
+        individual_ttl += "  " + property + " " + values + " ;\n";
+        prefixer(property, prefixes);
       }
-    } catch (error) {
-      var notify = Notify ? new Notify() : function () {};
-      notify("danger", error);
-      return uri;
+    }
+    return individual_ttl + ".\n";
+  }).join("\n");
+
+  ttl = "\n" + ttl;
+
+  for ( var prefix in prefixes ) {
+    ttl = ["@prefix", prefix, "<" + prefixes[prefix] + ">"].join(" ") + ".\n" + ttl;
+  }
+
+  callback(undefined, ttl);
+
+  function prefixer(value, prefixes) {
+    var reg_uri = /^([a-z-0-9]+:)[a-zA-Z0-9-_]*$/;
+    var ontologies = veda.ontology.ontologies;
+    var result = reg_uri.exec(value);
+    var prefix = result ? result[1] : null;
+    var expanded;
+    if (prefix === "dc") {
+      expanded = "http://purl.org/dc/elements/1.1/";
+    } else if (prefix === "grddl") {
+      expanded = "http://www.w3.org/2003/g/data-view#";
+    } else if (ontologies[prefix]) {
+      expanded = ontologies[prefix]["v-s:fullUrl"][0].toString();
+    }
+    if (expanded) {
+      prefixes[prefix] = expanded;
+      return value;
+    } else {
+      return "<" + value + ">";
     }
   }
 };
