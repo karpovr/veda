@@ -3497,8 +3497,9 @@ v-ui:Graph
   </div>
 </div>
 <script>
-  System.import("vis").then(function () {
-    System.import("contextmenu").then(function () {
+  System.import("vis").then(function (module) {
+    var vis = module.default;
+    System.import("contextmenu").then(function (module) {
 
       function addNode (individual) {
         return individual.load().then(function (individual) {
