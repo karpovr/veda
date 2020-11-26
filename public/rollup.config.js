@@ -7,7 +7,7 @@ export default {
   input: 'src/js/server/main.js',
   output: [
     {
-      file: 'dist/js/server/server.bundle.js',
+      file: 'dist/js/server/server.js',
       format: 'iife',
       name: 'veda',
       plugins: [terser()]

@@ -47,6 +47,6 @@
   "scripts": {
     "build": "npm run build-browser-scripts && npm run build-server-scripts",
     "build-browser-scripts": "rm -Rf ./dist && babel src --ignore \"src/**/test\" --ignore \"src/**/server\" --out-dir dist --source-maps --copy-files",
-    "build-server-scripts": "rm -Rf ./dist/js/server && rollup -c && mkdir -p dist/js/server/lib && cp src/js/server/lib/* dist/js/server/lib"
+    "build-server-scripts": "rm -Rf ./dist/js/server && rollup -c && cat ./src/js/server/lib/*.js ./dist/js/server/*.js > .tmp-build && rm -f ./dist/js/server/*.js && mv .tmp-build ./dist/js/server/server.bundle.js"
   }
 }
