@@ -8,6 +8,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "pre-install"
+          command: | 
+           sudo apt-get clean
+           sudo apt-get update
+           sudo apt-get install dpkg
+      - run:
           name: "Install Test Env"
           command: | 
            sudo apt-get install nodejs
@@ -24,9 +30,6 @@ jobs:
       - run:
           name: "Install"
           command: | 
-           sudo apt-get clean
-           sudo apt-get update
-           sudo apt-get install dpkg
            ./tools/install-tarantool.sh
            ./control-install.sh
            source $HOME/.cargo/env
