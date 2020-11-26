@@ -22,6 +22,15 @@ fi
 
 ./tools/update-version-ttl.sh
 
+if [ -z $1 ] || [ $1 == "web" ] || [ $1 == "public" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    echo BUILD PUBLIC
+
+    cd source-web
+    npm install
+    npm run build
+    cd $BUILD_PATH
+fi
+
 export CARGO_TARGET_DIR=$HOME/target
 
 if [ -z $1 ] || [ $1 == "az" ] || [ $1 == "veda-az" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
