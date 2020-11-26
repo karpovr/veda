@@ -19,6 +19,7 @@ jobs:
            source $HOME/.cargo/env
            go version
            rustc -V
+      - run:
           name: "Build"
           command: | 
 	    source $HOME/.cargo/env
