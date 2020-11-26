@@ -4,10 +4,10 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import {terser} from 'rollup-plugin-terser';
 
 export default {
-  input: 'src/js/server/main.js',
+  input: 'js/server/main.js',
   output: [
     {
-      file: 'dist/js/server/server.js',
+      file: '../public/js/server/server.js',
       format: 'iife',
       name: 'veda',
       plugins: [terser()]

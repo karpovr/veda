@@ -1,4 +1,10 @@
 {
+  "ignore": [
+    "sw.js",
+    "sw-simple.js",
+    "test",
+    "node_modules"
+  ],
   "plugins": [
     "@babel/plugin-transform-instanceof",
     "@babel/plugin-transform-modules-systemjs"

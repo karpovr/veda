@@ -48,7 +48,7 @@
 
     <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css"/>
-    <link rel="stylesheet" href="/dist/css/veda.css"/>
+    <link rel="stylesheet" href="/css/veda.css"/>
 
     <!-- Polyfills for IE11 -->
     <script type="text/javascript" src="/node_modules/promis/promise.js"></script>
@@ -59,7 +59,6 @@
     <script type="systemjs-importmap">
       {
         "imports": {
-          "main": "/dist/js/browser/main.js",
           "jquery": "/node_modules/jquery/dist/jquery.min.js",
           "jquery-ui": "/node_modules/jquery-ui-dist/jquery-ui.min.js",
           "bootstrap":"/node_modules/bootstrap/dist/js/bootstrap.min.js",
@@ -76,8 +75,9 @@
           "ace":"/node_modules/ace-builds/src-min/ace.js",
           "vis":"/node_modules/vis-network/standalone/umd/vis-network.min.js",
           "jsplumb":"/node_modules/jsplumb/dist/js/jsPlumb-1.7.9-min.js",
-          "jsworkflow":"/dist/js/browser/veda_workflow_editor.js",
-          "tablesortable":"/dist/js/browser/table_sortable.js"
+          "main": "/js/browser/main.js",
+          "jsworkflow":"/js/browser/veda_workflow_editor.js",
+          "tablesortable":"/js/browser/table_sortable.js"
         }
       }
     </script>

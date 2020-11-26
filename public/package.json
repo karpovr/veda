@@ -46,7 +46,7 @@
   },
   "scripts": {
     "build": "npm run build-browser-scripts && npm run build-server-scripts",
-    "build-browser-scripts": "rm -Rf ./dist && babel src --ignore \"src/**/test\" --ignore \"src/**/server\" --out-dir dist --source-maps --copy-files",
-    "build-server-scripts": "rm -Rf ./dist/js/server && rollup -c && cat ./src/js/server/lib/*.js ./dist/js/server/*.js > .tmp-build && rm -f ./dist/js/server/*.js && mv .tmp-build ./dist/js/server/server.bundle.js"
+    "build-browser-scripts": "babel . --out-dir ../public --source-maps --copy-files --ignore 'node_modules'",
+    "build-server-scripts": "rm -Rf ../public/js/server && rollup -c && cat js/server/lib/*.js ../public/js/server/*.js > .tmp-build && rm -f ../public/js/server/*.js && mv .tmp-build ../public/js/server/server.bundle.js"
   }
 }
