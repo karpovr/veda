@@ -1,7 +1,7 @@
 {
   "name": "Safety profile",
   "short_name": "Safety profile",
-  "start_url": "./",
+  "start_url": "./#/mnd-s:CheckEmployeeProfileMain",
   "display": "minimal-ui",
   "background_color": "#fff",
   "theme_color": "white",
@@ -16,7 +16,7 @@
     "sizes": "512x512",
     "type": "image/png"
   }],
-  "veda_version": 6,
-  "veda_layout": "mnd-s:Layout",
-  "veda_main": "mnd-s:CheckingEmployeeProfileSearch"
+  "veda_layout": "mnd-s:CheckEmployeeProfileLayout",
+  "veda_main": "mnd-s:CheckEmployeeProfileMain",
+  "veda_version": 6
 }
