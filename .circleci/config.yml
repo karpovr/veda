@@ -21,10 +21,9 @@ jobs:
            rustc -V
       - run:
           name: "Build"
-          command: | 
-	    source $HOME/.cargo/env
-	    ./build.sh 
-
+          command: |
+           source $HOME/.cargo/env
+           ./build.sh
   test:
     docker:
       - image: circleci/<language>:<version TAG>
