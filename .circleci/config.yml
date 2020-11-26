@@ -19,6 +19,8 @@ jobs:
            source $HOME/.cargo/env
            go version
            rustc -V
+          name: "Build"
+          command: ./build.sh 
 
   test:
     docker:
