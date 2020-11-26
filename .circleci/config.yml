@@ -1,18 +1,40 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
+
+# Define the jobs we want to run for this project
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - checkout
+      - run:
+          name: "Install"
+          command: | 
+           sudo apt-get clean
+           sudo apt-get update
+           sudo apt-get install dpkg
+           ./tools/install-tarantool.sh
+           ./tools/install-clickhouse.sh
+           ./control-install.sh
+           source $HOME/.cargo/env
+           go version
+           rustc -V
+
+  test:
+    docker:
+      - image: circleci/<language>:<version TAG>
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+    steps:
+      - checkout
+      - run: echo "this is the test job"
+
+# Orchestrate our job run sequence
 workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
+  build_and_test:
     jobs:
-	include:
-	    - stage: build-veda
-    	    before_install:
-    		- sudo apt-get clean
-    		- sudo apt-get update
-    		- sudo apt-get install dpkg
+      - build
+      - test:
+          requires:
+            - build
