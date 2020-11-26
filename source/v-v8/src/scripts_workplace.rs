@@ -75,9 +75,9 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
         let mut modules_de = vec![];
         let mut o_files = vec![];
 
-        collect_module_dirs("./public/dist/modules", &mut modules_de);
+        collect_module_dirs("./public/modules", &mut modules_de);
 
-        for path in ["./public/dist/js/server/"].iter() {
+        for path in ["./public/js/server/"].iter() {
             let seq = path.to_string() + ".seq";
 
             if Path::new(&seq).exists() {
