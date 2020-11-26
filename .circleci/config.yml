@@ -19,6 +19,7 @@ jobs:
            sudo apt-get install nodejs-legacy
            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
            sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
+           npm install --save-dev testcafe
            stty cols 80
            export DISPLAY=:99.0
            fluxbox >/dev/null 2>&1 &
@@ -36,12 +37,6 @@ jobs:
           command: | 
            source $HOME/.cargo/env
            ./build.sh 
-
-  test:
-   machine:
-     image: ubuntu-1604:202004-01
-   steps:
-      - checkout
       - run:
           name: "test"
           command: | 
@@ -70,6 +65,3 @@ workflows:
   build_and_test:
     jobs:
       - build
-      - test:
-          requires:
-            - build
