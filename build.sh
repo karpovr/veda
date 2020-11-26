@@ -190,7 +190,7 @@ if [ -z $1 ] || [ $1 == "ro-storage" ] || [ $1 == "veda-ro-storage" ] || [ $1 ==
 
 fi
 
-if [ $1 == "fanout-email" ] || [ $1 == "veda-fanout-email" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "fanout-email" ] || [ $1 == "veda-fanout-email" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     echo BUILD FANOUT-EMAIL
     cd source/veda-fanout-email
     cargo build --release
@@ -198,7 +198,7 @@ if [ $1 == "fanout-email" ] || [ $1 == "veda-fanout-email" ] || [ $1 == "all" ];
     cp $CARGO_TARGET_DIR/release/veda-fanout-email $PWD
 fi
 
-if [ $1 == "fanout-sql" ] || [ $1 == "veda-fanout-sql" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "fanout-sql" ] || [ $1 == "veda-fanout-sql" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     echo BUILD FANOUT-SQL
     cd source/veda-fanout-sql
     cargo build --release
@@ -206,7 +206,7 @@ if [ $1 == "fanout-sql" ] || [ $1 == "veda-fanout-sql" ] || [ $1 == "all" ]; the
     cp $CARGO_TARGET_DIR/release/veda-fanout-sql $PWD
 fi
 
-if [ $1 == "search-index-tt" ] || [ $1 == "veda-search-index-tt" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "search-index-tt" ] || [ $1 == "veda-search-index-tt" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     echo BUILD TT
     cd source/veda-search-index-tt
     cargo build --release
@@ -214,7 +214,7 @@ if [ $1 == "search-index-tt" ] || [ $1 == "veda-search-index-tt" ] || [ $1 == "a
     cp $CARGO_TARGET_DIR/release/veda-search-index-tt $PWD
 fi
 
-if [ $1 == "search-index-pt" ] || [ $1 == "veda-search-index-pt" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "search-index-pt" ] || [ $1 == "veda-search-index-pt" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     echo BUILD PT
     cd source/veda-search-index-pt
     cargo build --release
@@ -222,7 +222,7 @@ if [ $1 == "search-index-pt" ] || [ $1 == "veda-search-index-pt" ] || [ $1 == "a
     cp $CARGO_TARGET_DIR/release/veda-search-index-pt $PWD
 fi
 
-if [ $1 == "search-query" ] || [ $1 == "veda-search-query" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "search-query" ] || [ $1 == "veda-search-query" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     echo BUILD SEARCH-QUERY
     cd source/veda-search-query
     cargo build --release
@@ -230,7 +230,7 @@ if [ $1 == "search-query" ] || [ $1 == "veda-search-query" ] || [ $1 == "all" ];
     cp $CARGO_TARGET_DIR/release/veda-search-query $PWD
 fi
 
-if [ $1 == "cleaner" ] || [ $1 == "veda-cleaner" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "cleaner" ] || [ $1 == "veda-cleaner" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     echo BUILD CLEANER
     cd source/veda-cleaner
     cargo build --release
