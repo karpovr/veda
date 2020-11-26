@@ -10,4 +10,9 @@ workflows:
   welcome:
     # Run the welcome/run job in its own container
     jobs:
-      - welcome/run
+	include:
+	    - stage: build-veda
+    	    before_install:
+    		- sudo apt-get clean
+    		- sudo apt-get update
+    		- sudo apt-get install dpkg
