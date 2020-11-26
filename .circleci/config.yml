@@ -20,9 +20,9 @@ jobs:
            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
            sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
            stty cols 80
-           "export DISPLAY=:99.0"
+           export DISPLAY=:99.0
            fluxbox >/dev/null 2>&1 &
-           "cp -R ./qa/onto/* ./ontology 2>/dev/null || :"
+           cp -R ./qa/onto/* ./ontology 2>/dev/null || :
       - run:
           name: "Install"
           command: | 
