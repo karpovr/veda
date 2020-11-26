@@ -20,19 +20,51 @@ jobs:
            go version
            rustc -V
       - run:
+          name: "Install Test Env"
+          command: | 
+	  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+	  sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
+          stty cols 80
+          sudo apt-get install nodejs-legacy
+          npm install -g grunt-cli
+          npm install grunt-contrib-qunit --save-dev
+          npm install grunt --save-dev
+          npm install --save-dev testcafe
+          "export DISPLAY=:99.0"
+          fluxbox >/dev/null 2>&1 &
+          "cp -R ./qa/onto/* ./ontology 2>/dev/null || :"
+      - run:
           name: "Build"
-          command: |
-           source $HOME/.cargo/env
-           ./build.sh
+          command: | 
+	    source $HOME/.cargo/env
+	    ./build.sh 
+
   test:
-    docker:
-      - image: circleci/<language>:<version TAG>
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
-      - run: echo "this is the test job"
+      - run:
+          name: "test"
+          command: | 
+          ./control-start.sh
+          sleep 180
+    	    grunt test --stack --verbose
+            testcafe chrome qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            testcafe chrome qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testComment.js --screenshots screens --screenshots-on-fails screens --speed 0.5
+            testcafe chrome qa/testcafe/testSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            testcafe chrome qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testRights.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            testcafe chrome qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.7
 
 # Orchestrate our job run sequence
 workflows:
