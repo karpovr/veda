@@ -1,21 +1,6 @@
 use crate::v8_script::OutValue;
 use camunda_client::models::{CompleteExternalTaskDto, VariableValueDto};
 use std::collections::HashMap;
-use v_module::module::Module;
-
-pub fn get_storage_init_param() -> String {
-    let tarantool_addr = if let Some(p) = Module::get_property("tarantool_url") {
-        p
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-    tarantool_addr
-}
 
 pub fn out_value_2_complete_external_task(worker_id: &str, res: OutValue) -> CompleteExternalTaskDto {
     let mut out_data = CompleteExternalTaskDto::new();

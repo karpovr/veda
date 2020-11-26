@@ -3,7 +3,7 @@ extern crate log;
 #[macro_use]
 extern crate lazy_static;
 
-use crate::common::{get_storage_init_param, out_value_2_complete_external_task};
+use crate::common::out_value_2_complete_external_task;
 use crate::v8_script::{execute_external_js_task, load_external_task_scripts, OutValue, ScriptInfoContext};
 use camunda_client::apis::client::APIClient;
 use camunda_client::apis::configuration::Configuration;
@@ -11,7 +11,7 @@ use camunda_client::models::{FetchExternalTaskTopicDto, FetchExternalTasksDto};
 use serde_json::Value;
 use std::{thread, time};
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{init_log, Module, get_info_of_module, wait_module, wait_load_ontology};
+use v_module::module::{init_log, Module, get_info_of_module, wait_module, wait_load_ontology, get_storage_init_param};
 use v_module::onto::load_onto;
 use v_onto::onto::Onto;
 use v_storage::remote_indv_r_storage::inproc_storage_manager;

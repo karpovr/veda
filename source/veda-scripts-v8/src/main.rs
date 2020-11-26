@@ -11,7 +11,7 @@ use v_api::app::ResultCode;
 use v_api::{APIClient, IndvOp};
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::info::ModuleInfo;
-use v_module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
+use v_module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError, get_storage_init_param};
 use v_module::onto::load_onto;
 use v_onto::individual::Individual;
 use v_onto::onto::Onto;
@@ -48,20 +48,6 @@ fn setup() -> SetupGuard {
         v8::V8::initialize();
     }
     SetupGuard {}
-}
-
-fn get_storage_init_param() -> String {
-    let tarantool_addr = if let Some(p) = Module::get_property("tarantool_url") {
-        p.to_owned()
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-    tarantool_addr
 }
 
 pub struct MyContext<'a> {

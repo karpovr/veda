@@ -541,3 +541,17 @@ pub fn indv_apply_cmd(cmd: &IndvOp, prev_indv: &mut Individual, indv: &mut Indiv
         }
     }
 }
+
+pub fn get_storage_init_param() -> String {
+    let tarantool_addr = if let Some(p) = Module::get_property("tarantool_url") {
+        p
+    } else {
+        warn!("param [tarantool_url] not found in veda.properties");
+        "".to_owned()
+    };
+
+    if !tarantool_addr.is_empty() {
+        info!("tarantool addr={}", &tarantool_addr);
+    }
+    tarantool_addr
+}

@@ -21,7 +21,7 @@ mod user_task;
 mod v8_script;
 mod work_order;
 
-use crate::common::{get_storage_init_param, is_start_form};
+use crate::common::is_start_form;
 use crate::decision_form::{is_decision_form, prepare_decision_form};
 use crate::start_form::prepare_start_form;
 use crate::token::{is_token, prepare_token};
@@ -33,7 +33,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::thread;
 use v_module::info::ModuleInfo;
-use v_module::module::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
+use v_module::module::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError, get_storage_init_param};
 use v_module::onto::load_onto;
 use v_onto::individual::Individual;
 use v_onto::onto::Onto;

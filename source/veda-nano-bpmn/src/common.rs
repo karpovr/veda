@@ -18,20 +18,6 @@ impl fmt::Display for MyError {
 
 impl Error for MyError {}
 
-pub fn get_storage_init_param() -> String {
-    let tarantool_addr = if let Some(p) = Module::get_property("tarantool_url") {
-        p
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-    tarantool_addr
-}
-
 pub fn set_and_store_token_into(dest_uri: &str, token_uri: &[String], sys_ticket: &str, module: &mut Module) -> Result<(), Box<dyn Error>> {
     let indv = &mut Individual::default();
     indv.set_id(dest_uri);

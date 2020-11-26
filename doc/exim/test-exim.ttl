@@ -1,0 +1,193 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+<http://semantic-machines.com/veda/test-process>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+############# Test exim filters
+
+v-s:EximFilter1
+  rdf:type v-s:EximFilter ;
+  v-s:triggerByType v-s:Person ;
+  v-s:preventByType v-s:Version ;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * super_classes = super classes of the document.
+ */
+
+    // выгрузка person
+
+    if (document['sys:source'] !== undefined) {
+	return '';
+    }
+
+    return '*';
+
+"""
+.
+
+v-s:EximFilter2
+  rdf:type v-s:EximFilter ;
+  v-s:triggerByType v-s:OrganizationUnit ;
+  v-s:preventByType v-s:Version ;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * super_classes = super classes of the document.
+ */
+
+    // для всех потребителей выгружаем элемент орг струкутры не имеющий поля [sys:source]
+
+    if (document['sys:source'] !== undefined) {
+	return '';
+    }
+
+    return'*';
+
+"""
+.
+
+v-s:EximFilter3
+  rdf:type v-s:EximFilter ;
+  v-s:triggerByType v-wf:Decision ;
+  v-s:preventByType v-s:Version ;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * super_classes = super classes of the document.
+ */
+
+    // выгрузка принятого решения у которого в поле [v-s:lastEditor] находится
+    // индивид из другой системы
+
+    if (document['sys:source'] !== undefined) {
+	return '';
+    }
+
+    var src = veda.Util.getPropertyChain(document, "v-s:backwardTarget", "sys:source");
+    if (src) {
+	return src;
+    }
+
+
+"""
+.
+
+
+v-s:EximFilter4
+  rdf:type v-s:EximFilter ;
+  v-s:triggerByType v-s:PermissionStatement ;
+  v-s:preventByType v-s:Version ;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * super_classes = super classes of the document.
+ */
+
+    // выгрузка прав если они содержат ссылку на внешнего индивида
+
+    if (document['sys:source'] !== undefined) {
+	return '';
+    }
+
+    var src = veda.Util.getPropertyChain(document, "v-s:permissionSubject", "sys:source");
+    if (src) {
+	return src;
+    }
+
+"""
+.
+
+v-s:EximFilter5
+  rdf:type v-s:EximFilter ;
+  v-s:triggerByType v-wf:DecisionForm ;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * super_classes = super classes of the document.
+ */
+
+    // выгрузка формы решения у которого в поле [v-wf:to] находится индивид из
+    // другой системы и в поле [v-wf:onDocument] должен находится
+    // документ типа gen:InternalDocument
+    var res = [];
+
+    if (document['sys:source'] !== undefined) {
+	return [];
+    }
+
+    var d = veda.Util.getUri(document['v-wf:onDocument']);
+    if (d !== undefined) {
+	var doc = get_individual(ticket, d);
+	if (doc === undefined) {
+	    return [];
+	}
+
+	var t = veda.Util.getUri (doc['rdf:type']);
+	if (t == "gen:InternalDocument" || t == "gen:Contract" || t == "gen:RequestIT") {
+ 
+	    var src = veda.Util.getPropertyChain(doc, "v-wf:to", "sys:source");
+	    if (src) {
+    		for (var predicate in document) {
+		    for (var val in document[predicate]) { 
+			if (val.type == "Uri") {
+			    if (predicate == "v-s:lastEditor" || predicate == "v-s:creator" || predicate == "v-s:initiator") {
+                        	continue;
+                            }
+
+			    var link_uri = veda.Util.getUri(doc[predicate]);
+			    if (link_uri) {
+				var linked_doc = get_individual(ticket, d);
+				if (linked_doc) {
+				    if (veda.Util.getUri("v-s:parent") === doc['@']) {
+					res.push ({src, linked_doc});    
+				    }
+				}
+			    }
+			    
+			}
+		    }
+		    res.push ({src, doc});
+		}
+
+	    }
+	
+	}	
+
+    }
+
+    return res;
+
+"""
+.

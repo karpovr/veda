@@ -18,20 +18,6 @@ impl fmt::Display for MyError {
 
 impl Error for MyError {}
 
-pub fn get_storage_init_param() -> String {
-    let tarantool_addr = if let Some(p) = Module::get_property("tarantool_url") {
-        p
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-    tarantool_addr
-}
-
 pub fn add_right(subj_uri: &str, obj_uri: &str, ctx: &mut Context, module: &mut Module) -> Result<(), Box<dyn Error>> {
     if subj_uri.is_empty() || obj_uri.is_empty() {
         return Err(Box::new(MyError("empty subj_uri or obj_uri".into())));
