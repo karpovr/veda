@@ -3,7 +3,8 @@
     "sw.js",
     "sw-simple.js",
     "test",
-    "node_modules"
+    "node_modules",
+    "rollup.config.js"
   ],
   "plugins": [
     "@babel/plugin-transform-instanceof",
