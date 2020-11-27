@@ -16,14 +16,13 @@ jobs:
       - run:
           name: "Install Test Env"
           command: | 
-           sudo apt-get install nodejs-legacy
+           sudo apt-get install nodejs
+           sudo apt install npm
+           npm install -g testcafe
+           npm install grunt
+           npm install grunt-contrib-qunit
            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
            sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
-           npm install --save-dev testcafe
-           stty cols 80
-           export DISPLAY=:99.0
-           fluxbox >/dev/null 2>&1 &
-           cp -R ./qa/onto/* ./ontology 2>/dev/null || :
       - run:
           name: "Install"
           command: | 
@@ -41,24 +40,25 @@ jobs:
           name: "test"
           command: | 
             ./control-start.sh
-            sleep 180
-            testcafe chrome qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 0.7
-            testcafe chrome qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testComment.js --screenshots screens --screenshots-on-fails screens --speed 0.5
-            testcafe chrome qa/testcafe/testSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 0.7
-            testcafe chrome qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testRights.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 0.7
-            testcafe chrome qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            sleep 200
+            grunt test --stack --verbose
+            testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 0.2
+            testcafe chrome:headless qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testComment.js --screenshots screens --screenshots-on-fails screens --speed 0.5
+            testcafe chrome:headless qa/testcafe/testSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            testcafe chrome:headless qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testRights.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 0.2
+            testcafe chrome:headless qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 0.2
+            testcafe chrome:headless qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 0.2
+            testcafe chrome:headless qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens --speed 0.8
+            testcafe chrome:headless qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            testcafe chrome:headless qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.7
 
 # Orchestrate our job run sequence
 workflows:
