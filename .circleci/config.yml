@@ -41,7 +41,6 @@ jobs:
           command: | 
             ./control-start.sh
             sleep 200
-            grunt test --stack --verbose
             testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 0.8
             testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 0.2
             testcafe chrome:headless qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 0.8
