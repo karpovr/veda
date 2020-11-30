@@ -137,19 +137,19 @@ v-s:PsDelegationPurposeForRequestDelegationAdmin
 
 
 # ------------------------------------------------------------ ШАБЛОНЫ --
-v-s:TS_RequestDelegation 
+v-s:TS_RequestDelegation
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-ui:forClass v-s:RequestDelegation
 .
-v-s:TS_RequestDelegationUser 
+v-s:TS_RequestDelegationUser
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-ui:forClass v-s:RequestDelegationUser
 .
-v-s:TS_RequestDelegationAdmin 
+v-s:TS_RequestDelegationAdmin
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
@@ -365,14 +365,14 @@ v-s:RequestDelegationTemplate
             input.prop( "id", position.id );
 
             if (delegatedPositions.indexOf(position.id) >= 0) {
-              label.text( position.toString() + " (делегировано)" );  
+              label.text( position.toString() + " (делегировано)" );
             } else {
               label.text( position.toString() );
             };
             if (mode === "view") {
               input.prop("disabled", "disabled");
             }
-            
+
             tmpl.appendTo( $("#positions", template) );
           });
         });
@@ -613,7 +613,7 @@ if (!allDelegated) {
 allDelegated["rdf:value"] = allDelegated["rdf:value"] || [];
 
 position_uris.map(function (position_uri) {
-  var uri = "d:" + Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri].join("_").split(":").join("_") ).substring(40);
+  var uri = "d:" + veda.Util.Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri].join("_").split(":").join("_") ).substring(40);
   var appointment = get_individual(ticket, uri);
 
   if ( !appointment ) {
@@ -648,7 +648,7 @@ position_uris.map(function (position_uri) {
     appointment["v-s:hasDelegationPurpose"] = document["v-s:hasDelegationPurpose"];
     appointment["v-s:official"] = document["v-s:official"];
     appointment["v-s:ignoreExclusive"] = document["v-s:ignoreExclusive"];
-    
+
     print("[cfg:Event_Delegation] set appointment dates", uri, "| isActual =", isActual);
   } else {
     print("[cfg:Event_Delegation] dates update is not allowed!");

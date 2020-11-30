@@ -225,42 +225,46 @@ v-s:GroupGeneratorTemplate
   </div>
 </div>
 <script>
-  $("#authClass", template).change(function() {
-    var uri = $(this).val();
-    if (uri) {
-      individual["v-s:authClass"] = [new veda.IndividualModel(uri)];
-    } else {
-      individual["v-s:authClass"] = [];
+  System.import("sha256").then(function (module) {
+    var Sha256 = module.default;
+
+    $("#authClass", template).change(function() {
+      var uri = $(this).val();
+      if (uri) {
+        individual["v-s:authClass"] = [new veda.IndividualModel(uri)];
+      } else {
+        individual["v-s:authClass"] = [];
+      }
+    });
+
+    $("#authProperty", template).change(function() {
+      var uri = $(this).val();
+      if (uri) {
+        individual["v-s:authProperty"] = [new veda.IndividualModel(uri)];
+      } else {
+        individual["v-s:authProperty"] = [];
+      }
+    });
+
+    individual.on("propertyModified", handler);
+    template.one("remove", function () {
+      individual.off("propertyModified", handler);
+    });
+    handler();
+
+    function handler() {
+      var $groupUri = $(".group-uri", template);
+      if ( individual.hasValue("v-s:authValue") ) {
+        var group_concat_uri = individual.id + " " + individual["v-s:authValue"][0].toString();
+        var hash = Sha256.hash(group_concat_uri).substring(32);
+        var group_uri = "d:grp-" + hash;
+        $groupUri.text(group_uri);
+      } else {
+        $groupUri.text("");
+      }
     }
+
   });
-
-  $("#authProperty", template).change(function() {
-    var uri = $(this).val();
-    if (uri) {
-      individual["v-s:authProperty"] = [new veda.IndividualModel(uri)];
-    } else {
-      individual["v-s:authProperty"] = [];
-    }
-  });
-
-  individual.on("propertyModified", handler);
-  template.one("remove", function () {
-    individual.off("propertyModified", handler);
-  });
-  handler();
-
-  function handler() {
-    var $groupUri = $(".group-uri", template);
-    if ( individual.hasValue("v-s:authValue") ) {
-      var group_concat_uri = individual.id + " " + individual["v-s:authValue"][0].toString();
-      var hash = Sha256.hash(group_concat_uri).substring(32);
-      var group_uri = "d:grp-" + hash;
-      $groupUri.text(group_uri);
-    } else {
-      $groupUri.text("");
-    }
-  }
-
   //# sourceURL=v-s:GroupGeneratorTemplate_post
 </script>
 """ ;
@@ -701,7 +705,7 @@ while (currGroup = currGroupsUris[i]) {
 }
 
 function addMembership(group_uri, groups) {
-  var mem_uri = "d:mem-" + Sha256.hash(document["@"] + " " + group_uri).substring(32);
+  var mem_uri = "d:mem-" + veda.Util.Sha256.hash(document["@"] + " " + group_uri).substring(32);
   var group_label = groups[group_uri].label;
   var power = groups[group_uri].power;
   var mem = {
@@ -736,13 +740,13 @@ function addMembership(group_uri, groups) {
 
 function removeMembership(group_uri, groups) {
   var group_label = groups[group_uri].label;
-  var mem_uri = "d:mem-" + Sha256.hash(document["@"] + " " + group_uri).substring(32);
+  var mem_uri = "d:mem-" + veda.Util.Sha256.hash(document["@"] + " " + group_uri).substring(32);
   remove_individual(veda.ticket, mem_uri);
   console.log("removed from", group_uri, group_label);
 }
 
 function checkAddMembership(group_uri, groups) {
-  var mem_uri = "d:mem-" + Sha256.hash(document["@"] + " " + group_uri).substring(32);
+  var mem_uri = "d:mem-" + veda.Util.Sha256.hash(document["@"] + " " + group_uri).substring(32);
   var mem = get_individual(veda.ticket, mem_uri);
   var group_label = groups[group_uri].label;
   var power = groups[group_uri].power;
@@ -809,7 +813,7 @@ function generateGroups(document) {
                 fn_value_item = fn.authValue;
               }
               group_concat_uri = fn.generatorUri + " " + fn_value_item;
-              hash = Sha256.hash(group_concat_uri).substring(32);
+              hash = veda.Util.Sha256.hash(group_concat_uri).substring(32);
               group_uri = "d:grp-" + hash;
               group_label = "Auth group. Generator: " + fn.generatorUri + ", value: " + fn_value_item;
               groups[group_uri] = { "label": group_label, "keep": fn.keep, "power": fn.power };
@@ -882,7 +886,7 @@ if (veda.Util.hasValue(permissionGenerator, "v-s:permissionSubject")) {
   var subjectGroupGenerator = veda.Util.getUri(permissionGenerator["v-s:subjectGroupGenerator"]);
   var subjectGroupGeneratorValue = permissionGenerator["v-s:subjectGroupGeneratorValue"][0].data;
   var subjectGroup_concat_uri = subjectGroupGenerator + " " + subjectGroupGeneratorValue;
-  var subjectGroup_hash = Sha256.hash(subjectGroup_concat_uri).substring(32);
+  var subjectGroup_hash = veda.Util.Sha256.hash(subjectGroup_concat_uri).substring(32);
   subjectGroup_uri = "d:grp-" + subjectGroup_hash;
 }
 if (veda.Util.hasValue(permissionGenerator, "v-s:permissionObject")) {
@@ -891,12 +895,12 @@ if (veda.Util.hasValue(permissionGenerator, "v-s:permissionObject")) {
   var objectGroupGenerator = veda.Util.getUri(permissionGenerator["v-s:objectGroupGenerator"]);
   var objectGroupGeneratorValue = permissionGenerator["v-s:objectGroupGeneratorValue"][0].data;
   var objectGroup_concat_uri = objectGroupGenerator + " " + objectGroupGeneratorValue;
-  var objectGroup_hash = Sha256.hash(objectGroup_concat_uri).substring(32);
+  var objectGroup_hash = veda.Util.Sha256.hash(objectGroup_concat_uri).substring(32);
   objectGroup_uri = "d:grp-" + objectGroup_hash;
 }
 if (subjectGroup_uri && objectGroup_uri) {
   var permission_concat_uri = subjectGroup_uri + " " + objectGroup_uri;
-  var permission_hash = Sha256.hash(permission_concat_uri).substring(32);
+  var permission_hash = veda.Util.Sha256.hash(permission_concat_uri).substring(32);
   var permission_uri = "d:per-" + permission_hash;
   var permission = {
     "@": permission_uri,
