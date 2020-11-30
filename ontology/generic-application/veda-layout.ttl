@@ -273,8 +273,6 @@ v-s:MainMenu
   v-s:menuItem v-s:Tests ;
   v-s:menuItem v-s:Divider ;
   v-s:menuItem v-s:Administration ;
-  v-s:menuItem v-s:Divider ;
-  v-s:menuItem v-s:Exit ;
 .
 v-s:Divider
   rdf:type v-s:Menu ;
@@ -328,12 +326,6 @@ v-s:Tests
   rdfs:label "Тесты"@ru ;
   rdfs:label "Tests"@en ;
   v-s:staticLink "/tests"^^xsd:string ;
-.
-v-s:Exit
-  rdf:type v-s:Menu ;
-  rdfs:label "Выйти"@ru ;
-  rdfs:label "Exit"@en ;
-  v-s:staticLink "javascript:veda.logout()"^^xsd:string ;
 .
 v-s:Administration
   rdf:type v-s:Menu ;

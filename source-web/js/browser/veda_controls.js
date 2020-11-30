@@ -8,6 +8,8 @@ import jQuery from "jquery";
 
 import autosize from "autosize";
 
+import Util from "../common/util.js";
+
 // INPUT CONTROLS
 
 // Generic literal input behaviour
@@ -15,7 +17,7 @@ var veda_literal_input = function( options ) {
   var opts = $.extend( {}, veda_literal_input.defaults, options ),
     input = $(opts.template),
     spec = opts.spec,
-    placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : ""),
+    placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : ""),
     property_uri = opts.property_uri,
     individual = opts.individual,
     timeout;
@@ -210,34 +212,6 @@ $.fn.veda_uri.defaults = {
   template: $("#string-control-template").html()
 };
 
-// Password input
-$.fn.veda_password = function( options ) {
-  var opts = $.extend( {}, $.fn.veda_password.defaults, options ),
-    control = veda_literal_input.call(this, opts);
-
-  var tabindex = this.attr("tabindex");
-  if (tabindex) {
-    this.removeAttr("tabindex");
-    control.attr("tabindex", tabindex);
-  }
-
-  this.append(control);
-  return this;
-};
-$.fn.veda_password.defaults = {
-  template: $("#password-control-template").html(),
-  parser: function (input) {
-    if (input.length === 64) {
-      return new String( input );
-    } else if (input) {
-      return new String( Sha256.hash(input) );
-    } else {
-      return null;
-    }
-  },
-  isSingle: true
-};
-
 // Text input
 $.fn.veda_text = function( options ) {
   var opts = $.extend( {}, $.fn.veda_text.defaults, options ),
@@ -389,7 +363,7 @@ System.import("moment").then(function (module) {
         control = $(opts.template),
         format = opts.format,
         spec = opts.spec,
-        placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : ""),
+        placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : ""),
         property_uri = opts.property_uri,
         individual = opts.individual,
         isSingle = spec && spec.hasValue("v-ui:maxCardinality") ? spec["v-ui:maxCardinality"][0] === 1 : true,
@@ -596,7 +570,7 @@ var veda_multilingual = function( options ) {
     individual = opts.individual,
     property_uri = opts.property_uri,
     spec = opts.spec,
-    placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : ""),
+    placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : ""),
     timeout;
 
   var tabindex = this.attr("tabindex");
@@ -826,7 +800,6 @@ $.fn.veda_boolean = function( options ) {
     e.stopPropagation();
     if (e.type === "view") {
       control.attr("disabled", "disabled");
-      //control.parents("label").tooltip("destroy");
     } else {
       if ( control.closest(".checkbox.disabled").length ) {
         control.attr("disabled", "disabled");
@@ -858,7 +831,7 @@ $.fn.veda_actor = function( options ) {
     individual = opts.individual,
     rel_uri = opts.property_uri,
     spec = opts.spec,
-    placeholder = this.data("placeholder") || ( spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : new veda.IndividualModel("v-s:StartTypingBundle") ),
+    placeholder = this.data("placeholder") || ( spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : new veda.IndividualModel("v-s:StartTypingBundle") ),
     specQueryPrefix = this.data("query-prefix") || ( spec && spec.hasValue("v-ui:queryPrefix") ? spec["v-ui:queryPrefix"][0].toString() : undefined),
     queryPrefix,
     sort = this.data("sort") || ( spec && spec.hasValue("v-ui:sort") ? spec["v-ui:sort"][0].toString() : "'rdfs:label_ru' asc , 'rdfs:label_en' asc , 'rdfs:label' asc" ),
@@ -1388,7 +1361,7 @@ $.fn.veda_select = function (options) {
     range = rangeRestriction ? [ rangeRestriction ] : (new veda.IndividualModel(property_uri))["rdfs:range"],
     queryPrefix = this.attr("data-query-prefix") || ( spec && spec.hasValue("v-ui:queryPrefix") ? spec["v-ui:queryPrefix"][0] : range.map(function (item) { return "'rdf:type'==='" + item.id + "'"; }).join(" || ") ),
     sort = this.attr("data-sort") || ( spec && spec.hasValue("v-ui:sort") ? spec["v-ui:sort"][0].toString() : "'rdfs:label_ru' asc , 'rdfs:label_en' asc , 'rdfs:label' asc" ),
-    placeholder = this.attr("placeholder") || ( spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : new veda.IndividualModel("v-s:SelectValueBundle") ),
+    placeholder = this.attr("placeholder") || ( spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : new veda.IndividualModel("v-s:SelectValueBundle") ),
     source = this.attr("data-source") || undefined,
     template = this.attr("data-template") || undefined,
     options = [],
@@ -1857,17 +1830,17 @@ $.fn.veda_booleanRadio = function (options) {
     spec = opts.spec,
     trueOption = {
       label: spec && spec.hasValue("v-ui:trueLabel") ?
-        Promise.resolve(spec.get("v-ui:trueLabel").join(" ")) :
+        Promise.resolve(spec.get("v-ui:trueLabel").map(Util.formatValue).join(" ")) :
         (new veda.IndividualModel("v-s:YesBundle")).load().then(function(loaded) {
-          return loaded.get("rdfs:label").join(" ");
+          return loaded.get("rdfs:label").map(Util.formatValue).join(" ");
         }),
       value: true
     },
     falseOption = {
       label: spec && spec.hasValue("v-ui:falseLabel") ?
-        Promise.resolve(spec.get("v-ui:falseLabel").join(" ")) :
+        Promise.resolve(spec.get("v-ui:falseLabel").map(Util.formatValue).join(" ")) :
         (new veda.IndividualModel("v-s:NoBundle")).load().then(function(loaded) {
-          return loaded.get("rdfs:label").join(" ");
+          return loaded.get("rdfs:label").map(Util.formatValue).join(" ");
         }),
       value: false
     },
@@ -1950,7 +1923,7 @@ $.fn.veda_numeration = function( options ) {
     that = this,
     control = $(opts.template),
     spec = opts.spec,
-    placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : ""),
+    placeholder = this.attr("placeholder") || (spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : ""),
     isSingle = spec && spec.hasValue("v-ui:maxCardinality") ? spec["v-ui:maxCardinality"][0] === 1 : true,
     property_uri = opts.property_uri,
     individual = opts.individual,
@@ -2347,10 +2320,10 @@ $.fn.veda_file.defaults = {
 $.fn.veda_link = function( options ) {
   var opts = $.extend( {}, $.fn.veda_link.defaults, options ),
     control = $(opts.template),
-    template = this.attr("data-template") || "{individual['rdfs:label'].join(' ')}",
+    template = this.attr("data-template") || "{individual['rdfs:label'].map(Util.formatValue).join(' ')}",
     individual = opts.individual,
     spec = opts.spec,
-    placeholder = this.attr("placeholder") || ( spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].join(" ") : new veda.IndividualModel("v-s:StartTypingBundle") ),
+    placeholder = this.attr("placeholder") || ( spec && spec.hasValue("v-ui:placeholder") ? spec["v-ui:placeholder"].map(Util.formatValue).join(" ") : new veda.IndividualModel("v-s:StartTypingBundle") ),
     rel_uri = opts.property_uri,
     rangeRestriction = spec && spec.hasValue("v-ui:rangeRestriction") ? spec["v-ui:rangeRestriction"][0] : undefined,
     range = rangeRestriction ? [ rangeRestriction ] : new veda.IndividualModel(rel_uri)["rdfs:range"],
