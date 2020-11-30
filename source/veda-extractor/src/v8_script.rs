@@ -30,14 +30,16 @@ pub struct OutValue {
     pub indv: Option<Individual>,
 }
 
-pub fn is_exportable(_module: &mut Module, ctx: &mut Context, prev_state_indv: &mut Individual, new_state_indv: &mut Individual, user_id: &str) -> Vec<OutValue> {
+pub fn is_exportable(_module: &mut Module, ctx: &mut Context, prev_state_indv: Option<&mut Individual>, new_state_indv: &mut Individual, user_id: &str) -> Vec<OutValue> {
     let mut ov = vec![];
 
     let rdf_types = new_state_indv.get_literals("rdf:type").unwrap_or_default();
 
     let mut session_data = CallbackSharedData::default();
 
-    session_data.g_key2indv.insert("$prev_state".to_owned(), Individual::new_from_obj(prev_state_indv.get_obj()));
+    if let Some(indv) = prev_state_indv {
+        session_data.g_key2indv.insert("$prev_state".to_owned(), Individual::new_from_obj(indv.get_obj()));
+    }
     session_data.g_key2indv.insert("$document".to_owned(), Individual::new_from_obj(new_state_indv.get_obj()));
     session_data.g_key2attr.insert("$ticket".to_owned(), ctx.sys_ticket.to_owned());
     if !user_id.is_empty() {

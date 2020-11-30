@@ -10,7 +10,8 @@ extern crate log;
 extern crate lazy_static;
 
 use crate::v8_script::{is_exportable, load_exim_filter_scripts};
-use std::{thread, time};
+use std::{env, thread, time};
+use v_api::app::ResultCode;
 use v_api::IndvOp;
 use v_exim::*;
 use v_ft_xapian::xapian_reader::XapianReader;
@@ -24,6 +25,7 @@ use v_onto::onto::*;
 use v_queue::consumer::*;
 use v_queue::queue::*;
 use v_queue::record::*;
+use v_search::common::FTQuery;
 use v_storage::remote_indv_r_storage::inproc_storage_manager;
 use v_v8::common::ScriptInfoContext;
 use v_v8::jsruntime::JsRuntime;
@@ -102,6 +104,18 @@ fn listen_queue<'a>(js_runtime: &'a mut JsRuntime) -> Result<(), i32> {
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
         load_exim_filter_scripts(&mut ctx.workplace, &mut ctx.xr);
 
+        let args: Vec<String> = env::args().collect();
+        for el in args.iter() {
+            if el.starts_with("--query") {
+                if let Some(i) = el.find("=") {
+                    let query = el.to_string().split_off(i + 1).replace("\'", "'");
+                    if let Err(e) = export_from_query(&query, &mut module, &mut ctx) {
+                        error!("fail execute query [{}], err={:?}", query, e);
+                    }
+                }
+            }
+        }
+
         module.listen_queue(
             &mut queue_consumer,
             &mut module_info.unwrap(),
@@ -144,18 +158,29 @@ fn prepare(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context
     //    if date.is_none() {
     //        return Ok(());
     //    }
+    prepare_indv(module, ctx, cmd.unwrap(), Some(&mut prev_state), &mut new_state, &user_id, date.unwrap_or_default(), &queue_element.get_id())
+}
 
-    let mut exportable = is_exportable(module, ctx, &mut prev_state, &mut new_state, &user_id);
+fn prepare_indv(
+    module: &mut Module,
+    ctx: &mut Context,
+    cmd: IndvOp,
+    prev_state: Option<&mut Individual>,
+    new_state: &mut Individual,
+    user_id: &str,
+    date: i64,
+    msg_id: &str,
+) -> Result<bool, PrepareError> {
+    let mut exportable = is_exportable(module, ctx, prev_state, new_state, user_id);
     if exportable.is_empty() {
         return Ok(true);
     }
 
-    let cmd = cmd.unwrap();
     for el in exportable.iter_mut() {
         let res = if let Some(i) = &mut el.indv {
-            add_to_queue(&mut ctx.queue_out, cmd.clone(), i, &queue_element.get_id(), &ctx.db_id, &el.target, date.unwrap_or_default())
+            add_to_queue(&mut ctx.queue_out, cmd.clone(), i, msg_id, &ctx.db_id, &el.target, date)
         } else {
-            add_to_queue(&mut ctx.queue_out, cmd.clone(), &mut new_state, &queue_element.get_id(), &ctx.db_id, &el.target, date.unwrap_or_default())
+            add_to_queue(&mut ctx.queue_out, cmd.clone(), new_state, msg_id, &ctx.db_id, &el.target, date)
         };
 
         if let Err(e) = res {
@@ -190,6 +215,20 @@ fn add_to_queue(queue_out: &mut Queue, cmd: IndvOp, new_state_indv: &mut Individ
         if let Err(e) = queue_out.push(&raw1, MsgType::Object) {
             error!("fail push into queue, err={:?}", e);
             return Err(-1);
+        }
+    }
+    Ok(())
+}
+
+fn export_from_query(query: &str, module: &mut Module, ctx: &mut Context) -> Result<(), PrepareError> {
+    let res = ctx.xr.query(FTQuery::new_with_user("cfg:VedaSystem", query), &mut module.storage);
+    info!("execute query [{}]", query);
+    if res.result_code == ResultCode::Ok && res.count > 0 {
+        for id in &res.result {
+            if let Some(mut indv) = module.get_individual(id, &mut Individual::default()) {
+                let msg_id = indv.get_id().to_string();
+                prepare_indv(module, ctx, IndvOp::Put, None, &mut indv, "", 0, &msg_id)?;
+            }
         }
     }
     Ok(())
