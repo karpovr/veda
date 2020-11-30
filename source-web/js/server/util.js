@@ -4,9 +4,13 @@
 
 import veda from "../common/veda.js";
 
+import Sha256 from "../common/lib/sha256.js";
+
 var Util = veda.Util || {};
 
 export default veda.Util = Util;
+
+Util.Sha256 = Sha256;
 
 Util.getJournalUri = function (object_uri)
 {

@@ -4,6 +4,8 @@
 
 import veda from "../common/veda.js";
 
+import Sha256 from "../common/lib/sha256.js";
+
 var Codelet = {};
 
 export default veda.Codelet = Codelet;

@@ -16,6 +16,8 @@ import OntologyModel from "../common/ontology_model.js";
 
 import Backend from "../common/backend.js";
 
+import Sha256 from "../common/lib/sha256.js";
+
 var Util = veda.Util || {};
 
 export default veda.Util = Util;
