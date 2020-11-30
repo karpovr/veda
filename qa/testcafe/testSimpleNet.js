@@ -18,6 +18,7 @@ import { Selector, t } from 'testcafe';
       .typeText('div#object-container div#props-col div#props table#taskTemplateProperties tbody tr td veda-control#VClabel input.form-control', timeStamp)
       .dragToElement('.state-io-condition-input .ep', '.glyphicon-stop')
       .click('button#workflow-save-button')
+      .click('.navbar-brand')
       .click('#menu')
       .click('li[id="menu"] li[resource="v-s:Create"]')
       .click('veda-control.fulltext.dropdown')

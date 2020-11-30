@@ -1,7 +1,8 @@
 import Basic from './basic'
+import config from './config';
 import { Selector, t } from 'testcafe';
   fixture `test Simple Net Low Priority`
-    .page `http://localhost:8080/`;
+    .page `${config.baseUrl}`;
   const basic = new Basic();
   test('testSimpleNetLowPriority', async t => {
     basic.login('karpovrt', '123');

@@ -2,7 +2,7 @@ import Basic from './basic';
 import config from './config';
 import { Selector, t } from 'testcafe';
   fixture `test search`
-    .page `http://localhost:8080/`;
+    .page `${config.baseUrl}`;
   const basic = new Basic();
   const pageForNavigateFromConfig = `${config.baseUrl}`+'#/v-ui:TestUIRegistry';
   test('testSearch', async t => {
