@@ -276,8 +276,8 @@ function processTemplate (individual, container, template, mode) {
         var alertModel = new IndividualModel("v-s:DeletedAlert");
         var recoverModel = new IndividualModel("v-s:Recover");
         Promise.all([ alertModel.load(), recoverModel.load(), this.canUpdate() ]).then(function (arr) {
-          var alert = arr[0]["rdfs:label"].join(" ");
-          var recover = arr[1]["rdfs:label"].join(" ");
+          var alert = arr[0]["rdfs:label"].map(Util.formatValue).join(" ");
+          var recover = arr[1]["rdfs:label"].map(Util.formatValue).join(" ");
           var canUpdate = arr[2];
           if (canUpdate) alert = alert + '<button id="deleted-alert-recover" class="btn btn-primary btn-xs recover pull-right">' + recover + '</button>';
           var deletedAlert = $(
@@ -312,7 +312,7 @@ function processTemplate (individual, container, template, mode) {
     if ( this.hasValue("v-s:valid", false) && !this.hasValue("v-s:deleted", true) && mode === "view" ) {
       if ( (container.prop("id") === "main" || container.hasClass("modal-body") ) && !template.hasClass("invalid") ) {
         new IndividualModel("v-s:InvalidAlert").load().then(function(loaded) {
-          var alert = loaded["rdfs:label"].join(" ");
+          var alert = loaded["rdfs:label"].map(Util.formatValue).join(" ");
           var invalidAlert = $(
             '<div id="invalid-alert" class="container sheet margin-lg">\
               <div class="alert alert-danger no-margin clearfix" role="alert">\
@@ -697,7 +697,7 @@ function processTemplate (individual, container, template, mode) {
           });
           Promise.all(causesPromises).then(function (causes) {
             explanation = causes.map(function (cause) {
-              return cause["rdfs:comment"].join(", ");
+              return cause["rdfs:comment"].map(Util.formatValue).filter(Boolean).join(", ");
             }).join("\n");
           });
         }
