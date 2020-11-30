@@ -70,7 +70,7 @@ v-s:LayoutTemplate
           <li about="v-ft:Inbox" data-template="v-ft:FunctionTasksIndicatorTemplate"></li>
           <li id="user-info"></li>
           <li id="menu" class="dropdown" about="v-s:MainMenu" data-template="v-s:MenuTemplate"></li>
-          <li id="log-out" about="v-s:Exit" data-template="v-ui:ExitButtonTemplate"></li>
+          <li about="v-s:Logout" data-template="v-ui:ExitButtonTemplate"></li>
           <li about="v-ui:AvailableLanguage" data-template="v-ui:LanguageSwitchTemplate"></li>
           <li style="padding-left:10px; margin-left:10px; border-left:1px solid #ddd;" about="@" data-template="v-ui:FullWidthSwitchTemplate"></li>
         </ul>

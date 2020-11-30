@@ -34,10 +34,11 @@ export default function Auth() {
   function submitLoginPassword(e) {
     e.preventDefault();
     var passwordInput = $("#password", loginForm);
-    var login = $("#login", loginForm).val(),
-      password = passwordInput.val(),
-      hash = Sha256.hash(password);
-      passwordInput.val("");
+    var login = $("#login", loginForm).val();
+    var password = passwordInput.val();
+    var hash = Sha256.hash(password);
+
+    passwordInput.val("");
 
     var ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
     return ntlmProvider.load().then(function (ntlmProvider) {
