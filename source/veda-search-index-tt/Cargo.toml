@@ -15,8 +15,8 @@ regex = "1"
 url = "2.1.1"
 bincode = "1.2.1"
 serde = "1.0.104"
+v_queue = "0.1"
 
-v_queue = { path = "../v-queue" }
 v_search = { path = "../v-search" }
 v_onto = { path = "../v-onto" }
 v_storage = { path = "../v-storage" }

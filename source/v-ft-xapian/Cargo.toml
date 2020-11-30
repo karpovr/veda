@@ -17,10 +17,11 @@ xapian-rusty = "0.0.38"
 #xapian-rusty = { path = "../xapian-rusty" }
 regex = "1.3.9"
 
+v_authorization = "0.1.0"
+
 v_onto = { path = "../v-onto" }
 v_module = { path = "../v-module" }
 v_search = { path = "../v-search" }
 v_api = { path = "../v-api" }
-v_authorization = { path = "../v-authorization" }
 v_az_lmdb = { path = "../v-az-lmdb" }
 v_storage = { path = "../v-storage" }

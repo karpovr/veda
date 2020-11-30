@@ -9,7 +9,8 @@ log = "0.4"
 lettre = "0.9"
 lettre_email = "0.9"
 
-v_queue = { path = "../v-queue" }
+v_queue = "0.1"
+
 v_search = { path = "../v-search" }
 v_onto = { path = "../v-onto" }
 v_storage = { path = "../v-storage" }

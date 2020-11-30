@@ -17,8 +17,9 @@ crc32fast = "1.2.0"
 scan_fmt = "0.1.3"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
+v_queue = "0.1"
+
 v_onto = { path = "../v-onto" }
-v_queue = { path = "../v-queue" }
 v_search = { path = "../v-search" }
 v_storage = { path = "../v-storage" }
 v_api = { path = "../v-api" }

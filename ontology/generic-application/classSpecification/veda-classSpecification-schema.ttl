@@ -45,6 +45,15 @@ v-s:listProperties
   rdfs:range owl:ObjectProperty ;
   rdfs:domain v-s:ClassSpecification;
 .
+  v-s:PS_listProperties_ClassSpecification
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:ClassSpecification ;
+    v-ui:forProperty v-s:listProperties ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация cвойства v-s:listProperties в v-s:ClassSpecification"@ru ;
+    rdfs:label "v-s:listProperties property specification in v-s:ClassSpecification"@en ;
+  . 
 
 #-----Срок хранения
 v-s:shelfLife
@@ -54,19 +63,7 @@ v-s:shelfLife
   rdfs:range xsd:integer ;
   rdfs:domain v-s:ClassSpecification;
 .
-  v-s:PS_shelfLife_ClassSpecification
-    rdf:type v-ui:DatatypePropertySpecification ;
-    v-ui:forClass v-s:ClassSpecification ;
-    v-ui:forProperty v-s:shelfLife ;
-    v-ui:minCardinality 0 ;
-    v-ui:maxCardinality 1 ;
-    v-ui:minValue 0 ;
-    v-ui:maxValue 100 ;
-    v-ui:tooltip "Укажите количество лет от 0 до 100"@ru ;
-    v-ui:tooltip "Non-required, single integer value, range 0-100."@en ;
-    rdfs:label "Спецификация cвойства v-s:shelfLife в v-s:ClassSpecification"@ru ;
-    rdfs:label "v-s:shelfLife property specification in v-s:ClassSpecification"@en ;
-  . 
+  
 
 #-----Бессрочно
 v-s:isShelfLifeAlways

@@ -20,7 +20,8 @@ rand = "0.7"
 tokio = "0.2.4"
 futures = "0.3.1"
 
+v_queue = "0.1"
+
 v_module = { path = "../v-module" }
-v_queue = { path = "../v-queue" }
 v_onto = { path = "../v-onto" }
 v_storage = { path = "../v-storage" }

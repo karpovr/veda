@@ -13,6 +13,8 @@ rust_decimal = "1.7.0"
 # sudo apt install libglib2.0-dev
 rusty_v8 = "0.13.0"
 
+v_queue = "0.1"
+
 v_v8 = { path = "../v-v8" }
 v_module = { path = "../v-module" }
 v_storage = { path = "../v-storage" }
@@ -20,4 +22,3 @@ v_onto = { path = "../v-onto" }
 v_api = { path = "../v-api" }
 v_search = { path = "../v-search" }
 v_ft_xapian = { path = "../v-ft-xapian" }
-v_queue = { path = "../v-queue" }
