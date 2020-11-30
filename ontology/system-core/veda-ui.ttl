@@ -3109,7 +3109,7 @@ v-ui:ttl
     pre.html(anchored);
   });
 
-  function sanitize(value) {
+  function sanitize(string) {
     var map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -3119,7 +3119,7 @@ v-ui:ttl
         "/": '&#x2F;',
     };
     var reg = /[&<>"'/]/ig;
-    return value.replace(reg, function (match) { return map[match]; });
+    return string.replace(reg, function (match) { return map[match]; });
   }
 
   //# sourceURL=v-ui:ttl
@@ -3205,27 +3205,25 @@ v-ui:json
     Object.keys(json).sort().forEach(function(key) {
       ordered[key] = json[key];
     });
-    return JSON.stringify(ordered, sanitize, 2);
+    return JSON.stringify(ordered, null, 2);
   };
 
-  function sanitize(key, value) {
-    if (typeof value === "string") {
-      var map = {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#x27;',
-          "/": '&#x2F;',
-      };
-      var reg = /[&<>"'/]/ig;
-      return value.replace(reg, function (match) { return map[match]; });
-    }
-    return value;
+  function sanitize(string) {
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+    };
+    var reg = /[&<>"'/]/ig;
+    return string.replace(reg, function (match) { return map[match]; });
   }
 
   function anchorize (string) {
-    return string.replace(/("|')([a-zA-Z][\\w-]*:[\\w-]*)("|')/gi, "$1<a class='text-black' href='#/$2//v-ui:json'>$2</a>$3");
+    var sanitized = sanitize(string);
+    return sanitized.replace(/("|')([a-zA-Z][\\w-]*:[\\w-]*)("|')/gi, "$1<a class='text-black' href='#/$2//v-ui:json'>$2</a>$3");
   };
 
   //# sourceURL=v-ui:json
