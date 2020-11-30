@@ -16,9 +16,10 @@ serde_derive = "1.0"
 indextree = "4.2.0"
 nanoid = "0.3.0"
 
+v_queue = "0.1"
+
 v_v8 = { path = "../v-v8" }
 v_api = { path = "../v-api" }
 v_module = { path = "../v-module" }
 v_storage = { path = "../v-storage" }
 v_onto = { path = "../v-onto" }
-v_queue = { path = "../v-queue" }

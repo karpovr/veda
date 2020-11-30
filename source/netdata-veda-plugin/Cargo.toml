@@ -7,4 +7,5 @@ edition = "2018"
 [dependencies]
 chrono = "0.4"
 rust-ini = "0.16"
-v_queue = { path = "../v-queue" }
+
+v_queue = "0.1"

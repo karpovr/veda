@@ -18,6 +18,6 @@ quote = "1.0.3"
 v_onto = { path = "../v-onto" }
 v_module = { path = "../v-module" }
 v_api = { path = "../v-api" }
-v_authorization = { path = "../v-authorization" }
+v_authorization = "0.1.0"
 v_az_lmdb = { path = "../v-az-lmdb" }
 v_search = { path = "../v-search" }

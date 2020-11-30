@@ -12,7 +12,7 @@ crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
 v_az_lmdb = { path = "../v-az-lmdb" }
-v_authorization = { path = "../v-authorization" }
+v_authorization = "0.1.0"
 
 #[build-dependencies]
 #cbindgen = "0.1"

@@ -18,8 +18,9 @@ reqwest = { version = "0.10", features = ["blocking", "json"] }
 serde_json = "1.0"
 base64 = "0.13.0"
 
+v_queue = "0.1"
+
 v_onto = { path = "../v-onto" }
-v_queue = { path = "../v-queue" }
 v_module = { path = "../v-module" }
 v_api = { path = "../v-api" }
 

@@ -10,9 +10,9 @@ path = "src/main.rs"
 
 [dependencies]
 log = "0.4"
-#reqwest = { version = "0.10", features = ["blocking", "json"] }
 
-v_queue = { path = "../v-queue" }
+v_queue = "0.1"
+
 v_onto = { path = "../v-onto" }
 v_search = { path = "../v-search" }
 v_storage = { path = "../v-storage" }
