@@ -36,7 +36,7 @@ v-s:EximFilter1
 
     // выгрузка person
 
-    if (document['sys:source'] !== undefined) {
+    if (document['sys:source']) {
 	return '';
     }
 
@@ -60,7 +60,7 @@ v-s:EximFilter2
 
     // для всех потребителей выгружаем элемент орг струкутры не имеющий поля [sys:source]
 
-    if (document['sys:source'] !== undefined) {
+    if (document['sys:source']) {
 	return '';
     }
 
@@ -85,7 +85,7 @@ v-s:EximFilter3
     // выгрузка принятого решения у которого в поле [v-s:lastEditor] находится
     // индивид из другой системы
 
-    if (document['sys:source'] !== undefined) {
+    if (document['sys:source']) {
 	return '';
     }
 
@@ -114,7 +114,7 @@ v-s:EximFilter4
 
     // выгрузка прав если они содержат ссылку на внешнего индивида
 
-    if (document['sys:source'] !== undefined) {
+    if (document['sys:source']) {
 	return '';
     }
 
@@ -143,7 +143,7 @@ v-s:EximFilter5
     // документ типа gen:InternalDocument
     var res = [];
 
-    if (document['sys:source'] !== undefined) {
+    if (document['sys:source']) {
 	return [];
     }
 
