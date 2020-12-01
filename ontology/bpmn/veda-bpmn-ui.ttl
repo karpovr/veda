@@ -1,0 +1,616 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
+
+<http://semantic-machines.com/veda/veda-bpmn>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda"@ru ;
+  rdfs:label "Veda system ontology"@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+bpmn:ComplexRouteStartForm
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf bpmn:StartForm ;
+  rdfs:label "Стартовая форма Комплексного маршрута"@ru ;
+  rdfs:label "Complex route start form"@en ;
+  v-ui:hasModel bpmn:ComplexRouteStartForm_Model ;
+.
+
+bpmn:ComplexRouteStartForm_Model
+  rdf:type v-ui:ClassModel ;
+  v-ui:forClass bpmn:ComplexRouteStartForm ;
+  rdfs:comment "Модель для класса bpmn:ComplexRouteStartForm"@ru ;
+  rdfs:comment "Model for bpmn:ComplexRouteStartForm class"@en ;
+  rdfs:label "Модель bpmn:ComplexRouteStartForm"@ru ;
+  rdfs:label "bpmn:ComplexRouteStartForm model"@en ;
+  v-s:script """
+  /**
+   * @method
+   * @param stages {Array} Array of required stages.
+   * @param complexPrefix {String} Default prefix to complex routing.
+   * @return { true }.
+   */
+  this.addSimpleStartForm = function (stages, complexPrefix) {
+    var self=this;
+    stages.forEach(function(stage) {
+      var temp = new veda.IndividualModel();
+      temp['rdf:type'] = [new veda.IndividualModel('s-wf:SimpleRouteStartForm')];
+      var routeid = complexPrefix + stage;
+      self[routeid] = [temp];
+    });
+    return true;
+  };
+  //# sourceURL=bpmn:ComplexRouteStartForm_Model
+  """ ;
+.
+
+bpmn:SimpleRouteStartFormMinimal_Template
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон стартовых данных простого маршрута"@ru ;
+  rdfs:label "Single route start form template"@en ;
+  v-ui:template """
+<div>
+  <em about="s-wf:SimpleRouteStartForm_participant" property="rdfs:label"></em>
+  <div rel="s-wf:SimpleRouteStartForm_participant" class="view edit -search" data-template="v-ui:LabelTemplate"></div>
+  <veda-control data-type="link" rel="s-wf:SimpleRouteStartForm_participant" class="-view edit search fulltext"></veda-control>
+  <em about="s-wf:SimpleRouteStartForm_comment" property="rdfs:label"></em>
+  <div property="s-wf:SimpleRouteStartForm_comment" class="view -edit -search"></div>
+  <veda-control data-type="text" property="s-wf:SimpleRouteStartForm_comment" class="-view edit -search"></veda-control>
+  <div class="checkbox checkbox_canEdit disabled">
+    <label>
+      <veda-control property="v-wf:StartForm_canEdit" data-type="boolean"></veda-control>
+      <span about="v-wf:StartForm_canEdit" property="rdfs:label"></span>
+    </label>
+  </div>
+</div>
+<script>
+  $('.sign .checkbox').show();
+</script>
+  """ ;
+.
+
+bpmn:SimpleRouteStartFormForActions_Template
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения данных для автопоручений"@ru ;
+  rdfs:label "Auto instruction start form template"@en ;
+  v-ui:template """
+<div class="row">
+  <div class="col-md-5">
+    <em about="v-s:responsible" property="rdfs:label"></em>
+    <div rel="v-s:responsible" class="view edit -search" data-template="v-ui:LabelTemplate"></div>
+    <veda-control data-type="link" rel="v-s:responsible" class="-view edit search fulltext"></veda-control>
+  </div>
+  <div class="col-md-4">
+    <em about="v-s:description" property="rdfs:label"></em>
+    <div property="v-s:description" class="view -edit -search"></div>
+    <veda-control data-type="text" property="v-s:description" class="-view edit -search"></veda-control>
+  </div>
+  <div class="col-md-3">
+    <em about="v-s:dateToPlan" property="rdfs:label"></em>
+    <div property="v-s:dateToPlan" class="view -edit -search"></div>
+    <veda-control data-type="dateTime" property="v-s:dateToPlan" class="-view edit -search"></veda-control>
+  </div>
+</div>
+<hr>
+  """ ;
+.
+
+bpmn:SimpleRouteStartFormShort_Template
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон стартовых данных простого маршрута"@ru ;
+  rdfs:label "Single route start form template"@en ;
+  v-ui:template """
+<div>
+  <em about="s-wf:SimpleRouteStartForm_participant" property="rdfs:label"></em>
+  <div rel="s-wf:SimpleRouteStartForm_participant" class="view edit -search" data-template="v-ui:LabelTemplate"></div>
+  <veda-control data-type="link" rel="s-wf:SimpleRouteStartForm_participant" class="-view edit search fulltext"></veda-control>
+  <em about="s-wf:SimpleRouteStartForm_comment" property="rdfs:label"></em>
+  <div property="s-wf:SimpleRouteStartForm_comment" class="view -edit -search"></div>
+  <veda-control data-type="text" property="s-wf:SimpleRouteStartForm_comment" class="-view edit -search"></veda-control>
+  <em about="s-wf:SimpleRouteStartForm_deadlineDays" property="rdfs:label"></em>
+  <div property="s-wf:SimpleRouteStartForm_deadlineDays" class="view -edit -search"></div>
+  <veda-control data-type="integer" property="s-wf:SimpleRouteStartForm_deadlineDays" class="-view edit -search"></veda-control>
+  <div class="checkbox checkbox_canEdit disabled">
+    <label>
+      <veda-control property="v-wf:StartForm_canEdit" data-type="boolean"></veda-control>
+      <span about="v-wf:StartForm_canEdit" property="rdfs:label"></span>
+    </label>
+  </div>
+</div>
+  """ ;
+.
+
+bpmn:SimpleRouteStartFormFull_Template
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон стартовых данных простого маршрута"@ru ;
+  rdfs:label "Single route start form template"@en ;
+  v-ui:template """
+<div>
+  <em about="s-wf:SimpleRouteStartForm_participant" property="rdfs:label"></em>
+  <div rel="s-wf:SimpleRouteStartForm_participant" class="view edit -search" data-template="v-ui:LabelTemplate"></div>
+  <veda-control data-type="link" rel="s-wf:SimpleRouteStartForm_participant" class="-view edit search fulltext"></veda-control>
+  <em about="s-wf:SimpleRouteStartForm_comment" property="rdfs:label"></em>
+  <div property="s-wf:SimpleRouteStartForm_comment" class="view -edit -search"></div>
+  <veda-control data-type="text" property="s-wf:SimpleRouteStartForm_comment" class="-view edit -search"></veda-control>
+  <div class="row">
+    <div class="col-md-6">
+      <em about="s-wf:SimpleRouteStartForm_deadlineDate" property="rdfs:label"></em>
+      <div property="s-wf:SimpleRouteStartForm_deadlineDate" class="view -edit -search"></div>
+      <veda-control data-type="dateTime" property="s-wf:SimpleRouteStartForm_deadlineDate" class="-view edit -search"></veda-control>
+    </div>
+    <div class="col-md-6">
+      <em about="s-wf:SimpleRouteStartForm_deadlineDays" property="rdfs:label"></em>
+      <div property="s-wf:SimpleRouteStartForm_deadlineDays" class="view -edit -search"></div>
+      <veda-control data-type="integer" property="s-wf:SimpleRouteStartForm_deadlineDays" class="-view edit -search"></veda-control>
+    </div>
+  </div>
+  <div class="checkbox checkbox_canEdit disabled">
+    <label>
+      <veda-control property="v-wf:StartForm_canEdit" data-type="boolean"></veda-control>
+      <span about="v-wf:StartForm_canEdit" property="rdfs:label"></span>
+    </label>
+  </div>
+  <div class="checkbox checkbox_setStatus -edit">
+    <label>
+      <veda-control property="v-wf:StartForm_setStatus" data-type="boolean"></veda-control>
+      <span about="v-wf:StartForm_setStatus" property="rdfs:label"></span>
+    </label>
+  </div>
+  <em about="s-wf:SimpleRouteStartForm_controller" property="rdfs:label"></em>
+  <div property="s-wf:SimpleRouteStartForm_controller" class="view -edit -search"></div>
+  <veda-control data-type="link" rel="s-wf:SimpleRouteStartForm_controller" class="-view edit -search fulltext"></veda-control>
+</div>
+  """ ;
+.
+
+bpmn:ComplexRouteStartForm_Common_Template
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон стартовых данных Комплексного маршрута"@ru ;
+  rdfs:label "Complex route start form template"@en ;
+  v-ui:forClass bpmn:ComplexRouteStartForm ;
+  v-ui:template """
+<script>
+  var stages = [];
+  var complex = 's-wf:ComplexRouteStartForm_';
+  var simple = 's-wf:SimpleRouteStartForm_';
+  var stagePromises = [];
+
+  $('#save_and_start_process', template).on('click', function () {
+    stages.forEach(function(stage) {
+      var routeid = complex+stage;
+      var sub = individual[routeid][0];
+      if (sub) {
+        if (!sub.hasValue(simple+'participant') || sub.properties[simple+'participant'].length == 0) {
+          if (!sub.hasValue(simple+'actions') || sub.properties[simple+'actions'].length == 0) {
+            delete individual.properties[routeid];
+            $('[rel="' + routeid + '"]', template).empty();
+          }
+        };
+      } else {
+        delete individual.properties[routeid];
+        $('[rel="' + routeid + '"]', template).empty();
+      };
+    });
+    template.trigger("save");
+    template.closest(".modal").modal("hide").remove();
+    var notify = veda.Notify ? new veda.Notify() : function () {};
+    var sendSuccess = new veda.IndividualModel("v-s:SendSuccess");
+    sendSuccess.load().then(function (sendSuccess) {
+      notify("success", {name: sendSuccess});
+    });
+  });
+
+  // INFORMING
+  if (individual.hasValue(complex+"informing")) {
+    stages.push("informing");
+    individual[complex+'informing'][0]['v-s:parent'] = [individual];
+  }
+
+  // COORDINATION
+  for (var i = 1; i <= 6; i++) {
+    if ( individual.hasValue(complex + "coordination" + i) ) {
+      individual[complex+'coordination'+i][0][simple+'possible_decisions'] = [
+        new veda.IndividualModel('v-wf:DecisionAgreed'),
+        new veda.IndividualModel('v-wf:DecisionDeclined'),
+        new veda.IndividualModel('v-wf:DecisionNoAgreed'),
+        new veda.IndividualModel('v-wf:DecisionNotForMe')
+      ];
+      individual[complex + 'coordination' + i][0][simple + 'task_label'] = veda.Util.mlstring("Согласовать", "Coordinate");
+      stages.push("coordination" + i);
+      individual[complex + 'coordination' + i][0]['v-s:parent'] = [individual];
+    };
+  }
+
+  // INTRODUCTION
+  if ( individual.hasValue(complex + "introduction") ) {
+    individual[complex + 'introduction'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionExamined')
+    ];
+    individual[complex + 'introduction'][0][simple + 'task_label'] = veda.Util.mlstring("Ознакомление", "Introduction");
+    stages.push("introduction");
+    individual[complex + 'introduction'][0]['v-s:parent'] = [individual];
+  }
+
+  // SIGN
+  if ( individual.hasValue(complex + "sign") ) {
+    individual[complex + 'sign'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionSign'),
+      new veda.IndividualModel('v-wf:DecisionDeclined'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'sign'][0][simple + 'task_label'] = veda.Util.mlstring("Подписать", "Sign");
+    stages.push("sign");
+    individual[complex + 'sign'][0]['v-s:parent'] = [individual];
+  }
+
+  // APPROVE
+  if ( individual.hasValue(complex + "approval") ) {
+    individual[complex + 'approval'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionApprove'),
+      new veda.IndividualModel('v-wf:DecisionDeclined'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'approval'][0][simple + 'task_label'] = veda.Util.mlstring("Утвердить", "Approve");
+    stages.push("approval");
+    individual[complex + 'approval'][0]['v-s:parent'] = [individual];
+  }
+
+  // REVIEW
+  if (individual.hasValue(complex+"review")) {
+    individual[complex + 'review'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionReview'),
+      new veda.IndividualModel('v-wf:DecisionRejected'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'review'][0][simple + 'task_label'] = veda.Util.mlstring("Рассмотреть", "Review");
+    stages.push("review");
+    individual[complex + 'review'][0]['v-s:parent'] = [individual];
+  }
+
+
+  // INSTRUCTION
+  if ( individual.hasValue(complex + "instruction") ) {
+    individual[complex + 'instruction'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionAchieved'),
+      new veda.IndividualModel('v-wf:DecisionRejected'),
+      new veda.IndividualModel('v-wf:DecisionNotPerformed'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'instruction'][0][simple + 'task_label'] = veda.Util.mlstring("Исполнить поручение", "Execute task");
+    stages.push("instruction");
+    individual[complex + 'instruction'][0]['v-s:parent'] = [individual];
+  }
+
+  // INSTRUCTION 2
+  if ( individual.hasValue(complex + "instruction2") ) {
+    individual[complex + 'instruction2'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionAchieved'),
+      new veda.IndividualModel('v-wf:DecisionRejected'),
+      new veda.IndividualModel('v-wf:DecisionNotPerformed'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'instruction2'][0][simple + 'task_label'] = veda.Util.mlstring("Рассмотреть", "Execute task");
+    stages.push("instruction2");
+    individual[complex+'instruction2'][0]['v-s:parent'] = [individual];
+  }
+
+  // INSTRUCTION 3
+  if (individual.hasValue(complex + "instruction3")) {
+    individual[complex + 'instruction3'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionAchieved'),
+      new veda.IndividualModel('v-wf:DecisionRejected'),
+      new veda.IndividualModel('v-wf:DecisionNotPerformed'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'instruction3'][0][simple + 'task_label'] = veda.Util.mlstring("Ознакомиться", "Execute task");
+    stages.push("instruction3");
+    individual[complex + 'instruction3'][0]['v-s:parent'] = [individual];
+  }
+
+  // INSTRUCTION 4
+  if (individual.hasValue(complex + "instruction4")) {
+    individual[complex + 'instruction4'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionAchieved'),
+      new veda.IndividualModel('v-wf:DecisionRejected'),
+      new veda.IndividualModel('v-wf:DecisionNotPerformed'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'instruction4'][0][simple + 'task_label'] = veda.Util.mlstring("Исполнить поручение", "Execute task");
+    stages.push("instruction4");
+    individual[complex + 'instruction4'][0]['v-s:parent'] = [individual];
+  }
+
+  // EXAMINE
+  if ( individual.hasValue(complex + "examination") ) {
+    individual[complex + 'examination'][0][simple + 'possible_decisions'] = [
+      new veda.IndividualModel('v-wf:DecisionExamined'),
+      new veda.IndividualModel('v-wf:DecisionNotForMe')
+    ];
+    individual[complex + 'examination'][0][simple + 'task_label'] = veda.Util.mlstring("Ознакомиться", "Examine");
+    stages.push("examination");
+    individual[complex + 'examination'][0]['v-s:parent'] = [individual];
+  }
+
+  if (individual.hasValue(complex + "autoinstruction")) {
+    stages.push("autoinstruction");
+  }
+
+  if (individual.hasValue(complex + "distribution")) {
+    stages.push("distribution");
+  }
+
+//# sourceURL=bpmn:ComplexRouteStartForm_Template_pre
+</script>
+<div class="container sheet">
+  <style scoped>
+    .col-md-6 {
+      min-height: 0px;
+    }
+  </style>
+  <h2 about="bpmn:ComplexRouteStartForm" property="rdfs:label"></h2>
+  <h4 id="on-document" about="@" rel="v-s:onDocument" data-template="v-ui:ClassNameLabelLinkTemplate"></h4>
+  <br>
+  <div class="row">
+    <div class="col-md-6 simpleStartForm informing" rel="s-wf:ComplexRouteStartForm_informing" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_informing" property="rdfs:label"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-embedded="true" data-template="s-wf:SimpleRouteStartFormMinimal_Template"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm introduction" rel="s-wf:ComplexRouteStartForm_introduction" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_introduction" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm coordination1" rel="s-wf:ComplexRouteStartForm_coordination1" data-embedded="true">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_coordination1" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm coordination2" rel="s-wf:ComplexRouteStartForm_coordination2" data-embedded="true">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_coordination2" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+
+    <div class="col-md-6 simpleStartForm coordination3" rel="s-wf:ComplexRouteStartForm_coordination3" data-embedded="true">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_coordination3" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm coordination4" rel="s-wf:ComplexRouteStartForm_coordination4" data-embedded="true">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_coordination4" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm coordination5" rel="s-wf:ComplexRouteStartForm_coordination5" data-embedded="true">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_coordination5" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm coordination6" rel="s-wf:ComplexRouteStartForm_coordination6" data-embedded="true">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_coordination6" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormShort_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm sign" rel="s-wf:ComplexRouteStartForm_sign" data-embedded="true">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_sign" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormMinimal_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm approval" rel="s-wf:ComplexRouteStartForm_approval" data-embedded="true">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_approval" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormMinimal_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm review" rel="s-wf:ComplexRouteStartForm_review" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_review" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormFull_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm instruction" rel="s-wf:ComplexRouteStartForm_instruction" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_instruction" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormFull_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm instruction2" rel="s-wf:ComplexRouteStartForm_instruction2" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_instruction" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormFull_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm instruction3" rel="s-wf:ComplexRouteStartForm_instruction3" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_instruction" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormFull_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm instruction4" rel="s-wf:ComplexRouteStartForm_instruction4" data-embedded="true">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_instruction" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormFull_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm examination" rel="s-wf:ComplexRouteStartForm_examination" data-embedded="true">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_examination" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormMinimal_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+    <div class="col-md-6 simpleStartForm distribution" rel="s-wf:ComplexRouteStartForm_distribution" data-embedded="true">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="s-wf:ComplexRouteStartForm_distribution" property="rdfs:label"></span>
+            <span class="pull-right statusWorkflow" about="@" rel="v-wf:hasStatusWorkflow" data-template="v-ui:StatusTemplate"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" data-template="s-wf:SimpleRouteStartFormMinimal_Template" data-embedded="true" style="min-height:380px; height:380px; overflow-y:auto; overflow-x:hidden;"></div>
+      </div>
+    </div>
+
+    <div class="col-md-12 simpleStartForm autoinstruction" rel="s-wf:ComplexRouteStartForm_autoinstruction" data-embedded="true">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title clearfix">
+            <span class="pull-left" about="@" property="rdfs:label"></span>
+          </h3>
+        </div>
+        <div class="panel-body" about="@" rel="s-wf:SimpleRouteStartForm_actions" data-template="s-wf:SimpleRouteStartFormForActions_Template" data-embedded="true"></div>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="actions">
+    <button type="button" class="action btn btn-warning" id="save_and_start_process" about="v-s:Send" property="rdfs:label"></button>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel"></span>
+  </div>
+</div>
+<script>
+  if (!individual.hasValue("v-wf:isProcess")) {
+    $(".actions #save", template).remove();
+    $(".actions #edit", template).remove();
+  }
+</script>
+  """ ;
+.
+
+
+bpmn:InternalDocument_ComplexRouteStartForm_Template
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон стартовых данных комплексного маршрута Внутренний документ"@ru ;
+  rdfs:label "InternalDocument complex route start form template"@en ;
+  v-ui:template """
+<script>
+  var stages = ['coordination1', 'coordination2', 'sign', 'review'];
+  var complex = "s-wf:ComplexRouteStartForm_";
+  var simple = "s-wf:SimpleRouteStartForm_";
+
+  individual.addSimpleStartForm(stages, complex);
+
+  individual[complex+'coordination1'][0][simple+'visible'] = [true];
+  individual[complex+'coordination1'][0][simple+'editable'] = [true];
+  individual[complex+'coordination1'][0][simple+'participant'] = [new veda.IndividualModel("cfg:AdministratorAppointment")];
+
+  individual[complex+'coordination2'][0][simple+'visible'] = [true];
+  individual[complex+'coordination2'][0][simple+'editable'] = [true];
+  individual[complex+'coordination2'][0][simple+'participant'] = [new veda.IndividualModel("cfg:AdministratorAppointment")];
+
+  individual[complex+'sign'][0][simple+'visible'] = [true];
+  individual[complex+'sign'][0][simple+'editable'] = [true];
+  individual[complex+'sign'][0][simple+'deadlineDays'] = [5];
+  individual[complex+'sign']["v-wf:StartForm_canEdit"] = [true];
+  individual[complex+'sign'][0][simple+'participant'] = [new veda.IndividualModel("cfg:AdministratorAppointment")];
+
+  individual[complex+'review'][0][simple+'visible'] = [true];
+  individual[complex+'review'][0][simple+'editable'] = [true];
+  individual[complex+'review'][0][simple+'deadlineDays'] = [3];
+  individual[complex+'review'][0][simple+'participant'] = [new veda.IndividualModel("cfg:AdministratorAppointment")];
+
+  individual["bpmn:startProcess"] = [new veda.IndividualModel("td:bpmn-complex-route1")];
+  individual["bpmn:hasStatus"] = [new veda.IndividualModel("bpmn:ToBeStarted")];
+
+//# sourceURL=bpmn:InternalDocument_ComplexRouteStartForm_Template_pre
+</script>
+<div about="@" data-embedded="true" data-template="bpmn:ComplexRouteStartForm_Common_Template" class="view edit"></div>
+""" ;
+.

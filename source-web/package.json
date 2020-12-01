@@ -1,0 +1,57 @@
+{
+  "name": "veda-client",
+  "version": "0.0.1",
+  "description": "veda client",
+  "main": "main.js",
+  "author": {
+    "name": "Roman Karpov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/semantic-machines/veda.git"
+  },
+  "license": "AGPL-3.0-or-later",
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-transform-instanceof": "^7.12.1",
+    "@babel/plugin-transform-modules-systemjs": "^7.12.1",
+    "@rollup/plugin-commonjs": "^16.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^10.0.0",
+    "babel-preset-minify": "^0.5.1",
+    "rollup": "^2.33.1",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "dependencies": {
+    "ace-builds": "^1.4.12",
+    "autosize": "^4.0.2",
+    "bootstrap": "^3.4.1",
+    "bootstrap-contextmenu": "^1.0.0",
+    "construct-style-sheets-polyfill": "^2.4.3",
+    "cropperjs": "^1.5.9",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47",
+    "file-saver": "^1.3.8",
+    "font-awesome": "^4.7.0",
+    "fullcalendar": "^3.0.1",
+    "jquery": "^3.3.1",
+    "jquery-touchswipe": "^1.6.19",
+    "jquery-ui-dist": "^1.12.1",
+    "jsplumb": "^1.7.9",
+    "jszip": "^3.1.3",
+    "marked": "^1.2.3",
+    "moment": "^2.29.1",
+    "mustache": "^4.0.1",
+    "promis": "^1.1.4",
+    "symbol-es6": "^0.1.2",
+    "systemjs": "^6.7.1",
+    "systemjs-plugin-css": "^0.1.37",
+    "vis-network": "^8.5.2"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run build-browser-scripts && npm run build-server-scripts",
+    "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
+    "build-browser-scripts": "babel . --out-dir ../public --source-maps --copy-files --ignore 'node_modules'",
+    "build-server-scripts": "rm -Rf ../public/js/server && rollup -c && cat js/server/lib/*.js ../public/js/server/*.js > .tmp-build && rm -f ../public/js/server/*.js && mv .tmp-build ../public/js/server/server.bundle.js"
+  }
+}

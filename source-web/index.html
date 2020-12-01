@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" class="notranslate" translate="no">
+  <head>
+    <style>
+      #load-indicator {
+        background-color: white;
+        z-index: 9999;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        opacity: 0.5;
+        text-align: center;
+      }
+      #load-indicator > .loader {
+        position: relative;
+        top: 35%;
+        width: 2em;
+        height: 2em;
+        border-width: 0.2em;
+        margin: 0;
+      }
+      .loader {
+        display: inline-block;
+        border: 0.125em solid #555;
+        border-top: 0.125em solid transparent;
+        border-radius: 50%;
+        width: 1.25em;
+        height: 1.25em;
+        margin-left: 0.5em;
+        vertical-align: middle;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    <meta name="google" content="notranslate"/>
+    <meta charset="utf-8"/>
+    <title>Veda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <link rel="manifest" href="./manifest">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/veda.css"/>
+
+    <!-- Polyfills for IE11 -->
+    <script type="text/javascript" src="/node_modules/promis/promise.js"></script>
+    <script type="text/javascript" src="/node_modules/symbol-es6/dist/symbol-es6.min.js"></script>
+    <script type="text/javascript" src="/node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js"></script>
+
+    <!-- SystemJS -->
+    <script type="systemjs-importmap">
+      {
+        "imports": {
+          "jquery": "/node_modules/jquery/dist/jquery.min.js",
+          "jquery-ui": "/node_modules/jquery-ui-dist/jquery-ui.min.js",
+          "bootstrap":"/node_modules/bootstrap/dist/js/bootstrap.min.js",
+          "cropper/":"/node_modules/cropperjs/dist/",
+          "moment":"/node_modules/moment/min/moment-with-locales.min.js",
+          "datetimepicker/":"/node_modules/eonasdan-bootstrap-datetimepicker/build/",
+          "fullcalendar/":"/node_modules/fullcalendar/dist/",
+          "contextmenu":"/node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js",
+          "touchswipe":"/node_modules/jquery-touchswipe/jquery.touchSwipe.min.js",
+          "autosize":"/node_modules/autosize/dist/autosize.min.js",
+          "filesaver":"/node_modules/file-saver/FileSaver.min.js",
+          "jszip":"/node_modules/jszip/dist/jszip.min.js",
+          "marked":"/node_modules/marked/marked.min.js",
+          "ace":"/node_modules/ace-builds/src-min/ace.js",
+          "vis":"/node_modules/vis-network/standalone/umd/vis-network.min.js",
+          "jsplumb":"/node_modules/jsplumb/dist/js/jsPlumb-1.7.9-min.js",
+          "main": "/js/browser/main.js",
+          "jsworkflow":"/js/browser/veda_workflow_editor.js",
+          "tablesortable":"/js/browser/table_sortable.js",
+          "sha256":"/js/common/lib/sha256.js"
+        }
+      }
+    </script>
+    <script src="/node_modules/systemjs/dist/system.min.js"></script>
+    <script src="/node_modules/systemjs/dist/extras/amd.min.js"></script>
+    <script src="/node_modules/systemjs/dist/extras/named-register.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function (e) {
+        System.import("main").then(function (module) {
+          window.veda = module.default;
+        });
+      });
+    </script>
+
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private" />
+    <!--meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src https://www.google.com:443 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src https://www.google.com:443 https://www.gstatic.com:443 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: wss:;" /-->
+  </head>
+  <body>
+
+    <!-- Load indicator -->
+    <div id="load-indicator">
+      <span class="loader"></span>
+    </div>
+
+    <!-- Line status -->
+    <div class="container-fluid text-right online" id="line-status" style="display:none;">
+      <span class="online"><span class="text-success glyphicon glyphicon-ok-sign"></span> ONLINE</span>
+      <span class="limited"><span class="text-warning glyphicon glyphicon-exclamation-sign"></span> LIMITED</span>
+      <span class="offline"><span class="text-danger glyphicon glyphicon-remove-sign"></span> OFFLINE</span>
+    </div>
+    <div class="container margin-xl" id="install-app" style="display:none;">
+      <div class="well well-sm text-center no-margin bg-white">
+        Установить приложение на главный экран? Install the application on the main screen?
+        <button id="install-btn" class="btn btn-sm btn-primary margin-md margin-md-h">Установить / Install</button>
+        <button id="reject-install-btn" class="btn btn-sm btn-link" style="margin-left:0;padding-left:0;">Отказаться / Refuse</button>
+      </div>
+    </div>
+
+    <!-- Login form -->
+    <form style="display:none;" class="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
+      <h3>Войдите / Sign in</h3>
+      <div id="unavailable-error" style="display:none;" class="alert alert-danger">
+        <p><strong>Ошибка!</strong> Система недоступна.</p>
+        <p><strong>Error!</strong> System unavailable.</p>
+      </div>
+      <div id="login-failed-error" style="display:none;" class="alert alert-danger">
+        <p><strong>Ошибка!</strong> Неверное имя пользователя или пароль.</p>
+        <p><strong>Error!</strong> Wrong login or password.</p>
+        <div id="recaptcha" style="width:300px; margin: 1em auto 0 auto;"></div>
+      </div>
+      <div id="invalid-secret-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Неверный код.</p>
+        <p><strong>Fail!</strong> Invalid secret code.</p>
+      </div>
+      <div id="empty-password-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Вы ввели пустой пароль.</p>
+        <p><strong>Fail!</strong> You have entered empty password.</p>
+      </div>
+      <div id="equal-password-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Новый пароль совпадает с предыдущим.</p>
+        <p><strong>Fail!</strong> New password is equal to previous.</p>
+      </div>
+      <div id="invalid-password-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Новый пароль не принят.</p>
+        <p><strong>Fail!</strong> New password was not accepted.</p>
+      </div>
+      <div id="frequent-pass-change-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Пароль можно менять не чаще 1 раза в сутки.</p>
+        <p><strong>Fail!</strong> Password may be changed only once a day.</p>
+      </div>
+      <div id="pass-change-not-allowed-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Смена пароля для учетной записи запрещена.</p>
+        <p><strong>Fail!</strong> Password change is not allowed.</p>
+      </div>
+      <div id="secret-expired-warning" style="display:none;" class="alert alert-warning">
+        <p><strong>Отказ!</strong> Код просрочен.</p>
+        <p><strong>Fail!</strong> Secret code expired.</p>
+      </div>
+      <div id="password-expired-error" style="display:none;" class="alert alert-danger">
+        <p><strong>Ошибка!</strong> Истекло время действия пароля.</p>
+        <p><strong>Error!</strong> Password expired.</p>
+      </div>
+      <div id="auth-locked-error" style="display:none;" class="alert alert-danger">
+        <p><strong>Ошибка!</strong> Слишком много неудачных попыток аутентификации. Учетная запись заблокирована на 30 минут.</p>
+        <p><strong>Error!</strong> Too many failed authentication attempts. Account is locked for 30 minutes.</p>
+      </div>
+      <div id="pass-change-locked-error" style="display:none;" class="alert alert-danger">
+        <p><strong>Ошибка!</strong> Слишком много неудачных попыток сменить пароль. Учетная запись заблокирована на 30 минут.</p>
+        <p><strong>Error!</strong> Too many failed password change attempts. Account is locked for 30 minutes.</p>
+      </div>
+      <div id="secret-request-info" style="display:none;" class="alert alert-info">
+        <p><strong>Инфо!</strong> Вам выслан новый код для смены пароля.</p>
+        <p><strong>Info!</strong> New secret code sent. Try to change password with new secret code.</p>
+      </div>
+      <button style="display:none;" class="ok btn btn-lg btn-block btn-primary">Ok</button>
+      <fieldset id="enter-login-password">
+        <input class="form-control input-lg" id="login" placeholder="Логин / login" type="text" name="login" autofocus="autofocus"/>
+        <input class="form-control input-lg margin-lg" id="password" placeholder="Пароль / password" type="password" name="password"/>
+        <button type="submit" id="submit-login-password" class="btn btn-lg btn-primary btn-block margin-lg">Войти / Sign in</button>
+        <button type="submit" id="change-password" class="btn btn-link btn-block btn-sm">Изменить пароль / Change password</button>
+      </fieldset>
+      <fieldset id="enter-new-password" style="display:none;">
+        <input class="form-control input-lg" id="new-password" placeholder="Новый пароль / New password" type="password" name="new-password" autocomplete="off"/>
+        <input class="form-control input-lg margin-lg" id="confirm-new-password" placeholder="Повторите пароль / Confirm password" type="password" name="confirm-new-password" autocomplete="off"/>
+        <span class="help-block password-strength" style="display:none;">Не менее 6 символов, должен содержать минимум 1 латинскую строчную букву, 1 латинскую прописную букву, 1 цифру</span>
+        <span class="help-block password-strength" style="display:none;">At least 6 characters and contain at least 1 lowercase latin letter, 1 uppercase latin letter, 1 digit</span>
+        <span class="help-block password-must-match" style="display:none;">Пароли должны совпадать</span>
+        <span class="help-block password-must-match" style="display:none;">Passwords must match</span>
+        <input class="form-control input-lg margin-lg" id="secret" placeholder="Код из письма / Code from e-mail" type="text" name="secret" autocomplete="off"/>
+        <span class="help-block enter-secret" style="display:none;">Введите код из письма</span>
+        <span class="help-block enter-secret" style="display:none;">Enter secret form e-mail</span>
+        <button disabled="disabled" type="submit" id="submit-new-password" class="btn btn-lg btn-primary btn-block margin-lg">Отправить / Submit</button>
+      </fieldset>
+    </form>
+
+    <!-- Autocomplete feature -->
+    <iframe name="autocomplete-frame" style="display:none" src="about:blank"></iframe>
+    <form target="autocomplete-frame" method="post" action="about:invalid" autocomplete="on" onkeypress="return (event.keyCode !== 13 || event.target.tagName === 'TEXTAREA')">
+      <!-- Application container -->
+      <div id="app"></div>
+    </form>
+
+    <!-- Notification alerts -->
+    <div id="notification-container"></div>
+
+
+    <!-- TEMPLATES -->
+
+    <!-- Notification alert -->
+    <script type="html/template" id="notification-template">
+      <div class="alert alert-notify fade in" role="alert">
+        <p class="note"><strong class="note-icon"></strong> <strong class="note-code"></strong> <strong class="note-name"></strong> <span class="note-message"></span></p>
+      </div>
+    </script>
+
+    <!-- Drafts template -->
+    <script type="html/template" id="drafts-template">
+      <div id="drafts" class="container sheet">
+        <h2 id="drafts-title"></h2>
+        <hr>
+        <ol id="drafts-list"></ol>
+        <button id="delete-all" class="btn btn-default"></button>
+      </div>
+    </script>
+
+    <!-- MODALS -->
+
+    <!-- Minimal modal -->
+    <script type="html/template" id="minimal-modal-template">
+      <div class="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-body">
+               <button type="button" class="close" data-dismiss="modal"><span class="fa fa-times"></span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <!-- Confirm modal -->
+    <script type="html/template" id="confirm-modal-template">
+      <div class="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary ok" data-dismiss="modal">Ok</button>
+              <button type="button" class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <!-- Individual modal -->
+    <script type="html/template" id="individual-modal-template">
+      <div class="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-body">
+               <button type="button" class="close" data-dismiss="modal"><span class="fa fa-times"></span></button>
+               <div class="holder"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary pull-left" id="ok" data-dismiss="modal">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <!-- Notification modal -->
+    <script type="html/template" id="notification-modal-template">
+      <div class="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-body">
+              <button id="follow" class="close" style="margin-right:20px;"><span class="fa fa-window-maximize"></span></button>
+              <button type="button" class="close" data-dismiss="modal"><span class="fa fa-times"></span></button>
+              <div class="holder"></div>
+            </div>
+            <div class="modal-footer hide">
+              <button type="button" class="btn btn-primary pull-left" id="ok" data-dismiss="modal">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+
+    <!-- CONTROLS -->
+
+    <!-- Link control template -->
+    <script type="html/template" id="link-control-template">
+      <div class="link-control">
+        <div class="input-group">
+          <div class="input-group-addon btn btn-default tree" tabindex="0">
+            <i class="fa fa-sitemap"></i>
+          </div>
+          <textarea rows="1" class="form-control fulltext"></textarea>
+          <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
+          <div class="input-group-addon btn btn-default dropdown" tabindex="0">
+            <i class="caret"></i>
+          </div>
+          <div class="input-group-addon btn btn-default create" tabindex="0">
+            <i class="glyphicon glyphicon-plus"></i>
+          </div>
+        </div>
+        <div class="fulltext-menu">
+          <div class="header clearfix">
+            <small class="actions pull-left">
+              <span class="select-all"></span>
+              <span class="cancel-selection"></span>
+              <span class="invert-selection"></span>
+            </small>
+            <small class="actions pull-right">
+              <span class="close-menu"></span>
+            </small>
+          </div>
+          <div class="suggestions"></div>
+        </div>
+      </div>
+    </script>
+
+    <!-- Actor control template -->
+    <script type="html/template" id="actor-control-template">
+      <div class="link-control">
+        <div class="input-group">
+          <div class="input-group-addon btn btn-default dropdown" style="padding:0;" tabindex="0">
+            <span data-toggle="dropdown" id="actor-type-menu" aria-haspopup="true" aria-expanded="true" style="padding:10px;">
+              <i class="glyphicon glyphicon-search"></i><i class="caret"></i>
+            </span>
+            <div class="dropdown-menu actor-type-menu padding-lg-h" aria-labelledby="actor-type-menu">
+              <div class="radio">
+                <label>
+                  <input type="radio" name="actor-type" value="v-s:Appointment"/>
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="actor-type" value="v-s:Person"/>
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="actor-type" value="v-s:Position"/>
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="actor-type" value="v-s:Department"/>
+                </label>
+              </div>
+              <hr class="margin-sm">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="only-deleted" value="v-s:OnlyDeleted"/>
+                </label>
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="full-name" value="v-s:FullNameBundle"/>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="input-group-addon btn btn-default tree" tabindex="0">
+            <i class="fa fa-sitemap"></i>
+          </div>
+          <textarea class="form-control fulltext" autocomplete="off" rows="1"></textarea>
+          <div class="input-group-addon btn btn-default clear" tabindex="0">
+            <span>&#10005;</span>
+          </div>
+        </div>
+        <div class="fulltext-menu">
+          <div class="header clearfix">
+            <small class="actions pull-left">
+              <span class="select-all"></span>
+              <span class="cancel-selection"></span>
+              <span class="invert-selection"></span>
+            </small>
+            <small class="actions pull-right">
+              <span class="close-menu"></span>
+            </small>
+          </div>
+          <div class="suggestions"></div>
+        </div>
+      </div>
+    </script>
+
+    <!-- String control template -->
+    <script type="html/template" id="string-control-template">
+      <input type="text" class="form-control" autocomplete="on" />
+    </script>
+
+    <!-- Text control template -->
+    <script type="html/template" id="text-control-template">
+      <textarea class="form-control" rows="1" />
+    </script>
+
+    <!-- Multilingual string control template -->
+    <script type="html/template" id="multilingual-string-control-template">
+      <div class="input-group">
+        <div class="input-group-addon"><small class="language-tag"></small></div>
+        <input type="text" class="form-control" lang="" autocomplete="on" />
+      </div>
+    </script>
+
+    <!-- Multilingual text control template -->
+    <script type="html/template" id="multilingual-text-control-template">
+      <div class="input-group">
+        <div class="input-group-addon"><small class="language-tag"></small></div>
+        <textarea class="form-control" lang="" rows="1"></textarea>
+      </div>
+    </script>
+
+    <!-- Source code control template -->
+    <script type="html/template" id="source-control-template">
+      <div class="panel panel-default" style="min-height:300px"></div>
+    </script>
+
+    <!-- Datetime control template -->
+    <script type="html/template" id="datetime-control-template">
+      <div class="input-group date">
+        <span class="input-group-addon">
+          <span class="glyphicon glyphicon-time"></span>
+        </span>
+        <input type="text" class="form-control" autocomplete="off"/>
+      </div>
+    </script>
+
+    <!-- Integer control template -->
+    <script type="html/template" id="integer-control-template">
+      <input type="text" class="form-control" placeholder="#" />
+    </script>
+
+    <!-- WorkTime control template -->
+    <script type="html/template" id="worktime-control-template">
+      <table>
+        <tbody>
+          <tr>
+            <td width="25%">
+              <div class="input-group">
+                <span class="input-group-addon">DD</span>
+                <input type="text" class="form-control">
+              </div>
+            </td>
+            <td width="25%">
+              <div class="input-group">
+                <span class="input-group-addon">HH</span>
+                <input type="text" class="form-control">
+              </div>
+            </td>
+            <td width="25%">
+              <div class="input-group">
+                <span class="input-group-addon">mm</span>
+                <input type="text" class="form-control">
+              </div>
+            </td>
+            <td>
+              <div class="input-group" style="width:100%">
+                <span class="input-group-addon">&sum;</span>
+                <span id="worktime-summary-text" class="text-right form-control"></span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </script>
+
+    <!-- Numeration control template -->
+    <script type="html/template" id="numeration-control-template">
+      <div class="input-group">
+        <div class="get-numeration-value input-group-addon btn btn-default">
+          <i class="glyphicon glyphicon-retweet"></i>
+        </div>
+        <input type="text" class="form-control" />
+      </div>
+    </script>
+
+    <!-- Decimal control template -->
+    <script type="html/template" id="decimal-control-template">
+      <input type="text" class="form-control" placeholder="#.#" />
+    </script>
+
+    <!-- Boolean control template -->
+    <script type="html/template" id="boolean-control-template">
+      <input type="checkbox" />
+    </script>
+
+    <!-- Option select control template -->
+    <script type="html/template" id="select-control-template">
+      <select class="form-control">
+        <option></option>
+      </select>
+    </script>
+
+    <!-- Checkbox control template -->
+    <script type="html/template" id="checkbox-control-template">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" />
+        </label>
+      </div>
+    </script>
+
+    <!-- Radio control template -->
+    <script type="html/template" id="radio-control-template">
+      <div class="radio">
+        <label>
+          <input type="radio" />
+        </label>
+      </div>
+    </script>
+
+    <!-- File control template -->
+    <script type="html/template" id="file-control-template">
+      <button class="browse btn btn-default">
+        Browse...<strong class="indicator-percentage"></strong><span class="indicator-spinner fa fa-spinner fa-pulse fa-lg fa-fw text-info" style="display:none"></span>
+      </button><input type="file" style="display:none"/>
+    </script>
+
+  </body>
+</html>

@@ -70,7 +70,7 @@ v-s:LayoutTemplate
           <li about="v-ft:Inbox" data-template="v-ft:FunctionTasksIndicatorTemplate"></li>
           <li id="user-info"></li>
           <li id="menu" class="dropdown" about="v-s:MainMenu" data-template="v-s:MenuTemplate"></li>
-          <li id="log-out" about="v-s:Exit" data-template="v-ui:ExitButtonTemplate"></li>
+          <li about="v-s:Logout" data-template="v-ui:ExitButtonTemplate"></li>
           <li about="v-ui:AvailableLanguage" data-template="v-ui:LanguageSwitchTemplate"></li>
           <li style="padding-left:10px; margin-left:10px; border-left:1px solid #ddd;" about="@" data-template="v-ui:FullWidthSwitchTemplate"></li>
         </ul>
@@ -273,8 +273,6 @@ v-s:MainMenu
   v-s:menuItem v-s:Tests ;
   v-s:menuItem v-s:Divider ;
   v-s:menuItem v-s:Administration ;
-  v-s:menuItem v-s:Divider ;
-  v-s:menuItem v-s:Exit ;
 .
 v-s:Divider
   rdf:type v-s:Menu ;
@@ -328,12 +326,6 @@ v-s:Tests
   rdfs:label "Тесты"@ru ;
   rdfs:label "Tests"@en ;
   v-s:staticLink "/tests"^^xsd:string ;
-.
-v-s:Exit
-  rdf:type v-s:Menu ;
-  rdfs:label "Выйти"@ru ;
-  rdfs:label "Exit"@en ;
-  v-s:staticLink "javascript:veda.logout()"^^xsd:string ;
 .
 v-s:Administration
   rdf:type v-s:Menu ;

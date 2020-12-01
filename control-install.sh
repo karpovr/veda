@@ -18,6 +18,7 @@ LIB_NAME[10]="autoconf"
 LIB_NAME[11]="automake"
 LIB_NAME[12]="curl"
 LIB_NAME[13]="python"
+LIB_NAME[14]="npm"
 
 LIB_OK="Status: install ok installed"
 F_UL=0
@@ -50,8 +51,8 @@ sudo apt-get install build-essential
 if [ "$1" = force ] || ! rustc -V ; then
     echo "--- INSTALL RUST ---"
     curl https://sh.rustup.rs -sSf | sh -s -- -y
-    source $HOME/.cargo/env
     rustup update nightly
+    source $HOME/.cargo/env
 else
     echo "--- UPDATE RUST ---"
     rustup update stable

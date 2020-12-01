@@ -28,6 +28,11 @@ v-s:More
   rdfs:label "Подробнее..."@ru ;
   rdfs:label "See more..."@en ;
 .
+v-s:Logout
+  rdf:type v-s:Bundle ;
+  rdfs:label "Выйти"@ru ;
+  rdfs:label "Leave"@en ;
+.
 v-s:MainProperties
   rdf:type v-s:Bundle ;
   rdfs:label "Основные свойства"@ru ;

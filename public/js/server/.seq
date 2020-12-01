@@ -1,7 +1,0 @@
-lib/mustache.js
-lib/synchronous-promise.js
-backend.js
-util.js
-nano_bpmn.js
-$modules
-veda_init.js

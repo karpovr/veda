@@ -629,7 +629,10 @@ v-fs:AttributiveSearchTemplate
       if ( exportAs === "blob" ) {
         return blob;
       } else if ( exportAs === "xls" ) {
-        saveAs(blob, name + ".xls");
+        System.import("filesaver").then(function (module) {
+          var saveAs = module.default;
+          saveAs(blob, name + ".xls");
+        });
       }
     }
   })();
@@ -649,41 +652,55 @@ v-fs:AttributiveSearchTemplate
     var resultTable = $(".search-result table").clone();
     resultTable.find(".hidden").remove();
 
-    var filesPromises = $("[typeof='v-s:File']", resultTable).map(function () {
-      var link = $("a", this);
-      var fileName = link.text().trim();
-      var fileUrl = link.attr("href");
-      return filePromise(fileUrl, fileName);
-    });
+    var filesEls = $("[typeof='v-s:File']", resultTable);
+
+    var filesPromises;
+
+    if (filesEls.length) {
+      filesPromises = filesEls.map(function () {
+        var link = $("a", this);
+        var fileName = link.text().trim();
+        var fileUrl = link.attr("href");
+        return filePromise(fileUrl, fileName);
+      });
+    } else {
+      filesPromises = [];
+    }
 
     Promise.all(filesPromises).then(function (files) {
-      var zip = new JSZip();
-      var folder = zip.folder("files");
-      var unique = {};
-      files.forEach(function (file) {
-        var name = file.name;
-        var i = 1;
-        while (unique[name]) {
-          name = file.name.replace(/(.*?).([^.]*)$/, "$1 ("+ i +").$2");
-          if (name === file.name) { name = file.name + " ("+ i +")"; }
-          i++;
-        }
-        file.name = name;
-        unique[file.name] = true;
-        $("[href=" + veda.Util.escape4$(file.url) + "]", resultTable).attr("href", "/files/" + file.name).text(file.name);
-        folder.file(file.name, file);
-      });
-      var registry = exportTable(resultTable.get(0), individual["rdfs:label"].join(", "), "blob");
-      zip.file("registry.html", registry);
-      zip.generateAsync({type:"blob"}).then(function(content) {
-        saveAs(content, "registry.zip");
-        toggleSpin(btn);
+      System.import("jszip").then(function (module) {
+        var JSZip = module.default;
+        var zip = new JSZip();
+        var folder = zip.folder("files");
+        var unique = {};
+        files.forEach(function (file) {
+          var name = file.name;
+          var i = 1;
+          while (unique[name]) {
+            name = file.name.replace(/(.*?).([^.]*)$/, "$1 ("+ i +").$2");
+            if (name === file.name) { name = file.name + " ("+ i +")"; }
+            i++;
+          }
+          file.name = name;
+          unique[file.name] = true;
+          $("[href=" + veda.Util.escape4$(file.url) + "]", resultTable).attr("href", "/files/" + file.name).text(file.name);
+          folder.file(file.name, file);
+        });
+        var registry = exportTable(resultTable.get(0), individual["rdfs:label"].join(", "), "blob");
+        zip.file("registry.html", registry);
+        zip.generateAsync({type:"blob"}).then(function(content) {
+          System.import("filesaver").then(function (module) {
+            var saveAs = module.default;
+            saveAs(content, "registry.zip");
+          });
+        });
       });
     }).catch(function (error) {
       console.log(error, error.stack);
-      toggleSpin(btn);
       var notify = new veda.Notify();
       notify("danger", { message: "Ошибка выгрузки реестра. Обратитесь в поддержку." });
+    }).then(function () {
+      toggleSpin(btn);
     });
   });
 
@@ -850,51 +867,58 @@ v-fs:AttributiveSearchInlineTemplate
     $(".no-more-results", template).remove();
   }
 
-  // Enable swipe for result table
-  $("body").keydown(enableSwipe).keyup(disableSwipe);
-  template.one("remove", function () {
-    $("body").off("keydown", enableSwipe).off("keyup", disableSwipe);
-  });
-  function disableSwipe (e) {
-    if (e.which === 17) {
-      $(".search-result", template).addClass("noSwipe").removeClass("swipe");
-    }
-  }
-  function enableSwipe (e) {
-    if (e.ctrlKey) {
-      $(".search-result", template).addClass("swipe").removeClass("noSwipe");
-    }
-  }
-
-  var prevDistance = 0, delta = 0;
-  $(".search-result", template).swipe({
-    swipeStatus: function (event, phase, direction, distance, duration) {
-      if (phase === "move" && event.ctrlKey === true) {
-        this.css("cursor", "move");
-        if (direction === "left") {
-          delta = distance - prevDistance;
-          prevDistance = distance;
-          this.scrollLeft( this.scrollLeft() + delta );
-        } else if (direction === "right") {
-          delta = distance - prevDistance;
-          prevDistance = distance;
-          this.scrollLeft( this.scrollLeft() - delta );
-        } else if (direction === "up") {
-          window.scrollBy(0, distance);
-        } else if (direction === "down") {
-          window.scrollBy(0, -distance);
-        }
-      } else {
-        prevDistance = 0;
-        delta = 0;
-        this.css("cursor", "");
+  System.import("touchswipe")
+  .then(function () {
+    // Enable swipe for result table
+    $("body").keydown(enableSwipe).keyup(disableSwipe);
+    template.one("remove", function () {
+      $("body").off("keydown", enableSwipe).off("keyup", disableSwipe);
+    });
+    function disableSwipe (e) {
+      if (e.which === 17) {
+        $(".search-result", template).addClass("noSwipe").removeClass("swipe");
       }
     }
-  });
-  template.one("remove", function () {
-    prevDistance = null;
-    delta = null;
-    $(".search-result", template).swipe("destroy");
+    function enableSwipe (e) {
+      if (e.ctrlKey) {
+        $(".search-result", template).addClass("swipe").removeClass("noSwipe");
+      }
+    }
+
+    var prevDistance = 0, delta = 0;
+
+    $(".search-result", template).swipe({
+      swipeStatus: function (event, phase, direction, distance, duration) {
+        if (phase === "move" && event.ctrlKey === true) {
+          this.css("cursor", "move");
+          if (direction === "left") {
+            delta = distance - prevDistance;
+            prevDistance = distance;
+            this.scrollLeft( this.scrollLeft() + delta );
+          } else if (direction === "right") {
+            delta = distance - prevDistance;
+            prevDistance = distance;
+            this.scrollLeft( this.scrollLeft() - delta );
+          } else if (direction === "up") {
+            window.scrollBy(0, distance);
+          } else if (direction === "down") {
+            window.scrollBy(0, -distance);
+          }
+        } else {
+          prevDistance = 0;
+          delta = 0;
+          this.css("cursor", "");
+        }
+      }
+    });
+    template.one("remove", function () {
+      prevDistance = null;
+      delta = null;
+      $(".search-result", template).swipe("destroy");
+    });
+  })
+  .catch(function (err) {
+    console.log("Touch swipe error:", err);
   });
 
   if ( !searchResultTemplate ) {

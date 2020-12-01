@@ -524,7 +524,7 @@ v-wf:SimpleNetTemplate
   """ ;
 .
 
-v-wf:TS_Net 
+v-wf:TS_Net
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:NetTemplate;
@@ -609,32 +609,36 @@ v-wf:NetTemplate
   </div>
 </div>
 <script>
-  var wrapper = $(".workflow-canvas-wrapper", template),
-    height = ( $("#copyright").offset().top - wrapper.offset().top - 25 ) + "px",
-    fullWidth = $("#full-width", template),
-    icon = $("span", fullWidth),
-    propsCol = $("#props-col", template),
-    schema = $("#schema", template);
-  wrapper.css("height", height);
-  propsCol.css("height", height);
-  fullWidth.click(function () {
-    propsCol.toggle();
-    icon.toggleClass("glyphicon-resize-full glyphicon-resize-small");
-    schema.toggleClass("col-md-8 col-md-12");
-  });
-  jsWorkflow.ready(function () {
-    // Create a new workflow instance as workflow
-    var workflow = new jsWorkflow.Instance();
+  System.import("jsworkflow").then(function (module) {
+    var jsWorkflow = module.default;
+    var wrapper = $(".workflow-canvas-wrapper", template),
+      height = ( $("#copyright").offset().top - wrapper.offset().top - 25 ) + "px",
+      fullWidth = $("#full-width", template),
+      icon = $("span", fullWidth),
+      propsCol = $("#props-col", template),
+      schema = $("#schema", template);
+    wrapper.css("height", height);
+    propsCol.css("height", height);
+    fullWidth.click(function () {
+      propsCol.toggle();
+      icon.toggleClass("glyphicon-resize-full glyphicon-resize-small");
+      schema.toggleClass("col-md-8 col-md-12");
+    });
+    jsWorkflow.ready(function () {
+      // Create a new workflow instance as workflow
+      var workflow = new jsWorkflow.Instance();
 
-    // Initialize workflow with workflow container id
-    var net = workflow.init('workflow-canvas', veda, individual, template, container);
+      // Initialize workflow with workflow container id
+      var net = workflow.init('workflow-canvas', veda, individual, template, container);
 
-    veda.net = net;
+      veda.net = net;
 
-    template.one("remove", function () {
-      delete veda.net
+      template.one("remove", function () {
+        delete veda.net
+      });
     });
   });
+
   //# sourceURL=v-wf:NetTemplate
 </script>
   """ ;
@@ -713,28 +717,31 @@ v-wf:ProcessTemplate
     </div>
   </div>
 </div>
-
 <script>
-  var wrapper = $(".workflow-canvas-wrapper", template),
-    height = ( $("#copyright").offset().top - wrapper.offset().top - 15 ) + "px",
-    fullWidth = $("#full-width", template),
-    icon = $("span", fullWidth),
-    propsCol = $("#props-col", template),
-    schema = $("#schema", template);
-  wrapper.css("height", height);
-  propsCol.css("height", height);
-  fullWidth.click(function () {
-    propsCol.toggle();
-    icon.toggleClass("glyphicon-resize-full glyphicon-resize-small");
-    schema.toggleClass("col-md-8 col-md-12");
-  });
-  jsWorkflow.ready(function () {
-      // Create a new workflow instance as workflow
-      var workflow = new jsWorkflow.Instance();
+  System.import("jsworkflow").then(function (module) {
+    var jsWorkflow = module.default;
+    var wrapper = $(".workflow-canvas-wrapper", template),
+      height = ( $("#copyright").offset().top - wrapper.offset().top - 15 ) + "px",
+      fullWidth = $("#full-width", template),
+      icon = $("span", fullWidth),
+      propsCol = $("#props-col", template),
+      schema = $("#schema", template);
+    wrapper.css("height", height);
+    propsCol.css("height", height);
+    fullWidth.click(function () {
+      propsCol.toggle();
+      icon.toggleClass("glyphicon-resize-full glyphicon-resize-small");
+      schema.toggleClass("col-md-8 col-md-12");
+    });
+    jsWorkflow.ready(function () {
+        // Create a new workflow instance as workflow
+        var workflow = new jsWorkflow.Instance();
 
-      // Initialize workflow with workflow container id
-      var net = workflow.init('workflow-canvas', veda, individual, template, container);
+        // Initialize workflow with workflow container id
+        var net = workflow.init('workflow-canvas', veda, individual, template, container);
+    });
   });
+
   //# sourceURL=v-wf:ProcessTemplate
 </script>
   """ ;
@@ -868,7 +875,7 @@ v-wf:executorPropertySpecification1
   v-ui:maxCardinality "1"^^xsd:nonNegativeInteger ;
 .
 
-v-wf:TS_Task 
+v-wf:TS_Task
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:TaskTemplateAsProperties;
@@ -1264,19 +1271,19 @@ v-wf:TaskTemplateAsProperties
   """ ;
   .
 
-v-wf:TS_Condition 
+v-wf:TS_Condition
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:ConditionTemplateAsProperties;
   v-ui:forClass v-wf:Condition
 .
-v-wf:TS_InputCondition 
+v-wf:TS_InputCondition
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:ConditionTemplateAsProperties;
   v-ui:forClass v-wf:InputCondition
 .
-v-wf:TS_OutputCondition 
+v-wf:TS_OutputCondition
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:ConditionTemplateAsProperties;
@@ -1346,7 +1353,7 @@ v-wf:ConditionTemplateAsProperties
   """ ;
   .
 
-v-wf:TS_Flow 
+v-wf:TS_Flow
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:FlowTemplateAsProperties;
@@ -1563,7 +1570,7 @@ v-wf:WorkItemTemplate
 """ ;
   .
 
-v-wf:TS_Variable 
+v-wf:TS_Variable
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:VariableTemplate;
@@ -2644,7 +2651,7 @@ v-wf:TaskGivenTemplate
   """ ;
 .
 
-v-wf:TS_TaskCompleted 
+v-wf:TS_TaskCompleted
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:TaskCompletedTemplate;
@@ -2699,7 +2706,7 @@ v-wf:TS_ProcessStopped
   v-ui:defaultTemplate v-wf:ProcessEventTemplate;
   v-ui:forClass v-wf:ProcessStopped
 .
-v-wf:TS_ProcessCompleted 
+v-wf:TS_ProcessCompleted
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:ProcessEventTemplate;
@@ -2790,7 +2797,7 @@ v-wf:WorkItemStartedEventTemplate
   """ ;
 .
 
-v-wf:TS_WorkOrderStarted 
+v-wf:TS_WorkOrderStarted
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:WorkOrderStartedEventTemplate;
@@ -2805,7 +2812,7 @@ v-wf:WorkOrderStartedEventTemplate
   """ ;
 .
 
-v-wf:TS_DecisionFormStarted 
+v-wf:TS_DecisionFormStarted
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:DecisionFormStartedEventTemplate;
@@ -2848,7 +2855,7 @@ v-wf:DecisionFormStartedEventTemplate
   """ ;
 .
 
-v-wf:TS_TraceRecord 
+v-wf:TS_TraceRecord
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-wf:TraceRecordTemplate;

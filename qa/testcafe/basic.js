@@ -15,8 +15,7 @@ export default class basic {
 
   async logout() {
     await t
-      .click('#menu')
-      .click('li[id="menu"] li[resource="v-s:Exit"]');
+      .click('#logout');
   }
 
   async createPerson(last, first, middle, birthDate) {

@@ -135,62 +135,81 @@ v-cal:FunctionCalendarTemplate
   <div id="fullcalendar"></div>
 </div>
 <script>
-  /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
-  var counter = new veda.IndividualModel(counter_uri);*/
-  var fullCalendarOptions = {
-    eventSources: [
-      {
-        events: function(start, end, timezone, callback) {
-          individual.getEvents(start, end).then(function (events) {
-            // Update counter if counter & events count do not match
-            /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
-            var counter = new veda.IndividualModel(counter_uri);
-            counter.load().then(function (counter) {
-              if ( counter.isNew() ) {
-                counter["rdf:type"] = [ new veda.IndividualModel("v-ft:TaskCounter") ];
-              }
-              if ( !counter.hasValue("v-ft:inboxWeekCount", events.length) && start.toDate() <= new Date() && new Date() <= end.toDate() ) {
-                counter["v-ft:inboxWeekCount"] = [events.length];
-                counter.save();
-              }
-            });*/
-            callback(events);
-          });
-        }
-      }
-    ],
-    header: {
-      left:   'today',
-      center: 'prev title next',
-      right:  'month,agendaWeek,agendaDay,listWeek'
-    },
-    navLinks: true,
-    firstDay: 1,
-    defaultView: 'agendaWeek',
-    weekNumbers: true,
-    weekNumberCalculation: "ISO",
-    businessHours: {
-      dow: [ 1, 2, 3, 4, 5 ],
-      start: '8:00',
-      end: '18:00'
-    },
-    locale: Object.keys(veda.user.preferences.language)[0].toLowerCase(),
-    timezone: 'local',
-    height: function () {
-      var top = $('#fullcalendar', template).offset().top;
-      var bottom = container.next().offset().top;
-      return (bottom - top - 30);
-    }
-  };
+  System.import("moment").then(function (module) {
+    var moment = module.default;
+    System.import("fullcalendar/fullcalendar.min.js").then(function (fullCalendar) {
+      System.import("fullcalendar/locale/ru.js").then(function () {
+        System.import("fullcalendar/fullcalendar.min.css").then(function (fullcalendarStyles) {
+          var rulesTxt = "";
+          var list = fullcalendarStyles.default.cssRules || fullcalendarStyles.default.rules;
+          var len = list.length;
+          for (var i = 0; i < len; i++) {
+            rulesTxt += " " + list[i].cssText;
+          }
+          var style = document.createElement("style");
+          style.textContent = rulesTxt;
+          template.prepend(style);
 
-  setTimeout(function () {
-    var fullCalendar = $('#fullcalendar', template);
-    fullCalendar.fullCalendar(fullCalendarOptions);
+          /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
+          var counter = new veda.IndividualModel(counter_uri);*/
+          var fullCalendarOptions = {
+            eventSources: [
+              {
+                events: function(start, end, timezone, callback) {
+                  individual.getEvents(start, end).then(function (events) {
+                    // Update counter if counter & events count do not match
+                    /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
+                    var counter = new veda.IndividualModel(counter_uri);
+                    counter.load().then(function (counter) {
+                      if ( counter.isNew() ) {
+                        counter["rdf:type"] = [ new veda.IndividualModel("v-ft:TaskCounter") ];
+                      }
+                      if ( !counter.hasValue("v-ft:inboxWeekCount", events.length) && start.toDate() <= new Date() && new Date() <= end.toDate() ) {
+                        counter["v-ft:inboxWeekCount"] = [events.length];
+                        counter.save();
+                      }
+                    });*/
+                    callback(events);
+                  });
+                }
+              }
+            ],
+            header: {
+              left:   'today',
+              center: 'prev title next',
+              right:  'month,agendaWeek,agendaDay,listWeek'
+            },
+            navLinks: true,
+            firstDay: 1,
+            defaultView: 'agendaWeek',
+            weekNumbers: true,
+            weekNumberCalculation: "ISO",
+            businessHours: {
+              dow: [ 1, 2, 3, 4, 5 ],
+              start: '8:00',
+              end: '18:00'
+            },
+            locale: Object.keys(veda.user.preferences.language)[0].toLowerCase(),
+            timezone: 'local',
+            height: function () {
+              var top = $('#fullcalendar', template).offset().top;
+              var bottom = container.next().offset().top;
+              return (bottom - top - 30);
+            }
+          };
 
-    template.one("remove", function () {
-      fullCalendar.fullCalendar("destroy");
+          setTimeout(function () {
+            var fullCalendar = $('#fullcalendar', template);
+            fullCalendar.fullCalendar(fullCalendarOptions);
+
+            template.one("remove", function () {
+              fullCalendar.fullCalendar("destroy");
+            });
+          }, 0);
+        });
+      });
     });
-  }, 0);
+  });
 
   //# sourceURL=v-cal:FunctionCalendarTemplate_post
 </script>

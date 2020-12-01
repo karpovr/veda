@@ -77,7 +77,7 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
 
         collect_module_dirs("./public/modules", &mut modules_de);
 
-        for path in ["./public/js/common/", "./public/js/server/"].iter() {
+        for path in ["./public/js/server/"].iter() {
             let seq = path.to_string() + ".seq";
 
             if Path::new(&seq).exists() {

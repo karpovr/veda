@@ -22,6 +22,7 @@ import { Selector, t } from 'testcafe';
       .dragToElement('.state-io-condition-input .ep', '.state-task')
       .dragToElement('.state-task .ep', '.glyphicon-stop')
       .click('button#workflow-save-button')
+      .click('.navbar-brand')
       .click('#menu')
       .click('li[id="menu"] li[resource="v-s:Create"]')
       .click('veda-control.fulltext.dropdown')

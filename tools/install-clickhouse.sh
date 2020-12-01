@@ -7,7 +7,7 @@ echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee \
     /etc/apt/sources.list.d/clickhouse.list
 sudo apt-get update
 
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y clickhouse-server clickhouse-client
+sudo apt-get install -y clickhouse-server clickhouse-client
 
 sudo cp -v ./tools/clickhouse/users.xml /etc/clickhouse-server/users.xml
 
