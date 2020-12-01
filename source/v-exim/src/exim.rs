@@ -152,7 +152,7 @@ pub fn send_changes_to_node(queue_consumer: &mut Consumer, resp_api: &Configurat
                     }
                 }
 
-                thread::sleep(time::Duration::from_millis(10000));
+                thread::sleep(time::Duration::from_millis(attempt_count * 100));
             }
 
             queue_consumer.commit_and_next();
@@ -167,9 +167,6 @@ pub fn send_changes_to_node(queue_consumer: &mut Consumer, resp_api: &Configurat
 
 pub fn create_export_message(queue_element: &mut Individual, node_id: &str) -> Result<Individual, ExImCode> {
     if parse_raw(queue_element).is_ok() {
-
-
-
         let target_veda = queue_element.get_first_literal("target_veda");
         if target_veda.is_none() {
             return Err(ExImCode::InvalidMessage);

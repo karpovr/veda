@@ -109,10 +109,12 @@ fn export_delta(remote_node_id: String, _in_ctx: State<Mutex<Context>>) -> Optio
                     } else {
                         error!("fail encode out message");
                     }
-                },
+                }
                 Err(e) => {
-                    error!("fail create out message {:?}", e);
-                },
+                    if e != ExImCode::Ok {
+                        error!("fail create out message {:?}", e);
+                    }
+                }
             }
         }
     }

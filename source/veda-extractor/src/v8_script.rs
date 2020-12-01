@@ -25,6 +25,7 @@ impl Drop for SetupGuard {
     }
 }
 
+#[derive(Debug)]
 pub struct OutValue {
     pub target: String,
     pub indv: Option<Individual>,
@@ -158,6 +159,11 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
       })();";
 
         let mut scr_inf: ScriptInfo<ScriptInfoContext> = ScriptInfo::new_with_src(&ev_indv.get_id(), &str_script);
+
+        scr_inf.context.prevent_by_type = HashVec::new(ev_indv.get_literals("v-s:preventByType").unwrap_or_default());
+        scr_inf.context.trigger_by_uid = HashVec::new(ev_indv.get_literals("v-s:triggerByUid").unwrap_or_default());
+        scr_inf.context.trigger_by_type = HashVec::new(ev_indv.get_literals("v-s:triggerByType").unwrap_or_default());
+        scr_inf.dependency = HashVec::new(ev_indv.get_literals("v-s:dependency").unwrap_or_default());
 
         wp.add_to_order(&scr_inf);
 
