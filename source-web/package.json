@@ -6,7 +6,11 @@
   "author": {
     "name": "Roman Karpov"
   },
-  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/semantic-machines/veda.git"
+  },
+  "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
@@ -45,7 +49,8 @@
     "vis-network": "^8.5.2"
   },
   "scripts": {
-    "build": "npm run build-browser-scripts && npm run build-server-scripts",
+    "build": "npm run clean && npm run build-browser-scripts && npm run build-server-scripts",
+    "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel . --out-dir ../public --source-maps --copy-files --ignore 'node_modules'",
     "build-server-scripts": "rm -Rf ../public/js/server && rollup -c && cat js/server/lib/*.js ../public/js/server/*.js > .tmp-build && rm -f ../public/js/server/*.js && mv .tmp-build ../public/js/server/server.bundle.js"
   }
