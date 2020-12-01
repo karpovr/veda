@@ -1,5 +1,6 @@
-# Veda - ontology driven application development platform 
 [![Semantic machines](https://circleci.com/gh/semantic-machines/veda.svg?style=svg)](https://circleci.com/gh/semantic-machines/veda)
+
+# Veda - ontology driven application development platform 
 
 ![](https://github.com/semantic-machines/veda/blob/master/doc/images/search.png)
 
