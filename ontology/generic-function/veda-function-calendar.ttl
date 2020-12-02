@@ -137,11 +137,13 @@ v-cal:FunctionCalendarTemplate
 <script>
   System.import("moment").then(function (module) {
     var moment = module.default;
-    System.import("fullcalendar/fullcalendar.min.js").then(function (fullCalendar) {
-      System.import("fullcalendar/locale/ru.js").then(function () {
-        System.import("fullcalendar/fullcalendar.min.css").then(function (fullcalendarStyles) {
+    System.import("fullcalendar").then(function (module) {
+      var fullCalendar = module.default;
+      System.import("fullcalendar-locale").then(function (module) {
+        var locale = module.default;
+        System.import("fullcalendar-style").then(function (module) {
           var rulesTxt = "";
-          var list = fullcalendarStyles.default.cssRules || fullcalendarStyles.default.rules;
+          var list = module.default.cssRules || module.default.rules;
           var len = list.length;
           for (var i = 0; i < len; i++) {
             rulesTxt += " " + list[i].cssText;
@@ -199,11 +201,11 @@ v-cal:FunctionCalendarTemplate
           };
 
           setTimeout(function () {
-            var fullCalendar = $('#fullcalendar', template);
-            fullCalendar.fullCalendar(fullCalendarOptions);
+            var calendar = $('#fullcalendar', template);
+            calendar.fullCalendar(fullCalendarOptions);
 
             template.one("remove", function () {
-              fullCalendar.fullCalendar("destroy");
+              calendar.fullCalendar("destroy");
             });
           }, 0);
         });
