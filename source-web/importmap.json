@@ -1,0 +1,26 @@
+{
+  "imports": {
+    "jquery": "/node_modules/jquery/dist/jquery.min.js",
+    "jquery-ui": "/node_modules/jquery-ui-dist/jquery-ui.min.js",
+    "bootstrap":"/node_modules/bootstrap/dist/js/bootstrap.min.js",
+    "cropper/":"/node_modules/cropperjs/dist/",
+    "moment":"/node_modules/moment/min/moment-with-locales.min.js",
+    "datetimepicker/":"/node_modules/eonasdan-bootstrap-datetimepicker/build/",
+    "fullcalendar":"/node_modules/fullcalendar/dist/fullcalendar.min.js",
+    "fullcalendar-locale":"/node_modules/fullcalendar/dist/locale/ru.js",
+    "fullcalendar-style":"/node_modules/fullcalendar/dist/fullcalendar.min.css",
+    "contextmenu":"/node_modules/bootstrap-contextmenu/bootstrap-contextmenu.js",
+    "touchswipe":"/node_modules/jquery-touchswipe/jquery.touchSwipe.min.js",
+    "autosize":"/node_modules/autosize/dist/autosize.min.js",
+    "filesaver":"/node_modules/file-saver/FileSaver.min.js",
+    "jszip":"/node_modules/jszip/dist/jszip.min.js",
+    "marked":"/node_modules/marked/marked.min.js",
+    "ace":"/node_modules/ace-builds/src-min/ace.js",
+    "vis":"/node_modules/vis-network/standalone/umd/vis-network.min.js",
+    "jsplumb":"/node_modules/jsplumb/dist/js/jsPlumb-1.7.9-min.js",
+    "main": "/js/browser/main.js",
+    "jsworkflow":"/js/browser/veda_workflow_editor.js",
+    "tablesortable":"/js/browser/table_sortable.js",
+    "sha256":"/js/common/lib/sha256.js"
+  }
+}
