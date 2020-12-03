@@ -20,8 +20,20 @@ export default function AppPresenter() {
   // "v-ui:ttl" on Ctrl + Alt + Click
   // "v-ui:json" on Alt + Shift + Click
   // "v-ui:generic" on Ctrl + Alt + Shift + Click
-  $("body").on("click", "[resource], [about]", function (e) {
-    var uri = $(this).attr("resource") || $(this).attr("about");
+
+  var delegateHandler = function (el, event, delegateSelector, handler) {
+    el.addEventListener(event, function (e) {
+      for (var target = e.target; target && target != this; target = target.parentNode) {
+        if (target.matches(delegateSelector)) {
+          handler.call(target, e);
+          break;
+        }
+      }
+    });
+  }
+
+  delegateHandler(document.body, "click", "[resource], [about]", function (e) {
+    var uri = this.getAttribute("resource") || this.getAttribute("about");
     var hash = "#/" + uri;
     if (e.altKey && e.ctrlKey && e.shiftKey) {
       e.preventDefault();
@@ -43,39 +55,47 @@ export default function AppPresenter() {
       });
     }
   });
+
   // Outline resource containers to switch view to special templates
-  var outlined = [];
-  $(document)
-    .on("keydown", function (e) {
-      if (e.altKey && e.shiftKey || e.altKey && e.ctrlKey || e.altKey && e.ctrlKey && e.shiftKey) {
-        $("body").on("mouseover", "[resource], [about]", outline);
-      }
-    })
-    .on("keyup", removeOutline);
+  var outlined;
+  document.body.addEventListener("keydown", function (e) {
+    if (e.altKey && e.shiftKey || e.altKey && e.ctrlKey || e.altKey && e.ctrlKey && e.shiftKey) {
+      delegateHandler(document.body, "mouseover", "[resource], [about]", outline);
+    }
+  });
+
+  document.body.addEventListener("keyup", removeOutline);
+
   function outline(e) {
     if (e.altKey && e.shiftKey || e.altKey && e.ctrlKey || e.altKey && e.ctrlKey && e.shiftKey) {
       e.stopPropagation();
-      outlined.forEach(function (item) { item.removeAttr("title").removeClass("gray-outline") });
-      var $this = $(this);
-      $this.addClass("gray-outline").attr("title", $this.attr("resource") || $this.attr("about"));
-      outlined = [ $this ];
+      if (outlined) {
+        outlined.classList.remove("gray-outline");
+        outlined.removeAttribute("title");
+      }
+      this.classList.add("gray-outline");
+      this.setAttribute("title", this.getAttribute("resource") || this.getAttribute("about"));
+      outlined = this;
     } else {
       removeOutline(e);
     }
   }
+
   function removeOutline(e) {
-    $("body").off("mouseover", outline);
-    outlined.forEach(function (item) { item.removeAttr("title").removeClass("gray-outline") });
-    outlined = [];
+    document.body.removeEventListener("mouseover", outline);
+    if (outlined) {
+      outlined.removeAttribute("title");
+      outlined.classList.remove("gray-outline");
+    }
+    outlined = null;
   }
 
   // Localize resources on language change
   veda.on("language:changed", function () {
-    var resourcesNodes = $("[resource], [about]");
-    var resources = resourcesNodes.map(function () {
-      var $this = $(this);
-      return $this.attr("about") || $this.attr("resource");
-    }).get();
+    var resourcesNodes = document.querySelectorAll("[resource], [about]");
+    var resources = [].map.call(resourcesNodes, function (node) {
+      return node.getAttribute("about") || node.getAttribute("resource");
+    });
     resources = Util.unique(resources);
     resources.forEach(function (resource_uri) {
       var resource = new IndividualModel(resource_uri);
@@ -90,14 +110,14 @@ export default function AppPresenter() {
   });
 
   // Prevent empty links routing
-  $("body").on("click", "[href='']", function (e) {
+  delegateHandler(document.body, "click", "[href='']", function (e) {
     e.preventDefault();
   });
 
   // Route on link click (IE mandatory!)
-  $("body").on("click", "[href^='#/']", function (e) {
+  delegateHandler(document.body, "click", "[href^='#/']", function (e) {
     e.preventDefault();
-    var hash = $(this).attr("href");
+    var hash = this.getAttribute("href");
     return ( hash === location.hash ? false : riot.route(hash) );
   });
 
@@ -111,7 +131,9 @@ export default function AppPresenter() {
 
     // Router function
     riot.route( function (hash) {
-      $("#load-indicator").show();
+      var loadIndicator = document.getElementById("load-indicator");
+      loadIndicator.style.display = "";
+
       if (typeof hash === "string") {
         var hash_index = hash.indexOf("#");
         if (hash_index >= 0) {
@@ -119,13 +141,13 @@ export default function AppPresenter() {
         } else {
           $("#main").empty();
           return main.present("#main").then(function () {
-            $("#load-indicator").hide();
+            loadIndicator.style.display = "none";
           });
         }
       } else {
         $("#main").empty();
         return main.present("#main").then(function () {
-          $("#load-indicator").hide();
+          loadIndicator.style.display = "none";
         });
       }
       var tokens = decodeURI(hash).slice(2).split("/"),
@@ -151,7 +173,7 @@ export default function AppPresenter() {
         var individual = new IndividualModel(uri);
         $(container).empty();
         individual.present(container, template, mode, extra).then(function () {
-          $("#load-indicator").hide();
+          loadIndicator.style.display = "none";
           if ( !individual.scroll ) {
             window.scrollTo(0, 0);
           }
@@ -159,7 +181,7 @@ export default function AppPresenter() {
       } else {
         $("#main").empty();
         main.present("#main").then(function () {
-          $("#load-indicator").hide();
+          loadIndicator.style.display = "none";
         });
       }
     });
@@ -167,7 +189,9 @@ export default function AppPresenter() {
 
   // Triggered in auth
   veda.on("started", function () {
-    $("#load-indicator").show();
+    var loadIndicator = document.getElementById("load-indicator");
+    loadIndicator.style.display = "";
+
     var layout_uri = veda.manifest.veda_layout;
     var main_uri = veda.manifest.veda_main;
     var start_url = veda.manifest.start_url;
