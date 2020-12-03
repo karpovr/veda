@@ -313,5 +313,5 @@ if [ -z $1 ] || [ $1 == "gowebserver" ] || [ $1 == "veda-gowebserver" ] || [ $1 
     cd source/veda-gowebserver
     go build
     cd $BUILD_PATH
-    cp source/veda-gowebserver/veda-gowebserver $VEDA_BIN/veda-gowebserver
+    mv source/veda-gowebserver/veda-gowebserver $VEDA_BIN/veda-gowebserver
 fi
