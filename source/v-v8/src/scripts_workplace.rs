@@ -77,15 +77,13 @@ impl<'a, T: Default> ScriptsWorkPlace<'a, T> {
 
         collect_module_dirs("./public/modules", &mut modules_de);
 
-        let scripts_location = Module::get_property("scripts_location");
-
-        let scr_lc = if let Some(s) = scripts_location {
+        let scripts_location = if let Some(s) = Module::get_property("scripts_location") {
             vec![s]
         } else {
             vec!["./public/js/common".to_owned(), "./public/js/server".to_owned()]
         };
 
-        for p in scr_lc.iter() {
+        for p in scripts_location.iter() {
             let path = p.to_owned() + "/";
             let seq = path.to_string() + ".seq";
 

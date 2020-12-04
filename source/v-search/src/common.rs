@@ -30,6 +30,7 @@ impl Default for QueryResult {
     }
 }
 
+#[derive(Debug)]
 pub struct FTQuery {
     pub ticket: String,
     pub user: String,

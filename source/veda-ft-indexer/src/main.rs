@@ -60,7 +60,7 @@ fn main() -> Result<(), XError> {
         if let Err(e) = ctx.init("") {
             match e {
                 XError::Xapian(c) => {
-                    error!("fail init index base, err={}", get_xapian_err_type (c));
+                    error!("fail init index base, err={}", get_xapian_err_type(c));
                 }
                 _ => {
                     error!("fail init index base, err={:?}", e);
@@ -86,8 +86,10 @@ fn main() -> Result<(), XError> {
 }
 
 fn heartbeat(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer) {
-    if let Err(e) = ctx.commit_all_db(module_info) {
-        error!("fail commit, err={:?}", e);
+    if ctx.committed_time.elapsed().as_millis() > 100 {
+        if let Err(e) = ctx.commit_all_db(module_info) {
+            error!("fail commit, err={:?}", e);
+        }
     }
 }
 

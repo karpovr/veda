@@ -5,6 +5,7 @@ use crate::vql::*;
 use crate::xapian_vql::*;
 use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
+use std::time::Instant;
 use std::time::SystemTime;
 use v_api::app::OptAuthorize;
 use v_api::app::ResultCode;
@@ -100,6 +101,7 @@ impl XapianReader {
         storage: &mut VStorage,
         ctx: &mut T,
     ) -> Result<QueryResult> {
+        let total_time = Instant::now();
         let mut sr = QueryResult::default();
 
         let wtta = TTA::parse_expr(&request.query);
@@ -171,7 +173,7 @@ impl XapianReader {
         }
 
         debug!("res={:?}", sr);
-
+        sr.total_time = total_time.elapsed().as_millis() as i64;
         Ok(sr)
     }
 

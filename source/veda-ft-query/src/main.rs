@@ -72,6 +72,7 @@ const FROM: usize = 7;
 
 fn req_prepare(module: &mut Module, request: &Message, xr: &mut XapianReader) -> Message {
     if let Ok(s) = str::from_utf8(request.as_slice()) {
+
         let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
             v
         } else {
@@ -122,9 +123,11 @@ fn req_prepare(module: &mut Module, request: &Message, xr: &mut XapianReader) ->
                 from,
             };
 
+            info! ("ticket={}, user={}, query={}", ticket_id, request.user, request.query);
+
             if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
                 res.result = ctx;
-                debug!("res={:?}", res);
+                info! ("count = {}, total time={}", res.count, res.total_time);
                 if let Ok(s) = serde_json::to_string(&res) {
                     return Message::from(s.as_bytes());
                 }

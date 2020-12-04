@@ -1,5 +1,6 @@
 use crate::index_workplace::IndexDocWorkplace;
 use std::collections::HashMap;
+use std::path::Path;
 use std::process::exit;
 use std::time::Instant;
 use std::{fmt, fs};
@@ -15,7 +16,6 @@ use v_onto::individual::Individual;
 use v_onto::onto::Onto;
 use v_onto::resource::Resource;
 use xapian_rusty::*;
-use std::path::Path;
 
 pub(crate) struct Indexer {
     pub onto: Onto,
@@ -56,7 +56,6 @@ impl Indexer {
         self.use_db = use_db.to_string();
 
         for (db_name, path) in self.db2path.iter() {
-
             let mut db;
             let full_path = &("./".to_owned() + path);
             if Path::new(full_path).is_dir() {
@@ -317,7 +316,7 @@ impl Indexer {
         if delta > 0 {
             let mut is_fail_commit = false;
             for (name, db) in self.index_dbs.iter_mut() {
-                info!("commit to {}", name);
+                debug!("commit to {}", name);
                 if let Err(e) = db.commit() {
                     is_fail_commit = true;
                     error!("FT:commit:{} fail={}, err={:?}", name, self.prepared_op_id, get_xapian_err_type(e.into()));
