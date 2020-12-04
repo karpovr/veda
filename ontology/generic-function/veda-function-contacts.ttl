@@ -257,7 +257,7 @@ v-s:ContactsTemplate
     var queryPattern = "'v-s:parentUnit'=='" + parentUri + "' && ";
 
     var queryDepartments = queryPattern + "'rdf:type'=='v-s:Department'";
-    var queryAppointment = queryPattern + "'rdf:type'=='v-s:Appointment'";
+    var queryAppointment = queryPattern + "'rdf:type'=='v-s:Appointment' && 'v-s:official'=='true'";
     var queryStringArray = [];
     if (parent.hasValue('rdf:type', 'v-s:Department')) {
       queryStringArray = [queryDepartments, queryAppointment];
@@ -474,7 +474,7 @@ v-s:ContactsTemplate
     var searchText = $('#searchText input', template).val();
     if (!searchText) return;
     var sort = "'rdfs:label' desc";
-    var q = "('rdf:type'==='v-s:OrgGroup' || 'rdf:type'==='v-s:Department' || 'rdf:type'==='v-s:Organization' || 'rdf:type'==='v-s:Appointment') && 'v-s:parentOrganization'=='"+ individual['v-s:managedOrganization'][0].id +"' && 'rdfs:label'=='"+ searchText +"*'";
+    var q = "('rdf:type'==='v-s:OrgGroup' || 'rdf:type'==='v-s:Department' || 'rdf:type'==='v-s:Organization' || ('rdf:type'==='v-s:Appointment' && 'v-s:official'=='true')) && 'v-s:parentOrganization'=='"+ individual['v-s:managedOrganization'][0].id +"' && 'rdfs:label'=='"+ searchText +"*'";
     veda.Backend.query({
       ticket: veda.ticket,
       query: q,

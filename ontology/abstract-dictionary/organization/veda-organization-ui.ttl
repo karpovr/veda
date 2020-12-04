@@ -1269,8 +1269,9 @@ v-s:NewAppointmentTemplate
       return tempEmployee.save();
     }).then(function(savedEmployee) {
       if (savedEmployee) {
-        individual['v-s:employee'] = [ tempEmployee ];  
+        individual['v-s:employee'] = [ tempEmployee ]; 
       }
+      individual['v-s:official'] = [true]; 
       individual.save();
     });
     return false;
