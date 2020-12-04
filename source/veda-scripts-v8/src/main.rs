@@ -436,7 +436,7 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
             + AFTER_VARS
             + "function script() {"
             + &script_text
-            + "}; } catch (e) { log_trace (e); }";
+            + "}; } catch (e) { log_trace (e.stack); }";
 
         let mut scr_inf: ScriptInfo<ScriptInfoContext> = ScriptInfo::new_with_src(ev_indv.get_id(), &str_script);
 
