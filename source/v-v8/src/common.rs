@@ -101,26 +101,31 @@ pub fn v8obj_into_individual<'a>(scope: &mut HandleScope<'a>, v8_obj: v8::Local<
 
             if predicate == "@" {
                 res.set_id(&v8_2_str(scope, &val));
-            } else if let Some(resources) = val.to_object(scope) {
-                if !resources.is_array() {
-                    add_v8_value_obj_to_individual(scope, &predicate, resources, &mut res, data_key, type_key, lang_key);
-                } else if let Some(key_list) = resources.get_property_names(scope) {
-                    for resources_idx in 0..key_list.length() {
-                        let j_resources_idx = v8::Integer::new(scope, resources_idx as i32);
-                        if let Some(v) = resources.get(scope, j_resources_idx.into()) {
-                            if let Some(resource) = v.to_object(scope) {
-                                if resource.is_array() {
-                                    let idx_0 = v8::Integer::new(scope, 0);
-                                    if let Some(v) = resource.get(scope, idx_0.into()) {
-                                        if let Some(resource) = v.to_object(scope) {
-                                            add_v8_value_obj_to_individual(scope, &predicate, resource, &mut res, data_key, type_key, lang_key);
+            } else {
+                if val.is_null_or_undefined() {
+                    continue;
+                }
+                if let Some(resources) = val.to_object(scope) {
+                    if !resources.is_array() {
+                        add_v8_value_obj_to_individual(scope, &predicate, resources, &mut res, data_key, type_key, lang_key);
+                    } else if let Some(key_list) = resources.get_property_names(scope) {
+                        for resources_idx in 0..key_list.length() {
+                            let j_resources_idx = v8::Integer::new(scope, resources_idx as i32);
+                            if let Some(v) = resources.get(scope, j_resources_idx.into()) {
+                                if let Some(resource) = v.to_object(scope) {
+                                    if resource.is_array() {
+                                        let idx_0 = v8::Integer::new(scope, 0);
+                                        if let Some(v) = resource.get(scope, idx_0.into()) {
+                                            if let Some(resource) = v.to_object(scope) {
+                                                add_v8_value_obj_to_individual(scope, &predicate, resource, &mut res, data_key, type_key, lang_key);
+                                            }
                                         }
+                                    } else {
+                                        add_v8_value_obj_to_individual(scope, &predicate, resource, &mut res, data_key, type_key, lang_key);
                                     }
                                 } else {
-                                    add_v8_value_obj_to_individual(scope, &predicate, resource, &mut res, data_key, type_key, lang_key);
+                                    error!("v8obj2individual: invalid value predicate[{}], idx={}", predicate, resources_idx);
                                 }
-                            } else {
-                                error!("v8obj2individual: invalid value predicate[{}], idx={}", predicate, resources_idx);
                             }
                         }
                     }
