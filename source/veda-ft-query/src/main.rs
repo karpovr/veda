@@ -5,9 +5,9 @@ use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::{env, str};
+use v_api::app::OptAuthorize;
 use v_api::app::ResultCode;
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_api::app::OptAuthorize;
 use v_module::module::{init_log, Module};
 use v_search::common::FTQuery;
 
@@ -72,7 +72,6 @@ const FROM: usize = 7;
 
 fn req_prepare(module: &mut Module, request: &Message, xr: &mut XapianReader) -> Message {
     if let Ok(s) = str::from_utf8(request.as_slice()) {
-
         let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
             v
         } else {
@@ -123,11 +122,14 @@ fn req_prepare(module: &mut Module, request: &Message, xr: &mut XapianReader) ->
                 from,
             };
 
-            info! ("ticket={}, user={}, query={}", ticket_id, request.user, request.query);
+            info!(
+                "ticket={}, user={}, query={}, sort={}, db={}, top={}, limit={}, from={}",
+                ticket_id, request.user, request.query, request.sort, request.databases, request.top, request.limit, request.from
+            );
 
             if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
                 res.result = ctx;
-                info! ("count = {}, total time={}", res.count, res.total_time);
+                info!("count = {}, total time={}", res.count, res.total_time);
                 if let Ok(s) = serde_json::to_string(&res) {
                     return Message::from(s.as_bytes());
                 }

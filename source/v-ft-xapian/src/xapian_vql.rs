@@ -36,10 +36,10 @@ pub(crate) fn exec_xapian_query_and_queue_authorize<T>(
         Ok(res) => return res,
         Err(e) => match e {
             XError::Xapian(err_code) => {
-                if err_code == -1 {
+                if err_code == -10 {
                     sr.result_code = ResultCode::DatabaseModifiedError;
                 } else {
-                    error!("{}", get_xapian_err_type(err_code));
+                    error!("{}, err_code={}", get_xapian_err_type(err_code), err_code);
                     sr.result_code = ResultCode::InternalServerError;
                 }
             }
