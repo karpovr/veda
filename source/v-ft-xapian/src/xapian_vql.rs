@@ -90,13 +90,18 @@ fn exec<T>(
     let mut it = matches.iterator()?;
 
     while it.is_next()? {
+        processed += 1;
+        if (processed % 1000) == 0 {
+            info!("processed {}", processed);
+        }
+
         let subject_id = it.get_document_data()?;
 
         if subject_id.is_empty() {
+            it.next()?;
             continue;
         }
 
-        processed += 1;
         let mut is_passed = true;
 
         if op_auth == OptAuthorize::YES {
@@ -116,6 +121,7 @@ fn exec<T>(
         }
         it.next()?;
     }
+    
     sr.result_code = ResultCode::Ok;
     sr.processed = processed as i64;
     sr.count = read_count as i64;
