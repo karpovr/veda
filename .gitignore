@@ -10,6 +10,7 @@
 **/libauthorization.so
 **/libauthorization.a
 **/Cargo.lock
+**/target
 /backup
 /bin
 /data
