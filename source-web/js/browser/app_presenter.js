@@ -21,9 +21,9 @@ export default function AppPresenter() {
   // "v-ui:json" on Alt + Shift + Click
   // "v-ui:generic" on Ctrl + Alt + Shift + Click
 
-  var delegateHandler = function (el, event, delegateSelector, handler) {
+  function delegateHandler(el, event, delegateSelector, handler) {
     el.addEventListener(event, function (e) {
-      for (var target = e.target; target && target != this; target = target.parentNode) {
+      for (let target = e.target; target && target != this; target = target.parentNode) {
         if (target.matches(delegateSelector)) {
           handler.call(target, e);
           break;
@@ -33,8 +33,8 @@ export default function AppPresenter() {
   }
 
   delegateHandler(document.body, "click", "[resource], [about]", function (e) {
-    var uri = this.getAttribute("resource") || this.getAttribute("about");
-    var hash = "#/" + uri;
+    const uri = this.getAttribute("resource") || this.getAttribute("about");
+    const hash = "#/" + uri;
     if (e.altKey && e.ctrlKey && e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
@@ -57,7 +57,7 @@ export default function AppPresenter() {
   });
 
   // Outline resource containers to switch view to special templates
-  var outlined;
+  let outlined;
   document.body.addEventListener("keydown", function (e) {
     if (e.altKey && e.shiftKey || e.altKey && e.ctrlKey || e.altKey && e.ctrlKey && e.shiftKey) {
       delegateHandler(document.body, "mouseover", "[resource], [about]", outline);
@@ -92,14 +92,12 @@ export default function AppPresenter() {
 
   // Localize resources on language change
   veda.on("language:changed", function () {
-    var resourcesNodes = document.querySelectorAll("[resource], [about]");
-    var resources = [].map.call(resourcesNodes, function (node) {
-      return node.getAttribute("about") || node.getAttribute("resource");
-    });
+    const resourcesNodes = document.querySelectorAll("[resource], [about]");
+    let resources = Array.prototype.map.call(resourcesNodes, node => node.getAttribute("about") || node.getAttribute("resource"));
     resources = Util.unique(resources);
-    resources.forEach(function (resource_uri) {
-      var resource = new IndividualModel(resource_uri);
-      for (var property_uri in resource.properties) {
+    resources.forEach(resource_uri => {
+      const resource = new IndividualModel(resource_uri);
+      for (let property_uri in resource.properties) {
         if (property_uri === "@") { continue; }
         if ( resource.properties[property_uri] && resource.properties[property_uri].length && resource.properties[property_uri][0].type === "String" ) {
           resource.trigger("propertyModified", property_uri, resource.get(property_uri));
@@ -110,18 +108,16 @@ export default function AppPresenter() {
   });
 
   // Prevent empty links routing
-  delegateHandler(document.body, "click", "[href='']", function (e) {
-    e.preventDefault();
-  });
+  delegateHandler(document.body, "click", "[href='']", e => e.preventDefault());
 
   // Route on link click (IE mandatory!)
   delegateHandler(document.body, "click", "[href^='#/']", function (e) {
     e.preventDefault();
-    var hash = this.getAttribute("href");
+    const hash = this.getAttribute("href");
     return ( hash === location.hash ? false : riot.route(hash) );
   });
 
-  var routerInstalled;
+  let routerInstalled;
 
   function installRouter (main) {
 
@@ -131,18 +127,16 @@ export default function AppPresenter() {
 
     // Router function
     riot.route( function (hash) {
-      var loadIndicator = document.getElementById("load-indicator");
+      const loadIndicator = document.getElementById("load-indicator");
       loadIndicator.style.display = "";
 
       if (typeof hash === "string") {
-        var hash_index = hash.indexOf("#");
+        const hash_index = hash.indexOf("#");
         if (hash_index >= 0) {
           hash = hash.substring(hash_index);
         } else {
           $("#main").empty();
-          return main.present("#main").then(function () {
-            loadIndicator.style.display = "none";
-          });
+          return main.present("#main").then(() => loadIndicator.style.display = "none");
         }
       } else {
         $("#main").empty();
@@ -150,29 +144,27 @@ export default function AppPresenter() {
           loadIndicator.style.display = "none";
         });
       }
-      var tokens = decodeURI(hash).slice(2).split("/"),
-          uri = tokens[0],
-          container = tokens[1] || "#main",
-          template = tokens[2],
-          mode = tokens[3],
-          extra = tokens[4];
+      const tokens = decodeURI(hash).slice(2).split("/");
+      const uri = tokens[0];
+      const container = tokens[1] || "#main";
+      const template = tokens[2];
+      const mode = tokens[3];
+      const extra = tokens[4];
       if (extra) {
         extra = extra.split("&").reduce(function (acc, pair) {
-          var split = pair.split("="),
-              name  = split[0] || "",
-              values = split[1].split("|") || "";
+          const split = pair.split("=");
+          const name  = split[0] || "";
+          const values = split[1].split("|") || "";
           acc[name] = acc[name] || [];
-          values.forEach(function (value) {
-            acc[name].push( parse(value) );
-          });
+          values.forEach(value => acc[name].push(parse(value)));
           return acc;
         }, {});
       }
 
       if (uri) {
-        var individual = new IndividualModel(uri);
+        const individual = new IndividualModel(uri);
         $(container).empty();
-        individual.present(container, template, mode, extra).then(function () {
+        individual.present(container, template, mode, extra).then(() => {
           loadIndicator.style.display = "none";
           if ( !individual.scroll ) {
             window.scrollTo(0, 0);
@@ -180,60 +172,43 @@ export default function AppPresenter() {
         });
       } else {
         $("#main").empty();
-        main.present("#main").then(function () {
-          loadIndicator.style.display = "none";
-        });
+        main.present("#main").then(() => loadIndicator.style.display = "none");
       }
     });
   }
 
   // Triggered in auth
   veda.on("started", function () {
-    var loadIndicator = document.getElementById("load-indicator");
+    const loadIndicator = document.getElementById("load-indicator");
     loadIndicator.style.display = "";
 
-    var layout_uri = veda.manifest.veda_layout;
-    var main_uri = veda.manifest.veda_main;
-    var start_url = veda.manifest.start_url;
+    const layout_uri = veda.manifest.veda_layout;
+    const main_uri = veda.manifest.veda_main;
+    const start_url = veda.manifest.start_url;
     $("#app").empty();
     if (layout_uri && main_uri && start_url) {
-      var layout = new IndividualModel(layout_uri);
+      const layout = new IndividualModel(layout_uri);
       layout.present("#app")
-        .then(function () {
-          var main = new IndividualModel(main_uri);
-          return main.load();
-        })
+        .then(() => new IndividualModel(main_uri).load())
         .then(installRouter)
-        .then(function () {
-          riot.route(location.hash || start_url);
-        });
+        .then(() => riot.route(location.hash || start_url));
     } else {
       console.log("Incomplete layout params in manifest");
-      var layout_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:LayoutExternal" : "cfg:Layout" ;
-      var layout_param = new IndividualModel( layout_param_uri );
-      var main_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:MainExternal" : "cfg:Main" ;
-      var main_param = new IndividualModel( main_param_uri );
+      const layout_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:LayoutExternal" : "cfg:Layout" ;
+      const layout_param = new IndividualModel( layout_param_uri );
+      const main_param_uri = veda.user.hasValue("v-s:origin", "ExternalUser") ? "cfg:MainExternal" : "cfg:Main" ;
+      const main_param = new IndividualModel( main_param_uri );
       layout_param.load()
-      .then(function (layout_param) {
-        return layout_param["rdf:value"][0].load();
-      })
-      .then(function (layout) {
-        return layout.present("#app");
-      })
-      .then(function () {
-        return main_param.load();
-      })
-      .then(function (main_param) {
-        return main_param["rdf:value"][0].load();
-      })
+      .then(layout_param => layout_param["rdf:value"][0].load())
+      .then(layout => layout.present("#app"))
+      .then(() => main_param.load())
+      .then((main_param) => main_param["rdf:value"][0].load())
       .then(installRouter)
-      .catch( function (error) {
-        var notify = new Notify();
+      .catch((error) => {
+        const notify = new Notify();
         notify("danger", error);
       })
-      .then(function () {
-        riot.route(location.hash);
-      });
+      .then(() => riot.route(location.hash));
     }
   });
   function parse (value) {
@@ -246,8 +221,8 @@ export default function AppPresenter() {
     } else if ( value === "false" ) {
       return false;
     } else {
-      var individ = new IndividualModel(value);
-      if ( individ.isSync() && !individ.isNew() ) { return individ; }
+      const individual = new IndividualModel(value);
+      if ( individual.isSync() && !individual.isNew() ) { return individual; }
     }
     return value || null;
   }
@@ -256,25 +231,25 @@ export default function AppPresenter() {
   if (typeof localStorage !== "undefined" && localStorage !== null) {
     // Listen to client notifications
     veda.on("started", function () {
-      var clientNotification = new IndividualModel("cfg:ClientNotification");
+      const clientNotification = new IndividualModel("cfg:ClientNotification");
       clientNotification.load().then(function (clientNotification) {
         clientNotification.on("afterReset", checkNotification);
         checkNotification.call(clientNotification);
       });
       function checkNotification() {
-        var clientNotification = this;
-        var browserNotificationList;
+        const clientNotification = this;
+        const browserNotificationList;
         try {
           browserNotificationList = JSON.parse(localStorage.clientNotification);
         } catch (error) {
           browserNotificationList = [];
         }
-        var serverNotificationList = clientNotification.get("rdf:value").map(function (item) { return item.id; });
+        const serverNotificationList = clientNotification.get("rdf:value").map(function (item) { return item.id; });
         if ( !Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
           serverNotificationList.reduce(function (p, notification_uri, i) {
             return p.then(function () {
               if (browserNotificationList.indexOf(notification_uri) >= 0) { return; }
-              var notification = new IndividualModel(notification_uri);
+              const notification = new IndividualModel(notification_uri);
               return notification.load().then(function (notification) {
                 return (notification.properties["v-s:newsAudience"] || []).map(function (audience) {
                   return audience.data;
@@ -283,7 +258,9 @@ export default function AppPresenter() {
                 audience = audience.sort();
                 return veda.user.memberOf().then(function (memberOf) {
                   memberOf = memberOf.sort();
-                  var i = 0, j = 0, audience_uri, memberOf_uri;
+                  let i = 0;
+                  let j = 0;
+                  let audience_uri, memberOf_uri;
                   while( (audience_uri = audience[i]) && (memberOf_uri = memberOf[j]) ) {
                     if (memberOf_uri < audience_uri) {
                       j++;
@@ -294,7 +271,7 @@ export default function AppPresenter() {
                         if ( confirmed ) {
                           localStorage.clientNotification = JSON.stringify(serverNotificationList);
                           if (notification.hasValue("v-s:script")) {
-                            var script = notification.get("v-s:script")[0].toString();
+                            const script = notification.get("v-s:script")[0].toString();
                             return eval(script);
                           }
                         }
@@ -315,7 +292,7 @@ export default function AppPresenter() {
 
   // On/off-line status indicator
   function statusHandler(status) {
-    var lineStatus = document.getElementById("line-status");
+    const lineStatus = document.getElementById("line-status");
     lineStatus.style.display = "block";
     lineStatus.classList.remove("online");
     lineStatus.classList.remove("limited");
@@ -335,16 +312,16 @@ export default function AppPresenter() {
     });
 
     // Install application prompt
-    var showAddToHomeScreen = function () {
-      var installApp = document.getElementById("install-app");
-      var installBtn = document.getElementById("install-btn");
-      var rejectInstallBtn = document.getElementById("reject-install-btn");
+    const showAddToHomeScreen = function () {
+      const installApp = document.getElementById("install-app");
+      const installBtn = document.getElementById("install-btn");
+      const rejectInstallBtn = document.getElementById("reject-install-btn");
       installApp.style.display = "block";
       installBtn.addEventListener("click", addToHomeScreen);
       rejectInstallBtn.addEventListener("click", rejectInstall);
     }
-    var addToHomeScreen = function () {
-      var installApp = document.getElementById("install-app");
+    const addToHomeScreen = function () {
+      const installApp = document.getElementById("install-app");
       installApp.style.display = "none";  // Hide the prompt
       deferredPrompt.prompt();  // Wait for the user to respond to the prompt
       deferredPrompt.userChoice
@@ -357,12 +334,12 @@ export default function AppPresenter() {
           deferredPrompt = null;
         });
     }
-    var rejectInstall = function () {
-      var installApp = document.getElementById("install-app");
+    const rejectInstall = function () {
+      const installApp = document.getElementById("install-app");
       installApp.style.display = "none";
       localStorage.rejectedInstall = true;
     }
-    var deferredPrompt;
+    let deferredPrompt;
     window.addEventListener("beforeinstallprompt", function (e) {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
