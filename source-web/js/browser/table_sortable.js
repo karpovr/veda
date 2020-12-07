@@ -3,30 +3,29 @@
 import jQuery from "jquery";
 
 System.import("moment").then(function (module) {
-  var moment = module.default;
+  const moment = module.default;
 
   $.fn.tableSortable = function (clicked) {
     return this.each(function() {
-      var table = $(this);
+      const table = $(this);
       if ( table.hasClass("table-sortable-done") ) {
         return;
       }
-      var tbody = table.children("tbody");
-      var thead = table.children("thead");
-      var ths = thead.find("tr:last-child > th");
+      const tbody = table.children("tbody");
+      const thead = table.children("thead");
+      const ths = thead.find("tr:last-child > th");
       table.addClass("table-sortable-done");
 
       ths.each( function () {
-        var th = $(this);
-        var index = th.index();
+        const th = $(this);
+        const index = th.index();
 
         th.click(function (e) {
-          var rows = tbody.children();
+          const rows = tbody.children();
           e.preventDefault();
           e.stopPropagation();
-          var $this = $(this);
+          const $this = $(this);
           $this.siblings().removeClass("asc desc");
-          var dir;
           if ( $this.hasClass("asc") ) {
             $this.removeClass("asc").addClass("desc");
             rows.sort(orderDesc);
@@ -40,13 +39,13 @@ System.import("moment").then(function (module) {
           rows.detach().appendTo(tbody);
         });
 
-        var orderAsc = order(function (a,b) {return a < b;});
-        var orderDesc = order(function (a,b) {return a > b;});
+        const orderAsc = order((a,b) => a < b);
+        const orderDesc = order((a,b) => a > b);
 
         function order (compare) {
           return function (a, b) {
-            var valueA = $(a).children(":nth-child(" + (index + 1) + ")").text().toLowerCase().trim();
-            var valueB = $(b).children(":nth-child(" + (index + 1) + ")").text().toLowerCase().trim();
+            const valueA = $(a).children(":nth-child(" + (index + 1) + ")").text().toLowerCase().trim();
+            const valueB = $(b).children(":nth-child(" + (index + 1) + ")").text().toLowerCase().trim();
             if ( !isNaN(valueA) ) {
               valueA = parseFloat(valueA);
               valueB = parseFloat(valueB);
