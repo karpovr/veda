@@ -10,51 +10,56 @@ import IndividualModel from "../common/individual_model.js";
 
 import Sha256 from "../common/lib/sha256.js";
 
+import $ from "jquery";
+
 export default function Auth() {
 
-  var storage = typeof localStorage !== "undefined" && localStorage !== null ? localStorage : {
-    clear: function () {
-      var self = this;
-      Object.keys(this).map(function (key) {
-        if (typeof self[key] !== "function") delete self[key];
-      });
-    }
-  };
+  function delegateHandler(el, event, delegateSelector, handler) {
+    el.addEventListener(event, function (e) {
+      for (let target = e.target; target && target != this; target = target.parentNode) {
+        if (target.matches(delegateSelector)) {
+          handler.call(target, e);
+          break;
+        }
+      }
+    });
+  }
+
+  const storage = window.localStorage;
 
   // Login invitation
-  var loginForm = $(".login-form");
+  const loginForm = document.getElementById("login-form");
 
-  $("#submit-login-password", loginForm).click(submitLoginPassword);
-  $("#login, #password", loginForm).keyup(function (e) {
-    if (e.which === 13) {
+  loginForm.querySelector("#submit-login-password").addEventListener("click", submitLoginPassword);
+
+  delegateHandler(loginForm, "keyup", "#login, #password", function (e) {
+    if (e.key === "Enter") {
       submitLoginPassword(e);
     }
   });
 
   function submitLoginPassword(e) {
     e.preventDefault();
-    var passwordInput = $("#password", loginForm);
-    var login = $("#login", loginForm).val();
-    var password = passwordInput.val();
-    var hash = Sha256.hash(password);
+    const passwordInput = loginForm.querySelector("#password");
+    const login = loginForm.querySelector("#login").value;
+    const password = passwordInput.value;
+    const hash = Sha256.hash(password);
 
-    passwordInput.val("");
+    passwordInput.value = "";
 
-    var ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
+    const ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
     return ntlmProvider.load().then(function (ntlmProvider) {
-      var ntlm = !ntlmProvider.hasValue("v-s:deleted", true) && ntlmProvider.hasValue("rdf:value") && ntlmProvider.get("rdf:value")[0];
+      const ntlm = !ntlmProvider.hasValue("v-s:deleted", true) && ntlmProvider.hasValue("rdf:value") && ntlmProvider.get("rdf:value")[0];
       if (ntlm) {
-        var params = {
-          type: "POST",
-          url: "/ad/",
-          data: {
-            "login": login,
-            "password": password
-          },
-          dataType: "json",
-          async: true
-        };
-        return $.ajax(params);
+        return new Promise(function (resolve, reject) {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/ad/", true);
+          xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+          xhr.onload = resolve;
+          xhr.onerror = reject;
+          xhr.onabort = reject;
+          xhr.send(JSON.stringify({"login": login, "password": password}));
+        });
       } else {
         throw new Error();
       }
@@ -66,77 +71,78 @@ export default function Auth() {
     .catch(handleLoginError)
   }
 
-  $("#new-password, #confirm-new-password, #secret", loginForm).on("input", validateNewPassword);
-  var re = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})");
-  function validateNewPassword() {
-    var submit = $("#submit-new-password", loginForm);
-    var newPasswordGroup = $("#new-password-group", loginForm);
-    var newPassword = $("#new-password", loginForm);
-    var confirmNewPassword = $("#confirm-new-password", loginForm);
-    var passwordStrength = $(".password-strength", loginForm);
-    var passwordMustMatch = $(".password-must-match", loginForm);
-    var secret = $("#secret", loginForm);
-    var enterSecret = $(".enter-secret", loginForm);
+  delegateHandler(loginForm, "input", "#new-password, #confirm-new-password, #secret", validateNewPassword);
 
-    var reMatch = re.test( newPassword.val() );
-    var passwordsMatch = confirmNewPassword.val() === newPassword.val();
-    var isSecret = !!secret.val();
-    var isValid = reMatch && passwordsMatch && isSecret;
+  const re = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})");
+  function validateNewPassword() {
+    const submit = loginForm.querySelector("#submit-new-password");
+    const newPasswordGroup = loginForm.querySelector("#new-password-group");
+    const newPassword = loginForm.querySelector("#new-password");
+    const confirmNewPassword = loginForm.querySelector("#confirm-new-password");
+    const passwordStrength = loginForm.querySelector(".password-strength");
+    const passwordMustMatch = loginForm.querySelector(".password-must-match");
+    const secret = loginForm.querySelector("#secret");
+    const enterSecret = loginForm.querySelector(".enter-secret");
+
+    const reMatch = re.test( newPassword.value );
+    const passwordsMatch = confirmNewPassword.value === newPassword.value;
+    const isSecret = !!secret.value;
+    const isValid = reMatch && passwordsMatch && isSecret;
 
     if ( !reMatch ) {
-      passwordStrength.show();
+      passwordStrength.style.display = "block";
     } else {
-      passwordStrength.hide();
+      passwordStrength.style.display = "none";
     }
     if ( !passwordsMatch ) {
-      passwordMustMatch.show();
+      passwordMustMatch.style.display = "block";
     } else {
-      passwordMustMatch.hide();
+      passwordMustMatch.style.display = "none";
     }
     if ( !isSecret ) {
-      enterSecret.show();
+      enterSecret.style.display = "block";
     } else {
-      enterSecret.hide();
+      enterSecret.style.display = "none";
     }
     if ( !isValid ) {
-      submit.attr("disabled", "disabled");
+      submit.setAttribute("disabled", "disabled");
     } else {
-      submit.removeAttr("disabled", "disabled");
+      submit.removeAttribute("disabled");
     }
   }
 
-  $("#submit-new-password", loginForm).click( function (e) {
+  loginForm.querySelector("#submit-new-password").addEventListener("click", function (e) {
     e.preventDefault();
-    var login = $("#login", loginForm).val(),
-      password = $("#new-password", loginForm).val(),
-      secret = $("#secret", loginForm).val(),
-      hash = Sha256.hash(password);
+    const login = loginForm.querySelector("#login").value;
+    const password = loginForm.querySelector("#new-password").value;
+    const secret = loginForm.querySelector("#secret").value;
+    const hash = Sha256.hash(password);
 
     Backend.authenticate(login, hash, secret)
       .then(handleLoginSuccess)
       .catch(handleLoginError)
       .then(function () {
-        $("#new-password", loginForm).val("");
-        $("#confirm-new-password", loginForm).val("");
+        loginForm.querySelector("#new-password").value = "";
+        loginForm.querySelector("#confirm-new-password").value = "";
       });
   });
 
-  var changePasswordPressed;
-  $("#change-password", loginForm).click( function (e) {
+  let changePasswordPressed;
+  loginForm.querySelector("#change-password").addEventListener("click", function (e) {
     e.preventDefault();
     changePasswordPressed = true;
-    var login = $("#login", loginForm).val(),
-      secret = "?";
+    const login = loginForm.querySelector("#login").value;
+    const secret = "?";
 
     Backend.authenticate(login, undefined, secret)
       .then(handleLoginSuccess)
       .catch(handleLoginError);
   });
 
-  var captchaRendered = false;
+  let captchaRendered = false;
   function reCAPTCHA(onSuccess, onExpired, onError) {
     if (!captchaRendered) {
-      var reCAPTCHA_key = new IndividualModel("cfg:reCAPTCHA_client_key");
+      const reCAPTCHA_key = new IndividualModel("cfg:reCAPTCHA_client_key");
       reCAPTCHA_key.load().then(function (reCAPTCHA_key) {
         window.captchaCallback = function() {
           grecaptcha.render("recaptcha", {
@@ -148,7 +154,7 @@ export default function Auth() {
           });
           captchaRendered = true;
         };
-        var captchaScript = document.createElement("script");
+        const captchaScript = document.createElement("script");
         captchaScript.src = "https://www.google.com/recaptcha/api.js?onload=captchaCallback&render=explicit";
         document.head.appendChild(captchaScript);
       });
@@ -158,166 +164,202 @@ export default function Auth() {
   }
 
   function handleLoginError(error) {
-    var enterLoginPassword = $("#enter-login-password", loginForm).hide();
-    var enterNewPassword = $("#enter-new-password", loginForm).hide();
+    const enterLoginPassword = loginForm.querySelector("#enter-login-password");
+    enterLoginPassword.style.display = "none";
+    const enterNewPassword = loginForm.querySelector("#enter-new-password");
+    enterNewPassword.style.display = "none";
 
-    var invalidSecretWarning = $("#invalid-secret-warning", loginForm).hide();
-    var emptyPasswordWarning = $("#empty-password-warning", loginForm).hide();
-    var equalPasswordWarning = $("#equal-password-warning", loginForm).hide();
-    var invalidPasswordWarning = $("#invalid-password-warning", loginForm).hide();
-    var frequentPassChangeWarning = $("#frequent-pass-change-warning", loginForm).hide();
-    var passChangeNotAllowedWarning = $("#pass-change-not-allowed-warning", loginForm).hide();
-    var secretExpiredWarning = $("#secret-expired-warning", loginForm).hide();
+    const invalidSecretWarning = loginForm.querySelector("#invalid-secret-warning");
+    const emptyPasswordWarning = loginForm.querySelector("#empty-password-warning");
+    const equalPasswordWarning = loginForm.querySelector("#equal-password-warning");
+    const invalidPasswordWarning = loginForm.querySelector("#invalid-password-warning");
+    const frequentPassChangeWarning = loginForm.querySelector("#frequent-pass-change-warning");
+    const passChangeNotAllowedWarning = loginForm.querySelector("#pass-change-not-allowed-warning");
+    const secretExpiredWarning = loginForm.querySelector("#secret-expired-warning");
 
-    var passwordExpiredError = $("#password-expired-error", loginForm).hide();
-    var loginFailedError = $("#login-failed-error", loginForm).hide();
-    var authLockedError = $("#auth-locked-error", loginForm).hide();
-    var passChangeLockedError = $("#pass-change-locked-error", loginForm).hide();
-    var unavailableError = $("#unavailable-error", loginForm).hide();
+    const passwordExpiredError = loginForm.querySelector("#password-expired-error");
+    const loginFailedError = loginForm.querySelector("#login-failed-error");
+    const authLockedError = loginForm.querySelector("#auth-locked-error");
+    const passChangeLockedError = loginForm.querySelector("#pass-change-locked-error");
+    const unavailableError = loginForm.querySelector("#unavailable-error");
 
-    var secretRequestInfo = $("#secret-request-info", loginForm).hide();
-    $("input:not(#login)", loginForm).val("");
+    const secretRequestInfo = loginForm.querySelector("#secret-request-info");
 
-    var ok = $(".btn.ok", loginForm).hide();
-    var okHandler;
+    const alerts = loginForm.querySelectorAll(".alert");
+    Array.prototype.forEach.call(alerts, alert => alert.style.display = "none");
+
+    const inputs = loginForm.querySelector("input:not(#login)");
+    Array.prototype.forEach.call(inputs, input => input.value = "");
+
+    const ok = loginForm.querySelector(".btn.ok");
+    ok.style.display = "none";
+    let okHandler = () => {};
 
     switch (error.code) {
       case 423: // Password change is allowed once a day
-        frequentPassChangeWarning.show();
-        ok.show();
+        frequentPassChangeWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          frequentPassChangeWarning.hide();
-          enterLoginPassword.show();
+          frequentPassChangeWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 429: // Too many auth fails
-        authLockedError.show();
-        ok.show();
+        authLockedError.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          authLockedError.hide();
-          enterLoginPassword.show();
+          authLockedError.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 430: // Too many pass change fails
-        passChangeLockedError.show();
-        ok.show();
+        passChangeLockedError.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          passChangeLockedError.hide();
-          enterLoginPassword.show();
+          passChangeLockedError.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 463: // Password change not allowed
-        passChangeNotAllowedWarning.show();
-        ok.show();
+        passChangeNotAllowedWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          passChangeNotAllowedWarning.hide();
-          enterLoginPassword.show();
+          passChangeNotAllowedWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 464: // Secret expired
-        secretExpiredWarning.show();
-        ok.show();
+        secretExpiredWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          secretExpiredWarning.hide();
-          enterLoginPassword.show();
+          secretExpiredWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 465: // Empty password
-        emptyPasswordWarning.show();
-        ok.show();
+        emptyPasswordWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          emptyPasswordWarning.hide();
-          enterLoginPassword.show();
+          emptyPasswordWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 466: // New password is equal to old
-        equalPasswordWarning.show();
-        ok.show();
+        equalPasswordWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          equalPasswordWarning.hide();
-          enterLoginPassword.show();
+          equalPasswordWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 467: // Invalid password
-        invalidPasswordWarning.show();
-        ok.show();
+        invalidPasswordWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          invalidPasswordWarning.hide();
-          enterLoginPassword.show();
+          invalidPasswordWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 468: // Invalid secret
-        invalidSecretWarning.show();
-        ok.show();
+        invalidSecretWarning.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          invalidSecretWarning.hide();
-          enterLoginPassword.show();
+          invalidSecretWarning.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
       case 469: // Password expired
         if ( !changePasswordPressed ) {
-          passwordExpiredError.show();
-          ok.show();
+          passwordExpiredError.style.display = "block";
+          ok.style.display = "block";
           okHandler = function () {
-            passwordExpiredError.hide();
-            enterNewPassword.show();
-            secretRequestInfo.show();
+            passwordExpiredError.style.display = "none";
+            enterNewPassword.style.display = "block";
+            secretRequestInfo.style.display = "block";
+            this.removeEventListener("click", okHandler);
+            this.style.display = "none";
           };
         } else {
-          enterNewPassword.show();
-          secretRequestInfo.show();
+          enterNewPassword.style.display = "block";
+          secretRequestInfo.style.display = "block";
         }
         break;
       case 472: // Not authorized
       case 473: // Authentication failed
-        loginFailedError.show();
+        loginFailedError.style.display = "block";
+        enterLoginPassword.style.display = "none";
         reCAPTCHA(onSuccess, onExpired, onSuccess);
         break;
       default:
-        unavailableError.show();
-        ok.show();
+        unavailableError.style.display = "block";
+        ok.style.display = "block";
         okHandler = function () {
-          unavailableError.hide();
-          enterLoginPassword.show();
+          unavailableError.style.display = "none";
+          enterLoginPassword.style.display = "block";
+          this.removeEventListener("click", okHandler);
+          this.style.display = "none";
         };
         break;
     }
-    ok.off("click").one("click", okHandler).one("click", okHide);
-    function okHide() {
-      $(this).hide();
-    }
+    ok.addEventListener("click", okHandler);
     function onSuccess() {
-      $(".alert, fieldset", loginForm).hide();
-      enterLoginPassword.show();
+      Array.prototype.forEach.call(loginForm.querySelector(".alert, fieldset"), item => item.style.display = "none");
+      enterLoginPassword.style.display = "block";
     }
     function onExpired() {
-      $(".alert, fieldset", loginForm).hide();
-      loginFailedError.show();
+      Array.prototype.forEach.call(loginForm.querySelector(".alert, fieldset"), item => item.style.display = "none");
+      loginFailedError.style.display = "block";
     }
   }
 
   function handleLoginSuccess(authResult) {
-    var enterLoginPassword = $("#enter-login-password", loginForm).show();
-    var enterNewPassword = $("#enter-new-password", loginForm).hide();
+    const enterLoginPassword = loginForm.querySelector("#enter-login-password");
+    const enterNewPassword = loginForm.querySelector("#enter-new-password");
 
-    var invalidSecretWarning = $("#invalid-secret-warning", loginForm).hide();
-    var emptyPasswordWarning = $("#empty-password-warning", loginForm).hide();
-    var equalPasswordWarning = $("#equal-password-warning", loginForm).hide();
-    var invalidPasswordWarning = $("#invalid-password-warning", loginForm).hide();
-    var frequentPassChangeWarning = $("#frequent-pass-change-warning", loginForm).hide();
-    var passChangeNotAllowedWarning = $("#pass-change-not-allowed-warning", loginForm).hide();
-    var secretExpiredWarning = $("#secret-expired-warning", loginForm).hide();
+    const invalidSecretWarning = loginForm.querySelector("#invalid-secret-warning");
+    const emptyPasswordWarning = loginForm.querySelector("#empty-password-warning");
+    const equalPasswordWarning = loginForm.querySelector("#equal-password-warning");
+    const invalidPasswordWarning = loginForm.querySelector("#invalid-password-warning");
+    const frequentPassChangeWarning = loginForm.querySelector("#frequent-pass-change-warning");
+    const passChangeNotAllowedWarning = loginForm.querySelector("#pass-change-not-allowed-warning");
+    const secretExpiredWarning = loginForm.querySelector("#secret-expired-warning");
 
-    var passwordExpiredError = $("#password-expired-error", loginForm).hide();
-    var loginFailedError = $("#login-failed-error", loginForm).hide();
-    var authLockedError = $("#auth-locked-error", loginForm).hide();
-    var passChangeLockedError = $("#pass-change-locked-error", loginForm).hide();
-    var unavailableError = $("#unavailable-error", loginForm).hide();
+    const passwordExpiredError = loginForm.querySelector("#password-expired-error");
+    const loginFailedError = loginForm.querySelector("#login-failed-error");
+    const authLockedError = loginForm.querySelector("#auth-locked-error");
+    const passChangeLockedError = loginForm.querySelector("#pass-change-locked-error");
+    const unavailableError = loginForm.querySelector("#unavailable-error");
 
-    var secretRequestInfo = $("#secret-request-info", loginForm).hide();
-    $("input:not(#login)", loginForm).val("");
+    const secretRequestInfo = loginForm.querySelector("#secret-request-info");
 
-    var ok = $(".btn.ok", loginForm).hide();
+    const alerts = loginForm.querySelectorAll(".alert");
+    Array.prototype.forEach.call(alerts, alert => alert.style.display = "none");
+
+    const inputs = loginForm.querySelector("input:not(#login)");
+    Array.prototype.forEach.call(inputs, input => input.value = "");
+
+    const ok = loginForm.querySelector(".btn.ok");
+    ok.style.display = "none";
+
+    enterLoginPassword.style.display = "block";
 
     veda.trigger("login:success", authResult);
   }
@@ -337,26 +379,27 @@ export default function Auth() {
     delTicketCookie();
 
     if (storage.logout) {
-      loginForm.show();
+      loginForm.style.display = "block";
       delete storage.logout;
       return;
     }
 
     // NTLM auth using iframe
-    var ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
+    const ntlmProvider = new IndividualModel("cfg:NTLMAuthProvider", true, false);
     ntlmProvider.load().then(function (ntlmProvider) {
-      var ntlm = !ntlmProvider.hasValue("v-s:deleted", true) && ntlmProvider.hasValue("rdf:value") && ntlmProvider.get("rdf:value")[0];
+      const ntlm = !ntlmProvider.hasValue("v-s:deleted", true) && ntlmProvider.hasValue("rdf:value") && ntlmProvider.get("rdf:value")[0];
       if (ntlm) {
-        var iframe = $("<iframe>", {"class": "hidden"});
-        iframe.appendTo(loginForm);
-        iframe.one("load", function () {
+        const iframe = document.createElement("iframe");
+        iframe.classList.add("hidden");
+        loginForm.appendChild(iframe);
+        iframe.addEventListener("load", function () {
           try {
-            loginForm.hide();
-            var body = iframe.contents().find("body"),
-              ticket = $("#ticket", body).text(),
-              user_uri = $("#user_uri", body).text(),
-              end_time = $("#end_time", body).text(),
-              authResult = {
+            loginForm.style.display = "none";
+            const iframeDoc = iframe.contentWindow.document;
+            const ticket = iframeDoc.getElementById("ticket").textContent;
+            const user_uri = iframeDoc.getElementById("user_uri").textContent;
+            const end_time = iframeDoc.getElementById("end_time").textContent;
+            const authResult = {
                 ticket: ticket,
                 user_uri: user_uri,
                 end_time: end_time
@@ -368,44 +411,45 @@ export default function Auth() {
             }
           } catch (err) {
             console.log(err);
-            loginForm.show();
+            loginForm.style.display = "block";
           }
         });
         document.domain = document.domain;
-        iframe.attr("src", ntlm);
+        iframe.setAttribute("src", ntlm);
       } else {
-        loginForm.show();
+        loginForm.style.display = "block";
       }
     });
   });
 
   // Initialize application if ticket is valid
   veda.on("login:success", function (authResult) {
-    loginForm.hide();
+    loginForm.style.display = "none";
     veda.user_uri = storage.user_uri = authResult.user_uri;
     veda.ticket = storage.ticket = authResult.ticket;
     veda.end_time = storage.end_time = authResult.end_time;
     setTicketCookie(veda.ticket, veda.end_time);
     // Re-login on ticket expiration
     if( veda.end_time ) {
-      var ticketDelay = parseInt(veda.end_time) - Date.now();
-      var ticketDelayHours = Math.floor(ticketDelay / 1000 / 60 / 60);
-      var ticketDelayMinutes = Math.floor(ticketDelay / 1000 / 60 - ticketDelayHours  * 60);
+      const ticketDelay = parseInt(veda.end_time) - Date.now();
+      const ticketDelayHours = Math.floor(ticketDelay / 1000 / 60 / 60);
+      const ticketDelayMinutes = Math.floor(ticketDelay / 1000 / 60 - ticketDelayHours  * 60);
       console.log("Ticket will expire in %d hrs. %d mins.", ticketDelayHours, ticketDelayMinutes);
       setTimeout(function () {
         console.log("Ticket expired, re-login.");
         veda.trigger("login:failed");
       }, ticketDelay);
     }
-    $("#load-indicator").show();
+
+    document.getElementById("load-indicator").style.display = "block";
     veda.init(veda.user_uri).then(function () {
-      $("#load-indicator").hide();
+      document.getElementById("load-indicator").style.display = "none";
       veda.trigger("started");
     });
   });
 
   // Logout handler
-  $(document).on("click", "#logout, .logout", function () {
+  delegateHandler(document.body, "click", "#logout, .logout", function () {
     delete storage.ticket;
     delete storage.user_uri;
     delete storage.end_time;
@@ -415,13 +459,13 @@ export default function Auth() {
   });
 
   // Init application
-  $("#load-indicator").show();
+  document.getElementById("load-indicator").style.display = "block";
   veda.init("cfg:Guest")
     .then(function () {
       // Check if ticket is valid
-      var ticket = storage.ticket,
-          user_uri = storage.user_uri,
-          end_time = ( new Date() < new Date(parseInt(storage.end_time)) ) && storage.end_time;
+      const ticket = storage.ticket;
+      const user_uri = storage.user_uri;
+      const end_time = ( new Date() < new Date(parseInt(storage.end_time)) ) && storage.end_time;
       if (ticket && user_uri && end_time) {
         return Backend.is_ticket_valid(ticket);
       } else {
@@ -436,7 +480,7 @@ export default function Auth() {
           end_time: storage.end_time
         });
       } else {
-        var authRequired = new IndividualModel("cfg:AuthRequired");
+        const authRequired = new IndividualModel("cfg:AuthRequired");
         authRequired.load().then(function (authRequiredParam) {
           if ( authRequiredParam && authRequiredParam.hasValue("rdf:value", false) ) {
             veda.trigger("login:success", {
@@ -451,7 +495,7 @@ export default function Auth() {
       }
     })
     .then(function () {
-      $("#load-indicator").hide();
+      document.getElementById("load-indicator").style.display = "none";
     });
 
 }
