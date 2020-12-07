@@ -74,7 +74,6 @@
     <!--meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src https://www.google.com:443 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src https://www.google.com:443 https://www.gstatic.com:443 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: wss:;" /-->
   </head>
   <body>
-
     <!-- Load indicator -->
     <div id="load-indicator">
       <span class="loader"></span>
@@ -95,7 +94,7 @@
     </div>
 
     <!-- Login form -->
-    <form style="display:none;" class="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
+    <form style="display:none;" id="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
       <h3>Войдите / Sign in</h3>
       <div id="unavailable-error" style="display:none;" class="alert alert-danger">
         <p><strong>Ошибка!</strong> Система недоступна.</p>
