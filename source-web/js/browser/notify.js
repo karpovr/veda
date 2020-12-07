@@ -66,10 +66,11 @@ function notify (type = "info", {code = "", name = "", message = ""}) {
     </div>
   `;
 
-  const template = document.createElement("template");
-  template.innerHTML = HTML.trim();
-  const note = template.content.firstChild;
-  container.insertBefore(note, container.firstChild);
+  const fragment = document.createDocumentFragment();
+  const note = document.createElement("div");
+  fragment.appendChild(note);
+  note.innerHTML = HTML.trim();
+  container.insertBefore(fragment, container.firstChild);
 
   setTimeout(function () {
     container.removeChild(note);
