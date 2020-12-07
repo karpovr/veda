@@ -143,7 +143,7 @@ export default function AppPresenter() {
       const mode = tokens[3];
       const extra = tokens[4];
       if (extra) {
-        extra = extra.split("&").reduce((acc, pair) {
+        extra = extra.split("&").reduce((acc, pair) => {
           const split = pair.split("=");
           const name  = split[0] || "";
           const values = split[1].split("|") || "";
@@ -230,7 +230,7 @@ export default function AppPresenter() {
       });
       function checkNotification() {
         const clientNotification = this;
-        const browserNotificationList;
+        let browserNotificationList;
         try {
           browserNotificationList = JSON.parse(localStorage.clientNotification);
         } catch (error) {
