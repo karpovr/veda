@@ -16,12 +16,12 @@ System.import("jquery").then(function () {
 
   System.import("bootstrap").then(function () {
 
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.onload = function (e) {
-      var loadIndicator = document.getElementById("load-indicator");
+      const loadIndicator = document.getElementById("load-indicator");
       loadIndicator.style.display = "none";
       if (this.status == 200) {
-        var manifest = JSON.parse(xhr.response);
+        const manifest = JSON.parse(xhr.response);
         AppModel.call(veda, manifest);
         Auth();
         AppPresenter();
