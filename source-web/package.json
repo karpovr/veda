@@ -21,6 +21,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
     "babel-preset-minify": "^0.5.1",
+    "live-server": "^1.2.1",
     "rollup": "^2.33.1",
     "rollup-plugin-terser": "^7.0.2"
   },
@@ -53,6 +54,10 @@
     "build": "npm run clean && npm run build-browser-scripts && npm run build-server-scripts",
     "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel . --out-dir ../public --source-maps --copy-files --ignore 'node_modules'",
-    "build-server-scripts": "rm -Rf ../public/js/server && rollup -c && cat js/server/lib/*.js ../public/js/server/*.js > .tmp-build && rm -f ../public/js/server/*.js && mv .tmp-build ../public/js/server/server.bundle.js"
+    "build-server-scripts": "rm -Rf ../public/js/server && rollup -c && cat js/server/lib/*.js ../public/js/server/*.js > .tmp-build && rm -f ../public/js/server/*.js && mv .tmp-build ../public/js/server/server.bundle.js",
+    "watch": "npm run watch-browser & npm run watch-common & npm run live-server",
+    "watch-browser": "babel ./js/browser --out-dir ../public/js/browser --source-maps --watch",
+    "watch-common": "babel ./js/common --out-dir ../public/js/common --source-maps --watch",
+    "live-server": "cd ../public && live-server --port=9090 --host=localhost --no-browser --ignore=**/node_modules/**"
   }
 }
