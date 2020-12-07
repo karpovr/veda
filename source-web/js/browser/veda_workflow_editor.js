@@ -10,6 +10,8 @@
 
 import "jsplumb";
 
+import $ from "jquery";
+
 var jsWorkflow = {};
 
 export default jsWorkflow;
