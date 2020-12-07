@@ -12,7 +12,7 @@ export default UpdateService;
 
 function UpdateService() {
 
-  var self = this;
+  const self = this;
 
   // Singleton pattern
   if (UpdateService.prototype._singletonInstance) {
@@ -20,26 +20,27 @@ function UpdateService() {
   }
 
   this.list = {};
-  var buffer = [];
-  var socketDelay = 1000;
-  var socketTimeout;
-  var reconnectDelayInitial = 2500 + Math.round(Math.random() * 2500); // 2.5 - 5 sec
-  var reconnectDelay = reconnectDelayInitial;
-  var reconnectDelayFactor = 1.1;
-  var reconnectDelayLimit = 5 * 60 * 1000; // 5 min
-  var lastPing = Date.now();
-  var pingTimeout = 5000;
-  var pingInterval;
+  const reconnectDelayInitial = 2500 + Math.round(Math.random() * 2500); // 2.5 - 5 sec
+  const reconnectDelayFactor = 1.1;
+  const reconnectDelayLimit = 5 * 60 * 1000; // 5 min
+  const pingTimeout = 5000;
+
+  let buffer = [];
+  let socketDelay = 1000;
+  let socketTimeout;
+  let reconnectDelay = reconnectDelayInitial;
+  let lastPing = Date.now();
+  let pingInterval;
 
   return UpdateService.prototype._singletonInstance = initSocket();
 
   function initSocket() {
     return Backend.reset_individual(veda.ticket, "cfg:ClientUpdateServicePort").then(function (ccusPortCfg) {
-      var ccusPort = ccusPortCfg["rdf:value"] && ccusPortCfg["rdf:value"][0].data,
-          protocol = location.protocol === "http:" ? "ws:" : "wss:",
-          port = ccusPort || ( protocol === "ws:" ? 80 : 443 ),
-          address = protocol + "//" + location.hostname + ":" + port + "/ccus",
-          socket = new WebSocket(address);
+      const ccusPort = ccusPortCfg["rdf:value"] && ccusPortCfg["rdf:value"][0].data;
+      const protocol = location.protocol === "http:" ? "ws:" : "wss:";
+      const port = ccusPort || ( protocol === "ws:" ? 80 : 443 );
+      const address = protocol + "//" + location.hostname + ":" + port + "/ccus";
+      const socket = new WebSocket(address);
 
       socket.onopen = openedHandler;
       socket.onclose = closedHandler;
@@ -53,7 +54,7 @@ function UpdateService() {
   }
 
   function sendMessage (msg) {
-    var socket = this;
+    const socket = this;
     if (msg === "=" || msg === "-*" || msg.indexOf("ccus") === 0) {
       if (socket.readyState === 1) {
         socket.send(msg);
@@ -64,7 +65,7 @@ function UpdateService() {
     buffer.push(msg);
     if ( !socketTimeout ) {
       socketTimeout = setTimeout(function () {
-        var message = buffer.join(",");
+        const message = buffer.join(",");
         if (socket.readyState === 1) {
           socket.send(message);
           //console.log("client -> server:", message);
@@ -81,20 +82,20 @@ function UpdateService() {
       lastPing = Date.now();
       return;
     }
-    var uris = msg.indexOf("=") === 0 ? msg.substr(1) : msg;
+    let uris = msg.indexOf("=") === 0 ? msg.substr(1) : msg;
     if (uris.length === 0) {
       return;
     }
     uris = uris.split(",");
-    for (var i = 0; i < uris.length; i++) {
+    for (let i = 0; i < uris.length; i++) {
       try {
-        var tmp = uris[i].split("=");
-        var uri = tmp[0];
+        let tmp = uris[i].split("=");
+        let uri = tmp[0];
         if ( !uri ) {
           continue;
         }
-        var updateCounter = parseInt(tmp[1]);
-        var individual = new IndividualModel(uri);
+        let updateCounter = parseInt(tmp[1]);
+        let individual = new IndividualModel(uri);
         if ( individual.hasValue("v-s:updateCounter", updateCounter) ) { continue; }
         if (self.list[uri]) {
           self.list[uri].updateCounter = updateCounter;
@@ -129,7 +130,7 @@ function UpdateService() {
   }
 
   function messageHandler(event) {
-    var msg = event.data;
+    const msg = event.data;
     this.receiveMessage(msg);
   }
 
@@ -148,16 +149,16 @@ function UpdateService() {
 
 };
 
-var proto = UpdateService.prototype;
+const proto = UpdateService.prototype;
 
 proto.subscribe = function (uri, action) {
-  var self = this;
+  const self = this;
   if ( this.list[uri] ) {
     ++this.list[uri].subscribeCounter;
   } else {
-    var individual = new IndividualModel(uri);
+    const individual = new IndividualModel(uri);
     individual.load().then(function (individual) {
-      var updateCounter = individual.hasValue("v-s:updateCounter") ? individual.get("v-s:updateCounter")[0] : 0;
+      const updateCounter = individual.hasValue("v-s:updateCounter") ? individual.get("v-s:updateCounter")[0] : 0;
       self.list[uri] = {
         subscribeCounter: 1,
         updateCounter: updateCounter
@@ -184,8 +185,7 @@ proto.unsubscribe = function (uri) {
 
 proto.restore = function () {
   this.socket.sendMessage("-*");
-  var subscribeMsg = [];
-  for (var uri in this.list) {
+  for (let uri in this.list) {
     this.socket.sendMessage("+" + uri + "=" + this.list[uri].updateCounter);
   }
 };
