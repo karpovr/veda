@@ -5,6 +5,7 @@ use chrono::NaiveDateTime;
 use regex::Regex;
 use std::collections::HashSet;
 use std::io::{Error, ErrorKind};
+use stopwatch::Stopwatch;
 use v_api::app::OptAuthorize;
 use v_api::app::ResultCode;
 use v_authorization::common::Access;
@@ -89,6 +90,8 @@ fn exec<T>(
 
     let mut it = matches.iterator()?;
 
+    let mut auth_sw = Stopwatch::new();
+
     while it.is_next()? {
         processed += 1;
         if (processed % 1000) == 0 {
@@ -105,11 +108,13 @@ fn exec<T>(
         let mut is_passed = true;
 
         if op_auth == OptAuthorize::YES {
+            auth_sw.start();
             if _authorize(&subject_id, user_uri, Access::CanRead as u8, true, None).unwrap_or(0) != Access::CanRead as u8 {
                 is_passed = false;
             } else {
                 debug!("subject_id=[{}] authorized for user_id=[{}]", subject_id, user_uri);
             }
+            auth_sw.stop();
         }
 
         if is_passed {
@@ -121,15 +126,12 @@ fn exec<T>(
         }
         it.next()?;
     }
-    
+
     sr.result_code = ResultCode::Ok;
     sr.processed = processed as i64;
     sr.count = read_count as i64;
     sr.cursor = (from + processed) as i64;
-    //    sw.stop;
-    //    sr.total_time     = sw.peek.total !"msecs";
-    //    sr.authorize_time = sw_az.peek.total !"msecs";
-    //    sr.query_time     = sr.total_time - sr.authorize_time;
+    sr.authorize_time = auth_sw.elapsed_ms();
 
     Ok(sr)
 }

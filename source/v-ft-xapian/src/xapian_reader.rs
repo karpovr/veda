@@ -174,6 +174,8 @@ impl XapianReader {
 
         debug!("res={:?}", sr);
         sr.total_time = total_time.elapsed().as_millis() as i64;
+        sr.query_time = sr.total_time - sr.authorize_time;
+
         Ok(sr)
     }
 
