@@ -38,21 +38,15 @@ export default function AppPresenter() {
     if (e.altKey && e.ctrlKey && e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
-      setTimeout(function () {
-        riot.route(hash +  "//v-ui:generic");
-      });
+      setTimeout(() => riot.route(hash +  "//v-ui:generic"));
     } else if (e.altKey && e.ctrlKey) {
       e.preventDefault();
       e.stopPropagation();
-      setTimeout(function () {
-        riot.route(hash +  "//v-ui:ttl");
-      });
+      setTimeout(() => riot.route(hash +  "//v-ui:ttl"));
     } else if (e.altKey && e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
-      setTimeout(function () {
-        riot.route(hash +  "//v-ui:json");
-      });
+      setTimeout(() => riot.route(hash +  "//v-ui:json"));
     }
   });
 
@@ -140,9 +134,7 @@ export default function AppPresenter() {
         }
       } else {
         $("#main").empty();
-        return main.present("#main").then(function () {
-          loadIndicator.style.display = "none";
-        });
+        return main.present("#main").then(() => loadIndicator.style.display = "none");
       }
       const tokens = decodeURI(hash).slice(2).split("/");
       const uri = tokens[0];
@@ -151,7 +143,7 @@ export default function AppPresenter() {
       const mode = tokens[3];
       const extra = tokens[4];
       if (extra) {
-        extra = extra.split("&").reduce(function (acc, pair) {
+        extra = extra.split("&").reduce((acc, pair) {
           const split = pair.split("=");
           const name  = split[0] || "";
           const values = split[1].split("|") || "";
@@ -232,7 +224,7 @@ export default function AppPresenter() {
     // Listen to client notifications
     veda.on("started", function () {
       const clientNotification = new IndividualModel("cfg:ClientNotification");
-      clientNotification.load().then(function (clientNotification) {
+      clientNotification.load().then(clientNotification => {
         clientNotification.on("afterReset", checkNotification);
         checkNotification.call(clientNotification);
       });
@@ -244,16 +236,14 @@ export default function AppPresenter() {
         } catch (error) {
           browserNotificationList = [];
         }
-        const serverNotificationList = clientNotification.get("rdf:value").map(function (item) { return item.id; });
+        const serverNotificationList = clientNotification.get("rdf:value").map(item => item.id);
         if ( !Util.areEqual(browserNotificationList, serverNotificationList) && serverNotificationList.length ) {
           serverNotificationList.reduce(function (p, notification_uri, i) {
             return p.then(function () {
               if (browserNotificationList.indexOf(notification_uri) >= 0) { return; }
               const notification = new IndividualModel(notification_uri);
               return notification.load().then(function (notification) {
-                return (notification.properties["v-s:newsAudience"] || []).map(function (audience) {
-                  return audience.data;
-                });
+                return (notification.properties["v-s:newsAudience"] || []).map(audience => audience.data);
               }).then(function (audience) {
                 audience = audience.sort();
                 return veda.user.memberOf().then(function (memberOf) {
@@ -305,14 +295,12 @@ export default function AppPresenter() {
   if ("serviceWorker" in navigator) {
 
     // Install SW
-    navigator.serviceWorker.register("/sw-simple.js", { scope: window.location.pathname }).then(function(worker) {
-      console.log("Service worker registered:", worker.scope);
-    }).catch(function(error) {
-      console.log("Registration failed with " + error);
-    });
+    navigator.serviceWorker.register("/sw-simple.js", { scope: window.location.pathname })
+      .then(worker => console.log("Service worker registered:", worker.scope))
+      .catch(error => console.log("Registration failed with " + error));
 
     // Install application prompt
-    const showAddToHomeScreen = function () {
+    const showAddToHomeScreen = () => {
       const installApp = document.getElementById("install-app");
       const installBtn = document.getElementById("install-btn");
       const rejectInstallBtn = document.getElementById("reject-install-btn");
@@ -320,12 +308,12 @@ export default function AppPresenter() {
       installBtn.addEventListener("click", addToHomeScreen);
       rejectInstallBtn.addEventListener("click", rejectInstall);
     }
-    const addToHomeScreen = function () {
+    const addToHomeScreen = () => {
       const installApp = document.getElementById("install-app");
       installApp.style.display = "none";  // Hide the prompt
       deferredPrompt.prompt();  // Wait for the user to respond to the prompt
       deferredPrompt.userChoice
-        .then(function(choiceResult) {
+        .then(choiceResult => {
           if (choiceResult.outcome === "accepted") {
             console.log("User accepted install prompt");
           } else {
@@ -334,7 +322,7 @@ export default function AppPresenter() {
           deferredPrompt = null;
         });
     }
-    const rejectInstall = function () {
+    const rejectInstall = () => {
       const installApp = document.getElementById("install-app");
       installApp.style.display = "none";
       localStorage.rejectedInstall = true;
