@@ -354,7 +354,7 @@ hr.black {
   float: right;
 }
 
-.login-form {
+#login-form {
   max-width: 400px;
   padding: 15px;
   margin-top: 5%;
