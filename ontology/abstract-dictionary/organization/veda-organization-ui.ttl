@@ -2676,6 +2676,10 @@ v-s:PositionTemplate
   </div>
 </div>
 <script>
+  if (template.data("mode") === "view" && veda.appointment.id != 'cfg:AdministratorAppointment'){
+    $('#edit.action', template).remove();
+  }
+  
   if(!individual.isNew() && veda.appointment.id != 'cfg:AdministratorAppointment')
     $('.notEditForUsers').addClass('hide'); 
   
