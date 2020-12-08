@@ -9,7 +9,7 @@ edition = "2018"
 log = "0.4"
 quick-xml = {version = "0.18.1", features = [ "serialize" ]}
 maplit = "1.0.2"
-rusty_v8 = "0.13.0"
+rusty_v8 = "0.14.0"
 lazy_static = "1.4.0"
 serde = { version = "1.0", features = [ "derive" ] }
 serde_derive = "1.0"
