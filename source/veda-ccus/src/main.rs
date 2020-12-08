@@ -24,7 +24,7 @@ const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
 /////////////////////////////////////////////
 
-async fn ccus_route(req: HttpRequest, stream: web::Payload, srv: web::Data<Addr<server::CCUSServer>>) -> Result<HttpResponse, Error> {
+fn ccus_route(req: HttpRequest, stream: web::Payload, srv: web::Data<Addr<server::CCUSServer>>) -> Result<HttpResponse, Error> {
     ws::start(
         WsCCUSSession {
             id: 0,
@@ -78,12 +78,18 @@ impl Actor for WsCCUSSession {
             .then(|res, act, ctx| {
                 match res {
                     Ok(res) => act.id = res,
-                    // something is wrong with chat server
+                    // something is wrong with ccus server
                     _ => ctx.stop(),
                 }
-                actix::fut::ready(())
+                fut::ok(())
             })
             .wait(ctx);
+    }
+
+    fn stopped(&mut self, _: &mut Self::Context) {
+        self.addr.do_send(server::Disconnect {
+            id: self.id,
+        });
     }
 
     fn stopping(&mut self, _: &mut Self::Context) -> Running {
@@ -92,12 +98,6 @@ impl Actor for WsCCUSSession {
             id: self.id,
         });
         Running::Stop
-    }
-
-    fn stopped(&mut self, _: &mut Self::Context) {
-        self.addr.do_send(server::Disconnect {
-            id: self.id,
-        });
     }
 }
 
@@ -111,18 +111,18 @@ impl Handler<server::Msg> for WsCCUSSession {
 }
 
 /// WebSocket message handler
-impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsCCUSSession {
-    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
+impl StreamHandler<ws::Message, ws::ProtocolError> for WsCCUSSession {
+    fn handle(&mut self, msg: ws::Message, ctx: &mut Self::Context) {
         debug!("WEBSOCKET MESSAGE: {:?}", msg);
         match msg {
-            Ok(ws::Message::Ping(msg)) => {
+            ws::Message::Ping(msg) => {
                 self.hb = Instant::now();
                 ctx.pong(&msg);
             }
-            Ok(ws::Message::Pong(_)) => {
+            ws::Message::Pong(_) => {
                 self.hb = Instant::now();
             }
-            Ok(ws::Message::Text(text)) => {
+            ws::Message::Text(text) => {
                 let m = text.trim();
 
                 self.addr.do_send(server::ClientMessage {
@@ -130,12 +130,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsCCUSSession {
                     msg: m.to_owned(),
                 });
             }
-            Ok(ws::Message::Binary(_)) => println!("Unexpected binary"),
-            Ok(ws::Message::Close(_)) => {
+            ws::Message::Binary(_) => println!("Unexpected binary"),
+            ws::Message::Close(_) => {
                 ctx.stop();
             }
-            Ok(ws::Message::Nop) => (),
-            _ => {}
+            ws::Message::Nop => (),
         }
     }
 
@@ -165,7 +164,7 @@ impl WsCCUSSession {
                 // don't try to send a ping
                 return;
             }
-            ctx.ping(b"");
+            ctx.ping("");
             ctx.text("");
         });
     }
@@ -198,8 +197,7 @@ fn storage_manager(tarantool_addr: String, rx: Receiver<CMessage>) {
     }
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
     let env_var = "RUST_LOG";
     match std::env::var_os(env_var) {
         Some(val) => println!("use env var: {}: {:?}", env_var, val.to_str()),
@@ -228,6 +226,8 @@ async fn main() -> std::io::Result<()> {
     let (sbscr_tx, sbscr_rx): (Sender<CMessage>, Receiver<CMessage>) = mpsc::channel();
     thread::spawn(move || storage_manager(tarantool_addr.clone(), sbscr_rx));
 
+    let sys = System::new("ws-ccus");
+
     // Start ccus server actor
     let server = server::CCUSServer::new(sbscr_tx.clone()).start();
 
@@ -240,6 +240,7 @@ async fn main() -> std::io::Result<()> {
     })
     .bind("[::]:".to_owned() + &ccus_port)?
     //.keep_alive(75)
-    .run()
-    .await
+    .start();
+
+    sys.run()
 }
