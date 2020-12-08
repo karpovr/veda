@@ -56,7 +56,7 @@ jobs:
             testcafe chrome:headless qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 0.5
             testcafe chrome:headless qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 0.5
             testcafe chrome:headless qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 0.6
-            testcafe chrome:headless qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens --speed 0.6
+            testcafe chrome:headless qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens
             testcafe chrome:headless qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 0.7
             testcafe chrome:headless qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.7
 
