@@ -27,7 +27,7 @@ import { Selector, t } from 'testcafe';
       .wait(1000)
       .expect(Selector('div.container.sheet div[property="v-ui:testInteger"] span.value-holder').innerText).eql('777')
       .click('veda-control[property="v-ui:testDecimal"][data-type="decimal"]')
-      .typeText('veda-control[property="v-ui:testDecimal"][data-type="decimal"]', '3,14159265')
+      .typeText('veda-control[property="v-ui:testDecimal"][data-type="decimal"]', '3.14159265')
       .wait(1000)
       .expect(Selector('div.container.sheet div[property="v-ui:testDecimal"] span.value-holder').innerText).eql('3.14 159 265')
       .click('veda-control#date')
