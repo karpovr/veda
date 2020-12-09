@@ -166,6 +166,8 @@ fn add_v8_value_obj_to_individual<'a>(
                     if let Some(v) = vdata.to_string(scope) {
                         res.add_decimal_from_str(&predicate, &v.to_rust_string_lossy(scope));
                     }
+                } else {
+                    error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
             }
             "Integer" => {
@@ -187,19 +189,27 @@ fn add_v8_value_obj_to_individual<'a>(
             "Datetime" => {
                 if vdata.is_number() {
                     if let Some(v) = vdata.to_integer(scope) {
-                        res.add_datetime(&predicate, v.value());
+                        res.add_datetime(&predicate, v.value() / 1000);
+                    } else {
+                        error!("v8obj2individual: invalid number content of [{}], field [{}]", stype, predicate);
                     }
                 } else if vdata.is_string() {
                     res.add_datetime_from_str(&predicate, &v8_2_str(scope, &vdata));
                 } else if vdata.is_date() {
                     if let Some(v) = vdata.to_integer(scope) {
                         res.add_datetime(&predicate, v.value() / 1000);
+                    } else {
+                        error!("v8obj2individual: invalid date content of [{}], field [{}]", stype, predicate);
                     }
+                } else {
+                    error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
             }
             "Boolean" => {
                 if vdata.is_boolean() {
                     res.add_bool(&predicate, vdata.to_integer(scope).unwrap().value() != 0);
+                } else {
+                    error!("v8obj2individual: unknown type = {}, predicate[{}]", stype, predicate);
                 }
             }
             "String" => {
@@ -221,7 +231,7 @@ fn add_v8_value_obj_to_individual<'a>(
             }
         }
     } else {
-        error!("v8obj2individual: type is not string");
+        error!("v8obj2individual: type is not string, predicate[{}]", predicate);
     }
 }
 
