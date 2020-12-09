@@ -129,7 +129,7 @@ fn req_prepare(module: &mut Module, request: &Message, xr: &mut XapianReader) ->
 
             if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
                 res.result = ctx;
-                info!("count = {}, total time={}", res.count, res.total_time);
+                info!("count = {}, time: query={}, authorize={}, total={}", res.count, res.query_time, res.authorize_time, res.total_time);
                 if let Ok(s) = serde_json::to_string(&res) {
                     return Message::from(s.as_bytes());
                 }
