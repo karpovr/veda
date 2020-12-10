@@ -1,277 +1,291 @@
 // Veda browser utility functions
 
-"use strict";
+'use strict';
 
-import veda from "../common/veda.js";
+import veda from '../common/veda.js';
 
-import IndividualModel from "../common/individual_model.js";
+import IndividualModel from '../common/individual_model.js';
 
-import Backend from "../common/backend.js";
+import Backend from '../common/backend.js';
 
-import Notify from "../browser/notify.js";
+import Notify from '../browser/notify.js';
 
-var Util = veda.Util || {};
+const Util = veda.Util || {};
 
 export default veda.Util = Util;
 
 Util.registerHandler = function (individual, template, event, handler) {
   individual.on(event, handler);
-  template.one("remove", function () {
+  template.one('remove', function () {
     individual.off(event, handler);
   });
 };
 
 // Escape function for css (jQuery) selectors
 Util.escape4$ = function (str) {
-  if (str) return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
+  if (str) return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1');
   return str;
 };
 
 Util.toTTL = function (individualList, callback) {
-  var prefixes = {};
-  var ttl = individualList.map(function (individual) {
-    var individual_ttl = "";
-    for ( var property in individual.properties ) {
-      var resources = individual.properties[property];
-      if (property === "@") {
-        individual_ttl = resources + "\n" + individual_ttl;
-        prefixer(resources, prefixes);
-      } else {
-        var values = resources.reduce(function (acc, resource) {
-          var value;
-          switch (resource.type) {
-            case "Boolean":
-            case "Integer":
-            case "Decimal":
-              value = resource.data;
-              break;
-            case "Uri":
-              value = prefixer(resource.data, prefixes);
-              break;
-            case "Datetime":
-              value = "\"" + resource.data + "\"^^xsd:dateTime";
-              prefixer("xsd:", prefixes);
-              break;
-            case "String":
-              if (/("|\n)/.test(resource.data)) {
-                value = "\"\"\"" + resource.data + "\"\"\"";
-              } else {
-                value = "\"" + resource.data + "\"";
-              }
-              if (resource.lang !== undefined && resource.lang !== "NONE") {
-                value += "@" + resource.lang.toLowerCase();
-              }
-              break;
-          }
-          return acc.length ? acc + ", " + value : value ;
-        }, "");
-        individual_ttl += "  " + property + " " + values + " ;\n";
-        prefixer(property, prefixes);
-      }
-    }
-    return individual_ttl + ".\n";
-  }).join("\n");
+  const prefixes = {};
 
-  ttl = "\n" + ttl;
-
-  for ( var prefix in prefixes ) {
-    ttl = ["@prefix", prefix, "<" + prefixes[prefix] + ">"].join(" ") + ".\n" + ttl;
-  }
-
-  callback(undefined, ttl);
-
-  function prefixer(value, prefixes) {
-    var reg_uri = /^([a-z-0-9]+:)[a-zA-Z0-9-_]*$/;
-    var ontologies = veda.ontology.ontologies;
-    var result = reg_uri.exec(value);
-    var prefix = result ? result[1] : null;
-    var expanded;
-    if (prefix === "dc") {
-      expanded = "http://purl.org/dc/elements/1.1/";
-    } else if (prefix === "grddl") {
-      expanded = "http://www.w3.org/2003/g/data-view#";
+  const prefixer = function(value, prefixes) {
+    const reg_uri = /^([a-z-0-9]+:)[a-zA-Z0-9-_]*$/;
+    const ontologies = veda.ontology.ontologies;
+    const result = reg_uri.exec(value);
+    const prefix = result ? result[1] : null;
+    let expanded;
+    if (prefix === 'dc') {
+      expanded = 'http://purl.org/dc/elements/1.1/';
+    } else if (prefix === 'grddl') {
+      expanded = 'http://www.w3.org/2003/g/data-view#';
     } else if (ontologies[prefix]) {
-      expanded = ontologies[prefix]["v-s:fullUrl"][0].toString();
+      expanded = ontologies[prefix]['v-s:fullUrl'][0].toString();
     }
     if (expanded) {
       prefixes[prefix] = expanded;
       return value;
     } else {
-      return "<" + value + ">";
+      return '<' + value + '>';
+    }
+  };
+
+  let ttl = individualList.map(function (individual) {
+    let individual_ttl = '';
+    for ( const property in individual.properties ) {
+      if (Object.hasOwnProperty.call(individual.properties, property)) {
+        const resources = individual.properties[property];
+        if (property === '@') {
+          individual_ttl = resources + '\n' + individual_ttl;
+          prefixer(resources, prefixes);
+        } else {
+          const values = resources.reduce(function (acc, resource) {
+            let value;
+            switch (resource.type) {
+            case 'Boolean':
+            case 'Integer':
+            case 'Decimal':
+              value = resource.data;
+              break;
+            case 'Uri':
+              value = prefixer(resource.data, prefixes);
+              break;
+            case 'Datetime':
+              value = '"' + resource.data + '"^^xsd:dateTime';
+              prefixer('xsd:', prefixes);
+              break;
+            case 'String':
+              if (/("|\n)/.test(resource.data)) {
+                value = '"""' + resource.data + '"""';
+              } else {
+                value = '"' + resource.data + '"';
+              }
+              if (resource.lang !== undefined && resource.lang !== 'NONE') {
+                value += '@' + resource.lang.toLowerCase();
+              }
+              break;
+            }
+            return acc.length ? acc + ', ' + value : value;
+          }, '');
+          individual_ttl += '  ' + property + ' ' + values + ' ;\n';
+          prefixer(property, prefixes);
+        }
+      }
+    }
+    return individual_ttl + '.\n';
+  }).join('\n');
+
+  ttl = '\n' + ttl;
+
+  for ( const prefix in prefixes ) {
+    if (Object.hasOwnProperty.call(prefixes, prefix)) {
+      ttl = ['@prefix', prefix, '<' + prefixes[prefix] + '>'].join(' ') + '.\n' + ttl;
     }
   }
+
+  callback(undefined, ttl);
 };
 
 Util.exportTTL = function (individualList) {
-  System.import("filesaver").then(function (module) {
-    var saveAs = module.default;
+  System.import('filesaver').then(function (module) {
+    const saveAs = module.default;
     Util.toTTL(individualList, function (error, result) {
-      var blob = new Blob([result], {type: "text/plain;charset=utf-8"});
-      saveAs(blob, "exported_graph.ttl");
+      const blob = new Blob([result], {type: 'text/plain;charset=utf-8'});
+      saveAs(blob, 'exported_graph.ttl');
     });
   });
 };
 
 /**
- * Event `createReport` handler:
- *  - Find available reports or use report specified by `reportId` parameter.
- *  - Let user to choice report (if more then one founded)
- *  - Redirect to report
+ * Create specified report
+ * @param {string} report - uri of report to create
+ * @param {Object} params - parameters to pass to report
  */
 Util.createReport = function (report, params) {
-  if (typeof report === "string" || report instanceof String) {
+  if (typeof report === 'string' || report instanceof String) {
     report = new IndividualModel(report);
   }
-  var jasperServerCfg = new IndividualModel('cfg:jasperServerAddress');
+  const jasperServerCfg = new IndividualModel('cfg:jasperServerAddress');
   Promise.all([report.load(), jasperServerCfg.load()]).then(function (loaded) {
-    var report = loaded[0];
-    var jasperServerCfg = loaded[1];
-    var jasperServerAddress = jasperServerCfg['rdf:value'][0];
+    const report = loaded[0];
+    const jasperServerCfg = loaded[1];
+    const jasperServerAddress = jasperServerCfg['rdf:value'][0];
 
-    var form = document.createElement("form");
-    form.setAttribute("method", "post");
-    form.setAttribute("action", jasperServerAddress + "flow.html?_flowId=viewReportFlow&reportUnit=" + encodeURIComponent(report["v-s:reportPath"][0]) + "&output=" + encodeURIComponent(report["v-s:reportFormat"][0]) + "&documentId=" + encodeURIComponent(params.id) + "&ticket=" + veda.ticket);
-    form.setAttribute("target", "Report");
+    const form = document.createElement('form');
+    form.setAttribute('method', 'post');
+    form.setAttribute('action', jasperServerAddress + 'flow.html?_flowId=viewReportFlow&reportUnit=' + encodeURIComponent(report['v-s:reportPath'][0]) + '&output=' + encodeURIComponent(report['v-s:reportFormat'][0]) + '&documentId=' + encodeURIComponent(params.id) + '&ticket=' + veda.ticket);
+    form.setAttribute('target', 'Report');
 
     Object.getOwnPropertyNames(params.properties).forEach(function (key) {
-      if ( key !== "@" && params.hasValue(key) ) {
-        var hiddenField = document.createElement("input");
-        hiddenField.setAttribute("type", "hidden");
-        hiddenField.setAttribute("name", key.replace(":", "_"));
-        var value = params.get(key).map(function (item) {
+      if ( key !== '@' && params.hasValue(key) ) {
+        const hiddenField = document.createElement('input');
+        hiddenField.setAttribute('type', 'hidden');
+        hiddenField.setAttribute('name', key.replace(':', '_'));
+        const value = params.get(key).map(function (item) {
           return item instanceof IndividualModel ? item.id :
-                 item instanceof Date ? item.toISOString() :
-                 item;
-        }).join(",");
-        hiddenField.setAttribute("value", value);
+            item instanceof Date ? item.toISOString() :
+              item;
+        }).join(',');
+        hiddenField.setAttribute('value', value);
         form.appendChild(hiddenField);
       }
     });
     // Set client timezone parameter
-    var tz = (new Date()).getTimezoneOffset();
-    var tzField = document.createElement("input");
-    tzField.setAttribute("type", "hidden");
-    tzField.setAttribute("name", "timezone");
-    tzField.setAttribute("value", tz);
+    const tz = (new Date()).getTimezoneOffset();
+    const tzField = document.createElement('input');
+    tzField.setAttribute('type', 'hidden');
+    tzField.setAttribute('name', 'timezone');
+    tzField.setAttribute('value', tz);
     form.appendChild(tzField);
     document.body.appendChild(form);
-    window.open("", "Report");
+    window.open('', 'Report');
     form.submit();
   });
 };
 
 /**
- * Event `showRights` handler:
- *  - Find available reports
- *  - Let user to choice report (if more then one founded)
- *  - Redirect to report
+ * Show user's rights for individual
+ * @param {IndividualModel} individual - authorization subject
  */
 Util.showRights = function (individual) {
-  var modalTmpl = $("#individual-modal-template").html();
-  var modal = $(modalTmpl);
-  var modalBody = $(".modal-body", modal);
+  const modalTmpl = $('#individual-modal-template').html();
+  const modal = $(modalTmpl);
+  const modalBody = $('.modal-body', modal);
   modal.modal();
-  modal.on("hidden.bs.modal", function () {
+  modal.on('hidden.bs.modal', function () {
     modal.remove();
   });
-  $("body").append(modal);
-  individual.present(modalBody, "v-ui:PermissionsTemplate");
+  $('body').append(modal);
+  individual.present(modalBody, 'v-ui:PermissionsTemplate');
 };
 
 Util.showModal = function (individual, template, mode) {
-  if ( $("body").hasClass("modal-open")) {
-    $(".modal").modal("hide").remove();
+  if ( $('body').hasClass('modal-open')) {
+    $('.modal').modal('hide').remove();
   };
-  var modal = $( $("#notification-modal-template").html() );
+  const modal = $( $('#notification-modal-template').html() );
   modal.modal();
-  $("body").append(modal);
-  var container = $(".modal-body", modal);
-  if (typeof individual === "string") {
+  $('body').append(modal);
+  const container = $('.modal-body', modal);
+  if (typeof individual === 'string') {
     individual = new IndividualModel(individual);
   }
   individual.present(container, template, mode);
-  modal.find("#follow").click( function () {
-    var resourceTemplate = modal.find("[resource]").first();
-    var uri = resourceTemplate.attr("resource");
-    var mode = resourceTemplate.data("mode");
-    modal.modal("hide");
-    riot.route( ["#", uri, "#main", undefined, mode].join("/") );
+  modal.find('#follow').click( function () {
+    const resourceTemplate = modal.find('[resource]').first();
+    const uri = resourceTemplate.attr('resource');
+    const mode = resourceTemplate.data('mode');
+    modal.modal('hide');
+    riot.route( ['#', uri, '#main', undefined, mode].join('/') );
   });
-  $(".action#cancel", modal).click(function () {
-    modal.modal("hide");
+  $('.action#cancel', modal).click(function () {
+    modal.modal('hide');
   });
-  modal.on("hidden.bs.modal", function () {
+  modal.on('hidden.bs.modal', function () {
     modal.remove();
   });
   return modal;
 };
 
 Util.showSmallModal = function (individual, template, mode) {
-  var modal = $( $("#minimal-modal-template").html() );
+  const modal = $( $('#minimal-modal-template').html() );
   modal.modal();
-  $("body").append(modal);
-  var container = $(".modal-body", modal);
+  $('body').append(modal);
+  const container = $('.modal-body', modal);
   individual.present(container, template, mode);
-  $(".action#cancel", modal).click(function () {
-    modal.modal("hide");
+  $('.action#cancel', modal).click(function () {
+    modal.modal('hide');
   });
-  modal.on("hidden.bs.modal", function () {
+  modal.on('hidden.bs.modal', function () {
     modal.remove();
   });
   return modal;
 };
 
 Util.confirm = function (individual, template, mode) {
-  var modal = $( $("#confirm-modal-template").html() );
+  const modal = $( $('#confirm-modal-template').html() );
   modal.modal();
-  modal.on("hidden.bs.modal", function () {
+  modal.on('hidden.bs.modal', function () {
     modal.remove();
   });
-  $("body").append(modal);
-  var container = $(".modal-body", modal);
+  $('body').append(modal);
+  const container = $('.modal-body', modal);
   return individual.present(container, template, mode).then(function () {
     return new Promise(function (resolve, reject) {
-      $(".modal-footer > .ok", modal).click(function () { resolve(true); });
-      $(".modal-footer > .cancel", modal).click(function () { resolve(false); });
+      $('.modal-footer > .ok', modal).click(function () {
+        resolve(true);
+      });
+      $('.modal-footer > .cancel', modal).click(function () {
+        resolve(false);
+      });
     });
   });
 };
 
 /**
- * Event `send` handler:
- *  - Find transformation to start form or use transformation specified by `transformId` parameter
- *  - Apply transformation and redirect to start form.
+ * Start workflow process
+ *   - Apply transformation and redirect to start form.
+ * @param {IndividualModel} individual
+ * @param {template} template - reference to individual view where 'send' was invoked
+ * @param {string} transformId - id of a transformation for start form
+ * @param {string} _modal - obsolete
+ * @param {string} startFormTemplate - id of a start form template
+ * @return {void}
  */
-Util.send = function (individual, template, transformId, modal, startFormTemplate) {
+Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
-    template.trigger("save");
-    var transform = new IndividualModel(transformId);
+    template.trigger('save');
+    const transform = new IndividualModel(transformId);
     return transform.load().then(function (transform) {
       return Util.buildStartFormByTransformation(individual, transform).then(function (startForm) {
-        return Util.showModal(startForm, startFormTemplate, "edit");
+        return Util.showModal(startForm, startFormTemplate, 'edit');
       });
     });
   } else {
-    individual["v-wf:hasStatusWorkflow"] = [ new IndividualModel("v-wf:ToBeSent") ];
-    template.trigger("save");
-    template.closest(".modal").modal("hide").remove();
-    var notify = Notify ? new Notify() : function () {};
-    var sendSuccess = new IndividualModel("v-s:SendSuccess");
+    individual['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
+    template.trigger('save');
+    template.closest('.modal').modal('hide').remove();
+    const notify = Notify ? new Notify() : function () {};
+    const sendSuccess = new IndividualModel('v-s:SendSuccess');
     sendSuccess.load().then(function (sendSuccess) {
-      notify("success", {name: sendSuccess});
+      notify('success', {name: sendSuccess});
     });
   }
 };
 
 /**
- * @returns IndividualModel - start form
+ * Build start form using transformation
+ * @param {IndividualModel} individual - individual to transform
+ * @param {IndividualModel} transformation - transformation individual
+ * @return {IndividualModel} - start form
  */
-Util.buildStartFormByTransformation = function (individual, transform) {
-  var promises = [individual.load(), transform.load()];
+Util.buildStartFormByTransformation = function (individual, transformation) {
+  const promises = [individual.load(), transformation.load()];
   return Promise.all(promises).then(function(loadedItems) {
     return Util.transformation(loadedItems[0].properties, loadedItems[1].properties);
   }).then(function (transformResult) {
-    var startForm = new IndividualModel(transformResult[0]);
+    const startForm = new IndividualModel(transformResult[0]);
     startForm.isNew(true);
     startForm.isSync(false);
     return startForm.init();
@@ -279,57 +293,55 @@ Util.buildStartFormByTransformation = function (individual, transform) {
 };
 
 /**
- * Sync get individual
+ * Synchronous get individual
+ * @param {string} ticket
+ * @param {string} uri
+ * @return {Object} - individual properties object
  */
 function getSync(ticket, uri) {
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "get_individual?uri=" + uri + "&ticket=" + ticket, false);
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', 'get_individual?uri=' + uri + '&ticket=' + ticket, false);
   xhr.send();
   if (xhr.status === 200) {
     return JSON.parse(xhr.responseText, Util.decimalDatetimeReviver);
   } else {
-    throw new BackendError(xhr);
+    throw Error(xhr);
   }
 }
 
 /**
  * Трансформировать указанные индивидуалы по заданным правилам
- *
- * @param ticket сессионный билет
- * @param individuals один или несколько IndividualModel или их идентификаторов
- * @param transform применяемая трансформация
- * @param executor контекст исполнителя
- * @param work_order контекст рабочего задания
- * @returns {Array}
+ * @param {string|IndividualModel} individuals - один или несколько IndividualModel или их идентификаторов
+ * @param {string|IndividualModel} transform - применяемая трансформация
+ * @return {Array}
  */
 Util.transformation = function (individuals, transform) {
-
   if ( !Array.isArray(individuals) ) {
     individuals = [individuals];
   }
 
-  var rules = Util.getValues(transform['v-wf:transformRule']);
+  const rules = Util.getValues(transform['v-wf:transformRule']);
 
-  if (!rules.length) { return Promise.resolve(); }
+  if (!rules.length) {
+    return Promise.resolve();
+  }
 
   return Backend.get_individuals(veda.ticket, rules).then(function (rules) {
+    const out_data0 = {};
 
-    var out_data0 = {};
-
-    var out_data0_el = {};
+    let out_data0_el = {};
 
     /* PUT functions [BEGIN] */
 
-    var putFieldOfObject = (function()
-    {
-      return function(name, field)
-      {
-        var out_data0_el_arr;
+    const putFieldOfObject = (function() {
+      return function(name, field) {
+        let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
 
-        if (!out_data0_el_arr)
-            out_data0_el_arr = [];
+        if (!out_data0_el_arr) {
+          out_data0_el_arr = [];
+        }
 
         out_data0_el_arr.push(individual[field]);
 
@@ -337,186 +349,164 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    var putUri = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
+    const putUri = (function() {
+      return function(name, value) {
+        let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
 
-        if (!out_data0_el_arr)
+        if (!out_data0_el_arr) {
           out_data0_el_arr = [];
+        }
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Uri"
-        });
+          {
+            data: value,
+            type: 'Uri',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var setUri = function(name, value)
-    {
+    const setUri = function(name, value) {
       out_data0_el[name] = [
-      {
-        data: value,
-        type: "Uri"
-      }];
+        {
+          data: value,
+          type: 'Uri',
+        }];
     };
 
-    var putString = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
+    const putString = (function() {
+      return function(name, value) {
+        let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
 
-        if (!out_data0_el_arr)
+        if (!out_data0_el_arr) {
           out_data0_el_arr = [];
+        }
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "String"
-        });
+          {
+            data: value,
+            type: 'String',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var setString = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
-
-        out_data0_el_arr = [];
+    const setString = (function() {
+      return function(name, value) {
+        const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "String"
-        });
+          {
+            data: value,
+            type: 'String',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var setDatetime = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
-
-        out_data0_el_arr = [];
+    const setDatetime = (function() {
+      return function(name, value) {
+        const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Datetime"
-        });
+          {
+            data: value,
+            type: 'Datetime',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var putDatetime = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
+    const putDatetime = (function() {
+      return function(name, value) {
+        let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
 
-        if (!out_data0_el_arr)
+        if (!out_data0_el_arr) {
           out_data0_el_arr = [];
+        }
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Datetime"
-        });
+          {
+            data: value,
+            type: 'Datetime',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var putBoolean = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
+    const putBoolean = (function() {
+      return function(name, value) {
+        let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
 
-        if (!out_data0_el_arr)
+        if (!out_data0_el_arr) {
           out_data0_el_arr = [];
+        }
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Boolean"
-        });
+          {
+            data: value,
+            type: 'Boolean',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var setBoolean = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
-
-        out_data0_el_arr = [];
+    const setBoolean = (function() {
+      return function(name, value) {
+        const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Boolean"
-        });
+          {
+            data: value,
+            type: 'Boolean',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
 
-    var putInteger = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr = out_data0_el[name];
+    const putInteger = (function() {
+      return function(name, value) {
+        let out_data0_el_arr = out_data0_el[name];
 
-        if (!out_data0_el_arr)
+        if (!out_data0_el_arr) {
           out_data0_el_arr = [];
+        }
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Integer"
-        });
+          {
+            data: value,
+            type: 'Integer',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
     })();
 
-    var setInteger = (function()
-    {
-      return function(name, value)
-      {
-        var out_data0_el_arr;
-
-        out_data0_el_arr = [];
+    const setInteger = (function() {
+      return function(name, value) {
+        const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
-        {
-          data: value,
-          type: "Integer"
-        });
+          {
+            data: value,
+            type: 'Integer',
+          });
 
         out_data0_el[name] = out_data0_el_arr;
       };
@@ -524,284 +514,260 @@ Util.transformation = function (individuals, transform) {
 
     /* PUT functions [END] */
 
-    for (var key in individuals)
-    {
-      //print("#1 key=", key);
-      var individual = individuals[key];
+    for (const key in individuals) {
+      if (Object.hasOwnProperty.call(individuals, key)) {
+        // print("#1 key=", key);
+        const individual = individuals[key];
 
-      //print("#1.1 key=", key);
-      var objectContentStrValue = (function()
-      {
-        return function(name, value)
-        {
-          if (individual[name])
-          {
-            var result = false;
-            for (var i in individual[name])
-            {
-              if (value === individual[name][i].data)
-              {
-                result = true;
-              }
-            }
-            return result;
-          }
-        };
-      })();
-
-      var iteratedObject = Object.keys(individual);
-
-      for (var key2 = 0; key2 < iteratedObject.length; key2++)
-      {
-        var element = individual[iteratedObject[key2]];
-
-        var putValue = (function()
-        {
-          return function(name)
-          {
-            var out_data0_el_arr = out_data0_el[name];
-
-            if (!out_data0_el_arr)
-              out_data0_el_arr = [];
-
-            if (iteratedObject[key2] == '@')
-            {
-              out_data0_el_arr.push(
-              {
-                data: element,
-                type: "Uri"
-              });
-            }
-            else
-            {
-              if (Array.isArray(element) === true)
-              {
-                for (var key3 in element)
-                {
-                  out_data0_el_arr.push(element[key3]);
+        // print("#1.1 key=", key);
+        const objectContentStrValue = (function() {
+          return function(name, value) {
+            if (individual[name]) {
+              let result = false;
+              for (const i in individual[name]) {
+                if (value === individual[name][i].data) {
+                  result = true;
                 }
               }
-              else
+              return result;
+            }
+          };
+        })();
+
+        const iteratedObject = Object.keys(individual);
+
+        for (let key2 = 0; key2 < iteratedObject.length; key2++) {
+          const element = individual[iteratedObject[key2]];
+
+          const putValue = (function() {
+            return function(name) {
+              let out_data0_el_arr = out_data0_el[name];
+
+              if (!out_data0_el_arr) {
+                out_data0_el_arr = [];
+              }
+
+              if (iteratedObject[key2] == '@') {
+                out_data0_el_arr.push(
+                  {
+                    data: element,
+                    type: 'Uri',
+                  });
+              } else {
+                if (Array.isArray(element) === true) {
+                  for (const key3 in element) {
+                    if (Object.hasOwnProperty.call(element, key3)) {
+                      out_data0_el_arr.push(element[key3]);
+                    }
+                  }
+                } else {
+                  out_data0_el_arr.push(element);
+                }
+              }
+
+              out_data0_el[name] = out_data0_el_arr;
+            };
+          })();
+
+          const putValueFrom = (function() {
+            return function(name, path, transform) {
+              let out_data0_el_arr = out_data0_el[name];
+              if (!out_data0_el_arr) {
+                out_data0_el_arr = [];
+              }
+
+              let element_uri;
+
+              if (Array.isArray(element) === true) {
+                element_uri = Util.getUri(element);
+              } else {
+                element_uri = element.data ? element.data : element;
+              }
+
+              let curelem;
+
+              curelem = getSync(veda.ticket, element_uri);
+
+              for (let i = 0; i < path.length - 1; i++) {
+                if (!curelem || !curelem[path[i]]) return;
+                const uri = Array.isArray(curelem[path[i]]) && curelem[path[i]][0].data ? curelem[path[i]][0].data : curelem[path[i]];
+                curelem = getSync(veda.ticket, uri);
+              }
+              if (!curelem || !curelem[path[path.length - 1]]) return;
+
+              out_data0_el_arr = out_data0_el_arr.concat(curelem[path[path.length - 1]]);
+
+              out_data0_el[name] = out_data0_el_arr;
+            };
+          })();
+
+          const putFrontValue = (function() {
+            return function(name) {
+              let out_data0_el_arr = out_data0_el[name];
+
+              if (!out_data0_el_arr) {
+                out_data0_el_arr = [];
+              }
+              if (iteratedObject[key2] == '@') {
+                out_data0_el_arr.unshift(
+                  {
+                    data: element,
+                    type: 'Uri',
+                  });
+              } else {
+                if (Array.isArray(element) === true) {
+                  for (const key3 in element) {
+                    if (Object.hasOwnProperty.call(element, key3)) {
+                      out_data0_el_arr.unshift(element[key3]);
+                    }
+                  }
+                } else {
+                  out_data0_el_arr.unshift(element);
+                }
+              }
+
+              out_data0_el[name] = out_data0_el_arr;
+            };
+          })();
+
+          const putElement = (function() {
+            return function() {
+              const name = iteratedObject[key2];
+              if (name == '@') {
+                return;
+              }
+
+              let out_data0_el_arr = [];
+              out_data0_el_arr = out_data0_el[name];
+
+              if (!out_data0_el_arr) {
+                out_data0_el_arr = [];
+              }
+
+              if (Array.isArray(element) === true) {
+                for (const key3 in element) {
+                  if (Object.hasOwnProperty.call(element, key3)) {
+                    out_data0_el_arr.push(element[key3]);
+                  }
+                }
+              } else {
                 out_data0_el_arr.push(element);
-            }
+              }
 
-            out_data0_el[name] = out_data0_el_arr;
-          };
-        })();
+              out_data0_el[name] = out_data0_el_arr;
+            };
+          })();
 
-        var putValueFrom = (function()
-        {
-          return function(name, path, transform)
-          {
-            var out_data0_el_arr = out_data0_el[name];
-            if (!out_data0_el_arr)
-              out_data0_el_arr = [];
+          /* Segregate functions [BEGIN] */
+          const contentName = (function() {
+            return function(name) {
+              return iteratedObject[key2] == name;
+            };
+          })();
 
-            var element_uri;
+          const elementContentStrValue = (function() {
+            return function(name, value) {
+              if (iteratedObject[key2] !== name) {
+                return false;
+              }
+              const str = element[0].data;
+              if (str == value) {
+                return true;
+              } else {
+                return false;
+              }
+            };
+          })();
+          /* Segregate functions [END] */
 
-            if (Array.isArray(element) === true)
-              element_uri = Util.getUri (element);
-            else
-              element_uri = element.data ? element.data : element;
+          const getElement = (function() {
+            return function() {
+              return element;
+            };
+          })();
 
-            var curelem;
 
-            curelem = getSync(veda.ticket, element_uri);
+          // выполняем все rules
+          for (const key3 in rules) {
+            if (Object.hasOwnProperty.call(rules, key3)) {
+              const rule = rules[key3];
+              // 1. v-wf:segregateObject
+              const segregateObject = rule['v-wf:segregateObject'];
 
-            for (var i = 0; i < path.length - 1; i++)
-            {
-              if (!curelem || !curelem[path[i]]) return;
-              var uri = Array.isArray(curelem[path[i]]) && curelem[path[i]][0].data ? curelem[path[i]][0].data : curelem[path[i]];
-              curelem = getSync(veda.ticket, uri);
-            }
-            if (!curelem || !curelem[path[path.length - 1]]) return;
+              // 2. v-wf:segregateElement
+              const segregateElement = rule['v-wf:segregateElement'];
+              const grouping = rule['v-wf:grouping'];
 
-            out_data0_el_arr = out_data0_el_arr.concat(curelem[path[path.length - 1]]);
+              let res = undefined;
 
-            out_data0_el[name] = out_data0_el_arr;
-          };
-        })();
-
-        var putFrontValue = (function()
-        {
-          return function(name)
-          {
-            var out_data0_el_arr = out_data0_el[name];
-
-            if (!out_data0_el_arr)
-              out_data0_el_arr = [];
-            if (iteratedObject[key2] == '@')
-            {
-              out_data0_el_arr.unshift(
-              {
-                data: element,
-                type: "Uri"
-              });
-            }
-            else
-            {
-              if (Array.isArray(element) === true)
-              {
-                for (var key3 in element)
-                {
-                  out_data0_el_arr.unshift(element[key3]);
+              if (segregateObject) {
+                res = eval(segregateObject[0].data);
+                if (res == false) {
+                  continue;
                 }
               }
-              else
-                out_data0_el_arr.unshift(element);
-            }
 
-            out_data0_el[name] = out_data0_el_arr;
-          };
-        })();
+              if (segregateElement) {
+                res = eval(segregateElement[0].data);
+                if (res == false) {
+                  continue;
+                }
+              }
 
-        var putElement = (function()
-        {
-          return function()
-          {
-            var name = iteratedObject[key2];
-            if (name == '@')
-              return;
+              // 3. v-wf:aggregate
+              let group_key;
+              if (!grouping) {
+                out_data0_el = {};
+                out_data0_el['@'] = Util.genUri() + '-tr';
+              } else {
+                let useExistsUid = false;
+                for (const i in grouping) {
+                  if (Object.hasOwnProperty.call(grouping, i)) {
+                    const gk = grouping[i].data;
+                    if (gk == '@') {
+                      useExistsUid = true;
+                    } else {
+                      group_key = gk;
+                    }
+                  }
+                }
 
-            var out_data0_el_arr = [];
-            out_data0_el_arr = out_data0_el[name];
+                out_data0_el = out_data0[group_key];
+                if (!out_data0_el) {
+                  out_data0_el = {};
+                  if (useExistsUid) {
+                    out_data0_el['@'] = individual['@'];
+                  } else {
+                    out_data0_el['@'] = Util.genUri() + '-tr';
+                  }
+                }
+              }
 
-            if (!out_data0_el_arr)
-              out_data0_el_arr = [];
+              const agregate = rule['v-wf:aggregate'];
+              for (let i2 = 0; i2 < agregate.length; i2++) {
+                eval(agregate[i2].data);
+              }
 
-            if (Array.isArray(element) === true)
-            {
-              for (var key3 in element)
-              {
-                out_data0_el_arr.push(element[key3]);
+              if (!grouping) {
+                out_data0[out_data0_el['@']] = out_data0_el;
+              } else {
+                out_data0[group_key] = out_data0_el;
               }
             }
-            else
-              out_data0_el_arr.push(element);
-
-            out_data0_el[name] = out_data0_el_arr;
-          };
-        })();
-
-        /* Segregate functions [BEGIN] */
-        var contentName = (function()
-        {
-          return function(name)
-          {
-            return iteratedObject[key2] == name;
-          };
-        })();
-
-        var elementContentStrValue = (function()
-        {
-          return function(name, value)
-          {
-            if (iteratedObject[key2] !== name)
-              return false;
-            var str = element[0].data;
-            if (str == value)
-              return true;
-            else
-              return false;
-          };
-        })();
-        /* Segregate functions [END] */
-
-        var getElement = (function()
-        {
-          return function()
-          {
-            return element;
-          };
-        })();
-
-
-        // выполняем все rules
-        for (var key3 in rules)
-        {
-          var rule = rules[key3];
-          // 1. v-wf:segregateObject
-          var segregateObject = rule['v-wf:segregateObject'];
-
-          // 2. v-wf:segregateElement
-          var segregateElement = rule['v-wf:segregateElement'];
-          var grouping = rule['v-wf:grouping'];
-
-          var res = undefined;
-
-          if (segregateObject)
-          {
-            res = eval(segregateObject[0].data);
-            if (res == false)
-              continue;
-          }
-
-          if (segregateElement)
-          {
-            res = eval(segregateElement[0].data);
-            if (res == false)
-              continue;
-          }
-
-          // 3. v-wf:aggregate
-          var group_key;
-          if (!grouping)
-          {
-            out_data0_el = {};
-            out_data0_el['@'] = Util.genUri() + "-tr";
-          }
-          else
-          {
-            var useExistsUid = false;
-            for (var i in grouping)
-            {
-              var gk = grouping[i].data;
-              if (gk == '@')
-                useExistsUid = true;
-              else
-                group_key = gk;
-            }
-
-            out_data0_el = out_data0[group_key];
-            if (!out_data0_el)
-            {
-              out_data0_el = {};
-              if (useExistsUid)
-                out_data0_el['@'] = individual['@'];
-              else
-                out_data0_el['@'] = Util.genUri() + "-tr";
-            }
-          }
-
-          var agregate = rule['v-wf:aggregate'];
-          for (var i2 = 0; i2 < agregate.length; i2++)
-          {
-            eval(agregate[i2].data);
-          }
-
-          if (!grouping)
-          {
-            out_data0[out_data0_el['@']] = out_data0_el;
-          }
-          else
-          {
-            out_data0[group_key] = out_data0_el;
           }
         }
       }
     }
 
-    var out_data = [];
-    for (var key in out_data0)
-    {
-      out_data.push(out_data0[key]);
+    const out_data = [];
+    for (const key in out_data0) {
+      if (Object.hasOwnProperty.call(out_data0, key)) {
+        out_data.push(out_data0[key]);
+      }
     }
 
     return out_data;
-
   }).catch(function (error) {
-
     console.log(error);
-
   });
 };

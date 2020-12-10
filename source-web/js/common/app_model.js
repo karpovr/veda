@@ -1,21 +1,23 @@
 // Veda application Model
 
-import veda from "../common/veda.js";
+import riot from '../common/lib/riot.js';
 
-import riot from "../common/lib/riot.js";
+import OntologyModel from '../common/ontology_model.js';
 
-import OntologyModel from "../common/ontology_model.js";
+import UserModel from '../common/user_model.js';
 
-import UserModel from "../common/user_model.js";
+import UpdateService from '../browser/update_service.js';
 
-import UpdateService from "../browser/update_service.js";
-
+/**
+ * Application model
+ * @param {Object} manifest - app config
+ * @return {AppModel}
+ */
 export default function AppModel(manifest) {
-
-  var self = riot.observable(this);
+  const self = riot.observable(this);
 
   self.manifest = manifest;
-  self.ticket = self.ticket || "";
+  self.ticket = self.ticket || '';
   self.ontology = {};
   self.cache = {
     limit: 20000,
@@ -27,17 +29,19 @@ export default function AppModel(manifest) {
       return this.storage[key];
     },
     set: function (obj, expires) {
-      var that = this;
-      var count = this.count;
-      var limit = this.limit;
-      var delta = this.delta;
+      const that = this;
+      let count = this.count;
+      const limit = this.limit;
+      const delta = this.delta;
       if ( count >= limit ) {
-        var keys = Object.keys(this.expire);
+        const keys = Object.keys(this.expire);
         // First key is for ontology objects
-        for (var i = 1, key; (key = keys[i]) && (limit - count < delta); i++) {
-          this.expire[ key ] = this.expire[ key ].filter(function (obj) {
-            if (limit - count >= delta) { return true; }
-            delete that.storage[ obj.id ];
+        for (let i = 1, key; (key = keys[i]) && (limit - count < delta); i++) {
+          this.expire[key] = this.expire[key].filter(function (obj) {
+            if (limit - count >= delta) {
+              return true;
+            }
+            delete that.storage[obj.id];
             count--;
             return false;
           });
@@ -46,32 +50,33 @@ export default function AppModel(manifest) {
           }
         }
         this.count = count;
-        console.log("veda.cache limit (" + this.limit + " elements) reached, " + this.delta + " removed.");
+        console.log('veda.cache limit (' + this.limit + ' elements) reached, ' + this.delta + ' removed.');
       }
-      var expire_key = typeof expires === "number" ? expires : Date.now();
+      const expire_key = typeof expires === 'number' ? expires : Date.now();
       obj.expires = expire_key;
-      this.storage[ obj.id ] = obj;
-      this.expire[ expire_key ] = this.expire[ expire_key ] || [];
-      this.expire[ expire_key ].push(obj);
+      this.storage[obj.id] = obj;
+      this.expire[expire_key] = this.expire[expire_key] || [];
+      this.expire[expire_key].push(obj);
       this.count++;
-      if (typeof window !== "undefined" && expire_key !== 1) {
-        var updateService = new UpdateService();
+      if (typeof window !== 'undefined' && expire_key !== 1) {
+        const updateService = new UpdateService();
         updateService.then(function (updateService) {
           updateService.subscribe(obj.id);
         });
       }
     },
     remove: function (key) {
-      var that = this;
-      var obj = this.storage[key];
-      var expires = obj.expires;
-      this.expire[expires] = this.expire[expires].filter(function (item) { return item.id !== key });
+      const obj = this.storage[key];
+      const expires = obj.expires;
+      this.expire[expires] = this.expire[expires].filter(function (item) {
+        return item.id !== key;
+      });
       if (this.expire[expires].length === 0) {
         delete this.expire[expires];
       }
       this.count--;
-      if (typeof window !== "undefined") {
-        var updateService = new UpdateService();
+      if (typeof window !== 'undefined') {
+        const updateService = new UpdateService();
         updateService.then(function (updateService) {
           updateService.unsubscribe(key);
         });
@@ -82,18 +87,18 @@ export default function AppModel(manifest) {
       this.count = 0;
       this.storage = {};
       this.expire = {};
-      if (typeof window !== "undefined") {
-        var updateService = new UpdateService();
+      if (typeof window !== 'undefined') {
+        const updateService = new UpdateService();
         updateService.then(function (updateService) {
           updateService.unsubscribe();
         });
       }
-    }
+    },
   };
 
   // Load ontology
   self.init = function (user) {
-    var ontology = new OntologyModel();
+    const ontology = new OntologyModel();
     return ontology.then(function (ontology) {
       self.ontology = ontology;
       self.user = new UserModel(user);

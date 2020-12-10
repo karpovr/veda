@@ -1,17 +1,20 @@
 // Update service for individuals that were changed on server
 
-"use strict";
+'use strict';
 
-import veda from "../common/veda.js";
+import veda from '../common/veda.js';
 
-import IndividualModel from "../common/individual_model.js";
+import IndividualModel from '../common/individual_model.js';
 
-import Backend from "../common/backend.js";
+import Backend from '../common/backend.js';
 
 export default UpdateService;
 
+/**
+ * Client in memory cache update service singleton constructor
+ * @return {Promise} update service instance promise
+ */
 function UpdateService() {
-
   const self = this;
 
   // Singleton pattern
@@ -26,7 +29,7 @@ function UpdateService() {
   const pingTimeout = 5000;
 
   let buffer = [];
-  let socketDelay = 1000;
+  const socketDelay = 1000;
   let socketTimeout;
   let reconnectDelay = reconnectDelayInitial;
   let lastPing = Date.now();
@@ -34,12 +37,16 @@ function UpdateService() {
 
   return UpdateService.prototype._singletonInstance = initSocket();
 
+  /**
+   * Initialize instance
+   * @return {Promise} instance promise
+   */
   function initSocket() {
-    return Backend.reset_individual(veda.ticket, "cfg:ClientUpdateServicePort").then(function (ccusPortCfg) {
-      const ccusPort = ccusPortCfg["rdf:value"] && ccusPortCfg["rdf:value"][0].data;
-      const protocol = location.protocol === "http:" ? "ws:" : "wss:";
-      const port = ccusPort || ( protocol === "ws:" ? 80 : 443 );
-      const address = protocol + "//" + location.hostname + ":" + port + "/ccus";
+    return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort').then(function (ccusPortCfg) {
+      const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
+      const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
+      const port = ccusPort || window.location.port;
+      const address = protocol + '//' + window.location.hostname + (port ? ':' + port : '') + '/ccus';
       const socket = new WebSocket(address);
 
       socket.onopen = openedHandler;
@@ -53,22 +60,28 @@ function UpdateService() {
     });
   }
 
+  /**
+   * Send a message via socket
+   * @param {string} msg - message to send
+   * @this UpdateService
+   * @return {void}
+   */
   function sendMessage (msg) {
     const socket = this;
-    if (msg === "=" || msg === "-*" || msg.indexOf("ccus") === 0) {
+    if (msg === '=' || msg === '-*' || msg.indexOf('ccus') === 0) {
       if (socket.readyState === 1) {
         socket.send(msg);
-        //console.log("client -> server:", msg);
+        // console.log("client -> server:", msg);
       }
       return;
     }
     buffer.push(msg);
     if ( !socketTimeout ) {
       socketTimeout = setTimeout(function () {
-        const message = buffer.join(",");
+        const message = buffer.join(',');
         if (socket.readyState === 1) {
           socket.send(message);
-          //console.log("client -> server:", message);
+          // console.log("client -> server:", message);
         }
         buffer = [];
         socketTimeout = undefined;
@@ -76,27 +89,34 @@ function UpdateService() {
     }
   }
 
+  /**
+   * Receive a message via socket
+   * @param {string} msg - received message
+   * @return {void}
+   */
   function receiveMessage(msg) {
-    //console.log("server -> client:", msg);
-    if (msg === "") {
+    // console.log("server -> client:", msg);
+    if (msg === '') {
       lastPing = Date.now();
       return;
     }
-    let uris = msg.indexOf("=") === 0 ? msg.substr(1) : msg;
+    let uris = msg.indexOf('=') === 0 ? msg.substr(1) : msg;
     if (uris.length === 0) {
       return;
     }
-    uris = uris.split(",");
+    uris = uris.split(',');
     for (let i = 0; i < uris.length; i++) {
       try {
-        let tmp = uris[i].split("=");
-        let uri = tmp[0];
+        const tmp = uris[i].split('=');
+        const uri = tmp[0];
         if ( !uri ) {
           continue;
         }
-        let updateCounter = parseInt(tmp[1]);
-        let individual = new IndividualModel(uri);
-        if ( individual.hasValue("v-s:updateCounter", updateCounter) ) { continue; }
+        const updateCounter = parseInt(tmp[1]);
+        const individual = new IndividualModel(uri);
+        if ( individual.hasValue('v-s:updateCounter', updateCounter) ) {
+          continue;
+        }
         if (self.list[uri]) {
           self.list[uri].updateCounter = updateCounter;
         }
@@ -106,22 +126,28 @@ function UpdateService() {
           individual.reset(); // Default action
         }
       } catch (error) {
-        console.log("error: individual update service failed", error);
+        console.log('error: individual update service failed', error);
       }
     }
   }
 
+  /**
+   * Socket opened handler
+   * @param {Event} event
+   * @this UpdateService
+   * @return {void}
+   */
   function openedHandler(event) {
     reconnectDelay = reconnectDelayInitial;
-    console.log("client: websocket opened", event.target.url);
-    this.sendMessage("ccus=" + veda.ticket);
+    console.log('client: websocket opened', event.target.url);
+    this.sendMessage('ccus=' + veda.ticket);
     self.restore();
-    veda.trigger("ccus-online");
+    veda.trigger('ccus-online');
 
     pingInterval = setInterval(function (that) {
       if (Date.now() - lastPing > 2 * pingTimeout) {
-        console.log("client: ping missed, close socket");
-        veda.trigger("ccus-offline");
+        console.log('client: ping missed, close socket');
+        veda.trigger('ccus-offline');
         clearInterval(pingInterval);
         that.close();
         return;
@@ -129,24 +155,40 @@ function UpdateService() {
     }, pingTimeout, this);
   }
 
+  /**
+   * Message received handler
+   * @param {Event} event
+   * @this WebSocket
+   * @return {void}
+   */
   function messageHandler(event) {
     const msg = event.data;
     this.receiveMessage(msg);
   }
 
+  /**
+   * Socket error handler
+   * @param {Event} event
+   * @this WebSocket
+   * @return {void}
+   */
   function errorHandler(event) {
-    console.log("client: ccus error", event);
+    console.log('client: ccus error', event);
     this.close();
   }
 
+  /**
+   * Socket closed handler
+   * @param {Event} event
+   * @return {void}
+   */
   function closedHandler(event) {
-    reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit ;
-    console.log("client: websocket closed", event.target.url, "| re-connect in", reconnectDelay / 1000, "sec");
+    reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
+    console.log('client: websocket closed', event.target.url, '| re-connect in', reconnectDelay / 1000, 'sec');
     setTimeout(initSocket, reconnectDelay);
-    veda.trigger("ccus-offline");
+    veda.trigger('ccus-offline');
     clearInterval(pingInterval);
   }
-
 };
 
 const proto = UpdateService.prototype;
@@ -158,15 +200,15 @@ proto.subscribe = function (uri, action) {
   } else {
     const individual = new IndividualModel(uri);
     individual.load().then(function (individual) {
-      const updateCounter = individual.hasValue("v-s:updateCounter") ? individual.get("v-s:updateCounter")[0] : 0;
+      const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
       self.list[uri] = {
         subscribeCounter: 1,
-        updateCounter: updateCounter
+        updateCounter: updateCounter,
       };
       if (action) {
         self.list[uri].action = action;
       }
-      self.socket.sendMessage("+" + uri + "=" + updateCounter);
+      self.socket.sendMessage('+' + uri + '=' + updateCounter);
     });
   }
 };
@@ -174,18 +216,20 @@ proto.subscribe = function (uri, action) {
 proto.unsubscribe = function (uri) {
   if ( !uri ) {
     this.list = {};
-    this.socket.sendMessage("-*");
+    this.socket.sendMessage('-*');
   } else if ( this.list[uri] && this.list[uri].subscribeCounter > 1) {
     --this.list[uri].subscribeCounter;
   } else {
     delete this.list[uri];
-    this.socket.sendMessage("-" + uri);
+    this.socket.sendMessage('-' + uri);
   }
 };
 
 proto.restore = function () {
-  this.socket.sendMessage("-*");
-  for (let uri in this.list) {
-    this.socket.sendMessage("+" + uri + "=" + this.list[uri].updateCounter);
+  this.socket.sendMessage('-*');
+  for (const uri in this.list) {
+    if (Object.hasOwnProperty.call(this.list, uri)) {
+      this.socket.sendMessage('+' + uri + '=' + this.list[uri].updateCounter);
+    }
   }
 };

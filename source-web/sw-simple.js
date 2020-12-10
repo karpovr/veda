@@ -56,9 +56,8 @@ function handleFetch(event, CACHE) {
           cache.put(event.request, response.clone());
           return response;
         });
-      } else {
-        throw response;
       }
+      return response;
     });
   });
 }
