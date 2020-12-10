@@ -42,23 +42,23 @@ jobs:
             ./control-start.sh
             sleep 200
             grunt test --stack --verbose
-            testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 0.6
-            testcafe chrome:headless qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testComment.js --screenshots screens --screenshots-on-fails screens --speed 0.5
-            testcafe chrome:headless qa/testcafe/testSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 0.7
-            testcafe chrome:headless qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testRights.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 0.8
-            testcafe chrome:headless qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 0.5
-            testcafe chrome:headless qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 0.5
-            testcafe chrome:headless qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 0.5
-            testcafe chrome:headless qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 0.6
-            testcafe chrome:headless qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens
-            testcafe chrome:headless qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 0.7
-            testcafe chrome:headless qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 0.7
+            testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testComment.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSearch.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testRights.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 1
 
 # Orchestrate our job run sequence
 workflows:
