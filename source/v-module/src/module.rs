@@ -44,7 +44,9 @@ pub struct Module {
 }
 
 impl Default for Module {
-    fn default() -> Self { Module::new(StorageMode::ReadOnly, false) }
+    fn default() -> Self {
+        Module::new(StorageMode::ReadOnly, false)
+    }
 }
 
 impl Module {
@@ -138,14 +140,29 @@ impl Module {
 
 impl Module {
     pub fn get_property(param: &str) -> Option<String> {
+        let args: Vec<String> = env::args().collect();
+        for el in args.iter() {
+            if el.starts_with(&format!("--{}", param)) {
+                let p: Vec<&str> = el.split('=').collect();
+                if p.len() == 2 {
+                    let v = p[1].trim();
+                    info!("use arg --{}={}", param, v);
+                    return Some(p[1].to_owned());
+                }
+            }
+        }
+
         let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
 
         let section = conf.section(None::<String>).expect("fail parse veda.properties");
         if let Some(v) = section.get(param) {
-            Some(v.to_string())
-        } else {
-            None
+            let v = v.trim();
+            info!("use param {}={}", param, v);
+            return Some(v.to_string());
         }
+
+        error!("param [{}] not found", param);
+        None
     }
 
     pub fn get_sys_ticket_id_from_db(storage: &mut VStorage) -> Result<String, i32> {
@@ -158,7 +175,9 @@ impl Module {
         Err(-1)
     }
 
-    pub fn get_sys_ticket_id(&mut self) -> Result<String, i32> { Module::get_sys_ticket_id_from_db(&mut self.storage) }
+    pub fn get_sys_ticket_id(&mut self) -> Result<String, i32> {
+        Module::get_sys_ticket_id_from_db(&mut self.storage)
+    }
 
     pub fn get_literal_of_link(&mut self, indv: &mut Individual, link: &str, field: &str, to: &mut Individual) -> Option<String> {
         if let Some(v) = indv.get_literals(link) {
@@ -308,10 +327,10 @@ impl Module {
                                 //process::exit(e as i32);
                                 return;
                             }
-                        },
+                        }
                         Ok(b) => {
                             need_commit = b;
-                        },
+                        }
                     }
                 }
 
@@ -390,7 +409,9 @@ pub fn get_cmd(queue_element: &mut Individual) -> Option<IndvOp> {
     Some(IndvOp::from_i64(wcmd.unwrap_or_default()))
 }
 
-pub fn init_log(module_name: &str) { init_log_with_filter(module_name, None) }
+pub fn init_log(module_name: &str) {
+    init_log_with_filter(module_name, None)
+}
 
 pub fn init_log_with_filter(module_name: &str, filter: Option<&str>) {
     let var_log_name = module_name.to_owned() + "_LOG";
@@ -484,7 +505,9 @@ pub fn get_info_of_module(module_name: &str) -> Option<(i64, i64)> {
     info.read_info()
 }
 
-pub fn wait_load_ontology() -> i64 { wait_module("input-onto", 1) }
+pub fn wait_load_ontology() -> i64 {
+    wait_module("input-onto", 1)
+}
 
 pub fn wait_module(module_name: &str, wait_op_id: i64) -> i64 {
     if wait_op_id < 0 {
