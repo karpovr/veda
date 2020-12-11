@@ -32,7 +32,7 @@ struct Context {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    init_log_with_filter("EXIM_RESPOND", Some("error,rocket=error,exim=info"));
+    init_log_with_filter("EXIM_RESPOND", None /*Some("error,rocket=error,exim=info")*/);
     rocket()?.launch();
 
     Ok(())

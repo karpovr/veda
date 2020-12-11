@@ -221,8 +221,11 @@ fn add_to_queue(queue_out: &mut Queue, cmd: IndvOp, new_state_indv: &mut Individ
 }
 
 fn export_from_query(query: &str, module: &mut Module, ctx: &mut Context) -> Result<(), PrepareError> {
-    let res = ctx.xr.query(FTQuery::new_with_user("cfg:VedaSystem", query), &mut module.storage);
-    info!("execute query [{}]", query);
+    let mut ftq = FTQuery::new_with_user("cfg:VedaSystem", query);
+    ftq.top = 100000;
+    ftq.limit = 100000;
+    info!("execute query [{:?}]", ftq);
+    let res = ctx.xr.query(ftq, &mut module.storage);
     if res.result_code == ResultCode::Ok && res.count > 0 {
         for id in &res.result {
             if let Some(mut indv) = module.get_individual(id, &mut Individual::default()) {

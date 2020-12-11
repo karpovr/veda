@@ -34,6 +34,8 @@ pub struct OutValue {
 pub fn is_exportable(_module: &mut Module, ctx: &mut Context, prev_state_indv: Option<&mut Individual>, new_state_indv: &mut Individual, user_id: &str) -> Vec<OutValue> {
     let mut ov = vec![];
 
+    new_state_indv.parse_all();
+
     let rdf_types = new_state_indv.get_literals("rdf:type").unwrap_or_default();
 
     let mut session_data = CallbackSharedData::default();
