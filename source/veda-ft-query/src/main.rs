@@ -50,7 +50,16 @@ fn main() {
 
         loop {
             if let Ok(recv_msg) = server.recv() {
-                let out_msg = req_prepare(&mut module, &recv_msg, &mut xr);
+                let out_msg = if let Ok(s) = str::from_utf8(recv_msg.as_slice()) {
+                    if s.len() > 2 {
+                        req_prepare(&mut module, s, &mut xr)
+                    } else {
+                        Message::from("[]".as_bytes())
+                    }
+                } else {
+                    Message::from("[]".as_bytes())
+                };
+
                 if let Err(e) = server.send(out_msg) {
                     error!("fail send answer, err={:?}", e);
                 }
@@ -70,71 +79,69 @@ const TOP: usize = 5;
 const LIMIT: usize = 6;
 const FROM: usize = 7;
 
-fn req_prepare(module: &mut Module, request: &Message, xr: &mut XapianReader) -> Message {
-    if let Ok(s) = str::from_utf8(request.as_slice()) {
-        let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
-            v
-        } else {
-            JSONValue::Null
-        };
+fn req_prepare(module: &mut Module, s: &str, xr: &mut XapianReader) -> Message {
+    let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
+        v
+    } else {
+        JSONValue::Null
+    };
 
-        if let Some(a) = v.as_array() {
-            let ticket_id = a.get(TICKET).unwrap().as_str().unwrap_or_default();
-            let mut query = a.get(QUERY).unwrap().as_str().unwrap_or_default().to_string();
+    if let Some(a) = v.as_array() {
+        let ticket_id = a.get(TICKET).unwrap().as_str().unwrap_or_default();
+        let mut query = a.get(QUERY).unwrap().as_str().unwrap_or_default().to_string();
 
-            if !(query.find("==").is_some() || query.find("&&").is_some() || query.find("||").is_some()) {
-                query = "'*' == '".to_owned() + &query + "'";
-            }
+        if !(query.find("==").is_some() || query.find("&&").is_some() || query.find("||").is_some()) {
+            query = "'*' == '".to_owned() + &query + "'";
+        }
 
-            let sort = a.get(SORT).unwrap().as_str().unwrap_or_default().to_string();
-            let databases = a.get(DATABASES).unwrap().as_str().unwrap_or_default().to_string();
+        let sort = a.get(SORT).unwrap().as_str().unwrap_or_default().to_string();
+        let databases = a.get(DATABASES).unwrap().as_str().unwrap_or_default().to_string();
 
-            let top = a.get(TOP).unwrap().as_i64().unwrap_or_default() as i32;
-            let limit = a.get(LIMIT).unwrap().as_i64().unwrap_or_default() as i32;
-            let from = a.get(FROM).unwrap().as_i64().unwrap_or_default() as i32;
+        let top = a.get(TOP).unwrap().as_i64().unwrap_or_default() as i32;
+        let limit = a.get(LIMIT).unwrap().as_i64().unwrap_or_default() as i32;
+        let from = a.get(FROM).unwrap().as_i64().unwrap_or_default() as i32;
 
-            let mut user_uri = "cfg:Guest".to_owned();
-            if !ticket_id.is_empty() {
-                if ticket_id.starts_with("UU=") {
-                    user_uri = ticket_id.trim_start_matches("UU=").to_owned();
-                } else {
-                    let ticket = module.get_ticket_from_db(&ticket_id);
-                    if ticket.result == ResultCode::Ok {
-                        user_uri = ticket.user_uri;
-                    }
-                }
-            }
-
-            let mut ctx = vec![];
-            fn add_out_element(id: &str, ctx: &mut Vec<String>) {
-                ctx.push(id.to_owned());
-            }
-
-            let request = FTQuery {
-                ticket: "".to_string(),
-                user: user_uri,
-                query,
-                sort,
-                databases,
-                reopen: false,
-                top,
-                limit,
-                from,
-            };
-
-            info!(
-                "ticket={}, user={}, query={}, sort={}, db={}, top={}, limit={}, from={}",
-                ticket_id, request.user, request.query, request.sort, request.databases, request.top, request.limit, request.from
-            );
-
-            if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
-                res.result = ctx;
-                info!("count = {}, time: query={}, authorize={}, total={}", res.count, res.query_time, res.authorize_time, res.total_time);
-                if let Ok(s) = serde_json::to_string(&res) {
-                    return Message::from(s.as_bytes());
+        let mut user_uri = "cfg:Guest".to_owned();
+        if !ticket_id.is_empty() {
+            if ticket_id.starts_with("UU=") {
+                user_uri = ticket_id.trim_start_matches("UU=").to_owned();
+            } else {
+                let ticket = module.get_ticket_from_db(&ticket_id);
+                if ticket.result == ResultCode::Ok {
+                    user_uri = ticket.user_uri;
                 }
             }
         }
+
+        let mut ctx = vec![];
+        fn add_out_element(id: &str, ctx: &mut Vec<String>) {
+            ctx.push(id.to_owned());
+        }
+
+        let request = FTQuery {
+            ticket: "".to_string(),
+            user: user_uri,
+            query,
+            sort,
+            databases,
+            reopen: false,
+            top,
+            limit,
+            from,
+        };
+
+        info!(
+            "ticket={}, user={}, query={}, sort={}, db={}, top={}, limit={}, from={}",
+            ticket_id, request.user, request.query, request.sort, request.databases, request.top, request.limit, request.from
+        );
+
+        if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
+            res.result = ctx;
+            info!("count = {}, time: query={}, authorize={}, total={}", res.count, res.query_time, res.authorize_time, res.total_time);
+            if let Ok(s) = serde_json::to_string(&res) {
+                return Message::from(s.as_bytes());
+            }
+        }
     }
-    return Message::from("[]".as_bytes());
+    Message::from("[]".as_bytes())
 }
