@@ -40,24 +40,41 @@ jobs:
           name: "test"
           command: | 
             ./control-start.sh
-            sleep 200
+            sleep 120
             grunt test --stack --verbose
+            sleep 1
             testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testComment.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testSearch.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testRights.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testSimpleNet3.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testSimpleNetLowPriority.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testControls.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 1
+            sleep 1
             testcafe chrome:headless qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 1
 
 # Orchestrate our job run sequence
