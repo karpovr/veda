@@ -2,8 +2,10 @@
 extern crate log;
 
 use ini::Ini;
-use nng::{Message, Protocol, Socket};
+use nng::options::{Options, RecvTimeout, SendTimeout};
+use nng::{Message, Protocol, Socket, Error};
 use serde_json::value::Value as JSONValue;
+use std::time::Duration;
 use std::{env, str};
 use v_api::app::OptAuthorize;
 use v_api::app::ResultCode;
@@ -35,35 +37,67 @@ fn main() {
         if el.starts_with("--bind") {
             let p: Vec<&str> = el.split('=').collect();
             query_url = p[1].to_owned().trim().to_owned();
-            info!("bind to={}", query_url);
+            info!("use arg bind={}", query_url);
         }
     }
 
     let mut module = Module::default();
 
     if let Some(mut xr) = XapianReader::new("russian", &mut module.storage) {
-        let server = Socket::new(Protocol::Rep0).unwrap();
-        if let Err(e) = server.listen(&query_url) {
-            error!("fail listen {}, {:?}", query_url, e);
-            return;
-        }
-
+        let mut count = 0;
         loop {
-            if let Ok(recv_msg) = server.recv() {
-                let out_msg = if let Ok(s) = str::from_utf8(recv_msg.as_slice()) {
-                    if s.len() > 2 {
-                        req_prepare(&mut module, s, &mut xr)
-                    } else {
-                        Message::from("[]".as_bytes())
-                    }
-                } else {
-                    Message::from("[]".as_bytes())
-                };
+            let server = Socket::new(Protocol::Rep0).unwrap();
 
-                if let Err(e) = server.send(out_msg) {
-                    error!("fail send answer, err={:?}", e);
+            if let Err(e) = server.set_opt::<RecvTimeout>(Some(Duration::from_secs(30))) {
+                error!("fail set recv timeout, {} err={}", query_url, e);
+                return;
+            }
+            if let Err(e) = server.set_opt::<SendTimeout>(Some(Duration::from_secs(30))) {
+                error!("fail set send timeout, {} err={}", query_url, e);
+                return;
+            }
+
+            if let Err(e) = server.listen(&query_url) {
+                error!("fail listen {}, {:?}", query_url, e);
+                return;
+            }
+
+            info!("listen {}", query_url);
+
+            loop {
+                match server.recv() {
+                    Ok(recv_msg) => {
+                        count += 1;
+                        let out_msg = if let Ok(s) = str::from_utf8(recv_msg.as_slice()) {
+                            if s.len() > 2 {
+                                req_prepare(&mut module, s, &mut xr)
+                            } else {
+                                Message::from("[]".as_bytes())
+                            }
+                        } else {
+                            Message::from("[]".as_bytes())
+                        };
+
+                        if let Err(e) = server.send(out_msg) {
+                            error!("fail send answer, err={:?}", e);
+                            break;
+                        }
+                    }
+                    Err(e) => {
+                        match e {
+                            Error::TimedOut => {
+                                info!("count requests: {}", count);
+                            },
+                            _ => {
+                                error!("fail get request, err={:?}", e);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
+            error!("close socket");
+            server.close();
         }
     } else {
         error!("fail init ft-query");
