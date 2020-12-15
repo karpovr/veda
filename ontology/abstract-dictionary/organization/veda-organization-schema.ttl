@@ -235,6 +235,15 @@ v-s:official
 .
 # v-s:valid
 
+v-s:parentSubsidiary
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Родительский филиал"@ru ;
+  rdfs:label "Parent subsidiary"@en ;
+  rdfs:range v-s:Appointment ;
+  rdfs:domain v-s:Department ;
+  rdfs:domain v-s:Organization ;
+.
+
 # ------------------------------------------------------------
 v-s:Person
   rdf:type owl:Class ;

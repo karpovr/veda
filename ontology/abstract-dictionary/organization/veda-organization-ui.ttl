@@ -1553,6 +1553,15 @@ v-s:AppointmentTemplate
     </div>
     <div class="row row-attribute">
       <div class="col-sm-3 col-xs-5">
+        <label about="v-s:Subsidiary" property="rdfs:label"></label>
+      </div>
+      <div class="col-sm-9 col-xs-7">
+        <div about="@" rel="v-s:parentSubsidiary" class="view -edit -search" data-template="v-ui:LabelLinkTemplate"></div>
+        <veda-control rel="v-s:parentSubsidiary" data-query-prefix = "(('rdf:type'=='v-s:Department' || 'rdf:type'=='v-s:Organization') && 'v-s:parentOrganization'=='{individual['v-s:parentOrganization'][0].id}') || '@'=='{individual['v-s:parentOrganization'][0].id}'" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+      </div>
+    </div>
+    <div class="row row-attribute">
+      <div class="col-sm-3 col-xs-5">
         <label about="v-s:Department" property="rdfs:label"></label>
       </div>
       <div class="col-sm-9 col-xs-7">
