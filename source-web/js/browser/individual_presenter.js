@@ -227,15 +227,19 @@ function processTemplate (individual, container, template, mode) {
 
   // Define handlers
   template.callModelMethod = function (method, parent) {
-    return Promise.all(embedded.map(function (item) {
-      return item.callModelMethod(method, individual.id);
-    })).then(function () {
+    return embedded.reduce(function (p, item) {
+      return p.then(function () {
+        return item.callModelMethod(method, individual.id);
+      })
+    }, Promise.resolve())
+    .then(function () {
       if (parent === individual.id) {
         return Promise.resolve();
       } else {
         return individual[method]();
       }
-    }).then(function () {
+    })
+    .then(function () {
       template.trigger('view');
       if (method === 'reset') {
         return;
@@ -250,7 +254,8 @@ function processTemplate (individual, container, template, mode) {
         const parentIndividual = new IndividualModel(parent);
         parentIndividual.isSync(false);
       }
-    }).catch(function (error) {
+    })
+    .catch(function (error) {
       const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
       errorMsg.then(function (errorMsg) {
         const notify = Notify ? new Notify() : function () {};
