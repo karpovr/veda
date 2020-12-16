@@ -72,8 +72,7 @@ pub struct CCUSServer {
 
 impl CCUSServer {
     pub fn new(tx: Sender<CMessage>) -> CCUSServer {
-
-	wait_load_ontology();
+        wait_load_ontology();
 
         let _consumer = Consumer::new("./data/queue", "CCUS1", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
         let ch = mpsc::channel();
@@ -180,6 +179,7 @@ impl CCUSServer {
     }
 
     fn prepare_command(&mut self, message: &str, session_id: usize) {
+        debug!("prepare_command: recv: {}", message);
         let mut changes = String::new();
 
         for item in message.split(',') {
@@ -197,16 +197,16 @@ impl CCUSServer {
                     };
                     // Добавить подписку: +uriN=M[,...]
 
-                    let registred_counter = self.subscribe(uri, counter, session_id);
+                    let registered_counter = self.subscribe(uri, counter, session_id);
 
-                    if registred_counter > counter || registred_counter == 0 {
+                    if registered_counter > counter {
                         if !changes.is_empty() {
                             changes.push_str(",");
                         }
 
                         changes.push_str(&uri.to_owned());
                         changes.push_str("=");
-                        changes.push_str(&registred_counter.to_string());
+                        changes.push_str(&registered_counter.to_string());
                     }
                 }
             } else if els.len() == 1 {
@@ -225,7 +225,7 @@ impl CCUSServer {
         if !changes.is_empty() {
             if let Some(addr) = self.sessions.get(&session_id) {
                 let _ = addr.do_send(Msg(changes.to_owned()));
-                debug!("send {}", changes);
+                debug!("prepare_command: send {}", changes);
             }
         }
     }
@@ -329,7 +329,7 @@ impl Actor for CCUSServer {
 
                 if let Some(addr) = act.sessions.get(el.0) {
                     let _ = addr.do_send(Msg(changes.to_owned()));
-                    debug!("send {}", changes);
+                    debug!("run_interval: send {}", changes);
                 }
             }
         });
