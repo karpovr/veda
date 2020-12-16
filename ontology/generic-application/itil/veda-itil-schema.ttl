@@ -54,3 +54,13 @@ v-s:IT_InfrastructureObjectsDataBase
   v-s:labelPattern "{@.v-s:title} - {@.v-s:hasMaintenanceObjectKind.rdfs:label}"^^xsd:string;
   #v-ui:hasTemplate v-s:IT_InfrastructureObjectsTemplate;
 .
+
+#-------------------------------------------------------- Инсталяция --
+v-s:LinkObject
+  rdf:type owl:Class ;
+  rdfs:label "Инсталляция"@ru ;
+  rdfs:label "Installation"@en ;
+  rdfs:subClassOf v-s:IT_InfrastructureObjects, v-s:Labeled;
+  v-s:labelPattern "{@.v-s:title}"^^xsd:string;
+.
+
