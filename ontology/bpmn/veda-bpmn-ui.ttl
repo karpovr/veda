@@ -200,12 +200,20 @@ bpmn:ComplexRouteStartForm_Common_Template
         $('[rel="' + routeid + '"]', template).empty();
       };
     });
-    template.trigger("save");
-    template.closest(".modal").modal("hide").remove();
-    var notify = veda.Notify ? new veda.Notify() : function () {};
-    var sendSuccess = new veda.IndividualModel("v-s:SendSuccess");
-    sendSuccess.load().then(function (sendSuccess) {
-      notify("success", {name: sendSuccess});
+    template.callModelMethod('save').then(function () {
+      template.closest('.modal').modal('hide').remove();
+      const notify = new Notify();
+      const sendSuccess = new IndividualModel('v-s:SendSuccess');
+      sendSuccess.load().then(function (sendSuccess) {
+        notify('success', {name: sendSuccess});
+      });
+    }).catch(function (error) {
+      const notify = new Notify();
+      const sendError = new IndividualModel('v-s:SendError');
+      sendError.load().then(function (sendError) {
+        notify('danger', {name: sendError});
+      });
+      console.log("Send error:", error.stack);
     });
   });
 
