@@ -44,7 +44,7 @@ proto.init = function () {
         return self.processOntology();
       })
       .catch(function (error) {
-        console.log('Ontology load error.', error);
+        console.log('Ontology load error.', error.stack);
         return error;
       });
   } else {
@@ -207,8 +207,8 @@ proto.processOntology = function () {
         property['rdfs:domain'].map( function ( _class ) {
           classTree[_class.id].properties.push(property.id);
         });
-      } catch (err) {
-        console.error('Ontology init error, uri = %s', uri, err.name);
+      } catch (error) {
+        console.error('Ontology init error, uri =', uri, error.stack);
       }
     });
 
@@ -224,8 +224,8 @@ proto.processOntology = function () {
             classTree[_class.id].specifications[prop.id] = spec.id;
           });
         });
-      } catch (err) {
-        console.error('Ontology init error, uri = %s', uri, err.name);
+      } catch (error) {
+        console.error('Ontology init error, uri =', uri, error.stack);
       }
     });
 
@@ -245,8 +245,8 @@ proto.processOntology = function () {
         }).map(function(templateSpec) {
           return templateSpec.properties['v-ui:defaultTemplate'][0].data;
         });
-      } catch (err) {
-        console.error('Ontology init error, uri = %s', uri, err.name);
+      } catch (error) {
+        console.error('Ontology init error, uri =', uri, error.stack);
       }
     });
 
@@ -256,7 +256,7 @@ proto.processOntology = function () {
         return;
       }
       return individual.init().catch(function (error) {
-        console.error('Ontology individual init error, uri = %s', individual.id, error);
+        console.error('Ontology individual init error, uri =', individual.id, error.stack);
       });
     });
 
