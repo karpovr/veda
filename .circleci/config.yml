@@ -45,7 +45,7 @@ jobs:
             sleep 1
             testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 0.6
             sleep 1
-            testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --skip-js-errors --speed 0.6
+            testcafe chrome:headless qa/testcafe/testPerson.js --screenshots screens --screenshots-on-fails screens --speed 0.6
             sleep 1
             testcafe chrome:headless qa/testcafe/testLanguage.js --screenshots screens --screenshots-on-fails screens --speed 1
             sleep 1
