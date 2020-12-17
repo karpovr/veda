@@ -141,7 +141,11 @@ impl Individual {
         } else {
             let ndt;
             if value.len() == 10 {
-                ndt = NaiveDateTime::parse_from_str(&(value.to_owned() + "T00:00:00"), "%Y-%m-%dT%H:%M:%S");
+                if value.contains('.') {
+                    ndt = NaiveDateTime::parse_from_str(&(value.to_owned() + "T00:00:00"), "%d.%m.%YT%H:%M:%S");
+                } else {
+                    ndt = NaiveDateTime::parse_from_str(&(value.to_owned() + "T00:00:00"), "%Y-%m-%dT%H:%M:%S");
+                }
             } else {
                 ndt = NaiveDateTime::parse_from_str(&value, "%Y-%m-%dT%H:%M:%S")
             }
