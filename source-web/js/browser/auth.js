@@ -52,7 +52,7 @@ export default function Auth() {
         if (ntlm) {
           return new Promise(function (resolve, reject) {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/ad/', true);
+            xhr.open('POST', '/ad', true);
             xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
             xhr.onload = resolve;
             xhr.onerror = reject;
@@ -379,7 +379,8 @@ export default function Auth() {
    * @return {void}
    */
   function setTicketCookie(ticket, expires) {
-    document.cookie = 'ticket=' + ticket + '; expires=' + new Date(parseInt(expires)).toGMTString() + '; samesite=strict; path=/;' + window.location.protocol === 'https:' ? 'secure;' : '';
+    const cookie = 'ticket=' + ticket + '; expires=' + new Date(parseInt(expires)).toGMTString() + '; samesite=strict; path=/;' + (window.location.protocol === 'https:' ? 'secure;' : '');
+    document.cookie = cookie;
   }
 
   /**
