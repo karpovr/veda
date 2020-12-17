@@ -46,74 +46,75 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
 
   const reg_uri = /^[a-z-0-9]+:([a-zA-Z0-9-_])*$/;
 
-  return this.load().then(function (individual) {
-    const offlineTemplate = '<h5 class=\'container sheet text-center text-muted\'>Нет связи с сервером. Этот объект сейчас недоступен / Server disconnected. This object is not available now</h5>';
+  return this.load()
+    .then(function (individual) {
+      const offlineTemplate = '<h5 class=\'container sheet text-center text-muted\'>Нет связи с сервером. Этот объект сейчас недоступен / Server disconnected. This object is not available now</h5>';
 
-    if (template) {
-      if (template instanceof IndividualModel) {
-      // if template is uri
-      } else if (typeof template === 'string' && reg_uri.test(template) ) {
-        template = new IndividualModel(template);
-      } else {
-        let templateString;
-        if (typeof template === 'string') {
-          templateString = template;
-        } else if (template instanceof HTMLElement) {
-          templateString = template.outerHTML;
-        }
-        const uri = Util.simpleHash(templateString).toString();
-        template = veda.cache.get(uri) ? veda.cache.get(uri) : new IndividualModel({
-          '@': uri,
-          'v-ui:template': [{data: templateString, type: 'String'}],
-        }, 1);
-      }
-      return template.load().then(function (template) {
-        template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
-        return renderTemplate(individual, container, template, mode, extra, toAppend);
-      });
-    } else {
-      const isClass = individual.hasValue('rdf:type', 'owl:Class') || individual.hasValue('rdf:type', 'rdfs:Class');
-      let templatePromise;
-      if ( individual.hasValue('v-ui:hasTemplate') && !isClass ) {
-        template = individual['v-ui:hasTemplate'][0];
-        templatePromise = template.load().then(function (template) {
-          if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
-            throw new Error('Template type violation!');
+      if (template) {
+        if (template instanceof IndividualModel) {
+        // if template is uri
+        } else if (typeof template === 'string' && reg_uri.test(template) ) {
+          template = new IndividualModel(template);
+        } else {
+          let templateString;
+          if (typeof template === 'string') {
+            templateString = template;
+          } else if (template instanceof HTMLElement) {
+            templateString = template.outerHTML;
           }
+          const uri = Util.simpleHash(templateString).toString();
+          template = veda.cache.get(uri) ? veda.cache.get(uri) : new IndividualModel({
+            '@': uri,
+            'v-ui:template': [{data: templateString, type: 'String'}],
+          }, 1);
+        }
+        return template.load().then(function (template) {
           template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
           return renderTemplate(individual, container, template, mode, extra, toAppend);
         });
       } else {
-        const ontology = veda.ontology;
-
-        const typePromises = individual['rdf:type'].map(function (type) {
-          return type.load();
-        });
-        templatePromise = Promise.all(typePromises).then(function (types) {
-          const templatesPromises = types.map( function (type) {
-            const defaultTemplateUri = ontology.getClassTemplate(type.id);
-            if (defaultTemplateUri) {
-              return new IndividualModel(defaultTemplateUri).load();
-            } else {
-              return type.hasValue('v-ui:hasTemplate') ? type['v-ui:hasTemplate'][0].load() : new IndividualModel('v-ui:generic').load();
+        const isClass = individual.hasValue('rdf:type', 'owl:Class') || individual.hasValue('rdf:type', 'rdfs:Class');
+        let templatePromise;
+        if ( individual.hasValue('v-ui:hasTemplate') && !isClass ) {
+          template = individual['v-ui:hasTemplate'][0];
+          templatePromise = template.load().then(function (template) {
+            if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
+              throw new Error('Template type violation!');
             }
-          });
-          return Promise.all(templatesPromises);
-        }).then(function (templates) {
-          const renderedTemplatesPromises = templates.map( function (template) {
             template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
             return renderTemplate(individual, container, template, mode, extra, toAppend);
           });
-          return Promise.all(renderedTemplatesPromises);
-        }).then(function (renderedTemplates) {
-          return renderedTemplates.reduce(function (acc, renderedTemplate) {
-            return acc.add(renderedTemplate);
-          }, $());
-        });
+        } else {
+          const ontology = veda.ontology;
+
+          const typePromises = individual['rdf:type'].map(function (type) {
+            return type.load();
+          });
+          templatePromise = Promise.all(typePromises).then(function (types) {
+            const templatesPromises = types.map( function (type) {
+              const defaultTemplateUri = ontology.getClassTemplate(type.id);
+              if (defaultTemplateUri) {
+                return new IndividualModel(defaultTemplateUri).load();
+              } else {
+                return type.hasValue('v-ui:hasTemplate') ? type['v-ui:hasTemplate'][0].load() : new IndividualModel('v-ui:generic').load();
+              }
+            });
+            return Promise.all(templatesPromises);
+          }).then(function (templates) {
+            const renderedTemplatesPromises = templates.map( function (template) {
+              template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+              return renderTemplate(individual, container, template, mode, extra, toAppend);
+            });
+            return Promise.all(renderedTemplatesPromises);
+          }).then(function (renderedTemplates) {
+            return renderedTemplates.reduce(function (acc, renderedTemplate) {
+              return acc.add(renderedTemplate);
+            }, $());
+          });
+        }
+        return templatePromise;
       }
-      return templatePromise;
-    }
-  })
+    })
     .catch(function (error) {
       console.log('Presenter error', error);
     });
@@ -230,38 +231,38 @@ function processTemplate (individual, container, template, mode) {
     return embedded.reduce(function (p, item) {
       return p.then(function () {
         return item.callModelMethod(method, individual.id);
-      })
-    }, Promise.resolve())
-    .then(function () {
-      if (parent === individual.id) {
-        return Promise.resolve();
-      } else {
-        return individual[method]();
-      }
-    })
-    .then(function () {
-      template.trigger('view');
-      if (method === 'reset') {
-        return;
-      }
-      if (!parent) {
-        const successMsg = new IndividualModel('v-s:SuccessBundle').load();
-        successMsg.then(function (successMsg) {
-          const notify = Notify ? new Notify() : function () {};
-          notify('success', {name: successMsg.toString()});
-        });
-      } else if (parent !== individual.id) {
-        const parentIndividual = new IndividualModel(parent);
-        parentIndividual.isSync(false);
-      }
-    })
-    .catch(function (error) {
-      const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
-      errorMsg.then(function (errorMsg) {
-        const notify = Notify ? new Notify() : function () {};
-        notify('danger', {name: errorMsg.toString()});
       });
-    });
+    }, Promise.resolve())
+      .then(function () {
+        if (parent === individual.id) {
+          return Promise.resolve();
+        } else {
+          return individual[method]();
+        }
+      })
+      .then(function () {
+        template.trigger('view');
+        if (method === 'reset') {
+          return;
+        }
+        if (!parent) {
+          const successMsg = new IndividualModel('v-s:SuccessBundle').load();
+          successMsg.then(function (successMsg) {
+            const notify = Notify ? new Notify() : function () {};
+            notify('success', {name: successMsg.toString()});
+          });
+        } else if (parent !== individual.id) {
+          const parentIndividual = new IndividualModel(parent);
+          parentIndividual.isSync(false);
+        }
+      })
+      .catch(function (error) {
+        const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
+        errorMsg.then(function (errorMsg) {
+          const notify = Notify ? new Notify() : function () {};
+          notify('danger', {name: errorMsg.toString()});
+        });
+      });
   };
   template.on('save cancel delete destroy recover', function (e) {
     e.stopPropagation();
