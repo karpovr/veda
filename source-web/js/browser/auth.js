@@ -475,7 +475,7 @@ export default function Auth() {
     delete storage.end_time;
     delTicketCookie();
     storage.logout = true;
-    location.reload();
+    window.location.reload();
   });
 
   // Init application

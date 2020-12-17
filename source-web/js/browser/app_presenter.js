@@ -109,7 +109,7 @@ export default function AppPresenter() {
   function anchorHandler(event) {
     event.preventDefault();
     const hash = this.getAttribute('href');
-    return (hash === location.hash ? false : riot.route(hash));
+    return (hash === window.location.hash ? false : riot.route(hash));
   }
   delegateHandler(document.body, 'click', '[href^=\'#/\']', anchorHandler);
 
@@ -235,7 +235,7 @@ export default function AppPresenter() {
           const notify = new Notify();
           notify('danger', error);
         })
-        .then(() => riot.route(location.hash));
+        .then(() => riot.route(window.location.hash));
     }
   });
 
@@ -309,9 +309,7 @@ export default function AppPresenter() {
   function statusHandler(status) {
     const lineStatus = document.getElementById('line-status');
     lineStatus.style.display = 'block';
-    lineStatus.classList.remove('online');
-    lineStatus.classList.remove('limited');
-    lineStatus.classList.remove('offline');
+    lineStatus.classList.remove('online', 'limited', 'offline');
     lineStatus.classList.add(status);
   }
   veda.on('status', statusHandler);
