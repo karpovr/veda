@@ -19,7 +19,7 @@ jobs:
            sudo apt-get install nodejs
            sudo apt install npm
            npm install -g testcafe@1.9.4
-	   testcafe --version    
+           testcafe --version    
            npm install grunt
            npm install grunt-contrib-qunit
            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
