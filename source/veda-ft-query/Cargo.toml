@@ -10,10 +10,10 @@ rust-ini = "0.16"
 nng = "0.5.1"
 serde_json = "1.0"
 
-v_onto = { path = "../v-onto" }
-v_module = { path = "../v-module" }
-v_api = { path = "../v-api" }
-v_search = { path = "../v-search" }
-v_ft_xapian = { path = "../v-ft-xapian" }
-v_storage = { path = "../v-storage" }
+v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
+v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
+v_ft_xapian = { git = "https://github.com/semantic-machines/v-common-ft-xapian.git" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
 

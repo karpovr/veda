@@ -14,8 +14,8 @@ chrono = "0.4"
 v_queue = "0.1"
 v_authorization = "0.1.0"
 
-v_storage = { path = "../v-storage" }
-v_onto = { path = "../v-onto" }
-v_module = { path = "../v-module" }
-v_api = { path = "../v-api" }
-v_az_lmdb = { path = "../v-az-lmdb" }
+v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
+v_az_lmdb = { git = "https://github.com/semantic-machines/v-common-az-lmdb.git" }

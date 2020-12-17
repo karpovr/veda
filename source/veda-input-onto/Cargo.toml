@@ -19,7 +19,7 @@ md-5 = "0.8.0"
 hex = "0.4.0"
 crossbeam-channel = "0.3.9"
 
-v_onto = { path = "../v-onto" }
-v_module = { path = "../v-module" }
-v_api = { path = "../v-api" }
+v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
 

@@ -18,10 +18,10 @@ parse_duration = "2.1.0"
 
 v_authorization = "0.1.0"
 
-v_ft_xapian = { path = "../v-ft-xapian" }
-v_search = { path = "../v-search" }
-v_storage = { path = "../v-storage" }
-v_onto = { path = "../v-onto" }
-v_module = { path = "../v-module" }
-v_api = { path = "../v-api" }
-v_az_lmdb = { path = "../v-az-lmdb" }
+v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_ft_xapian = { git = "https://github.com/semantic-machines/v-common-ft-xapian.git" }
+v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
+v_az_lmdb = { git = "https://github.com/semantic-machines/v-common-az-lmdb.git" }

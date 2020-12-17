@@ -18,8 +18,8 @@ nanoid = "0.3.0"
 
 v_queue = "0.1"
 
-v_v8 = { path = "../v-v8" }
-v_api = { path = "../v-api" }
-v_module = { path = "../v-module" }
-v_storage = { path = "../v-storage" }
-v_onto = { path = "../v-onto" }
+v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_v8 = { git = "https://github.com/semantic-machines/v-common-v8.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }

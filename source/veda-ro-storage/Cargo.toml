@@ -9,6 +9,6 @@ log = "0.4"
 rust-ini = "0.16"
 nng = "0.5.1"
 
-v_storage = { path = "../v-storage" }
-v_onto = { path = "../v-onto" }
-v_module = { path = "../v-module" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }

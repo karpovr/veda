@@ -13,4 +13,4 @@ rust-ini = "0.16"
 
 v_queue = "0.1"
 
-v_onto = { path = "../v-onto" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }

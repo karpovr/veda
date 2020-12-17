@@ -17,8 +17,8 @@ bincode = "1.2.1"
 serde = "1.0.104"
 v_queue = "0.1"
 
-v_search = { path = "../v-search" }
-v_onto = { path = "../v-onto" }
-v_storage = { path = "../v-storage" }
-v_module = { path = "../v-module" }
-v_api = { path = "../v-api" }
+v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
+v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
+v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
