@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 chrono = "0.4"
 log = "0.4"
-xapian-rusty = "0.0.40"
+xapian-rusty = "0.0.42"
 #xapian-rusty = { path = "../xapian-rusty" }
 
 v_queue = "0.1"

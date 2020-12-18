@@ -96,6 +96,8 @@ impl Indexer {
             return Ok(());
         }
 
+        debug! ("prepare {}", new_indv.get_id());
+
         let is_deleted = new_indv.is_exists_bool("v-s:deleted", true);
         let prev_is_deleted = prev_indv.is_exists_bool("v-s:deleted", true);
 
@@ -194,6 +196,7 @@ impl Indexer {
             let mut iwp = IndexDocWorkplace::new(Document::new()?);
             self.tg.set_document(&mut iwp.doc)?;
 
+            let mut prepared_links = HashSet::new();
             new_indv.parse_all();
             for (predicate, resources) in new_indv.get_obj().get_resources() {
                 debug!("predicate={}", predicate);
@@ -207,10 +210,10 @@ impl Indexer {
                 for oo in resources {
                     for _type in types.iter() {
                         if let Some(id) = self.idx_schema.get_index_id_of_uri_and_property(_type, predicate) {
-                            self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut HashSet::new())?;
+                            self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
                         } else {
                             if let Some(id) = self.idx_schema.get_index_id_of_property(predicate) {
-                                self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut HashSet::new())?;
+                                self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
                             }
                         }
                     }
@@ -347,13 +350,13 @@ impl Indexer {
         predicate: &str,
         rs: &Resource,
         ln: &str,
-        lvl: i32,
+        level: i32,
         prep: &mut HashSet<String>,
     ) -> Result<()> {
         let key = format!("{}+{}", predicate, rs.get_uri());
 
-        if prep.contains(&key) {
-            error!("found loop, predicate={}, link={}", predicate, rs.get_uri());
+        if level > 0 && prep.contains(&key) {
+            error!("found loop, predicate={}, link={}, level={}", predicate, rs.get_uri(), level);
             return Ok(());
         }
 
@@ -380,7 +383,7 @@ impl Indexer {
                                                 if let Some(links) = inner_indv.get_obj().get_resources().get(for_property) {
                                                     debug!("forProperty=[{}], links=[{:?}]", for_property, links);
                                                     for link in links {
-                                                        self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + &for_property), lvl + 1, prep)?;
+                                                        self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + &for_property), level + 1, prep)?;
                                                     }
                                                 }
                                             }
