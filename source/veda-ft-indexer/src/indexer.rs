@@ -1,5 +1,5 @@
 use crate::index_workplace::IndexDocWorkplace;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::process::exit;
 use std::time::Instant;
@@ -207,10 +207,10 @@ impl Indexer {
                 for oo in resources {
                     for _type in types.iter() {
                         if let Some(id) = self.idx_schema.get_index_id_of_uri_and_property(_type, predicate) {
-                            self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0)?;
+                            self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut HashSet::new())?;
                         } else {
                             if let Some(id) = self.idx_schema.get_index_id_of_property(predicate) {
-                                self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0)?;
+                                self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut HashSet::new())?;
                             }
                         }
                     }
@@ -339,7 +339,26 @@ impl Indexer {
         Ok(())
     }
 
-    fn prepare_index(&mut self, module: &mut Module, iwp: &mut IndexDocWorkplace, idx_id: &str, predicate: &str, rs: &Resource, ln: &str, level: i32) -> Result<()> {
+    fn prepare_index(
+        &mut self,
+        module: &mut Module,
+        iwp: &mut IndexDocWorkplace,
+        idx_id: &str,
+        predicate: &str,
+        rs: &Resource,
+        ln: &str,
+        lvl: i32,
+        prep: &mut HashSet<String>,
+    ) -> Result<()> {
+        let key = format!("{}+{}", predicate, rs.get_uri());
+
+        if prep.contains(&key) {
+            error!("found loop, predicate={}, link={}", predicate, rs.get_uri());
+            return Ok(());
+        }
+
+        prep.insert(key);
+
         if let Some(idx) = self.idx_schema.get_copy_of_index(idx_id) {
             if rs.rtype == DataType::String {
                 if idx.get_literals_nm("vdi:indexed_field_as_fwildcard").is_some() {
@@ -361,7 +380,7 @@ impl Indexer {
                                                 if let Some(links) = inner_indv.get_obj().get_resources().get(for_property) {
                                                     debug!("forProperty=[{}], links=[{:?}]", for_property, links);
                                                     for link in links {
-                                                        self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + &for_property), level + 1)?;
+                                                        self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + &for_property), lvl + 1, prep)?;
                                                     }
                                                 }
                                             }
