@@ -845,7 +845,7 @@ proto.is = function (_class) {
     } else {
       const types = type.get('rdfs:subClassOf');
       return Promise.all(types.map(isSub)).then(function (results) {
-        return eval(results.join('||'));
+        return results.reduce((state, isSub) => state || isSub, false);
       });
     }
   };
@@ -855,16 +855,12 @@ proto.is = function (_class) {
     _class = new IndividualModel( _class.valueOf() );
   }
   const types = self.get('rdf:type');
-  let is = eval(
-    types.map(function (type) {
-      return self.hasValue('rdf:type', _class.id);
-    }).join('||'),
-  );
+  let is = types.reduce((state, type) => state || self.hasValue('rdf:type', _class.id), false);
   if (is) {
     return Promise.resolve(is);
   } else {
     return Promise.all(types.map(isSub)).then(function (results) {
-      return eval(results.join('||'));
+      return results.reduce((state, isSub) => state || isSub, false);
     });
   }
 };
