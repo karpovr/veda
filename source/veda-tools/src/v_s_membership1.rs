@@ -1,5 +1,6 @@
 use crate::common::remove;
-use crate::CleanerContext;
+
+use crate::cleaner::CleanerContext;
 use v_api::app::{OptAuthorize, ResultCode};
 use v_module::info::ModuleInfo;
 use v_onto::individual::Individual;

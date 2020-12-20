@@ -1,14 +1,3 @@
-mod common;
-mod v_s_email;
-mod v_s_membership;
-mod v_s_membership1;
-mod v_s_membership2;
-mod v_s_permissionstatement;
-mod v_wf_process;
-
-#[macro_use]
-extern crate log;
-
 use crate::v_s_email::*;
 use crate::v_s_membership::*;
 use crate::v_s_membership1::*;
@@ -20,25 +9,23 @@ use std::collections::HashSet;
 use std::fs::{File, OpenOptions};
 use std::time::*;
 use std::{env, thread};
-use v_module::module::{init_log, Module};
+use v_module::module::Module;
 use v_module::onto::load_onto;
 use v_module::ticket::Ticket;
 use v_onto::onto::Onto;
 use v_search::clickhouse_client::*;
 
 pub struct CleanerContext {
-    module: Module,
-    onto: Onto,
-    ch_client: CHClient,
-    sys_ticket: Ticket,
-    report_type: String,
-    report: Option<File>,
-    operations: HashSet<String>,
+    pub(crate) module: Module,
+    pub(crate) onto: Onto,
+    pub(crate) ch_client: CHClient,
+    pub(crate) sys_ticket: Ticket,
+    pub(crate) report_type: String,
+    pub(crate) report: Option<File>,
+    pub(crate) operations: HashSet<String>,
 }
 
-fn main() {
-    init_log("CLEANER");
-
+pub fn clean() {
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");

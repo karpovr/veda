@@ -1,5 +1,6 @@
 use crate::common::remove;
-use crate::CleanerContext;
+
+use crate::cleaner::CleanerContext;
 use chrono::prelude::*;
 use std::collections::HashMap;
 use std::fs::File;

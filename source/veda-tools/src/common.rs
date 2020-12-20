@@ -1,4 +1,4 @@
-use crate::CleanerContext;
+use crate::cleaner::CleanerContext;
 use chrono::NaiveDateTime;
 use v_api::IndvOp;
 use v_onto::individual::Individual;
