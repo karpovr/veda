@@ -23,8 +23,16 @@ enum Tools {
     #[help = "Run cleaner"]
     Cleaner {
         #[named]
-        #[help = "list of executing cleaning algorithms"]
+        #[help = "name of executing cleaning algorithm"]
         module: String,
+
+        #[named]
+        #[help = "operation"]
+        operation: String,
+
+        #[named]
+        #[help = "type of report"]
+        report: String,
     },
 }
 
@@ -37,9 +45,11 @@ fn main() {
         }
         Tools::Cleaner {
             module,
+            operation,
+            report,
         } => {
             info!("module={}", module);
-            clean();
+            clean(module, operation, report);
         }
     }
 }

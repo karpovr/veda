@@ -7,8 +7,8 @@ use crate::v_wf_process::*;
 use ini::Ini;
 use std::collections::HashSet;
 use std::fs::{File, OpenOptions};
+use std::thread;
 use std::time::*;
-use std::{env, thread};
 use v_module::module::Module;
 use v_module::onto::load_onto;
 use v_module::ticket::Ticket;
@@ -25,7 +25,7 @@ pub struct CleanerContext {
     pub(crate) operations: HashSet<String>,
 }
 
-pub fn clean() {
+pub fn clean(modules: String, operations: String, report: String) {
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
@@ -46,28 +46,15 @@ pub fn clean() {
     };
 
     let mut cleaner_modules = HashSet::new();
-    let args: Vec<String> = env::args().collect();
-    for el in args.iter() {
-        if el.starts_with("--modules") {
-            let p: Vec<&str> = el.split('=').collect();
-            if p.len() == 2 {
-                for s in p[1].split(',') {
-                    cleaner_modules.insert(s);
-                }
-            }
-        } else if el.starts_with("--report") {
-            let p: Vec<&str> = el.split('=').collect();
-            if p.len() == 2 {
-                ctx.report_type = p[1].to_owned();
-            }
-        } else if el.starts_with("--operation") {
-            let p: Vec<&str> = el.split('=').collect();
-            if p.len() == 2 {
-                for s in p[1].split(',') {
-                    ctx.operations.insert(s.to_string());
-                }
-            }
-        }
+
+    for s in modules.split(',') {
+        cleaner_modules.insert(s);
+    }
+
+    ctx.report_type = report.to_owned();
+
+    for s in operations.split(',') {
+        ctx.operations.insert(s.to_string());
     }
 
     if !ctx.report_type.is_empty() {
