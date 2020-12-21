@@ -50,7 +50,7 @@ function LocalDB() {
       openReq.onsuccess = function (event) {
         const db = event.target.result;
         self.db = db;
-        console.log('DB open success');
+        console.log(`DB open success. Version ${version}`);
         resolve(self);
       };
 
@@ -70,7 +70,7 @@ function LocalDB() {
           console.log('DB store deleted:', store);
         });
         db.createObjectStore(self.store_name);
-        console.log('DB create success');
+        console.log(`DB create success. Version ${version}`);
       };
     }).catch((error) => {
       console.log('IndexedDB error, using in-memory fallback.', error);
