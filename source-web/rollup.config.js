@@ -12,17 +12,22 @@ export default {
       name: 'veda',
       plugins: [
         terser(),
-      ]
-    }
+      ],
+    },
   ],
   plugins: [
     nodeResolve({
       //module: true,
-      browser: true
+      browser: true,
     }),
     commonjs({
-      include: ['node_modules/**']
+      include: ['node_modules/**'],
     }),
-    json()
+    json(),
   ],
+  onwarn(warning, warn) {
+    if (warning.code === 'EVAL') return;
+    if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+    warn(warning);
+  },
 };
