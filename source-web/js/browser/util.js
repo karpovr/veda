@@ -268,7 +268,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
       sendError.load().then(function (sendError) {
         notify('danger', {name: sendError});
       });
-      console.log("Save before send error:", error.stack);
+      console.log('Save before send error:', error.stack);
     });
   } else {
     individual['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
@@ -285,7 +285,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
       sendError.load().then(function (sendError) {
         notify('danger', {name: sendError});
       });
-      console.log("Send error:", error.stack);
+      console.log('Send error:', error.stack);
     });
   }
 };

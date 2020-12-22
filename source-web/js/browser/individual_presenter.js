@@ -228,10 +228,16 @@ function processTemplate (individual, container, template, mode) {
 
   // Define handlers
 
+  /**
+   * Call model method
+   * @param {string} method
+   * @param {string} parent
+   * @return {Promise<void>}
+   */
   function callModelMethod(method, parent) {
     return embedded.reduce(function (p, item) {
       return p.then(function () {
-        return item.data("callModelMethod")(method, individual.id);
+        return item.data('callModelMethod')(method, individual.id);
       });
     }, Promise.resolve())
       .then(function () {
@@ -263,6 +269,7 @@ function processTemplate (individual, container, template, mode) {
           const notify = Notify ? new Notify() : function () {};
           notify('danger', {name: errorMsg.toString()});
         });
+        throw error;
       });
   }
   template.on('save cancel delete destroy recover', function (e) {
@@ -270,7 +277,7 @@ function processTemplate (individual, container, template, mode) {
     if (e.type === 'cancel') {
       callModelMethod('reset');
     } else if (e.type === 'destroy') {
-      template.data("callModelMethod")('remove').then(function (removed) {
+      template.data('callModelMethod')('remove').then(function (removed) {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
           template.empty().append('<div class="container alert alert-danger"><strong>' + removedAlert.toString() + '</strong></div>');
@@ -282,7 +289,7 @@ function processTemplate (individual, container, template, mode) {
   });
   template.data('callModelMethod', callModelMethod);
   template.one('remove', function () {
-    template.removeData("callModelMethod");
+    template.removeData('callModelMethod');
   });
 
   /**
