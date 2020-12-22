@@ -321,20 +321,20 @@ export default function AppPresenter() {
         console.log('Service worker registered:', registration.scope);
 
         // Update application on `update` event
-        veda.one('update', function () {
+        veda.on('update', function () {
           registration.update();
         });
       })
       .catch((error) => console.log(`Registration failed with ${error}`));
 
-    // Receive and log server worker version
+    // Receive and log server worker `veda_version` value
     navigator.serviceWorker.addEventListener('message', (event) => {
-      console.log(`Service worker version: ${event.data}`);
+      console.log(`Service worker veda_version = ${event.data}`);
     });
 
-    // Ask server worker version
+    // Ask server worker the value of its veda_version
     navigator.serviceWorker.ready.then((registration) => {
-      registration.active.postMessage('version');
+      registration.active.postMessage('veda_version');
     });
 
     // Install application prompt

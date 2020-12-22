@@ -1,6 +1,6 @@
 // This is the "Simple offline" service worker
 
-const version = 2;
+const veda_version = 7;
 
 const FILES = 'files';
 const STATIC = 'static';
@@ -34,8 +34,8 @@ const NTLM = [
 ];
 
 addEventListener('message', (event) => {
-  if (event.data === 'version') {
-    event.source.postMessage(version);
+  if (event.data === 'veda_version') {
+    event.source.postMessage(veda_version);
   }
 });
 
@@ -46,7 +46,7 @@ addEventListener('message', (event) => {
  */
 function clearCache(event) {
   self.skipWaiting();
-  console.log(`Service worker updated to version ${version}. Clear cache.`);
+  console.log(`Service worker updated, veda_version = ${veda_version}. Clear cache.`);
   event.waitUntil(
     caches.keys().then(function(keyList) {
       return Promise.all(keyList.map(function(key) {

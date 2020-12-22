@@ -26,7 +26,7 @@ export default LocalDB;
  */
 function LocalDB() {
   const self = this;
-  const version = veda.manifest.veda_version;
+  const veda_version = veda.manifest.veda_version;
   this.db_name = veda.manifest.short_name;
   this.store_name = 'store';
 
@@ -45,12 +45,12 @@ function LocalDB() {
    */
   function initDB(db_name, store_name) {
     return new Promise(function (resolve, reject) {
-      const openReq = window.indexedDB.open(db_name, version);
+      const openReq = window.indexedDB.open(db_name, veda_version);
 
       openReq.onsuccess = function (event) {
         const db = event.target.result;
         self.db = db;
-        console.log(`DB open success. Version ${version}`);
+        console.log(`DB open success, veda_version = ${veda_version}`);
         resolve(self);
       };
 
@@ -70,7 +70,7 @@ function LocalDB() {
           console.log('DB store deleted:', store);
         });
         db.createObjectStore(self.store_name);
-        console.log(`DB create success. Version ${version}`);
+        console.log(`DB create success, veda_version = ${veda_version}`);
       };
     }).catch((error) => {
       console.log('IndexedDB error, using in-memory fallback.', error);
