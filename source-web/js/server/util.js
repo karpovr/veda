@@ -975,9 +975,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
               const agregate = rule['v-wf:aggregate'];
               for (let i2 = 0; i2 < agregate.length; i2++) {
-                console.log("ELEMENT BEFORE", element);
                 eval(agregate[i2].data);
-                console.log("ELEMENT AFTER", element);
               }
 
               if (!grouping) {
