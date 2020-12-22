@@ -232,7 +232,7 @@ bpmn:ComplexRouteStartForm_Common_Template
         new veda.IndividualModel('v-wf:DecisionNoAgreed'),
         new veda.IndividualModel('v-wf:DecisionNotForMe')
       ];
-      individual[complex + 'coordination' + i][0][simple + 'task_label'] = veda.Util.mlstring("Согласовать", "Coordinate");
+      individual[complex + 'coordination' + i][0][simple + 'task_label'] = ['Согласовать@ru', 'Coordinate@en'];
       stages.push("coordination" + i);
       individual[complex + 'coordination' + i][0]['v-s:parent'] = [individual];
     };
@@ -243,7 +243,7 @@ bpmn:ComplexRouteStartForm_Common_Template
     individual[complex + 'introduction'][0][simple + 'possible_decisions'] = [
       new veda.IndividualModel('v-wf:DecisionExamined')
     ];
-    individual[complex + 'introduction'][0][simple + 'task_label'] = veda.Util.mlstring("Ознакомление", "Introduction");
+    individual[complex + 'introduction'][0][simple + 'task_label'] = ['Ознакомление@ru', 'Introduction@en'];
     stages.push("introduction");
     individual[complex + 'introduction'][0]['v-s:parent'] = [individual];
   }
@@ -255,7 +255,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionDeclined'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'sign'][0][simple + 'task_label'] = veda.Util.mlstring("Подписать", "Sign");
+    individual[complex + 'sign'][0][simple + 'task_label'] = ['Подписать@ru', 'Sign@en'];
     stages.push("sign");
     individual[complex + 'sign'][0]['v-s:parent'] = [individual];
   }
@@ -267,7 +267,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionDeclined'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'approval'][0][simple + 'task_label'] = veda.Util.mlstring("Утвердить", "Approve");
+    individual[complex + 'approval'][0][simple + 'task_label'] = ['Утвердить@ru', 'Approve@en'];
     stages.push("approval");
     individual[complex + 'approval'][0]['v-s:parent'] = [individual];
   }
@@ -279,7 +279,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionRejected'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'review'][0][simple + 'task_label'] = veda.Util.mlstring("Рассмотреть", "Review");
+    individual[complex + 'review'][0][simple + 'task_label'] = ['Рассмотреть@ru', 'Review@en'];
     stages.push("review");
     individual[complex + 'review'][0]['v-s:parent'] = [individual];
   }
@@ -293,7 +293,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionNotPerformed'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'instruction'][0][simple + 'task_label'] = veda.Util.mlstring("Исполнить поручение", "Execute task");
+    individual[complex + 'instruction'][0][simple + 'task_label'] = ['Исполнить поручение@ru', 'Execute task@en'];
     stages.push("instruction");
     individual[complex + 'instruction'][0]['v-s:parent'] = [individual];
   }
@@ -306,7 +306,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionNotPerformed'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'instruction2'][0][simple + 'task_label'] = veda.Util.mlstring("Рассмотреть", "Execute task");
+    individual[complex + 'instruction2'][0][simple + 'task_label'] = ['Рассмотреть@ru', 'Execute task@en'];
     stages.push("instruction2");
     individual[complex+'instruction2'][0]['v-s:parent'] = [individual];
   }
@@ -319,7 +319,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionNotPerformed'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'instruction3'][0][simple + 'task_label'] = veda.Util.mlstring("Ознакомиться", "Execute task");
+    individual[complex + 'instruction3'][0][simple + 'task_label'] = ['Ознакомиться@ru', 'Execute task@en'];
     stages.push("instruction3");
     individual[complex + 'instruction3'][0]['v-s:parent'] = [individual];
   }
@@ -332,7 +332,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionNotPerformed'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'instruction4'][0][simple + 'task_label'] = veda.Util.mlstring("Исполнить поручение", "Execute task");
+    individual[complex + 'instruction4'][0][simple + 'task_label'] = ['Исполнить поручение@ru', 'Execute task@en'];
     stages.push("instruction4");
     individual[complex + 'instruction4'][0]['v-s:parent'] = [individual];
   }
@@ -343,7 +343,7 @@ bpmn:ComplexRouteStartForm_Common_Template
       new veda.IndividualModel('v-wf:DecisionExamined'),
       new veda.IndividualModel('v-wf:DecisionNotForMe')
     ];
-    individual[complex + 'examination'][0][simple + 'task_label'] = veda.Util.mlstring("Ознакомиться", "Examine");
+    individual[complex + 'examination'][0][simple + 'task_label'] = ['Ознакомиться@ru', 'Examine@en'];
     stages.push("examination");
     individual[complex + 'examination'][0]['v-s:parent'] = [individual];
   }

@@ -1548,10 +1548,6 @@ Util.getFirstValueUseLang = function (property_value, lang) {
   return null;
 };
 
-Util.mlstring = function (ruString, enString) {
-  return [{type: 'String', data: ruString, lang: 'RU'}, {type: 'String', data: enString, lang: 'EN'}];
-};
-
 // Returns literal value or resource id for given property chain
 Util.getPropertyChain = function (...args) {
   let value = args[0];
