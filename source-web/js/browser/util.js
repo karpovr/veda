@@ -255,38 +255,55 @@ Util.confirm = function (individual, template, mode) {
  */
 Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
-    template.data('callModelMethod')('save').then(function () {
-      const transform = new IndividualModel(transformId);
-      return transform.load().then(function (transform) {
-        return Util.buildStartFormByTransformation(individual, transform).then(function (startForm) {
-          return Util.showModal(startForm, startFormTemplate, 'edit');
+    individual.canUpdate()
+      .then(function (canUpdate) {
+        return canUpdate ? template.callModelMethod('save') : Promise.resolve();
+      })
+      .catch(function (error) {
+        const notify = new Notify();
+        const sendError = new IndividualModel('v-s:SendError');
+        sendError.load().then(function (sendError) {
+          notify('danger', {name: sendError});
         });
+        console.log('Save before send error:', error.stack);
+        throw error;
+      })
+      .then(function () {
+        const transform = new IndividualModel(transformId);
+        return transform.load().then(function (transform) {
+          return Util.buildStartFormByTransformation(individual, transform).then(function (startForm) {
+            return Util.showModal(startForm, startFormTemplate, 'edit');
+          });
+        });
+      })
+      .catch(function (error) {
+        const notify = new Notify();
+        const sendError = new IndividualModel('v-s:SendError');
+        sendError.load().then(function (sendError) {
+          notify('danger', {name: sendError});
+        });
+        console.log('Send error:', error.stack);
+        throw error;
       });
-    }).catch(function (error) {
-      const notify = new Notify();
-      const sendError = new IndividualModel('v-s:SendError');
-      sendError.load().then(function (sendError) {
-        notify('danger', {name: sendError});
-      });
-      console.log('Save before send error:', error.stack);
-    });
   } else {
     individual['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
-    template.data('callModelMethod')('save').then(function () {
-      template.closest('.modal').modal('hide').remove();
-      const notify = new Notify();
-      const sendSuccess = new IndividualModel('v-s:SendSuccess');
-      sendSuccess.load().then(function (sendSuccess) {
-        notify('success', {name: sendSuccess});
+    template.callModelMethod('save')
+      .then(function () {
+        template.closest('.modal').modal('hide').remove();
+        const notify = new Notify();
+        const sendSuccess = new IndividualModel('v-s:SendSuccess');
+        sendSuccess.load().then(function (sendSuccess) {
+          notify('success', {name: sendSuccess});
+        });
+      })
+      .catch(function (error) {
+        const notify = new Notify();
+        const sendError = new IndividualModel('v-s:SendError');
+        sendError.load().then(function (sendError) {
+          notify('danger', {name: sendError});
+        });
+        console.log('Send error:', error.stack);
       });
-    }).catch(function (error) {
-      const notify = new Notify();
-      const sendError = new IndividualModel('v-s:SendError');
-      sendError.load().then(function (sendError) {
-        notify('danger', {name: sendError});
-      });
-      console.log('Send error:', error.stack);
-    });
   }
 };
 
