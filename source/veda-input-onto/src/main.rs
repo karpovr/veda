@@ -452,35 +452,35 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                     Typed {
                         value,
                         datatype,
-                    } => match datatype.iri {
-                        "http://www.w3.org/2001/XMLSchema#string" => {
+                    } => match datatype.iri.replace("#", "/").as_str() {
+                        "http://www.w3.org/2001/XMLSchema/string" => {
                             indv.add_string(&predicate, value, Lang::NONE);
                         }
-                        "http://www.w3.org/2001/XMLSchema#nonNegativeInteger" => {
+                        "http://www.w3.org/2001/XMLSchema/nonNegativeInteger" => {
                             if let Ok(v) = value.parse::<i64>() {
                                 indv.add_integer(&predicate, v);
                             } else {
                                 error!("fail parse [{}] to integer", value);
                             }
                         }
-                        "http://www.w3.org/2001/XMLSchema#integer" => {
+                        "http://www.w3.org/2001/XMLSchema/integer" => {
                             if let Ok(v) = value.trim().parse::<i64>() {
                                 indv.add_integer(&predicate, v);
                             } else {
                                 error!("fail parse [{}] to integer", value);
                             }
                         }
-                        "http://www.w3.org/2001/XMLSchema#boolean" => {
+                        "http://www.w3.org/2001/XMLSchema/boolean" => {
                             if let Ok(v) = value.parse::<bool>() {
                                 indv.add_bool(&predicate, v);
                             } else {
                                 error!("fail parse [{}] to bool", value);
                             }
                         }
-                        "http://www.w3.org/2001/XMLSchema#decimal" => {
+                        "http://www.w3.org/2001/XMLSchema/decimal" => {
                             indv.add_decimal_from_str(&predicate, value);
                         }
-                        "http://www.w3.org/2001/XMLSchema#dateTime" => {
+                        "http://www.w3.org/2001/XMLSchema/dateTime" => {
                             indv.add_datetime_from_str(&predicate, value);
                         }
                         _ => {
