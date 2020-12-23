@@ -3202,7 +3202,7 @@ v-s:AppointmentEmbeddedTableTemplate
   Promise.all([canUpdateAppointment]).then(function(results) {
     if ( !results[0]) {
       $("#deleteAppointment", template).remove();
-      $("#moveToAnotherDepartment", template).remove();
+      $("#moveToAnotherDepartment", template).attr('disabled', 'disabled');
     }
   })
 </script>

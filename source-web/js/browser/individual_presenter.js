@@ -227,10 +227,17 @@ function processTemplate (individual, container, template, mode) {
   template.on('view edit search', syncEmbedded);
 
   // Define handlers
-  template.callModelMethod = function (method, parent) {
+
+  /**
+   * Call model method
+   * @param {string} method
+   * @param {string} parent
+   * @return {Promise<void>}
+   */
+  function callModelMethod(method, parent) {
     return embedded.reduce(function (p, item) {
       return p.then(function () {
-        return item.callModelMethod(method, individual.id);
+        return item.data('callModelMethod')(method, individual.id);
       });
     }, Promise.resolve())
       .then(function () {
@@ -262,25 +269,27 @@ function processTemplate (individual, container, template, mode) {
           const notify = Notify ? new Notify() : function () {};
           notify('danger', {name: errorMsg.toString()});
         });
+        throw error;
       });
-  };
+  }
   template.on('save cancel delete destroy recover', function (e) {
     e.stopPropagation();
     if (e.type === 'cancel') {
-      template.callModelMethod('reset');
+      callModelMethod('reset');
     } else if (e.type === 'destroy') {
-      template.callModelMethod('remove').then(function (removed) {
+      template.data('callModelMethod')('remove').then(function (removed) {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
           template.empty().append('<div class="container alert alert-danger"><strong>' + removedAlert.toString() + '</strong></div>');
         });
       });
     } else {
-      template.callModelMethod(e.type);
+      callModelMethod(e.type);
     }
   });
+  template.data('callModelMethod', callModelMethod);
   template.one('remove', function () {
-    template.callModelMethod = null;
+    template.removeData('callModelMethod');
   });
 
   /**

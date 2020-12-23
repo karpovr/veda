@@ -314,11 +314,28 @@ export default function AppPresenter() {
   veda.on('status', statusHandler);
 
   // Service worker
-  if (false && 'serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
     // Install SW
     navigator.serviceWorker.register('/sw-simple.js', {scope: window.location.pathname})
-      .then((worker) => console.log('Service worker registered:', worker.scope))
+      .then((registration) => {
+        console.log('Service worker registered:', registration.scope);
+
+        // Update application on `update` event
+        veda.on('update', function () {
+          registration.update();
+        });
+      })
       .catch((error) => console.log(`Registration failed with ${error}`));
+
+    // Receive and log server worker `veda_version` value
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      console.log(`Service worker veda_version = ${event.data}`);
+    });
+
+    // Ask server worker the value of its veda_version
+    navigator.serviceWorker.ready.then((registration) => {
+      registration.active.postMessage('veda_version');
+    });
 
     // Install application prompt
     const showAddToHomeScreen = () => {
@@ -329,6 +346,7 @@ export default function AppPresenter() {
       installBtn.addEventListener('click', addToHomeScreen);
       rejectInstallBtn.addEventListener('click', rejectInstall);
     };
+
     const addToHomeScreen = () => {
       const installApp = document.getElementById('install-app');
       installApp.style.display = 'none'; // Hide the prompt
@@ -343,11 +361,13 @@ export default function AppPresenter() {
           deferredPrompt = null;
         });
     };
+
     const rejectInstall = () => {
       const installApp = document.getElementById('install-app');
       installApp.style.display = 'none';
       localStorage.rejectedInstall = true;
     };
+
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
