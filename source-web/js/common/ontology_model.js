@@ -118,14 +118,15 @@ proto.processOntology = function () {
   const templates = this.templates;
 
   // Allocate ontology objects
-  const ontologyPromises = ontology.map( function (json) {
+  const ontologyIndividuals = ontology.map( function (json) {
     if (JSON.stringify(json) === '{"@":""}') {
       return;
     }
-    return new IndividualModel( json, 1, false ).load();
+    return new IndividualModel(json, 1, false);
   });
-  return Promise.all(ontologyPromises).then(function (ontology) {
-    ontology.forEach( function (individual) {
+
+  ontologyIndividuals.forEach( function (individual) {
+    try {
       if ( !individual ) {
         return;
       }
@@ -171,10 +172,14 @@ proto.processOntology = function () {
         }
         break;
       }
-    });
+    } catch (error) {
+      console.log('Ontology init error, uri =', individual.id, error.stack);
+    }
+  });
 
-    // Process classes
-    Object.keys(classes).forEach( function (uri) {
+  // Process classes
+  Object.keys(classes).forEach( function (uri) {
+    try {
       const _class = classes[uri];
       // populate classTree
       if ( !classTree[_class.id] ) {
@@ -195,74 +200,78 @@ proto.processOntology = function () {
       _class['rdfs:subClassOf'].map( function ( superClass ) {
         classTree[_class.id].superClasses.push( superClass.id );
       });
-    });
+    } catch (error) {
+      console.log('Ontology init error, uri =', uri, error.stack);
+    }
+  });
 
-    // Process properties
-    Object.keys(properties).forEach( function (uri) {
-      try {
-        const property = properties[uri];
-        if (!property['rdfs:domain']) {
-          return;
-        }
-        property['rdfs:domain'].map( function ( _class ) {
-          classTree[_class.id].properties.push(property.id);
-        });
-      } catch (error) {
-        console.error('Ontology init error, uri =', uri, error.stack);
-      }
-    });
-
-    // Process specifications
-    Object.keys(specifications).forEach( function (uri) {
-      try {
-        const spec = specifications[uri];
-        if (!spec['v-ui:forClass']) {
-          return;
-        }
-        spec['v-ui:forClass'].map( function ( _class ) {
-          spec['v-ui:forProperty'].map( function (prop) {
-            classTree[_class.id].specifications[prop.id] = spec.id;
-          });
-        });
-      } catch (error) {
-        console.error('Ontology init error, uri =', uri, error.stack);
-      }
-    });
-
-    // Process template specifications
-    Object.keys(templates).forEach(function (uri) {
-      try {
-        templates[uri] = templates[uri].sort(function(cur, prev) {
-          if (cur.properties['v-s:loadPriority']) {
-            if (prev.properties['v-s:loadPriority']) {
-              return cur.properties['v-s:loadPriority'][0].data - prev.properties['v-s:loadPriority'][0].data;
-            } else {
-              return -1;
-            }
-          } else {
-            return 1;
-          }
-        }).map(function(templateSpec) {
-          return templateSpec.properties['v-ui:defaultTemplate'][0].data;
-        });
-      } catch (error) {
-        console.error('Ontology init error, uri =', uri, error.stack);
-      }
-    });
-
-    // Init ontology individuals
-    const initPromises = ontology.map( function (individual) {
-      if ( !individual ) {
+  // Process properties
+  Object.keys(properties).forEach( function (uri) {
+    try {
+      const property = properties[uri];
+      if (!property['rdfs:domain']) {
         return;
       }
-      return individual.init().catch(function (error) {
-        console.error('Ontology individual init error, uri =', individual.id, error.stack);
+      property['rdfs:domain'].map( function ( _class ) {
+        classTree[_class.id].properties.push(property.id);
       });
-    });
+    } catch (error) {
+      console.log('Ontology init error, uri =', uri, error.stack);
+    }
+  });
 
+  // Process specifications
+  Object.keys(specifications).forEach( function (uri) {
+    try {
+      const spec = specifications[uri];
+      if (!spec['v-ui:forClass']) {
+        return;
+      }
+      spec['v-ui:forClass'].map( function ( _class ) {
+        spec['v-ui:forProperty'].map( function (prop) {
+          classTree[_class.id].specifications[prop.id] = spec.id;
+        });
+      });
+    } catch (error) {
+      console.log('Ontology init error, uri =', uri, error.stack);
+    }
+  });
+
+  // Process template specifications
+  Object.keys(templates).forEach(function (uri) {
+    try {
+      templates[uri] = templates[uri].sort(function(cur, prev) {
+        if (cur.properties['v-s:loadPriority']) {
+          if (prev.properties['v-s:loadPriority']) {
+            return cur.properties['v-s:loadPriority'][0].data - prev.properties['v-s:loadPriority'][0].data;
+          } else {
+            return -1;
+          }
+        } else {
+          return 1;
+        }
+      }).map(function(templateSpec) {
+        return templateSpec.properties['v-ui:defaultTemplate'][0].data;
+      });
+    } catch (error) {
+      console.log('Ontology init error, uri =', uri, error.stack);
+    }
+  });
+
+  // Init ontology individuals
+  const initPromises = ontologyIndividuals.map( function (individual, i) {
+    return individual.init()
+      .catch(function (error) {
+        console.log('Ontology individual init error, uri =', individual.id, error.stack);
+      });
+  });
+
+  if (typeof window !== 'undefined') {
     return Promise.all(initPromises).then(function () {
       return self;
     });
-  });
+  } else {
+    return Promise.resolve(self);
+  }
 };
 

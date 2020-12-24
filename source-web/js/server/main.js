@@ -14,12 +14,20 @@ import '../server/numerator.js';
 
 import '../server/util.js';
 
-veda.ticket = get_env_str_var('$ticket');
+try {
 
-AppModel.call(veda);
+  veda.ticket = get_env_str_var('$ticket');
 
-veda.init('cfg:VedaSystem');
+  AppModel.call(veda);
 
-console.log('user:', veda.user.id, '| ticket:', veda.ticket);
+  veda.init('cfg:VedaSystem');
+
+  console.log('user:', veda.user.id, '| ticket:', veda.ticket);
+
+} catch (error) {
+
+  console.log('Veda init error', error.stack);
+
+}
 
 export default veda;

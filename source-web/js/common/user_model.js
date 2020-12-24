@@ -35,6 +35,9 @@ proto._init = function () {
       if ( self.id !== 'cfg:Guest' ) {
         return self.save();
       }
+    })
+    .catch(function (error) {
+      console.log('User init error', error.stack);
     });
 };
 

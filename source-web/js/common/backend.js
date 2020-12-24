@@ -43,7 +43,12 @@ serverBackend.get_individual = function (ticket, uri) {
     uri = arg.uri;
   }
   try {
-    return Promise.resolve( get_individual(ticket, uri) );
+    const json = get_individual(ticket, uri);
+    if (json) {
+      return Promise.resolve(json);
+    } else {
+      return Promise.reject(Error('Not found'));
+    }
   } catch (err) {
     return Promise.reject(err);
   }
