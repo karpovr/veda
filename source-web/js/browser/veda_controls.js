@@ -2237,7 +2237,7 @@ function resizeImage (image, maxWidth) {
     if (image.width <= maxWidth) {
       resolve(image);
     } else {
-      // const temp = $('<div></div>').append(image);
+      const temp = $('<div></div>').append(image);
       System.import('cropper/cropper.min.js').then(function (module) {
         const Cropper = module.default;
         System.import('cropper/cropper.min.css').then(function () {
@@ -2977,6 +2977,7 @@ $.fn.veda_link = function( options ) {
   } else {
     fulltext.remove();
     fulltextMenu.remove();
+    $('.dropdown', control).remove();
   }
 
   // Clear feature
