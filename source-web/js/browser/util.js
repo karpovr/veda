@@ -255,16 +255,7 @@ Util.confirm = function (individual, template, mode) {
  */
 Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
-    (template.data('mode') === 'edit' ? template.data('callModelMethod')('save') : Promise.resolve())
-      .catch(function (error) {
-        const notify = new Notify();
-        const sendError = new IndividualModel('v-s:SendError');
-        sendError.load().then(function (sendError) {
-          notify('danger', {name: sendError});
-        });
-        console.log('Save before send error:', error.stack);
-        throw error;
-      })
+    (template.data('mode') === 'edit' ? individual.isSync(false) || template.data('callModelMethod')('save') : Promise.resolve())
       .then(function () {
         const transform = new IndividualModel(transformId);
         return transform.load().then(function (transform) {
@@ -279,7 +270,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
         sendError.load().then(function (sendError) {
           notify('danger', {name: sendError});
         });
-        console.log('Send error:', error.stack);
+        console.log('Save before send error:', error.stack);
         throw error;
       });
   } else {
@@ -300,6 +291,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
           notify('danger', {name: sendError});
         });
         console.log('Send error:', error.stack);
+        throw error;
       });
   }
 };
