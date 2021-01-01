@@ -21,4 +21,4 @@ v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch 
 v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
 v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
 v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
-v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git", version = "0.1.1" }

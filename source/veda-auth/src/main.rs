@@ -31,7 +31,7 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
-    let mut module = Module::new(StorageMode::ReadWrite, false);
+    let mut module = Module::new(StorageMode::ReadOnly, false);
 
     let systicket = if let Ok(t) = module.get_sys_ticket_id() {
         t

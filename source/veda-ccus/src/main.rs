@@ -14,10 +14,10 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::{Duration, Instant};
 use v_onto::individual::*;
-use v_storage::storage::{StorageMode, VStorage};
 
 mod server;
 use crate::server::CMessage;
+use v_module::module::new_ro_storage;
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_millis(5000);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -170,14 +170,10 @@ impl WsCCUSSession {
     }
 }
 
-fn storage_manager(tarantool_addr: String, rx: Receiver<CMessage>) {
+fn storage_manager(rx: Receiver<CMessage>) {
     info!("Start STORAGE MANAGER");
 
-    let mut storage = if !tarantool_addr.is_empty() {
-        VStorage::new_tt(tarantool_addr, "veda6", "123456")
-    } else {
-        VStorage::new_lmdb("./data", StorageMode::ReadOnly)
-    };
+    let mut storage = new_ro_storage();
 
     loop {
         if let Ok((msg, msg_id, sender)) = rx.recv() {
@@ -213,18 +209,11 @@ fn main() -> std::io::Result<()> {
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let ccus_port = section.get("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
 
-    let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
-        p.to_owned()
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    info!("CCUS PORT={:?}, tarantool addr={:?}", ccus_port, tarantool_addr);
+    info!("CCUS PORT={:?}", ccus_port);
 
     // создадим канал приема и передачи с нитью storage_manager
     let (sbscr_tx, sbscr_rx): (Sender<CMessage>, Receiver<CMessage>) = mpsc::channel();
-    thread::spawn(move || storage_manager(tarantool_addr.clone(), sbscr_rx));
+    thread::spawn(move || storage_manager(sbscr_rx));
 
     let sys = System::new("ws-ccus");
 

@@ -6,7 +6,7 @@ use nng::{Message, Protocol, Socket};
 use std::str;
 use v_onto::individual::Individual;
 use v_storage::storage::*;
-use v_module::module::init_log;
+use v_module::module::{init_log, new_ro_storage};
 
 /**
  * storage service
@@ -26,23 +26,7 @@ fn main() -> std::io::Result<()> {
 
     let ro_storage_url = section.get("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
 
-    let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
-        p.to_owned()
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-
-    let mut storage: VStorage;
-    if !tarantool_addr.is_empty() {
-        storage = VStorage::new_tt(tarantool_addr, "veda6", "123456");
-    } else {
-        storage = VStorage::new_lmdb("./data", StorageMode::ReadOnly);
-    }
+    let mut storage = new_ro_storage ();
 
     let server = Socket::new(Protocol::Rep0)?;
     if let Err(e) = server.listen(&ro_storage_url) {
