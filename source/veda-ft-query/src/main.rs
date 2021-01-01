@@ -3,7 +3,7 @@ extern crate log;
 
 use ini::Ini;
 use nng::options::{Options, RecvTimeout, SendTimeout};
-use nng::{Message, Protocol, Socket, Error};
+use nng::{Error, Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::Duration;
 use std::{env, str};
@@ -83,20 +83,18 @@ fn main() {
                             break;
                         }
                     }
-                    Err(e) => {
-                        match e {
-                            Error::TimedOut => {
-                                info!("count requests: {}", count);
-                            },
-                            _ => {
-                                error!("fail get request, err={:?}", e);
-                                break;
-                            }
+                    Err(e) => match e {
+                        Error::TimedOut => {
+                            info!("count requests: {}", count);
+                            break;
                         }
-                    }
+                        _ => {
+                            error!("fail get request, err={:?}", e);
+                            break;
+                        }
+                    },
                 }
             }
-            error!("close socket");
             server.close();
         }
     } else {
