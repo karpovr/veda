@@ -64,7 +64,7 @@ jobs:
             sleep 1
             testcafe chrome:headless qa/testcafe/testSearchRangeOfDates.js --screenshots screens --screenshots-on-fails screens --speed 1
             sleep 1
-            testcafe chrome:headless qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testSimpleNet.js --screenshots screens --screenshots-on-fails screens --speed 0.7
             sleep 1
             testcafe chrome:headless qa/testcafe/testSimpleNet2.js --screenshots screens --screenshots-on-fails screens --speed 1
             sleep 1
