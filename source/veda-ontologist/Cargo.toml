@@ -18,5 +18,5 @@ v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch 
 v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
 v_ft_xapian = { git = "https://github.com/semantic-machines/v-common-ft-xapian.git", version = "0.1.1" }
 v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
-v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
-v_module = { git = "https://github.com/semantic-machines/v-common-module.git", version = "0.1.1" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git", version = "0.1.1" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git", version = "0.1.2" }

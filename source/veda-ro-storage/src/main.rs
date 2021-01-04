@@ -6,7 +6,7 @@ use nng::{Message, Protocol, Socket};
 use std::str;
 use v_onto::individual::Individual;
 use v_storage::storage::*;
-use v_module::module::{init_log, new_ro_storage};
+use v_module::module::init_log;
 
 /**
  * storage service
