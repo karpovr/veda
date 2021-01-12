@@ -2635,6 +2635,7 @@ $.fn.veda_link = function( options ) {
   }
 
   // Fulltext search feature
+  let selected = [];
   const fulltext = $('.fulltext', control);
   const fulltextMenu = $('.fulltext-menu', control);
   if ( this.hasClass('fulltext') || this.hasClass('full') ) {
@@ -2769,8 +2770,6 @@ $.fn.veda_link = function( options ) {
       };
     }());
     fulltext.on('keydown', inputHandler);
-
-    let selected = [];
 
     const renderResults = function (results) {
       suggestions.empty();
