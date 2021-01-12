@@ -72,7 +72,11 @@ Util.toTTL = function (individualList, callback) {
               value = prefixer(resource.data, prefixes);
               break;
             case 'Datetime':
-              value = '"' + resource.data.toISOString() + '"^^xsd:dateTime';
+              if (resource.data instanceof Date) {
+                value = '"' + resource.data.toISOString() + '"^^xsd:dateTime';
+              } else {
+                value = '"' + resource.data + '"^^xsd:dateTime';
+              }
               prefixer('xsd:', prefixes);
               break;
             case 'String':
