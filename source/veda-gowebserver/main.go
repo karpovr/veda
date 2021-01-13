@@ -263,8 +263,8 @@ func main() {
 
   // Request handler
   requestHandler := func (ctx *fasthttp.RequestCtx) {
-    ctx.Response.Header.Set("server", "nginx/1.8.1")
-    ctx.Response.Header.SetCanonical([]byte("server"), []byte("nginx/1.8.1"))
+    ctx.Response.Header.Set("server", "nginx/1.19.6")
+    ctx.Response.Header.SetCanonical([]byte("server"), []byte("nginx/1.19.6"))
     ctx.Response.Header.Set("X-XSS-Protection", "1; mode=block")
     ctx.Response.Header.Set("X-Content-Type-Options", "nosniff")
     ctx.Response.Header.Set("X-Frame-Options", "sameorigin")
