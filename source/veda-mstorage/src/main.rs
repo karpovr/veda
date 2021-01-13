@@ -34,22 +34,6 @@ fn main() -> std::io::Result<()> {
 
     let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
-    let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
-        p.to_owned()
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-
-    let use_backup_db = if let Some(p) = section.get("use_backup_db") {
-        p.to_owned().parse().unwrap()
-    } else {
-        false
-    };
-
     let notify_channel_url = section.get("notify_channel_url");
     if notify_channel_url.is_none() {
         error!("fail read property [notify_channel_url]");
@@ -63,26 +47,13 @@ fn main() -> std::io::Result<()> {
         info!("bind to notify_channel={}", notify_channel_url.unwrap());
     }
 
-    let mut primary_storage: VStorage;
-    let mut backup_storage: VStorage;
-
-    if !tarantool_addr.is_empty() {
-        primary_storage = VStorage::new_tt(tarantool_addr, "veda6", "123456");
-        backup_storage = VStorage::new_lmdb(base_path, StorageMode::ReadWrite);
-    } else {
-        primary_storage = VStorage::new_lmdb(base_path, StorageMode::ReadWrite);
-        backup_storage = VStorage::new_lmdb(base_path, StorageMode::ReadOnly);
-    }
-
-    if use_backup_db && backup_storage.get_raw_value(StorageId::Individuals, "rdf:type").is_empty() {
-        info!("backup db is empty");
-    }
+    let mut storage = new_rw_storage();
 
     let mut sys_ticket = Ticket::default();
-    if let Ok(ticket_id) = Module::get_sys_ticket_id_from_db(&mut primary_storage) {
-        get_ticket_from_db(&ticket_id, &mut sys_ticket, &mut primary_storage);
+    if let Ok(ticket_id) = Module::get_sys_ticket_id_from_db(&mut storage) {
+        get_ticket_from_db(&ticket_id, &mut sys_ticket, &mut storage);
     } else {
-        sys_ticket = create_sys_ticket(&mut primary_storage);
+        sys_ticket = create_sys_ticket(&mut storage);
     }
 
     let param_name = "main_module_url";
@@ -98,7 +69,7 @@ fn main() -> std::io::Result<()> {
         error!("fail listen, {:?}", e);
         return Ok(());
     }
-    info! ("listen {}", main_module_url);
+    info!("listen {}", main_module_url);
 
     let mut tickets_cache: HashMap<String, Ticket> = HashMap::new();
 
@@ -119,17 +90,7 @@ fn main() -> std::io::Result<()> {
         if let Ok(recv_msg) = server.recv() {
             let mut out_msg = JSONValue::default();
             out_msg["type"] = json!("OpResult");
-            let resp = request_prepare(
-                &sys_ticket,
-                &mut op_id,
-                &recv_msg,
-                &mut primary_storage,
-                use_backup_db,
-                &mut backup_storage,
-                &mut queue_out,
-                &mut mstorage_info,
-                &mut tickets_cache,
-            );
+            let resp = request_prepare(&sys_ticket, &mut op_id, &recv_msg, &mut storage, &mut queue_out, &mut mstorage_info, &mut tickets_cache);
             if let Ok(v) = resp {
                 let mut data = vec![];
                 for el in v.iter() {
@@ -182,8 +143,6 @@ fn request_prepare(
     op_id: &mut i64,
     request: &Message,
     primary_storage: &mut VStorage,
-    use_backup_db: bool,
-    backup_storage: &mut VStorage,
     queue_out: &mut Queue,
     mstorage_info: &mut ModuleInfo,
     tickets_cache: &mut HashMap<String, Ticket>,
@@ -262,8 +221,6 @@ fn request_prepare(
                     assigned_subsystems,
                     &mut indv,
                     primary_storage,
-                    use_backup_db,
-                    backup_storage,
                     queue_out,
                     mstorage_info,
                     sys_ticket,
@@ -287,8 +244,6 @@ fn operation_prepare(
     assigned_subsystems: Option<i64>,
     new_indv: &mut Individual,
     primary_storage: &mut VStorage,
-    use_backup_db: bool,
-    backup_storage: &mut VStorage,
     queue_out: &mut Queue,
     my_info: &mut ModuleInfo,
     sys_ticket: &Ticket,
@@ -415,8 +370,6 @@ fn operation_prepare(
             prev_state,
             upd_counter,
             primary_storage,
-            use_backup_db,
-            backup_storage,
             my_info,
             queue_out,
         ) {
@@ -425,22 +378,7 @@ fn operation_prepare(
         }
     } else {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
-        if !to_storage_and_queue(
-            IndvOp::Put,
-            op_id,
-            ticket,
-            event_id,
-            src,
-            assigned_subsystems,
-            new_indv,
-            prev_state,
-            upd_counter,
-            primary_storage,
-            use_backup_db,
-            backup_storage,
-            my_info,
-            queue_out,
-        ) {
+        if !to_storage_and_queue(IndvOp::Put, op_id, ticket, event_id, src, assigned_subsystems, new_indv, prev_state, upd_counter, primary_storage, my_info, queue_out) {
             error!("not completed update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
@@ -448,22 +386,7 @@ fn operation_prepare(
 
     if cmd == IndvOp::Remove {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
-        if !to_storage_and_queue(
-            cmd,
-            op_id,
-            ticket,
-            event_id,
-            src,
-            assigned_subsystems,
-            new_indv,
-            vec![],
-            upd_counter,
-            primary_storage,
-            use_backup_db,
-            backup_storage,
-            my_info,
-            queue_out,
-        ) {
+        if !to_storage_and_queue(cmd, op_id, ticket, event_id, src, assigned_subsystems, new_indv, vec![], upd_counter, primary_storage, my_info, queue_out) {
             error!("not completed update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
@@ -483,8 +406,6 @@ fn to_storage_and_queue(
     prev_state: Vec<u8>,
     update_counter: i64,
     primary_storage: &mut VStorage,
-    use_backup_db: bool,
-    backup_storage: &mut VStorage,
     mstorage_info: &mut ModuleInfo,
     queue_out: &mut Queue,
 ) -> bool {
@@ -494,28 +415,12 @@ fn to_storage_and_queue(
     if cmd == IndvOp::Remove {
         if primary_storage.remove(StorageId::Individuals, new_indv.get_id()) {
             info!("remove individual, id={}", new_indv.get_id());
-
-            if use_backup_db {
-                if backup_storage.remove(StorageId::Individuals, new_indv.get_id()) {
-                    info!("backup storage: remove individual, id={}", new_indv.get_id());
-                } else {
-                    error!("backup storage: fail remove individual, id={}", new_indv.get_id());
-                }
-            }
         } else {
             error!("fail remove individual, id={}", new_indv.get_id());
             return false;
         }
     } else {
         if to_msgpack(&new_indv, &mut new_state).is_ok() && primary_storage.put_kv_raw(StorageId::Individuals, new_indv.get_id(), new_state.clone()) {
-            if use_backup_db {
-                if backup_storage.put_kv_raw(StorageId::Individuals, new_indv.get_id(), new_state.clone()) {
-                    info!("backup storage: update, id={}", new_indv.get_id());
-                } else {
-                    error!("backup storage: fail update individual, id={}", new_indv.get_id());
-                }
-            }
-
             info!("update, id={}", new_indv.get_id());
         } else {
             error!("fail update individual, id={}", new_indv.get_id());
