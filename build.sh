@@ -1,3 +1,22 @@
+build_server_module () {
+    BUILD_PATH=$PWD
+    VEDA_BIN=$BUILD_PATH/bin
+    module_name=$1
+
+    echo $module_name
+    rm ./$module_name
+
+    cd source/$module_name
+    cargo build --release
+    status=$?
+    if test $status -ne 0
+    then
+	exit $status;
+    fi
+    cd $BUILD_PATH
+    cp $CARGO_TARGET_DIR/release/$module_name $VEDA_BIN
+}
+
 BUILD_PATH=$PWD
 
 #!/bin/sh
@@ -25,7 +44,7 @@ fi
 
 ./tools/update-version-ttl.sh
 
-if [ -z $1 ] || [ $1 == "web" ] || [ $1 == "public" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+if [ -z $1 ] || [ $1 == "web" ] || [ $1 == "public" ] || [ $1 == "all" ]; then
     echo BUILD PUBLIC
 
     cd source-web
@@ -37,265 +56,91 @@ fi
 export CARGO_TARGET_DIR=$HOME/target
 
 if [ -z $1 ] || [ $1 == "az" ] || [ $1 == "veda-az" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD AZ
-    
+
+    build_server_module "libauthorization"
+
     mkdir $VEDA_BIN/lib
-    cd source/libauthorization
-    cargo build --release
     cd $BUILD_PATH
     cp $CARGO_TARGET_DIR/release/libauthorization.so ./source/lib64/libauthorization.so
     cp $CARGO_TARGET_DIR/release/libauthorization.a ./source/lib64/libauthorization.a
     cp $CARGO_TARGET_DIR/release/libauthorization.so $VEDA_BIN/lib
-
-fi
-
-if [ $1 == "winpak" ] || [ $1 == "veda-winpak" ] || [ $1 == "all" ] ; then
-    echo BUILD WINPAK
-
-    rm ./veda-winpak
-
-    cd source/veda-winpak
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-winpak $VEDA_BIN
-
-fi
-
-if [ -z $1 ] || [ $1 == "auth" ] || [ $1 == "veda-auth" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD AUTH
-    rm ./veda-auth
-
-    cd source/veda-auth
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-auth $VEDA_BIN
-
-fi
-
-if [ -z $1 ] || [ $1 == "az-indexer" ] || [ $1 == "veda-az-indexer" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD AZ_INDEXER
-
-    rm ./veda-az-indexer
-
-    cd source/veda-az-indexer
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-az-indexer $VEDA_BIN
-
-fi
-
-if [ $1 == "exim-inquire" ] || [ $1 == "veda-exim-inquire" ] || [ $1 == "exim" ] || [ $1 == "all" ]; then
-    echo BUILD EXIM-INQUIRE
-    rm ./veda-exim-inquire
-
-    cd source/veda-exim-inquire
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-exim-inquire $VEDA_BIN
-
-fi
-
-if [ $1 == "exim-respond" ] || [ $1 == "veda-exim-respond" ] || [ $1 == "exim" ] || [ $1 == "all" ]; then
-    echo BUILD EXIM-RESPOND
-
-    rm ./veda-exim-respond
-    cd source/veda-exim-respond
-
-    cargo +nightly build --release
-
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-exim-respond $VEDA_BIN
-
-fi
-
-if [ $1 == "extractor" ] || [ $1 == "veda-extractor" ] || [ $1 == "exim" ] || [ $1 == "all" ]; then
-    echo BUILD VEDA-EXTRACTOR
-    rm ./veda-extractor
-
-    cd source/veda-extractor
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-extractor $VEDA_BIN
-fi
-
-if [ -z $1 ] || [ $1 == "input-onto" ] || [ $1 == "veda-input-onto" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD INPUT-ONTO
-
-    rm ./veda-input-onto
-
-    cd source/veda-input-onto
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-input-onto $VEDA_BIN
-
-fi
-
-if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD CCUS
-    rm ./veda-ccus
-
-    cd source/veda-ccus
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-ccus $VEDA_BIN
-fi
-
-if [ -z $1 ] || [ $1 == "ontologist" ] || [ $1 == "veda-ontologist" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD ONTOLOGIST
-    rm ./veda-ontologist
-
-    cd source/veda-ontologist
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-ontologist $VEDA_BIN
-fi
-
-if [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] || [ $1 == "all" ] ; then
-
-    echo start make VEDA-GEO-INDEXER
-    rm ./veda-geo-indexer
-
-    cd source/veda-geo-indexer
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-geo-indexer $VEDA_BIN
-
-    echo end make VEDA-GEO-INDEXER
-fi
-
-if [ $1 == "webserver" ] || [ $1 == "veda-webserver" ] ; then
-    echo BUILD VEDA-WEBSERVER
-    rm ./veda-webserver
-
-    cd source/veda-webserver
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-webserver $VEDA_BIN
 fi
 
 if [ -z $1 ] || [ $1 == "bootstrap" ] || [ $1 == "veda" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD VEDA-BOOTSTRAP
-    rm ./veda
-
-    cd source/veda-bootstrap
-    cargo build --release
-    cd $BUILD_PATH
+    build_server_module "veda-bootstrap"
     cp $CARGO_TARGET_DIR/release/veda-bootstrap $VEDA_BIN/veda
 fi
 
-if [ -z $1 ] || [ $1 == "mstorage" ] || [ $1 == "veda-mstorage" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD MSTORAGE
-    cd source/veda-mstorage
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-mstorage $VEDA_BIN
+if [ -z $1 ] || [ $1 == "auth" ] || [ $1 == "veda-auth" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-auth"
+fi
 
+if [ -z $1 ] || [ $1 == "az-indexer" ] || [ $1 == "veda-az-indexer" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-az-indexer"
+fi
+
+if [ -z $1 ] || [ $1 == "input-onto" ] || [ $1 == "veda-input-onto" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-input-onto"
+fi
+
+if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-ccus"
+fi
+
+if [ -z $1 ] || [ $1 == "ontologist" ] || [ $1 == "veda-ontologist" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-ontologist"
+fi
+
+if [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] || [ $1 == "all" ] ; then
+    build_server_module "veda-geo-indexer"
+fi
+
+if [ $1 == "webserver" ] || [ $1 == "veda-webserver" ] ; then
+    build_server_module "veda-webserver"
+fi
+
+if [ -z $1 ] || [ $1 == "mstorage" ] || [ $1 == "veda-mstorage" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-mstorage"
 fi
 
 if [ -z $1 ] || [ $1 == "ro-storage" ] || [ $1 == "veda-ro-storage" ] || [ $1 == "basic" ] || [ $1 == "all" ] ; then
-    echo BUILD RO-STORAGE
-    cd source/veda-ro-storage
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-ro-storage $VEDA_BIN
-
+    build_server_module "veda-ro-storage"
 fi
 
 if [ $1 == "fanout-email" ] || [ $1 == "veda-fanout-email" ] || [ $1 == "all" ]; then
-    echo BUILD FANOUT-EMAIL
-    cd source/veda-fanout-email
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-fanout-email $VEDA_BIN
+    build_server_module "veda-fanout-email"
 fi
 
 if [ $1 == "fanout-sql" ] || [ $1 == "veda-fanout-sql" ] || [ $1 == "all" ]; then
-    echo BUILD FANOUT-SQL
-    cd source/veda-fanout-sql
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-fanout-sql $VEDA_BIN
+    build_server_module "veda-fanout-sql"
 fi
 
 if [ $1 == "search-index-tt" ] || [ $1 == "veda-search-index-tt" ] || [ $1 == "all" ]; then
-    echo BUILD TT
-    cd source/veda-search-index-tt
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-search-index-tt $VEDA_BIN
+    build_server_module "veda-search-index-tt"
 fi
 
 if [ $1 == "search-index-pt" ] || [ $1 == "veda-search-index-pt" ] || [ $1 == "all" ]; then
-    echo BUILD PT
-    cd source/veda-search-index-pt
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-search-index-pt $VEDA_BIN
+    build_server_module "veda-search-index-pt"
 fi
 
 if [ $1 == "search-query" ] || [ $1 == "veda-search-query" ] || [ $1 == "all" ]; then
-    echo BUILD SEARCH-QUERY
-    cd source/veda-search-query
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-search-query $VEDA_BIN
+    build_server_module "veda-search-query"
 fi
 
 if [ $1 == "cleaner" ] || [ $1 == "veda-cleaner" ] || [ $1 == "all" ]; then
-    echo BUILD CLEANER
-    cd source/veda-cleaner
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-cleaner $VEDA_BIN
+    build_server_module "veda-cleaner"
 fi
 
 if [ -z $1 ] || [ $1 == "scripts-v8" ] || [ $1 == "veda-scripts-v8" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD SCRIPTS-V8
-    cd source/veda-scripts-v8
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-scripts-v8 $VEDA_BIN
-fi
-
-if [ $1 == "nano-bpmn" ] || [ $1 == "veda-nano-bpmn" ] || [ $1 == "all" ]; then
-    echo BUILD nano-bpmn
-    cd source/veda-nano-bpmn
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-nano-bpmn $VEDA_BIN
-fi
-
-if [ $1 == "camunda-external-task" ] || [ $1 == "veda-camunda-external-task" ] || [ $1 == "all" ]; then
-    echo BUILD camunda-external-task
-    cd source/veda-camunda-external-task
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-camunda-external-task $VEDA_BIN
-fi
-
-
-if [ $1 == "camunda-connector" ] || [ $1 == "veda-camunda-connector" ] || [ $1 == "all" ]; then
-    echo BUILD camunda-connector
-    cd source/veda-camunda-connector
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-camunda-connector $VEDA_BIN
+    build_server_module "veda-scripts-v8"
 fi
 
 if [ -z $1 ] || [ $1 == "ft-indexer" ] || [ $1 == "veda-ft-indexer" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD FT-INDEXER
-    cd source/veda-ft-indexer
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-ft-indexer $VEDA_BIN/veda-ft-indexer
+    build_server_module "veda-ft-indexer"
 fi
 
 if [ -z $1 ] || [ $1 == "ft-query" ] || [ $1 == "veda-ft-query" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    echo BUILD FT-QUERY
-    cd source/veda-ft-query
-    cargo build --release
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/veda-ft-query $VEDA_BIN/veda-ft-query
+    build_server_module "veda-ft-query"
 fi
 
 if [ -z $1 ] || [ $1 == "gowebserver" ] || [ $1 == "veda-gowebserver" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
