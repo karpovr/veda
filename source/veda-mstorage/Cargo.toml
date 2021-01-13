@@ -16,6 +16,6 @@ v_authorization = "0.1.0"
 
 v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
 v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
-v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git", version = "0.1.1" }
-v_module = { git = "https://github.com/semantic-machines/v-common-module.git", version = "0.1.3" }
+v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
+v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
 v_az_lmdb = { git = "https://github.com/semantic-machines/v-common-az-lmdb.git" }

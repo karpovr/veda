@@ -11,7 +11,6 @@ use rio_api::parser::TriplesParser;
 use rio_turtle::{TurtleError, TurtleParser};
 use ron::de::from_reader;
 use ron::ser::{to_string_pretty, PrettyConfig};
-use serde::export::Formatter;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fs::{DirEntry, File};
@@ -28,6 +27,7 @@ use v_module::onto::*;
 use v_onto::datatype::Lang;
 use v_onto::individual::Individual;
 use v_onto::onto::*;
+use std::fmt::Formatter;
 
 #[derive(Serialize, Deserialize)]
 struct FileHash {
