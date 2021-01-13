@@ -21,6 +21,7 @@
     "main": "/js/browser/main.js",
     "jsworkflow":"/js/browser/veda_workflow_editor.js",
     "tablesortable":"/js/browser/table_sortable.js",
-    "sha256":"/js/common/lib/sha256.js"
+    "sha256":"/js/common/lib/sha256.js",
+    "bowser":"/node_modules/bowser/es5.js"
   }
 }

@@ -37,6 +37,7 @@
     "autosize": "^4.0.2",
     "bootstrap": "^3.4.1",
     "bootstrap-contextmenu": "^1.0.0",
+    "bowser": "^2.11.0",
     "construct-style-sheets-polyfill": "^2.4.3",
     "core-js": "^3.8.1",
     "cropperjs": "^1.5.9",
