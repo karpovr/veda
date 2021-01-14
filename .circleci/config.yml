@@ -56,7 +56,7 @@ jobs:
             sleep 1
             testcafe chrome:headless qa/testcafe/testCreatingNetInterface.js --screenshots screens --screenshots-on-fails screens --speed 0.7
             sleep 1
-            testcafe chrome:headless qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 1
+            testcafe chrome:headless qa/testcafe/testDeleteAndRecovery.js --screenshots screens --screenshots-on-fails screens --speed 0.7
             sleep 1
             testcafe chrome:headless qa/testcafe/testJournal.js --screenshots screens --screenshots-on-fails screens --speed 1
             sleep 1
