@@ -1,6 +1,6 @@
 // Veda application presenter
 
-import $ from 'jquery';
+import './check_browser.js';
 
 import veda from '../common/veda.js';
 
