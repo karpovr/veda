@@ -61,7 +61,8 @@ fn main() -> std::io::Result<()> {
     let mut backup_storage: VStorage = VStorage::none();
     let mut use_backup_db = false;
 
-    if !tarantool_addr.is_empty() {
+    if tarantool_addr.is_empty() {
+        primary_storage.get_value(StorageId::Individuals, "?");
         if let Some (db_url) = section.get("use_backup_db") {
             backup_storage = VStorage::new_tt(db_url.to_owned(), "veda6", "123456");
             use_backup_db = true;

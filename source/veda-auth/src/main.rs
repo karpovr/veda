@@ -15,6 +15,7 @@ use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::{create_sys_ticket, init_log, Module};
+use v_storage::storage::StorageMode;
 
 fn main() -> std::io::Result<()> {
     init_log("AUTH");
@@ -30,7 +31,7 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
-    let mut module = Module::new(false);
+    let mut module = Module::new(StorageMode::ReadWrite, false);
 
     let systicket = if let Ok(t) = module.get_sys_ticket_id() {
         t
