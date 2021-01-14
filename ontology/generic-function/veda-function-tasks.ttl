@@ -377,6 +377,7 @@ v-ft:Inbox
   v-ui:hasTemplate v-ft:InboxTemplate ;
   v-fs:applicableOperation v-ft:MakeDecisionOperation ;
   v-fs:queryBuilder "veda.Util.queryInbox" ;
+  v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
 v-ft:InboxBlank
@@ -410,6 +411,7 @@ v-ft:Outbox
   v-fs:sortOrder "'v-s:created' desc"^^xsd:string ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
   v-fs:queryBuilder "veda.Util.queryInbox" ;
+  v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
 v-ft:OutboxBlank
@@ -443,6 +445,7 @@ v-ft:Completed
   v-fs:sortOrder "'v-s:created' desc"^^xsd:string ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
   v-fs:queryBuilder "veda.Util.queryInbox" ;
+  v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
 v-ft:CompletedBlank
@@ -476,6 +479,7 @@ v-ft:OutboxCompleted
   v-fs:sortOrder "'v-s:created' desc"^^xsd:string ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
   v-fs:queryBuilder "veda.Util.queryInbox" ;
+  v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
 v-ft:OutboxCompletedBlank

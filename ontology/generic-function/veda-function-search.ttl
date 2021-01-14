@@ -189,6 +189,15 @@ v-fs:queryBuilder
   rdfs:domain v-fs:AttributiveSearch ;
   rdfs:range xsd:string ;
 .
+v-fs:queryLanguage
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Источник данных"@ru ;
+  rdfs:label "Data source"@en ;
+  rdfs:domain v-fs:AttributiveSearch ;
+  rdfs:range xsd:string ;
+  rdfs:comment "Возможные значения: VQL | SQL. По умолчанию - VQL"@ru ;
+  rdfs:comment "Possible values: VQL | SQL. Default - VQL"@en ;
+.
 v-fs:loadAll
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Загрузить все"@ru ;
@@ -279,6 +288,7 @@ v-fs:AttributiveSearchModel
   this["v-fs:authorized"] = [ this["v-fs:authorized"][0] || 0 ];
   this["v-fs:sortOrder"] = [ this["v-fs:sortOrder"][0] || "'v-s:created' desc" ];
   var queryBuilder = this.hasValue("v-fs:queryBuilder") ? eval(this.get("v-fs:queryBuilder")[0].valueOf()) : veda.Util.queryFromIndividualTT_JOIN;
+  var queryLanguage = this.hasValue("v-fs:queryLanguage") ? this.get("v-fs:queryLanguage")[0].valueOf().toLowerCase() : 'vql';
 
   function evalQuery (query) {
     return new Promise(function (resolve, reject) {
@@ -315,21 +325,24 @@ v-fs:AttributiveSearchModel
               return searchBlank.initBlank();
             })
             .then(function (blankObject) {
-              var vql = veda.Util.queryFromIndividual(blankObject);
               var sort = self["v-fs:sortOrder"][0];
-              var sql = queryBuilder(blankObject, sort);
-              if (ft && !vql) {
-                query.vql = ft;
-              } else if (ft && vql) {
-                query.vql = ft + " && " + vql;
-              } else if (!ft && vql) {
-                query.vql = vql;
+              if (queryLanguage === 'vql') {
+                var vql = veda.Util.queryFromIndividual(blankObject);
+                if (ft && !vql) {
+                  query.vql = ft;
+                } else if (ft && vql) {
+                  query.vql = ft + " && " + vql;
+                } else if (!ft && vql) {
+                  query.vql = vql;
+                }
+              } else if (queryLanguage === 'sql') {
+                var sql = queryBuilder(blankObject, sort);
                 if (sql) {
                   query.sql = sql;
                 }
               }
               return query;
-            })
+            });
         } else {
           query.vql = ft;
           return query;
@@ -340,20 +353,20 @@ v-fs:AttributiveSearchModel
 
   function performQuery(query) {
     var self = this;
-    this["v-fs:query"] = [ query.vql ];
-    if ( !query.vql ) {
-      this["v-fs:searchResult"] = [];
-      return Promise.resolve([]);
-    }
-    return veda.Backend.query({
+    var params = {
       ticket: veda.ticket,
-      query: query.vql,
-      sort: self["v-fs:sortOrder"][0],
-      top: self["v-fs:top"][0] || veda.user.preferences.displayedElements || 10,
-      limit: self["v-fs:limit"][0] || 10000,
-      from: self["v-fs:cursor"][0],
-      sql: query.sql
-    }).then(function (results) {
+      sort: this["v-fs:sortOrder"][0],
+      top: this["v-fs:top"][0] || veda.user.preferences.displayedElements || 10,
+      limit: this["v-fs:limit"][0] || 10000,
+      from: this["v-fs:cursor"][0],
+    };
+    if (query.vql) {
+      params.query = query.vql;
+    } else if (query.sql) {
+      params.sql = query.sql;
+    }
+    this["v-fs:query"] = [ query.vql || query.sql ];
+    return veda.Backend.query(params).then(function (results) {
       self["v-fs:estimated"] = [ results.estimated ];
       self["v-fs:cursor"] = [ results.cursor ];
       return results.result;
