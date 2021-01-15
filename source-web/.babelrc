@@ -25,7 +25,7 @@
         "builtIns": false,
         "consecutiveAdds": true,
         "deadcode": true,
-        "evaluate": true,
+        "evaluate": false,
         "flipComparisons": true,
         "guards": true,
         "infinity": true,
