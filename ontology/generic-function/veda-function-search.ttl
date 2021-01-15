@@ -180,7 +180,7 @@ v-fs:query
   rdfs:label "Запрос"@ru ;
   rdfs:label "Query"@en ;
   rdfs:domain v-fs:AttributiveSearch ;
-  rdfs:range xsd:boolean ;
+  rdfs:range xsd:string ;
 .
 v-fs:queryBuilder
   rdf:type owl:DatatypeProperty ;
