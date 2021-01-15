@@ -15,10 +15,10 @@ regex = "1"
 url = "2.1.1"
 bincode = "1.2.1"
 serde = "1.0"
-v_queue = "0.1"
 
-v_api = { git = "https://github.com/semantic-machines/v-common-api.git", branch = "main" }
-v_onto = { git = "https://github.com/semantic-machines/v-common-onto.git" }
-v_search = { git = "https://github.com/semantic-machines/v-common-search.git" }
-v_storage = { git = "https://github.com/semantic-machines/v-common-storage.git" }
-v_module = { git = "https://github.com/semantic-machines/v-common-module.git" }
+v_queue = "0.1"
+v_onto = { package = "v-common-onto", version = "0.1.1" }
+v_api = { package = "v-common-api", version = "0.1.2" }
+v_storage = { package = "v-common-storage", version = "0.1.2" }
+v_search = { package = "v-common-search", version = "0.1.2" }
+v_module = { package = "v-common-module", version = "0.1.5" }

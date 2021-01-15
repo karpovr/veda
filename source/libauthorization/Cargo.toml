@@ -11,7 +11,7 @@ path = "src/lib.rs"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-v_az_lmdb = { git = "https://github.com/semantic-machines/v-common-az-lmdb.git" }
+v_az_lmdb = { package = "v-common-az-lmdb", version = "0.1.1" }
 v_authorization = "0.1.0"
 
 #[build-dependencies]
