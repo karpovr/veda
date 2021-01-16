@@ -5,7 +5,7 @@ authors = ["Roman Karpov <roman.karpov@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-clickhouse-rs = {git = "https://github.com/xbinxu/clickhouse-rs", rev = "6950ce586050d97cb423c9d49f142e54416cd46f", default-features = false, features = ["async_std"] }
+clickhouse-rs = {package = "v-clickhouse-rs", version = "0.2.0-alpha.6", default-features = false, features = ["async_std"] }
 futures = "0.3.5"
 log = "0.4"
 chrono = "0.4"
