@@ -67,6 +67,10 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
+    if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
+        wait_module("fulltext_indexer", wait_load_ontology());
+    }
+
     if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
         let mut ctx = Context {
             last_found_changes: Instant::now(),
@@ -141,11 +145,14 @@ fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut C
 
 fn prepare(
     _module: &mut Module,
-    _module_info: &mut ModuleInfo,
+    module_info: &mut ModuleInfo,
     ctx: &mut Context,
     queue_element: &mut Individual,
     _my_consumer: &Consumer,
 ) -> Result<bool, PrepareError> {
+
+    let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+
     if let Some((id, counter, is_deleted)) = test_on_onto(queue_element, &ctx.onto_types) {
         ctx.last_found_changes = Instant::now();
         ctx.is_need_generate = true;
@@ -160,6 +167,11 @@ fn prepare(
                 error!("fail update onto index, err={}", e);
             }
         }
+    }
+
+    if let Err(e) = module_info.put_info(op_id, op_id) {
+        error!("fail write module_info, op_id={}, err={:?}", op_id, e);
+        return Err(PrepareError::Fatal);
     }
 
     return Ok(true);

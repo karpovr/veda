@@ -75,7 +75,7 @@ fn main() -> Result<(), i32> {
 
 fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
-        wait_module("fulltext_indexer", wait_load_ontology());
+        wait_module("ontologist", wait_load_ontology());
     }
 
     let mut module = Module::default();
