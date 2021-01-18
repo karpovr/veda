@@ -1,6 +1,6 @@
-#ro-storage
-
 mstorage
+
+#ro-storage
 
 auth
 
@@ -26,10 +26,6 @@ ft-query
 #search-query
 
 #fanout-sql
-
-#ltr-scripts
-    module = scripts
-    args = ltr
 
 scripts-lp
     module = scripts-v8
