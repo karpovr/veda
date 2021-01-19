@@ -322,7 +322,11 @@ export default function AppPresenter() {
 
         // Update application on `update` event
         veda.on('update', function () {
-          registration.update();
+          registration.update()
+            .catch(console.log)
+            .then(function (registration) {
+              window.location.reload();
+            });
         });
       })
       .catch((error) => console.log(`Registration failed with ${error}`));
