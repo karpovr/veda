@@ -11,6 +11,7 @@ import (
   "strings"
   "time"
   "unicode/utf8"
+  "path/filepath"
 )
 
 //uploadFile handles file uploading from request context
@@ -214,6 +215,21 @@ func files(ctx *fasthttp.RequestCtx, routeParts []string) {
     eFileName := url.PathEscape(fileName)
     ctx.Response.Header.Set("Content-Disposition", "attachment; filename*=UTF-8''"+eFileName)
     fasthttp.ServeFileBytesUncompressed(ctx, []byte(filePathStr))
+
+    var ext = filepath.Ext(fileName)
+    log.Println("ext=", ext)
+
+    if ext == ".docx" {
+	ctx.Response.Header.Set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    }
+
+    if ext == ".xlsx" {
+	ctx.Response.Header.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    }
+
+    if ext == ".pptx" {
+	ctx.Response.Header.Set("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation")
+    }
 
     trail1(ticket.Id, ticket.UserURI, "files", uri, "", Ok, timestamp)
   } else {
