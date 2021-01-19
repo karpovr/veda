@@ -1,5 +1,6 @@
 mod cleaner;
 mod common;
+mod queue_tools;
 mod v_s_email;
 mod v_s_membership;
 mod v_s_membership1;
@@ -10,6 +11,7 @@ mod v_wf_process;
 #[macro_use]
 extern crate log;
 
+use crate::queue_tools::{export_from_query, queue_to_json, queue_to_veda};
 use cleaner::clean;
 use type_cli::CLI;
 use v_module::module::init_log;
@@ -17,8 +19,21 @@ use v_module::module::init_log;
 #[derive(CLI)]
 #[help = "veda tools"]
 enum Tools {
+    #[help = "Store individuals from queue to storage"]
+    QueueStorage(String),
+
+    #[help = "Print individuals from queue to json"]
+    QueueJson {
+        #[named]
+        #[help = "path to queue"]
+        queue_path: String,
+
+        #[named]
+        #[help = "queue part id"]
+        part_id: u32,
+    },
     #[help = "Build queue from query"]
-    Query2Queue(String),
+    QueryQueue(String),
 
     #[help = "Run cleaner"]
     Cleaner {
@@ -40,8 +55,9 @@ fn main() {
     init_log("VEDA-TOOLS");
 
     match Tools::process() {
-        Tools::Query2Queue(query) => {
+        Tools::QueryQueue(query) => {
             info!("query={}", query);
+            export_from_query(&query).expect("fail create query from queue");
         }
         Tools::Cleaner {
             module,
@@ -50,6 +66,17 @@ fn main() {
         } => {
             info!("module={}", module);
             clean(module, operation, report);
+        }
+        Tools::QueueStorage(path_to_queue) => {
+            info!("path_to_queue={}", path_to_queue);
+            queue_to_veda();
+        }
+        Tools::QueueJson {
+            queue_path,
+            part_id,
+        } => {
+            info!("queue_path={}, part_id={}", queue_path, part_id);
+            queue_to_json(queue_path, part_id);
         }
     }
 }

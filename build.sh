@@ -127,8 +127,8 @@ if [ $1 == "search-query" ] || [ $1 == "veda-search-query" ] || [ $1 == "all" ];
     build_server_module "veda-search-query"
 fi
 
-if [ $1 == "cleaner" ] || [ $1 == "veda-cleaner" ] || [ $1 == "all" ]; then
-    build_server_module "veda-cleaner"
+if [ $1 == "tools" ] || [ $1 == "veda-tools" ] || [ $1 == "all" ]; then
+    build_server_module "veda-tools"
 fi
 
 if [ -z $1 ] || [ $1 == "scripts-v8" ] || [ $1 == "veda-scripts-v8" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
