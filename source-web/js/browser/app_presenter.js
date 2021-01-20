@@ -30,10 +30,10 @@ export default function AppPresenter() {
     if (event.altKey && event.ctrlKey) {
       event.preventDefault();
       event.stopPropagation();
-      setTimeout(() => riot.route(`${hash}//v-ui:ttl`));
+      riot.route(`${hash}//v-ui:ttl`);
     }
   }
-  delegateHandler(document.body, 'click', '[resource], [about]', specialTemplateHandler);
+  delegateHandler(document.body, 'click', '[resource], [about]', specialTemplateHandler, true);
 
   // Outline resource containers to switch view to special templates
   let outlined;

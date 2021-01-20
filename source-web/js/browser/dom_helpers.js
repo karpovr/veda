@@ -8,8 +8,8 @@
  * @param {function} handler - event handler
  * @return {void}
  */
-function delegateHandler(el, event, delegateSelector, handler) {
-  el.addEventListener(event, ancestorHandler);
+function delegateHandler(el, event, delegateSelector, handler, useCapture) {
+  el.addEventListener(event, ancestorHandler, useCapture);
 
   /**
    * Event listener for ancestor element
