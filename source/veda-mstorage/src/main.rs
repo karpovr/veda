@@ -8,6 +8,7 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::str;
+use url::*;
 use v_api::app::ResultCode;
 use v_api::IndvOp;
 use v_authorization::common::{Access, Trace};
@@ -61,15 +62,23 @@ fn main() -> std::io::Result<()> {
     let mut backup_storage: VStorage = VStorage::none();
     let mut use_backup_db = false;
 
-    if let Some(backup_db_conn) = section.get("backup_db_connect") {
-        let backup_db_type = section.get("backup_db_type").unwrap_or_default();
-        if backup_db_type == "tarantool" {
-            backup_storage = VStorage::new_tt(backup_db_conn.to_owned(), "veda6", "123456");
-            use_backup_db = true;
-        } else if backup_db_type == "lmdb" {
-            backup_storage = VStorage::new_lmdb(backup_db_conn, StorageMode::ReadWrite);
-            use_backup_db = true;
-            primary_storage.get_value(StorageId::Individuals, "?");
+    if let Some(s) = section.get("backup_db_connection") {
+        if let Ok(conn) = Url::parse(s) {
+            if conn.scheme() == "tcp" {
+                let conn_str = format!("{}:{}", conn.host().expect("invalid backup_db_connection"), conn.port().unwrap_or(0));
+                info!("BACKUP DB: TARANTOOL {}", conn);
+                backup_storage = VStorage::new_tt(conn_str, conn.username(), conn.password().unwrap_or_default());
+                use_backup_db = true;
+                primary_storage.get_value(StorageId::Individuals, "?");
+            } else if conn.scheme() == "file" {
+                let path = format!(".{}", conn.path());
+                info!("BACKUP DB: LMDB {}", path);
+                backup_storage = VStorage::new_lmdb(&path, StorageMode::ReadWrite);
+                use_backup_db = true;
+                backup_storage.get_value(StorageId::Individuals, "?");
+            }
+        } else {
+            error!("invalid backup_db_connection string {}", s);
         }
     }
 
