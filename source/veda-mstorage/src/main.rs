@@ -61,11 +61,15 @@ fn main() -> std::io::Result<()> {
     let mut backup_storage: VStorage = VStorage::none();
     let mut use_backup_db = false;
 
-    if tarantool_addr.is_empty() {
-        primary_storage.get_value(StorageId::Individuals, "?");
-        if let Some (db_url) = section.get("use_backup_db") {
-            backup_storage = VStorage::new_tt(db_url.to_owned(), "veda6", "123456");
+    if let Some(backup_db_conn) = section.get("backup_db_connect") {
+        let backup_db_type = section.get("backup_db_type").unwrap_or_default();
+        if backup_db_type == "tarantool" {
+            backup_storage = VStorage::new_tt(backup_db_conn.to_owned(), "veda6", "123456");
             use_backup_db = true;
+        } else if backup_db_type == "lmdb" {
+            backup_storage = VStorage::new_lmdb(backup_db_conn, StorageMode::ReadWrite);
+            use_backup_db = true;
+            primary_storage.get_value(StorageId::Individuals, "?");
         }
     }
 
