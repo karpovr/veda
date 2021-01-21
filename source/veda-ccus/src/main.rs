@@ -17,7 +17,7 @@ use v_onto::individual::*;
 
 mod server;
 use crate::server::CMessage;
-use v_storage::storage::new_ro_storage;
+use v_storage::storage::*;
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_millis(5000);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -173,7 +173,7 @@ impl WsCCUSSession {
 fn storage_manager(rx: Receiver<CMessage>) {
     info!("Start STORAGE MANAGER");
 
-    let mut storage = new_ro_storage();
+    let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
     loop {
         if let Ok((msg, msg_id, sender)) = rx.recv() {

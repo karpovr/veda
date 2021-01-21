@@ -18,18 +18,7 @@ fn main() {
 
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
-
-    let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
-        p.to_owned()
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-
+    
     let mut query_url = section.get("ft_query_service_url").expect("param [search_query_url] not found in veda.properties").to_owned();
 
     let args: Vec<String> = env::args().collect();

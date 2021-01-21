@@ -12,6 +12,6 @@ lettre_email = "0.9"
 v_queue = "0.1"
 v_onto = { package = "v-common-onto", version = "0.1.1" }
 v_api = { package = "v-common-api", version = "0.1.2" }
-v_storage = { package = "v-common-storage", version = "0.1.2" }
+v_storage = { package = "v-common-storage", version = "0.1.3" }
 v_search = { package = "v-common-search", version = "0.1.2" }
-v_module = { package = "v-common-module", version = "0.1.7" }
+v_module = { package = "v-common-module", version = "0.1.9" }

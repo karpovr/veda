@@ -35,16 +35,6 @@ fn main() -> std::io::Result<()> {
 
     let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
-    let tarantool_addr = if let Some(p) = section.get("tarantool_url") {
-        p.to_owned()
-    } else {
-        warn!("param [tarantool_url] not found in veda.properties");
-        "".to_owned()
-    };
-    if !tarantool_addr.is_empty() {
-        info!("tarantool addr={}", &tarantool_addr);
-    }
-
     let notify_channel_url = section.get("notify_channel_url");
     if notify_channel_url.is_none() {
         error!("fail read property [notify_channel_url]");
@@ -58,7 +48,7 @@ fn main() -> std::io::Result<()> {
         info!("bind to notify_channel={}", notify_channel_url.unwrap());
     }
 
-    let mut primary_storage = new_rw_storage();
+    let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
     let mut backup_storage: VStorage = VStorage::none();
     let mut use_backup_db = false;
 

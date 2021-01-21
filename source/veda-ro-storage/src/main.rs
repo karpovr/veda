@@ -26,7 +26,7 @@ fn main() -> std::io::Result<()> {
 
     let ro_storage_url = section.get("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
 
-    let mut storage = new_ro_storage ();
+    let mut storage = get_storage_use_prop (StorageMode::ReadOnly);
 
     let server = Socket::new(Protocol::Rep0)?;
     if let Err(e) = server.listen(&ro_storage_url) {
