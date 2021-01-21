@@ -1548,35 +1548,6 @@ Util.getFirstValueUseLang = function (property_value, lang) {
   return null;
 };
 
-// Returns literal value or resource id for given property chain
-Util.getPropertyChain = function (...args) {
-  let value = args[0];
-  const argsLength = args.length;
-  if (typeof value === 'string') {
-    value = Backend.get_individual(veda.ticket, value);
-  }
-  let i; let property_uri; let type;
-  for (i = 1; i < argsLength; i++) {
-    property_uri = args[i];
-    if ( Util.hasValue(value, property_uri) ) {
-      if (i === (argsLength - 1) ) {
-        return value[property_uri].map(function (el) {
-          return el.data;
-        });
-      } else {
-        type = value[property_uri][0].type;
-        value = value[property_uri][0].data;
-        if (type === 'Uri') {
-          value = Backend.get_individual(veda.ticket, value);
-          continue;
-        }
-      }
-    }
-    return;
-  }
-  return value;
-};
-
 Util.areEqual = function (x, y) {
   if ( x === y ) return true;
   if ( ! ( x instanceof Object ) || ! ( y instanceof Object ) ) return false;

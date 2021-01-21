@@ -12,6 +12,35 @@ export default veda.Util = Util;
 
 Util.Sha256 = Sha256;
 
+// Returns literal value or resource id for given property chain
+Util.getPropertyChain = function (...args) {
+  let value = args[0];
+  const argsLength = args.length;
+  if (typeof value === 'string') {
+    value = get_individual(veda.ticket, value);
+  }
+  let i; let property_uri; let type;
+  for (i = 1; i < argsLength; i++) {
+    property_uri = args[i];
+    if ( Util.hasValue(value, property_uri) ) {
+      if (i === (argsLength - 1) ) {
+        return value[property_uri].map(function (el) {
+          return el.data;
+        });
+      } else {
+        type = value[property_uri][0].type;
+        value = value[property_uri][0].data;
+        if (type === 'Uri') {
+          value = get_individual(veda.ticket, value);
+          continue;
+        }
+      }
+    }
+    return;
+  }
+  return value;
+};
+
 Util.getJournalUri = function (object_uri) {
   return object_uri + 'j';
 };
