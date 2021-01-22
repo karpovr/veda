@@ -14,7 +14,7 @@ use v_api::IndvOp;
 use v_authorization::common::{Access, Trace};
 use v_az_lmdb::_authorize;
 use v_module::info::ModuleInfo;
-use v_module::module::{create_sys_ticket, indv_apply_cmd, init_log, Module};
+use v_module::module::*;
 use v_module::ticket::Ticket;
 use v_onto::datatype::Lang;
 use v_onto::individual::{Individual, RawObj};

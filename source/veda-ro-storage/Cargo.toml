@@ -10,5 +10,5 @@ rust-ini = "0.16"
 nng = "0.5.1"
 
 v_onto = { package = "v-common-onto", version = "0.1.1" }
-v_storage = { package = "v-common-storage", version = "0.1.3" }
-v_module = { package = "v-common-module", version = "0.1.9" }
+v_storage = { package = "v-common-storage", version = "0.1.5" }
+v_module = { package = "v-common-module", version = "0.1.10" }
