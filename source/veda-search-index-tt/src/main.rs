@@ -17,6 +17,7 @@ use std::io::{BufReader, BufWriter};
 use std::time::Instant;
 use std::{fs, process};
 use url::Url;
+use v_api::IndvOp;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::load_onto;
@@ -26,7 +27,6 @@ use v_onto::individual::*;
 use v_onto::onto::Onto;
 use v_onto::resource::Value;
 use v_queue::consumer::*;
-use v_api::IndvOp;
 
 type TypedBatch = HashMap<String, Batch>;
 type Batch = Vec<BatchElement>;
@@ -64,7 +64,7 @@ enum ColumnData {
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct TypeOps {
     type_name: String,
-    ops: Vec<i64>
+    ops: Vec<i64>,
 }
 
 impl Context {
@@ -78,13 +78,6 @@ impl Context {
 
         let mut new_state = Individual::default();
         get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
-
-        let id = new_state.get_id().to_string();
-        let actual_version = new_state.get_first_literal("v-s:actualVersion").unwrap_or_default();
-        if !actual_version.is_empty() && actual_version != id {
-            info!("Skip not actual version. {}.v-s:actualVersion {} != {}", id, &actual_version, id);
-            return;
-        }
 
         let mut prev_state = Individual::default();
         let is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
@@ -113,19 +106,30 @@ impl Context {
             is_remove = false;
         }
         if !is_remove {
-            if let Some(type_resources) = new_state.get_resources("rdf:type") {
-                for type_resource in type_resources {
-                    if let Value::Uri(type_name) = type_resource.value {
-                        let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-                        let mut new_state = Individual::default();
-                        get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
-                        if !self.typed_batch.contains_key(&type_name) {
-                            let new_batch = Batch::new();
-                            self.typed_batch.insert(type_name.clone(), new_batch);
-                        }
-                        let batch = self.typed_batch.get_mut(&type_name).unwrap();
-                        batch.push((op_id, new_state, 1));
+            if let Some(types) = new_state.get_literals("rdf:type") {
+                let id = new_state.get_id().to_string();
+
+                let actual_version = if !types.contains(&"v-s:Version".to_owned()) {
+                    new_state.get_first_literal("v-s:actualVersion").unwrap_or_default()
+                } else {
+                    String::default()
+                };
+
+                if !actual_version.is_empty() && actual_version != id {
+                    info!("Skip not actual version. {}.v-s:actualVersion {} != {}", id, &actual_version, id);
+                    return;
+                }
+
+                for type_name in types {
+                    let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+                    let mut new_state = Individual::default();
+                    get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
+                    if !self.typed_batch.contains_key(&type_name) {
+                        let new_batch = Batch::new();
+                        self.typed_batch.insert(type_name.clone(), new_batch);
                     }
+                    let batch = self.typed_batch.get_mut(&type_name).unwrap();
+                    batch.push((op_id, new_state, 1));
                 }
             }
         }
@@ -138,13 +142,8 @@ impl Context {
             let db_type_tables = &mut self.db_type_tables;
             let stats = &mut self.stats;
 
-            let f = OpenOptions::new()
-                            .read(true)
-                            .write(true)
-                            .create(true)
-                            .truncate(false)
-                            .open(BATCH_LOG_FILE_NAME)?;
-            let batch_log_file= f.try_clone()?;
+            let f = OpenOptions::new().read(true).write(true).create(true).truncate(false).open(BATCH_LOG_FILE_NAME)?;
+            let batch_log_file = f.try_clone()?;
             let mut reader = BufReader::new(f);
             let mut committed_types_ops: CommittedTypesOps = HashMap::new();
             loop {
@@ -465,11 +464,7 @@ impl Context {
     ) -> Result<Block, Error> {
         let rows = id_column.len();
 
-        let mut block = Block::new()
-            .column("id", id_column)
-            .column("sign", sign_column)
-            .column("version", version_column)
-            .column("text", text_column);
+        let mut block = Block::new().column("id", id_column).column("sign", sign_column).column("version", version_column).column("text", text_column);
 
         for (column_name, column_data) in columns.iter_mut() {
             let mut column_type = "Array(String)";

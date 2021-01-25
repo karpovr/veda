@@ -1,31 +1,31 @@
 #[macro_use]
 extern crate log;
 
-use std::{process, fs};
 use std::collections::{HashMap, HashSet};
+use std::{fs, process};
 
-use std::fs::{File, OpenOptions};
-use std::io::{BufReader, BufWriter};
 use bincode::{deserialize_from, serialize_into};
 use serde::{Deserialize, Serialize};
+use std::fs::{File, OpenOptions};
+use std::io::{BufReader, BufWriter};
 
-use clickhouse_rs::{Pool, errors::Error, Block, ClientHandle};
 use chrono::prelude::*;
 use chrono_tz::Tz;
-use std::time::Instant;
+use clickhouse_rs::{errors::Error, Block, ClientHandle, Pool};
 use futures::executor::block_on;
+use std::time::Instant;
 
+use url::Url;
+use v_api::IndvOp;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::onto::load_onto;
+use v_onto::datatype::DataType;
+use v_onto::datatype::Lang;
 use v_onto::individual::*;
 use v_onto::onto::Onto;
 use v_onto::resource::Value;
-use v_onto::datatype::DataType;
-use v_onto::datatype::Lang;
 use v_queue::consumer::*;
-use v_api::IndvOp;
-use url::Url;
 
 type TypedBatch = HashMap<String, Batch>;
 type Batch = Vec<BatchElement>;
@@ -73,9 +73,7 @@ pub struct TypePropOps {
 }
 
 impl Context {
-
     fn add_to_typed_batch(&mut self, queue_element: &mut Individual) {
-
         let cmd = get_cmd(queue_element);
         if cmd.is_none() {
             error!("Queue element cmd is none. Skip element.");
@@ -86,11 +84,6 @@ impl Context {
         get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
         let id = new_state.get_id().to_string();
-        let actual_version = new_state.get_first_literal("v-s:actualVersion").unwrap_or_default();
-        if !actual_version.is_empty() && actual_version != id {
-            info!("Skip not actual version. {}.v-s:actualVersion {} != {}", id, &actual_version, id);
-            return;
-        }
 
         let mut prev_state = Individual::default();
         let is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
@@ -122,6 +115,17 @@ impl Context {
         }
         if !is_remove {
             if let Some(types) = new_state.get_literals("rdf:type") {
+                let actual_version = if !types.contains(&"v-s:Version".to_owned()) {
+                    new_state.get_first_literal("v-s:actualVersion").unwrap_or_default()
+                } else {
+                    String::default()
+                };
+
+                if !actual_version.is_empty() && actual_version != id {
+                    info!("Skip not actual version. {}.v-s:actualVersion {} != {}", id, &actual_version, id);
+                    return;
+                }
+
                 for type_name in types {
                     if !self.onto.is_some_entered(&type_name, &EXPORTED_TYPE) {
                         continue;
@@ -149,12 +153,7 @@ impl Context {
             let stats = &mut self.stats;
 
             //Read or create batch log file
-            let f = OpenOptions::new()
-                            .read(true)
-                            .write(true)
-                            .create(true)
-                            .truncate(false)
-                            .open(BATCH_LOG_FILE_NAME)?;
+            let f = OpenOptions::new().read(true).write(true).create(true).truncate(false).open(BATCH_LOG_FILE_NAME)?;
             let batch_log_file = f.try_clone()?;
             let mut committed_types_props_ops: CommittedTypesPropsOps = HashMap::new();
             let mut reader = BufReader::new(f);
@@ -208,7 +207,6 @@ impl Context {
         committed_types_props_ops: &mut CommittedTypesPropsOps,
         batch_log_file: &File,
     ) -> Result<(), Error> {
-
         let mut predicate_tables: PredicateTables = HashMap::new();
 
         let now = Instant::now();
@@ -232,7 +230,6 @@ impl Context {
         let now = Instant::now();
 
         for (predicate, predicate_table) in predicate_tables {
-
             let (block, type_prop_ops) = Context::mk_block(type_name, predicate.clone(), predicate_table, client, db_predicate_tables).await?;
 
             //info!("`{}` block = {:?}", predicate, block);
@@ -294,7 +291,6 @@ impl Context {
         op_id: i64,
         committed_types_props_ops: &mut CommittedTypesPropsOps,
     ) {
-
         let id = individual.get_id().to_owned();
 
         let version = individual.get_first_integer("v-s:updateCounter").unwrap_or(0) as u32;
@@ -343,7 +339,6 @@ impl Context {
         op_id: i64,
     ) {
         if let Some(resources) = individual.get_resources(predicate) {
-
             if !predicate_tables.contains_key(predicate) {
                 let new_table = (vec![], vec![], vec![], vec![], vec![], vec![], HashMap::new());
                 predicate_tables.insert(predicate.to_string(), new_table);
@@ -374,20 +369,23 @@ impl Context {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                },
+                }
                 DataType::String => {
                     let column_name = "str".to_string();
-                    let column_value: Vec<String> = resources.iter().map(|resource| {
-                        let str_value = resource.get_str();
+                    let column_value: Vec<String> = resources
+                        .iter()
+                        .map(|resource| {
+                            let str_value = resource.get_str();
 
-                        text_content.push(str_value.trim().to_owned());
+                            text_content.push(str_value.trim().to_owned());
 
-                        let lang = match resource.get_lang() {
-                            Lang::NONE => String::from(""),
-                            lang => format!("@{}", lang.to_string()),
-                        };
-                        format!("{}{}", str_value.replace("'", "\\'"), lang)
-                    }).collect();
+                            let lang = match resource.get_lang() {
+                                Lang::NONE => String::from(""),
+                                lang => format!("@{}", lang.to_string()),
+                            };
+                            format!("{}{}", str_value.replace("'", "\\'"), lang)
+                        })
+                        .collect();
 
                     if !columns.contains_key(&column_name) {
                         let new_column = ColumnData::Str(Vec::new());
@@ -400,7 +398,7 @@ impl Context {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                },
+                }
                 DataType::Uri => {
                     let column_name = "str".to_string();
                     let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri().to_string()).collect();
@@ -416,15 +414,16 @@ impl Context {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                },
+                }
                 DataType::Boolean => {
                     let column_name = "int".to_string();
-                    let column_value: Vec<i64> = resources.iter().map(|resource| {
-                        match resource.value {
+                    let column_value: Vec<i64> = resources
+                        .iter()
+                        .map(|resource| match resource.value {
                             Value::Bool(true) => 1,
-                            _ => 0
-                        }
-                    }).collect();
+                            _ => 0,
+                        })
+                        .collect();
 
                     if !columns.contains_key(&column_name) {
                         let new_column = ColumnData::Int(Vec::new());
@@ -437,7 +436,7 @@ impl Context {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                },
+                }
                 DataType::Decimal => {
                     let column_name = "dec".to_string();
                     let column_value: Vec<f64> = resources.iter().map(|resource| resource.get_float()).collect();
@@ -453,7 +452,7 @@ impl Context {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                },
+                }
                 DataType::Datetime => {
                     let column_name = "date".to_string();
                     let column_value: Vec<DateTime<Tz>> = resources.iter().map(|resource| Tz::UTC.timestamp(resource.get_datetime(), 0)).collect();
@@ -469,7 +468,7 @@ impl Context {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                },
+                }
                 _ => {
                     error!("Value type is not supported");
                 }
@@ -482,9 +481,8 @@ impl Context {
         predicate: String,
         predicate_table: PredicateTable,
         client: &mut ClientHandle,
-        db_predicate_tables: &mut HashMap<String, HashMap<String, String>>
+        db_predicate_tables: &mut HashMap<String, HashMap<String, String>>,
     ) -> Result<(Block, TypePropOps), Error> {
-
         let (type_column, created_column, id_column, sign_column, version_column, op_type_column, mut columns) = predicate_table;
 
         let rows = id_column.len();
@@ -492,7 +490,7 @@ impl Context {
         let predicate_ops = TypePropOps {
             type_name: type_name.to_string(),
             predicate: predicate.clone(),
-            ops: op_type_column
+            ops: op_type_column,
         };
 
         let mut block = Block::new()
@@ -503,7 +501,7 @@ impl Context {
             .column("version", version_column);
 
         for (column_name, column_data) in columns.iter_mut() {
-            let mut column_type= "Array(String)";
+            let mut column_type = "Array(String)";
             if let ColumnData::Int(column) = column_data {
                 column_type = "Array(Int64)";
                 let column_size = column.len();
@@ -540,10 +538,9 @@ impl Context {
         }
         Ok((block, predicate_ops))
     }
-
 }
 
-fn main() ->  Result<(), Error> {
+fn main() -> Result<(), Error> {
     init_log("SEARCH_INDEX_PT");
 
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
@@ -564,7 +561,7 @@ fn main() ->  Result<(), Error> {
         Err(e) => {
             error!("Failed to connect to clickhouse: {}", e);
             process::exit(101)
-        },
+        }
         Ok(pool) => pool,
     };
 
@@ -587,7 +584,7 @@ fn main() ->  Result<(), Error> {
         pool,
         db_predicate_tables,
         typed_batch,
-        stats
+        stats,
     };
 
     load_onto(&mut module.storage, &mut ctx.onto);
@@ -601,7 +598,7 @@ fn main() ->  Result<(), Error> {
         &mut (before as fn(&mut Module, &mut Context, u32) -> Option<u32>),
         &mut (process as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
         &mut (after as fn(&mut Module, &mut ModuleInfo, &mut Context, u32) -> bool),
-        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context))
+        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context)),
     );
     Ok(())
 }
@@ -629,11 +626,16 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     Ok(false)
 }
 
-async fn create_predicate_table(predicate_name: &str, client: &mut ClientHandle, db_predicate_tables: &mut HashMap<String, HashMap<String, String>>) -> Result<(), Error> {
+async fn create_predicate_table(
+    predicate_name: &str,
+    client: &mut ClientHandle,
+    db_predicate_tables: &mut HashMap<String, HashMap<String, String>>,
+) -> Result<(), Error> {
     if db_predicate_tables.get(predicate_name).is_some() {
         return Ok(());
     }
-    let query = format!(r"
+    let query = format!(
+        r"
         CREATE TABLE IF NOT EXISTS {}.`{}` (
             id String,
             sign Int8 DEFAULT 1,
@@ -644,7 +646,9 @@ async fn create_predicate_table(predicate_name: &str, client: &mut ClientHandle,
         ENGINE = VersionedCollapsingMergeTree(sign, version)
         ORDER BY (`rdf_type_str`, `v_s_created_date`, id)
         PARTITION BY (`rdf_type_str`)
-    ", DB, predicate_name);
+    ",
+        DB, predicate_name
+    );
     client.execute(query).await?;
     let mut table_columns: HashMap<String, String> = HashMap::new();
     table_columns.insert("id".to_owned(), "String".to_owned());
@@ -656,7 +660,13 @@ async fn create_predicate_table(predicate_name: &str, client: &mut ClientHandle,
     Ok(())
 }
 
-async fn create_predicate_value_column(predicate_name: &str, column_name: &str, column_type: &str, client: &mut ClientHandle, db_predicate_tables: &mut HashMap<String, HashMap<String, String>>) -> Result<(), Error> {
+async fn create_predicate_value_column(
+    predicate_name: &str,
+    column_name: &str,
+    column_type: &str,
+    client: &mut ClientHandle,
+    db_predicate_tables: &mut HashMap<String, HashMap<String, String>>,
+) -> Result<(), Error> {
     if None == db_predicate_tables.get_mut(predicate_name) {
         create_predicate_table(predicate_name, client, db_predicate_tables).await?;
     }
@@ -683,7 +693,7 @@ async fn read_predicate_tables(pool: &mut Pool) -> Result<HashMap<String, HashMa
         let mut table_columns: HashMap<String, String> = HashMap::new();
         let columns_block = client.query(read_columns).fetch_all().await?;
         for row_column in columns_block.rows() {
-            let column_name: String      = row_column.get("name")?;
+            let column_name: String = row_column.get("name")?;
             let data_type: String = row_column.get("type")?;
             table_columns.insert(column_name, data_type);
         }

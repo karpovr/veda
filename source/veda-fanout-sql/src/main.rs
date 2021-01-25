@@ -103,12 +103,16 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     Ok(true)
 }
 
-fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &[String], is_new: bool, ctx: &mut Context) -> Result<bool, PrepareError> {
+fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[String], is_new: bool, ctx: &mut Context) -> Result<bool, PrepareError> {
     let uri = new_state.get_id().to_string();
 
     let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
 
-    let actual_version = new_state.get_first_literal("v-s:actualVersion").unwrap_or_default();
+    let actual_version = if !types.contains(&"v-s:Version".to_owned()) {
+        new_state.get_first_literal("v-s:actualVersion").unwrap_or_default()
+    } else {
+        String::default()
+    };
 
     if !actual_version.is_empty() && actual_version != uri {
         info!("Skip not actual version. {}.v-s:actualVersion {} != {}", uri, &actual_version, uri);
@@ -165,7 +169,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &[St
         "NULL"
     };
 
-    classes.iter().for_each(|class| {
+    types.iter().for_each(|class| {
         new_state.get_predicates().iter().for_each(|predicate| {
             new_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
                 let mut predicate = predicate.to_lowercase();
@@ -209,11 +213,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, classes: &[St
             Ok(_) => {
                 info!("Transaction rolled back for `{}`", uri);
                 return Ok(true);
-            },
+            }
             Err(e) => {
                 error!("Transaction roll back failed for `{}`. {:?}", uri, e);
                 return Err(PrepareError::Fatal);
-            },
+            }
         }
     }
 
