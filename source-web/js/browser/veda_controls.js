@@ -2317,10 +2317,9 @@ function cropImage(imageForCrop, ratio, maxWidth) {
 $.fn.veda_file = function( options ) {
   const opts = $.extend( {}, $.fn.veda_file.defaults, options );
   const control = $(opts.template);
-  const browseButton = $(control[0]);
-  const fileInput = $(control[1]);
-  const indicatorPercentage = $('.indicator-percentage', browseButton);
-  const indicatorSpinner = $('.indicator-spinner', browseButton);
+  const fileInput = control.find("input");
+  const indicatorPercentage = $('.indicator-percentage', control);
+  const indicatorSpinner = $('.indicator-spinner', control);
   const spec = opts.spec;
   const individual = opts.individual;
   const rel_uri = opts.property_uri;
@@ -2337,14 +2336,6 @@ $.fn.veda_file = function( options ) {
   if (accept) {
     fileInput.attr('accept', accept);
   }
-
-  browseButton.on('click', function (e) {
-    fileInput.click();
-  }).on('keyup', function (e) {
-    if ( e.which === 13 ) {
-      $(e.delegateTarget).click();
-    }
-  });
 
   const progress = function (progressEvent) {
     if (progressEvent.lengthComputable) {
@@ -2415,9 +2406,7 @@ $.fn.veda_file = function( options ) {
     });
   };
 
-  fileInput.click(function (e) {
-    e.stopPropagation();
-  }).change(function (e) {
+  fileInput.change(function (e) {
     const that = e.delegateTarget;
     const fileIndividualPromises = [];
     for (let i = 0, file; (file = that.files && that.files[i]); i++) {
@@ -2427,21 +2416,28 @@ $.fn.veda_file = function( options ) {
     if (!fileIndividualPromises.length) {
       return;
     }
-    browseButton.attr('disabled', 'disabled');
-    Promise.all(fileIndividualPromises).then(function (fileIndividuals) {
-      browseButton.removeAttr('disabled');
-      that.value = '';
-      indicatorSpinner.empty().hide();
-      indicatorPercentage.empty().hide();
-      if (isSingle) {
-        individual.set(rel_uri, fileIndividuals);
-      } else {
-        individual.addValue(rel_uri, fileIndividuals);
-      }
-    }).catch(function (error) {
-      browseButton.removeAttr('disabled');
-      console.log(error);
-    });
+    control.addClass('disabled');
+    fileInput.attr('disabled', 'disabled');
+    Promise.all(fileIndividualPromises)
+      .then(function (fileIndividuals) {
+        control.removeClass('disabled');
+        fileInput.removeAttr('disabled');
+        that.value = '';
+        indicatorSpinner.empty().hide();
+        indicatorPercentage.empty().hide();
+        if (isSingle) {
+          individual.set(rel_uri, fileIndividuals);
+        } else {
+          individual.addValue(rel_uri, fileIndividuals);
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+      .then(function () {
+        control.removeClass('disabled');
+        fileInput.removeAttr('disabled');
+      });
   });
 
   this.on('view edit search', function (e) {
