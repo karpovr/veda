@@ -115,13 +115,13 @@ v-s:PS_checkedDepartment_CountOfUsersTasks_Report_Parameters
 .
 
 # TEMPLATES ------------------------------------------------------------
-v-s:TS_CountOfUsersTasks_Report_Parameters 
+v-s:TS_CountOfUsersTasks_Report_Parameters
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:CountOfUsersTasks_Report_ParametersTemplate;
   v-ui:forClass v-s:CountOfUsersTasks_Report_Parameters
 .
-v-s:TS_CompletedTasksCount_Report_Parameters 
+v-s:TS_CompletedTasksCount_Report_Parameters
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:CompletedTasksCount_Report_ParametersTemplate;
@@ -159,7 +159,7 @@ v-s:CountOfUsersTasks_Report_ParametersTemplate
   </div>
   <br><br>
   <div class="actions">
-    <button type="button" class="action btn btn-success -view edit -search" id="createReport" about="v-s:CreateReport" property="rdfs:label"/>
+    <button type="button" class="action btn btn-success -view edit -search" id="createReport" about="v-s:CreateReport" property="rdfs:label"></button>
   </div>
 </div>
 <script>
@@ -201,7 +201,7 @@ v-s:CompletedTasksCount_Report_ParametersTemplate
   </div>
   <br><br>
   <div class="actions">
-    <button type="button" class="action btn btn-success -view edit -search" id="createReport" about="v-s:CreateReport" property="rdfs:label"/>
+    <button type="button" class="action btn btn-success -view edit -search" id="createReport" about="v-s:CreateReport" property="rdfs:label"></button>
   </div>
 </div>
 <script>

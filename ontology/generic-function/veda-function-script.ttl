@@ -229,8 +229,8 @@ v-s:UserScriptTemplate
   <div class="actions view edit -search clearfix">
     <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
     <div class="pull-right">
-      <button type="button" class="action btn btn-warning view -edit -search" id="run" about="v-s:RunBundle" property="rdfs:label"/>
-      <button type="button" class="action btn btn-default -view edit -search" id="clear" about="v-s:ClearBundle" property="rdfs:label"/>
+      <button type="button" class="action btn btn-warning view -edit -search" id="run" about="v-s:RunBundle" property="rdfs:label"></button>
+      <button type="button" class="action btn btn-default -view edit -search" id="clear" about="v-s:ClearBundle" property="rdfs:label"></button>
     </div>
   </div>
 </div>
@@ -597,9 +597,9 @@ v-s:OperationFooterTemplate
 </script>
 <div class="actions view edit -search clearfix">
   <div class="pull-left">
-    <button type="button" class="action btn btn-success view -edit -search" id="start" about="v-s:StartBundle" property="rdfs:label"/>
-    <button type="button" class="action btn btn-info view -edit -search" id="restart" about="v-s:RestartBundle" property="rdfs:label"/>
-    <button type="button" class="action btn btn-danger view -edit -search" id="stop" about="v-s:StopBundle" property="rdfs:label"/>
+    <button type="button" class="action btn btn-success view -edit -search" id="start" about="v-s:StartBundle" property="rdfs:label"></button>
+    <button type="button" class="action btn btn-info view -edit -search" id="restart" about="v-s:RestartBundle" property="rdfs:label"></button>
+    <button type="button" class="action btn btn-danger view -edit -search" id="stop" about="v-s:StopBundle" property="rdfs:label"></button>
   </div>
 </div>
   """ ;

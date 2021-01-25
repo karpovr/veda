@@ -261,7 +261,7 @@ v-s:LetterTemplate
       <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="send save edit cancel delete journal task"></span>
       <button type="button" class="action btn btn-success view -edit -search" id="add-OutgoingLetter" about="v-s:OutgoingLetter" property="rdfs:label"></button>
       <button type="button" class="action btn btn-success view -edit -search" id="add-IncomingLetter" about="v-s:IncomingLetter" property="rdfs:label"></button>
-      <button type="button" class="action btn btn-info view -edit -search" id="incoming-print-blank" about="v-s:IncomingLetterPrintBlank" property="rdfs:label"/>
+      <button type="button" class="action btn btn-info view -edit -search" id="incoming-print-blank" about="v-s:IncomingLetterPrintBlank" property="rdfs:label"></button>
       <div class="btn-group dropup" id="outgoing-print-blank">
         <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
          <span about="v-s:OutgoingLetterPrintBlank" property="rdfs:label"> </span>
