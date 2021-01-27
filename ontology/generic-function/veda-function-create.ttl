@@ -161,7 +161,10 @@ var initStopList = [
   "v-s:deleted",
   "rdfs:label",
   "rdfs:isDefinedBy",
-  "v-fc:targetType"
+  "v-fc:targetType",
+  "v-s:actualVersion",
+  "v-s:previousVersion",
+  "v-s:nextVersion",
 ];
 
 var updateStopList = [
@@ -171,7 +174,10 @@ var updateStopList = [
   "v-s:deleted",
   "rdfs:label",
   "rdfs:isDefinedBy",
-  "v-fc:targetType"
+  "v-fc:targetType",
+  "v-s:actualVersion",
+  "v-s:previousVersion",
+  "v-s:nextVersion",
 ];
 
 this.initBlank = function (blankObject) {
