@@ -157,25 +157,31 @@ cfg:Event_3
  * super_classes = super classes of the document.
  */
 
-var isAdmin = (user_uri === "cfg:Administrator" || user_uri === "cfg:VedaSystem");
+// First class event
+if (parent_script_id) {
+  // print("Not first class event. Exit.");
+  return;
+}
+
+var isAdmin = (user_uri === 'cfg:Administrator' || user_uri === 'cfg:VedaSystem');
 
 // Get latest document state
-document = get_individual(ticket, document["@"]);
+document = get_individual(ticket, document['@']);
 
-if (super_classes.indexOf("v-s:AutomaticallyVersioned") >= 0 && !isAdmin) {
+if (super_classes.indexOf('v-s:AutomaticallyVersioned') >= 0 && !isAdmin && prev_state && !parent_script_id) {
   veda.Util.create_version(ticket, document, prev_state, user_uri, _event_id);
 }
 
-if (super_classes.indexOf("v-s:Journaling") >= 0) {
-  var publisher_uri = veda.Util.getUri(document["v-s:creator"]);
+if (super_classes.indexOf('v-s:Journaling') >= 0) {
+  var publisher_uri = veda.Util.getUri(document['v-s:creator']);
   if (!publisher_uri) { return; }
 
   var publisher = get_individual(ticket, publisher_uri);
   if (!publisher) { return; }
 
   var employee_uri;
-  if ( veda.Util.hasValue(publisher, "rdf:type", {data: "v-s:Appointment", type: "Uri"}) ) {
-    employee_uri = publisher["v-s:employee"];
+  if ( veda.Util.hasValue(publisher, 'rdf:type', {data: 'v-s:Appointment', type: 'Uri'}) ) {
+    employee_uri = publisher['v-s:employee'];
     if (!employee_uri) { return; }
   } else {
     employee_uri = publisher_uri;
@@ -183,13 +189,13 @@ if (super_classes.indexOf("v-s:Journaling") >= 0) {
 
   if (!employee_uri) { return; }
 
-  var journal_uri = veda.Util.getJournalUri(document["@"]);
+  var journal_uri = veda.Util.getJournalUri(document['@']);
   var exist_journal = get_individual(ticket, journal_uri);
 
   var user = get_individual(ticket, user_uri);
 
-  var actor_uri = veda.Util.hasValue(user, "v-s:defaultAppointment") ? veda.Util.getUri(user["v-s:defaultAppointment"]) :
-                  veda.Util.hasValue(user, "v-s:hasAppointment") ? veda.Util.getUri(user["v-s:hasAppointment"]) :
+  var actor_uri = veda.Util.hasValue(user, 'v-s:defaultAppointment') ? veda.Util.getUri(user['v-s:defaultAppointment']) :
+                  veda.Util.hasValue(user, 'v-s:hasAppointment') ? veda.Util.getUri(user['v-s:hasAppointment']) :
                   user_uri;
 
   var actor = veda.Util.newUri(actor_uri);
@@ -199,43 +205,42 @@ if (super_classes.indexOf("v-s:Journaling") >= 0) {
   } else if (exist_journal && !isAdmin) {
     // UPDATE DOCUMENT
     var journal_record = veda.Util.newJournalRecord(journal_uri);
-    if ( document["v-s:actualVersion"] && document["v-s:actualVersion"][0].data == document["@"] ) {
-      journal_record["v-s:documentVersion"] = document["v-s:previousVersion"];
+    if ( document['v-s:actualVersion'] && document['v-s:actualVersion'][0].data == document['@'] ) {
+      journal_record['v-s:documentVersion'] = document['v-s:previousVersion'];
     }
     if (
-      (!prev_state["v-s:deleted"] || prev_state["v-s:deleted"].data === false) &&
-      (document["v-s:deleted"] && document["v-s:deleted"].data === true)
+      (!prev_state['v-s:deleted'] || prev_state['v-s:deleted'].data === false) &&
+      (document['v-s:deleted'] && document['v-s:deleted'].data === true)
     ) {
       journal_record['rdf:type'] = [{
         data: 'v-s:DocumentDeleted',
-        type: "Uri"
+        type: 'Uri'
       }];
     } else {
       journal_record['rdf:type'] = [{
         data: 'v-s:DocumentUpdated',
-        type: "Uri"
+        type: 'Uri'
       }];
     }
     journal_record['v-s:actor'] = actor;
     veda.Util.logToJournal(ticket, journal_uri, journal_record);
-    veda.Util.addRight(ticket, 'cfg:AllUsersGroup', journal_record['@'], ["v-s:canRead"]);
+    veda.Util.addToGroup(ticket, journal_uri, journal_record['@'], ['v-s:canRead']);
   } else {
     // CREATE DOCUMENT
     var new_journal = {
       '@': journal_uri,
       'rdf:type': [{
         data: 'v-s:Journal',
-        type: "Uri"
+        type: 'Uri'
       }],
       'v-s:onDocument': [{
         data: document['@'],
-        type: "Uri"
+        type: 'Uri'
       }],
       'v-s:actor': actor
     };
     put_individual(ticket, new_journal, _event_id);
-
-    veda.Util.addRight(ticket, 'cfg:AllUsersGroup', journal_uri, ["v-s:canRead"]);
+    veda.Util.addToGroup(ticket, document['@'], journal_uri, ['v-s:canRead']);
 
     var journal_record = veda.Util.newJournalRecord(new_journal['@']);
     if (document['v-s:actualVersion'] && document['v-s:actualVersion'][0].data == document['@']) {
@@ -243,11 +248,11 @@ if (super_classes.indexOf("v-s:Journaling") >= 0) {
     }
     journal_record['rdf:type'] = [{
       data: 'v-s:DocumentCreated',
-      type: "Uri"
+      type: 'Uri'
     }];
     journal_record['v-s:actor'] = actor;
     veda.Util.logToJournal(ticket, journal_uri, journal_record);
-    veda.Util.addRight(ticket, 'cfg:AllUsersGroup', journal_record['@'], ["v-s:canRead"]);
+    veda.Util.addToGroup(ticket, journal_uri, journal_record['@'], ['v-s:canRead']);
   }
 }
   """ ;

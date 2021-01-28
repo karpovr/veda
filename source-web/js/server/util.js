@@ -507,92 +507,60 @@ Util.replace_word = function (src, from, to) {
 
 Util.create_version = function (ticket, document, prev_state, user_uri, _event_id) {
   // Only if we save actual version of document (or it is first save of versioned document)
-  if (
-    !document['v-s:actualVersion'] ||
-    (
-      document['v-s:actualVersion'][0].data === document['@'] &&
-      (
-        (
-          !document['v-s:previousVersion'] && (!prev_state || !prev_state['v-s:previousVersion'])
-        ) ||
-        (
-          prev_state &&
-          document['v-s:previousVersion'] &&
-          prev_state['v-s:previousVersion'] &&
-          document['v-s:previousVersion'][0].data === prev_state['v-s:previousVersion'][0].data
-        )
-      )
-    )
-  ) {
+  if ( !document['v-s:actualVersion'] || document['v-s:actualVersion'][0].data === document['@'] ) {
     const user = get_individual(ticket, user_uri);
     const appointment_uri = Util.getUri(user['v-s:defaultAppointment']) || Util.getUri(user['v-s:hasAppointment']);
     const actor_uri = appointment_uri || user_uri;
 
-    if (!prev_state) prev_state = document;
-    const actualId = document['@'];
     const versionId = Util.genUri() + '-vr';
 
     // Create new version
-    const version = get_individual(ticket, document['@']);
+    const version = veda.Util.clone(prev_state);
     version['@'] = versionId;
-    if (prev_state['v-s:previousVersion']) {
-      version['v-s:previousVersion'] = prev_state['v-s:previousVersion'];
-    } else {
-      version['v-s:previousVersion'] = [];
-    }
     version['v-s:actualVersion'] = [{
       data: document['@'],
       type: 'Uri',
     }];
     version['v-s:nextVersion'] = [{
-      data: actualId,
+      data: document['@'],
       type: 'Uri',
     }];
+    if (veda.Util.hasValue(document, 'v-s:previousVersion')) {
+      version['v-s:previousVersion'] = [{
+        data: document['v-s:previousVersion'][0].data,
+        type: 'Uri',
+      }];
+    }
     version['rdf:type'] = version['rdf:type'].concat(
       [{
         data: 'v-s:Version',
         type: 'Uri',
       }],
     );
-    version['v-s:created'] = [{data: new Date(), type: 'Datetime'}];
-    version['v-s:edited'] = [];
-    version['v-s:creator'] = Util.newUri(actor_uri);
-    version['v-s:lastEditor'] = [];
-
     put_individual(ticket, version, _event_id);
 
-    // Add rights to version
-    const membership_uri = 'd:membership_' + versionId.split(':').join('_') + '_' + actualId.split(':').join('_');
-    const membership = {
-      '@': membership_uri,
-      'rdf:type': Util.newUri('v-s:Membership'),
-      'v-s:memberOf': Util.newUri(actualId),
-      'v-s:resource': Util.newUri(versionId),
-      'rdfs:comment': Util.newStr('создано: server script Util.create_version ()'),
-      'v-s:canRead': Util.newBool(true),
-    };
-    put_individual(ticket, membership, _event_id);
+    // Add version to document group
+    veda.Util.addToGroup(ticket, document['@'], version['@'], ['v-s:canRead']);
 
     // Update previous version
     if (document['v-s:previousVersion']) {
       const previous = get_individual(ticket, Util.getUri(document['v-s:previousVersion']));
       previous['v-s:nextVersion'] = [{
-        data: versionId,
+        data: version['@'],
         type: 'Uri',
       }];
       put_individual(ticket, previous, _event_id);
     }
 
     // Update actual version
-    document['v-s:previousVersion'] = [{
-      data: versionId,
-      type: 'Uri',
-    }];
     document['v-s:actualVersion'] = [{
       data: document['@'],
       type: 'Uri',
     }];
-    document['v-s:nextVersion'] = [];
+    document['v-s:previousVersion'] = [{
+      data: version['@'],
+      type: 'Uri',
+    }];
     document['v-s:edited'] = [{data: new Date(), type: 'Datetime'}];
     document['v-s:lastEditor'] = Util.newUri(actor_uri);
     put_individual(ticket, document, _event_id);

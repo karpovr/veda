@@ -1026,12 +1026,33 @@ v-ui:VersionTemplate
   rdfs:label "Template for class v-s:Version"@en ;
   v-ui:forClass v-s:Version ;
   v-ui:template """
-<div class="alert alert-warning hidden">
-  <p>
+<div class="alert alert-warning hidden clearfix">
+  <style scoped>
+    p > span:not(:first-child) {
+      padding-left:0.5em;
+      padding-right:0.5em;
+    }
+    p > span:first-child {
+      padding-right:0.5em;
+    }
+  </style>
+  <p class="pull-left">
     <span about="v-s:VersionAlert" property="rdfs:label"></span>
-    <span class="pull-right" about="@" rel="v-s:actualVersion">
+    <span about="@" rel="v-s:actualVersion">
       <a href="#/@" class="alert-link">
-        <span about="v-s:actualVersion" property="rdfs:label"></span>&rarr;
+        &uarr; <span about="v-s:actualVersion" property="rdfs:label"></span>
+      </a>
+    </span>
+  </p>
+  <p class="pull-right">
+    <span about="@" rel="v-s:previousVersion">
+      <a href="#/@" class="alert-link">
+        &larr; <span about="v-s:previousVersion" property="rdfs:label"></span>
+      </a>
+    </span>
+    <span about="@" rel="v-s:nextVersion">
+      <a href="#/@" class="alert-link">
+        <span about="v-s:nextVersion" property="rdfs:label"></span> &rarr;
       </a>
     </span>
   </p>
