@@ -3107,7 +3107,7 @@ v-ui:ttl
   veda.Util.toTTL(list, function (error, ttl) {
     var pre = $("pre", template),
         sanitized = sanitize(ttl),
-        anchored = sanitized.replace(/([a-zA-Z][\\w-]*:[\\w-]*)(\\s|\\;|\\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
+        anchored = sanitized.replace(/([a-zA-Z][\\w-]*:[\\w-]*)(\\,|\\s|\\;|\\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
     pre.html(anchored);
   });
 
@@ -3225,7 +3225,8 @@ v-ui:json
 
   function anchorize (string) {
     var sanitized = sanitize(string);
-    return sanitized.replace(/("|')([a-zA-Z][\\w-]*:[\\w-]*)("|')/gi, "$1<a class='text-black' href='#/$2//v-ui:json'>$2</a>$3");
+    var anchorized = sanitized.replace(/(&quot;)([a-zA-Z][\\w-]*:[\\w-]*)(&quot;)/gi, "$1<a class='text-black' href='#/$2//v-ui:json'>$2</a>$3");
+    return anchorized;
   };
 
   //# sourceURL=v-ui:json
