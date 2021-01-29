@@ -510,7 +510,7 @@ fn to_storage_and_queue(
                 }
             }
 
-            info!("update, id={}", new_indv.get_id());
+            info!("update, id={}, event_id={}, src={}", new_indv.get_id(), event_id.unwrap_or_default(), src.unwrap_or_default());
         } else {
             error!("fail update individual, id={}", new_indv.get_id());
             return false;

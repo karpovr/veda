@@ -214,7 +214,7 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
 
     let src = queue_element.get_first_literal("src").unwrap_or_default();
-    if src != "?" && ctx.queue_name != src {
+    if (src != "?" && ctx.queue_name != src) || (src != "?" && src != "exim-with-scripts") {
         return Ok(op_id);
     }
 
