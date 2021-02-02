@@ -58,7 +58,7 @@ export default function Auth() {
               if (xhr.status === 200) {
                 resolve(xhr.response);
               } else {
-                reject('AD form auth failed');
+                reject(Error('AD form auth failed'));
               }
             };
             xhr.onerror = reject;
