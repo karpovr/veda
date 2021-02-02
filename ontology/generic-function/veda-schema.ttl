@@ -462,7 +462,7 @@ v-s:DirectoryTemplate
   <br>
   <!-- BUTTONS -->
   <div class="actions view edit -search">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete journal journal-dms task"></span>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete journal  task"></span>
   </div>
 </div>
   """ ;
