@@ -54,7 +54,13 @@ export default function Auth() {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/ad', true);
             xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-            xhr.onload = resolve;
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                resolve(xhr.response);
+              } else {
+                reject('AD form auth failed');
+              }
+            };
             xhr.onerror = reject;
             xhr.onabort = reject;
             xhr.send(JSON.stringify({'login': login, 'password': password}));
@@ -63,7 +69,8 @@ export default function Auth() {
           throw new Error();
         }
       })
-      .catch(function () {
+      .catch(function (error) {
+        console.log(error);
         return Backend.authenticate(login, hash);
       })
       .then(handleLoginSuccess)
