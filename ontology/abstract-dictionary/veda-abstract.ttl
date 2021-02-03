@@ -476,6 +476,20 @@ v-s:dateToFact
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Temporal ;
 .
+v-s:dateAbsenceFrom
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Дата начала отсутствия"@ru ;
+  rdfs:label "Start date of absence"@en ;
+  rdfs:range xsd:dateTime ;
+  rdfs:domain v-s:Temporal ;
+.
+v-s:dateAbsenceTo
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Дата окончания отсутствия"@ru ;
+  rdfs:label "Finish date of absence"@en ;
+  rdfs:range xsd:dateTime ;
+  rdfs:domain v-s:Temporal ;
+.
 v-s:dateOfReceiving
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Дата получения"@ru ;
@@ -1579,7 +1593,7 @@ v-s:PsHasRoleInContract_ContractParticipantCustomer
   v-ui:forProperty v-s:hasRoleInContract ;
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'@' == 'd:dsxyd1uxsxuui6f1t3s4ki3rdp' || '@' == 'd:a14fhdnimgodskj2jlmzwausubs' || '@' == 'd:ji9b5cqs5ucr1uy8ou7s78989x' || '@' == 'd:xxsa1kfknh7anmo6688y026udp' || '@' == 'd:a1268rvzfsml3g4j0wcjxf2skc9' || '@' == 'd:hmmpzblf01agptcfl0kn704l2a' || '@' == 'd:h77kc056374cpeyqk9qj2nl20e'" ;
+  v-ui:queryPrefix "'@' == 'd:dsxyd1uxsxuui6f1t3s4ki3rdp' || '@' == 'd:a14fhdnimgodskj2jlmzwausubs' || '@' == 'd:ji9b5cqs5ucr1uy8ou7s78989x' || '@' == 'd:xxsa1kfknh7anmo6688y026udp' || '@' == 'd:a1268rvzfsml3g4j0wcjxf2skc9' || '@' == 'd:h77kc056374cpeyqk9qj2nl20e' || '@' == 'd:d7baxl3cu7w5hbzl2g560vyvb0'" ;
 .
 v-s:PsHasRoleInContract_ContractParticipantSupplier
   rdf:type v-ui:ObjectPropertySpecification ;
@@ -1587,7 +1601,7 @@ v-s:PsHasRoleInContract_ContractParticipantSupplier
   v-ui:forProperty v-s:hasRoleInContract ;
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'@' == 'd:wws2oz313z6xpl1hd4u3laxzfg' || '@' == 'd:jslj1t0dm3o6sg8jas931um4kw' || '@' == 'd:a1nzzs06xqqx3fvud0bsjq78cdq' || '@' == 'd:wh0t3y7ou4k9o0ec5vw4j5df5c' || '@' == 'd:p7xxv9vvwex8f1jfs2lhqjl85v' || '@' == 'd:hmmpzblf01agptcfl0kn704l2a' || '@' == 'd:h77kc056374cpeyqk9qj2nl20e'" ;
+  v-ui:queryPrefix "'@' == 'd:wws2oz313z6xpl1hd4u3laxzfg' || '@' == 'd:jslj1t0dm3o6sg8jas931um4kw' || '@' == 'd:a1nzzs06xqqx3fvud0bsjq78cdq' || '@' == 'd:wh0t3y7ou4k9o0ec5vw4j5df5c' || '@' == 'd:p7xxv9vvwex8f1jfs2lhqjl85v' || '@' == 'd:hmmpzblf01agptcfl0kn704l2a' || '@' == 'd:kwe8nsn9qn3e6u9dczwn7wpu67'" ;
 .
 v-s:PsHasRoleInContract_ContractParticipantStakeholder
   rdf:type v-ui:ObjectPropertySpecification ;
