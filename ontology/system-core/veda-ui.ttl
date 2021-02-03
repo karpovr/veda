@@ -746,12 +746,12 @@ v-ui:StandardButtonsTemplate
     veda.off("status", statusHandler);
   });
 
-  // var allButtons = "send edit save cancel delete destroy journal  task rights";
+  // var allButtons = "send edit save cancel delete destroy journal task rights";
   var defaultButtons = "send edit save cancel delete journal task";
   individual.rights.then(function (rights) {
     var canUpdate = rights.hasValue("v-s:canUpdate", true);
     var canDelete = rights.hasValue("v-s:canDelete", true);
-    var enabledButtons = (container.data("buttons") || defaultButtons).trim().replace(/\\s+/g, " ").split(" ");
+    var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
     enabledButtons.forEach(function (id) {
       if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
       if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
@@ -809,18 +809,6 @@ v-ui:StandardButtonsTemplate
       }
     });
   });
-  $("#", template).on("click", function (e) {
-    var uri = individual.id.substring(2);
-    var journalDMS_cfg = new veda.IndividualModel("cfg:JournalDMSUrl").load()
-      .then(function (journalDMS_cfg) {
-        return journalDMS_cfg["rdf:value"][0];
-      })
-      .then(function (journalDMS_url) {
-        if (journalDMS_url) {
-          window.open(journalDMS_url + uri, "");
-        }
-      });
-  });
   $("#send", template).on("click", function (e) {
     veda.Util.send(individual, template.parent().closest("[resource]"));
   });
@@ -851,7 +839,6 @@ v-ui:StandardButtonsTemplate
   <button type="button" class="rm hidden action btn btn-link allButtons view -edit -search" id="delete" about="v-s:Delete" property="rdfs:label"></button>
   <button type="button" class="rm hidden action btn btn-danger allButtons view edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"></button>
   <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="" about="v-s:ViewJournalDMS" property="rdfs:label"></button>
   <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="rights" about="v-s:Rights" property="rdfs:label"></button>
   <div class="rm hidden action btn-group dropup allButtons view -edit -search" id="task">
     <button class="action btn btn-warning btn-block dropdown-toggle" id="task-button" data-toggle="dropdown">

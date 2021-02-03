@@ -297,7 +297,7 @@ v-s:PsRulesBooleanProperty
   v-ui:forProperty v-s:isClone ;
 .
 
-v-s:TS_DocumentLinkRules 
+v-s:TS_DocumentLinkRules
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:DocumentLinkRulesTemplate;
@@ -462,7 +462,7 @@ v-s:DirectoryTemplate
   <br>
   <!-- BUTTONS -->
   <div class="actions view edit -search">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete journal  task"></span>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete journal task"></span>
   </div>
 </div>
   """ ;
