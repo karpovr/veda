@@ -113,9 +113,11 @@ v-s:PsDelegationPurposeForRequestDelegationUser
   rdf:type v-ui:ObjectPropertySpecification ;
   v-ui:forClass v-s:RequestDelegationUser ;
   v-ui:forProperty v-s:hasDelegationPurpose ;
+  v-ui:optionValue d:delegate_Acting ;
+  v-ui:deafultValue d:delegate_Acting ;
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'rdf:type'=='v-s:DelegationPurpose' && ('@'=='d:delegate_Control' || '@'=='d:delegate_Collaboration')" ;
+  v-ui:queryPrefix "'rdf:type'=='v-s:DelegationPurpose' && ('@'=='d:delegate_Acting')" ;
 .
 
 #----------------заявка для администратора---------
