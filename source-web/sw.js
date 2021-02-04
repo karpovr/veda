@@ -4,7 +4,9 @@ const veda_version = 7;
 
 const FILES = 'files';
 const STATIC = 'static';
-const API = [
+const API = 'api';
+
+const API_FNS = [
   '/ping',
   '/get_rights',
   '/get_rights_origin',
@@ -60,7 +62,7 @@ self.addEventListener('install', clearCache);
 self.addEventListener('fetch', function (event) {
   const url = new URL(event.request.url);
   const pathname = url.pathname;
-  const isAPI = API.indexOf(pathname) >= 0;
+  const isAPI = API_FNS.indexOf(pathname) >= 0;
   const isNTLM = NTLM.indexOf(pathname) >= 0;
   const isFILES = pathname.indexOf('/files') === 0;
   const isSTATIC = !isAPI && !isFILES && !isNTLM;
@@ -137,9 +139,11 @@ function handleError(response) {
 function handleAPI(event) {
   const cloneRequest = event.request.method !== 'GET' && event.request.clone();
   const url = new URL(event.request.url);
-  const fn = url.pathname.split('/')[2];
+  const fn = url.pathname.split('/').pop();
   if (event.request.method === 'GET') {
-    if (fn === 'reset_individual') {
+    if (fn === 'ping') {
+      return fetch(event.request);
+    } else if (fn === 'reset_individual') {
       // Fetch first
       return fetch(event.request)
         .then(handleError)
