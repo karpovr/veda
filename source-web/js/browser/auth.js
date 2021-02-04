@@ -53,7 +53,8 @@ export default function Auth() {
           return new Promise(function (resolve, reject) {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/ad', true);
-            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.responseType = 'json';
             xhr.onload = function() {
               if (xhr.status === 200) {
                 resolve(xhr.response);
@@ -63,10 +64,10 @@ export default function Auth() {
             };
             xhr.onerror = reject;
             xhr.onabort = reject;
-            xhr.send(JSON.stringify({'login': login, 'password': password}));
+            xhr.send(`login=${login}&password=${password}`);
           });
         } else {
-          throw new Error();
+          return Promise.reject(Error('AD provider is not defined'));
         }
       })
       .catch(function (error) {
@@ -213,12 +214,21 @@ export default function Auth() {
     const alerts = loginForm.querySelectorAll('.alert');
     Array.prototype.forEach.call(alerts, (alert) => alert.style.display = 'none');
 
-    const inputs = loginForm.querySelector('input:not(#login)');
+    const inputs = loginForm.querySelectorAll('input:not(#login)');
     Array.prototype.forEach.call(inputs, (input) => input.value = '');
 
     const ok = loginForm.querySelector('.btn.ok');
     ok.style.display = 'none';
     let okHandler = () => {};
+
+    const onSuccess = function () {
+      Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, fieldset'), (item) => item.style.display = 'none');
+      enterLoginPassword.style.display = 'block';
+    };
+    const onExpired = function () {
+      Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, fieldset'), (item) => item.style.display = 'none');
+      loginFailedError.style.display = 'block';
+    };
 
     switch (error.code) {
     case 423: // Password change is allowed once a day
@@ -345,16 +355,6 @@ export default function Auth() {
       break;
     }
     ok.addEventListener('click', okHandler);
-
-
-    const onSuccess = function () {
-      Array.prototype.forEach.call(loginForm.querySelector('.alert, fieldset'), (item) => item.style.display = 'none');
-      enterLoginPassword.style.display = 'block';
-    };
-    const onExpired = function () {
-      Array.prototype.forEach.call(loginForm.querySelector('.alert, fieldset'), (item) => item.style.display = 'none');
-      loginFailedError.style.display = 'block';
-    };
   }
 
   /**
@@ -368,7 +368,7 @@ export default function Auth() {
     const alerts = loginForm.querySelectorAll('.alert');
     Array.prototype.forEach.call(alerts, (alert) => alert.style.display = 'none');
 
-    const inputs = loginForm.querySelector('input:not(#login)');
+    const inputs = loginForm.querySelectorAll('input:not(#login)');
     Array.prototype.forEach.call(inputs, (input) => input.value = '');
 
     const ok = loginForm.querySelector('.btn.ok');
