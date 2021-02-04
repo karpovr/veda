@@ -1041,6 +1041,7 @@ cfg:Event_7
   rdfs:comment "Скрипт включает индивид в группу индивидов своего класса." ;
   v-s:triggerByType v-s:ClassAuthorized ;
   v-s:preventByType v-s:Version;
+  v-s:executeIfEvent "exim";
   v-s:script """
 /* Available variables:
  * ticket = superuser ticket
