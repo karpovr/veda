@@ -590,6 +590,7 @@ v-s:Event_GroupGenerator
   rdfs:label "Скрипт распределения по группам авторизации" ;
   v-s:triggerByType v-s:GroupAuthorized ;
   v-s:preventByType v-s:Version;
+  v-s:executeIfEvent "exim";
   v-s:runAt "V8.LowPriority" ;
   v-s:script """
 /* Available variables:

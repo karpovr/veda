@@ -313,6 +313,10 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
                     }
                 }
 
+                if event_id == "exim" && script.context.execute_if != event_id {
+                    continue;
+                }
+
                 if !is_filter_pass(script, &doc_id, &rdf_types, &mut ctx.onto) {
                     debug!("skip (filter) script:{}", script_id);
                     continue;
@@ -459,6 +463,11 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         scr_inf.context.prevent_by_type = HashVec::new(ev_indv.get_literals("v-s:preventByType").unwrap_or_default());
         scr_inf.context.trigger_by_uid = HashVec::new(ev_indv.get_literals("v-s:triggerByUid").unwrap_or_default());
         scr_inf.context.trigger_by_type = HashVec::new(ev_indv.get_literals("v-s:triggerByType").unwrap_or_default());
+
+        if let Some(v) = ev_indv.get_first_literal("v-s:executeIfEvent") {
+            scr_inf.context.execute_if = v;
+        }
+
         scr_inf.dependency = HashVec::new(ev_indv.get_literals("v-s:dependency").unwrap_or_default());
 
         wp.add_to_order(&scr_inf);
