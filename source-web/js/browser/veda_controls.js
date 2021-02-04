@@ -896,13 +896,13 @@ $.fn.veda_actor = function( options ) {
   const individual = opts.individual;
   const rel_uri = opts.property_uri;
   const spec = opts.spec;
-  const placeholder = this.data('placeholder') || ( spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : new veda.IndividualModel('v-s:StartTypingBundle') );
-  const specQueryPrefix = this.data('query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : undefined);
+  const placeholder = this.attr('data-placeholder') || ( spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : new veda.IndividualModel('v-s:StartTypingBundle') );
+  const specQueryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : undefined);
   let queryPrefix;
-  const sort = this.data('sort') || ( spec && spec.hasValue('v-ui:sort') ? spec['v-ui:sort'][0].toString() : '\'rdfs:label_ru\' asc , \'rdfs:label_en\' asc , \'rdfs:label\' asc' );
-  const actorType = this.data('actor-type') || 'v-s:Appointment v-s:Person v-s:Position v-s:Department';
-  const complex = this.data('complex') || false;
-  const isSingle = this.data('single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
+  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
+  const actorType = this.attr('data-actor-type') || 'v-s:Appointment v-s:Person v-s:Position v-s:Department';
+  const complex = this.attr('data-complex') || false;
+  const isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   const withDeleted = false || this.attr('data-deleted');
   let chosenActorType;
   let fullName;
@@ -1485,13 +1485,13 @@ $.fn.veda_select = function (params) {
   const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map(function (item) {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
-  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') ? spec['v-ui:sort'][0].toString() : '\'rdfs:label_ru\' asc , \'rdfs:label_en\' asc , \'rdfs:label\' asc' );
+  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   let placeholder = this.attr('placeholder') || ( spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : new veda.IndividualModel('v-s:SelectValueBundle') );
   const source = this.attr('data-source') || undefined;
   const template = this.attr('data-template') || undefined;
   let options = [];
-  const isSingle = ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true ) || this.data('single');
-  let withDeleted = false || this.data('deleted');
+  const isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
+  let withDeleted = false || this.attr('data-deleted');
 
   if (placeholder instanceof veda.IndividualModel) {
     placeholder.load().then(function (placeholderLoaded) {
@@ -1682,11 +1682,11 @@ $.fn.veda_checkbox = function (params) {
   const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map(function (item) {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
-  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') ? spec['v-ui:sort'][0].toString() : '\'rdfs:label_ru\' asc , \'rdfs:label_en\' asc , \'rdfs:label\' asc' );
+  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   const source = this.attr('data-source') || undefined;
   const template = this.attr('data-template') || undefined;
   let options = [];
-  let withDeleted = false || this.data('deleted');
+  let withDeleted = false || this.attr('data-deleted');
 
   populate();
 
@@ -1859,11 +1859,11 @@ $.fn.veda_radio = function (params) {
   const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map(function (item) {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
-  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') ? spec['v-ui:sort'][0].toString() : '\'rdfs:label_ru\' asc , \'rdfs:label_en\' asc , \'rdfs:label\' asc' );
+  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   const source = this.attr('data-source') || undefined;
   const template = this.attr('data-template') || undefined;
   let options = [];
-  let withDeleted = false || this.data('deleted');
+  let withDeleted = false || this.attr('data-deleted');
 
   populate();
 
@@ -2317,7 +2317,7 @@ function cropImage(imageForCrop, ratio, maxWidth) {
 $.fn.veda_file = function( options ) {
   const opts = $.extend( {}, $.fn.veda_file.defaults, options );
   const control = $(opts.template);
-  const fileInput = control.find("input");
+  const fileInput = control.find('input');
   const indicatorPercentage = $('.indicator-percentage', control);
   const indicatorSpinner = $('.indicator-spinner', control);
   const spec = opts.spec;
@@ -2327,8 +2327,8 @@ $.fn.veda_file = function( options ) {
   const range = rangeRestriction ? [rangeRestriction] : new veda.IndividualModel(rel_uri)['rdfs:range'];
   const isSingle = spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true;
   const accept = this.attr('accept');
-  const maxWidth = this.data('max-width') || 2048;
-  const targetRatio = this.data('ratio');
+  const maxWidth = this.attr('data-max-width') || 2048;
+  const targetRatio = this.attr('data-ratio');
 
   if (!isSingle) {
     fileInput.attr('multiple', 'multiple');
@@ -2466,8 +2466,8 @@ $.fn.veda_link = function( options ) {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
   const source = this.attr('data-source') || undefined;
-  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') ? spec['v-ui:sort'][0].toString() : '\'rdfs:label_ru\' asc , \'rdfs:label_en\' asc , \'rdfs:label\' asc' );
-  let isSingle = this.data('single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
+  const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
+  let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   let withDeleted = false || this.attr('data-deleted');
 
   const tabindex = this.attr('tabindex');
@@ -3123,7 +3123,7 @@ function ftQuery(prefix, input, sort, withDeleted) {
     return veda.Backend.query({
       ticket: veda.ticket,
       query: queryString,
-      sort: sort ? sort : '\'rdfs:label_ru\' asc , \'rdfs:label_en\' asc , \'rdfs:label\' asc',
+      sort: sort ? sort : '\'rdfs:label' + (veda.user.getLanguage()[0] ? '_' + veda.user.getLanguage()[0].toLowerCase() : '') + '\' asc',
       from: cursor,
       top: 10,
       limit: 1000,

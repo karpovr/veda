@@ -23,6 +23,10 @@ UserModel.prototype.constructor = UserModel;
 
 const proto = UserModel.prototype;
 
+proto.getLanguage = function () {
+  return this.preferences && this.preferences.language ? Object.keys(this.preferences.language) : undefined;
+};
+
 proto._init = function () {
   const self = this;
   return this.load()
