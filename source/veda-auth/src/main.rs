@@ -84,7 +84,8 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
                 xr,
                 module,
                 user_stat,
-                exist_password: "".to_owned(),
+                stored_password: "".to_owned(),
+                stored_salt: "".to_string(),
                 edited: 0,
                 credential: &mut Default::default(),
             };

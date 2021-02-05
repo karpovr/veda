@@ -1,5 +1,9 @@
+use data_encoding::HEXLOWER;
 use parse_duration::parse;
 use regex::Regex;
+use ring::rand::SecureRandom;
+use ring::{digest, pbkdf2, rand};
+use std::num::NonZeroU32;
 use v_api::app::ResultCode;
 use v_api::IndvOp;
 use v_authorization::common::Trace;
@@ -13,6 +17,8 @@ use v_search::common::{FTQuery, QueryResult};
 
 pub const EMPTY_SHA256_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 pub const ALLOW_TRUSTED_GROUP: &str = "cfg:TrustedAuthenticationUserGroup";
+const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
+pub const N_ITER: u32 = 100_000;
 
 #[derive(Default, Debug)]
 pub(crate) struct UserStat {
@@ -135,22 +141,22 @@ pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Module, xr:
     xr.query(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage)
 }
 
-pub(crate) fn create_new_credential(systicket: &str, module: &mut Module, uses_credential: &mut Individual, account: &mut Individual) -> bool {
+pub(crate) fn create_new_credential(systicket: &str, module: &mut Module, credential: &mut Individual, account: &mut Individual) -> bool {
     let password = account.get_first_literal("v-s:password").unwrap_or_default();
 
-    uses_credential.set_id(&(account.get_id().to_owned() + "-crdt"));
-    uses_credential.set_uri("rdf:type", "v-s:Credential");
-    uses_credential.set_string("v-s:password", &password, Lang::NONE);
+    credential.set_id(&(account.get_id().to_owned() + "-crdt"));
+    credential.set_uri("rdf:type", "v-s:Credential");
+    set_password(credential, &password);
 
-    let res = module.api.update(systicket, IndvOp::Put, &uses_credential);
+    let res = module.api.update(systicket, IndvOp::Put, &credential);
     if res.result != ResultCode::Ok {
-        error!("fail update, uri={}, result_code={:?}", uses_credential.get_id(), res.result);
+        error!("fail update, uri={}, result_code={:?}", credential.get_id(), res.result);
         return false;
     } else {
-        info!("create v-s:Credential {}, res={:?}", uses_credential.get_id(), res);
+        info!("create v-s:Credential {}, res={:?}", credential.get_id(), res);
 
         account.remove("v-s:password");
-        account.set_uri("v-s:usesCredential", uses_credential.get_id());
+        account.set_uri("v-s:usesCredential", credential.get_id());
 
         let res = module.api.update(&systicket, IndvOp::Put, account);
         if res.result != ResultCode::Ok {
@@ -160,6 +166,25 @@ pub(crate) fn create_new_credential(systicket: &str, module: &mut Module, uses_c
         info!("update user {}, res={:?}", account.get_id(), res);
     }
     true
+}
+
+pub(crate) fn set_password(credential: &mut Individual, password: &str) {
+    let n_iter = NonZeroU32::new(N_ITER).unwrap();
+    let rng = rand::SystemRandom::new();
+
+    let mut salt = [0u8; CREDENTIAL_LEN];
+    if let Ok(..) = rng.fill(&mut salt) {
+        let mut pbkdf2_hash = [0u8; CREDENTIAL_LEN];
+        pbkdf2::derive(pbkdf2::PBKDF2_HMAC_SHA512, n_iter, &salt, password.as_bytes(), &mut pbkdf2_hash);
+
+        debug!("Salt: {}", HEXLOWER.encode(&salt));
+        debug!("PBKDF2 hash: {}", HEXLOWER.encode(&pbkdf2_hash));
+
+        credential.set_string("v-s:salt", &HEXLOWER.encode(&salt), Lang::NONE);
+        credential.set_string("v-s:password", &HEXLOWER.encode(&pbkdf2_hash), Lang::NONE);
+    } else {
+        credential.set_string("v-s:password", &password, Lang::NONE);
+    }
 }
 
 pub(crate) fn remove_secret(uses_credential: &mut Individual, person_id: &str, module: &mut Module, systicket: &str) {

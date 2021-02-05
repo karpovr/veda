@@ -1,6 +1,9 @@
-use crate::common::{create_new_credential, get_candidate_users_of_login, remove_secret, AuthConf, UserStat, EMPTY_SHA256_HASH};
+use crate::common::{create_new_credential, get_candidate_users_of_login, remove_secret, set_password, AuthConf, UserStat, EMPTY_SHA256_HASH, N_ITER};
 use chrono::Utc;
+use data_encoding::HEXLOWER;
 use rand::{thread_rng, Rng};
+use ring::pbkdf2;
+use std::num::NonZeroU32;
 use uuid::Uuid;
 use v_api::app::ResultCode;
 use v_api::IndvOp;
@@ -19,7 +22,8 @@ pub(crate) struct AuthWorkPlace<'a> {
     pub xr: &'a mut XapianReader,
     pub module: &'a mut Module,
     pub user_stat: &'a mut UserStat,
-    pub exist_password: String,
+    pub stored_password: String,
+    pub stored_salt: String,
     pub edited: i64,
     pub credential: &'a mut Individual,
 }
@@ -127,7 +131,7 @@ impl<'a> AuthWorkPlace<'a> {
                 }
 
                 // ATTEMPT AUTHENTICATION
-                if !self.exist_password.is_empty() && !self.password.is_empty() && self.password.len() > 63 && self.exist_password == self.password {
+                if !self.stored_password.is_empty() && !self.password.is_empty() && self.password.len() > 63 && self.verify_password() {
                     create_new_ticket(self.login, &user_id, self.conf.ticket_lifetime, ticket, &mut self.module.storage);
                     self.user_stat.wrong_count_login = 0;
                     self.user_stat.last_wrong_login_date = 0;
@@ -170,7 +174,7 @@ impl<'a> AuthWorkPlace<'a> {
             return false;
         }
 
-        if self.exist_password == self.password {
+        if self.stored_password == self.password {
             error!("update password: now password equal previous password, reject. user={}", person.get_id());
             ticket.result = ResultCode::NewPasswordIsEqualToOld;
             remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
@@ -191,7 +195,8 @@ impl<'a> AuthWorkPlace<'a> {
         }
 
         // update password
-        self.credential.set_string("v-s:password", &self.password, Lang::NONE);
+        set_password(self.credential, &self.password);
+
         self.credential.set_datetime("v-s:dateFrom", now);
         self.credential.remove("v-s:secret");
         self.credential.remove("v-s:SecretDateFrom");
@@ -209,12 +214,30 @@ impl<'a> AuthWorkPlace<'a> {
         }
     }
 
+    fn verify_password(&mut self) -> bool {
+        if self.stored_salt.is_empty() {
+            self.stored_password == self.password
+        } else {
+            let stored_salt = HEXLOWER.decode(self.stored_salt.as_bytes());
+            let stored_pass = HEXLOWER.decode(self.stored_password.as_bytes());
+
+            if stored_salt.is_err() || stored_pass.is_err() {
+                error!("fail encode credential");
+                return false;
+            }
+
+            let n_iter = NonZeroU32::new(N_ITER).unwrap();
+            pbkdf2::verify(pbkdf2::PBKDF2_HMAC_SHA512, n_iter, &stored_salt.unwrap(), self.password.as_bytes(), &stored_pass.unwrap()).is_ok()
+        }
+    }
+
     fn get_credential(&mut self, account: &mut Individual) {
         match account.get_first_literal("v-s:usesCredential") {
             Some(uses_credential_uri) => {
                 if let Some(_credential) = self.module.get_individual(&uses_credential_uri, &mut self.credential) {
                     _credential.parse_all();
-                    self.exist_password = _credential.get_first_literal("v-s:password").unwrap_or_default();
+                    self.stored_password = _credential.get_first_literal("v-s:password").unwrap_or_default();
+                    self.stored_salt = _credential.get_first_literal("v-s:salt").unwrap_or_default();
                     self.edited = _credential.get_first_datetime("v-s:dateFrom").unwrap_or_default();
                 } else {
                     error!("fail read credential: {}", uses_credential_uri);
@@ -223,7 +246,7 @@ impl<'a> AuthWorkPlace<'a> {
             }
             None => {
                 warn!("credential not found, create new");
-                self.exist_password = account.get_first_literal("v-s:password").unwrap_or_default();
+                self.stored_password = account.get_first_literal("v-s:password").unwrap_or_default();
 
                 create_new_credential(self.sys_ticket, self.module, &mut self.credential, account);
             }
