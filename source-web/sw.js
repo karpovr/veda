@@ -96,13 +96,13 @@ function handleFetch(event, CACHE) {
   });
 }
 
-const api_fns = {
+const OFFLINE_API_RESPONSE = {
   // GET
   'authenticate': '{"end_time":' + (Date.now() + 12 * 3600 * 1000) + ',"id":"","result":200,"user_uri":""}',
-  'get_ticket_trusted': '',
+  'get_ticket_trusted': '{"end_time":' + (Date.now() + 12 * 3600 * 1000) + ',"id":"","result":200,"user_uri":""}',
   'is_ticket_valid': 'true',
   'get_rights': '{"@":"_","rdf:type":[{"data":"v-s:PermissionStatement","type":"Uri"}],"v-s:canCreate":[{"data":true,"type":"Boolean"}],"v-s:canDelete":[{"data":false,"type":"Boolean"}],"v-s:canRead":[{"data":true,"type":"Boolean"}],"v-s:canUpdate":[{"data":true,"type":"Boolean"}]}',
-  'get_rights_origin': '',
+  'get_rights_origin': '[{"@":"_","rdf:type":[{"data":"v-s:PermissionStatement","type":"Uri"}],"v-s:canCreate":[{"data":true,"type":"Boolean"}],"v-s:canRead":[{"data":true,"type":"Boolean"}],"v-s:canUpdate":[{"data":true,"type":"Boolean"}],"v-s:permissionObject":[{"data":"v-s:AllResourcesGroup","type":"Uri"}],"v-s:permissionSubject":[{"data":"cfg:Guest","type":"Uri"}]}]',
   'get_membership': '{"@":"_","rdf:type":[{"data":"v-s:Membership","type":"Uri"}],"v-s:memberOf":[{"data":"v-s:AllResourcesGroup","type":"Uri"}]}',
   // 'get_individual':'{"@":"_","rdf:type":[{"type":"Uri","data": "rdfs:Resource"}],"rdfs:label": [{"type": "String", "data": "Нет связи с сервером. Этот объект сейчас недоступен.", "lang": "RU"},{"type": "String", "data": "Server disconnected. This object is not available now.", "lang": "EN"}]}',
 
@@ -173,7 +173,7 @@ function handleAPI(event) {
             if (fn === 'get_individual') {
               return error;
             } else {
-              return new Response(api_fns[fn], {headers: {'Content-Type': 'application/json'}});
+              return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
             }
           });
       });
@@ -203,7 +203,7 @@ function handleAPI(event) {
         });
       })
       .catch(function(error) {
-        return new Response(api_fns[fn], {headers: {'Content-Type': 'application/json'}});
+        return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
       });
   } else if (event.request.method === 'PUT') {
     // Fetch first
@@ -212,7 +212,7 @@ function handleAPI(event) {
       .catch(function (error) {
         return enqueueRequest(cloneRequest).then(function (queue) {
           console.log('Offline operation added to queue, queue length = ', queue.length);
-          return new Response(api_fns[fn], {headers: {'Content-Type': 'application/json'}});
+          return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
         });
       });
   }
@@ -270,106 +270,6 @@ self.addEventListener('message', function (event) {
   }
 });
 
-// indexedDB for non-GET requests
-const db_name = 'veda-sw';
-const store = 'sw';
-
-const fallback = {
-  get: function (key) {
-    return Promise.resolve(this[key]);
-  },
-  put: function (key, value) {
-    this[key] = value;
-    return Promise.resolve(value);
-  },
-  remove: function (key) {
-    const result = delete this[key];
-    return Promise.resolve(result);
-  },
-};
-
-const LocalDB = function () {
-  const self = this;
-
-  if (LocalDB.prototype._singletonInstance) {
-    return Promise.resolve(LocalDB.prototype._singletonInstance);
-  }
-
-  return LocalDB.prototype._singletonInstance = initDB();
-
-  /**
-   * Init db
-   * @return {Request}
-   */
-  function initDB() {
-    return new Promise(function (resolve, reject) {
-      const openReq = indexedDB.open(db_name, 1);
-
-      openReq.onsuccess = function (event) {
-        const db = event.target.result;
-        self.db = db;
-        console.log('DB open success');
-        resolve(self);
-      };
-
-      openReq.onerror = function errorHandler(error) {
-        console.log('DB open error', error);
-        reject(error);
-      };
-
-      openReq.onupgradeneeded = function (event) {
-        const db = event.target.result;
-        db.createObjectStore(store);
-        console.log('DB create success');
-      };
-    }).catch(function (error) {
-      console.log('IndexedDB error, using in-memory fallback.\n', error);
-      return fallback;
-    });
-  }
-};
-
-const proto = LocalDB.prototype;
-
-proto.get = function (key) {
-  const self = this;
-  return new Promise(function (resolve, reject) {
-    const request = self.db.transaction([store], 'readonly').objectStore(store).get(key);
-    request.onerror = function(error) {
-      reject(error);
-    };
-    request.onsuccess = function(event) {
-      resolve(request.result);
-    };
-  });
-};
-
-proto.put = function (key, value) {
-  const self = this;
-  return new Promise(function (resolve, reject) {
-    const request = self.db.transaction([store], 'readwrite').objectStore(store).put(value, key);
-    request.onerror = function(error) {
-      reject(error);
-    };
-    request.onsuccess = function(event) {
-      resolve(value);
-    };
-  });
-};
-
-proto.remove = function (key) {
-  const self = this;
-  return new Promise(function (resolve, reject) {
-    const request = self.db.transaction([store], 'readwrite').objectStore(store).delete(key);
-    request.onerror = function(error) {
-      reject(error);
-    };
-    request.onsuccess = function(event) {
-      resolve(request.result);
-    };
-  });
-};
-
 /**
  * Serialize Request / Response
  * @param {Request|Response} subject
@@ -417,3 +317,106 @@ function serialize(subject) {
 function deserialize(subject) {
   return subject.method ? new Request(subject.url, subject) : new Response(subject.body, subject);
 }
+
+// Local DB for api calls
+
+const fallback = {
+  get: function (key) {
+    return Promise.resolve(this[key]);
+  },
+  put: function (key, value) {
+    this[key] = value;
+    return Promise.resolve(value);
+  },
+  remove: function (key) {
+    const result = delete this[key];
+    return Promise.resolve(result);
+  },
+};
+
+/**
+ * Local database singleton constructor
+ * @return {Promise} database instance promise
+ */
+function LocalDB() {
+  const self = this;
+  this.db_name = 'Veda';
+  this.store_name = 'sw-store';
+
+  // Singleton pattern
+  if (LocalDB.prototype[this.db_name + this.store_name]) {
+    return Promise.resolve(LocalDB.prototype[this.db_name + this.store_name]);
+  }
+
+  return LocalDB.prototype[this.db_name + this.store_name] = initDB(this.db_name, this.store_name);
+
+  /**
+   * Initialize database instance
+   * @param {string} db_name - database name
+   * @param {string} store_name - database store name
+   * @return {Promise} database instance promise
+   */
+  function initDB(db_name, store_name) {
+    return new Promise(function (resolve, reject) {
+      const openReq = window.indexedDB.open(db_name, veda_version);
+
+      openReq.onsuccess = function (event) {
+        const db = event.target.result;
+        self.db = db;
+        console.log(`DB open success, veda_version = ${veda_version}`);
+        resolve(self);
+      };
+
+      openReq.onerror = function errorHandler(error) {
+        console.log('DB open error', error);
+        reject(error);
+      };
+
+      openReq.onupgradeneeded = function (event) {
+        const db = event.target.result;
+        const stores = [];
+        for (let i = 0; i < db.objectStoreNames.length; i++) {
+          stores.push( db.objectStoreNames[i] );
+        }
+        stores.forEach((store) => {
+          db.deleteObjectStore(store);
+          console.log('DB store deleted:', store);
+        });
+        db.createObjectStore(self.store_name);
+        console.log(`DB create success, veda_version = ${veda_version}`);
+      };
+    }).catch((error) => {
+      console.log('IndexedDB error, using in-memory fallback.', error);
+      return fallback;
+    });
+  }
+};
+
+const proto = LocalDB.prototype;
+
+proto.get = function (key) {
+  const self = this;
+  return new Promise(function (resolve, reject) {
+    const request = self.db.transaction([self.store_name], 'readonly').objectStore(self.store_name).get(key);
+    request.onerror = reject;
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
+};
+
+proto.put = function (key, value) {
+  const self = this;
+  return new Promise(function (resolve, reject) {
+    const request = self.db.transaction([self.store_name], 'readwrite').objectStore(self.store_name).put(value, key);
+    request.onerror = reject;
+    request.onsuccess = () => resolve(value);
+  });
+};
+
+proto.remove = function (key) {
+  const self = this;
+  return new Promise(function (resolve, reject) {
+    const request = self.db.transaction([self.store_name], 'readwrite').objectStore(self.store_name).delete(key);
+    request.onerror = reject;
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
+};
