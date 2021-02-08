@@ -22,4 +22,4 @@ rand = "0.7"
 v_queue = "0.1"
 v_onto = { package = "v-common-onto", version = "0.1.1" }
 v_storage = { package = "v-common-storage", version = "0.1.5" }
-v_module = { package = "v-common-module", version = "0.1.11" }
+v_module = { package = "v-common-module", version = "0.1.12" }
