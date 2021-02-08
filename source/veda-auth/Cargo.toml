@@ -24,5 +24,5 @@ v_api = { package = "v-common-api", version = "0.1.2" }
 v_storage = { package = "v-common-storage", version = "0.1.5" }
 v_az_lmdb = { package = "v-common-az-lmdb", version = "0.1.1" }
 v_search = { package = "v-common-search", version = "0.1.2" }
-v_module = { package = "v-common-module", version = "0.1.10" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.8" }
+v_module = { package = "v-common-module", version = "0.1.11" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.9" }

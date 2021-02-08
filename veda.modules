@@ -9,6 +9,8 @@ az-indexer
     args = --use_index_format_v2
 
 ft-indexer
+    module = ft-indexer
+    args = --max_batch_size=5000
 
 ft-query
     module = ft-query

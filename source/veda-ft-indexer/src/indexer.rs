@@ -17,6 +17,8 @@ use v_onto::onto::Onto;
 use v_onto::resource::Resource;
 use xapian_rusty::*;
 
+const BATCH_SIZE_OF_TRANSACTION: i64 = 5000;
+
 pub(crate) struct Indexer {
     pub onto: Onto,
     pub index_dbs: HashMap<String, WritableDatabase>,
@@ -288,7 +290,7 @@ impl Indexer {
 
             self.prepared_op_id = op_id;
 
-            if (op_id - self.committed_op_id) % 5000 == 0 {
+            if (op_id - self.committed_op_id) % BATCH_SIZE_OF_TRANSACTION == 0 {
                 if !self.key2slot.is_empty() {
                     if let Err(e) = self.key2slot.store() {
                         error!("fail store key2slot, err={:?}", e);

@@ -21,6 +21,7 @@ use v_queue::consumer::*;
 use xapian_rusty::*;
 
 const BASE_PATH: &str = "./data";
+const TIMEOUT_BETWEEN_COMMITS: u128 = 100;
 
 fn main() -> Result<(), XError> {
     init_log("FT_INDEXER");
@@ -86,7 +87,7 @@ fn main() -> Result<(), XError> {
 }
 
 fn heartbeat(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer) {
-    if ctx.committed_time.elapsed().as_millis() > 100 {
+    if ctx.committed_time.elapsed().as_millis() > TIMEOUT_BETWEEN_COMMITS {
         if let Err(e) = ctx.commit_all_db(module_info) {
             error!("fail commit, err={:?}", e);
         }
