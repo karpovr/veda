@@ -60,23 +60,23 @@ fn main() -> Result<(), i32> {
         &mut ctx,
         &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
         &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> bool),
-        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context)),
+        &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context) -> Result<(), PrepareError>),
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) {}
+fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
 
 fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context, _prepared_batch_size: u32) -> bool {
+fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     if (ctx.permission_statement_counter + ctx.membership_counter) % 100 == 0 {
         info!("count prepared: permissions={}, memberships={}", ctx.permission_statement_counter, ctx.membership_counter);
     }
-    false
+    Ok (false)
 }
 
 fn prepare(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {

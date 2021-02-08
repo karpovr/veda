@@ -158,8 +158,8 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
             &mut ctx,
             &mut (before_batch as fn(&mut Module, &mut MyContext<'a>, batch_size: u32) -> Option<u32>),
             &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>, prepared_batch_size: u32) -> bool),
-            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>)),
+            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>) -> Result<(), PrepareError>),
         );
     } else {
         error!("fail init ft-query");
@@ -167,14 +167,14 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut MyContext) {}
+fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut MyContext) -> Result<(), PrepareError> { Ok (()) }
 
 fn before_batch(_module: &mut Module, _ctx: &mut MyContext, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut MyContext, _prepared_batch_size: u32) -> bool {
-    false
+fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut MyContext, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok (false)
 }
 
 fn prepare(

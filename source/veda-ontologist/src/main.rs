@@ -96,8 +96,8 @@ fn main() -> std::io::Result<()> {
             &mut ctx,
             &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
             &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> bool),
-            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context)),
+            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context) -> Result<(), PrepareError>),
         );
     } else {
         error!("fail init ft-query");
@@ -115,7 +115,7 @@ pub struct Context {
     pub xr: XapianReader,
 }
 
-fn heartbeat(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context) {
+fn heartbeat(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context) -> Result<(), PrepareError>{
     if !ctx.onto_index.exists() {
         recover_index_from_ft(ctx, module);
         if let Err(e) = ctx.onto_index.dump() {
@@ -133,14 +133,16 @@ fn heartbeat(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Conte
             }
         }
     }
+
+    Ok(())
 }
 
 fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> bool {
-    true
+fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok (true)
 }
 
 fn prepare(
