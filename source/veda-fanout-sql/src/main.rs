@@ -108,14 +108,9 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
 
     let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
 
-    let actual_version = if !types.contains(&"v-s:Version".to_owned()) {
-        new_state.get_first_literal("v-s:actualVersion").unwrap_or_default()
-    } else {
-        String::default()
-    };
-
-    if !actual_version.is_empty() && actual_version != uri {
-        info!("Skip not actual version. {}.v-s:actualVersion {} != {}", uri, &actual_version, uri);
+    let is_version = types.contains(&"v-s:Version".to_owned());
+    if is_version {
+        info!("{} skip version.", uri);
         return Ok(true);
     }
 

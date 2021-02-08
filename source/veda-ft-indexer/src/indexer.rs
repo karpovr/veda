@@ -112,21 +112,12 @@ impl Indexer {
 
         if !new_indv.is_empty() {
             let is_draft_of = new_indv.get_first_literal("v-s:is_draft_of");
-            //let previousVersion_prev = prev_indv.get_first_literal("v-s:previousVersion");
-            //let previousVersion_new = new_indv.get_first_literal("v-s:previousVersion");
 
             if is_draft_of.is_some() {
                 info!("new_indv [{}] is draft, ignore", new_indv.get_id());
                 return Ok(());
             }
-            /*
-                        if !is_deleted && !actual_version.is_empty() && actual_version != new_indv.get_id() {
-                            if actual_version != new_indv.get_id() {
-                                info!("new[{}].v-s:actualVersion[{}] != [{}], ignore", new_indv.get_id(), actual_version, new_indv.get_id());
-                            }
-                            return Ok(());
-                        }
-            */
+
             let types = new_indv.get_literals("rdf:type").unwrap_or_default();
             let prev_types = prev_indv.get_literals("rdf:type").unwrap_or_default();
 
@@ -153,19 +144,15 @@ impl Indexer {
                 }
             }
 
-            let actual_version = if !types.contains(&"v-s:Version".to_owned()) {
-                new_indv.get_first_literal("v-s:actualVersion").unwrap_or_default()
-            } else {
-                String::default()
-            };
+            let is_version = types.contains(&"v-s:Version".to_owned());
 
-            if !is_deleted && !actual_version.is_empty() && actual_version != new_indv.get_id() {
+            if !is_deleted && is_version {
                 if self.index_dbs.contains_key(&dbname) {
                     if let Some(db) = self.index_dbs.get_mut(&dbname) {
                         if db.delete_document(&uuid).is_ok() {
-                            info!("new[{}].v-s:actualVersion[{}] != [{}], remove", new_indv.get_id(), actual_version, new_indv.get_id());
+                            info!("{} is_version, remove", new_indv.get_id());
                         } else {
-                            info!("new[{}].v-s:actualVersion[{}] != [{}], ignore", new_indv.get_id(), actual_version, new_indv.get_id());
+                            info!("{} is_version, ignore", new_indv.get_id());
                         }
                     }
                 }

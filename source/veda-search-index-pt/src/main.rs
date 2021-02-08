@@ -115,14 +115,10 @@ impl Context {
         }
         if !is_remove {
             if let Some(types) = new_state.get_literals("rdf:type") {
-                let actual_version = if !types.contains(&"v-s:Version".to_owned()) {
-                    new_state.get_first_literal("v-s:actualVersion").unwrap_or_default()
-                } else {
-                    String::default()
-                };
 
-                if !actual_version.is_empty() && actual_version != id {
-                    info!("Skip not actual version. {}.v-s:actualVersion {} != {}", id, &actual_version, id);
+                let is_version = types.contains(&"v-s:Version".to_owned());
+                if is_version {
+                    info!("{}, skip version.", id);
                     return;
                 }
 

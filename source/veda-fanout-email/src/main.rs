@@ -99,6 +99,12 @@ fn prepare(module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context,
     }
 
     if let Some(types) = new_state.get_literals("rdf:type") {
+        let is_version = types.contains(&"v-s:Version".to_owned());
+        if is_version {
+            info!("{} is version, ignore", new_state.get_id());
+            return Ok(true);
+        }
+
         for itype in types {
             if ctx.onto.is_some_entered(&itype, &["v-s:Deliverable"]) {
                 prepare_deliverable(&mut new_state, module, ctx);
@@ -119,15 +125,9 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
     }
 
     let is_draft_of = prepared_indv.get_first_literal("v-s:is_draft_of");
-    let actual_version = prepared_indv.get_first_literal("v-s:actualVersion").unwrap_or_default();
 
     if is_draft_of.is_some() {
         info!("new_indv {} is draft, ignore it", prepared_indv.get_id());
-        return ResultCode::Ok;
-    }
-
-    if !actual_version.is_empty() && actual_version != prepared_indv.get_id() {
-        info!("new {}.v-s:actualVersion {} != {}, ignore", prepared_indv.get_id(), &actual_version, prepared_indv.get_id());
         return ResultCode::Ok;
     }
 
