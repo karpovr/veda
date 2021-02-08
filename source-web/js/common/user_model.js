@@ -32,7 +32,7 @@ proto._init = function () {
   return this.load()
     .then(self.initAspect.bind(self))
     .then(self.initAppointment.bind(self))
-    // ~ .then(self.initAppointments.bind(self))
+    .then(self.initAppointments.bind(self))
     .then(self.initPreferences.bind(self))
     .then(self.initLanguage.bind(self))
     .then(function () {
@@ -91,24 +91,24 @@ proto.initAppointment = function () {
   return veda.appointment.load();
 };
 
-// ~ proto.initAppointments = function () {
-// ~ const self = this;
-// ~ return veda.Backend.query({
-// ~ ticket: veda.ticket,
-// ~ query: '\'rdf:type\'===\'v-s:Appointment\' && \'v-s:employee\'===\'' + self.id + '\'',
-// ~ }).then(function (result) {
-// ~ const appointments_uris = result.result;
-// ~ return Promise.all(
-// ~ appointments_uris.map(function (appointment_uri) {
-// ~ const appointment = new veda.IndividualModel(appointment_uri);
-// ~ return appointment.load();
-// ~ }),
-// ~ );
-// ~ }).then(function (appointments) {
-// ~ self.set('v-s:hasAppointment', appointments);
-// ~ return veda.appointments = appointments;
-// ~ });
-// ~ };
+proto.initAppointments = function () {
+  const self = this;
+  return veda.Backend.query({
+    ticket: veda.ticket,
+    query: '\'rdf:type\'===\'v-s:Appointment\' && \'v-s:official\'==true && \'v-s:employee\'===\'' + self.id + '\'',
+  }).then(function (result) {
+    const appointments_uris = result.result;
+    return Promise.all(
+      appointments_uris.map(function (appointment_uri) {
+        const appointment = new veda.IndividualModel(appointment_uri);
+        return appointment.load();
+      }),
+    );
+  }).then(function (appointments) {
+    self.set('v-s:hasAppointment', appointments);
+    return veda.appointments = appointments;
+  });
+};
 
 proto.initPreferences = function () {
   const self = this;
