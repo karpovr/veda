@@ -35,7 +35,7 @@ function LocalDB() {
     return Promise.resolve(LocalDB.prototype[this.db_name + this.store_name]);
   }
 
-  return LocalDB.prototype[this.db_name + this.store_name] = initDB(this.db_name, this.store_name);
+  return LocalDB.prototype[this.db_name + this.store_name] = initDB(this.db_name, this.store_name, veda_version);
 
   /**
    * Initialize database instance
@@ -43,7 +43,7 @@ function LocalDB() {
    * @param {string} store_name - database store name
    * @return {Promise} database instance promise
    */
-  function initDB(db_name, store_name) {
+  function initDB(db_name, store_name, veda_version) {
     return new Promise(function (resolve, reject) {
       const openReq = window.indexedDB.open(db_name, veda_version);
 
@@ -61,16 +61,12 @@ function LocalDB() {
 
       openReq.onupgradeneeded = function (event) {
         const db = event.target.result;
-        const stores = [];
-        for (let i = 0; i < db.objectStoreNames.length; i++) {
-          stores.push( db.objectStoreNames[i] );
+        if (db.objectStoreNames.contains(store_name)) {
+          db.deleteObjectStore(store_name);
+          console.log(`DB store deleted: ${store_name}`);
         }
-        stores.forEach((store) => {
-          db.deleteObjectStore(store);
-          console.log('DB store deleted:', store);
-        });
         db.createObjectStore(self.store_name);
-        console.log(`DB create success, veda_version = ${veda_version}`);
+        console.log(`DB create success: ${store_name}, veda_version = ${veda_version}`);
       };
     }).catch((error) => {
       console.log('IndexedDB error, using in-memory fallback.', error);
