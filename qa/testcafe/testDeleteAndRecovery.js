@@ -34,6 +34,7 @@ import { Selector, t } from 'testcafe';
       .typeText(labelInput, timeStamp)
       .click(saveBtn)
       .click(fulltextSearch)
+      .wait(1000)
       .typeText(fulltextQueryInput, queryStartForm)
       .click(searchBtn)
       .wait(2000)

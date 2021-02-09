@@ -606,15 +606,15 @@ v-ui:FullWidthSwitchTemplate
   """
 .
 
-v-ui:SpecCreator
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация свойства v-s:creator для класса v-s:Thing"@ru ;
-  rdfs:label "v-s:creator property specification for v-s:Thing class"@en ;
-  v-ui:forClass v-s:Thing ;
-  v-ui:forProperty v-s:creator ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-.
+# v-ui:SpecCreator
+#   rdf:type v-ui:DatatypePropertySpecification ;
+#   rdfs:label "Спецификация свойства v-s:creator для класса v-s:Thing"@ru ;
+#   rdfs:label "v-s:creator property specification for v-s:Thing class"@en ;
+#   v-ui:forClass v-s:Thing ;
+#   v-ui:forProperty v-s:creator ;
+#   v-ui:minCardinality 1 ;
+#   v-ui:maxCardinality 1 ;
+# .
 
 v-ui:SystemPropertiesTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -624,11 +624,11 @@ v-ui:SystemPropertiesTemplate
   rdfs:comment "System properties"@en ;
   v-ui:template """
 <script>
-  if ( individual.isNew() && veda.appointments && veda.appointments.length > 1 ) {
-    $("div[about='@'][rel='v-s:creator']", template).remove();
-  } else {
-    $("veda-control[rel='v-s:creator'][data-type='radio']", template).remove();
-  }
+  // if ( individual.isNew() && veda.appointments && veda.appointments.length > 1 ) {
+  //   $("div[about='@'][rel='v-s:creator']", template).remove();
+  // } else {
+  //   $("veda-control[rel='v-s:creator'][data-type='radio']", template).remove();
+  // }
   //# sourceURL=v-ui:SystemPropertiesTemplate
 </script>
 <div>
@@ -636,7 +636,7 @@ v-ui:SystemPropertiesTemplate
   <div class="row">
     <div class="col-sm-3 col-xs-12">
       <em about="v-s:creator" property="rdfs:label"></em>
-      <veda-control data-type="radio" data-source="veda.appointments" rel="v-s:creator" class="-view edit -search"></veda-control>
+      <!--veda-control data-type="radio" data-source="veda.appointments" rel="v-s:creator" class="-view edit -search"></veda-control-->
       <veda-control data-type="link" rel="v-s:creator" class="-view -edit search fulltext"></veda-control>
       <div about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
       <div rel="v-s:creator" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
@@ -664,26 +664,6 @@ v-ui:SystemPropertiesTemplate
 """ ;
 .
 
-v-ui:SystemPropertiesShortTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон с набором системных свойств"@ru ;
-  rdfs:label "Template with system properties"@en ;
-  rdfs:comment "Системные свойства"@ru ;
-  rdfs:comment "System properties"@en ;
-  v-ui:template """
-<script>
-  if ( !(individual.isNew() && veda.appointments && veda.appointments.length > 1) ) {
-    template.empty();
-  }
-  //# sourceURL=v-ui:SystemPropertiesShortTemplate
-</script>
-<div>
-  <em about="v-s:creator" property="rdfs:label"></em>
-  <veda-control data-type="radio" data-source="veda.appointments" rel="v-s:creator" class="-view"></veda-control>
-</div>
-""" ;
-.
-
 v-s:CreatedBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Создано"@ru ;
@@ -702,14 +682,6 @@ v-ui:SystemPropertiesNewTemplate
   rdfs:comment "Системные свойства"@ru ;
   rdfs:comment "System properties"@en ;
   v-ui:template """
-<script>
-  if ( individual.isNew() && veda.appointments && veda.appointments.length > 1 ) {
-    $("div[about='@'][rel='v-s:creator']", template).remove();
-  } else {
-    $("veda-control[rel='v-s:creator'][data-type='radio']", template).remove();
-  }
-  //# sourceURL=v-ui:SystemPropertiesNewTemplate
-</script>
 <div>
   <section id="SystemProperties">
     <h4 class="section-header" about="v-ui:SystemPropertiesTemplate" property="rdfs:comment"></h4>
@@ -720,7 +692,6 @@ v-ui:SystemPropertiesNewTemplate
       <div class="col-sm-9 col-xs-7">
         <div class="row">
           <div class="col-sm-6 col-xs-6">
-            <veda-control data-type="radio" data-source="veda.appointments" rel="v-s:creator" class="-view edit -search"></veda-control>
             <veda-control data-type="link" rel="v-s:creator" class="-view -edit search fulltext"></veda-control>
             <div about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
             <div rel="v-s:creator" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
