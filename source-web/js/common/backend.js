@@ -947,25 +947,39 @@ function flushQueue() {
   return localDB.then(function (db) {
     return db.get('offline-queue').then(function(queue) {
       if (queue && queue.length) {
-        return queue.reduce(function (prom, params) {
-          return prom.then(function () {
-            params = JSON.parse(params);
-            params.ticket = veda.ticket;
-            return call_server(params);
+        if (veda.ticket) {
+          return browserBackend.is_ticket_valid(veda.ticket).then(function (isValid) {
+            if (isValid) {
+              return queue.reduce(function (prom, params) {
+                return prom.then(function () {
+                  params = JSON.parse(params);
+                  params.ticket = veda.ticket;
+                  return call_server(params);
+                }).catch(function (error) {
+                  console.log('Offline queue operation failed:', params, error);
+                });
+              }, Promise.resolve()).then(function () {
+                db.remove('offline-queue');
+                return queue.length;
+              });
+            } else {
+              return Promise.reject(Error('Ticket is not valid, skip queue flushing.'));
+            }
           });
-        }, Promise.resolve()).then(function () {
-          db.remove('offline-queue');
-          return queue.length;
-        });
+        } else {
+          return Promise.reject(Error('No ticket, skip queue flushing.'));
+        }
       } else {
         return 0;
       }
     });
   });
 }
-veda.on('online', function () {
-  console.log('Veda \'online\', flushing queue');
-  flushQueue().then(function (queue_length) {
-    console.log('Done, queue flushed', queue_length);
-  });
+veda.on('online started', function () {
+  if (browserBackend.status === 'online') {
+    console.log('Veda \'online\', flushing queue');
+    flushQueue().then(function (queue_length) {
+      console.log('Done, queue flushed', queue_length);
+    }).catch(console.log);
+  }
 });
