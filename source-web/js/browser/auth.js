@@ -324,11 +324,11 @@ export default function Auth() {
     case 469: // Password expired
       if ( !changePasswordPressed ) {
         passwordExpiredError.style.display = 'block';
+        secretRequestInfo.style.display = 'block';
         ok.style.display = 'block';
         okHandler = function () {
           passwordExpiredError.style.display = 'none';
           enterNewPassword.style.display = 'block';
-          secretRequestInfo.style.display = 'block';
           ok.removeEventListener('click', okHandler);
           ok.style.display = 'none';
         };
