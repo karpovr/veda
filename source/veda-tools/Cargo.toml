@@ -22,5 +22,5 @@ v_onto = { package = "v-common-onto", version = "0.1.1" }
 v_api = { package = "v-common-api", version = "0.1.2" }
 v_az_lmdb = { package = "v-common-az-lmdb", version = "0.1.1" }
 v_search = { package = "v-common-search", version = "0.1.2" }
-v_module = { package = "v-common-module", version = "0.1.12" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.10" }
+v_module = { package = "v-common-module", version = "0.1.13" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.11" }

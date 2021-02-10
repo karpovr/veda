@@ -13,7 +13,7 @@ use v_module::onto::load_onto;
 use v_onto::individual::*;
 use v_onto::onto::Onto;
 
-use crate::indexer::Indexer;
+use crate::indexer::{Indexer, BATCH_SIZE_OF_TRANSACTION};
 use std::time::Instant;
 use v_ft_xapian::init_db_path;
 use v_ft_xapian::xapian_reader::XapianReader;
@@ -25,6 +25,33 @@ const TIMEOUT_BETWEEN_COMMITS: u128 = 100;
 
 fn main() -> Result<(), XError> {
     init_log("FT_INDEXER");
+    let mut batch_size = 0;
+    loop {
+        let mut module = Module::default();
+        if batch_size == 0 {
+            batch_size = module.max_batch_size.unwrap_or_default();
+        }
+        if batch_size == 0 {
+            batch_size = BATCH_SIZE_OF_TRANSACTION as u32;
+        }
+
+        info! ("BATCH_SIZE = {}", batch_size);
+
+        module.max_batch_size = Some (batch_size);
+        if let Err(e) = index(&mut module) {
+            error!("indexer, err={:?}", e);
+        }
+
+        batch_size = batch_size / 2;
+
+        if batch_size < 1 {
+            break;
+        }
+    }
+    Ok(())
+}
+
+fn index(module: &mut Module) -> Result<(), XError> {
 
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
         wait_module("input-onto", wait_load_ontology());
@@ -36,7 +63,6 @@ fn main() -> Result<(), XError> {
         error!("{:?}", module_info.err());
         process::exit(101);
     }
-    let mut module = Module::default();
     let mut onto = Onto::default();
     load_onto(&mut module.storage, &mut onto);
 
@@ -86,13 +112,14 @@ fn main() -> Result<(), XError> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer) -> Result<(), PrepareError>{
+fn heartbeat(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer) -> Result<(), PrepareError> {
     if ctx.committed_time.elapsed().as_millis() > TIMEOUT_BETWEEN_COMMITS {
         if let Err(e) = ctx.commit_all_db(module_info) {
             error!("fail commit, err={:?}", e);
+            return Err(PrepareError::Fatal);
         }
     }
-    Ok (())
+    Ok(())
 }
 
 fn before(_module: &mut Module, _ctx: &mut Indexer, _batch_size: u32) -> Option<u32> {
@@ -102,8 +129,9 @@ fn before(_module: &mut Module, _ctx: &mut Indexer, _batch_size: u32) -> Option<
 fn after(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer, _processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = ctx.commit_all_db(module_info) {
         error!("fail commit, err={:?}", e);
+        return Err(PrepareError::Fatal);
     }
-    Ok (true)
+    Ok(true)
 }
 
 fn process(module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {

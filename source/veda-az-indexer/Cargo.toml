@@ -12,4 +12,4 @@ v_authorization = "0.1.0"
 v_onto = { package = "v-common-onto", version = "0.1.1" }
 v_api = { package = "v-common-api", version = "0.1.2" }
 v_storage = { package = "v-common-storage", version = "0.1.5" }
-v_module = { package = "v-common-module", version = "0.1.12" }
+v_module = { package = "v-common-module", version = "0.1.13" }

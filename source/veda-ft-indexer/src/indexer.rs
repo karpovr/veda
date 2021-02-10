@@ -1,7 +1,6 @@
 use crate::index_workplace::IndexDocWorkplace;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use std::process::exit;
 use std::time::Instant;
 use std::{fmt, fs};
 use v_api::IndvOp;
@@ -17,7 +16,7 @@ use v_onto::onto::Onto;
 use v_onto::resource::Resource;
 use xapian_rusty::*;
 
-const BATCH_SIZE_OF_TRANSACTION: i64 = 5000;
+pub const BATCH_SIZE_OF_TRANSACTION: i64 = 5000;
 
 pub(crate) struct Indexer {
     pub onto: Onto,
@@ -311,18 +310,12 @@ impl Indexer {
         debug!("duration = {}", duration);
 
         if delta > 0 {
-            let mut is_fail_commit = false;
             for (name, db) in self.index_dbs.iter_mut() {
                 debug!("commit to {}", name);
                 if let Err(e) = db.commit() {
-                    is_fail_commit = true;
-                    error!("FT:commit:{} fail={}, err={:?}", name, self.prepared_op_id, get_xapian_err_type(e.into()));
+                    //error!("FT:commit:{} fail={}, err={:?}", name, self.prepared_op_id, get_xapian_err_type(e.into()));
+                    return Err(e);
                 }
-            }
-
-            if is_fail_commit {
-                warn!("EXIT");
-                exit(-1);
             }
 
             self.committed_op_id = self.prepared_op_id;
