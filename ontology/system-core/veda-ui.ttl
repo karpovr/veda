@@ -3886,3 +3886,91 @@ v-ui:Graph
 </script>
   """ ;
 .
+
+v-ui:AppointmentSwitchInfo
+  rdf:type rdfs:Resource ;
+  rdfs:label "Выберите должность от имени которой Вы будете работать"@ru ;
+  rdfs:label "Choose a position you like to work with"@en ;
+.
+
+v-ui:AppointmentSwitchTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса Главная страница"@ru ;
+  rdfs:label "Template for Main page class"@en ;
+  v-ui:template """
+<script>
+  return veda.Backend.query({
+    ticket: veda.ticket,
+    query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
+  }).then(function (result) {
+    var apps = result.result;
+    if (apps.length > 1) {
+      return Promise.all(apps.map(function (id) {
+        const app = new veda.IndividualModel(id);
+        const checked = (id === veda.appointment.id);
+        return app.getPropertyChain('v-s:occupation', 'rdfs:label').then(function (label) {
+          label = label.map(veda.Util.formatValue).join(' ');
+          return `<div class="radio">
+                    <label>
+                      <input type="radio" name="appointments" value="${ id }" ${ checked ? 'checked' : '' }>
+                      ${ label }
+                    </label>
+                  </div>`;
+        });
+      })).then(function (radios) {
+        const form = $('#appointments-form', template);
+        form.append(radios);
+        form.on('change', function () {
+          const selected = $("input[name='appointments']:checked").val();
+          individual['v-s:defaultAppointment'] = new veda.IndividualModel(selected);
+        });
+        setTimeout(function () {
+          template.modal();
+        }, 500);
+      });
+    } else {
+      template.remove();
+      container.remove();
+    }
+  });
+  //# sourceURL=v-ui:AppointmentSwitchTemplate_pre
+</script>
+<div class="modal fade switch-appointment" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" about="v-ui:AppointmentSwitchInfo" property="rdfs:label"></h4>
+      </div>
+      <div class="modal-body">
+        <form id="appointments-form">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+  """ ;
+.
+
+v-ui:AppointmentSwitchMenuTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса Главная страница"@ru ;
+  rdfs:label "Template for Main page class"@en ;
+  v-ui:template """
+<script>
+  template.on('click', function (e) {
+    e.preventDefault();
+    $('.switch-appointment').modal('show');
+  })
+  //# sourceURL=v-ui:AppointmentSwitchMenuTemplate_pre
+</script>
+<a href="#" rel="v-s:occupation">
+  <p class="no-margin">
+    <span about="@" property="rdfs:label"></span> &udarr;
+  </p>
+</a>
+  """ ;
+.
+
