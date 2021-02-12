@@ -82,6 +82,7 @@ impl<'a> AuthWorkPlace<'a> {
     fn prepare_candidate_account(&mut self, account_id: &str, ticket: &mut Ticket) -> bool {
         if let Some(account) = self.module.get_individual(&account_id, &mut Individual::default()) {
             account.parse_all();
+
             let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
             if user_id.is_empty() {
                 error!("user id is null, user_indv={}", account);
@@ -232,6 +233,12 @@ impl<'a> AuthWorkPlace<'a> {
     }
 
     fn get_credential(&mut self, account: &mut Individual) {
+        if let Some(account_origin) = account.get_first_literal("v-s:authOrigin") {
+            if account_origin.to_uppercase() == "AD" {
+                return;
+            }
+        }
+
         match account.get_first_literal("v-s:usesCredential") {
             Some(uses_credential_uri) => {
                 if let Some(_credential) = self.module.get_individual(&uses_credential_uri, &mut self.credential) {
