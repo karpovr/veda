@@ -51,7 +51,12 @@ func addToIndividual(ctx *fasthttp.RequestCtx) {
     return
   }
 
-  eventID = jsonData["event_id"].(string)
+  var _eventID = jsonData["event_id"]
+  if _eventID == nil {
+    eventID = ""
+  } else {
+    eventID = _eventID.(string)
+  }
 
   indv := jsonData["individual"]
   if indv == nil {

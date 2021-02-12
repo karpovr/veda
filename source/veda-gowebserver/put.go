@@ -52,8 +52,13 @@ func putIndividual(ctx *fasthttp.RequestCtx) {
     return
   }
 
-  eventID = jsonData["event_id"].(string)
-
+  var _eventID = jsonData["event_id"]
+  if _eventID == nil {
+    eventID = ""
+  } else {
+    eventID = _eventID.(string)
+  }
+    
   indv := jsonData["individual"]
   if indv == nil {
     log.Printf("ERR! bad request=%v\n", string(ctx.Request.Body()))
@@ -118,7 +123,13 @@ func putIndividuals(ctx *fasthttp.RequestCtx) {
     return
   }
 
-  eventID = jsonData["event_id"].(string)
+  var _eventID = jsonData["event_id"]
+  if _eventID == nil {
+    eventID = ""
+  } else {
+    eventID = _eventID.(string)
+  }
+
 
   rc, ticket := getTicket(ticketKey)
   if rc != Ok {

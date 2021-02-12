@@ -52,7 +52,12 @@ func removeFromIndividual(ctx *fasthttp.RequestCtx) {
     return
   }
 
-  eventID = jsonData["event_id"].(string)
+  var _eventID = jsonData["event_id"]
+  if _eventID == nil {
+    eventID = ""
+  } else {
+    eventID = _eventID.(string)
+  }
 
   indv := jsonData["individual"]
   if indv == nil {
@@ -123,7 +128,12 @@ func removeIndividual(ctx *fasthttp.RequestCtx) {
     assignedSubsystems = uint64(jsonData["assigned_subsystems"].(float64))
   }
 
-  eventID = jsonData["event_id"].(string)
+  var _eventID = jsonData["event_id"]
+  if _eventID == nil {
+    eventID = ""
+  } else {
+    eventID = _eventID.(string)
+  }
 
   //Check if ticket is valid, if not then return fail code to client
   rc, ticket := getTicket(ticketKey)
