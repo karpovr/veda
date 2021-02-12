@@ -3898,6 +3898,22 @@ v-ui:AppointmentSwitchTemplate
   rdfs:label "Шаблон для класса Главная страница"@ru ;
   rdfs:label "Template for Main page class"@en ;
   v-ui:template """
+<div class="modal switch-appointment" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" about="v-ui:AppointmentSwitchInfo" property="rdfs:label"></h4>
+      </div>
+      <div class="modal-body">
+        <form id="appointments-form">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
   return veda.Backend.query({
     ticket: veda.ticket,
@@ -3935,22 +3951,6 @@ v-ui:AppointmentSwitchTemplate
   });
   //# sourceURL=v-ui:AppointmentSwitchTemplate_pre
 </script>
-<div class="modal fade switch-appointment" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" about="v-ui:AppointmentSwitchInfo" property="rdfs:label"></h4>
-      </div>
-      <div class="modal-body">
-        <form id="appointments-form">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal">Ok</button>
-      </div>
-    </div>
-  </div>
-</div>
   """ ;
 .
 
@@ -3959,18 +3959,33 @@ v-ui:AppointmentSwitchMenuTemplate
   rdfs:label "Шаблон для класса Главная страница"@ru ;
   rdfs:label "Template for Main page class"@en ;
   v-ui:template """
+<a href="#" about="@">
+  <span href="#" about="@" rel="v-s:defaultAppointment">
+    <span href="#" about="@" rel="v-s:occupation">
+      <span class="no-margin">
+        <span about="@" property="rdfs:label"></span> &udarr;
+      </span>
+    </span>
+  </span>
+</a>
 <script>
-  template.on('click', function (e) {
-    e.preventDefault();
-    $('.switch-appointment').modal('show');
-  })
+  return veda.Backend.query({
+    ticket: veda.ticket,
+    query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
+  }).then(function (result) {
+    var apps = result.result;
+    if (apps.length > 1) {
+      template.on('click', function (e) {
+        e.preventDefault();
+        $('.switch-appointment').modal('show');
+      });
+    } else {
+      template.remove();
+      container.remove();
+    }
+  });
   //# sourceURL=v-ui:AppointmentSwitchMenuTemplate_pre
 </script>
-<a href="#" rel="v-s:occupation">
-  <p class="no-margin">
-    <span about="@" property="rdfs:label"></span> &udarr;
-  </p>
-</a>
   """ ;
 .
 
