@@ -16,11 +16,11 @@ url = "2.2.0"
 quote = "1.0.8"
 type-cli = "0.0.3"
 
-v_authorization = "0.1.0"
-v_queue = "0.1.2"
-v_onto = { package = "v-common-onto", version = "0.1.1" }
-v_api = { package = "v-common-api", version = "0.1.2" }
-v_az_lmdb = { package = "v-common-az-lmdb", version = "0.1.1" }
-v_search = { package = "v-common-search", version = "0.1.2" }
-v_module = { package = "v-common-module", version = "0.1.13" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.11" }
+v_authorization = "=0.1.0"
+v_queue = "=0.1.2"
+v_onto = { package = "v-common-onto", version = "=0.1.1" }
+v_api = { package = "v-common-api", version = "=0.1.2" }
+v_az_lmdb = { package = "v-common-az-lmdb", version = "=0.1.1" }
+v_search = { package = "v-common-search", version = "=0.1.2" }
+v_module = { package = "v-common-module", version = "=0.1.13" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.11" }
