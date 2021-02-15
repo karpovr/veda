@@ -8,14 +8,14 @@ use lettre_email::mime::IMAGE_JPEG;
 use lettre_email::{Email, Mailbox};
 use std::collections::HashMap;
 use std::path::Path;
-use v_api::app::ResultCode;
+use v_module::v_api::app::ResultCode;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::onto::load_onto;
-use v_onto::individual::*;
-use v_onto::onto::Onto;
+use v_module::common::load_onto;
+use v_module::v_onto::individual::*;
+use v_module::v_onto::onto::Onto;
 use v_queue::consumer::*;
-use v_search::common::FTQuery;
+use v_module::v_search::common::FTQuery;
 
 const ATTACHMENTS_DB_PATH: &str = "data/files";
 

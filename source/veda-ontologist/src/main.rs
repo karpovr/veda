@@ -7,16 +7,16 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
-use v_api::app::ResultCode;
-use v_api::IndvOp;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_onto::individual2turtle::to_turtle;
-use v_onto::onto_index::OntoIndex;
-use v_onto::{individual::*, parser::*};
+use v_module::v_onto::individual2turtle::to_turtle;
+use v_module::v_onto::onto_index::OntoIndex;
+use v_module::v_onto::{individual::*, parser::*};
 use v_queue::consumer::*;
-use v_search::common::FTQuery;
+use v_module::v_search::common::FTQuery;
 
 fn main() -> std::io::Result<()> {
     init_log("ONTOLOGIST");

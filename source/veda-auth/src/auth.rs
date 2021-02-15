@@ -5,13 +5,13 @@ use rand::{thread_rng, Rng};
 use ring::pbkdf2;
 use std::num::NonZeroU32;
 use uuid::Uuid;
-use v_api::app::ResultCode;
-use v_api::IndvOp;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::{create_new_ticket, Module};
 use v_module::ticket::Ticket;
-use v_onto::datatype::Lang;
-use v_onto::individual::Individual;
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::datatype::Lang;
 
 pub(crate) struct AuthWorkPlace<'a> {
     pub conf: &'a AuthConf,

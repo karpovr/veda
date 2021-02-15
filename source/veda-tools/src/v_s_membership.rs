@@ -1,8 +1,8 @@
 use crate::cleaner::CleanerContext;
 use crate::common::remove;
-use v_api::app::{OptAuthorize, ResultCode};
+use v_module::v_api::app::{OptAuthorize, ResultCode};
 use v_module::info::ModuleInfo;
-use v_onto::individual::Individual;
+use v_module::v_onto::individual::Individual;
 
 const MAX_SIZE_BATCH: i64 = 100000;
 

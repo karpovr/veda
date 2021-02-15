@@ -7,9 +7,9 @@ use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::*;
 use std::{str, thread};
-use v_api::app::{ResultCode, OptAuthorize};
+use v_module::v_api::app::{ResultCode, OptAuthorize};
 use v_module::module::{init_log, Module};
-use v_search::clickhouse_client::*;
+use v_module::v_search::clickhouse_client::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {

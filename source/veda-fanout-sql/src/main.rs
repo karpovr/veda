@@ -8,13 +8,13 @@ use std::{process, thread, time};
 
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::onto::load_onto;
-use v_onto::datatype::DataType;
-use v_onto::datatype::Lang;
-use v_onto::individual::*;
-use v_onto::onto::Onto;
-use v_onto::resource::Resource;
-use v_onto::resource::Value;
+use v_module::common::load_onto;
+use v_module::v_onto::datatype::DataType;
+use v_module::v_onto::datatype::Lang;
+use v_module::v_onto::individual::*;
+use v_module::v_onto::onto::Onto;
+use v_module::v_onto::resource::Resource;
+use v_module::v_onto::resource::Value;
 use v_queue::consumer::*;
 
 pub struct Context {

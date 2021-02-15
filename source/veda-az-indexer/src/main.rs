@@ -6,9 +6,9 @@ use std::env;
 use v_authorization::common::{Access, FILTER_PREFIX, MEMBERSHIP_PREFIX, PERMISSION_PREFIX};
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_onto::individual::*;
+use v_module::v_onto::individual::*;
+use v_module::v_storage::storage::*;
 use v_queue::consumer::*;
-use v_storage::storage::*;
 
 mod common;
 
@@ -66,7 +66,9 @@ fn main() -> Result<(), i32> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
+fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) -> Result<(), PrepareError> {
+    Ok(())
+}
 
 fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
@@ -76,7 +78,7 @@ fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Co
     if (ctx.permission_statement_counter + ctx.membership_counter) % 100 == 0 {
         info!("count prepared: permissions={}, memberships={}", ctx.permission_statement_counter, ctx.membership_counter);
     }
-    Ok (false)
+    Ok(false)
 }
 
 fn prepare(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {

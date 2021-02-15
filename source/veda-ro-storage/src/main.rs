@@ -4,8 +4,8 @@ extern crate log;
 use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use std::str;
-use v_onto::individual::Individual;
-use v_storage::storage::*;
+use v_module::v_onto::individual::Individual;
+use v_module::v_storage::storage::*;
 use v_module::module::*;
 
 /**

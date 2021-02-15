@@ -2,9 +2,9 @@ use crate::cleaner::CleanerContext;
 use chrono::prelude::*;
 use std::ops::Sub;
 use time::Duration;
-use v_api::app::{OptAuthorize, ResultCode};
-use v_api::IndvOp;
-use v_onto::individual::Individual;
+use v_module::v_api::app::{OptAuthorize, ResultCode};
+use v_module::v_api::IndvOp;
+use v_module::v_onto::individual::Individual;
 
 const MAX_SIZE_BATCH: i64 = 100000;
 

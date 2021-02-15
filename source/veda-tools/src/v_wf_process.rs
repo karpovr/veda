@@ -7,10 +7,10 @@ use std::fs::File;
 use std::io::Write;
 use std::ops::Sub;
 use time::Duration;
-use v_api::app::{OptAuthorize, ResultCode};
+use v_module::v_api::app::{OptAuthorize, ResultCode};
 use v_module::info::ModuleInfo;
-use v_onto::individual::Individual;
-use v_onto::individual2turtle::to_turtle;
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::individual2turtle::to_turtle;
 
 const MAX_SIZE_BATCH: i64 = 10000;
 

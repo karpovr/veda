@@ -13,21 +13,21 @@ use ron::de::from_reader;
 use ron::ser::{to_string_pretty, PrettyConfig};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use std::fmt::Formatter;
 use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{fmt, fs, io};
 use std::{thread, time as std_time};
-use v_api::app::ResultCode;
-use v_api::*;
+use v_module::common::*;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::onto::*;
-use v_onto::datatype::Lang;
-use v_onto::individual::Individual;
-use v_onto::onto::*;
-use std::fmt::Formatter;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::*;
+use v_module::v_onto::datatype::Lang;
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::onto::*;
 
 #[derive(Serialize, Deserialize)]
 struct FileHash {

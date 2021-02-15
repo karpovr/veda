@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use v_authorization::common::Access;
 use v_authorization::formats::{decode_rec_to_rightset, encode_rightset, update_counters, M_IGNORE_EXCLUSIVE, M_IS_EXCLUSIVE};
 use v_authorization::{Right, RightSet};
-use v_onto::individual::Individual;
-use v_storage::storage::{StorageId, VStorage};
+use v_module::v_onto::individual::Individual;
+use v_module::v_storage::storage::{StorageId, VStorage};
 
 pub struct Context {
     pub permission_statement_counter: u32,

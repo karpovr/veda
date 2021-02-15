@@ -13,8 +13,8 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::{Duration, Instant};
-use v_onto::individual::*;
-use v_storage::storage::*;
+use v_module::v_onto::individual::*;
+use v_module::v_storage::storage::*;
 use v_module::module::*;
 
 mod server;

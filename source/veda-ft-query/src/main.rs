@@ -7,11 +7,11 @@ use nng::{Error, Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::Duration;
 use std::{env, str};
-use v_api::app::OptAuthorize;
-use v_api::app::ResultCode;
+use v_module::v_api::app::OptAuthorize;
+use v_module::v_api::app::ResultCode;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::{init_log, Module};
-use v_search::common::FTQuery;
+use v_module::v_search::common::FTQuery;
 
 fn main() {
     init_log("FT_QUERY");

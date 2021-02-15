@@ -4,19 +4,16 @@ extern crate log;
 mod index_workplace;
 mod indexer;
 
-use std::process;
-
-use v_module::info::ModuleInfo;
-use v_module::module::*;
-use v_module::onto::load_onto;
-
-use v_onto::individual::*;
-use v_onto::onto::Onto;
-
 use crate::indexer::{Indexer, BATCH_SIZE_OF_TRANSACTION};
+use std::process;
 use std::time::Instant;
 use v_ft_xapian::init_db_path;
 use v_ft_xapian::xapian_reader::XapianReader;
+use v_module::common::load_onto;
+use v_module::info::ModuleInfo;
+use v_module::module::*;
+use v_module::v_onto::individual::*;
+use v_module::v_onto::onto::Onto;
 use v_queue::consumer::*;
 use xapian_rusty::*;
 
@@ -35,9 +32,9 @@ fn main() -> Result<(), XError> {
             batch_size = BATCH_SIZE_OF_TRANSACTION as u32;
         }
 
-        info! ("BATCH_SIZE = {}", batch_size);
+        info!("BATCH_SIZE = {}", batch_size);
 
-        module.max_batch_size = Some (batch_size);
+        module.max_batch_size = Some(batch_size);
         if let Err(e) = index(&mut module) {
             error!("indexer, err={:?}", e);
         }
@@ -52,7 +49,6 @@ fn main() -> Result<(), XError> {
 }
 
 fn index(module: &mut Module) -> Result<(), XError> {
-
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
         wait_module("input-onto", wait_load_ontology());
     }

@@ -3,8 +3,8 @@ use rand::{self, rngs::ThreadRng, Rng};
 use std::collections::{HashMap, HashSet};
 use std::str;
 use std::time::Duration;
-use v_onto::individual::*;
-use v_onto::parser::*;
+use v_module::v_onto::individual::*;
+use v_module::v_onto::parser::*;
 use v_queue::consumer::*;
 use v_queue::record::*;
 

@@ -1,16 +1,16 @@
-use v_api::app::ResultCode;
-use v_api::IndvOp;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::*;
 use v_module::module::{Module, PrepareError};
-use v_onto::individual::Individual;
-use v_onto::individual::*;
-use v_onto::individual2msgpack::to_msgpack;
-use v_onto::parser::*;
+use v_module::v_onto::individual::Individual;
+use v_module::v_onto::individual::*;
+use v_module::v_onto::individual2msgpack::to_msgpack;
+use v_module::v_onto::parser::*;
 use v_queue::consumer::Consumer;
 use v_queue::queue::Queue;
 use v_queue::record::{Mode, MsgType};
-use v_search::common::FTQuery;
+use v_module::v_search::common::FTQuery;
 
 pub fn export_from_query(query: &str) -> Result<(), PrepareError> {
     let mut module = Module::default();

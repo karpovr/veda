@@ -10,10 +10,10 @@ use std::fs::{File, OpenOptions};
 use std::thread;
 use std::time::*;
 use v_module::module::Module;
-use v_module::onto::load_onto;
+use v_module::common::load_onto;
 use v_module::ticket::Ticket;
-use v_onto::onto::Onto;
-use v_search::clickhouse_client::*;
+use v_module::v_onto::onto::Onto;
+use v_module::v_search::clickhouse_client::*;
 
 pub struct CleanerContext {
     pub(crate) module: Module,
