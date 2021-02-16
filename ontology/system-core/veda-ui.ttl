@@ -3963,8 +3963,16 @@ v-ui:AppointmentSwitchMenuTemplate
   <span href="#" about="@" rel="v-s:defaultAppointment">
     <span href="#" about="@" rel="v-s:occupation">
       <span class="no-margin">
-        <span about="@" property="rdfs:label"></span> &udarr;
+        <span class="short-label"></span> &udarr;
       </span>
+      <script>
+        if (individual.hasValue('rdfs:label')) {
+          var label = individual['rdfs:label'][0].replace(/^(.{15}).*$/, '$1...');
+          template.find('.short-label').text(label);
+        } else {
+          template.remove();
+        }
+      </script>
     </span>
   </span>
 </a>
