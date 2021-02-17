@@ -3967,7 +3967,7 @@ v-ui:AppointmentSwitchMenuTemplate
       </span>
       <script>
         if (individual.hasValue('rdfs:label')) {
-          var label = individual['rdfs:label'][0].replace(/^(.{15}).*$/, '$1...');
+          var label = individual['rdfs:label'][0].replace(/^(.{15}).{5,}$/, '$1...');
           template.find('.short-label').text(label);
         } else {
           template.remove();
