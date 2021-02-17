@@ -3889,7 +3889,7 @@ v-ui:Graph
 
 v-ui:AppointmentSwitchInfo
   rdf:type rdfs:Resource ;
-  rdfs:label "Выберите должность от имени которой Вы будете работать"@ru ;
+  rdfs:label "Выберите должность, от имени которой Вы будете работать"@ru ;
   rdfs:label "Choose a position you like to work with"@en ;
 .
 
@@ -3967,7 +3967,7 @@ v-ui:AppointmentSwitchMenuTemplate
       </span>
       <script>
         if (individual.hasValue('rdfs:label')) {
-          var label = individual['rdfs:label'][0].replace(/^(.{15}).{5,}$/, '$1...');
+          var label = individual['rdfs:label'][0].replace(/^(.{20}).{5,}$/, '$1...');
           template.find('.short-label').text(label);
         } else {
           template.remove();
