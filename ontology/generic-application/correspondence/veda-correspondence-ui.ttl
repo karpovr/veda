@@ -403,8 +403,8 @@ v-s:CorrespondentTemplate
         <span about="@" property="v-s:postalAddress"></span>
       </a>
     </div>
-    <veda-control data-type="link" rel="v-s:correspondentOrganization" class="-view edit -search fulltext create create-modal" data-template="{individual['v-s:shortLabel'].join(' ') + ', ' + individual['v-s:postalAddress'].join(' ')}"></veda-control>
-    <veda-control data-type="link" rel="v-s:correspondentOrganization" class="-view -edit search fulltext" data-template="{individual['v-s:shortLabel'].join(' ') + ', ' + individual['v-s:postalAddress'].join(' ')}"></veda-control>
+    <veda-control data-type="link" rel="v-s:correspondentOrganization" class="-view edit -search fulltext create create-modal" data-template="{individual['rdfs:label'].join(' ') + ', ' + individual['v-s:postalAddress'].join(' ')}"></veda-control>
+    <veda-control data-type="link" rel="v-s:correspondentOrganization" class="-view -edit search fulltext" data-template="{individual['rdfs:label'].join(' ') + ', ' + individual['v-s:postalAddress'].join(' ')}"></veda-control>
     <div class="user-organization">
       <hr class="margin-md">
       <em about="v-s:correspondentDepartment" property="rdfs:label"></em>

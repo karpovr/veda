@@ -62,6 +62,11 @@ v-s:EmployeeValidationBundle
   rdfs:label "В организацию уже введен сотрудик с данными ФИО и датой рождения"@ru ;
   rdfs:label "The organization has already entered an employee with this full name and date of birth"@en ;
 .
+v-s:FullNameBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "В организацию уже введен сотрудик с данными ФИО и датой рождения"@ru ;
+  rdfs:label "The organization has already entered an employee with this full name and date of birth"@en ;
+.
 
 
 # ------------------------------------------------------------ МОДЕЛИ --
@@ -200,13 +205,13 @@ v-s:PslabelForOrganization
   rdf:type v-ui:PropertySpecification ;
   v-ui:forClass v-s:Organization ;
   v-ui:forProperty rdfs:label ;
-  v-ui:forProperty v-s:shortLabel;
+  v-ui:forProperty v-s:title;
   v-ui:forProperty v-s:legalAddress;
   v-ui:forProperty v-s:postalAddress;
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 100 ;
-  rdfs:label "Спецификация свойств rdfs:label, v-s:shortLabel, v-s:legalAddress, v-s:postalAddress для класса v-s:Organization"@ru ;
-  rdfs:label "rdfs:label, v-s:shortLabel, v-s:legalAddress, v-s:postalAddress property specification for v-s:Organization"@en ;
+  rdfs:label "Спецификация свойств rdfs:label, v-s:title, v-s:legalAddress, v-s:postalAddress для класса v-s:Organization"@ru ;
+  rdfs:label "rdfs:label, v-s:title, v-s:legalAddress, v-s:postalAddress property specification for v-s:Organization"@en ;
 .
 
 v-s:taxRegistrationCauseForOrganization
@@ -476,15 +481,15 @@ v-s:OrganizationTemplate
     </h2>
     <hr>
     <div class="row">
-      <div class="col-md-4">
-        <em about="v-s:shortLabel" property="rdfs:label"></em>
-        <div property="v-s:shortLabel" class="view -edit -search"></div>
-        <veda-control data-type="string" property="v-s:shortLabel" class="-view edit search"></veda-control>
-      </div>
       <div class="col-md-8">
         <em about="rdfs:label" property="rdfs:label"></em>
         <div property="rdfs:label" class="view -edit -search"></div>
         <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
+      </div>
+      <div class="col-md-8">
+        <em about="v-s:FullNameBundle" property="rdfs:label"></em>
+        <div property="v-s:title" class="view -edit -search"></div>
+        <veda-control data-type="string" property="v-s:title" class="-view edit search"></veda-control>
       </div>
     </div>
     <hr class="view -edit -search">
@@ -550,7 +555,7 @@ v-s:OrganizationTemplate
       <thead>
         <tr class="view -edit -search active">
           <th width="1%"><span class="glyphicon glyphicon-search"></th>
-          <th about="v-s:shortLabel" property="rdfs:label"></th>
+          <th about="rdfs:label" property="rdfs:label"></th>
           <th about="v-s:taxRegistrationCause" property="rdfs:label"></th>
           <th about="v-s:postalAddress" property="rdfs:label"></th>
         </tr>
@@ -559,8 +564,8 @@ v-s:OrganizationTemplate
         <tr>
           <td about="@" data-template="v-ui:IconModalTemplate"></td>
           <td>
-            <div property="v-s:shortLabel" class="view -edit -search"></div>
-            <veda-control property="v-s:shortLabel" data-type="string" class="-view edit search"></div>
+            <div property="rdfs:label" class="view -edit -search"></div>
+            <veda-control property="rdfs:label" data-type="string" class="-view edit search"></div>
           </td>
           <td>
             <div property="v-s:taxRegistrationCause" class="view -edit -search"></div>
@@ -834,13 +839,13 @@ v-s:SubsidiaryTemplate
 
     <hr class="view -edit -search">
 
+    <em about="v-s:FullNameBundle" property="rdfs:label"></em>
+    <div property="v-s:title" class="view -edit -search"></div>
+    <veda-control data-type="string" property="v-s:title" class="-view edit search"></veda-control>
+
     <em about="rdfs:label" property="rdfs:label"></em>
     <div property="rdfs:label" class="view -edit -search"></div>
     <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
-
-    <em about="v-s:shortLabel" property="rdfs:label"></em>
-    <div property="v-s:shortLabel" class="view -edit -search"></div>
-    <veda-control data-type="string" property="v-s:shortLabel" class="-view edit search"></veda-control>
 
     <hr class="view -edit -search">
 

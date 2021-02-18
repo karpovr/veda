@@ -217,7 +217,7 @@ v-s:AccountingDoc
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:Contractual ; 
-  v-s:labelPattern "Исполнитель: {@.v-s:hasContractParticipantSupplier.v-s:hasOrganization.v-s:shortLabel} (№{@.v-s:registrationNumber}, {@.v-s:registrationDate}) -> Заказчик: {@.v-s:hasContractParticipantCustomer.v-s:hasOrganization.v-s:shortLabel} (№{@.v-s:registrationNumberIn}, {@.v-s:transactionDate}) {@.v-s:hasDocumentKind.v-s:shortLabel}" ;
+  v-s:labelPattern "Исполнитель: {@.v-s:hasContractParticipantSupplier.v-s:hasOrganization.rdfs:label} (№{@.v-s:registrationNumber}, {@.v-s:registrationDate}) -> Заказчик: {@.v-s:hasContractParticipantCustomer.v-s:hasOrganization.rdfs:label} (№{@.v-s:registrationNumberIn}, {@.v-s:transactionDate}) {@.v-s:hasDocumentKind.v-s:shortLabel}" ;
   rdfs:label "Первичный документ"@ru ;
   rdfs:label "Accounting document"@en ;
 .

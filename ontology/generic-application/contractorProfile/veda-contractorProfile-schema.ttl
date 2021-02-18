@@ -30,7 +30,7 @@ v-s:ContractorProfile
   rdfs:subClassOf v-s:Labeled;
   rdfs:subClassOf v-s:Document;
   rdfs:subClassOf v-s:UserSearchableDocument;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:shortLabel}"^^xsd:string;
+  v-s:labelPattern "{@.v-s:backwardTarget.rdfs:label}"^^xsd:string;
   rdfs:label "Досье контрагента"@ru ;
   rdfs:label "Contractor profile"@en ;
 .
@@ -241,7 +241,7 @@ v-s:ContractorCategoryRequest
   rdfs:subClassOf v-s:Contractual ;
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:Financial ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:shortLabel} {@.v-s:created}" ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.rdfs:label} {@.v-s:created}" ;
   rdfs:label "Запрос на согласование контрагента"@ru ;
   rdfs:label "Contractor category request"@en ;
   v-s:hasLinksTree v-s:ContractorCategoryRequestLinksTree ;
@@ -308,7 +308,7 @@ v-s:ContractorCategoryDecision
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:shortLabel} {@.v-s:created}" ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.rdfs:label} {@.v-s:created}" ;
   rdfs:label "Единый лист оценки"@ru ;
   rdfs:label "Assessment list"@en ;
 .
@@ -356,7 +356,7 @@ v-s:ContractorCategoryDecisionSecurity
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:shortLabel} {@.v-s:created}" ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.rdfs:label} {@.v-s:created}" ;
   rdfs:label "Заключение СБ"@ru ;
   rdfs:label "Resolution Security"@en ;
 .
@@ -417,7 +417,7 @@ v-s:ContractorCategoryDecisionLegal
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:shortLabel} {@.v-s:created}" ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.rdfs:label} {@.v-s:created}" ;
   rdfs:label "Заключение юр. отдела"@ru ;
   rdfs:label "Resolution Legal"@en ;
 .
@@ -450,7 +450,7 @@ v-s:ContractorCategoryDecisionFinancial
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:shortLabel} {@.v-s:created}" ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.rdfs:label} {@.v-s:created}" ;
   rdfs:label "Заключение бухгалтерии"@ru ;
   rdfs:label "Resolution accounting"@en ;
 .
@@ -476,7 +476,7 @@ v-s:ContractorCategoryDecisionManagement
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:shortLabel} {@.v-s:created}" ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.v-s:backwardTarget.rdfs:label} {@.v-s:created}" ;
   rdfs:label "Заключение руководства"@ru ;
   rdfs:label "Management resolution"@en ;
 .

@@ -22,7 +22,7 @@ d:org_RU000000000000 a v-s:Organization;
   v-s:hasClassifierLegalForm d:OKOPF_50000;
   v-s:legalAddress " "^^xsd:string;
   v-s:postalAddress " "^^xsd:string;
-  v-s:shortLabel "Физическое лицо"^^xsd:string;
+  v-s:title "Физическое лицо"^^xsd:string;
   v-s:taxId "0000000000"^^xsd:string;
   v-s:updateCounter "1"^^xsd:integer;
 .
@@ -34,7 +34,7 @@ d:org_RU111111111111 a v-s:Organization;
   v-s:hasClassifierLegalForm d:OKOPF_50000;
   v-s:legalAddress " "^^xsd:string;
   v-s:postalAddress " "^^xsd:string;
-  v-s:shortLabel "Юридическое лицо"^^xsd:string;
+  v-s:title "Юридическое лицо"^^xsd:string;
   v-s:taxId "1111111111"^^xsd:string;
   v-s:updateCounter "1"^^xsd:integer;
 .
