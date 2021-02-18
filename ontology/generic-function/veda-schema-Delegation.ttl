@@ -113,11 +113,10 @@ v-s:PsDelegationPurposeForRequestDelegationUser
   rdf:type v-ui:ObjectPropertySpecification ;
   v-ui:forClass v-s:RequestDelegationUser ;
   v-ui:forProperty v-s:hasDelegationPurpose ;
-  v-ui:optionValue d:delegate_Acting ;
-  v-ui:deafultValue d:delegate_Acting ;
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'rdf:type'=='v-s:DelegationPurpose' && ('@'=='d:delegate_Acting')" ;
+  v-ui:queryPrefix "'rdf:type'=='v-s:DelegationPurpose' && '@'=='d:delegate_Acting'" ;
+  v-ui:defaultValue d:delegate_Acting;
 .
 
 #----------------заявка для администратора---------
@@ -167,16 +166,16 @@ v-s:RequestDelegationTemplate
   rdfs:label "Template for v-s:RequestDelegationUser class"@en ;
   v-ui:template """
 <script>
-  if ( individual.hasValue("rdf:type", "v-s:RequestDelegationAdmin") ) {
+   if ( individual.hasValue("rdf:type", "v-s:RequestDelegationAdmin") ) {
     $("#delegator-control", template).removeClass("-edit").addClass("edit");
     $("#delegator-value", template).removeClass("edit").addClass("-edit");
     $("#position-control", template).removeClass("-edit").addClass("edit");
     $("#position-container", template).removeClass("-edit").addClass("edit");
-  } else {
+   } else {
     $("#custom-label", template).remove();
     $("#ignoreExclusive-control", template).remove();
     $("#official-control", template).remove();
-  }
+   }
   //# sourceURL=v-s:RequestDelegationTemplate_pre
 </script>
 <div class="container sheet">
@@ -336,7 +335,7 @@ v-s:RequestDelegationTemplate
     if (values.length) {
       var delegator = values[0];
       var queryStr = "( 'rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "' )";
-      var delegatedPositions = [];
+      var delegatedPositions = []
       veda.Backend.query(veda.ticket, queryStr)
         .then(function (queryResult) {
           return veda.Backend.get_individuals(veda.ticket, queryResult.result);
@@ -367,14 +366,14 @@ v-s:RequestDelegationTemplate
             input.prop( "id", position.id );
 
             if (delegatedPositions.indexOf(position.id) >= 0) {
-              label.text( position.toString() + " (делегировано)" );
+              label.text( position.toString() + " (делегировано)" );  
             } else {
               label.text( position.toString() );
             };
             if (mode === "view") {
               input.prop("disabled", "disabled");
             }
-
+            
             tmpl.appendTo( $("#positions", template) );
           });
         });
