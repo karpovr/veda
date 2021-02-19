@@ -2783,7 +2783,7 @@ v-ui:TreeTemplate
   var literals = ["rdfs:Literal", "xsd:string", "xsd:boolean", "xsd:integer", "xsd:nonNegativeInteger", "xsd:decimal", "xsd:dateTime"];
 
   displayedProperty.forEach( function (property, index) {
-    headTmpl += "<th>" + property["rdfs:label"].join(", ") + "</th>";
+    headTmpl += "<th>" + property["rdfs:label"].map(veda.Util.formatValue).join(" ") + "</th>";
     var isLiteral = (literals.indexOf(property["rdfs:range"][0].id) >= 0);
     if ( index === 0 ) {
       if (isLiteral) {
