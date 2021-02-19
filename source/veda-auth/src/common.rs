@@ -4,16 +4,16 @@ use regex::Regex;
 use ring::rand::SecureRandom;
 use ring::{digest, pbkdf2, rand};
 use std::num::NonZeroU32;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
 use v_authorization::common::Trace;
 use v_az_lmdb::_authorize;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::{create_new_ticket, Module};
 use v_module::ticket::Ticket;
-use v_module::v_search::common::{FTQuery, QueryResult};
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
+use v_module::v_search::common::{FTQuery, QueryResult};
 
 pub const EMPTY_SHA256_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 pub const ALLOW_TRUSTED_GROUP: &str = "cfg:TrustedAuthenticationUserGroup";
@@ -106,7 +106,12 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
 
                         let user_login = account.get_first_literal("v-s:login").unwrap_or_default();
                         if user_login.is_empty() {
-                            error!("user login {:?} not equal request login {}", user_login, login);
+                            warn!("user login {:?} not equal request login {}, skip", user_login, login);
+                            continue;
+                        }
+
+                        if user_login.to_lowercase() != login.to_lowercase() {
+                            warn!("user login {} not equal request login {}, skip", user_login, login);
                             continue;
                         }
 
