@@ -663,7 +663,7 @@ for (var i=0; i<result.length; i++){
     print("Created: ", uri, ". For document:", result[i]);
   }
   if (isAll) {
-    set_in_document['v-s:scriptHandlered'] = veda.Util.newBool('true');
+    set_in_document['v-s:scriptHandlered'] = veda.Util.newBool(true);
   }
   set_in_individual(ticket, set_in_document, _event_id);
 }
