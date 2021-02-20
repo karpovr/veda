@@ -458,7 +458,7 @@ function processTemplate (individual, container, template, mode) {
     const countDisplayed = relContainer.children().length - 1;//last children is .more button
     const rel_uri = relContainer.attr('rel');
 
-    resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 5);
+    resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 10);
     $this.remove();
   });
 
@@ -548,9 +548,6 @@ function processTemplate (individual, container, template, mode) {
         relContainer.empty();
         const templatesPromises = [];
         let i = 0; let value;
-        if (limit != Infinity) {
-          values.reverse();
-        }
         while ( i < limit && (value = values[i]) ) {
           templatesPromises.push( renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false) );
           i++;
