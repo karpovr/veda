@@ -370,6 +370,10 @@ v-s:AppointmentSaveEvent
   rdf:type v-s:Event ;
   v-s:triggerByType v-s:Appointment ;
   v-s:script """
+if (parent_script_id) {
+  //print("Not first class event. Exit.");
+  return;
+}
 document = get_individual(veda.ticket, document["@"]);
 var parentUnit = veda.Util.getPropertyChain(document, "v-s:occupation", "v-s:parentUnit");
 if ( !parentUnit ) { return; }
@@ -377,6 +381,37 @@ if ( !veda.Util.hasValue(document, "v-s:parentUnit", {data: parentUnit, type: "U
   document["v-s:parentUnit"] = veda.Util.newUri(parentUnit);
   put_individual (veda.ticket, document);
   console.log(document["@"], "---(v-s:parentUnit)--->", parentUnit);
+}
+"""
+.
+
+v-s:PositionSaveEvent
+  rdf:type v-s:Event ;
+  v-s:triggerByType v-s:Position ;
+  v-s:script """
+  /* Available variables:
+   * ticket = superuser ticket
+   * document = captured document
+   * user_uri = user whose actions triggered event
+   * prev_state = previous state of the captured document
+   * _event_id = id of the event to prevent cycles in triggers. Must be passed to every function that modifies DB.
+   * parent_script_id = id of the parent script that triggered this event.
+   * parent_document_id = id of the document that triggered this event.
+   * super_classes = super classes of the document.
+   */
+document = get_individual(veda.ticket, document["@"]);
+if (prev_state["v-s:parentUnit"] && document["v-s:parentUnit"]) {
+  if (prev_state["v-s:parentUnit"][0].data !== document["v-s:parentUnit"][0].data) {
+    var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'==='" + document["@"] + "'";
+    var result = query(veda.ticket, queryString).result;
+    for (var i = 0; i < result.length; i++) {
+      var setInAppointment = {
+        "@": result[i],
+        "v-s:parentUnit": document["v-s:parentUnit"]
+      };
+      set_in_individual(veda.ticket, setInAppointment, _event_id);
+    }
+  }  
 }
 """
 .
