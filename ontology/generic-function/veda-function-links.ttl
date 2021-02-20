@@ -286,7 +286,7 @@ v-s:LinksListTemplate
         <th width="10%"></th>
       </tr>
     </thead>
-    <tbody about="@" rel="v-s:hasLink" data-embedded="true">
+    <tbody about="@" rel="v-s:hasLink" data-embedded="true" data-limit="5" data-more="true">
       <script>
         var displayedDoc = container.closest("[resource]").attr("resource");
         if ( this.hasValue("v-s:from", displayedDoc) ) {
