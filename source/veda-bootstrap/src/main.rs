@@ -3,6 +3,7 @@ extern crate log;
 
 use chrono::prelude::*;
 use env_logger::Builder;
+use ini::Ini;
 use log::LevelFilter;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
@@ -14,6 +15,12 @@ use std::process::{Child, Command};
 use std::time::SystemTime;
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
+use v_module::module::*;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::*;
+use v_module::v_onto::individual::*;
+
+pub const MSTORAGE_ID: i64 = 1;
 
 #[derive(Debug)]
 #[repr(u8)]
@@ -23,7 +30,7 @@ pub enum ModuleError {
 }
 
 #[derive(Debug)]
-struct Module {
+struct VedaModule {
     name: String,
     exec_name: String,
     args: Vec<String>,
@@ -35,9 +42,11 @@ struct Module {
 struct App {
     date_changed_modules_info: Option<SystemTime>,
     app_dir: String,
-    modules_info: HashMap<String, Module>,
+    modules_info: HashMap<String, VedaModule>,
     modules_start_order: Vec<String>,
     started_modules: Vec<(String, Child)>,
+    module: Module,
+    systicket: String,
 }
 
 impl App {
@@ -83,6 +92,17 @@ impl App {
     }
 
     fn watch_started_modules(&mut self) {
+        let mut mstorage_watchdog_check_period = None;
+        let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
+        let section = conf.section(None::<String>).expect("fail parse veda.properties");
+        if let Some(p) = section.get("mstorage_watchdog_period") {
+            if let Ok(t) = parse_duration::parse(p) {
+                mstorage_watchdog_check_period = Some(t);
+                info!("start mstorage watchdog, period = {}", p);
+            }
+        }
+
+        let mut prev_check_mstorage = Utc::now().naive_utc().timestamp();
         loop {
             let mut new_config_modules = HashSet::new();
 
@@ -96,10 +116,38 @@ impl App {
                 new_config_modules.insert(el.to_owned());
             }
 
+            let mstorage_ready = if let Some(d) = mstorage_watchdog_check_period {
+                let now = Utc::now().naive_utc().timestamp();
+                if now - prev_check_mstorage > d.as_secs() as i64 {
+                    prev_check_mstorage = now;
+
+                    if !self.mstorage_watchdog_check() {
+                        error!("detect problem in module MSTORAGE, restart it");
+                        false
+                    } else {
+                        true
+                    }
+                } else {
+                    true
+                }
+            } else {
+                true
+            };
+
+
             let mut sys = sysinfo::System::new();
             sys.refresh_processes();
             for (name, process) in self.started_modules.iter_mut() {
-                let (is_ok, memory) = is_ok_process(&mut sys, process.id());
+
+                let (mut is_ok, memory) = is_ok_process(&mut sys, process.id());
+
+                if !mstorage_ready && name == "mstorage" {
+                    if let Ok(_0) = process.kill() {
+                        warn!("attempt stop module {} {}", process.id(), name);
+                        is_ok = false;
+                    }
+                }
+
                 debug!("name={}, memory={}", name, memory);
                 if !is_ok {
                     let exit_code = if let Ok(c) = process.wait() {
@@ -165,6 +213,33 @@ impl App {
         }
     }
 
+    fn mstorage_watchdog_check(&mut self) -> bool{
+        if self.systicket.is_empty() {
+            while !self.module.api.connect() {
+                info!("wait for start main module ...");
+                thread::sleep(std::time::Duration::from_millis(100));
+            }
+
+            let mut systicket = self.module.get_sys_ticket_id();
+            while systicket.is_err() {
+                info!("wait for read systicket ...");
+                thread::sleep(std::time::Duration::from_millis(100));
+                systicket = self.module.get_sys_ticket_id();
+            }
+            self.systicket = systicket.unwrap();
+        }
+
+        let test_indv_id = "cfg:watchdog_test";
+        let mut test_indv = Individual::default();
+        test_indv.set_id(test_indv_id);
+        test_indv.set_uri("rdf:type", "v-s:resource");
+        if self.module.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &mut test_indv).result != ResultCode::Ok {
+            error!("fail store test individual: {}", test_indv.get_id());
+            return false;
+        }
+        true
+    }
+
     fn get_modules_info(&mut self) -> io::Result<()> {
         let f = File::open("veda.modules")?;
         let file = &mut BufReader::new(&f);
@@ -205,7 +280,7 @@ impl App {
                     }
                 }
 
-                let mut module = Module {
+                let mut module = VedaModule {
                     name: line.to_string(),
                     args: Vec::new(),
                     memory_limit: None,
@@ -258,7 +333,7 @@ impl App {
             }
         }
 
-        let mut vmodules: Vec<&Module> = Vec::new();
+        let mut vmodules: Vec<&VedaModule> = Vec::new();
         for el in self.modules_info.values() {
             vmodules.push(el);
         }
@@ -298,6 +373,8 @@ fn main() {
         modules_info: HashMap::new(),
         modules_start_order: vec![],
         started_modules: vec![],
+        module: Default::default(),
+        systicket: "".to_string(),
     };
 
     if let Err(e) = app.get_modules_info() {
@@ -353,7 +430,7 @@ fn is_ok_process(sys: &mut sysinfo::System, pid: u32) -> (bool, u64) {
     }
 }
 
-fn start_module(module: &Module) -> io::Result<Child> {
+fn start_module(module: &VedaModule) -> io::Result<Child> {
     let datetime: DateTime<Local> = Local::now();
 
     fs::create_dir_all("./logs").unwrap_or_default();

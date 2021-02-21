@@ -10,6 +10,6 @@ rust-ini = "0.16"
 nng = "0.5.1"
 serde_json = "1.0"
 
-v_module = { package = "v-common-module", version = "0.1.20" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.19" }
+v_module = { package = "v-common-module", version = "0.1.21" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.20" }
 
