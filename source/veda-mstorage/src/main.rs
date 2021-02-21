@@ -9,21 +9,23 @@ use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::str;
 use url::*;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
 use v_authorization::common::{Access, Trace};
 use v_az_lmdb::_authorize;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::ticket::Ticket;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::{Individual, RawObj};
 use v_module::v_onto::individual2msgpack::to_msgpack;
 use v_module::v_onto::json2individual::parse_json_to_individual;
 use v_module::v_onto::parser::parse_raw;
+use v_module::v_storage::storage::*;
 use v_queue::queue::Queue;
 use v_queue::record::{Mode, MsgType};
-use v_module::v_storage::storage::*;
+
+pub const MSTORAGE_ID: i64 = 1;
 
 fn main() -> std::io::Result<()> {
     init_log("MSTORAGE");
@@ -518,60 +520,66 @@ fn to_storage_and_queue(
     }
 
     // add to queue
-
-    let mut queue_element = Individual::default();
-    queue_element.set_id(&format!("{}", op_id));
-    queue_element.set_integer("cmd", cmd.to_i64());
-    queue_element.set_uri("uri", new_indv.get_id());
-
-    if !ticket.user_uri.is_empty() {
-        queue_element.set_uri("user_uri", &ticket.user_uri);
-    }
-
-    if !new_state.is_empty() {
-        queue_element.set_binary("new_state", new_state);
-    }
-
-    if !prev_state.is_empty() {
-        queue_element.set_binary("prev_state", prev_state);
-    }
-
-    if let Some(v) = event_id {
-        queue_element.set_string("event_id", v, Lang::NONE);
-    }
-
-    queue_element.set_integer("tnx_id", *op_id);
-
-    let src = if let Some(v) = src {
-        if v.is_empty() {
-            "?"
-        } else {
-            v
-        }
+    let store_to_queue = if let Some(i) = assigned_subsystems {
+        i != 1
     } else {
-        "?"
+        true
     };
-    queue_element.set_string("src", src, Lang::NONE);
-    queue_element.add_datetime("date", Utc::now().naive_utc().timestamp());
-    queue_element.add_integer("op_id", *op_id + 1);
-    queue_element.add_integer("u_count", update_counter);
 
-    if let Some(i) = assigned_subsystems {
-        queue_element.add_integer("assigned_subsystems", i);
+    if store_to_queue {
+        let mut queue_element = Individual::default();
+        queue_element.set_id(&format!("{}", op_id));
+        queue_element.set_integer("cmd", cmd.to_i64());
+        queue_element.set_uri("uri", new_indv.get_id());
+
+        if !ticket.user_uri.is_empty() {
+            queue_element.set_uri("user_uri", &ticket.user_uri);
+        }
+
+        if !new_state.is_empty() {
+            queue_element.set_binary("new_state", new_state);
+        }
+
+        if !prev_state.is_empty() {
+            queue_element.set_binary("prev_state", prev_state);
+        }
+
+        if let Some(v) = event_id {
+            queue_element.set_string("event_id", v, Lang::NONE);
+        }
+
+        queue_element.set_integer("tnx_id", *op_id);
+
+        let src = if let Some(v) = src {
+            if v.is_empty() {
+                "?"
+            } else {
+                v
+            }
+        } else {
+            "?"
+        };
+        queue_element.set_string("src", src, Lang::NONE);
+        queue_element.add_datetime("date", Utc::now().naive_utc().timestamp());
+        queue_element.add_integer("op_id", *op_id + 1);
+        queue_element.add_integer("u_count", update_counter);
+
+        if let Some(i) = assigned_subsystems {
+            queue_element.add_integer("assigned_subsystems", i);
+        }
+
+        debug!("add to queue: uri={}", new_indv.get_id());
+
+        let mut raw1: Vec<u8> = Vec::new();
+        if let Err(e) = to_msgpack(&queue_element, &mut raw1) {
+            error!("fail serialize, err={:?}", e);
+            return false;
+        }
+        if let Err(e) = queue_out.push(&raw1, MsgType::String) {
+            error!("fail push into queue, err={:?}", e);
+            return false;
+        }
     }
-
-    debug!("add to queue: uri={}", new_indv.get_id());
-
-    let mut raw1: Vec<u8> = Vec::new();
-    if let Err(e) = to_msgpack(&queue_element, &mut raw1) {
-        error!("fail serialize, err={:?}", e);
-        return false;
-    }
-    if let Err(e) = queue_out.push(&raw1, MsgType::String) {
-        error!("fail push into queue, err={:?}", e);
-        return false;
-    }
-
     *op_id += 1;
     if let Err(e) = mstorage_info.put_info(*op_id, *op_id) {
         error!("fail put info, error={:?}", e);
