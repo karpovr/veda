@@ -17,6 +17,7 @@
   v-s:loadPriority 7 ;
 .
 
+
 v-wf:appInboxUrl
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:AppInfo ;
@@ -1889,6 +1890,25 @@ v-wf:PsStartForm_setStatus
   rdfs:label "Permission to edit specification for v-wf:StartForm_setStatus"@en ;
 .
 
+v-wf:StartForm_setAutoCompleted
+  rdf:type rdf:Property ;
+  rdfs:label "Разрешить автозавершение в контрольный срок"@ru ;
+  rdfs:label "Permission to AutoCompleted"@en ;
+  rdfs:domain v-wf:StartForm ;
+  rdfs:range xsd:boolean ;
+  rdfs:isDefinedBy v-wf: ;
+.
+v-wf:PsStartForm_setAutoCompleted
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-wf:StartForm ;
+  v-ui:forProperty v-wf:StartForm_setAutoCompleted ;
+  v-ui:maxCardinality 1 ;
+  v-ui:minCardinality 1 ;
+  v-ui:defaultValue "false"^^xsd:boolean ;
+  rdfs:label "Спецификация для свойства v-wf:StartForm_setAutoCompleted"@ru ;
+  rdfs:label "Permission to edit specification for v-wf:StartForm_setAutoCompleted"@en ;
+.
+
 v-wf:permission_on_start_from
   rdf:type v-s:PermissionStatement ;
   v-s:canCreate "true"^^xsd:boolean ;
@@ -2197,6 +2217,16 @@ v-wf:isSetStatus
   rdfs:isDefinedBy v-wf: ;
   rdfs:label "Задача, меняющая статус"@ru ;
   rdfs:label "Task changed status"@en ;
+  rdfs:domain v-wf:WorkItem ;
+  rdfs:domain v-wf:Process ;
+  rdfs:domain v-wf:DecisionForm ;
+  rdfs:range xsd:boolean ;
+.
+v-wf:isAutoCompleted
+  rdf:type rdf:Property ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Автозавершающаяся задача в контрольный срок"@ru ;
+  rdfs:label "isSetAutoCompleted"@en ;
   rdfs:domain v-wf:WorkItem ;
   rdfs:domain v-wf:Process ;
   rdfs:domain v-wf:DecisionForm ;
