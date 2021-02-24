@@ -12,5 +12,5 @@ xapian-rusty = "=0.0.45"
 
 v_queue = "=0.1"
 
-v_module = { package = "v-common-module", version = "=0.1.21" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.21" }
+v_module = { package = "v-common-module", version = "=0.1.22" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.22" }

@@ -19,5 +19,5 @@ md-5 = "0.8.0"
 hex = "0.4.0"
 crossbeam-channel = "0.3.9"
 
-v_module = { package = "v-common-module", version = "0.1.21" }
+v_module = { package = "v-common-module", version = "=0.1.22" }
 
