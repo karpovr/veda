@@ -1080,7 +1080,7 @@ $.fn.veda_actor = function( options ) {
       .text( actions[2].toString() );
     header.find('.close-menu')
       .click(function () {
-        individual.set(rel_uri, selected);
+        setValue(selected);
         fulltextMenu.hide();
         $(document).off('click', clickOutsideMenuHandler);
         $(document).off('keydown', arrowHandler);
