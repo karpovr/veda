@@ -7,6 +7,7 @@
 @prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
 
 <http://semantic-machines.com/veda/veda-schema-Delegation>
   rdf:type owl:Ontology ;
@@ -366,14 +367,14 @@ v-s:RequestDelegationTemplate
             input.prop( "id", position.id );
 
             if (delegatedPositions.indexOf(position.id) >= 0) {
-              label.text( position.toString() + " (делегировано)" );  
+              label.text( position.toString() + " (делегировано)" );
             } else {
               label.text( position.toString() );
             };
             if (mode === "view") {
               input.prop("disabled", "disabled");
             }
-            
+
             tmpl.appendTo( $("#positions", template) );
           });
         });
