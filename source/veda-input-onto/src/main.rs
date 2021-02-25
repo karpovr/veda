@@ -1,13 +1,12 @@
 #[macro_use]
 extern crate log;
 
-//use crossbeam_channel::unbounded;
-use std::sync::mpsc::channel;
 use md5::{Digest, Md5};
-use notify::{RecommendedWatcher, RecursiveMode, Result as NotifyResult, Watcher, DebouncedEvent};
+use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Result as NotifyResult, Watcher};
 use rio_api::model::Literal::{LanguageTaggedString, Simple, Typed};
 use rio_api::model::NamedOrBlankNode;
 use rio_api::model::Term::{BlankNode, Literal, NamedNode};
+use rio_api::parser::TriplesParser;
 use rio_turtle::{TurtleError, TurtleParser};
 use ron::de::from_reader;
 use ron::ser::{to_string_pretty, PrettyConfig};
@@ -18,6 +17,7 @@ use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::channel;
 use std::{fmt, fs, io};
 use std::{thread, time as std_time};
 use v_module::common::*;
@@ -28,7 +28,6 @@ use v_module::v_api::*;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::*;
-use rio_api::parser::TriplesParser;
 
 #[derive(Serialize, Deserialize)]
 struct FileHash {
@@ -163,21 +162,19 @@ fn main() -> NotifyResult<()> {
 
         loop {
             match rx.recv_timeout(std_time::Duration::from_secs(30)) {
-                Ok(event) => {
-                    match event {
-                        DebouncedEvent::Create(ref path) | DebouncedEvent::Write(ref path) => {
-                            info!("changed: {:?}", event);
-                            if processing_files(vec![path.clone()], &mut new_hashes_set.data, &mut module, &systicket, &mut module_info) > 0 {
-                                store_hash_list(&new_hashes_set, &path_files_hashes);
-                            }
-                            prepared_count += 1;
+                Ok(event) => match event {
+                    DebouncedEvent::Create(ref path) | DebouncedEvent::Write(ref path) => {
+                        info!("changed: {:?}", event);
+                        if processing_files(vec![path.clone()], &mut new_hashes_set.data, &mut module, &systicket, &mut module_info) > 0 {
+                            store_hash_list(&new_hashes_set, &path_files_hashes);
                         }
-                        _ => {
-                            prepared_count += 1;
-                            info!("ignore: {:?}", event);
-                        }
+                        prepared_count += 1;
                     }
-                }
+                    _ => {
+                        prepared_count += 1;
+                        info!("ignore: {:?}", event);
+                    }
+                },
                 Err(_) => {
                     if prepared_count > 0 {
                         info!("files watcher timeout");
@@ -270,6 +267,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
         let new_hash = match get_hash_of_file(path) {
             Ok(new_h) => {
+                info!("HASH:{}", new_h);
                 hash_list.remove(&file_path);
                 hash_list.insert(file_path, new_h.clone());
                 count_prepared_ttl_files += 1;
@@ -291,10 +289,13 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
         if file_need_for_load {
             let mut individuals = file2indv.entry(path.to_owned()).or_default();
-            let (onto_id, _onto_url, load_priority) = parse_file(path, &mut individuals, &mut prefixes);
-            //        info!("ontology: {} {} {}", &file, onto_id, load_priority);
-            full_file_info_indv(&onto_id, individuals, &mut file_info_indv, new_hash, path, name);
-            priority_list.push((load_priority, onto_id, path.to_owned()));
+            if let Some((onto_id, _onto_url, load_priority)) = parse_file(path, &mut individuals, &mut prefixes) {
+                //        info!("ontology: {} {} {}", &file, onto_id, load_priority);
+                full_file_info_indv(&onto_id, individuals, &mut file_info_indv, new_hash, path, name);
+                priority_list.push((load_priority, onto_id, path.to_owned()));
+            } else {
+                error!("failed to parse");
+            }
         }
     }
 
@@ -390,142 +391,143 @@ fn full_file_info_indv(onto_id: &str, individuals: &mut HashMap<String, Individu
     }
 }
 
-fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, prefixes: &mut Prefixes) -> (String, String, i64) {
-    let mut parser = TurtleParser::new(BufReader::new(File::open(file_path).unwrap()), None);
+fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, prefixes: &mut Prefixes) -> Option<(String, String, i64)> {
+    if let Ok(file) = File::open(file_path) {
+        let mut parser = TurtleParser::new(BufReader::new(file), None);
 
-    let mut onto_id = String::default();
-    let mut onto_url = String::default();
-    let mut load_priority = 999;
+        let mut onto_id = String::default();
+        let mut onto_url = String::default();
+        let mut load_priority = 999;
 
-    loop {
-        for ns in &parser.namespaces {
-            if !prefixes.namespaces2id.contains_key(ns.1) {
-                if let Some(s) = ns.1.get(0..ns.1.len() - 1) {
-                    prefixes.namespaces2id.insert(s.to_owned(), ns.0.clone());
-                    prefixes.id2orignamespaces.insert(ns.0.to_owned() + ":", ns.1.to_owned());
-                    prefixes.id2namespaces.insert(ns.0.to_owned() + ":", s.to_string());
+        loop {
+            for ns in &parser.namespaces {
+                if !prefixes.namespaces2id.contains_key(ns.1) {
+                    if let Some(s) = ns.1.get(0..ns.1.len() - 1) {
+                        prefixes.namespaces2id.insert(s.to_owned(), ns.0.clone());
+                        prefixes.id2orignamespaces.insert(ns.0.to_owned() + ":", ns.1.to_owned());
+                        prefixes.id2namespaces.insert(ns.0.to_owned() + ":", s.to_string());
+                    }
                 }
             }
-        }
 
-        let mut id = String::default();
-        let mut idx = 0;
-        let res = parser.parse_step(&mut |t| {
-            //info!("namespaces: {:?}", namespaces);
+            let mut id = String::default();
+            let mut idx = 0;
+            let res = parser.parse_step(&mut |t| {
+                let subject = match t.subject {
+                    NamedOrBlankNode::BlankNode(n) => n.id,
+                    NamedOrBlankNode::NamedNode(n) => n.iri,
+                };
 
-            let subject = match t.subject {
-                NamedOrBlankNode::BlankNode(n) => n.id,
-                NamedOrBlankNode::NamedNode(n) => n.iri,
-            };
+                let s = to_prefix_form(&subject, &prefixes.namespaces2id);
+                if s.is_empty() {
+                    error!("invalid subject={:?}", subject);
+                }
 
-            let s = to_prefix_form(&subject, &prefixes.namespaces2id);
-            if s.is_empty() {
-                error!("invalid subject={:?}", subject);
-            }
+                let indv = individuals.entry(s.to_owned()).or_default();
 
-            let indv = individuals.entry(s.to_owned()).or_default();
+                if indv.get_id().is_empty() {
+                    id.insert_str(0, &s);
+                    indv.set_id(&s);
+                }
 
-            if indv.get_id().is_empty() {
-                id.insert_str(0, &s);
-                indv.set_id(&s);
-            }
+                let predicate = to_prefix_form(t.predicate.iri, &prefixes.namespaces2id);
 
-            let predicate = to_prefix_form(t.predicate.iri, &prefixes.namespaces2id);
+                //info!("[{:?}]", predicate);
+                match t.object {
+                    BlankNode(n) => error!("BlankNode {}", n.id),
+                    NamedNode(n) => indv.add_uri(&predicate, &to_prefix_form(n.iri, &prefixes.namespaces2id)),
 
-            //info!("[{:?}]", predicate);
-            match t.object {
-                BlankNode(n) => error!("BlankNode {}", n.id),
-                NamedNode(n) => indv.add_uri(&predicate, &to_prefix_form(n.iri, &prefixes.namespaces2id)),
-
-                Literal(l) => match l {
-                    Simple {
-                        value,
-                    } => indv.add_string(&predicate, value, Lang::NONE),
-                    LanguageTaggedString {
-                        value,
-                        language,
-                    } => indv.add_string(&predicate, value, Lang::new_from_str(language)),
-                    Typed {
-                        value,
-                        datatype,
-                    } => match datatype.iri.replace("#", "/").as_str() {
-                        "http://www.w3.org/2001/XMLSchema/string" => {
-                            indv.add_string(&predicate, value, Lang::NONE);
-                        }
-                        "http://www.w3.org/2001/XMLSchema/nonNegativeInteger" => {
-                            if let Ok(v) = value.parse::<i64>() {
-                                indv.add_integer(&predicate, v);
-                            } else {
-                                error!("fail parse [{}] to integer", value);
+                    Literal(l) => match l {
+                        Simple {
+                            value,
+                        } => indv.add_string(&predicate, value, Lang::NONE),
+                        LanguageTaggedString {
+                            value,
+                            language,
+                        } => indv.add_string(&predicate, value, Lang::new_from_str(language)),
+                        Typed {
+                            value,
+                            datatype,
+                        } => match datatype.iri.replace("#", "/").as_str() {
+                            "http://www.w3.org/2001/XMLSchema/string" => {
+                                indv.add_string(&predicate, value, Lang::NONE);
                             }
-                        }
-                        "http://www.w3.org/2001/XMLSchema/integer" => {
-                            if let Ok(v) = value.trim().parse::<i64>() {
-                                indv.add_integer(&predicate, v);
-                            } else {
-                                error!("fail parse [{}] to integer", value);
+                            "http://www.w3.org/2001/XMLSchema/nonNegativeInteger" => {
+                                if let Ok(v) = value.parse::<i64>() {
+                                    indv.add_integer(&predicate, v);
+                                } else {
+                                    error!("fail parse [{}] to integer", value);
+                                }
                             }
-                        }
-                        "http://www.w3.org/2001/XMLSchema/boolean" => {
-                            if let Ok(v) = value.parse::<bool>() {
-                                indv.add_bool(&predicate, v);
-                            } else {
-                                error!("fail parse [{}] to bool", value);
+                            "http://www.w3.org/2001/XMLSchema/integer" => {
+                                if let Ok(v) = value.trim().parse::<i64>() {
+                                    indv.add_integer(&predicate, v);
+                                } else {
+                                    error!("fail parse [{}] to integer", value);
+                                }
                             }
-                        }
-                        "http://www.w3.org/2001/XMLSchema/decimal" => {
-                            indv.add_decimal_from_str(&predicate, value);
-                        }
-                        "http://www.w3.org/2001/XMLSchema/dateTime" => {
-                            indv.add_datetime_from_str(&predicate, value);
-                        }
-                        _ => {
-                            error!("unknown type {}", datatype.iri);
-                        }
+                            "http://www.w3.org/2001/XMLSchema/boolean" => {
+                                if let Ok(v) = value.parse::<bool>() {
+                                    indv.add_bool(&predicate, v);
+                                } else {
+                                    error!("fail parse [{}] to bool", value);
+                                }
+                            }
+                            "http://www.w3.org/2001/XMLSchema/decimal" => {
+                                indv.add_decimal_from_str(&predicate, value);
+                            }
+                            "http://www.w3.org/2001/XMLSchema/dateTime" => {
+                                indv.add_datetime_from_str(&predicate, value);
+                            }
+                            _ => {
+                                error!("unknown type {}", datatype.iri);
+                            }
+                        },
                     },
-                },
-            }
-
-            idx += 1;
-            Ok(()) as Result<(), TurtleError>
-        });
-
-        if let Err(e) = res {
-            error!("failed to parse {}, err={}", file_path, e);
-            break;
-        }
-
-        if !id.is_empty() {
-            let indv = individuals.entry(id).or_default();
-
-            if indv.get_id().is_empty() {
-                error!("individual not content uri");
-            }
-
-            if indv.any_exists("rdf:type", &["owl:Ontology"]) {
-                if let Some(v) = indv.get_first_integer("v-s:loadPriority") {
-                    load_priority = v;
                 }
 
-                if let Some(s) = prefixes.id2orignamespaces.get(indv.get_id()) {
-                    indv.set_string("v-s:fullUrl", &s, Lang::NONE);
+                idx += 1;
+                Ok(()) as Result<(), TurtleError>
+            });
+
+            if let Err(e) = res {
+                error!("fail parse {}, err={}", file_path, e);
+                break;
+            }
+
+            if !id.is_empty() {
+                let indv = individuals.entry(id).or_default();
+
+                if indv.get_id().is_empty() {
+                    error!("individual not content uri");
                 }
 
-                if let Some(s) = prefixes.id2namespaces.get(indv.get_id()) {
-                    onto_url.insert_str(0, s.as_str());
-                }
+                if indv.any_exists("rdf:type", &["owl:Ontology"]) {
+                    if let Some(v) = indv.get_first_integer("v-s:loadPriority") {
+                        load_priority = v;
+                    }
 
-                onto_id.insert_str(0, indv.get_id());
+                    if let Some(s) = prefixes.id2orignamespaces.get(indv.get_id()) {
+                        indv.set_string("v-s:fullUrl", &s, Lang::NONE);
+                    }
+
+                    if let Some(s) = prefixes.id2namespaces.get(indv.get_id()) {
+                        onto_url.insert_str(0, s.as_str());
+                    }
+
+                    onto_id.insert_str(0, indv.get_id());
+                }
+            }
+
+            if parser.is_end() {
+                break;
             }
         }
 
-        if parser.is_end() {
-            break;
-        }
+        debug!("{}, load {}", file_path, individuals.len());
+        return Some((onto_id, onto_url, load_priority));
     }
-
-    //info!("{}, load {}", file_path, individuals.len());
-    (onto_id, onto_url, load_priority)
+    None
 }
 
 fn to_prefix_form(iri: &str, namespaces2id: &HashMap<String, String>) -> String {
