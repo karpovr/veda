@@ -1,9 +1,10 @@
 #[macro_use]
 extern crate log;
 
-use crossbeam_channel::unbounded;
+//use crossbeam_channel::unbounded;
+use std::sync::mpsc::channel;
 use md5::{Digest, Md5};
-use notify::{EventKind, RecommendedWatcher, RecursiveMode, Result as NotifyResult, Watcher};
+use notify::{RecommendedWatcher, RecursiveMode, Result as NotifyResult, Watcher, DebouncedEvent};
 use rio_api::model::Literal::{LanguageTaggedString, Simple, Typed};
 use rio_api::model::NamedOrBlankNode;
 use rio_api::model::Term::{BlankNode, Literal, NamedNode};
@@ -69,7 +70,7 @@ fn main() -> NotifyResult<()> {
     let mut module = Module::default();
 
     while !module.api.connect() {
-        info!("wait for start main module ...");
+        info!("wait for start of main module ...");
         thread::sleep(std::time::Duration::from_millis(100));
     }
 
@@ -86,7 +87,7 @@ fn main() -> NotifyResult<()> {
     if let Ok(t) = module.get_sys_ticket_id() {
         systicket = t;
     } else {
-        error!("fail get systicket");
+        error!("failed to get systicket");
         return Ok(());
     }
 
@@ -110,7 +111,7 @@ fn main() -> NotifyResult<()> {
         match from_reader(f) {
             Ok(x) => prev_hashes_set = x,
             Err(e) => {
-                error!("Failed to load files_hashes: {}", e);
+                error!("failed to load files_hashes: {}", e);
                 prev_hashes_set = FileHash {
                     data: HashMap::new(),
                 }
@@ -124,7 +125,7 @@ fn main() -> NotifyResult<()> {
 
     let mut list_candidate_files: Vec<PathBuf> = Vec::new();
     if onto.relations.is_empty() {
-        info!("ontology not found");
+        info!("ontology is not found");
         for el in list_files.iter() {
             list_candidate_files.push(el.to_owned());
         }
@@ -153,38 +154,33 @@ fn main() -> NotifyResult<()> {
     }
 
     loop {
-        info!("start watcher changes of files");
-        let (tx, rx) = unbounded();
-        let mut watcher: RecommendedWatcher = Watcher::new(tx, std_time::Duration::from_secs(2))?;
+        info!("start files watcher");
+        let (tx, rx) = channel();
+        let mut watcher: RecommendedWatcher = Watcher::new(tx, std_time::Duration::from_secs(5))?;
         watcher.watch(onto_path.clone(), RecursiveMode::Recursive)?;
 
         let mut prepared_count = 0;
 
         loop {
             match rx.recv_timeout(std_time::Duration::from_secs(30)) {
-                Ok(w_event) => {
-                    if let Ok(event) = w_event {
-                        match event.kind {
-                            EventKind::Create(_) | EventKind::Modify(_) => {
-                                if event.flag().is_some() {
-                                    info!("changed: {:?}", event);
-                                    if processing_files(event.paths, &mut new_hashes_set.data, &mut module, &systicket, &mut module_info) > 0 {
-                                        store_hash_list(&new_hashes_set, &path_files_hashes);
-                                    }
-                                    prepared_count += 1;
-                                }
+                Ok(event) => {
+                    match event {
+                        DebouncedEvent::Create(ref path) | DebouncedEvent::Write(ref path) => {
+                            info!("changed: {:?}", event);
+                            if processing_files(vec![path.clone()], &mut new_hashes_set.data, &mut module, &systicket, &mut module_info) > 0 {
+                                store_hash_list(&new_hashes_set, &path_files_hashes);
                             }
-                            _ => {
-                                prepared_count += 1;
-                                info!("ignore: {:?}", event);
-                                info!("paths {:?}", event.paths);
-                            }
+                            prepared_count += 1;
+                        }
+                        _ => {
+                            prepared_count += 1;
+                            info!("ignore: {:?}", event);
                         }
                     }
                 }
-                Err(_err) => {
+                Err(_) => {
                     if prepared_count > 0 {
-                        info!("watcher not respond");
+                        info!("files watcher timeout");
                         std::mem::drop(watcher);
                         break;
                     }
@@ -198,10 +194,10 @@ fn store_hash_list(new_hashes_set: &FileHash, path_files_hashes: &str) {
     if !new_hashes_set.data.is_empty() {
         if let Ok(mut file) = File::create(path_files_hashes) {
             if let Err(e) = file.write_all(to_string_pretty(&new_hashes_set, PrettyConfig::default()).unwrap_or_default().as_bytes()) {
-                error!("fail write hashes of ttl files, err={}", e);
+                error!("failed to write hashes of ttl files, err={}", e);
             }
         } else {
-            error!("fail create hashes of ttl files");
+            error!("failed to create hashes of ttl files");
         }
     }
 }
@@ -240,7 +236,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
     }
 
     if let Err(e) = module_info.put_info(cur_op_id, cur_op_id) {
-        info!("fail write module info, err={}", e);
+        info!("failed to write module info, err={}", e);
     }
 
     let mut count_prepared_ttl_files = 0;
@@ -287,7 +283,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                 Some(new_h)
             }
             Err(e) => {
-                error!("fail calculate HASH of file {}, err={}", &path, e);
+                error!("failed to calculate HASH of file {}, err={}", &path, e);
                 None
             }
         };
@@ -312,7 +308,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
         if let Some(indvs) = file2indv.get_mut(&path) {
             for indv_file in indvs.values_mut() {
                 if !indv_file.is_exists("rdf:type") {
-                    error!("{}: [{}] not contain [rdf:type], ignore it !!!", path, indv_file.get_id());
+                    error!("{}: [{}] does not contain [rdf:type], ignore it !!!", path, indv_file.get_id());
                     continue;
                 }
 
@@ -333,12 +329,12 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                     // thread::sleep(std::time::Duration::from_millis(100));
 
                     if res.result != ResultCode::Ok {
-                        error!("fail update, {}, file={}, uri={}, result_code={:?}", load_priority, path, indv_file.get_id(), res.result);
+                        error!("failed to update, {}, file={}, uri={}, result_code={:?}", load_priority, path, indv_file.get_id(), res.result);
                     } else {
-                        info!("success update, {}, file={}, uri={}", load_priority, path, indv_file.get_id());
+                        info!("successful update, {}, file={}, uri={}", load_priority, path, indv_file.get_id());
                         cur_op_id = res.op_id;
                         if let Err(e) = module_info.put_info(cur_op_id, committed_op_id) {
-                            info!("fail write module info, err={}", e);
+                            info!("failed to write module info, err={}", e);
                         }
                     }
                 }
@@ -361,14 +357,14 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
             prefix_indv.set_string("v-s:fullUrl", &url, Lang::NONE);
             let res = module.api.update(systicket, IndvOp::Put, &prefix_indv);
             if res.result != ResultCode::Ok {
-                error!("fail store {}", prefix_indv.get_obj().as_json_str());
+                error!("failed to store {}", prefix_indv.get_obj().as_json_str());
             }
         }
     }
 
     committed_op_id = cur_op_id;
     if let Err(e) = module_info.put_info(committed_op_id, committed_op_id) {
-        info!("fail write module info, err={}", e);
+        info!("failed to write module info, err={}", e);
     }
 
     info!("end prepare {} files", file2indv.len());
@@ -495,7 +491,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
         });
 
         if let Err(e) = res {
-            error!("fail parse {}, err={}", file_path, e);
+            error!("failed to parse {}, err={}", file_path, e);
             break;
         }
 
