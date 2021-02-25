@@ -7,7 +7,6 @@ use notify::{EventKind, RecommendedWatcher, RecursiveMode, Result as NotifyResul
 use rio_api::model::Literal::{LanguageTaggedString, Simple, Typed};
 use rio_api::model::NamedOrBlankNode;
 use rio_api::model::Term::{BlankNode, Literal, NamedNode};
-use rio_api::parser::TriplesParser;
 use rio_turtle::{TurtleError, TurtleParser};
 use ron::de::from_reader;
 use ron::ser::{to_string_pretty, PrettyConfig};
@@ -28,6 +27,7 @@ use v_module::v_api::*;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::*;
+use rio_api::parser::TriplesParser;
 
 #[derive(Serialize, Deserialize)]
 struct FileHash {
@@ -395,7 +395,7 @@ fn full_file_info_indv(onto_id: &str, individuals: &mut HashMap<String, Individu
 }
 
 fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, prefixes: &mut Prefixes) -> (String, String, i64) {
-    let mut parser = TurtleParser::new(BufReader::new(File::open(file_path).unwrap()), "").unwrap();
+    let mut parser = TurtleParser::new(BufReader::new(File::open(file_path).unwrap()), None);
 
     let mut onto_id = String::default();
     let mut onto_url = String::default();
