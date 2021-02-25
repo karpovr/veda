@@ -272,6 +272,14 @@ v-ui:treeRoot
   rdfs:label "Root"@en ;
   rdfs:range rdfs:Resource ;
 .
+v-ui:treeExpandLevel
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-ui:ObjectPropertySpecification ;
+  rdfs:domain v-ui:Tree ;
+  rdfs:label "Уровень раскрытия"@ru ;
+  rdfs:label "Expand level"@en ;
+  rdfs:range xsd:integer ;
+.
 v-ui:treeInProperty
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-ui:ObjectPropertySpecification ;
@@ -2718,6 +2726,7 @@ v-ui:TreeTemplate
   v-ui:template """
 <script>
   var root = this.hasValue("v-ui:treeRoot") ? this["v-ui:treeRoot"] : undefined,
+      expandLevel = this.hasValue("v-ui:treeExpandLevel") ? this["v-ui:treeExpandLevel"][0] : undefined,
       inProperty = this.hasValue("v-ui:treeInProperty") ? this["v-ui:treeInProperty"] : undefined,
       outProperty = this.hasValue("v-ui:treeOutProperty") ? this["v-ui:treeOutProperty"] : undefined,
       allowedClass = this.hasValue("v-ui:treeAllowedClass") ? this["v-ui:treeAllowedClass"] : undefined,
@@ -2803,9 +2812,13 @@ v-ui:TreeTemplate
   headTmpl = "<tr>" + headTmpl + "</tr>";
   thead.html(headTmpl);
 
-  template.on("click", "a.expand", function (e) {
-    e.stopPropagation();
-    e.preventDefault();
+  template.on("click", "a.expand", expandRow);
+
+  function expandRow(e, expandLevel) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     var that = $(this),
       thatRow = that.closest("tr"),
       thatLvl = parseInt( thatRow.attr("data-level") ),
@@ -2816,7 +2829,7 @@ v-ui:TreeTemplate
 
     if ( that.hasClass("expanded") ) {
       getChildren([], value, false).then(function (children) {
-        return renderRows(children, thatRow).then(function () {
+        return renderRows(children, thatRow, expandLevel).then(function () {
           var nextLvl = parseInt(thatRow.next().attr("data-level"));
           if ( isNaN(nextLvl) || nextLvl <= thatLvl ) {
             that.prev().css("width", 16 * (thatLvl + 1) - 2);
@@ -2837,10 +2850,9 @@ v-ui:TreeTemplate
       });
       rowsToRemove.remove();
     }
-    return false;
-  });
+  }
 
-  function renderRows(values_uris, parentRow) {
+  function renderRows(values_uris, parentRow, expandLevel) {
     var cont = $("<div>");
     var parentLvl = parentRow ? parseInt( parentRow.attr("data-level") ) : -1,
         tmpl = $("<tr class='value-row'>").attr("data-level", parentLvl + 1).append(rowTmpl);
@@ -2853,28 +2865,31 @@ v-ui:TreeTemplate
         }
         return value.present(cont, tmpl[0].outerHTML).then(function (tmpl) {
           // Pre-check children
-          getChildren([], value, false).then(function (children) {
+          return getChildren([], value, false).then(function (children) {
             if (!children.length) {
               tmpl.find(".expand").remove();
               tmpl.find(".select-deep").remove();
+            } else if (expandLevel) {
+              expandRow.call(tmpl.find(".expand"), undefined, expandLevel - 1);
             }
+          }).then(function () {
+            if (target && rel_uri) {
+              var selectRow = $(".select-row", tmpl);
+              var selectDeep = $(".select-deep", tmpl);
+              selectRow.prop("checked", target.hasValue(rel_uri, value));
+
+              if (value.deepSelected) {
+                selectDeep.removeClass("text-muted").addClass("text-danger");
+              } else {
+                selectDeep.addClass("text-muted").removeClass("text-danger");
+              }
+
+              if ( !selectableFilterFn.call(value) ) {
+                selectRow.remove();
+              }
+            }
+            return tmpl;
           });
-          if (target && rel_uri) {
-            var selectRow = $(".select-row", tmpl);
-            var selectDeep = $(".select-deep", tmpl);
-            selectRow.prop("checked", target.hasValue(rel_uri, value));
-
-            if (value.deepSelected) {
-              selectDeep.removeClass("text-muted").addClass("text-danger");
-            } else {
-              selectDeep.addClass("text-muted").removeClass("text-danger");
-            }
-
-            if ( !selectableFilterFn.call(value) ) {
-              selectRow.remove();
-            }
-          }
-          return tmpl;
         });
       });
     })).then(function (rendered) {
@@ -2884,6 +2899,7 @@ v-ui:TreeTemplate
         tbody.append( rendered );
       }
       cont.remove();
+      return rendered;
     });
   }
   var previousSelected;
@@ -2981,11 +2997,7 @@ v-ui:TreeTemplate
 
   // Render tree
   root.forEach( function (root, index, roots) {
-    renderRows([root.id]).then(function () {
-      if (roots.length === 1) {
-        tbody.find(".expand").click();
-      }
-    });
+    renderRows([root.id], undefined, typeof expandLevel !== 'undefined' ? expandLevel : roots.length === 1 ? 1 : 0);
   });
 
   function getChildren(acc, root, goDeeper) {
