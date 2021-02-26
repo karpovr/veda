@@ -329,7 +329,7 @@ function getSync(ticket, uri) {
   xhr.open('GET', 'get_individual?uri=' + uri + '&ticket=' + ticket, false);
   xhr.send();
   if (xhr.status === 200) {
-    return JSON.parse(xhr.responseText, Util.decimalDatetimeReviver);
+    return JSON.parse(xhr.responseText);
   } else {
     throw Error(xhr);
   }

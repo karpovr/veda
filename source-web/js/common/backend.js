@@ -291,7 +291,7 @@ function call_server(params) {
     const xhr = new XMLHttpRequest();
     xhr.onload = function () {
       if (this.status == 200) {
-        resolve( JSON.parse(this.response, Util.decimalDatetimeReviver) );
+        resolve( JSON.parse(this.response) );
       } else {
         reject( new BackendError(this) );
       }

@@ -500,7 +500,7 @@ proto.save = function() {
     return acc;
   }, this.properties);
 
-  const original = this.original ? JSON.parse(this.original, Util.decimalDatetimeReviver) : {'@': this.id};
+  const original = this.original ? JSON.parse(this.original) : {'@': this.id};
   const delta = Util.diff(this.properties, original);
 
   const promise = (this.isNew() ?
@@ -912,7 +912,7 @@ proto.init = function () {
  * @return {Promise<IndividualModel>} clone of this individual with different id.
  */
 proto.clone = function () {
-  const cloneProperties = JSON.parse( JSON.stringify(this.properties), Util.decimalDatetimeReviver );
+  const cloneProperties = JSON.parse( JSON.stringify(this.properties) );
   cloneProperties['@'] = Util.genUri();
   const clone = new IndividualModel(cloneProperties);
   clone.isNew(true);
