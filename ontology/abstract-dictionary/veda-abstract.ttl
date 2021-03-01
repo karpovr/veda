@@ -70,7 +70,7 @@ v-s:creator
   rdfs:range v-s:Appointment ;
   rdfs:domain v-s:Thing ;
 .
-v-s:Pscreator
+v-s:PS_creator
   rdf:type v-ui:PropertySpecification ;
   v-ui:forClass v-s:Thing ;
   v-ui:forProperty v-s:creator;
@@ -85,6 +85,14 @@ v-s:lastEditor
   rdfs:label "Last editor"@en ;
   rdfs:range v-s:Appointment ;
   rdfs:domain v-s:Thing ;
+.
+v-s:PS_lastEditor
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:Thing ;
+  v-ui:forProperty v-s:lastEditor;
+  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:official'=='true')"^^xsd:string ;
+  rdfs:label "Спецификация к свойству v-s:creator для класса v-s:Thing"@ru ;
+  rdfs:label "Spec for property v-s:creator for class v-s:Thing"@en ;
 .
 v-s:created
   rdf:type owl:DatatypeProperty ;
@@ -341,6 +349,13 @@ v-s:valid
   rdfs:domain v-s:Thing ;
   rdfs:label "Действующий"@ru ;
   rdfs:label "Valid"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:archived
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Thing ;
+  rdfs:label "В архиве"@ru ;
+  rdfs:label "Archived"@en ;
   rdfs:range xsd:boolean ;
 .
 v-s:isExclusive
