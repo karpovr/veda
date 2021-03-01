@@ -122,7 +122,7 @@ impl App {
                     prev_check_mstorage = now;
 
                     if !self.mstorage_watchdog_check() {
-                        error!("detect problem in module MSTORAGE, restart it");
+                        error!("detect problem in module MSTORAGE, restart all modules");
                         false
                     } else {
                         true
@@ -141,7 +141,7 @@ impl App {
 
                 let (mut is_ok, memory) = is_ok_process(&mut sys, process.id());
 
-                if !mstorage_ready && name == "mstorage" {
+                if !mstorage_ready {
                     if let Ok(_0) = process.kill() {
                         warn!("attempt stop module {} {}", process.id(), name);
                         is_ok = false;
