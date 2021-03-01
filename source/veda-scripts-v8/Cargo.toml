@@ -14,4 +14,4 @@ v_queue = "=0.1"
 
 v_module = { package = "v-common-module", version = "=0.1.22" }
 v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.22" }
-v_v8 = { package = "v-common-v8", version = "=0.1.26" }
+v_v8 = { package = "v-common-v8", version = "0.1.27" }
