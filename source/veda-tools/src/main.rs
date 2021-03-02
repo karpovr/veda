@@ -20,8 +20,21 @@ use v_module::module::init_log;
 #[help = "veda tools"]
 enum Tools {
     #[help = "Store individuals from queue to storage"]
-    QueueStorage(String),
+    QueueStorage {
+        #[named]
+        #[help = "path to queue"]
+        queue_path: String,
 
+        #[named]
+        #[help = "queue part id"]
+        #[optional]
+        part_id: Option<u32>,
+
+        #[named]
+        #[help = "check v-s:updateCounter"]
+        #[flag]
+        check_counter: bool,
+    },
     #[help = "Print individuals from queue to json"]
     QueueJson {
         #[named]
@@ -30,7 +43,8 @@ enum Tools {
 
         #[named]
         #[help = "queue part id"]
-        part_id: u32,
+        #[optional]
+        part_id: Option<u32>,
     },
     #[help = "Build queue from query"]
     QueryQueue(String),
@@ -67,15 +81,19 @@ fn main() {
             info!("module={}", module);
             clean(module, operation, report);
         }
-        Tools::QueueStorage(path_to_queue) => {
-            info!("path_to_queue={}", path_to_queue);
-            queue_to_veda();
+        Tools::QueueStorage {
+            queue_path,
+            part_id,
+            check_counter,
+        } => {
+            info!("queue_path={}, part_id={:?}", queue_path, part_id);
+            queue_to_veda(queue_path, part_id, check_counter);
         }
         Tools::QueueJson {
             queue_path,
             part_id,
         } => {
-            info!("queue_path={}, part_id={}", queue_path, part_id);
+            info!("queue_path={}, part_id={:?}", queue_path, part_id);
             queue_to_json(queue_path, part_id);
         }
     }

@@ -1,16 +1,16 @@
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::*;
 use v_module::module::{Module, PrepareError};
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::individual::*;
 use v_module::v_onto::individual2msgpack::to_msgpack;
 use v_module::v_onto::parser::*;
+use v_module::v_search::common::FTQuery;
 use v_queue::consumer::Consumer;
 use v_queue::queue::Queue;
 use v_queue::record::{Mode, MsgType};
-use v_module::v_search::common::FTQuery;
 
 pub fn export_from_query(query: &str) -> Result<(), PrepareError> {
     let mut module = Module::default();
@@ -62,14 +62,92 @@ fn add_to_queue(queue_out: &mut Queue, cmd: IndvOp, new_state_indv: &mut Individ
     Ok(())
 }
 
-pub fn queue_to_veda() {}
+pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bool) {
+    let mut module = Module::default();
 
-pub fn queue_to_json(queue_path: String, part_id: u32) {
+    let sys_ticket = module.get_sys_ticket_id();
+
+    if sys_ticket.is_err() {
+        error!("fail read systicket, exit");
+        return;
+    }
+
+    let sys_ticket = sys_ticket.unwrap();
+
+    let mut queue_consumer = Consumer::new(&queue_path, "queue2storage", "individuals-flow").expect("!!!!!!!!! FAIL OPEN QUEUE");
+
+    if let Some(id) = part_id {
+        queue_consumer.id = id;
+        queue_consumer.queue.open_part(id).expect(&format!("fail open part id={}", id));
+    }
+    // read queue current part info
+    if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
+        error!("get_info_of_part {}: {}", queue_consumer.id, e.as_str());
+        return;
+    }
+
+    let size_batch = queue_consumer.get_batch_size();
+
+    for _idx in 0..size_batch {
+        // пробуем взять из очереди заголовок сообщения
+        if !queue_consumer.pop_header() {
+            break;
+        }
+
+        let mut raw = RawObj::new(vec![0; (queue_consumer.header.msg_length) as usize]);
+
+        // заголовок взят успешно, занесем содержимое сообщения в структуру Individual
+        if let Err(_e) = queue_consumer.pop_body(&mut raw.data) {
+            break;
+        }
+
+        let mut queue_element = Individual::new_raw(raw);
+        if parse_raw(&mut queue_element).is_ok() {
+            let mut new_state = Individual::default();
+            get_inner_binobj_as_individual(&mut queue_element, "new_state", &mut new_state);
+            new_state.parse_all();
+
+            let mut is_update = false;
+            if !new_state.is_empty() {
+                let mut indv_from_db = Individual::default();
+                if check_counter {
+                    if module.storage.get_individual(new_state.get_id(), &mut indv_from_db) {
+                        let db_indv_counter = new_state.get_first_integer("v-s:updateCounter").unwrap_or(0);
+                        let queue_indv_counter = indv_from_db.get_first_integer("v-s:updateCounter").unwrap_or(0);
+
+                        if queue_indv_counter > db_indv_counter {
+                            is_update = true;
+                        } else {
+                            warn!("{}, counter db:{} >= queue:{}, skip it", new_state.get_id(), db_indv_counter, queue_indv_counter);
+                        }
+                    }
+                } else {
+                    is_update = true;
+                }
+
+                if is_update {
+                    let res = module.api.update(&sys_ticket, IndvOp::Put, &mut new_state);
+                    if res.result != ResultCode::Ok {
+                        error!("failed to store individual, id={}", new_state.get_id());
+                        return;
+                    } else {
+                        info!("update {}", new_state.get_id());
+                    }
+                }
+            }
+        }
+
+        queue_consumer.next(false);
+    }
+}
+
+pub fn queue_to_json(queue_path: String, part_id: Option<u32>) {
     let mut queue_consumer = Consumer::new(&queue_path, "queue2json", "individuals-flow").expect("!!!!!!!!! FAIL OPEN QUEUE");
 
-    queue_consumer.id = part_id;
-    queue_consumer.queue.open_part(part_id).expect(&format!("fail open part id={}", part_id));
-
+    if let Some(id) = part_id {
+        queue_consumer.id = id;
+        queue_consumer.queue.open_part(id).expect(&format!("fail open part id={}", id));
+    }
     // read queue current part info
     if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
         error!("get_info_of_part {}: {}", queue_consumer.id, e.as_str());
