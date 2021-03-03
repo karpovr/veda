@@ -603,6 +603,9 @@ v-fs:AttributiveSearchTemplate
     td.date {
       mso-number-format:"Short Date";
     }
+    td.text {
+      mso-number-format:"\@";
+    }
   </style>
   <div about="@" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
   <span class="additional-actions">
@@ -622,7 +625,7 @@ v-fs:AttributiveSearchTemplate
   // Export table to 'blob' or 'xls'
   var exportTable = (function () {
     var uri = 'data:application/vnd.ms-excel;base64,'
-      , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table border="1" cellspacing="0" bordercolor="#eee">{table}</table></body></html>'
+      , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/><style>td.text { mso-number-format:"\@"; } td.number { mso-number-format:General; } td.date { mso-number-format:"Short Date"; }</style></head><body><table border="1" cellspacing="0" bordercolor="#eee">{table}</table></body></html>'
       , format = function(s, c) { return s.replace(/{([a-z]+)}/g, function(m, p) { return c[p]; }) }
     return function(table, name, exportAs) {
       if (!table.nodeType) table = document.getElementById(table);
