@@ -632,11 +632,13 @@ v-ui:SystemPropertiesTemplate
   rdfs:comment "System properties"@en ;
   v-ui:template """
 <script>
-  // if ( individual.isNew() && veda.appointments && veda.appointments.length > 1 ) {
-  //   $("div[about='@'][rel='v-s:creator']", template).remove();
-  // } else {
-  //   $("veda-control[rel='v-s:creator'][data-type='radio']", template).remove();
-  // }
+  individual.on('v-s:archived', archivedHandler);
+  template.one('remove', function () {
+    individual.off('v-s:archived', archivedHandler);
+  });
+  function archivedHandler() {
+    this['v-s:deleted'] = this['v-s:archived'];
+  }
   //# sourceURL=v-ui:SystemPropertiesTemplate
 </script>
 <div>
@@ -644,7 +646,6 @@ v-ui:SystemPropertiesTemplate
   <div class="row">
     <div class="col-sm-3 col-xs-12">
       <em about="v-s:creator" property="rdfs:label"></em>
-      <!--veda-control data-type="radio" data-source="veda.appointments" rel="v-s:creator" class="-view edit -search"></veda-control-->
       <veda-control data-type="link" rel="v-s:creator" class="-view -edit search fulltext"></veda-control>
       <div about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
       <div rel="v-s:creator" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
@@ -668,6 +669,16 @@ v-ui:SystemPropertiesTemplate
       <div property="v-s:edited" class="-view -edit search"></div>
     </div>
   </div>
+  <div class="-view -edit search margin-md">
+    <label class="checkbox-inline">
+      <veda-control property="v-s:archived" data-type="boolean"></veda-control>
+      <strong about="v-s:archived" property="rdfs:label"></strong>
+    </label>
+    <label class="checkbox-inline">
+      <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
+      <strong about="v-s:deleted" property="rdfs:label"></strong>
+    </label>
+  </div>
 </div>
 """ ;
 .
@@ -690,6 +701,16 @@ v-ui:SystemPropertiesNewTemplate
   rdfs:comment "Системные свойства"@ru ;
   rdfs:comment "System properties"@en ;
   v-ui:template """
+<script>
+  individual.on('v-s:archived', archivedHandler);
+  template.one('remove', function () {
+    individual.off('v-s:archived', archivedHandler);
+  });
+  function archivedHandler() {
+    this['v-s:deleted'] = this['v-s:archived'];
+  }
+  //# sourceURL=v-ui:SystemPropertiesNewTemplate
+</script>
 <div>
   <section id="SystemProperties">
     <h4 class="section-header" about="v-ui:SystemPropertiesTemplate" property="rdfs:comment"></h4>
@@ -729,6 +750,19 @@ v-ui:SystemPropertiesNewTemplate
             <div property="v-s:edited" class="-view -edit search"></div>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="row row-attribute -view -edit search">
+      <div class="col-sm-3 col-xs-5"></div>
+      <div class="col-sm-9 col-xs-7">
+        <label class="checkbox-inline">
+          <veda-control property="v-s:archived" data-type="boolean"></veda-control>
+          <strong about="v-s:archived" property="rdfs:label"></strong>
+        </label>
+        <label class="checkbox-inline">
+          <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
+          <strong about="v-s:deleted" property="rdfs:label"></strong>
+        </label>
       </div>
     </div>
   </section>

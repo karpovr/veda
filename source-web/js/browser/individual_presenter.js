@@ -45,6 +45,7 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
   }
 
   const reg_uri = /^[a-z-0-9]+:([a-zA-Z0-9-_])*$/;
+  //const reg_file = /\.html\s*$/;
 
   return this.load()
     .then(function (individual) {
@@ -119,6 +120,16 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
       console.log('Presenter error', error);
     });
 }
+
+/**
+ * Get template
+ * @param {IndividualModel} individual - individual to render
+ * @param {IndividualModel|string} template - template to render individual with
+ * @return {Promise}
+ */
+/*function getTemplate(individual, template) {
+  return template;
+}*/
 
 /**
  * Render template
@@ -322,7 +333,9 @@ function processTemplate (individual, container, template, mode) {
           template.prepend(deletedAlert);
         });
       }
-      template.addClass('deleted');
+      if (mode !== 'search') {
+        template.addClass('deleted');
+      }
     } else {
       template.removeClass('deleted');
       if ( container && typeof container.prop === 'function' && container.prop('id') === 'main' ) {
