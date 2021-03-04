@@ -124,7 +124,7 @@ impl<'a> AuthWorkPlace<'a> {
                 };
 
                 if is_request_new_password {
-                    let res = self.request_new_password(person.get_id(), self.edited, account);
+                    let res = self.request_new_password(&mut person, self.edited, account);
                     if res != ResultCode::Ok {
                         ticket.result = res;
                         return true;
@@ -260,7 +260,7 @@ impl<'a> AuthWorkPlace<'a> {
         }
     }
 
-    fn request_new_password(&mut self, user_id: &str, edited: i64, account: &mut Individual) -> ResultCode {
+    fn request_new_password(&mut self, user: &mut Individual, edited: i64, account: &mut Individual) -> ResultCode {
         let now = Utc::now().naive_utc().timestamp();
         warn!("request new password, login={} password={} secret={}", self.login, self.password, self.secret);
 
@@ -304,15 +304,46 @@ impl<'a> AuthWorkPlace<'a> {
 
         let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
         if res.result != ResultCode::Ok {
-            error!("fail store new secret, user={}, result={:?}", user_id, res);
+            error!("fail store new secret, user={}, result={:?}", user.get_id(), res);
             return ResultCode::InternalServerError;
         }
 
         let mailbox = account.get_first_literal("v-s:mailbox").unwrap_or_default();
 
         if !mailbox.is_empty() && mailbox.len() > 3 {
-            let mut mail_with_secret = Individual::default();
+            let app_name = match self.module.get_individual("v-s:vedaInfo", &mut Individual::default()) {
+                Some(app_info) => {
+                    app_info.parse_all();
+                    app_info.get_first_literal("rdfs:label").unwrap_or("Veda".to_string())
+                },
+                None => "Veda".to_string()
+            };
 
+            user.parse_all();
+            let user_name = &*user.get_first_literal("rdfs:label").unwrap_or(user.get_id().to_string());
+
+            let subject = format!("{app}. Сообщение: процедура изменения пароля", app = &app_name);
+            let body = format!(r#"{name}!
+
+Вы получили данное письмо, потому что от Вашего имени было запрошено изменение пароля или срок действия Вашего пароля истек.
+Если Вы не использовали программный продукт, значит Ваша учетная запись скомпрометирована, обратитесь в службу поддержки.
+
+Разовый секретный код:
+{secret}
+
+Ваши дальнейшие действия:
+1. Скопируйте разовый секретный код
+2. Переключитесь из Почтовой программы на страницу Программного продукта {app}
+3. Заполните поля формы:
+   поле Новый пароль — введите новый пароль
+   поле Повторите пароль — еще раз введите новый пароль
+   поле Код из письма - введите  разовый секретный код
+   нажмите кнопку Отправить
+
+Это сообщение сформировано автоматически. Отвечать на него не нужно.
+{app}"#, name = user_name, secret = n_secret, app = &app_name);
+
+            let mut mail_with_secret = Individual::default();
             let uuid1 = "d:mail_".to_owned() + &Uuid::new_v4().to_string();
             mail_with_secret.set_id(&uuid1);
             mail_with_secret.add_uri("rdf:type", "v-s:Email");
@@ -320,7 +351,8 @@ impl<'a> AuthWorkPlace<'a> {
             mail_with_secret.add_datetime("v-s:created", now);
             mail_with_secret.add_uri("v-s:creator", "cfg:VedaSystemAppointment");
             mail_with_secret.add_uri("v-wf:from", "cfg:VedaSystemAppointment");
-            mail_with_secret.add_string("v-s:messageBody", &("your secret code is ".to_owned() + &n_secret), Lang::NONE);
+            mail_with_secret.add_string("v-s:subject", &subject, Lang::NONE);
+            mail_with_secret.add_string("v-s:messageBody", &body, Lang::NONE);
 
             let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
             if res.result != ResultCode::Ok {

@@ -12,7 +12,7 @@ git log -1 --pretty=format:"
     rdf:type owl:Ontology ;  
     v-s:loadPriority 4.
 
-v-s:vedaInfo 
+v-s:vedaVersion 
     rdf:type rdfs:Resource; 
     rdfs:label \"Veda\";
     v-s:appBuildVersion \"%h\"; 
