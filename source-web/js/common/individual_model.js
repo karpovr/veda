@@ -113,9 +113,6 @@ proto.set = function (property_uri, values, silently) {
   if ( !Array.isArray(values) ) {
     values = [values];
   }
-  values = values.filter(function (i) {
-    return i !== undefined && i !== null && i !== '';
-  });
   const serialized = values.map(serializer).filter(Boolean);
   const uniq = unique(serialized);
   if ( JSON.stringify(uniq) !== JSON.stringify(this.properties[property_uri] || []) ) {
@@ -493,9 +490,6 @@ proto.save = function() {
   this.trigger('beforeSave');
   Object.keys(this.properties).reduce(function (acc, property_uri) {
     if (property_uri === '@') return acc;
-    acc[property_uri] = acc[property_uri].filter(function (item) {
-      return item && item.data !== '' && item.data !== undefined && item.data !== null;
-    });
     if (!acc[property_uri].length) delete acc[property_uri];
     return acc;
   }, this.properties);
