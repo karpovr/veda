@@ -2,8 +2,6 @@
 
 import veda from '../common/veda.js';
 
-import Util from '../common/util.js';
-
 import LocalDB from '../browser/local_db.js';
 
 const serverBackend = {};
