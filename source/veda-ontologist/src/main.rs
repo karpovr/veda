@@ -7,16 +7,16 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::IndvOp;
 use v_module::v_onto::individual2turtle::to_turtle;
 use v_module::v_onto::onto_index::OntoIndex;
 use v_module::v_onto::{individual::*, parser::*};
-use v_queue::consumer::*;
 use v_module::v_search::common::FTQuery;
+use v_queue::consumer::*;
 
 fn main() -> std::io::Result<()> {
     init_log("ONTOLOGIST");
@@ -80,6 +80,7 @@ fn main() -> std::io::Result<()> {
             onto_index: OntoIndex::load(),
             is_need_generate: false,
             xr,
+            module_info: module_info.unwrap(),
         };
 
         if ctx.onto_index.len() == 0 {
@@ -92,12 +93,11 @@ fn main() -> std::io::Result<()> {
         let mut queue_consumer = Consumer::new("./data/queue", "ontologist", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
         module.listen_queue(
             &mut queue_consumer,
-            &mut module_info.unwrap(),
             &mut ctx,
             &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
-            &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context) -> Result<(), PrepareError>),
+            &mut (prepare as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
         );
     } else {
         error!("fail init ft-query");
@@ -113,9 +113,10 @@ pub struct Context {
     onto_index: OntoIndex,
     is_need_generate: bool,
     pub xr: XapianReader,
+    module_info: ModuleInfo,
 }
 
-fn heartbeat(module: &mut Module, _module_info: &mut ModuleInfo, ctx: &mut Context) -> Result<(), PrepareError>{
+fn heartbeat(module: &mut Module, ctx: &mut Context) -> Result<(), PrepareError> {
     if !ctx.onto_index.exists() {
         recover_index_from_ft(ctx, module);
         if let Err(e) = ctx.onto_index.dump() {
@@ -141,18 +142,11 @@ fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> O
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
-    Ok (true)
+fn after_batch(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok(true)
 }
 
-fn prepare(
-    _module: &mut Module,
-    module_info: &mut ModuleInfo,
-    ctx: &mut Context,
-    queue_element: &mut Individual,
-    _my_consumer: &Consumer,
-) -> Result<bool, PrepareError> {
-
+fn prepare(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
 
     if let Some((id, counter, is_deleted)) = test_on_onto(queue_element, &ctx.onto_types) {
@@ -171,7 +165,7 @@ fn prepare(
         }
     }
 
-    if let Err(e) = module_info.put_info(op_id, op_id) {
+    if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
         error!("fail write module_info, op_id={}, err={:?}", op_id, e);
         return Err(PrepareError::Fatal);
     }

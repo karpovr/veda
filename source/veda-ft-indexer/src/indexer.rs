@@ -32,6 +32,7 @@ pub(crate) struct Indexer {
     pub prepared_op_id: i64,
     pub committed_time: Instant,
     pub xr: XapianReader,
+    pub module_info: ModuleInfo,
 }
 
 impl fmt::Debug for Indexer {
@@ -84,15 +85,7 @@ impl Indexer {
     //        self.idx_prop.load(true, &self.onto, module);
     //    }
 
-    pub(crate) fn index_msg(
-        &mut self,
-        new_indv: &mut Individual,
-        prev_indv: &mut Individual,
-        cmd: IndvOp,
-        op_id: i64,
-        module: &mut Module,
-        module_info: &mut ModuleInfo,
-    ) -> Result<()> {
+    pub(crate) fn index_msg(&mut self, new_indv: &mut Individual, prev_indv: &mut Individual, cmd: IndvOp, op_id: i64, module: &mut Module) -> Result<()> {
         if cmd == IndvOp::Remove {
             return Ok(());
         }
@@ -296,14 +289,14 @@ impl Indexer {
                     }
                 }
 
-                self.commit_all_db(module_info)?;
+                self.commit_all_db()?;
             }
         }
 
         Ok(())
     }
 
-    pub(crate) fn commit_all_db(&mut self, module_info: &mut ModuleInfo) -> Result<()> {
+    pub(crate) fn commit_all_db(&mut self) -> Result<()> {
         let delta = self.prepared_op_id - self.committed_op_id;
         let duration = self.committed_time.elapsed().as_millis();
 
@@ -321,7 +314,7 @@ impl Indexer {
             self.committed_op_id = self.prepared_op_id;
             self.committed_time = Instant::now();
 
-            module_info.put_info(self.prepared_op_id, self.committed_op_id)?;
+            self.module_info.put_info(self.prepared_op_id, self.committed_op_id)?;
 
             info!("COMMIT, INDEXED {}, delta={}, cps={:.1}", self.committed_op_id, delta, delta as f64 / (duration as f64 / 1000.0));
         }

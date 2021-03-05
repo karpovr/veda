@@ -3,24 +3,24 @@ extern crate lazy_static;
 #[macro_use]
 extern crate log;
 
-use v_v8::rusty_v8 as v8;
-use v_v8::rusty_v8::Isolate;
 use std::sync::Mutex;
 use std::{env, thread, time};
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::{APIClient, IndvOp};
 use v_ft_xapian::xapian_reader::XapianReader;
+use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::common::load_onto;
 use v_module::remote_indv_r_storage::*;
+use v_module::v_api::app::ResultCode;
+use v_module::v_api::{APIClient, IndvOp};
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
+use v_module::v_search::common::FTQuery;
 use v_queue::consumer::Consumer;
 use v_queue::record::Mode;
-use v_module::v_search::common::FTQuery;
 use v_v8::callback::*;
 use v_v8::common::{is_filter_pass, HashVec, ScriptInfo, ScriptInfoContext};
+use v_v8::rusty_v8 as v8;
+use v_v8::rusty_v8::Isolate;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::{commit, CallbackSharedData, Transaction};
 
@@ -60,6 +60,7 @@ pub struct MyContext<'a> {
     main_queue_cs: Option<Consumer>,
     queue_name: String,
     count_exec: i64,
+    module_info: ModuleInfo,
 }
 
 fn main() -> Result<(), i32> {
@@ -107,6 +108,12 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     let consumer_name = &(process_name.to_owned() + "0");
     let main_queue_name = "individuals-flow";
 
+    let module_info = ModuleInfo::new("./data", &process_name, true);
+    if module_info.is_err() {
+        error!("{:?}", module_info.err());
+        return Err(-1);
+    }
+
     if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
         let mut ctx = MyContext {
             api_client: APIClient::new(Module::get_property("main_module_url").unwrap_or_default()),
@@ -118,6 +125,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
             queue_name: consumer_name.to_owned(),
             count_exec: 0,
             xr,
+            module_info: module_info.unwrap(),
         };
 
         info!("use VM id={}", process_name);
@@ -132,12 +140,6 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
 
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
         load_event_scripts(&mut ctx.workplace, &mut ctx.xr);
-
-        let module_info = ModuleInfo::new("./data", &process_name, true);
-        if module_info.is_err() {
-            error!("{:?}", module_info.err());
-            return Err(-1);
-        }
 
         let mut queue_consumer = Consumer::new("./data/queue", consumer_name, main_queue_name).expect("!!!!!!!!! FAIL OPEN RW CONSUMER");
 
@@ -154,12 +156,11 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
 
         module.listen_queue(
             &mut queue_consumer,
-            &mut module_info.unwrap(),
             &mut ctx,
             &mut (before_batch as fn(&mut Module, &mut MyContext<'a>, batch_size: u32) -> Option<u32>),
-            &mut (prepare as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after_batch as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut MyContext<'a>) -> Result<(), PrepareError>),
+            &mut (prepare as fn(&mut Module, &mut MyContext<'a>, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Module, &mut MyContext<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Module, &mut MyContext<'a>) -> Result<(), PrepareError>),
         );
     } else {
         error!("fail init ft-query");
@@ -167,23 +168,19 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut MyContext) -> Result<(), PrepareError> { Ok (()) }
+fn heartbeat(_module: &mut Module, _ctx: &mut MyContext) -> Result<(), PrepareError> {
+    Ok(())
+}
 
 fn before_batch(_module: &mut Module, _ctx: &mut MyContext, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut MyContext, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
-    Ok (false)
+fn after_batch(_module: &mut Module, _ctx: &mut MyContext, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok(false)
 }
 
-fn prepare(
-    _module: &mut Module,
-    module_info: &mut ModuleInfo,
-    ctx: &mut MyContext,
-    queue_element: &mut Individual,
-    my_consumer: &Consumer,
-) -> Result<bool, PrepareError> {
+fn prepare(_module: &mut Module, ctx: &mut MyContext, queue_element: &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError> {
     if let Some(main_cs_r) = &mut ctx.main_queue_cs {
         while my_consumer.count_popped > main_cs_r.count_popped && main_cs_r.id == my_consumer.id || my_consumer.id > main_cs_r.id {
             main_cs_r.get_info();
@@ -198,7 +195,7 @@ fn prepare(
 
     match prepare_for_js(ctx, queue_element) {
         Ok(op_id) => {
-            if let Err(e) = module_info.put_info(op_id, op_id) {
+            if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
                 error!("fail write module_info, op_id={}, err={:?}", op_id, e);
                 return Err(PrepareError::Fatal);
             }

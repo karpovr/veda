@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use v_authorization::common::Access;
 use v_authorization::formats::{decode_rec_to_rightset, encode_rightset, update_counters, M_IGNORE_EXCLUSIVE, M_IS_EXCLUSIVE};
 use v_authorization::{Right, RightSet};
+use v_module::info::ModuleInfo;
 use v_module::v_onto::individual::Individual;
 use v_module::v_storage::storage::{StorageId, VStorage};
 
@@ -10,6 +11,7 @@ pub struct Context {
     pub membership_counter: u32,
     pub storage: VStorage,
     pub version_of_index_format: u8,
+    pub module_info: ModuleInfo,
 }
 
 fn get_access_from_individual(state: &mut Individual) -> u8 {

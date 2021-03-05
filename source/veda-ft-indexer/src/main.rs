@@ -76,6 +76,7 @@ fn index(module: &mut Module) -> Result<(), XError> {
             prepared_op_id: 0,
             committed_time: Instant::now(),
             xr,
+            module_info: module_info.unwrap(),
         };
 
         info!("Rusty search-index: start listening to queue");
@@ -94,12 +95,11 @@ fn index(module: &mut Module) -> Result<(), XError> {
 
         module.listen_queue(
             &mut queue_consumer,
-            &mut module_info.unwrap(),
             &mut ctx,
             &mut (before as fn(&mut Module, &mut Indexer, u32) -> Option<u32>),
-            &mut (process as fn(&mut Module, &mut ModuleInfo, &mut Indexer, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after as fn(&mut Module, &mut ModuleInfo, &mut Indexer, u32) -> Result<bool, PrepareError>),
-            &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Indexer) -> Result<(), PrepareError>),
+            &mut (process as fn(&mut Module, &mut Indexer, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after as fn(&mut Module, &mut Indexer, u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Module, &mut Indexer) -> Result<(), PrepareError>),
         );
     } else {
         error!("fail init ft-query");
@@ -108,9 +108,9 @@ fn index(module: &mut Module) -> Result<(), XError> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer) -> Result<(), PrepareError> {
+fn heartbeat(_module: &mut Module, ctx: &mut Indexer) -> Result<(), PrepareError> {
     if ctx.committed_time.elapsed().as_millis() > TIMEOUT_BETWEEN_COMMITS {
-        if let Err(e) = ctx.commit_all_db(module_info) {
+        if let Err(e) = ctx.commit_all_db() {
             error!("fail commit, err={:?}", e);
             return Err(PrepareError::Fatal);
         }
@@ -122,15 +122,15 @@ fn before(_module: &mut Module, _ctx: &mut Indexer, _batch_size: u32) -> Option<
     None
 }
 
-fn after(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer, _processed_batch_size: u32) -> Result<bool, PrepareError> {
-    if let Err(e) = ctx.commit_all_db(module_info) {
+fn after(_module: &mut Module, ctx: &mut Indexer, _processed_batch_size: u32) -> Result<bool, PrepareError> {
+    if let Err(e) = ctx.commit_all_db() {
         error!("fail commit, err={:?}", e);
         return Err(PrepareError::Fatal);
     }
     Ok(true)
 }
 
-fn process(module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn process(module: &mut Module, ctx: &mut Indexer, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("cmd is none");
@@ -145,7 +145,7 @@ fn process(module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Indexer,
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
-    if let Err(e) = ctx.index_msg(&mut new_state, &mut prev_state, cmd.unwrap(), op_id, module, module_info) {
+    if let Err(e) = ctx.index_msg(&mut new_state, &mut prev_state, cmd.unwrap(), op_id, module) {
         error!("fail index msg, err={:?}", e);
     }
 

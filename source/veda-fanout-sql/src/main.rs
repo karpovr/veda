@@ -21,6 +21,7 @@ pub struct Context {
     onto: Onto,
     pool: mysql::Pool,
     tables: HashMap<String, bool>,
+    module_info: ModuleInfo
 }
 
 fn main() {
@@ -52,30 +53,30 @@ fn main() {
         onto: Onto::default(),
         pool,
         tables,
+        module_info: module_info.unwrap()
     };
 
     load_onto(&mut module.storage, &mut ctx.onto);
 
     module.listen_queue(
         &mut queue_consumer,
-        &mut module_info.unwrap(),
         &mut ctx,
         &mut (before_bath as fn(&mut Module, &mut Context, size_batch: u32) -> Option<u32>),
-        &mut (process as fn(&mut Module, &mut ModuleInfo, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (void as fn(&mut Module, _module_info: &mut ModuleInfo, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut ModuleInfo, &mut Context) -> Result<(), PrepareError>),
+        &mut (process as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (void as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
     );
 }
 
-fn heartbeat(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
+fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
 fn before_bath(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
-fn void(_module: &mut Module, _module_info: &mut ModuleInfo, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+fn void(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     Ok (false)
 }
 
-fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn process(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("Queue element cmd is none. Skip element.");
@@ -83,7 +84,7 @@ fn process(_module: &mut Module, module_info: &mut ModuleInfo, ctx: &mut Context
     }
 
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-    if let Err(e) = module_info.put_info(op_id, op_id) {
+    if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
         error!("Failed to write module_info, op_id={}, err={:?}", op_id, e);
     }
 
