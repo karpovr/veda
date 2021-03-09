@@ -377,9 +377,11 @@ function processTemplate (individual, container, template, mode) {
       }
     }
   }
-  individual.on('v-s:valid v-s:deleted', validHandler);
+  individual.on('v-s:valid', validHandler);
+  individual.on('v-s:deleted', validHandler);
   template.one('remove', function () {
-    individual.off('v-s:valid v-s:deleted', validHandler);
+    individual.off('v-s:valid', validHandler);
+    individual.off('v-s:deleted', validHandler);
   });
   validHandler.call(individual);
 
