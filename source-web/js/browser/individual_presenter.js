@@ -26,6 +26,8 @@ IndividualModel.prototype.present = IndividualPresenter;
 
 export default IndividualPresenter;
 
+//~ const counters = {};
+
 /**
  * Individual presenter method for IndividualModel class
  * @param {Element} container - container to render individual to
@@ -45,7 +47,7 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
   }
 
   const reg_uri = /^[a-z-0-9]+:([a-zA-Z0-9-_])*$/;
-  //const reg_file = /\.html\s*$/;
+  // const reg_file = /\.html\s*$/;
 
   return this.load()
     .then(function (individual) {
@@ -127,7 +129,7 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
  * @param {IndividualModel|string} template - template to render individual with
  * @return {Promise}
  */
-/*function getTemplate(individual, template) {
+/* function getTemplate(individual, template) {
   return template;
 }*/
 
@@ -209,7 +211,7 @@ function processTemplate (individual, container, template, mode) {
    * @param {Event} event
    * @return {void}
    */
-  function modeHandler (event) {
+  const modeHandler = function (event) {
     event.stopPropagation();
     mode = event.type;
     template.data('mode', mode);
@@ -218,7 +220,7 @@ function processTemplate (individual, container, template, mode) {
     case 'edit': edit.show(); _edit.hide(); break;
     case 'search': search.show(); _search.hide(); break;
     }
-  }
+  };
   template.on('view edit search', modeHandler);
 
   // Embedded templates list
@@ -229,12 +231,12 @@ function processTemplate (individual, container, template, mode) {
    * @param {Event} event
    * @return {void}
    */
-  function syncEmbedded (event) {
+  const syncEmbedded = function (event) {
     embedded.map(function (item) {
       item.trigger(event.type, individual.id);
     });
     event.stopPropagation();
-  }
+  };
   template.on('view edit search', syncEmbedded);
 
   // Define handlers
@@ -245,7 +247,7 @@ function processTemplate (individual, container, template, mode) {
    * @param {string} parent
    * @return {Promise<void>}
    */
-  function callModelMethod(method, parent) {
+  const callModelMethod = function (method, parent) {
     return embedded.reduce(function (p, item) {
       return p.then(function () {
         return item.data('callModelMethod')(method, individual.id);
@@ -282,7 +284,7 @@ function processTemplate (individual, container, template, mode) {
         });
         throw error;
       });
-  }
+  };
   template.on('save cancel delete destroy recover', function (e) {
     e.stopPropagation();
     if (e.type === 'cancel') {
@@ -308,7 +310,7 @@ function processTemplate (individual, container, template, mode) {
    * @this Individual
    * @return {void}
    */
-  function deletedHandler () {
+  const deletedHandler = function () {
     if ( this.hasValue('v-s:deleted', true) ) {
       if ( container && typeof container.prop === 'function' && container.prop('id') === 'main' && !template.hasClass('deleted') ) {
         const alertModel = new IndividualModel('v-s:DeletedAlert');
@@ -342,7 +344,7 @@ function processTemplate (individual, container, template, mode) {
         $('#deleted-alert', template).remove();
       }
     }
-  }
+  };
   individual.on('v-s:deleted', deletedHandler);
   template.one('remove', function () {
     individual.off('v-s:deleted', deletedHandler);
@@ -354,7 +356,7 @@ function processTemplate (individual, container, template, mode) {
    * @this Individual
    * @return {void}
    */
-  function validHandler () {
+  const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) && mode === 'view' ) {
       if ( (container.prop('id') === 'main' || container.hasClass('modal-body') ) && !template.hasClass('invalid') ) {
         new IndividualModel('v-s:InvalidAlert').load().then(function(loaded) {
@@ -376,7 +378,7 @@ function processTemplate (individual, container, template, mode) {
         $('#invalid-alert', template).remove();
       }
     }
-  }
+  };
   individual.on('v-s:valid', validHandler);
   individual.on('v-s:deleted', validHandler);
   template.one('remove', function () {
@@ -470,7 +472,7 @@ function processTemplate (individual, container, template, mode) {
     const resource_uri = $this.closest('[resource]').attr('resource');
     const resource = new IndividualModel(resource_uri);
     const relContainer = $this.closest('[rel]');
-    const countDisplayed = relContainer.children().length - 1;//last children is .more button
+    const countDisplayed = relContainer.children().length - 1;// last children is .more button
     const rel_uri = relContainer.attr('rel');
 
     resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 10);
@@ -647,7 +649,7 @@ function processTemplate (individual, container, template, mode) {
    * @param {Event} event - custom 'internal-validate' event
    * @return {void}
    */
-  function validateTemplate (event) {
+  const validateTemplate = function (event) {
     event.stopPropagation();
     if (mode === 'edit') {
       Object.keys(validation).map( function (property_uri) {
@@ -674,27 +676,34 @@ function processTemplate (individual, container, template, mode) {
     if ( template.data('isEmbedded') ) {
       container.trigger('internal-validate');
     }
-  }
+  };
   template.on('internal-validate', validateTemplate);
 
   /**
    * Trigger 'internal-validate' event on individual property change or when mode switches to 'edit'
    * @return {void}
    */
-  function triggerValidation() {
+  const triggerValidation = function () {
     if (mode === 'edit') {
       template.trigger('internal-validate');
     }
   };
   individual.on('propertyModified', triggerValidation);
+
+  //~ counters.on = (counters.on || 0) + 1;
+  //~ counters[individual.id] = counters[individual.id] || {};
+  //~ counters[individual.id].on = (counters[individual.id].on || 0) + 1;
+  //~ console.log('triggerValidation on', counters);
+
   template.one('remove', function () {
     individual.off('propertyModified', triggerValidation);
+
+    //~ counters.off = (counters.off || 0) + 1;
+    //~ counters[individual.id] = counters[individual.id] || {};
+    //~ counters[individual.id].off = (counters[individual.id].off || 0) + 1;
+    //~ console.log('triggerValidation off', counters);
   });
   template.on('edit', triggerValidation);
-
-  // Handle validation events from template
-  template.on('validate', (e) => e.stopPropagation());
-  template.on('validated', mergeValidationResult);
 
   /**
    * Merge validation result from custom template validation
@@ -702,7 +711,7 @@ function processTemplate (individual, container, template, mode) {
    * @param {Object} validationResult - validation result object
    * @return {void}
    */
-  function mergeValidationResult (event, validationResult) {
+  const mergeValidationResult = function (event, validationResult) {
     event.stopPropagation();
     if (mode === 'edit') {
       Object.keys(validationResult).map(function (property_uri) {
@@ -719,7 +728,11 @@ function processTemplate (individual, container, template, mode) {
       }, true);
       template.trigger('internal-validated', [validation]);
     }
-  }
+  };
+
+  // Handle validation events from template
+  template.on('validate', (e) => e.stopPropagation());
+  template.on('validated', mergeValidationResult);
 
   // Controls
   template.find('veda-control[property], veda-control[rel]').not('[rel] *').not('[about] *').map( function (i, el) {
