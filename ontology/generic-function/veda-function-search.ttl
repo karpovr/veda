@@ -1612,9 +1612,13 @@ v-fs:DocumentsSearchBlankTemplate
     }
   }
 
-  individual.on("rdfs:label v-fs:requiredClass v-s:created", searchHandler);
+  individual.on("rdfs:label", searchHandler);
+  individual.on("v-fs:requiredClass", searchHandler);
+  individual.on("v-s:created", searchHandler);
   template.one("remove", function(){
-    individual.off("rdfs:label v-fs:requiredClass v-s:created", searchHandler);
+    individual.off("rdfs:label", searchHandler);
+    individual.off("v-fs:requiredClass", searchHandler);
+    individual.off("v-s:created", searchHandler);
   });
   //# sourceURL=v-fs:DocumentsSearchBlankTemplate_post
 </script>
@@ -1714,9 +1718,15 @@ v-fs:AdvancedSearchTemplate
   }
   searchHandler();
 
-  individual.on("rdfs:label v-fs:requiredClass v-s:created v-s:creator", searchHandler);
+  individual.on("rdfs:label", searchHandler);
+  individual.on("v-fs:requiredClass", searchHandler);
+  individual.on("v-s:created", searchHandler);
+  individual.on("v-s:creator", searchHandler);
   template.one("remove", function(){
-    individual.off("rdfs:label v-fs:requiredClass v-s:created v-s:creator", searchHandler);
+    individual.off("rdfs:label", searchHandler);
+    individual.off("v-fs:requiredClass", searchHandler);
+    individual.off("v-s:created", searchHandler);
+    individual.off("v-s:creator", searchHandler);
   });
   //# sourceURL=v-fs:AdvancedSearchTemplate_post
 </script>

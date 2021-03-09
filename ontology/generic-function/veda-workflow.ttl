@@ -1255,10 +1255,12 @@ v-wf:TaskTemplateAsProperties
     var $state = $('#' + veda.Util.escape4$(individual.id));
     $('.state-name', $state).html(values);
   }
-  individual.on("v-wf:join v-wf:split", joinSplitHandler);
+  individual.on("v-wf:join", joinSplitHandler);
+  individual.on("v-wf:split", joinSplitHandler);
   individual.on("rdfs:label", labelHandler);
   template.one("remove", function () {
-    individual.off("v-wf:join v-wf:split", joinSplitHandler);
+    individual.off("v-wf:join", joinSplitHandler);
+    individual.off("v-wf:split", joinSplitHandler);
     individual.off("rdfs:label", labelHandler);
   });
 
