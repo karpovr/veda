@@ -1457,7 +1457,7 @@ $.fn.veda_actor = function( options ) {
   }
   individual.on( [rel_uri, rel_uri + '.v-s:employee', rel_uri + '.v-s:occupation', rel_uri + '.v-s:parentUnit'].join(' '), propertyModifiedHandler);
   control.one('remove', function () {
-    individual.off( [rel_uri, rel_uri + '.v-s:employee', rel_uri + '.v-s:occupation', rel_uri + '.v-s:parentUnit'].join(' '), propertyModifiedHandler);
+    [rel_uri, rel_uri + '.v-s:employee', rel_uri + '.v-s:occupation', rel_uri + '.v-s:parentUnit'].forEach(prop => individual.off(prop, propertyModifiedHandler));
   });
   propertyModifiedHandler();
 
