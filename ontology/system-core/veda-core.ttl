@@ -52,7 +52,8 @@ v-s:tenant
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:AppInfo ;
   rdfs:isDefinedBy v-s: ;
-  rdfs:label "Application tenant"@ru ;
+  rdfs:label "Владелец"@ru ;
+  rdfs:label "Tenant"@en ;
   rdfs:range v-s:Organization ;
 .
 
