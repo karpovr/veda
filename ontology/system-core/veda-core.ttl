@@ -48,6 +48,14 @@ v-s:appUrl
   rdfs:range xsd:string ;
 .
 
+v-s:tenant
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:AppInfo ;
+  rdfs:isDefinedBy v-s: ;
+  rdfs:label "Application tenant"@ru ;
+  rdfs:range v-s:Organization ;
+.
+
 v-s:Module
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:SystemThing ;
