@@ -323,7 +323,7 @@ var view = {
   "docLabel": doc["rdfs:label"][0].data,
   "author": author["rdfs:label"][0].data,
   "actionType": actionType["rdfs:label"][0].data,
-  "actionDate": action["v-s:created"][0].data instanceof Date ? action["v-s:created"][0].data.toISOString() : action["v-s:created"][0].data,
+  "actionDate": veda.Util.formatValue(action["v-s:created"][0].data),
   "docUrl": "http://optiflow.mp.local:8080/#/"+doc['@']
 };
 //print("view=", veda.Util.toJson(view));
