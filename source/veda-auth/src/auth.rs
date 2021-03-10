@@ -1,9 +1,11 @@
 use crate::common::{create_new_credential, get_candidate_users_of_login, remove_secret, set_password, AuthConf, UserStat, EMPTY_SHA256_HASH, N_ITER};
 use chrono::Utc;
 use data_encoding::HEXLOWER;
+use mustache::MapBuilder;
 use rand::{thread_rng, Rng};
 use ring::pbkdf2;
 use std::num::NonZeroU32;
+use std::str::from_utf8;
 use uuid::Uuid;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::{create_new_ticket, Module};
@@ -308,61 +310,58 @@ impl<'a> AuthWorkPlace<'a> {
             return ResultCode::InternalServerError;
         }
 
-        let mailbox = account.get_first_literal("v-s:mailbox").unwrap_or_default();
+        if let Some((subject_t_str, body_t_str)) = &self.conf.expired_pass_notification_template {
+            let mailbox = account.get_first_literal("v-s:mailbox").unwrap_or_default();
 
-        if !mailbox.is_empty() && mailbox.len() > 3 {
-            let app_name = match self.module.get_individual("v-s:vedaInfo", &mut Individual::default()) {
-                Some(app_info) => {
-                    app_info.parse_all();
-                    app_info.get_first_literal("rdfs:label").unwrap_or("Veda".to_string())
-                },
-                None => "Veda".to_string()
-            };
+            if !mailbox.is_empty() && mailbox.len() > 3 {
+                let app_name = match self.module.get_individual("v-s:vedaInfo", &mut Individual::default()) {
+                    Some(app_info) => {
+                        app_info.parse_all();
+                        app_info.get_first_literal("rdfs:label").unwrap_or("Veda".to_string())
+                    }
+                    None => "Veda".to_string(),
+                };
 
-            user.parse_all();
-            let user_name = &*user.get_first_literal("rdfs:label").unwrap_or(user.get_id().to_string());
+                user.parse_all();
+                let user_name = user.get_first_literal("rdfs:label").unwrap_or(user.get_id().to_string());
 
-            let subject = format!("{app}. Сообщение: процедура изменения пароля", app = &app_name);
-            let body = format!(r#"{name}!
+                let map = MapBuilder::new().insert_str("app_name", &app_name).insert_str("secret_code", n_secret.clone()).insert_str("user_name", user_name).build();
 
-Вы получили данное письмо, потому что от Вашего имени было запрошено изменение пароля или срок действия Вашего пароля истек.
-Если Вы не использовали программный продукт, значит Ваша учетная запись скомпрометирована, обратитесь в службу поддержки.
+                let mut subject = vec![];
+                if let Ok(t) = mustache::compile_str(subject_t_str) {
+                    if let Err(e) = t.render_data(&mut subject, &map) {
+                        error!("render subject from template, err={:?}", e)
+                    }
+                }
 
-Разовый секретный код:
-{secret}
+                let mut body = vec![];
+                if let Ok(t) = mustache::compile_str(body_t_str) {
+                    if let Err(e) = t.render_data(&mut body, &map) {
+                        error!("render body from template, err={:?}", e)
+                    }
+                }
 
-Ваши дальнейшие действия:
-1. Скопируйте разовый секретный код
-2. Переключитесь из Почтовой программы на страницу Программного продукта {app}
-3. Заполните поля формы:
-   поле Новый пароль — введите новый пароль
-   поле Повторите пароль — еще раз введите новый пароль
-   поле Код из письма - введите  разовый секретный код
-   нажмите кнопку Отправить
+                let mut mail_with_secret = Individual::default();
+                let uuid1 = "d:mail_".to_owned() + &Uuid::new_v4().to_string();
+                mail_with_secret.set_id(&uuid1);
+                mail_with_secret.add_uri("rdf:type", "v-s:Email");
+                mail_with_secret.add_string("v-s:recipientMailbox", &mailbox, Lang::NONE);
+                mail_with_secret.add_datetime("v-s:created", now);
+                mail_with_secret.add_uri("v-s:creator", "cfg:VedaSystemAppointment");
+                mail_with_secret.add_uri("v-wf:from", "cfg:VedaSystemAppointment");
+                mail_with_secret.add_string("v-s:subject", from_utf8(subject.as_slice()).unwrap_or_default(), Lang::NONE);
+                mail_with_secret.add_string("v-s:messageBody", from_utf8(body.as_slice()).unwrap_or_default(), Lang::NONE);
 
-Это сообщение сформировано автоматически. Отвечать на него не нужно.
-{app}"#, name = user_name, secret = n_secret, app = &app_name);
-
-            let mut mail_with_secret = Individual::default();
-            let uuid1 = "d:mail_".to_owned() + &Uuid::new_v4().to_string();
-            mail_with_secret.set_id(&uuid1);
-            mail_with_secret.add_uri("rdf:type", "v-s:Email");
-            mail_with_secret.add_string("v-s:recipientMailbox", &mailbox, Lang::NONE);
-            mail_with_secret.add_datetime("v-s:created", now);
-            mail_with_secret.add_uri("v-s:creator", "cfg:VedaSystemAppointment");
-            mail_with_secret.add_uri("v-wf:from", "cfg:VedaSystemAppointment");
-            mail_with_secret.add_string("v-s:subject", &subject, Lang::NONE);
-            mail_with_secret.add_string("v-s:messageBody", &body, Lang::NONE);
-
-            let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
-            if res.result != ResultCode::Ok {
-                error!("fail store email with new secret, user={}", account.get_id());
-                return ResultCode::AuthenticationFailed;
+                let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
+                if res.result != ResultCode::Ok {
+                    error!("fail store email with new secret, user={}", account.get_id());
+                    return ResultCode::AuthenticationFailed;
+                } else {
+                    info!("send {} new secret {} to mailbox {}, user={}", mail_with_secret.get_id(), n_secret, mailbox, account.get_id())
+                }
             } else {
-                info!("send {} new secret {} to mailbox {}, user={}", mail_with_secret.get_id(), n_secret, mailbox, account.get_id())
+                error!("mailbox not found, user={}", account.get_id());
             }
-        } else {
-            error!("mailbox not found, user={}", account.get_id());
         }
         ResultCode::PasswordExpired
     }

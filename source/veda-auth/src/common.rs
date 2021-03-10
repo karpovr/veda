@@ -38,6 +38,7 @@ pub(crate) struct AuthConf {
     pub ticket_lifetime: i64,
     pub secret_lifetime: i64,
     pub pass_lifetime: i64,
+    pub expired_pass_notification_template: Option<(String, String)>,
 }
 
 impl Default for AuthConf {
@@ -51,6 +52,7 @@ impl Default for AuthConf {
             ticket_lifetime: 10 * 60 * 60,
             secret_lifetime: 12 * 60 * 60,
             pass_lifetime: 90 * 24 * 60 * 60,
+            expired_pass_notification_template: None,
         }
     }
 }
@@ -243,6 +245,16 @@ pub(crate) fn read_auth_configuration(module: &mut Module) -> AuthConf {
         }
         if let Some(v) = node.get_first_integer("cfg:failed_change_pass_attempts") {
             res.failed_change_pass_attempts = v as i32;
+        }
+
+        if let Some(v) = node.get_first_literal("cfg:expired_pass_notification_template") {
+            if let Some(mut i) = module.get_individual_h(&v) {
+                if let Some(ss) = i.get_first_literal("v-s:notificationSubject") {
+                    if let Some(sb) = i.get_first_literal("v-s:notificationBody") {
+                        res.expired_pass_notification_template = Some((ss, sb));
+                    }
+                }
+            }
         }
     }
 
