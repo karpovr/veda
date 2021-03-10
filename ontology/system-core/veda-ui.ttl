@@ -2139,7 +2139,7 @@ v-ui:FileTemplateWithComment
     var idx = fn.lastIndexOf("."),
         ext = fn.substr(idx + 1);
     $("span.icon", template).text(ext);
-    if ( img.indexOf(ext) < 0 ) {
+    if ( img.indexOf(ext.toLowerCase()) < 0 ) {
       $(".thumbnail", template).remove();
     }
   }
