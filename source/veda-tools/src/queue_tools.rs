@@ -170,7 +170,16 @@ pub fn queue_to_json(queue_path: String, part_id: Option<u32>) {
         }
 
         let mut queue_element = Individual::new_raw(raw);
+
         if parse_raw(&mut queue_element).is_ok() {
+            let uri = queue_element.get_first_literal("uri").unwrap_or_default();
+            let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+            let src = queue_element.get_first_literal("src").unwrap_or_default();
+            let cmd = get_cmd(&mut queue_element);
+            let event_id = queue_element.get_first_literal("event_id").unwrap_or_default();
+            let user_id = queue_element.get_first_literal("user_uri").unwrap_or_default();
+            println!("uri=\"{}\", op_id={}, src={}, cmd={:?}, event_id={}, user_id={}", uri, op_id, src, cmd, event_id, user_id);
+
             let mut prev_state = Individual::default();
             get_inner_binobj_as_individual(&mut queue_element, "prev_state", &mut prev_state);
             prev_state.parse_all();
