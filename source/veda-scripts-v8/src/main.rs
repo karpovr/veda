@@ -71,6 +71,8 @@ fn main() -> Result<(), i32> {
 
     let isolate = &mut v8::Isolate::new(Default::default());
 
+    info! ("V8 version {}", v8::V8::get_version());
+
     main0(isolate)
 }
 
