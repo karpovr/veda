@@ -13,5 +13,5 @@ rust_decimal = "1.7.0"
 v_queue = "=0.1"
 
 v_module = { package = "v-common-module", version = "0.1.23" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.23" }
-v_v8 = { package = "v-common-v8", version = "0.1.29" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.24" }
+v_v8 = { package = "v-common-v8", version = "0.1.30" }
