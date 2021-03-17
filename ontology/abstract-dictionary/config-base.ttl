@@ -163,16 +163,20 @@ if (parent_script_id) {
   return;
 }
 
-var isAdmin = (user_uri === 'cfg:Administrator' || user_uri === 'cfg:VedaSystem');
-
 // Get latest document state
 document = get_individual(ticket, document['@']);
 
-if (super_classes.indexOf('v-s:AutomaticallyVersioned') >= 0 && !isAdmin && prev_state && !parent_script_id) {
+var isAdmin = (user_uri === 'cfg:Administrator' || user_uri === 'cfg:VedaSystem');
+
+var isJournaling = super_classes.indexOf('v-s:Journaling') >= 0 || veda.Util.hasValue(document, 'rdf:type', {data: 'v-s:Journaling', type: 'Uri'});
+
+var isAutomaticallyVersioned = super_classes.indexOf('v-s:AutomaticallyVersioned') >= 0 || veda.Util.hasValue(document, 'rdf:type', {data: 'v-s:AutomaticallyVersioned', type: 'Uri'});
+
+if (isAutomaticallyVersioned && !isAdmin && prev_state && !parent_script_id) {
   veda.Util.create_version(ticket, document, prev_state, user_uri, _event_id);
 }
 
-if (super_classes.indexOf('v-s:Journaling') >= 0) {
+if (isJournaling) {
   var publisher_uri = veda.Util.getUri(document['v-s:creator']);
   if (!publisher_uri) { return; }
 
