@@ -3175,13 +3175,21 @@ v-ui:ttl
   </div>
 </div>
 <script>
-  var list = [individual];
-  veda.Util.toTTL(list, function (error, ttl) {
-    var pre = $("pre", template),
-        sanitized = sanitize(ttl),
-        anchored = sanitized.replace(/([a-zA-Z][\\w-]*:[\\w-]*)(\\,|\\s|\\;|\\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
-    pre.html(anchored);
+  individual.on('afterReset', render);
+  template.one('remove', function () {
+    individual.off('afterReset', render);
   });
+  render();
+
+  function render () {
+    var list = [individual];
+    veda.Util.toTTL(list, function (error, ttl) {
+      var pre = $("pre", template),
+          sanitized = sanitize(ttl),
+          anchored = sanitized.replace(/([a-zA-Z][\\w-]*:[\\w-]*)(\\,|\\s|\\;|\\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
+      pre.html(anchored);
+    });
+  }
 
   function sanitize(string) {
     var map = {
