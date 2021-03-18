@@ -105,7 +105,7 @@ const proto = IndividualModel.prototype;
 proto.get = function (property_uri) {
   const self = this;
   if (!self.properties[property_uri]) return [];
-  return self.properties[property_uri].map( parser );
+  return self.properties[property_uri].map( parser ).filter(i => typeof i !== 'undefined');
 };
 
 proto.set = function (property_uri, values, silently) {
@@ -167,9 +167,9 @@ IndividualModel.defineProperty = function (property_uri) {
  * @return {string|number|Date|Boolean}
  */
 function parser(value) {
-  if (value.type === 'String') {
+  if (value.type === 'String' && value.data) {
     const string = new String(value.data);
-    if (value.lang !== 'NONE') {
+    if (value.lang && value.lang !== 'NONE') {
       string.language = value.lang;
     }
     return string;
@@ -179,8 +179,10 @@ function parser(value) {
     return new Date(Date.parse(value.data));
   } else if (value.type === 'Decimal') {
     return parseFloat(value.data);
-  } else {
-    return value.data;
+  } else if (value.type === 'Integer') {
+    return parseInt(value.data);
+  } else if (value.type === 'Boolean') {
+    return Boolean(value.data);
   }
 }
 
@@ -231,7 +233,7 @@ function serializer (value) {
         data: value.replace(reg_ml_string, '$1'),
         lang: value.replace(reg_ml_string, '$2').toUpperCase(),
       };
-    } else {
+    } else if (value.length) {
       return {
         type: 'String',
         data: value.valueOf(),
