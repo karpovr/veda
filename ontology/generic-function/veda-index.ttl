@@ -4,6 +4,7 @@
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
 
 @prefix vdi: <http://semantic-machines.com/veda/veda-index/> .
 <http://semantic-machines.com/veda/veda-index>
@@ -83,6 +84,7 @@ vdi:index_01
   vdi:forClass v-s:File ;
   vdi:forClass v-wf:Process ;
   vdi:forClass v-wf:DecisionForm ;
+  vdi:forClass bpmn:DecisionForm ;
   rdfs:label "system indexed" ;
   vdi:indexed_to "system" ;
 .
