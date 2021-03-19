@@ -300,12 +300,8 @@ Util.newJournalRecord = function (journal_uri) {
   return new_journal_record;
 };
 
-Util.logToJournal = function (ticket, journal_uri, journal_record, jr_type) {
-  // if (!jr_type)
-  //  print("@@@ logToJournal, new_journal_record=" + Util.toJson(journal_record));
-
+Util.logToJournal = function (ticket, journal_uri, journal_record) {
   put_individual(ticket, journal_record, _event_id);
-
   const add_to_journal = {
     '@': journal_uri,
     'v-s:childRecord': [
@@ -314,17 +310,7 @@ Util.logToJournal = function (ticket, journal_uri, journal_record, jr_type) {
         type: 'Uri',
       }],
   };
-
-  // if (!jr_type)
-  //  print("@@@ logToJournal, add_to_journal = " + Util.toJson(add_to_journal));
-
-  // var before = get_individual(ticket, journal_uri);
-  // print('BEFORE : '+Util.toJson(before))
-
   add_to_individual(ticket, add_to_journal, _event_id);
-
-  // var after = get_individual(ticket, journal_uri);
-  // print('AFTER : '+Util.toJson(after))
 };
 
 Util.traceToJournal = function (ticket, journal_uri, label, _data) {

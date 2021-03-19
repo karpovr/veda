@@ -1631,7 +1631,14 @@ v-ui:ClassNameLabelLinkTemplate
   rdfs:label "Шаблон с именем класса и меткой"@ru ;
   rdfs:label "Template with class name and label"@en ;
   v-ui:template """
-<a class="label-template" href="#/@"><span about="@" rel="rdf:type"><span about="@" property="rdfs:label"></span></span>: <span id="label" about="@" property="rdfs:label"></span></a>
+<a class="label-template" href="#/@">
+  <span about="@" rel="rdf:type">
+    <span>
+      <span about="@" property="rdfs:label"></span>
+    </span>
+  </span>:
+  <span id="label" about="@" property="rdfs:label"></span>
+</a>
 <script>
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
@@ -2463,8 +2470,8 @@ v-ui:JournalTemplate
 </script>
 <div class="container journal sheet">
   <style>
-    .journal-record > div > .sub-journal {
-      margin-left: 5px; padding-left: 20px;
+    .sub-journal {
+      margin-left: 5px; padding-left: 5px;
     }
     .journal hr.margin-sm {
       margin: 10px 0px;
@@ -2562,14 +2569,14 @@ v-ui:DocumentEventTemplate
 <div class="journal-record">
   <hr class="margin-sm">
   <div class="row">
-    <div class="col-md-3 col-sm-3 event-type">
+    <div class="col-md-2 col-sm-3 event-type">
       <span class="start-process" href="#" style="display:none">
         <a href="#" id="exp"><span class="glyphicon glyphicon-chevron-down"></span></a>
         <strong about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></strong>
       </span>
       <span class="non-start-process" about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span>
     </div>
-    <div class="col-md-7 col-sm-6 event-desc">
+    <div class="col-md-8 col-sm-6 event-desc">
       <div about="@" rel="v-s:documentVersion" data-template="v-ui:LabelLinkTemplate"></div>
       <div about="@" rel="v-wf:onProcess">
         <script>
@@ -3165,7 +3172,7 @@ v-ui:ttl
 <div class="container sheet">
   <pre style="border:none;background-color:#fff;"></pre>
   <div class="actions pull-left">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="delete destroy"></span>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="delete destroy journal task rights"></span>
   </div>
   <div class="pull-right">
     <a id="default" class="btn btn-info" href="#/@" about="v-s:Default" property="rdfs:label"></a>
@@ -3225,7 +3232,7 @@ v-ui:json
     <a id="ttl" class="btn btn-default" href="#/@//v-ui:ttl">ttl</a>
   </div>
   <div class="actions pull-left">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy journal task rights"></span>
   </div>
 </div>
 <script>
