@@ -88,6 +88,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
                 stored_salt: "".to_string(),
                 edited: 0,
                 credential: &mut Default::default(),
+                is_permanent: false,
             };
 
             let ticket = ah.authenticate();

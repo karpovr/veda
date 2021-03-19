@@ -28,6 +28,7 @@ pub(crate) struct AuthWorkPlace<'a> {
     pub stored_salt: String,
     pub edited: i64,
     pub credential: &'a mut Individual,
+    pub is_permanent: bool,
 }
 
 impl<'a> AuthWorkPlace<'a> {
@@ -118,7 +119,7 @@ impl<'a> AuthWorkPlace<'a> {
                 let is_request_new_password = if self.secret == "?" {
                     warn!("request for new password, user={}", account.get_id());
                     true
-                } else if self.conf.pass_lifetime > 0 && self.edited > 0 && now - self.edited > self.conf.pass_lifetime {
+                } else if !self.is_permanent && self.conf.pass_lifetime > 0 && self.edited > 0 && now - self.edited > self.conf.pass_lifetime {
                     error!("password is old, lifetime > {} days, user={}", self.conf.pass_lifetime, account.get_id());
                     true
                 } else {
@@ -248,6 +249,7 @@ impl<'a> AuthWorkPlace<'a> {
                     self.stored_password = _credential.get_first_literal("v-s:password").unwrap_or_default();
                     self.stored_salt = _credential.get_first_literal("v-s:salt").unwrap_or_default();
                     self.edited = _credential.get_first_datetime("v-s:dateFrom").unwrap_or_default();
+                    self.is_permanent = _credential.get_first_bool("v-s:isPermanent").unwrap_or(false);
                 } else {
                     error!("fail read credential: {}", uses_credential_uri);
                     create_new_credential(self.sys_ticket, self.module, &mut self.credential, account);
