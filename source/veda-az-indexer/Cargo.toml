@@ -10,4 +10,4 @@ log = "0.4"
 v_queue = "=0.1"
 v_authorization = "=0.1.0"
 
-v_module = { package = "v-common-module", version = "0.1.24" }
+v_module = { package = "v-common-module", version = "0.1.25" }
