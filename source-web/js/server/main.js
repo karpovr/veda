@@ -14,6 +14,8 @@ import '../server/numerator.js';
 
 import '../server/util.js';
 
+import '../server/bpmn.js';
+
 try {
 
   veda.ticket = get_env_str_var('$ticket');

@@ -2471,7 +2471,7 @@ v-ui:JournalTemplate
 <div class="container journal sheet">
   <style>
     .sub-journal {
-      margin-left: 5px; padding-left: 5px;
+      margin-left: 5px; padding-left: 10px;
     }
     .journal hr.margin-sm {
       margin: 10px 0px;
