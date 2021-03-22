@@ -1,10 +1,13 @@
 #[macro_use]
 extern crate log;
 
+use std::fs::{File, OpenOptions};
+
 mod index_workplace;
 mod indexer;
 
 use crate::indexer::{Indexer, BATCH_SIZE_OF_TRANSACTION};
+use std::io::{BufRead, BufReader, Write};
 use std::process;
 use std::time::Instant;
 use v_ft_xapian::init_db_path;
@@ -18,6 +21,7 @@ use v_queue::consumer::*;
 use xapian_rusty::*;
 
 const BASE_PATH: &str = "./data";
+const FAILED_LIST_FILE_NAME: &str = "ft-indexer-failed-ids-list.dat";
 const TIMEOUT_BETWEEN_COMMITS: u128 = 100;
 
 fn main() -> Result<(), XError> {
@@ -31,7 +35,6 @@ fn main() -> Result<(), XError> {
         if batch_size == 0 {
             batch_size = BATCH_SIZE_OF_TRANSACTION as u32;
         }
-
         info!("BATCH_SIZE = {}", batch_size);
 
         module.max_batch_size = Some(batch_size);
@@ -77,6 +80,8 @@ fn index(module: &mut Module) -> Result<(), XError> {
             committed_time: Instant::now(),
             xr,
             module_info: module_info.unwrap(),
+            last_indexed_id: "".to_string(),
+            failed_ids: Default::default(),
         };
 
         info!("Rusty search-index: start listening to queue");
@@ -93,6 +98,19 @@ fn index(module: &mut Module) -> Result<(), XError> {
             return Err(e);
         }
 
+        if let Ok(file) = File::open(format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME)) {
+            warn!("use {}", FAILED_LIST_FILE_NAME);
+            let reader = BufReader::new(file);
+
+            for (_index, line) in reader.lines().enumerate() {
+                if let Ok(line) = line {
+                    if !line.is_empty() {
+                        ctx.failed_ids.insert(line);
+                    }
+                }
+            }
+        }
+
         module.listen_queue(
             &mut queue_consumer,
             &mut ctx,
@@ -105,6 +123,7 @@ fn index(module: &mut Module) -> Result<(), XError> {
         error!("fail init ft-query");
     }
 
+    info!("Rusty search-index: end listening to queue");
     Ok(())
 }
 
@@ -122,9 +141,22 @@ fn before(_module: &mut Module, _ctx: &mut Indexer, _batch_size: u32) -> Option<
     None
 }
 
-fn after(_module: &mut Module, ctx: &mut Indexer, _processed_batch_size: u32) -> Result<bool, PrepareError> {
+fn after(_module: &mut Module, ctx: &mut Indexer, processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = ctx.commit_all_db() {
         error!("fail commit, err={:?}", e);
+
+        if processed_batch_size == 1 {
+            if !ctx.last_indexed_id.is_empty() {
+                if let Ok(mut f) = OpenOptions::new().write(true).append(true).create(true).open(format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME)) {
+                    if let Err(e) = writeln!(f, "{}", ctx.last_indexed_id) {
+                        error!("write, err={:?}", e);
+                    }
+                } else {
+                    error!("failed to open {}", format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME));
+                }
+            }
+        }
+
         return Err(PrepareError::Fatal);
     }
     Ok(true)
@@ -145,9 +177,16 @@ fn process(module: &mut Module, ctx: &mut Indexer, queue_element: &mut Individua
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
+    if !ctx.failed_ids.is_empty() && ctx.failed_ids.contains(new_state.get_id()) {
+        warn!("in failed list, skip: {}", new_state.get_id());
+        return Ok(false);
+    }
+
     if let Err(e) = ctx.index_msg(&mut new_state, &mut prev_state, cmd.unwrap(), op_id, module) {
         error!("fail index msg, err={:?}", e);
     }
+
+    ctx.last_indexed_id = new_state.get_id().to_owned();
 
     Ok(false)
 }

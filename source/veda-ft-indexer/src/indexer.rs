@@ -33,6 +33,8 @@ pub(crate) struct Indexer {
     pub committed_time: Instant,
     pub xr: XapianReader,
     pub module_info: ModuleInfo,
+    pub last_indexed_id: String,
+    pub failed_ids: HashSet<String>,
 }
 
 impl fmt::Debug for Indexer {
