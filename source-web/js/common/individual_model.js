@@ -665,7 +665,7 @@ proto.hasValue = function (property_uri, value) {
   if (typeof value !== 'undefined' && value !== null) {
     const serialized = serializer(value);
     result = result && !!this.properties[property_uri].filter( function (item) {
-      return ( item.data == serialized.data && (item.lang && serialized.lang ? item.lang === serialized.lang : true) );
+      return ( item.type === serialized.type && item.data === serialized.data && (item.lang && serialized.lang ? item.lang === serialized.lang : true) );
     }).length;
   }
   return result;
