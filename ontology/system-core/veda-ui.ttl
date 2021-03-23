@@ -2500,10 +2500,10 @@ v-ui:JournalTemplate
   </div>
   <br>
   <div class="row">
-    <div class="col-md-3 col-sm-3">
+    <div class="col-md-2 col-sm-3">
       <strong about="v-s:JournalRecord" property="rdfs:label"></strong>
     </div>
-    <div class="col-md-7 col-sm-6">
+    <div class="col-md-8 col-sm-6">
       <strong about="v-s:description" property="rdfs:label"></strong>
     </div>
     <div class="col-md-2 col-sm-3 text-right">
