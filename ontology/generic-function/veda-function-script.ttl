@@ -89,6 +89,7 @@ v-s:UserScriptEvent
  * parent_document_id = id of the document that triggered this event.
  * super_classes = super classes of the document.
  */
+document = get_individual(veda.ticket, document['@']);
 var toBeRun = document["v-s:toBeRun"] && document["v-s:toBeRun"][0] && document["v-s:toBeRun"][0].data ;
 var executeAt = document["v-s:executeAt"] && document["v-s:executeAt"][0] && document["v-s:executeAt"][0].data ;
 var script = document["v-s:script"] && document["v-s:script"][0] && document["v-s:script"][0].data;
