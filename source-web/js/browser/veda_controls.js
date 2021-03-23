@@ -2240,7 +2240,10 @@ function resizeImage (image, maxWidth) {
       const temp = $('<div></div>').append(image);
       System.import('cropper/cropper.min.js').then(function (module) {
         const Cropper = module.default;
-        System.import('cropper/cropper.min.css').then(function () {
+        System.import('cropper/cropper.min.css').then(function (module) {
+          const styleSheet = module.default;
+          document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
+
           const cropper = new Cropper(image, {
             autoCrop: false,
             ready: function (event) {
@@ -2280,7 +2283,10 @@ function cropImage(imageForCrop, ratio, maxWidth) {
   return new Promise(function (resolve, reject) {
     System.import('cropper/cropper.min.js').then(function (module) {
       const Cropper = module.default;
-      System.import('cropper/cropper.min.css').then(function () {
+      System.import('cropper/cropper.min.css').then(function (module) {
+        const styleSheet = module.default;
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
+
         // in templates ratio=h/w, in crop ratio=w/h
         const cropper = new Cropper(imageForCrop, {
           aspectRatio: 1 / ratio,
