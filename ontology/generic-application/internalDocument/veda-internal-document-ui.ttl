@@ -84,7 +84,7 @@ v-s:InitiatorDepartmentForInternalDocumentBundle
 .
 
 # Templates ------------------------------------------------------------
-v-s:TS_InternalDocument 
+v-s:TS_InternalDocument
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:InternalDocumentTemplate;
@@ -178,7 +178,9 @@ v-s:InternalDocumentTemplate
     InternalDocument["v-s:content"] = individual["v-s:content"] ;
     riot.route( ["#", InternalDocument.id, "#main", tmpl, "edit"].join("/") ) ;
     InternalDocument.one("afterSave", function () {
-      riot.route("#/" + InternalDocument.id, false);
+      setTimeout(() => {
+        riot.route("#/" + InternalDocument.id, false);
+      }, 250);
     });
   });
 
