@@ -295,8 +295,7 @@ v-s:RequestDelegationTemplate
 </div>
 <script>
   individual.on("v-s:delegatedPosition", delegatedPositionHandler);
-  individual.on("v-s:delegator", extractEmployee);
-  individual.on("v-s:delegate", extractEmployee);
+  individual.on("v-s:delegator v-s:delegate", extractEmployee);
   individual.on("v-s:delegator", delegatorHandler);
   template.one("remove", function () {
     individual.off("v-s:delegatedPosition", delegatedPositionHandler);
