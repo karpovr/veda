@@ -2359,27 +2359,15 @@ v-ui:SimplifiedJournalTemplate
             var currentOcuppation = veda.appointment["v-s:occupation"][0];
             var targetEmployee = individual["v-wf:from"][0];
             var targetOccupation = individual["v-wf:from"][1]
-
-            Promise.resolve().then(function() {
-              var canRevoke = currentEmployee === targetEmployee && currentOcuppation === targetOccupation;
-              if (!canRevoke && targetOccupation) {
-                var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + targetOccupation.id + "' && 'v-s:employee' == '" + currentEmployee.id + "'";
-                return veda.Backend.query(veda.ticket, queryString).then(function (queryResult) {
-                  return queryResult.result.length > 0 ;
-                });
-              } else {
-                return canRevoke;
-              }
-            }).then(function(canRevoke) {
-              var isDirectTask = individual.hasValue("v-wf:isDirectTask", true);
-              if (!canRevoke || !isDirectTask) {
-                $(".docflow-buttons", template).hide();
-              } else {
-                $(".docflow-buttons", template).show();
-                $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
-                $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
-              };
-            })
+            var canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
+            var isDirectTask = individual.hasValue("v-wf:isDirectTask", true);
+            if (!canRevoke || !isDirectTask) {
+              $(".docflow-buttons", template).hide();
+            } else {
+              $(".docflow-buttons", template).show();
+              $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
+              $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
+            }
           }
 
           function takeDecision(takenDecision, label) {
