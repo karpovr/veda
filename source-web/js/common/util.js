@@ -612,7 +612,12 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
                   .trim()
                   .replace(/[-*\s]+/g, ' ')
                   .split(' ');
-                return words.length && 'arrayStringConcat(' + prop + '_str, \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                // 'text' is a special single-value column without suffix with all text content of an individual
+                if ( /\.text$/.test(prop) ) {
+                  return words.length && prop + ' LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                } else {
+                  return words.length && 'arrayStringConcat(' + prop + ', \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                }
               });
               return lineQueries.filter(Boolean).join(' OR ');
             })
@@ -828,7 +833,12 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
                       .trim()
                       .replace(/[-*\s]+/g, ' ')
                       .split(' ');
-                    return words.length && 'arrayStringConcat(' + prop + '_str, \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                    // 'text' is a special single-value column without suffix with all text content of an individual
+                    if ( /\.text$/.test(prop) ) {
+                      return words.length && prop + ' LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                    } else {
+                      return words.length && 'arrayStringConcat(' + prop + ', \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                    }
                   });
                   return lineQueries.filter(Boolean).join(' OR ');
                 })

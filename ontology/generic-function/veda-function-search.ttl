@@ -1632,13 +1632,13 @@ v-fs:AdvancedSearch
   v-fs:searchBlank v-fs:AdvancedSearchBlank ;
   v-fs:searchBlankTemplate v-fs:AdvancedSearchTemplate ;
   v-fs:searchResultTemplate v-fs:FulltextResultTemplate ;
+  v-fs:queryLanguage "sql" ;
 .
 
 v-fs:AdvancedSearchBlank
   rdf:type v-fc:Blank ;
   rdfs:label "Бланк расширенного поиска"@ru ;
   rdfs:label "Advanced search blank"@en ;
-  v-fc:targetType v-s:Document ;
 .
 
 v-fs:AdvancedSearchTemplate
@@ -1649,13 +1649,12 @@ v-fs:AdvancedSearchTemplate
 <div>
   <div class="row">
     <div class="col-md-3">
-      <em about="v-fs:SearchForContentBundle" property="rdfs:label"></em>
-      <veda-control property="rdfs:label" data-type="string" placeholder="Введите запрос"></veda-control>
+      <em about="rdf:type" property="rdfs:label"></em>
+      <veda-control rel="rdf:type" data-single="true" data-type="link" class="fulltext dropdown" data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
     </div>
     <div class="col-md-3">
-      <em about="v-fs:requiredClass" property="rdfs:label"></em>
-      <div rel="v-fs:requiredClass" data-template="v-ui:LabelTemplate"></div>
-      <veda-control rel="v-fs:requiredClass" data-type="link" class="fulltext dropdown" data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+      <em about="v-fs:SearchForContentBundle" property="rdfs:label"></em>
+      <veda-control property="text" data-type="string" placeholder="Введите запрос"></veda-control>
     </div>
     <div class="col-md-3">
       <em about="v-s:created" property="rdfs:label"></em>
@@ -1672,62 +1671,24 @@ v-fs:AdvancedSearchTemplate
 <script>
   var find = container.siblings(".search-actions").find("#search-button.search-button");
 
-  function searchHandler() {
-    var queryString = null;
-    if (individual.hasValue("rdfs:label")) {
-      queryString = "('*'=='"+individual["rdfs:label"][0]+"')";
-    }
-    if (individual.hasValue("v-s:created")) {
-      var dates = individual["v-s:created"];
-      var start = new Date(dates[0]);
-      var end = new Date(dates[dates.length-1]);
-      start.setHours(0,0,0,0);
-      end.setHours(23,59,59,999);
-      var createdPart = "('v-s:created'==[" + start.toISOString() + "," + end.toISOString() + "])";
-
-      queryString = queryString == null? createdPart : queryString + " && " + createdPart;
-    }
-    if (individual.hasValue("v-s:creator")) {
-      var creatorPart = individual["v-s:creator"].map(function(creator) {
-        return "('v-s:creator'=='" +  creator.id + "')";
-      }).join(" || ");
-      creatorPart = "(" + creatorPart + ")";
-
-      queryString = queryString == null? creatorPart : queryString + " && " + creatorPart;
-    }
-
-    if (individual.hasValue("v-fs:requiredClass")) {
-      var typePart = individual["v-fs:requiredClass"].map(function(type){
-        return "('rdf:type'==='" + type.id + "')";
-      }).join(" || ");
-      typePart = "(" + typePart + ")";
-
-      queryString = queryString == null? typePart : queryString + " && " + typePart;
-    } else if (queryString != null) {
-      queryString = queryString + " && ('rdf:type'=='v-s:Document')";
-    }
-
-    if (queryString != null) {
-      individual.set("*", [queryString]);
-      find.removeAttr("disabled");
+  function typeHandler() {
+    if ( !individual.hasValue('rdf:type') ) {
+      find.attr('disabled', 'disabled');
+      find.addClass('disabled');
+      $('veda-control[rel="rdf:type"]', template).addClass('has-error');
     } else {
-      find.attr("disabled", "disabled");
-      delete individual.properties["*"];
-
+      find.removeAttr('disabled', 'disabled');
+      find.removeClass('disabled');
+      $('veda-control[rel="rdf:type"]', template).removeClass('has-error');
     }
   }
-  searchHandler();
+  typeHandler();
 
-  individual.on("rdfs:label", searchHandler);
-  individual.on("v-fs:requiredClass", searchHandler);
-  individual.on("v-s:created", searchHandler);
-  individual.on("v-s:creator", searchHandler);
-  template.one("remove", function(){
-    individual.off("rdfs:label", searchHandler);
-    individual.off("v-fs:requiredClass", searchHandler);
-    individual.off("v-s:created", searchHandler);
-    individual.off("v-s:creator", searchHandler);
+  individual.on('rdf:type', typeHandler);
+  template.one('remove', function () {
+    individual.off('rdf:type', typeHandler);
   });
+
   //# sourceURL=v-fs:AdvancedSearchTemplate_post
 </script>
   """ ;
