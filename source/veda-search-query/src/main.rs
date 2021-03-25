@@ -66,8 +66,8 @@ fn req_prepare(module: &mut Module, request: &Message, ch_client: &mut CHClient)
             let ticket_id = a.get(TICKET).unwrap().as_str().unwrap_or_default();
             let query = a.get(QUERY).unwrap().as_str().unwrap_or_default();
 
-            let top = a.get(TOP).unwrap().as_i64().unwrap_or_default();
             let limit = a.get(LIMIT).unwrap().as_i64().unwrap_or_default();
+            let top = a.get(TOP).unwrap().as_i64().unwrap_or(limit);
             let from = a.get(FROM).unwrap().as_i64().unwrap_or_default();
 
             let mut user_uri = "cfg:Guest".to_owned();

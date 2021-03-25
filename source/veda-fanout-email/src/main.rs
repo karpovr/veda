@@ -353,7 +353,7 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
 fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Context, module: &mut Module) -> Vec<Mailbox> {
     let mut res = Vec::new();
     let label;
-    if ap_id.is_empty() || ap_id.is_empty() {
+    if ap_id.is_empty()  {
         return vec![];
     }
 
