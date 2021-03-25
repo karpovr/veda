@@ -232,6 +232,7 @@ jsWorkflow.ready(function() {
 
     // Fill info panel on flow click
     instance.bind('click', function(transition) {
+      const flowId = transition.getData();
       veda['workflow'+elementId+'-selectedElement'] = transition.id;
       instance.defocus();
 
@@ -245,7 +246,7 @@ jsWorkflow.ready(function() {
       selectedElementType = 'flow';
       selectedElementSourceId = transition.sourceId;
 
-      const about = new veda.IndividualModel(transition.id);
+      const about = new veda.IndividualModel(flowId);
       const holder = $('<div>');
       about.present(holder);
       props.append(holder);
@@ -268,23 +269,18 @@ jsWorkflow.ready(function() {
 
     // Handle creating new flow event
     instance.bind('connection', function(info) {
-      if ( info.connection.id.indexOf('con') == -1 ) {
-        const flow = new veda.IndividualModel(info.connection.id);
-        flow['v-wf:flowsInto'] = [new veda.IndividualModel(info.targetId)]; // setup Flow target
-        return; // Don't use logic when we work with flows that already exists
-      }
-      const individual = new veda.IndividualModel(); // create individual (Task / Condition)
-
-      individual['rdf:type'] = [new veda.IndividualModel('v-wf:Flow')];
-
-      net['v-wf:consistsOf'] = net['v-wf:consistsOf'].concat(individual); // <- Add new Flow to Net
-
       const source = new veda.IndividualModel(info.sourceId);
-      source['v-wf:hasFlow'] = source['v-wf:hasFlow'].concat(individual);
+      const flowExists = source.get('v-wf:hasFlow').filter(function(flow) {
+         return flow.hasValue('v-wf:flowsInto', info.targetId);
+      }).length;
+      if (flowExists) { return; }
 
-      individual['v-wf:flowsInto'] = [new veda.IndividualModel(info.targetId)]; // setup Flow target
-
-      info.connection.id = individual.id;
+      const flow = new veda.IndividualModel(); // Create Flow individual
+      flow['rdf:type'] = 'v-wf:Flow';
+      flow['v-wf:flowsInto'] = info.targetId; // Set Flow target
+      net.addValue('v-wf:consistsOf', flow); // Add new Flow to Net
+      source.addValue('v-wf:hasFlow',flow); // Add new Flow to source
+      info.connection.setData(flow.id);
     });
 
     const subNetViewButton = function(state, $state) {
@@ -754,7 +750,6 @@ jsWorkflow.ready(function() {
 
     instance.createFlow = function(state, flow) {
       const connector = instance.connect({
-        id: flow.id,
         source: state.id,
         target: flow['v-wf:flowsInto'][0].id,
         detachable: (mode=='edit'),
@@ -762,6 +757,7 @@ jsWorkflow.ready(function() {
       if (flow.hasValue('rdfs:label')) {
         connector.addOverlay(['Label', {label: flow['rdfs:label'][0], location: 0.5, id: 'flowLabel'}]);
       }
+      connector.setData(flow.id);
     };
 
     instance.deleteFlow = function(flow, source) {
