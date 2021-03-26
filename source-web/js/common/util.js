@@ -616,7 +616,7 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
                 if ( /\.text$/.test(prop) ) {
                   return words.length && prop + ' LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
                 } else {
-                  return words.length && 'arrayStringConcat(' + prop + ', \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                  return words.length && 'arrayStringConcat(' + prop + '_str, \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
                 }
               });
               return lineQueries.filter(Boolean).join(' OR ');
@@ -837,7 +837,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
                     if ( /\.text$/.test(prop) ) {
                       return words.length && prop + ' LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
                     } else {
-                      return words.length && 'arrayStringConcat(' + prop + ', \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
+                      return words.length && 'arrayStringConcat(' + prop + '_str, \' \') LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
                     }
                   });
                   return lineQueries.filter(Boolean).join(' OR ');
