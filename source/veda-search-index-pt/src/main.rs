@@ -15,7 +15,6 @@ use clickhouse_rs::{errors::Error, Block, ClientHandle, Pool};
 use futures::executor::block_on;
 use std::time::Instant;
 
-use url::Url;
 use v_module::v_api::IndvOp;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
@@ -554,13 +553,8 @@ fn main() -> Result<(), Error> {
     }
     let mut module = Module::default();
 
-    let mut pool = match connect_to_clickhouse(&Module::get_property("query_indexer_db").unwrap_or_default()) {
-        Err(e) => {
-            error!("Failed to connect to clickhouse: {}", e);
-            process::exit(101)
-        }
-        Ok(pool) => pool,
-    };
+    let mut pool = Pool::new(Module::get_property("query_indexer_db")
+        .unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
 
     block_on(init_clickhouse(&mut pool))?;
 
@@ -697,27 +691,6 @@ async fn read_predicate_tables(pool: &mut Pool) -> Result<HashMap<String, HashMa
         tables.insert(table_name, table_columns);
     }
     Ok(tables)
-}
-
-fn connect_to_clickhouse(query_db_url: &str) -> Result<Pool, &'static str> {
-    info!("Configuration to connect to Clickhouse: {}", query_db_url);
-    match Url::parse(query_db_url) {
-        Ok(url) => {
-            let host = url.host_str().unwrap_or("127.0.0.1");
-            let port = url.port().unwrap_or(9000);
-            let user = url.username();
-            let pass = url.password().unwrap_or("123");
-            let url = format!("tcp://{}:{}@{}:{}/", user, pass, host, port);
-            info!("Trying to connect to Clickhouse, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
-            info!("Connection url: {}", url);
-            let pool = Pool::new(url);
-            return Ok(pool);
-        }
-        Err(e) => {
-            error!("{:?}", e);
-            return Err("Invalid connection url");
-        }
-    }
 }
 
 async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
