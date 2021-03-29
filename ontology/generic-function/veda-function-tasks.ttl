@@ -597,10 +597,10 @@ v-ft:TaskBlankTemplate
         function documentHandler() {
           if ( this.hasValue('rdfs:label') && !this.hasValue('rdf:type') ) {
             $('veda-control[rel="rdf:type"]', template).addClass('has-error');
-            $('.search-button').attr('disabled', 'disabled');
+            $('.search-button, .more-results, .all-results').attr('disabled', 'disabled');
           } else {
             $('veda-control[rel="rdf:type"]', template).removeClass('has-error');
-            $('.search-button').removeAttr('disabled');
+            $('.search-button, .more-results, .all-results').removeAttr('disabled');
           }
         }
         individual.on('propertyModified', documentHandler);
