@@ -94,6 +94,11 @@ v-fs:NoMoreResults
   rdfs:label "Все результаты загружены"@ru ;
   rdfs:label "All results loaded"@en ;
 .
+v-fs:SearchErrorMessage
+  rdf:type v-s:Bundle ;
+  rdfs:label "Ошибка поиска. Обратитесь к системному администратору."@ru ;
+  rdfs:label "Search error. Contact your system administrator."@en ;
+.
 v-fs:SearchForContentBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Содержание"@ru ;
@@ -1025,12 +1030,15 @@ v-fs:AttributiveSearchInlineTemplate
       </h4>
     </div>
     <div class="search-result table-responsive noSwipe"></div>
-    <div class="not-found alert alert-warning hidden">
+    <div class="not-found alert alert-warning no-margin hidden">
       <strong about="v-fs:Empty" property="rdfs:label"></strong> <span about="v-fs:NothingFound" property="rdfs:label"></span>
     </div>
-    <div class="no-more-results alert alert-success hidden">
+    <div class="no-more-results alert alert-success no-margin hidden">
       <strong about="v-fs:NoMoreResults" property="rdfs:label"></strong>
     </div>
+  </div>
+  <div class="search-error alert alert-danger no-margin hidden">
+    <strong about="v-fs:SearchErrorMessage" property="rdfs:label"></strong>
   </div>
 </div>
 <script>
@@ -1080,6 +1088,7 @@ v-fs:AttributiveSearchInlineTemplate
       moreResults = $(".more-results", template),
       allResults = $(".all-results", template),
       noMoreResults = $(".no-more-results", template),
+      searchError = $(".search-error", template),
       searchBlank = self.hasValue("v-fs:searchBlank") ? self["v-fs:searchBlank"][0] : undefined ,
       searchBlankTemplate = self.hasValue("v-fs:searchBlankTemplate") ? self["v-fs:searchBlankTemplate"][0] : undefined ,
       resultContainer = $(".result-container", template),
@@ -1149,6 +1158,7 @@ v-fs:AttributiveSearchInlineTemplate
   // Search handler
   function searchHandler() {
     var searchButtons = $(".search-button", template);
+    searchError.addClass("hidden");
     toggleSpin(searchButtons);
     self.search()
       .then(renderResult)
@@ -1162,6 +1172,7 @@ v-fs:AttributiveSearchInlineTemplate
       .catch(function (error) {
         console.log(error);
         toggleSpin(searchButtons);
+        searchError.removeClass("hidden");
       });
   }
   self.on("search", searchHandler);
