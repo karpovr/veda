@@ -376,7 +376,6 @@ v-ft:Inbox
   v-fs:sortOrder "'v-s:created' desc" ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
   v-fs:applicableOperation v-ft:MakeDecisionOperation ;
-  v-fs:queryBuilder "veda.Util.queryInbox" ;
   v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
@@ -385,7 +384,6 @@ v-ft:InboxBlank
   rdfs:label "Бланк входящих задач"@ru ;
   rdfs:label "Blank inbox task"@en ;
   v-fc:targetType v-wf:DecisionForm ;
-  v-fc:targetType bpmn:DecisionForm ;
   v-wf:onDocument v-ft:InboxDocumentBlank ;
   v-wf:takenDecision v-ft:InboxDecisionBlank ;
   v-wf:isCompleted false ;
@@ -410,7 +408,6 @@ v-ft:Outbox
   v-fs:searchResultTemplate v-ft:TaskResultTemplate ;
   v-fs:sortOrder "'v-s:created' desc"^^xsd:string ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
-  v-fs:queryBuilder "veda.Util.queryInbox" ;
   v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
@@ -419,7 +416,6 @@ v-ft:OutboxBlank
   rdfs:label "Бланк исходящих задач"@ru ;
   rdfs:label "Blank outbox task"@en ;
   v-fc:targetType v-wf:DecisionForm ;
-  v-fc:targetType bpmn:DecisionForm ;
   v-wf:onDocument v-ft:OutboxDocumentBlank ;
   v-wf:takenDecision v-ft:OutboxDecisionBlank ;
   v-wf:isCompleted false ;
@@ -444,7 +440,6 @@ v-ft:Completed
   v-fs:searchResultTemplate v-ft:CompletedResultTemplate ;
   v-fs:sortOrder "'v-s:created' desc"^^xsd:string ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
-  v-fs:queryBuilder "veda.Util.queryInbox" ;
   v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
@@ -453,7 +448,6 @@ v-ft:CompletedBlank
   rdfs:label "Бланк выполненных задач"@ru ;
   rdfs:label "Blank completed task"@en ;
   v-fc:targetType v-wf:DecisionForm ;
-  v-fc:targetType bpmn:DecisionForm ;
   v-wf:onDocument v-ft:CompletedDocumentBlank ;
   v-wf:takenDecision v-ft:CompletedDecisionBlank ;
   v-wf:isCompleted true ;
@@ -478,7 +472,6 @@ v-ft:OutboxCompleted
   v-fs:searchResultTemplate v-ft:CompletedResultTemplate ;
   v-fs:sortOrder "'v-s:created' desc"^^xsd:string ;
   v-ui:hasTemplate v-ft:InboxTemplate ;
-  v-fs:queryBuilder "veda.Util.queryInbox" ;
   v-fs:queryLanguage "vql" ;
   v-fs:searchOnLoad true ;
 .
@@ -487,7 +480,6 @@ v-ft:OutboxCompletedBlank
   rdfs:label "Бланк выполненных задач"@ru ;
   rdfs:label "Blank completed task"@en ;
   v-fc:targetType v-wf:DecisionForm ;
-  v-fc:targetType bpmn:DecisionForm ;
   v-wf:onDocument v-ft:OutboxCompletedDocumentBlank ;
   v-wf:takenDecision v-ft:OutboxCompletedDecisionBlank ;
   v-wf:isCompleted true ;
@@ -590,17 +582,34 @@ v-ft:TaskBlankTemplate
       <em about="v-wf:to" property="rdfs:label"></em>
       <veda-control property="v-wf:to" data-single="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
     </div>
-    <div class="col-md-4" about="@" rel="v-wf:onDocument">
-      <div>
-        <em about="v-ft:DocumentTypeBundle" property="rdfs:label"></em>
-        <veda-control rel="rdf:type" data-type="link" class="dropdown fulltext" data-single="true" data-placeholder=" " data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+    <div class="col-md-8" about="@" rel="v-wf:onDocument">
+      <div class="row">
+        <div class="col-md-6">
+          <em about="v-ft:DocumentTypeBundle" property="rdfs:label"></em>
+          <veda-control rel="rdf:type" data-type="link" class="dropdown fulltext" data-single="true" data-placeholder=" " data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+        </div>
+        <div class="col-md-6">
+          <em about="v-ft:DocumentBundle" property="rdfs:label"></em>
+          <veda-control property="rdfs:label" data-type="string"></veda-control>
+        </div>
       </div>
-    </div>
-    <div class="col-md-4" about="@" rel="v-wf:onDocument">
-      <div>
-        <em about="v-ft:DocumentBundle" property="rdfs:label"></em>
-        <veda-control property="rdfs:label" data-type="string"></veda-control>
-      </div>
+      <script>
+        function documentTypeHandler() {
+          if ( this.hasValue('rdf:type') ) {
+            $('veda-control[property="rdfs:label"] input', template).removeAttr('disabled');
+          } else {
+            $('veda-control[property="rdfs:label"] input', template).attr('disabled', 'disabled');
+            this.clearValue('rdfs:label');
+          }
+        }
+        individual.on('rdf:type', documentTypeHandler);
+        template.one('remove', function () {
+          individual.off('rdf:type', documentTypeHandler);
+        })
+        documentTypeHandler.apply(this);
+
+        //# sourceURL=v-ft:TaskBlankTemplate_inline
+      </script>
     </div>
   </div>
   <small class="advanced-toggle text-muted" about="v-fs:AdvancedSearchBundle" property="rdfs:label" style="border-bottom:1px dashed #707070; cursor:pointer;"></small>
@@ -645,6 +654,7 @@ v-ft:TaskBlankTemplate
       $(".advanced-search", template).addClass("hidden");
     }
   });
+
   //# sourceURL=v-ft:TaskBlankTemplate_post
 </script>
   """ ;
