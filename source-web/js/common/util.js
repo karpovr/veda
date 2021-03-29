@@ -770,6 +770,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
        * @param {number} type_index
        */
       function buildQuery(individual, parent_prop, type_index) {
+        if (!individual.hasValue('rdf:type')) { return; }
         table_counter++;
         type_index = type_index || 0;
         const type = individual.get('rdf:type')[type_index].id;
