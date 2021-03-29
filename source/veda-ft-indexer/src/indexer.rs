@@ -273,10 +273,10 @@ impl Indexer {
             if self.index_dbs.contains_key(&dbname) {
                 if let Some(db) = self.index_dbs.get_mut(&dbname) {
                     if is_deleted {
-                        info!("delete from [{}], uri=[{}]", dbname, new_indv.get_id());
+                        info!("delete from [{}], type={}, uri={}", dbname, types.first().unwrap_or(&"unknown".to_owned()), new_indv.get_id());
                         db.delete_document(&uuid)?;
                     } else {
-                        info!("index to [{}], uri=[{}]", dbname, new_indv.get_id());
+                        info!("index to [{}], type={}, uri={}", dbname, types.first().unwrap_or(&"unknown".to_owned()), new_indv.get_id());
                         db.replace_document(&uuid, &mut iwp.doc)?;
                     }
                 }
