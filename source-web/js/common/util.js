@@ -613,6 +613,9 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
                   .replace(/[-*\s]+/g, ' ')
                   .split(' ');
                 // 'text' is a special single-value column without suffix with all text content of an individual
+                if ( /\.\*$/.test(prop) ) {
+                  prop = prop.replace('*', 'text');
+                }
                 if ( /\.text$/.test(prop) ) {
                   return words.length && prop + ' LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
                 } else {
@@ -835,6 +838,9 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
                       .replace(/[-*\s]+/g, ' ')
                       .split(' ');
                     // 'text' is a special single-value column without suffix with all text content of an individual
+                    if ( /\.\*$/.test(prop) ) {
+                      prop = prop.replace('*', 'text');
+                    }
                     if ( /\.text$/.test(prop) ) {
                       return words.length && prop + ' LIKE \'%' + words.join('% %').replace(/\'/g, '\\\'').replace(/\"/g, '\'') + '%\'';
                     } else {
