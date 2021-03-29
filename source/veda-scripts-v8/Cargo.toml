@@ -10,7 +10,7 @@ chrono = "0.4"
 lazy_static = "1.4.0"
 rust_decimal = "1.7.0"
 
-v_queue = "=0.1"
+v_queue = "=0.1.2"
 
 v_module = { package = "v-common-module", version = "0.1.26" }
 v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.27" }
