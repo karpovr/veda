@@ -594,19 +594,20 @@ v-ft:TaskBlankTemplate
         </div>
       </div>
       <script>
-        function documentTypeHandler() {
-          if ( this.hasValue('rdf:type') ) {
-            $('veda-control[property="rdfs:label"] input', template).removeAttr('disabled');
+        function documentHandler() {
+          if ( this.hasValue('rdfs:label') && !this.hasValue('rdf:type') ) {
+            $('veda-control[rel="rdf:type"]', template).addClass('has-error');
+            $('.search-button').attr('disabled', 'disabled');
           } else {
-            $('veda-control[property="rdfs:label"] input', template).attr('disabled', 'disabled');
-            this.clearValue('rdfs:label');
+            $('veda-control[rel="rdf:type"]', template).removeClass('has-error');
+            $('.search-button').removeAttr('disabled');
           }
         }
-        individual.on('rdf:type', documentTypeHandler);
+        individual.on('propertyModified', documentHandler);
         template.one('remove', function () {
-          individual.off('rdf:type', documentTypeHandler);
-        })
-        documentTypeHandler.apply(this);
+          individual.off('propertyModified', documentHandler);
+        });
+        documentHandler.apply(this);
 
         //# sourceURL=v-ft:TaskBlankTemplate_inline
       </script>

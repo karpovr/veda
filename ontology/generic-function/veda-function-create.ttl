@@ -229,7 +229,52 @@ this.initBlank = function (blankObject) {
   return Promise.all(relations_done_promises).then(function () {
     return blank.object;
   });
-}
+};
+
+this.resetBlank = function (blankObject) {
+  var blank = this;
+  blank.object = new veda.IndividualModel();
+  blank.object["rdf:type"] = blank["v-fc:targetType"].slice(0);
+  blank.object.one("afterSave afterReset", function () {
+    delete blank.object;
+  });
+  var relations = Object.keys(blank.properties).filter(function (property_uri) {
+    if ( initStopList.indexOf(property_uri) >= 0 ) { return false; }
+    if ( blank.hasValue(property_uri) && blank.get(property_uri)[0] instanceof veda.IndividualModel) {
+      return true;
+    } else {
+      blank.object.set(property_uri, blank.get(property_uri).slice(0));
+      return false;
+    }
+  });
+  var relations_done_promises = relations.map(function (property_uri) {
+    var values_promises = blank.get(property_uri).map(function (value) {
+      return value.load();
+    });
+    return Promise.all(values_promises).then(function (values) {
+      var result_values_promises = values.map(function (value) {
+        if (value.hasValue("rdf:type", "v-fc:Blank")) {
+          return value.resetBlank().then(function (blankObject) {
+            blankObject.is("v-s:Embedded").then(function (isEmbedded) {
+              if ( isEmbedded && property_uri !== "v-s:parent" ) {
+                blankObject["v-s:parent"] = [ blank.object ];
+              }
+            });
+            return blankObject;
+          });
+        } else {
+          return value;
+        }
+      });
+      return Promise.all(result_values_promises).then(function (result_values) {
+        blank.object.set(property_uri, result_values);
+      });
+    });
+  });
+  return Promise.all(relations_done_promises).then(function () {
+    return blank.object;
+  });
+};
 
 this.updateBlank = function () {
   var blank = this;
@@ -267,7 +312,7 @@ this.updateBlank = function () {
   return Promise.all(relations_done_promises_flat).then(function () {
     return blank.save();
   });
-}
+};
 //# sourceURL=v-fc:BlankModel
   """
 .

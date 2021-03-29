@@ -1419,7 +1419,7 @@ v-fs:AttributiveSearchInlineTemplate
         $("#reset-button.reset-button", template).click(function () {
           searchBlank.object.off("*");
           delete searchBlank.object;
-          setupBlank();
+          resetBlank();
           hideResults();
         });
         return setupBlank();
@@ -1430,6 +1430,24 @@ v-fs:AttributiveSearchInlineTemplate
     }
     function setupBlank () {
       return searchBlank.initBlank().then(function (blankObject) {
+        blankObject.on("propertyModified", hideResults);
+        template.one("remove", function () {
+          blankObject.off("propertyModified", hideResults);
+        });
+        // Populate blank with extra parameters from URL
+        if (extra) {
+          for (var property_uri in extra) {
+            blankObject[property_uri] = extra[property_uri];
+          }
+        }
+        if ( searchBlankTemplate && searchBlankContainer.length ) {
+          searchBlankContainer.empty();
+          return blankObject.present(searchBlankContainer, searchBlankTemplate, "search");
+        }
+      });
+    }
+    function resetBlank () {
+      return searchBlank.resetBlank().then(function (blankObject) {
         blankObject.on("propertyModified", hideResults);
         template.one("remove", function () {
           blankObject.off("propertyModified", hideResults);
