@@ -548,18 +548,6 @@ ol.no-marks, ul.no-marks {
   list-style: none;
 }
 
-.form-control[disabled],
-.form-control[readonly],
-fieldset[disabled] .form-control {
-  cursor: not-allowed;
-  background-color: transparent;
-  border: none;
-  opacity: 1;
-  box-shadow: none !important;
-  height:auto;
-  padding: 0;
-}
-
 @media (min-width: 768px) {
   .modal-sm {
     width: 300px;
