@@ -556,12 +556,12 @@ cfg:ScheduledAction_CreateInstruction_Daily
   rdf:type v-s:Event ;
   v-s:author cfg:VedaSystemAppointment ;
   rdfs:label "Создание поручения для запланированных событий" ;
-  v-s:triggerByUid cfg:daily ;
+  v-s:triggerByUid cfg:hourly ;
   v-s:runAt "V8.LowPriority";
   v-s:script """
 print("[cfg:ScheduledAction_CreateInstruction_Daily] ************************** START **************************");
 
-var scriptInfo = get_individual(ticket, 'v-s:ScheduledAction_CreateInstruction_Daily_Info');
+var scriptInfo = get_individual(veda.ticket, 'v-s:ScheduledAction_CreateInstruction_Daily_Info');
 if (!scriptInfo) {
   var yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -574,48 +574,49 @@ if (!scriptInfo) {
 //print('scritInfo=', veda.Util.toJson(scriptInfo));
 var lastDate = scriptInfo['v-s:lastDateOfExecuting'][0].data;
 var today = new Date();
-today.setHours(23,59,59,0);
+today.setHours(today.getHours()+1);
+//today.setHours(23,59,59,0);
 var queryString = "( 'rdf:type'==='v-s:ScheduledAction' && 'v-s:scriptHandlered'=='false' )";
 var result = query(ticket, queryString).result;
 for (var i=0; i<result.length; i++){
-  var individ = new veda.IndividualModel(result[i], false);
+  var individ = get_individual(veda.ticket, result[i]);
   // не нужно в случае множественного значения периода
   // if (veda.Util.hasValue(individ, 'v-s:dateToFact')) {
   //   print('Skip, because was processed: ',result[i]);
   //   continue;
   // };
-  if (!individ.hasValue('v-s:backwardTarget')){
+  if (!veda.Util.hasValue(individ, "v-s:backwardTarget")) {
     print('Skip, because not found backwardTarget: ',result[i]);
     continue;
   }
-  if (!individ.hasValue('v-s:dateToPlan')){
+  if (!veda.Util.hasValue(individ, "v-s:dateToPlan")) {
     print('Skip, because not found dateToPlan: ',result[i]);
     continue;
   }
   //print('dateToPlan=', individ['v-s:dateToPlan']);
-  var deadline = individ['v-s:dateToPlan'][0];
+  var deadline = individ['v-s:dateToPlan'][0].data;
   var isAll = true;
   var set_in_document = {
     '@': result[i]
   };
   for (var j = 0; j < individ['v-s:hasPeriod'].length; j++){
-    var period = individ['v-s:hasPeriod'][j];
+    var period = individ['v-s:hasPeriod'][j].data;
     var delta;
-    if (period.id == 'd:z8r34mi5y8rl8m4kbo3q69uw5d') {
+    if (period == 'd:z8r34mi5y8rl8m4kbo3q69uw5d') {
       delta = 86400000;
-    } else if (period.id == 'd:a21t5y3pswuewm8ohjexiqtxscr') {
+    } else if (period == 'd:a21t5y3pswuewm8ohjexiqtxscr') {
       delta = 86400000*7;
-    } else if (period.id == 'd:fb27kxa3r98ilnkvmy99xc11p1') {
+    } else if (period == 'd:fb27kxa3r98ilnkvmy99xc11p1') {
       delta = 86400000*14;
-    } else if (period.id == 'd:pqauzdiqyls7pzrawelnh2zwj3') {
+    } else if (period == 'd:pqauzdiqyls7pzrawelnh2zwj3') {
       delta = 86400000*30;
-    } else if (period.id == 'd:d2cloqhm8yqaq8t68zi9iepc69') {
+    } else if (period == 'd:d2cloqhm8yqaq8t68zi9iepc69') {
       delta = 86400000*61;
-    } else if (period.id == 'd:a28m44dm9yw04j7hf69r4i40sn5') {
+    } else if (period == 'd:a28m44dm9yw04j7hf69r4i40sn5') {
       delta = 86400000*121;
-    } else if (period.id == 'd:p699yrkgnd7bamjaqwx305o5hi') {
+    } else if (period == 'd:p699yrkgnd7bamjaqwx305o5hi') {
       delta = 86400000*365;
-    } else if (period.id == 'd:jsc4p8dq5u4fm1sumekuifkw7r') {
+    } else if (period == 'd:jsc4p8dq5u4fm1sumekuifkw7r') {
       delta = 86400000/24;
     } else {
       print("Skip, because period is unbehavior",result[i]);
@@ -634,10 +635,8 @@ for (var i=0; i<result.length; i++){
       print("Skip, because too early: ", result[i]);
       continue;
     }
-    isAll = false;
     var uri = veda.Util.genUri() + "-tr";
-    print(veda.Util.toJson(individ['v-s:description']));
-    var comment = individ['v-s:description'][0];
+    //print(veda.Util.toJson(individ['v-s:description']));
     var startForm = {
       "@" : uri,
       "rdf:type" : veda.Util.newUri("v-df:InstructionRouteStartForm"),
@@ -646,19 +645,19 @@ for (var i=0; i<result.length; i++){
       "v-wf:forNet" : veda.Util.newUri("s-wf:WrapUniversalNet"),
       "v-wf:processedDocument" : veda.Util.newUri(result[i]),
       "v-wf:useTransformation" : veda.Util.newUri("v-df:InstructionRouteStartFormToNet"),
-      "v-s:responsible" : veda.Util.newUri(individ['v-s:responsible'][0].id),
+      "v-s:responsible" : individ['v-s:responsible'],
       "v-wf:hasStatusWorkflow" : veda.Util.newUri("v-wf:ToBeSent"),
       "v-wf:fromShedulerScript" : veda.Util.newBool(true),
       "v-s:creator" : veda.Util.newUri ('cfg:VedaSystemAppointment'),
-      "v-s:dateTo" : veda.Util.newDate(individ['v-s:dateToPlan'][0])
+      "v-s:dateTo" : individ['v-s:dateToPlan']
     };
-    if (individ.hasValue('v-s:description')){
-      startForm['rdfs:comment'] = veda.Util.newStr(individ['v-s:description'][0]);
+    if (veda.Util.hasValue(individ, "v-s:description")){
+      startForm['rdfs:comment'] = individ['v-s:description'];
     }
-    if (individ.hasValue('v-s:controller')) {
-      startForm['v-s:controller'] = veda.Util.newUri(individ['v-s:controller'][0].id);
+    if (veda.Util.hasValue(individ, "v-s:controller")) {
+      startForm['v-s:controller'] = individ['v-s:controller'];
     }
-    put_individual(ticket, startForm, _event_id);
+    put_individual(veda.ticket, startForm, _event_id);
     set_in_document['v-s:dateToFact'] = veda.Util.newDate(new Date());
     print("Created: ", uri, ". For document:", result[i]);
   }
