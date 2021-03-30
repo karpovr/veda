@@ -12,7 +12,7 @@ path = "src/main.rs"
 env_logger = "0.6"
 log = "0.4"
 
-v_queue = "0.1.4"
+v_queue = "0.1.5"
 
-v_module = { package = "v-common-module", version = "0.1.28" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.29" }
+v_module = { package = "v-common-module", version = "0.1.29" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "0.1.30" }
