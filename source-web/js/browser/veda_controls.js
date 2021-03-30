@@ -1132,6 +1132,20 @@ $.fn.veda_actor = function( options ) {
   }());
   fulltext.on('keydown', inputHandler);
 
+  function evalQueryPrefix(prefix) {
+    return new Promise(function (resolve, reject) {
+      try {
+        const result = prefix.replace(/{\s*.*?\s*}/g, function (match) {
+          return eval(match);
+        });
+        resolve(result);
+      } catch (error) {
+        console.log('Query prefix evaluation error', error);
+        reject(error);
+      }
+    });
+  }
+
   /**
    * Search actors
    * @param {string} value
@@ -1152,12 +1166,15 @@ $.fn.veda_actor = function( options ) {
         }).join('\n');
       }
     }
-    let ftQueryPromise;
-    if (onlyDeleted) {
-      ftQueryPromise = ftQuery(queryPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
-    } else {
-      ftQueryPromise = ftQuery(queryPrefix, value, sort, withDeleted);
-    }
+    
+    let ftQueryPromise = evalQueryPrefix(queryPrefix).then(function(evaledPrefix) {
+      if (onlyDeleted) {
+        return ftQuery(evaledPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
+      } else {
+        return ftQuery(evaledPrefix, value, sort, withDeleted);
+      };
+    });
+
     ftQueryPromise
       .then(renderResults)
       .catch(function (error) {
