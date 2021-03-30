@@ -1457,7 +1457,7 @@ $.fn.veda_actor = function( options ) {
   }
   individual.on( [rel_uri, rel_uri + '.v-s:employee', rel_uri + '.v-s:occupation', rel_uri + '.v-s:parentUnit'].join(' '), propertyModifiedHandler);
   control.one('remove', function () {
-    [rel_uri, rel_uri + '.v-s:employee', rel_uri + '.v-s:occupation', rel_uri + '.v-s:parentUnit'].forEach(prop => individual.off(prop, propertyModifiedHandler));
+    [rel_uri, rel_uri + '.v-s:employee', rel_uri + '.v-s:occupation', rel_uri + '.v-s:parentUnit'].forEach((prop) => individual.off(prop, propertyModifiedHandler));
   });
   propertyModifiedHandler();
 
@@ -2146,6 +2146,16 @@ $.fn.veda_source = function (options) {
   if (property_uri === 'v-s:script') opts.sourceMode = 'ace/mode/javascript';
   if (property_uri === 'v-ui:template') opts.sourceMode = 'ace/mode/html';
 
+  const debounce = function (f, ms) {
+    let skip = false;
+    return function(...args) {
+      if (skip) return;
+      skip = true;
+      setTimeout(() => skip = false, ms);
+      return f(...args);
+    };
+  };
+
   System.import('ace').then(function (module) {
     const ace = module.default;
 
@@ -2165,20 +2175,25 @@ $.fn.veda_source = function (options) {
             true;
     });
 
-    editor.session.on('change', function(delta) {
+    const editorHandler = function(delta) {
       const value = opts.parser( editor.session.getValue() );
       opts.change(value);
-    });
+    };
+    const debouncedEditorHandler = debounce(editorHandler, 100);
 
-    const handler = function (values) {
+    editor.session.on('change', debouncedEditorHandler);
+
+    const individualHandler = function (values) {
       const value = opts.parser( editor.session.getValue() );
       if (!values.length || values[0].toString() !== value) {
         editor.setValue( values.length ? values[0].toString() : '' );
       }
     };
-    individual.on(property_uri, handler );
+    const debouncedIndividualHandler = debounce(individualHandler, 100);
+
+    individual.on(property_uri, debouncedIndividualHandler);
     self.one('remove', function () {
-      individual.off(property_uri, handler);
+      individual.off(property_uri, debouncedIndividualHandler);
       editor.destroy();
     });
   });
