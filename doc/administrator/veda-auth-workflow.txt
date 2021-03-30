@@ -48,14 +48,14 @@
 3) Еще одна альтернатива - доменная учетка с временным паролем. Наименее удобный способ, поскольку надо править конфигурационные параметры аутентификации (пароль).
 
 ---
-Как сделать специальный запрос к ntlm-фильтру для получения тикета через AD на примере syk-vs146:
-POST https://syk-vs146.mp.local/ad
+Как сделать специальный запрос к ntlm-фильтру для получения тикета через AD:
+POST https://server.domain.tld/ad
 Тело запроса: 'login=user&password=***'
 
 Пример с использованием программы curl:
 
 Запрос:
-curl -k -X POST -d 'login=optiflos&password=********' https://syk-vs146.mp.local/ad
+curl -k -X POST -d 'login= user&password=********' https://server.domain.tld/ad
 
 Ответ:
-{"ticket":"39664f9e-ec63-44b4-861d-9b254f1871db","user_uri":"mnd-s:OptiFlowAdministrator","end_time":1617131888791}
+{"ticket":"39664f9e-ec63-44b4-861d-9b254f1871db","user_uri":"aUserURI","end_time":1617131888791}
