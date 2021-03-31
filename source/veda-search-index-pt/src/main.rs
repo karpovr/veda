@@ -89,6 +89,11 @@ impl Context {
         let is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
         if !is_new {
             if let Some(types) = prev_state.get_literals("rdf:type") {
+                let is_version = types.contains(&"v-s:Version".to_owned());
+                if is_version {
+                    info!("skip version, uri = {}", id);
+                    return;
+                }
                 for type_name in types {
                     if !self.onto.is_some_entered(&type_name, &EXPORTED_TYPE) {
                         continue;
@@ -114,13 +119,11 @@ impl Context {
         }
         if !is_remove {
             if let Some(types) = new_state.get_literals("rdf:type") {
-
                 let is_version = types.contains(&"v-s:Version".to_owned());
                 if is_version {
-                    info!("skip version: {}", id);
+                    info!("skip version, uri = {}", id);
                     return;
                 }
-
                 for type_name in types {
                     if !self.onto.is_some_entered(&type_name, &EXPORTED_TYPE) {
                         continue;

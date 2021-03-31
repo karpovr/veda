@@ -82,19 +82,23 @@ impl Context {
         let mut prev_state = Individual::default();
         let is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
         if !is_new {
-            if let Some(type_resources) = prev_state.get_resources("rdf:type") {
-                for type_resource in type_resources {
-                    if let Value::Uri(type_name) = type_resource.value {
-                        let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-                        let mut prev_state = Individual::default();
-                        get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
-                        if !self.typed_batch.contains_key(&type_name) {
-                            let new_batch = Batch::new();
-                            self.typed_batch.insert(type_name.clone(), new_batch);
-                        }
-                        let batch = self.typed_batch.get_mut(&type_name).unwrap();
-                        batch.push((op_id, prev_state, -1));
+            if let Some(types) = prev_state.get_literals("rdf:type") {
+                let id = prev_state.get_id().to_string();
+                let is_version = types.contains(&"v-s:Version".to_owned());
+                if is_version {
+                    info!("skip version, uri = {}", id);
+                    return;
+                }
+                for type_name in types {
+                    let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+                    let mut prev_state = Individual::default();
+                    get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
+                    if !self.typed_batch.contains_key(&type_name) {
+                        let new_batch = Batch::new();
+                        self.typed_batch.insert(type_name.clone(), new_batch);
                     }
+                    let batch = self.typed_batch.get_mut(&type_name).unwrap();
+                    batch.push((op_id, prev_state, -1));
                 }
             }
         }
@@ -108,13 +112,11 @@ impl Context {
         if !is_remove {
             if let Some(types) = new_state.get_literals("rdf:type") {
                 let id = new_state.get_id().to_string();
-
                 let is_version = types.contains(&"v-s:Version".to_owned());
                 if is_version {
-                    info!("{}, skip version.", id);
+                    info!("skip version, uri = {}", id);
                     return;
                 }
-
                 for type_name in types {
                     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
                     let mut new_state = Individual::default();
