@@ -301,6 +301,8 @@ impl Context {
 
         let version = individual.get_first_integer("v-s:updateCounter").unwrap_or(0) as u32;
 
+        info!("added row: id = {}, version = {}, sign = {}", id.clone(), version, sign);
+
         id_column.push(id);
 
         version_column.push(version);
