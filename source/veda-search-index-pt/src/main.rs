@@ -76,7 +76,7 @@ impl Context {
     fn add_to_typed_batch(&mut self, queue_element: &mut Individual) {
         let cmd = get_cmd(queue_element);
         if cmd.is_none() {
-            error!("Queue element cmd is none. Skip element.");
+            error!("skip queue message: cmd is none");
             return;
         }
 
@@ -102,7 +102,6 @@ impl Context {
                     }
                     let batch = self.typed_batch.get_mut(&type_name).unwrap();
                     batch.push((op_id, prev_state, -1));
-                    //info!("op_id = {}, sign = {}, type = {}", op_id, -1, type_name);
                 }
             }
         }
@@ -118,7 +117,7 @@ impl Context {
 
                 let is_version = types.contains(&"v-s:Version".to_owned());
                 if is_version {
-                    info!("{}, skip version.", id);
+                    info!("skip version: {}", id);
                     return;
                 }
 
@@ -135,7 +134,6 @@ impl Context {
                     }
                     let batch = self.typed_batch.get_mut(&type_name).unwrap();
                     batch.push((op_id, new_state, 1));
-                    //info!("op_id = {}, sign = {}, type = {}", op_id, 1, type_name);
                 }
             }
         }
@@ -176,7 +174,7 @@ impl Context {
                 }
             }
             if committed_types_props_ops.len() > 0 {
-                info!("Found info file for uncompleted previous batch.");
+                info!("uncompleted batch file found");
             }
 
             for (type_name, batch) in self.typed_batch.iter_mut() {
@@ -189,7 +187,7 @@ impl Context {
             fs::remove_file(BATCH_LOG_FILE_NAME)?;
             self.typed_batch.clear();
             stats.last = Instant::now();
-            info!("Batch processed in {} ms", now.elapsed().as_millis());
+            info!("batch processed in {} ms", now.elapsed().as_millis());
         }
         Ok(())
     }
@@ -209,9 +207,9 @@ impl Context {
 
         let rows = batch.len();
 
-        info!("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        info!("------------------------------------------------------");
 
-        info!("Processing class batch: {}, count: {}", type_name, rows);
+        info!("processing class batch: {}, count: {}", type_name, rows);
 
         for (op_id, individual, sign) in batch {
             Context::add_to_tables(individual, type_name, *sign, &mut predicate_tables, *op_id, committed_types_props_ops);
@@ -221,14 +219,12 @@ impl Context {
 
         stats.total_prepare_duration += elapsed as usize;
 
-        info!("Predicate tables prepared in {} ms", elapsed);
+        info!("predicate tables prepared in {} ms", elapsed);
 
         let now = Instant::now();
 
         for (predicate, predicate_table) in predicate_tables {
             let (block, type_prop_ops) = Context::mk_block(type_name, predicate.clone(), predicate_table, client, db_predicate_tables).await?;
-
-            //info!("`{}` block = {:?}", predicate, block);
 
             let table = format!("{}.`{}`", DB, predicate);
 
@@ -246,7 +242,7 @@ impl Context {
 
         let cps = (rows * 1000) as usize / (insert_duration as usize);
 
-        info!("Predicate tables inserted successfully! Individuals count = {}, duration = {} ms, cps = {}", rows, insert_duration, cps);
+        info!("predicate tables inserted successfully, individuals count = {}, duration = {} ms, cps = {}", rows, insert_duration, cps);
 
         stats.total_insert_duration += insert_duration as usize;
 
@@ -264,7 +260,7 @@ impl Context {
         let uptime_cps = (stats.total_rows * 1000 / uptime_ms) as f64;
 
         info!(
-            "Total individuals inserted = {}, total prepare duration = {} ms, total insert duration = {} ms, avg. insert cps = {}, uptime = {}h {}m {}s, avg. uptime cps = {}, inserts count = {}",
+            "total individuals inserted = {}, total prepare duration = {} ms, total insert duration = {} ms, avg. insert cps = {}, uptime = {}h {}m {}s, avg. uptime cps = {}, inserts count = {}",
             stats.total_rows,
             stats.total_prepare_duration,
             stats.total_insert_duration,
@@ -310,7 +306,7 @@ impl Context {
                 Context::add_to_predicate_table(&id, version, sign, created, type_name, individual, &predicate, predicate_tables, &mut text_content, op_id);
                 ops.insert(signed_op);
             } else {
-                info!("Skip already exported, uri = {}, type= {}, predicate = {}, op_id = {}", id, type_name, predicate, signed_op);
+                info!("skip already exported, uri = {}, type= {}, predicate = {}, op_id = {}", id, type_name, predicate, signed_op);
             }
         }
 
@@ -466,7 +462,7 @@ impl Context {
                     }
                 }
                 _ => {
-                    error!("Value type is not supported");
+                    error!("attribute value type is not supported");
                 }
             }
         }
@@ -503,7 +499,6 @@ impl Context {
                 let column_size = column.len();
                 let mut empty = vec![vec![0]; rows - column_size];
                 column.append(&mut empty);
-                //info!("column: {}, size: {}, {:?}", column_name, column.len(), column);
                 block = block.column(&column_name, column.to_owned());
             }
             if let ColumnData::Str(column) = column_data {
@@ -511,7 +506,6 @@ impl Context {
                 let column_size = column.len();
                 let mut empty = vec![vec!["".to_string()]; rows - column_size];
                 column.append(&mut empty);
-                //info!("column: {}, size: {}, {:?}", column_name, column.len(), column);
                 block = block.column(&column_name, column.to_owned());
             }
             if let ColumnData::Dec(column) = column_data {
@@ -519,7 +513,6 @@ impl Context {
                 let column_size = column.len();
                 let mut empty = vec![vec![0 as f64]; rows - column_size];
                 column.append(&mut empty);
-                //info!("column: {}, size: {}, {:?}", column_name, column.len(), column);
                 block = block.column(&column_name, column.to_owned());
             }
             if let ColumnData::Date(column) = column_data {
@@ -527,7 +520,6 @@ impl Context {
                 let column_size = column.len();
                 let mut empty = vec![vec![Tz::UTC.timestamp(0, 0)]; rows - column_size];
                 column.append(&mut empty);
-                //info!("column: {}, size: {}, {:?}", column_name, column.len(), column);
                 block = block.column(&column_name, column.to_owned());
             }
             create_predicate_value_column(&predicate, column_name, column_type, client, db_predicate_tables).await?;
@@ -548,7 +540,7 @@ fn main() -> Result<(), Error> {
     let mut queue_consumer = Consumer::new("./data/queue", &consumer_name, "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new("./data", &consumer_name, true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
     let mut module = Module::default();
@@ -581,7 +573,7 @@ fn main() -> Result<(), Error> {
 
     load_onto(&mut module.storage, &mut ctx.onto);
 
-    info!("Rusty search-index: start listening to queue");
+    info!("start listening to queue");
 
     module.listen_queue(
         &mut queue_consumer,
@@ -602,7 +594,7 @@ fn before(_module: &mut Module, _ctx: &mut Context, _batch_size: u32) -> Option<
 
 fn after(_module: &mut Module, ctx: &mut Context, _processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = block_on(ctx.process_typed_batch()) {
-        error!("Error processing batch: {}", e);
+        error!("failed to process a batch: {}", e);
         process::exit(101);
     }
     Ok (true)
@@ -611,7 +603,7 @@ fn after(_module: &mut Module, ctx: &mut Context, _processed_batch_size: u32) ->
 fn process(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("Failed to write module_info, op_id={}, err={:?}", op_id, e);
+        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
     }
     ctx.add_to_typed_batch(queue_element);
     Ok(false)

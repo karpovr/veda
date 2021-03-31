@@ -47,15 +47,15 @@ fn add_to_queue(queue_out: &mut Queue, cmd: IndvOp, new_state_indv: &mut Individ
         new_indv.add_integer("cmd", cmd as i64);
         //new_indv.add_integer("date", date);
 
-        info!("add to export queue: uri={}", new_state_indv.get_id());
+        info!("add to export queue: uri = {}", new_state_indv.get_id());
 
         let mut raw1: Vec<u8> = Vec::new();
         if let Err(e) = to_msgpack(&new_indv, &mut raw1) {
-            error!("fail serialize, err={:?}", e);
+            error!("failed to serialize, err = {:?}", e);
             return Err(PrepareError::Fatal);
         }
         if let Err(e) = queue_out.push(&raw1, MsgType::Object) {
-            error!("fail push into queue, err={:?}", e);
+            error!("failed to push into queue, err = {:?}", e);
             return Err(PrepareError::Fatal);
         }
     }
@@ -68,7 +68,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
     let sys_ticket = module.get_sys_ticket_id();
 
     if sys_ticket.is_err() {
-        error!("fail read systicket, exit");
+        error!("failed to read systicket, exit");
         return;
     }
 
@@ -82,7 +82,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
     }
     // read queue current part info
     if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
-        error!("get_info_of_part {}: {}", queue_consumer.id, e.as_str());
+        error!("failed to get_info_of_part {}: {}", queue_consumer.id, e.as_str());
         return;
     }
 
@@ -128,7 +128,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
                 if is_update {
                     let res = module.api.update(&sys_ticket, IndvOp::Put, &mut new_state);
                     if res.result != ResultCode::Ok {
-                        error!("failed to store individual, id={}", new_state.get_id());
+                        error!("failed to store individual, id = {}", new_state.get_id());
                         return;
                     } else {
                         info!("update {}", new_state.get_id());
@@ -150,7 +150,7 @@ pub fn queue_to_json(queue_path: String, part_id: Option<u32>) {
     }
     // read queue current part info
     if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
-        error!("get_info_of_part {}: {}", queue_consumer.id, e.as_str());
+        error!("failed to get_info_of_part {}: {}", queue_consumer.id, e.as_str());
         return;
     }
 

@@ -34,7 +34,7 @@ async fn main() -> Result<(), Error> {
 
     let server = Socket::new(Protocol::Rep0).unwrap();
     if let Err(e) = server.listen(&query_url) {
-        error!("fail listen {}, {:?}", query_url, e);
+        error!("failed to listen {}, err = {:?}", query_url, e);
         return Ok(());
     }
 
@@ -42,7 +42,7 @@ async fn main() -> Result<(), Error> {
         if let Ok(recv_msg) = server.recv() {
             let out_msg = req_prepare(&mut module, &recv_msg, &mut ch_client);
             if let Err(e) = server.send(out_msg) {
-                error!("fail send answer, err={:?}", e);
+                error!("failed to send answer, err = {:?}", e);
             }
         }
     }

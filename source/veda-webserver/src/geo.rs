@@ -54,7 +54,7 @@ pub fn geo_query(info: web::Json<GeoQuery>, db: web::Data<Addr<SyncActor>>) -> i
             Ok(HttpResponse::Ok().content_type("application/json").body(body))
         }
         Err(err) => {
-            error!("geo_query {:?}", err);
+            error!("failed geo_query, err = {:?}", err);
             Ok(HttpResponse::InternalServerError().finish())
         }
     })
@@ -99,7 +99,7 @@ pub struct SyncActor {
 
 impl SyncActor {
     pub fn new(ft_addr: &str, redis_addr: &str) -> SyncActor {
-        info!("connect to search:{}, redis:{} ", &ft_addr, &redis_addr);
+        info!("connect to search = {}, redis = {} ", &ft_addr, &redis_addr);
 
         let redis_addr = "redis://".to_owned() + &redis_addr.to_owned() + "/";
 
@@ -123,7 +123,7 @@ impl Actor for SyncActor {
     type Context = SyncContext<Self>;
 
     fn started(&mut self, _ctx: &mut Self::Context) {
-        info!("SYNC STARTED");
+        info!("started sync");
     }
 }
 

@@ -103,9 +103,9 @@ impl CCUSServer {
                 if let Ok(msg) = self.my_receiver.recv_timeout(Duration::from_millis(1000)) {
                     // success receive, now store id of this message, for next id generate
                     if msg_id < msg.1 {
-                        panic!("received someone else's message, ignore it. expected={}, recv={}", msg_id, msg.1);
+                        panic!("received someone else's message, ignore it. expected = {}, received = {}", msg_id, msg.1);
                     } else if msg_id > msg.1 {
-                        error!("received someone else's message, ignore it. expected={}, recv={}", msg_id, msg.1);
+                        error!("received someone else's message, ignore it. expected = {}, received = {}", msg_id, msg.1);
                     } else {
                         if msg.0 >= 0 {
                             info!("{}, from storage: {}, {}", self.msg_id, uri, msg.0);
@@ -114,7 +114,7 @@ impl CCUSServer {
                         break;
                     }
                 } else {
-                    error!("{}, timeout of read {} from storage", self.msg_id, uri);
+                    error!("failed to read message, timeout exceeded, message = {}, individual = {}", self.msg_id, uri);
                 }
             }
             self.msg_id = msg_id;
@@ -237,11 +237,11 @@ impl Actor for CCUSServer {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        info!("Start CCUS");
+        info!("start CCUS");
 
         ctx.run_interval(STAT_INTERVAL, |act, _ctx| {
             if act.sessions.len() != act.stat_sessions || act.uri2sessions.len() != act.stat_uris {
-                info!("STAT: count subscribers: {}, look uris: {}", act.sessions.len(), act.uri2sessions.len());
+                info!("stats: count subscribers: {}, look uris: {}", act.sessions.len(), act.uri2sessions.len());
 
                 act.stat_sessions = act.sessions.len();
                 act.stat_uris = act.uri2sessions.len();
@@ -275,7 +275,7 @@ impl Actor for CCUSServer {
             }
 
             if size_batch > 0 {
-                info!("queue: batch size={}", size_batch);
+                info!("queue: batch size = {}", size_batch);
             }
 
             let mut session2uris: HashMap<usize, HashMap<String, u64>> = HashMap::new();
@@ -293,7 +293,7 @@ impl Actor for CCUSServer {
                     if e == ErrorQueue::FailReadTailMessage {
                         break;
                     } else {
-                        error!("{} get msg from queue: {}", act.total_prepared_count, e.as_str());
+                        error!("failed to extract message from queue, total processed = {}, err = {}", act.total_prepared_count, e.as_str());
                         break;
                     }
                 }
@@ -301,7 +301,7 @@ impl Actor for CCUSServer {
                 let mut indv = Individual::new_raw(raw);
 
                 if prepare_queue_el(&mut indv, &mut act.uri2sessions, &mut session2uris).is_err() {
-                    error!("{}: fail parse, retry", act.total_prepared_count);
+                    error!("failed to parse mesage, total processed = {}", act.total_prepared_count);
                     break;
                 }
 
@@ -310,7 +310,7 @@ impl Actor for CCUSServer {
                 act.total_prepared_count += 1;
 
                 if act.total_prepared_count % 1000 == 0 {
-                    info!("get from queue, count: {}", act.total_prepared_count);
+                    info!("total processed = {}", act.total_prepared_count);
                 }
             }
 
@@ -379,7 +379,7 @@ impl Handler<Connect> for CCUSServer {
         let id = self.rng.gen::<usize>();
         self.sessions.insert(id, msg.addr);
 
-        info!("[{}] Registred", id);
+        info!("registred [{}]", id);
 
         // send id back
         id
@@ -393,7 +393,7 @@ impl Handler<Disconnect> for CCUSServer {
     fn handle(&mut self, msg: Disconnect, _: &mut Context<Self>) {
         // remove address
         if self.sessions.remove(&msg.id).is_some() {
-            info!("[{}] Unregistred", &msg.id);
+            info!("unregistred [{}]", &msg.id);
             self.unsubscribe_all(msg.id, true);
         }
     }

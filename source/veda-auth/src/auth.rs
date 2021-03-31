@@ -35,8 +35,8 @@ impl<'a> AuthWorkPlace<'a> {
     pub(crate) fn authenticate(&mut self) -> Ticket {
         let mut ticket = Ticket::default();
 
-        info!("authenticate, login={:?} password={:?}, secret={:?}", self.login, self.password, self.secret);
-        info!("login={:?}, stat: {:?}", self.login, self.user_stat);
+        info!("authenticate, login = {:?}, password = {:?}, secret = {:?}", self.login, self.password, self.secret);
+        info!("login = {:?}, stat = {:?}", self.login, self.user_stat);
 
         if self.login.is_empty() || self.login.len() < 3 {
             return ticket;
@@ -60,7 +60,7 @@ impl<'a> AuthWorkPlace<'a> {
         if self.user_stat.wrong_count_login >= self.conf.failed_auth_attempts {
             if Utc::now().timestamp() - self.user_stat.last_wrong_login_date < self.conf.failed_auth_lock_period {
                 ticket.result = ResultCode::TooManyRequests;
-                error!("too many attempt of login");
+                error!("too many attempts of login");
                 return ticket;
             } else {
                 self.user_stat.wrong_count_login = 0;
@@ -77,7 +77,7 @@ impl<'a> AuthWorkPlace<'a> {
             }
         }
 
-        error!("fail authenticate, login={} password={}, candidate users={:?}", self.login, self.password, candidate_account_ids.result);
+        error!("failed to authenticate, login = {}, password = {}, candidate users = {:?}", self.login, self.password, candidate_account_ids.result);
         ticket.result = ResultCode::AuthenticationFailed;
         ticket
     }
@@ -88,18 +88,18 @@ impl<'a> AuthWorkPlace<'a> {
 
             let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
             if user_id.is_empty() {
-                error!("user id is null, user_indv={}", account);
+                error!("user id is null, user_indv = {}", account);
                 return false;
             }
 
             let user_login = account.get_first_literal("v-s:login").unwrap_or_default();
             if user_login.is_empty() {
-                error!("user login {:?} not equal request login {}", user_login, self.login);
+                error!("user login {:?} not equal to requested login {}", user_login, self.login);
                 return false;
             }
 
             if user_login.to_lowercase() != self.login.to_lowercase() {
-                error!("user login {} not equal request login {}", user_login, self.login);
+                error!("user login {} not equal to requested login {}", user_login, self.login);
                 return false;
             }
 
@@ -117,10 +117,10 @@ impl<'a> AuthWorkPlace<'a> {
                 let now = Utc::now().naive_utc().timestamp();
 
                 let is_request_new_password = if self.secret == "?" {
-                    warn!("request for new password, user={}", account.get_id());
+                    warn!("request for new password, user = {}", account.get_id());
                     true
                 } else if !self.is_permanent && self.conf.pass_lifetime > 0 && self.edited > 0 && now - self.edited > self.conf.pass_lifetime {
-                    error!("password is old, lifetime > {} days, user={}", self.conf.pass_lifetime, account.get_id());
+                    error!("password is old, lifetime > {} days, user = {}", self.conf.pass_lifetime, account.get_id());
                     true
                 } else {
                     false
@@ -148,7 +148,7 @@ impl<'a> AuthWorkPlace<'a> {
             }
             warn!("user {} not pass", account.get_id());
         } else {
-            error!("fail read, uri={}", &account_id);
+            error!("failed to read, uri = {}", &account_id);
         }
         false
     }
@@ -158,14 +158,14 @@ impl<'a> AuthWorkPlace<'a> {
         let now = Utc::now().naive_utc().timestamp();
 
         if old_secret.is_empty() {
-            error!("update password: secret not found, user={}", person.get_id());
+            error!("update password: secret not found, user = {}", person.get_id());
             ticket.result = ResultCode::InvalidSecret;
             remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
             return false;
         }
 
         if self.secret != old_secret {
-            error!("request for update password: send secret not equal request secret {}, user={}", self.secret, person.get_id());
+            error!("request for update password: sent secret not equal to request secret {}, user = {}", self.secret, person.get_id());
             ticket.result = ResultCode::InvalidSecret;
             remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
             return false;
@@ -174,19 +174,19 @@ impl<'a> AuthWorkPlace<'a> {
         let prev_secret_date = self.credential.get_first_datetime("v-s:SecretDateFrom").unwrap_or_default();
         if now - prev_secret_date > self.conf.secret_lifetime {
             ticket.result = ResultCode::SecretExpired;
-            error!("request new password, secret expired, login={} password={} secret={}", self.login, self.password, self.secret);
+            error!("request new password, secret expired, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
             return false;
         }
 
         if self.stored_password == self.password {
-            error!("update password: now password equal previous password, reject. user={}", person.get_id());
+            error!("update password: password equals to previous password, reject, user = {}", person.get_id());
             ticket.result = ResultCode::NewPasswordIsEqualToOld;
             remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
             return false;
         }
 
         if self.password == EMPTY_SHA256_HASH {
-            error!("update password: now password is empty, reject. user={}", person.get_id());
+            error!("update password: password is empty, reject, user = {}", person.get_id());
             ticket.result = ResultCode::EmptyPassword;
             remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
             return false;
@@ -194,7 +194,7 @@ impl<'a> AuthWorkPlace<'a> {
 
         if (now - self.edited > 0) && now - self.edited < self.conf.success_pass_change_lock_period {
             ticket.result = ResultCode::Locked;
-            error!("request new password: too many requests, login={} password={} secret={}", self.login, self.password, self.secret);
+            error!("request new password: too many requests, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
             return false;
         }
 
@@ -208,12 +208,12 @@ impl<'a> AuthWorkPlace<'a> {
         let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
         if res.result != ResultCode::Ok {
             ticket.result = ResultCode::AuthenticationFailed;
-            error!("fail store new password {} for user, user={}", self.password, person.get_id());
+            error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
             return false;
         } else {
             create_new_ticket(self.login, &person.get_id(), self.conf.ticket_lifetime, ticket, &mut self.module.storage);
             self.user_stat.attempt_change_pass = 0;
-            info!("update password {} for user, user={}", self.password, person.get_id());
+            info!("updated password, password = {}, user = {}", self.password, person.get_id());
             return true;
         }
     }
@@ -226,7 +226,7 @@ impl<'a> AuthWorkPlace<'a> {
             let stored_pass = HEXLOWER.decode(self.stored_password.as_bytes());
 
             if stored_salt.is_err() || stored_pass.is_err() {
-                error!("fail encode credential");
+                error!("failed to encode credential");
                 return false;
             }
 
@@ -251,12 +251,12 @@ impl<'a> AuthWorkPlace<'a> {
                     self.edited = _credential.get_first_datetime("v-s:dateFrom").unwrap_or_default();
                     self.is_permanent = _credential.get_first_bool("v-s:isPermanent").unwrap_or(false);
                 } else {
-                    error!("fail read credential: {}", uses_credential_uri);
+                    error!("failed to read credential {}", uses_credential_uri);
                     create_new_credential(self.sys_ticket, self.module, &mut self.credential, account);
                 }
             }
             None => {
-                warn!("credential not found, create new");
+                warn!("failed to find credential, create new");
                 self.stored_password = account.get_first_literal("v-s:password").unwrap_or_default();
 
                 create_new_credential(self.sys_ticket, self.module, &mut self.credential, account);
@@ -266,7 +266,7 @@ impl<'a> AuthWorkPlace<'a> {
 
     fn request_new_password(&mut self, user: &mut Individual, edited: i64, account: &mut Individual) -> ResultCode {
         let now = Utc::now().naive_utc().timestamp();
-        warn!("request new password, login={} password={} secret={}", self.login, self.password, self.secret);
+        warn!("request new password, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
 
         if let Some(account_origin) = account.get_first_literal("v-s:authOrigin") {
             if account_origin != "veda" {
@@ -275,7 +275,7 @@ impl<'a> AuthWorkPlace<'a> {
         }
 
         if (now - edited > 0) && now - edited < self.conf.success_pass_change_lock_period {
-            error!("request new password: too many requests, login={} password={} secret={}", self.login, self.password, self.secret);
+            error!("request new password: too many requests, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
             return ResultCode::Locked;
         }
 
@@ -284,12 +284,12 @@ impl<'a> AuthWorkPlace<'a> {
             if now - prev_secret_date < self.conf.failed_pass_change_lock_period {
                 self.user_stat.wrong_count_login = self.conf.failed_auth_attempts + 1;
                 self.user_stat.last_wrong_login_date = Utc::now().timestamp();
-                error!("request new password, to many request, login={} password={} secret={}", self.login, self.password, self.secret);
+                error!("request new password, to many requests, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
                 return ResultCode::TooManyRequestsChangePassword;
             }
 
             if now - self.user_stat.last_attempt_change_pass_date < self.conf.failed_pass_change_lock_period {
-                error!("too many requests of change password");
+                error!("too many requests to change password");
                 self.user_stat.wrong_count_login = self.conf.failed_auth_attempts + 1;
                 self.user_stat.last_wrong_login_date = Utc::now().timestamp();
                 return ResultCode::TooManyRequestsChangePassword;
@@ -308,7 +308,7 @@ impl<'a> AuthWorkPlace<'a> {
 
         let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
         if res.result != ResultCode::Ok {
-            error!("fail store new secret, user={}, result={:?}", user.get_id(), res);
+            error!("failed to store new secret, user = {}, result = {:?}", user.get_id(), res);
             return ResultCode::InternalServerError;
         }
 
@@ -332,14 +332,14 @@ impl<'a> AuthWorkPlace<'a> {
                 let mut subject = vec![];
                 if let Ok(t) = mustache::compile_str(subject_t_str) {
                     if let Err(e) = t.render_data(&mut subject, &map) {
-                        error!("render subject from template, err={:?}", e)
+                        error!("failed to render subject from template, err = {:?}", e)
                     }
                 }
 
                 let mut body = vec![];
                 if let Ok(t) = mustache::compile_str(body_t_str) {
                     if let Err(e) = t.render_data(&mut body, &map) {
-                        error!("render body from template, err={:?}", e)
+                        error!("failed to render body from template, err = {:?}", e)
                     }
                 }
 
@@ -356,13 +356,13 @@ impl<'a> AuthWorkPlace<'a> {
 
                 let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
                 if res.result != ResultCode::Ok {
-                    error!("fail store email with new secret, user={}", account.get_id());
+                    error!("failed to store email with new secret, user = {}", account.get_id());
                     return ResultCode::AuthenticationFailed;
                 } else {
                     info!("send {} new secret {} to mailbox {}, user={}", mail_with_secret.get_id(), n_secret, mailbox, account.get_id())
                 }
             } else {
-                error!("mailbox not found, user={}", account.get_id());
+                error!("mailbox not found, user = {}", account.get_id());
             }
         }
         ResultCode::PasswordExpired

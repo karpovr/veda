@@ -60,7 +60,7 @@ impl App {
                     self.started_modules.push((module.name.to_owned(), child));
                 }
                 Err(e) => {
-                    return Err(Error::new(ErrorKind::Other, format!("fail execute {}, err={:?}", module.exec_name, e)));
+                    return Err(Error::new(ErrorKind::Other, format!("failed to execute {}, err = {:?}", module.exec_name, e)));
                 }
             }
         }
@@ -74,7 +74,7 @@ impl App {
             if is_ok_process(&mut sys, process.id()).0 {
                 success_started += 1;
             } else {
-                error!("fail start: {} {}", process.id(), name)
+                error!("failed to start, process = {}, name = {}", process.id(), name)
             }
         }
 
@@ -85,7 +85,7 @@ impl App {
                 }
             }
 
-            return Err(Error::new(ErrorKind::Other, "fail start"));
+            return Err(Error::new(ErrorKind::Other, "failed to start"));
         }
 
         Ok(())
@@ -93,12 +93,12 @@ impl App {
 
     fn watch_started_modules(&mut self) {
         let mut mstorage_watchdog_check_period = None;
-        let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-        let section = conf.section(None::<String>).expect("fail parse veda.properties");
+        let conf = Ini::load_from_file("veda.properties").expect("failed to load veda.properties file");
+        let section = conf.section(None::<String>).expect("failed to parse veda.properties");
         if let Some(p) = section.get("mstorage_watchdog_period") {
             if let Ok(t) = parse_duration::parse(p) {
                 mstorage_watchdog_check_period = Some(t);
-                info!("start mstorage watchdog, period = {}", p);
+                info!("started mstorage watchdog, period = {}", p);
             }
         }
 
@@ -108,7 +108,7 @@ impl App {
 
             if let Err(e) = self.get_modules_info() {
                 if e.kind() != ErrorKind::NotFound {
-                    error!("fail read modules info");
+                    error!("failed to read modules info");
                 }
             }
 
@@ -122,7 +122,7 @@ impl App {
                     prev_check_mstorage = now;
 
                     if !self.mstorage_watchdog_check() {
-                        error!("detect problem in module MSTORAGE, restart all modules");
+                        error!("detected a problem in module MSTORAGE, restart all modules");
                         false
                     } else {
                         true
@@ -159,7 +159,7 @@ impl App {
                     if exit_code != ModuleError::Fatal as i32 {
                         error!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code);
                         if let Ok(_0) = process.kill() {
-                            warn!("attempt stop module {} {}", process.id(), name);
+                            warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                         }
 
                         if let Some(module) = self.modules_info.get(name) {
@@ -169,27 +169,27 @@ impl App {
                                     *process = child;
                                 }
                                 Err(e) => {
-                                    error!("fail execute {}, err={:?}", module.exec_name, e);
+                                    error!("failed to execute, name = {}, err = {:?}", module.exec_name, e);
                                 }
                             }
                         } else {
-                            error!("? internal error, not found module {}", name);
+                            error!("failed to find module, name = {}", name);
                         }
                     }
                 }
                 if let Some(module) = self.modules_info.get(name) {
                     if let Some(memory_limit) = module.memory_limit {
                         if memory > memory_limit {
-                            warn!("process {}, memory={} KiB, limit={} KiB", name, memory, memory_limit);
+                            warn!("process = {}, memory = {} KiB, limit = {} KiB", name, memory, memory_limit);
                             if let Ok(_0) = process.kill() {
-                                warn!("attempt stop module {} {}", process.id(), name);
+                                warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                             }
                         }
                     }
                 } else {
                     info!("process {} does not exist in the configuration, it will be killed", name);
                     if let Ok(_0) = process.kill() {
-                        warn!("attempt stop module {} {}", process.id(), name);
+                        warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                     }
                 }
                 new_config_modules.remove(name);
@@ -203,7 +203,7 @@ impl App {
                             self.started_modules.push((module.name.to_owned(), child));
                         }
                         Err(e) => {
-                            error!("fail execute {}, err={:?}", module.exec_name, e);
+                            error!("failed to execute, name = {}, err = {:?}", module.exec_name, e);
                         }
                     }
                 }
@@ -216,13 +216,13 @@ impl App {
     fn mstorage_watchdog_check(&mut self) -> bool{
         if self.systicket.is_empty() {
             while !self.module.api.connect() {
-                info!("wait for start main module ...");
+                info!("waiting for main module start...");
                 thread::sleep(std::time::Duration::from_millis(100));
             }
 
             let mut systicket = self.module.get_sys_ticket_id();
             while systicket.is_err() {
-                info!("wait for read systicket ...");
+                info!("waiting for systicket...");
                 thread::sleep(std::time::Duration::from_millis(100));
                 systicket = self.module.get_sys_ticket_id();
             }
@@ -234,7 +234,7 @@ impl App {
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
         if self.module.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &mut test_indv).result != ResultCode::Ok {
-            error!("fail store test individual: {}", test_indv.get_id());
+            error!("failed to store test individual, uri = {}", test_indv.get_id());
             return false;
         }
         true
@@ -251,7 +251,7 @@ impl App {
             }
         }
 
-        info!("read modules configuration...");
+        info!("reading modules configuration...");
         self.modules_info.clear();
         self.date_changed_modules_info = Some(cur_modifed_date);
         let mut order = 0;
@@ -267,7 +267,7 @@ impl App {
                 while let Some(p) = file.lines().next() {
                     if let Ok(p) = p {
                         if p.starts_with('\t') || p.starts_with(' ') {
-                            info!("param={}", p);
+                            info!("param = {}", p);
                             if let Some(eq_pos) = p.find('=') {
                                 let nm: &str = &p[0..eq_pos].trim();
                                 let vl: &str = &p[eq_pos + 1..].trim();
@@ -313,7 +313,7 @@ impl App {
                     }
 
                     if module.memory_limit.is_none() {
-                        error!("fail parse param [memory-limit]");
+                        error!("failed to parse param [memory-limit]");
                     }
                 }
 
@@ -328,7 +328,7 @@ impl App {
                     module.exec_name = module_path;
                     self.modules_info.insert(line, module);
                 } else {
-                    return Err(Error::new(ErrorKind::Other, format!("not found module [{:?}]", &module_path)));
+                    return Err(Error::new(ErrorKind::Other, format!("failed to find module, path = {:?}", &module_path)));
                 }
             }
         }
@@ -366,7 +366,7 @@ fn main() {
         .filter(None, LevelFilter::Info)
         .init();
 
-    info!("app dir={}", app_dir);
+    info!("app dir = {}", app_dir);
     let mut app = App {
         date_changed_modules_info: None,
         app_dir,
@@ -378,7 +378,7 @@ fn main() {
     };
 
     if let Err(e) = app.get_modules_info() {
-        error!("fail read modules info, err={:?}", e);
+        error!("failed to read modules info, err = {:?}", e);
         return;
     }
 
@@ -396,20 +396,20 @@ fn main() {
         }
 
         if proc.name().starts_with("veda-") && module_full_names.contains(&proc.name().to_string()) {
-            error!("unable start, found other running process: pid={}, {:?} ({:?}) ", pid, proc.exe(), proc.status());
+            error!("failed to start, found other running process, pid = {}, {:?} ({:?}) ", pid, proc.exe(), proc.status());
             return;
         }
     }
 
     let started = app.start_modules();
     if started.is_err() {
-        error!("veda not started, exit. err={:?}", started.err());
+        error!("failed to start veda, err = {:?}", started.err());
         return;
     }
 
     if let Ok(mut file) = File::create(".pids/__".to_owned() + "bootstrap-pid") {
         if let Err(e) = file.write_all(format!("{}", process::id()).as_bytes()) {
-            error!("can not create pid file for bootstrap {}, err={:?}", process::id(), e);
+            error!("failed to create pid file for bootstrap, id = {}, err = {:?}", process::id(), e);
         }
     }
 
@@ -447,10 +447,10 @@ fn start_module(module: &VedaModule) -> io::Result<Child> {
 
     match child {
         Ok(p) => {
-            info!("success started {} with args {:?}", module.exec_name.to_string(), &module.args);
+            info!("started successfully, module = {}, args = {:?}", module.exec_name.to_string(), &module.args);
             if let Ok(mut file) = File::create(".pids/__".to_owned() + &module.name + "-pid") {
                 if let Err(e) = file.write_all(format!("{}", p.id()).as_bytes()) {
-                    error!("can not create pid file for {} {}, err={:?}", &module.name, p.id(), e);
+                    error!("failed to create pid file, module = {}, process = {}, err = {:?}", &module.name, p.id(), e);
                 }
             }
             if module.name == "mstorage" {

@@ -61,7 +61,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
     let login = login.unwrap_or_default();
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
 
-    info!("get_ticket_trusted, login={} ticket={}", login, tr_ticket_id);
+    info!("get_ticket_trusted, login = {}, ticket = {}", login, tr_ticket_id);
 
     if login.is_empty() || tr_ticket_id.len() < 6 {
         warn!("trusted authenticate: invalid login {} or ticket {}", login, tr_ticket_id);
@@ -92,7 +92,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
                     }
                 }
             }
-            Err(e) => error!("fail get authorization group of {}, err={}", &tr_ticket.user_uri, e),
+            Err(e) => error!("failed to get authorization group, user = {}, err = {}", &tr_ticket.user_uri, e),
         }
 
         if is_allow_trusted {
@@ -102,7 +102,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
                     if let Some(account) = module.get_individual(&account_id, &mut Individual::default()) {
                         let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
                         if user_id.is_empty() {
-                            error!("user id is null, user_indv={}", account);
+                            error!("user id is null, user_indv = {}", account);
                             continue;
                         }
 
@@ -119,21 +119,21 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
 
                         let mut ticket = Ticket::default();
                         create_new_ticket(login, &user_id, conf.ticket_lifetime, &mut ticket, &mut module.storage);
-                        info!("trusted authenticate, result ticket={:?}", ticket);
+                        info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;
                     }
                 }
             }
         } else {
-            error!("trusted authenticate: User {} must be a member of group {}", tr_ticket.user_uri, ALLOW_TRUSTED_GROUP);
+            error!("failed trusted authentication: user {} must be a member of group {}", tr_ticket.user_uri, ALLOW_TRUSTED_GROUP);
         }
     } else {
         warn!("trusted authenticate: problem ticket {}", tr_ticket_id);
     }
 
     tr_ticket.result = ResultCode::AuthenticationFailed;
-    error!("failed trusted authenticate, ticket={} login={}", tr_ticket_id, login);
+    error!("failed trusted authentication, ticket = {}, login = {}", tr_ticket_id, login);
 
     tr_ticket
 }
@@ -157,20 +157,20 @@ pub(crate) fn create_new_credential(systicket: &str, module: &mut Module, creden
 
     let res = module.api.update(systicket, IndvOp::Put, &credential);
     if res.result != ResultCode::Ok {
-        error!("fail update, uri={}, result_code={:?}", credential.get_id(), res.result);
+        error!("failed to update, uri = {}, result_code = {:?}", credential.get_id(), res.result);
         return false;
     } else {
-        info!("create v-s:Credential {}, res={:?}", credential.get_id(), res);
+        info!("create v-s:Credential {}, res = {:?}", credential.get_id(), res);
 
         account.remove("v-s:password");
         account.set_uri("v-s:usesCredential", credential.get_id());
 
         let res = module.api.update(&systicket, IndvOp::Put, account);
         if res.result != ResultCode::Ok {
-            error!("fail update, uri={}, res={:?}", account.get_id(), res);
+            error!("failed to update, uri = {}, res = {:?}", account.get_id(), res);
             return false;
         }
-        info!("update user {}, res={:?}", account.get_id(), res);
+        info!("update user {}, res = {:?}", account.get_id(), res);
     }
     true
 }
@@ -200,7 +200,7 @@ pub(crate) fn remove_secret(uses_credential: &mut Individual, person_id: &str, m
 
         let res = module.api.update(systicket, IndvOp::Remove, uses_credential);
         if res.result != ResultCode::Ok {
-            error!("fail remove secret code for user, user={}", person_id);
+            error!("failed to remove secret code for user, user = {}", person_id);
         }
     }
 }
@@ -210,7 +210,7 @@ pub(crate) fn read_duration_param(indv: &mut Individual, param: &str) -> Option<
         if let Ok(d) = parse(&v) {
             return Some(d);
         } else {
-            error!("fail parse auth param {}", param);
+            error!("failed to parse auth param {}", param);
         }
     }
     None

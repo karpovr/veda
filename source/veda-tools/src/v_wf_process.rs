@@ -23,7 +23,7 @@ struct ProcessElement {
 pub fn clean_process(ctx: &mut CleanerContext) {
     let module_info = ModuleInfo::new("./data", "clean_process", true);
     if module_info.is_err() {
-        error!("{:?}", &module_info.err());
+        error!("failed to start, err = {:?}", &module_info.err());
         return;
     }
     let mut module_info = module_info.unwrap();
@@ -102,24 +102,24 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                         if let Ok(mut file) = File::create(&(file_path)) {
                                             file.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
                                             if let Err(e) = file.write_all(buf.as_slice()) {
-                                                error!("fail write to file {:?}", e);
+                                                error!("failed to write to file, err = {:?}", e);
                                             } else {
-                                                info!("stored: count:{}, bytes:{}", indvs_count, buf.len());
+                                                info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
                                             }
                                         } else {
-                                            error!("fail create file {}", file_path);
+                                            error!("failed to create file {}", file_path);
                                         }
                                     }
                                 }
                             }
                         }
                     } else {
-                        error!("invalid WorkItem {}", id);
+                        error!("invalid workitem {}", id);
                     }
                 }
             }
             if let Err(e) = module_info.put_info(pos, pos) {
-                error!("{:?}", e);
+                error!("err = {:?}", e);
                 return;
             }
         }

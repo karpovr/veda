@@ -11,10 +11,10 @@ use v_module::module::*;
 /**
  * storage service
  *      protocol - nanomsg
- *		request: "T,url" - get ticket of url, response: JSON format
- *		request: "I,url" - get individual of url, response: JSON format
- *		request: "t,url" - get ticket of url, response: BINOBJ format
- *		request: "i,url" - get individual of url, response: BINOBJ format
+ *    request: "T,url" - get ticket of url, response: JSON format
+ *    request: "I,url" - get individual of url, response: JSON format
+ *    request: "t,url" - get ticket of url, response: BINOBJ format
+ *    request: "i,url" - get individual of url, response: BINOBJ format
  */
 
 fn main() -> std::io::Result<()> {
@@ -30,7 +30,7 @@ fn main() -> std::io::Result<()> {
 
     let server = Socket::new(Protocol::Rep0)?;
     if let Err(e) = server.listen(&ro_storage_url) {
-        error!("fail listen, {:?}", e);
+        error!("failed to listen, err = {:?}", e);
         return Ok(());
     }
 
@@ -38,7 +38,7 @@ fn main() -> std::io::Result<()> {
         if let Ok(recv_msg) = server.recv() {
             let res = req_prepare(&recv_msg, &mut storage);
             if let Err(e) = server.send(res) {
-                error!("fail send {:?}", e);
+                error!("failed to send reply, err = {:?}", e);
             }
         }
     }

@@ -39,14 +39,14 @@ pub(crate) struct Indexer {
 
 impl fmt::Debug for Indexer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "use_db={}", self.use_db)
+        write!(f, "use_db = {}", self.use_db)
     }
 }
 
 impl Indexer {
     pub(crate) fn init(&mut self, use_db: &str) -> Result<(), XError> {
         if !use_db.is_empty() {
-            warn!("indexer use only {} db", use_db);
+            warn!("indexer uses only {} db", use_db);
         }
 
         if let Ok(k) = Key2Slot::load() {
@@ -54,7 +54,7 @@ impl Indexer {
         } else {
             fs::create_dir_all(&(XAPIAN_INFO_PATH))?;
             self.key2slot = Default::default();
-            info!("key2slot no load, create empty");
+            warn!("failed to load key2slot file, create new one");
         }
 
         self.use_db = use_db.to_string();
@@ -63,17 +63,17 @@ impl Indexer {
             let mut db;
             let full_path = &("./".to_owned() + path);
             if Path::new(full_path).is_dir() {
-                info!("open db {}, path={}", db_name, full_path);
+                info!("opened db {}, path = {}", db_name, full_path);
                 Database::new_with_path(path, UNKNOWN)?;
                 db = WritableDatabase::new(path, DB_OPEN, UNKNOWN)?;
             } else {
-                info!("new db {}, create path={}", db_name, full_path);
+                info!("created new db {}, path = {}", db_name, full_path);
                 fs::create_dir_all(full_path)?;
                 db = WritableDatabase::new(path, DB_CREATE_OR_OPEN, CHERT)?;
             }
 
             let doc_count = db.get_doccount()?;
-            info!("{}, {}", db_name, doc_count);
+            info!("db {}, document count = {}", db_name, doc_count);
             self.index_dbs.insert(db_name.to_owned(), db);
         }
 
@@ -98,7 +98,7 @@ impl Indexer {
         let prev_is_deleted = prev_indv.is_exists_bool("v-s:deleted", true);
 
         let is_restored = if prev_is_deleted && !is_deleted && self.use_db.is_empty() {
-            info!("index msg: restore individual: {} ", new_indv.get_id());
+            info!("restore previously deleted individual: {} ", new_indv.get_id());
             true
         } else {
             false
@@ -110,7 +110,7 @@ impl Indexer {
             let is_draft_of = new_indv.get_first_literal("v-s:is_draft_of");
 
             if is_draft_of.is_some() {
-                info!("new_indv [{}] is draft, ignore", new_indv.get_id());
+                info!("individual {} is draft, skip", new_indv.get_id());
                 return Ok(());
             }
 
@@ -146,9 +146,9 @@ impl Indexer {
                 if self.index_dbs.contains_key(&dbname) {
                     if let Some(db) = self.index_dbs.get_mut(&dbname) {
                         if db.delete_document(&uuid).is_ok() {
-                            info!("{} is_version, remove", new_indv.get_id());
+                            info!("individual {} is version, remove", new_indv.get_id());
                         } else {
-                            info!("{} is_version, ignore", new_indv.get_id());
+                            info!("individual {} is version, ignore", new_indv.get_id());
                         }
                     }
                 }
@@ -187,7 +187,7 @@ impl Indexer {
             let mut prepared_links = HashSet::new();
             new_indv.parse_all();
             for (predicate, resources) in new_indv.get_obj().get_resources() {
-                debug!("predicate={}", predicate);
+                debug!("predicate = {}", predicate);
                 let mut p_text_ru = String::new();
                 let mut p_text_en = String::new();
 
@@ -273,10 +273,10 @@ impl Indexer {
             if self.index_dbs.contains_key(&dbname) {
                 if let Some(db) = self.index_dbs.get_mut(&dbname) {
                     if is_deleted {
-                        info!("delete from [{}], type={}, uri={}", dbname, types.first().unwrap_or(&"unknown".to_owned()), new_indv.get_id());
+                        info!("delete from db [{}], type = {}, uri = {}", dbname, types.first().unwrap_or(&"unknown".to_owned()), new_indv.get_id());
                         db.delete_document(&uuid)?;
                     } else {
-                        info!("index to [{}], type={}, uri={}", dbname, types.first().unwrap_or(&"unknown".to_owned()), new_indv.get_id());
+                        info!("index to db [{}], type = {}, uri = {}", dbname, types.first().unwrap_or(&"unknown".to_owned()), new_indv.get_id());
                         db.replace_document(&uuid, &mut iwp.doc)?;
                     }
                 }
@@ -287,7 +287,7 @@ impl Indexer {
             if (op_id - self.committed_op_id) % BATCH_SIZE_OF_TRANSACTION == 0 {
                 if !self.key2slot.is_empty() {
                     if let Err(e) = self.key2slot.store() {
-                        error!("fail store key2slot, err={:?}", e);
+                        error!("failed to store key2slot file, err = {:?}", e);
                     }
                 }
 
@@ -318,7 +318,7 @@ impl Indexer {
 
             self.module_info.put_info(self.prepared_op_id, self.committed_op_id)?;
 
-            info!("COMMIT, INDEXED {}, delta={}, cps={:.1}", self.committed_op_id, delta, delta as f64 / (duration as f64 / 1000.0));
+            info!("commit, indexed = {}, delta = {}, cps = {:.1}", self.committed_op_id, delta, delta as f64 / (duration as f64 / 1000.0));
         }
 
         Ok(())
@@ -338,7 +338,7 @@ impl Indexer {
         let key = format!("{}+{}", predicate, rs.get_uri());
 
         if level > 0 && prep.contains(&key) {
-            error!("found loop, predicate={}, link={}, level={}", predicate, rs.get_uri(), level);
+            error!("index loop found, predicate = {}, link = {}, level = {}", predicate, rs.get_uri(), level);
             return Ok(());
         }
 
@@ -358,12 +358,12 @@ impl Indexer {
                                 for value in values.iter() {
                                     // ссылка на наследуемый индекс, переходим вниз
                                     if let Some(inhr_idx) = self.idx_schema.get_index(value) {
-                                        debug!("[{}]ссылка на наследуемый индекс, переходим вниз по иерархии индекса [{}]", value, &inhr_idx.get_id());
+                                        debug!("[{}] ссылка на наследуемый индекс, переходим вниз по иерархии индекса [{}]", value, &inhr_idx.get_id());
 
                                         if let Some(for_properties) = inhr_idx.get_literals_nm("vdi:forProperty") {
                                             for for_property in for_properties.iter() {
                                                 if let Some(links) = inner_indv.get_obj().get_resources().get(for_property) {
-                                                    debug!("forProperty=[{}], links=[{:?}]", for_property, links);
+                                                    debug!("forProperty = [{}], links = [{:?}]", for_property, links);
                                                     for link in links {
                                                         self.prepare_index(
                                                             module,

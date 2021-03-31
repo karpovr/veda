@@ -36,7 +36,7 @@ fn indv_to_json(data: Vec<u8>) -> JSONValue {
         //        info! ("indv={}", indv);
         return indv.get_obj().as_json();
     } else {
-        error!("indv_to_json: fail parse binobj, len={}", indv.get_raw_len());
+        error!("failed to parse individual, len = {}", indv.get_raw_len());
     }
     return JSONValue::default();
 }

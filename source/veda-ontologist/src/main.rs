@@ -63,7 +63,7 @@ fn main() -> std::io::Result<()> {
 
     let module_info = ModuleInfo::new(path, "ontologist", true);
     if module_info.is_err() {
-        error!("{:?}", &module_info.err());
+        error!("failed to start, err = {:?}", &module_info.err());
         return Ok(());
     }
 
@@ -86,7 +86,7 @@ fn main() -> std::io::Result<()> {
         if ctx.onto_index.len() == 0 {
             recover_index_from_ft(&mut ctx, &mut module);
             if let Err(e) = ctx.onto_index.dump() {
-                error!("fail flush onto index, err={}", e);
+                error!("failed to flush ontology index, err = {:?}", e);
             }
         }
 
@@ -100,7 +100,7 @@ fn main() -> std::io::Result<()> {
             &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
         );
     } else {
-        error!("fail init ft-query");
+        error!("failed to init ft-query");
     }
     Ok(())
 }
@@ -120,7 +120,7 @@ fn heartbeat(module: &mut Module, ctx: &mut Context) -> Result<(), PrepareError>
     if !ctx.onto_index.exists() {
         recover_index_from_ft(ctx, module);
         if let Err(e) = ctx.onto_index.dump() {
-            error!("fail flush onto index, err={}", e);
+            error!("failed to flush onto index, err = {:?}", e);
         }
     }
 
@@ -152,21 +152,21 @@ fn prepare(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individu
     if let Some((id, counter, is_deleted)) = test_on_onto(queue_element, &ctx.onto_types) {
         ctx.last_found_changes = Instant::now();
         ctx.is_need_generate = true;
-        info!("update onto index, id={}, counter={}, is_deleted={}", id, counter, is_deleted);
+        info!("update ontology index, id = {}, counter = {}, is_deleted = {}", id, counter, is_deleted);
 
         if is_deleted {
             if let Err(e) = ctx.onto_index.remove(&id) {
-                error!("fail remove from onto index, err={}", e);
+                error!("failed to remove individual from ontology index, err = {:?}", e);
             }
         } else {
             if let Err(e) = ctx.onto_index.set(&id, &counter) {
-                error!("fail update onto index, err={}", e);
+                error!("failed to update ontology index, err = {:?}", e);
             }
         }
     }
 
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("fail write module_info, op_id={}, err={:?}", op_id, e);
+        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
         return Err(PrepareError::Fatal);
     }
 
@@ -175,30 +175,30 @@ fn prepare(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individu
 
 fn recover_index_from_ft(ctx: &mut Context, module: &mut Module) -> bool {
     info!("recover index from ft");
-    info!("query={}", ctx.query);
+    info!("query = {}", ctx.query);
 
     let res = ctx.xr.query(FTQuery::new_with_user("cfg:VedaSystem", &ctx.query), &mut module.storage);
     if res.result_code == ResultCode::Ok && res.count > 0 {
         //        if let Err(e) = ctx.onto_index.drop() {
-        //            error!("fail clean index, err={}", e);
+        //            error!("failed to clean index: {:?}", e);
         //            return false;
         //       }
 
         for id in &res.result {
             if let Err(e) = ctx.onto_index.set(id, &0) {
-                error!("fail create onto index, err={}", e);
+                error!("failed to create onto index, err = {:?}", e);
                 break;
             }
         }
     } else {
-        error!("search return empty set, query: {}", &ctx.query);
+        error!("failed to search individuals, empty set returned, query: {}", &ctx.query);
     }
 
     false
 }
 
 fn generate_turtle_file(ctx: &mut Context, module: &mut Module) -> bool {
-    info!("generate TURTLE file use onto index");
+    info!("generate TURTLE file using ontology index");
 
     let mut indvs_count = 0;
     let mut indvs = vec![];
@@ -221,7 +221,7 @@ fn generate_turtle_file(ctx: &mut Context, module: &mut Module) -> bool {
             indvs.push(rindv);
             indvs_count += 1;
         } else {
-            error!("fail read, uri={}", id);
+            error!("failed to read individual {}", id);
         }
     }
 
@@ -229,13 +229,13 @@ fn generate_turtle_file(ctx: &mut Context, module: &mut Module) -> bool {
         let file_path = ctx.ontology_file_path.clone() + ".ttl";
         if let Ok(mut file) = File::create(&(file_path)) {
             if let Err(e) = file.write_all(buf.as_slice()) {
-                error!("fail write to file {:?}", e);
+                error!("failed to write to file, err = {:?}", e);
             } else {
-                info!("stored: count:{}, bytes:{}", indvs_count, buf.len());
+                info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
                 return true;
             }
         } else {
-            error!("fail create file {}", file_path);
+            error!("failed to create file {}", file_path);
         }
     }
 
@@ -243,7 +243,7 @@ fn generate_turtle_file(ctx: &mut Context, module: &mut Module) -> bool {
 }
 
 fn generate_json_file(ctx: &mut Context, module: &mut Module) -> bool {
-    info!("generate JSON file use onto index");
+    info!("generate JSON file using ontology index");
 
     let mut indvs_count = 0;
     let mut buf = String::new();
@@ -263,7 +263,7 @@ fn generate_json_file(ctx: &mut Context, module: &mut Module) -> bool {
             buf.push_str(&rindv.get_obj().as_json_str());
             indvs_count += 1;
         } else {
-            error!("fail read, uri={}", id);
+            error!("failed to read individual, uri = {}", id);
         }
     }
 
@@ -271,13 +271,13 @@ fn generate_json_file(ctx: &mut Context, module: &mut Module) -> bool {
 
     if let Ok(mut file) = File::create(&ctx.ontology_file_path) {
         if let Err(e) = file.write_all(buf.as_bytes()) {
-            error!("fail write to file {:?}", e);
+            error!("failed to write to file, err = {:?}", e);
         } else {
-            info!("stored: count:{}, bytes:{}", indvs_count, buf.len());
+            info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
             return true;
         }
     } else {
-        error!("fail create file {}", ctx.ontology_file_path);
+        error!("failed to create file {}", ctx.ontology_file_path);
     }
 
     false
@@ -300,12 +300,12 @@ fn test_on_onto(queue_element: &mut Individual, onto_types: &Vec<String>) -> Opt
         if cmd != IndvOp::Remove {
             let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
             if new_state.any_exists_v("rdf:type", &onto_types) {
-                info!("found onto changes from storage: uri={}", new_state.get_id());
+                info!("found ontology changes from storage, uri = {}", new_state.get_id());
                 return Some((new_state.get_id().to_owned(), new_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), is_deleted));
             }
         } else {
             if prev_state.any_exists_v("rdf:type", &onto_types) {
-                info!("found onto changes from storage: uri={}", prev_state.get_id());
+                info!("found ontology changes from storage, uri = {}", prev_state.get_id());
                 return Some((prev_state.get_id().to_owned(), prev_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), true));
             }
         }

@@ -152,7 +152,7 @@ impl WsCCUSSession {
             // check client heartbeats
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
                 // heartbeat timed out
-                info!("Websocket Client heartbeat failed, disconnecting!");
+                info!("websocket client heartbeat failed, disconnect");
 
                 // notify ccus server
                 act.addr.do_send(server::Disconnect {
@@ -172,7 +172,7 @@ impl WsCCUSSession {
 }
 
 fn storage_manager(rx: Receiver<CMessage>) {
-    info!("Start STORAGE MANAGER");
+    info!("start storage manager");
 
     let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
@@ -188,7 +188,7 @@ fn storage_manager(rx: Receiver<CMessage>) {
             info!("main: {:?}->{}", indv.get_id(), out_counter);
 
             if let Err(e) = sender.send((out_counter, msg_id)) {
-                error!("NOT SEND RESPONSE, err={}", e);
+                error!("failed to send response, err = {}", e);
             }
         }
     }
@@ -210,7 +210,7 @@ fn main() -> std::io::Result<()> {
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let ccus_port = section.get("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
 
-    info!("CCUS PORT={:?}", ccus_port);
+    info!("ccus port = {:?}", ccus_port);
 
     // создадим канал приема и передачи с нитью storage_manager
     let (sbscr_tx, sbscr_rx): (Sender<CMessage>, Receiver<CMessage>) = mpsc::channel();

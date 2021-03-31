@@ -10,13 +10,13 @@ const MAX_SIZE_BATCH: i64 = 100000;
 pub fn remove_membership1(ctx: &mut CleanerContext) {
     let module_info = ModuleInfo::new("./data", "remove_membership1", true);
     if module_info.is_err() {
-        error!("{:?}", &module_info.err());
+        error!("failed to start, err = {:?}", &module_info.err());
         return;
     }
     let mut module_info = module_info.unwrap();
 
     if let Some((mut pos, _)) = module_info.read_info() {
-        info!("start remove_membership1, pos={}", pos);
+        info!("start remove_membership1, pos = {}", pos);
         let query = "SELECT id FROM veda_tt.`v-s:Membership` WHERE v_s_memberOf_str[1] = 'cfg:AllUsersGroup' AND rdfs_comment_str[1] = 'выдан cfg:Event_5' AND v_s_deleted_int[1] = 0";
         let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, pos, OptAuthorize::NO);
 
@@ -24,7 +24,7 @@ pub fn remove_membership1(ctx: &mut CleanerContext) {
             for id in res.result.iter() {
                 pos += 1;
                 if pos % 1000 == 0 {
-                    info!("pos={}", pos);
+                    info!("pos = {}", pos);
                 }
 
                 let mut indv: Individual = Individual::default();
@@ -43,7 +43,7 @@ pub fn remove_membership1(ctx: &mut CleanerContext) {
             }
 
             if let Err(e) = module_info.put_info(pos, pos) {
-                error!("{:?}", e);
+                error!("err = {:?}", e);
                 return;
             }
         }

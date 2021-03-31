@@ -37,7 +37,7 @@ fn main() -> Result<(), i32> {
 
     let module_info = ModuleInfo::new("./data", "fanout_email0", true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", &module_info.err());
         return Err(-1);
     }
 
@@ -55,9 +55,9 @@ fn main() -> Result<(), i32> {
 
     connect_to_smtp(&mut ctx, &mut module);
 
-    info!("load onto start");
+    info!("load ontology start");
     load_onto(&mut module.storage, &mut ctx.onto);
-    info!("load onto end");
+    info!("load ontology end");
 
     module.listen_queue(
         &mut queue_consumer,
@@ -83,7 +83,7 @@ fn after_batch(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u
 fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
-        error!("cmd is none");
+        error!("skip queue message: cmd is none");
         return Ok(true);
     }
 
@@ -96,13 +96,13 @@ fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individua
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("fail write module_info, op_id={}, err={:?}", op_id, e)
+        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e)
     }
 
     if let Some(types) = new_state.get_literals("rdf:type") {
         let is_version = types.contains(&"v-s:Version".to_owned());
         if is_version {
-            info!("{} is version, ignore", new_state.get_id());
+            info!("individual {} is version, ignore", new_state.get_id());
             return Ok(true);
         }
 
@@ -121,14 +121,14 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
     let is_deleted = prepared_indv.is_exists("v-s:deleted");
 
     if is_deleted {
-        info!("new_indv {} is deleted, ignore it", prepared_indv.get_id());
+        info!("individual {} is deleted, ignore", prepared_indv.get_id());
         return ResultCode::Ok;
     }
 
     let is_draft_of = prepared_indv.get_first_literal("v-s:is_draft_of");
 
     if is_draft_of.is_some() {
-        info!("new_indv {} is draft, ignore it", prepared_indv.get_id());
+        info!("individual {} is draft, ignore", prepared_indv.get_id());
         return ResultCode::Ok;
     }
 
@@ -157,14 +157,14 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
                 if let Some(r) = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, module).pop() {
                     email_from = r;
                 } else {
-                    error!("fail extract email from default_mail_sender {}", ctx.default_mail_sender);
+                    error!("failed to extract email from default_mail_sender {}", ctx.default_mail_sender);
                 }
             } else {
                 email_from = Mailbox::new(ctx.default_mail_sender.to_string());
             };
         } else {
             if !from.is_empty() {
-                info!("extract [from], {}", from);
+                info!("extract from: {}", from);
                 if let Some(r) = extract_email(&None, &from, ctx, module).pop() {
                     email_from = r;
                 }
@@ -221,7 +221,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
 
                             match email.clone().attachment_from_file(Path::new(&full_path), Some(&file_name.unwrap_or_default()), &IMAGE_JPEG) {
                                 Ok(att) => email = att,
-                                Err(e) => error!("fail add attachment {} into email {}, err={}", &full_path, prepared_indv.get_id(), e),
+                                Err(e) => error!("failed to add attachment {} to email {}, err = {:?}", &full_path, prepared_indv.get_id(), e),
                             }
                         }
                     }
@@ -251,26 +251,26 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
                 Ok(m) => {
                     if let Some(mailer) = &mut ctx.smtp_client {
                         if let Err(e) = &mailer.send(m.into()) {
-                            error!("fail send email id={}, err={}", prepared_indv.get_id(), e);
+                            error!("failed to send email, uri = {}, err = {:?}", prepared_indv.get_id(), e);
                         } else {
-                            info!("message {} success send", prepared_indv.get_id());
+                            info!("message successfully sent, uri = {}", prepared_indv.get_id());
                         }
                     } else {
-                        error!("fail send email id={}, mailer not found", prepared_indv.get_id());
+                        error!("failed to send email, mailer not found, uri = {}, ", prepared_indv.get_id());
                     }
                 }
                 Err(e) => {
-                    error!("fail build email id={}, err={}", prepared_indv.get_id(), e);
+                    error!("failed to build email, id = {}, err = {:?}", prepared_indv.get_id(), e);
                 }
             }
         }
     } else {
         if from.is_empty() || from.len() < 5 {
-            error!("push_to_smtp {}: empty or invalid field from {}", prepared_indv.get_id(), from);
+            error!("failed to send email, empty or invalid field from, uri = {}, from = {}", prepared_indv.get_id(), from);
         }
 
         if to.is_empty() {
-            error!("push_to_smtp {}: empty or invalid field to", prepared_indv.get_id());
+            error!("failed to send email, empty or invalid field to, uri = {}", prepared_indv.get_id());
         }
     }
 
@@ -303,12 +303,12 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
     if let Some(has_message_type) = has_message_type {
         if let Some(preference_uri) = prs.get_first_literal("v-ui:hasPreferences") {
             if let Some(preference) = module.get_individual(&preference_uri, &mut Individual::default()) {
-                info!("for {} found preferences, has message type {}", p_uri, has_message_type);
+                info!("found preferences, uri = {}, has message type = {}", p_uri, has_message_type);
 
                 let mut need_send = true;
                 if let Some(receive_message_types) = preference.get_literals("v-ui:rejectMessageType") {
                     for msg_type in receive_message_types.iter() {
-                        info!("check preference {}", msg_type);
+                        info!("check preferences {}", msg_type);
                         if !has_message_type.is_empty() && msg_type == has_message_type {
                             need_send = false;
                             break;
@@ -322,7 +322,7 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
                 }
 
                 if !need_send {
-                    info!("decline send message");
+                    info!("declined to send message");
                     return vec![];
                 }
             }
@@ -390,7 +390,7 @@ fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Conte
                 }
             }
         } else {
-            error!("extract_email: fail extract email from {}, this not appointment or position", ap_id);
+            error!("failed to extract email from {}, this is not an appointment, nor a position", ap_id);
         }
     }
     res
@@ -405,13 +405,13 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Module) -> bool {
                 if module.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:delete", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
                         if transport == "smtp" {
-                            info!("found connect to smtp {}", connection.get_id());
+                            info!("found connection configuration for smtp server, uri = {}", connection.get_id());
 
                             let host = connection.get_first_literal("v-s:host").unwrap_or_default();
                             let port = connection.get_first_integer("v-s:port").unwrap_or(25);
 
                             if host.is_empty() {
-                                error!("param [host] is empty");
+                                error!("parameter [host] is empty");
                                 return false;
                             }
 
@@ -423,16 +423,16 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Module) -> bool {
                             ctx.always_use_mail_sender = connection.get_first_bool("v-s:alwaysUseMailSender").unwrap_or_default();
 
                             if ctx.always_use_mail_sender {
-                                info!("use always_use_mail_sender");
+                                info!("use always_use_mail_sender parameter");
                             }
 
                             if !ctx.default_mail_sender.is_empty() {
-                                info!("default mail sender: {:?}", ctx.default_mail_sender);
+                                info!("default mail sender = {:?}", ctx.default_mail_sender);
                             }
 
                             let client = SmtpClient::new(host.to_owned() + ":" + &port.to_string(), ClientSecurity::None);
                             if let Err(e) = client {
-                                error!("fail connect to {}:{}, err={}", host, port, e);
+                                error!("failed to connect to {}:{}, err = {:?}", host, port, e);
                                 return false;
                             }
 
@@ -466,6 +466,6 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Module) -> bool {
         }
     }
 
-    error!("not found configuration for connection to smtp server");
+    error!("failed to find connection configuration for smtp server");
     false
 }

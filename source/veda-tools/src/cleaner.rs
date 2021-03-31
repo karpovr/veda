@@ -62,7 +62,7 @@ pub fn clean(modules: String, operations: String, report: String) {
             Ok(ff) => {
                 ctx.report = Some(ff);
             }
-            Err(e) => error!("error={:?}", e),
+            Err(e) => error!("err = {:?}", e),
         }
     }
 
@@ -75,7 +75,7 @@ pub fn clean(modules: String, operations: String, report: String) {
         thread::sleep(Duration::from_millis(10000));
     }
 
-    info!("cleaner started");
+    info!("started cleaner");
 
     if let Ok(t) = ctx.module.get_sys_ticket_id() {
         ctx.sys_ticket = ctx.module.get_ticket_from_db(&t);

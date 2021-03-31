@@ -9,7 +9,7 @@ const MAX_SIZE_BATCH: i64 = 100000;
 pub fn clean_invalid_membership(ctx: &mut CleanerContext) {
     let module_info = ModuleInfo::new("./data", "clean_invalid_membership", true);
     if module_info.is_err() {
-        error!("{:?}", &module_info.err());
+        error!("failed to start, err = {:?}", &module_info.err());
         return;
     }
     let mut module_info = module_info.unwrap();
@@ -35,7 +35,7 @@ pub fn clean_invalid_membership(ctx: &mut CleanerContext) {
             }
 
             if let Err(e) = module_info.put_info(pos, pos) {
-                error!("{:?}", e);
+                error!("err = {:?}", e);
                 return;
             }
         }

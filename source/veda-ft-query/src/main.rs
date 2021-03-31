@@ -18,7 +18,7 @@ fn main() {
 
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
-    
+
     let mut query_url = section.get("ft_query_service_url").expect("param [search_query_url] not found in veda.properties").to_owned();
 
     let args: Vec<String> = env::args().collect();
@@ -26,7 +26,7 @@ fn main() {
         if el.starts_with("--bind") {
             let p: Vec<&str> = el.split('=').collect();
             query_url = p[1].to_owned().trim().to_owned();
-            info!("use arg bind={}", query_url);
+            info!("use arg bind = {}", query_url);
         }
     }
 
@@ -38,16 +38,16 @@ fn main() {
             let server = Socket::new(Protocol::Rep0).unwrap();
 
             if let Err(e) = server.set_opt::<RecvTimeout>(Some(Duration::from_secs(30))) {
-                error!("fail set recv timeout, {} err={}", query_url, e);
+                error!("failed to set recv timeout, url = {}, err = {}", query_url, e);
                 return;
             }
             if let Err(e) = server.set_opt::<SendTimeout>(Some(Duration::from_secs(30))) {
-                error!("fail set send timeout, {} err={}", query_url, e);
+                error!("failed to set send timeout, url = {}, err = {}", query_url, e);
                 return;
             }
 
             if let Err(e) = server.listen(&query_url) {
-                error!("fail listen {}, {:?}", query_url, e);
+                error!("failed to listen, url = {}, err = {:?}", query_url, e);
                 return;
             }
 
@@ -68,7 +68,7 @@ fn main() {
                         };
 
                         if let Err(e) = server.send(out_msg) {
-                            error!("fail send answer, err={:?}", e);
+                            error!("failed to send answer, err = {:?}", e);
                             break;
                         }
                     }
@@ -78,7 +78,7 @@ fn main() {
                             break;
                         }
                         _ => {
-                            error!("fail get request, err={:?}", e);
+                            error!("failed to get request, err = {:?}", e);
                             break;
                         }
                     },
@@ -87,7 +87,7 @@ fn main() {
             server.close();
         }
     } else {
-        error!("fail init ft-query");
+        error!("failed to init ft-query");
     }
 }
 
@@ -152,13 +152,13 @@ fn req_prepare(module: &mut Module, s: &str, xr: &mut XapianReader) -> Message {
         };
 
         info!(
-            "ticket={}, user={}, query={}, sort={}, db={}, top={}, limit={}, from={}",
+            "ticket = {}, user = {}, query = {}, sort = {}, db = {}, top = {}, limit = {}, from = {}",
             ticket_id, request.user, request.query, request.sort, request.databases, request.top, request.limit, request.from
         );
 
         if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
             res.result = ctx;
-            info!("count = {}, time: query={}, authorize={}, total={}", res.count, res.query_time, res.authorize_time, res.total_time);
+            info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
             if let Ok(s) = serde_json::to_string(&res) {
                 return Message::from(s.as_bytes());
             }

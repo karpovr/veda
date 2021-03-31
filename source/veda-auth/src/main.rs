@@ -27,7 +27,7 @@ fn main() -> std::io::Result<()> {
 
     let server = Socket::new(Protocol::Rep0)?;
     if let Err(e) = server.listen(&auth_url) {
-        error!("fail listen, {:?}", e);
+        error!("failed to listen, err = {:?}", e);
         return Ok(());
     }
 
@@ -36,7 +36,7 @@ fn main() -> std::io::Result<()> {
     let systicket = if let Ok(t) = module.get_sys_ticket_id() {
         t
     } else {
-        error!("fail get systicket, create new");
+        error!("failed to get systicket, create new");
 
         create_sys_ticket(&mut module.storage).id
     };
@@ -50,12 +50,12 @@ fn main() -> std::io::Result<()> {
             if let Ok(recv_msg) = server.recv() {
                 let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut module, &mut suspicious);
                 if let Err(e) = server.send(res) {
-                    error!("fail send {:?}", e);
+                    error!("failed to send, err = {:?}", e);
                 }
             }
         }
     } else {
-        error!("fail init ft-query");
+        error!("failed to init ft-query");
     }
     Ok(())
 }

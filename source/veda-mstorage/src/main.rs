@@ -39,15 +39,15 @@ fn main() -> std::io::Result<()> {
 
     let notify_channel_url = section.get("notify_channel_url");
     if notify_channel_url.is_none() {
-        error!("fail read property [notify_channel_url]");
+        error!("failed to read property [notify_channel_url]");
         return Ok(());
     };
     let notify_soc = Socket::new(Protocol::Pub0).unwrap();
     if let Err(e) = notify_soc.listen(notify_channel_url.unwrap()) {
-        error!("fail connect to, {}, err={}", notify_channel_url.unwrap(), e);
+        error!("failed to connect to {}, err = {}", notify_channel_url.unwrap(), e);
         return Ok(());
     } else {
-        info!("bind to notify_channel={}", notify_channel_url.unwrap());
+        info!("bind to notify_channel = {}", notify_channel_url.unwrap());
     }
 
     let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
@@ -70,7 +70,7 @@ fn main() -> std::io::Result<()> {
                 backup_storage.get_value(StorageId::Individuals, "?");
             }
         } else {
-            error!("invalid backup_db_connection string {}", s);
+            error!("failed to parse backup_db_connection string: {}", s);
         }
     }
 
@@ -84,23 +84,23 @@ fn main() -> std::io::Result<()> {
     let param_name = "main_module_url";
     let main_module_url = Module::get_property(param_name);
     if main_module_url.is_none() {
-        error!("not found param {} in properties file", param_name);
+        error!("failed to find parameter [{}] in properties file", param_name);
         return Ok(());
     }
     let main_module_url = main_module_url.unwrap();
 
     let server = Socket::new(Protocol::Rep0)?;
     if let Err(e) = server.listen(&main_module_url) {
-        error!("fail listen, {:?}", e);
+        error!("failed to listen, err = {:?}", e);
         return Ok(());
     }
-    info!("listen {}", main_module_url);
+    info!("started listening {}", main_module_url);
 
     let mut tickets_cache: HashMap<String, Ticket> = HashMap::new();
 
     let info = ModuleInfo::new(base_path, "subject_manager", true);
     if info.is_err() {
-        error!("fail open info file, {:?}", info.err());
+        error!("failed to open info file, err = {:?}", info.err());
         return Ok(());
     }
 
@@ -109,7 +109,7 @@ fn main() -> std::io::Result<()> {
     if let Some((_op_id, committed_op_id)) = mstorage_info.read_info() {
         op_id = committed_op_id;
     }
-    info!("started with op_id={}", op_id);
+    info!("started with op_id = {}", op_id);
 
     loop {
         if let Ok(recv_msg) = server.recv() {
@@ -137,7 +137,7 @@ fn main() -> std::io::Result<()> {
                     if el.res == ResultCode::Ok {
                         let msg_to_modules = format!("#{};{};{}", el.id, el.counter, el.op_id);
                         if notify_soc.send(Message::from(msg_to_modules.as_bytes())).is_err() {
-                            error!("fail notify, id={}", el.id);
+                            error!("failed to notify, id = {}", el.id);
                         }
                     }
                 }
@@ -149,7 +149,7 @@ fn main() -> std::io::Result<()> {
             }
 
             if let Err(e) = server.send(Message::from(out_msg.to_string().as_bytes())) {
-                error!("fail send {:?}", e);
+                error!("failed to send, err = {:?}", e);
             }
         }
     }
@@ -246,7 +246,7 @@ fn request_prepare(
         for el in jindividuals {
             let mut indv = Individual::default();
             if !parse_json_to_individual(el, &mut indv) {
-                error!("fail parse individual from json");
+                error!("failed to parse individual from json");
                 res_of_id.push(Response::new("", ResultCode::BadRequest, -1, -1));
             } else {
                 res_of_id.push(operation_prepare(
@@ -309,13 +309,13 @@ fn operation_prepare(
         if parse_raw(&mut prev_indv).is_ok() {
             prev_indv.parse_all();
         } else {
-            error!("fail parse individual prev states, cmd={:?}, uri={}", cmd, new_indv.get_id());
+            error!("failed to parse individual prev states, cmd = {:?}, uri = {}", cmd, new_indv.get_id());
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
     }
 
     if prev_indv.is_empty() && (cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom) {
-        error!("fail update, cmd={:?}: not read prev_state uri={}", cmd, new_indv.get_id());
+        error!("failed to update, cmd = {:?}, no prev_state, uri = {}", cmd, new_indv.get_id());
         return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
     }
 
@@ -332,7 +332,7 @@ fn operation_prepare(
     if is_need_authorize {
         if cmd == IndvOp::Remove {
             if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8 {
-                error!("operation [Remove], Not Authorized, user {} request [can delete] {} ", ticket.user_uri, new_indv.get_id());
+                error!("operation [Remove], Not Authorized, user = {}, request [can delete], uri = {} ", ticket.user_uri, new_indv.get_id());
                 //return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
             }
         } else {
@@ -341,12 +341,12 @@ fn operation_prepare(
                     if is_deleted
                         && _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8
                     {
-                        error!("fail update, Not Authorized, user {} request [can delete] {} ", ticket.user_uri, new_indv.get_id());
+                        error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", ticket.user_uri, new_indv.get_id());
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
                 } else {
                     if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanUpdate as u8 {
-                        error!("fail update, Not Authorized, user {} request [can update] {} ", ticket.user_uri, new_indv.get_id());
+                        error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", ticket.user_uri, new_indv.get_id());
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
                 }
@@ -371,13 +371,13 @@ fn operation_prepare(
                         }
                     }
                 } else if cmd == IndvOp::Put {
-                    error!("fail update, not found type for new individual, user {}, id={} ", ticket.user_uri, new_indv.get_id());
+                    error!("failed to update, not found type for new individual, user = {}, id = {} ", ticket.user_uri, new_indv.get_id());
                     return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
 
                 for type_id in added_types.iter() {
                     if _authorize(type_id, &ticket.user_uri, Access::CanCreate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanCreate as u8 {
-                        error!("fail update, Not Authorized, user {} request [can create] for {} ", ticket.user_uri, type_id);
+                        error!("failed to update, Not Authorized, user = {}, request [can create], type = {}", ticket.user_uri, type_id);
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
                 }
@@ -416,7 +416,7 @@ fn operation_prepare(
             my_info,
             queue_out,
         ) {
-            error!("not completed update to main DB");
+            error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
     } else {
@@ -437,7 +437,7 @@ fn operation_prepare(
             my_info,
             queue_out,
         ) {
-            error!("not completed update to main DB");
+            error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
     }
@@ -460,7 +460,7 @@ fn operation_prepare(
             my_info,
             queue_out,
         ) {
-            error!("not completed update to main DB");
+            error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
     }
@@ -489,32 +489,32 @@ fn to_storage_and_queue(
     let mut new_state: Vec<u8> = Vec::new();
     if cmd == IndvOp::Remove {
         if primary_storage.remove(StorageId::Individuals, new_indv.get_id()) {
-            info!("remove individual, id={}", new_indv.get_id());
+            info!("remove individual, id = {}", new_indv.get_id());
 
             if use_backup_db {
                 if backup_storage.remove(StorageId::Individuals, new_indv.get_id()) {
-                    info!("backup storage: remove individual, id={}", new_indv.get_id());
+                    info!("backup storage: remove individual, id = {}", new_indv.get_id());
                 } else {
-                    error!("backup storage: fail remove individual, id={}", new_indv.get_id());
+                    error!("backup storage: failed to remove individual, id = {}", new_indv.get_id());
                 }
             }
         } else {
-            error!("fail remove individual, id={}", new_indv.get_id());
+            error!("failed to remove individual, id = {}", new_indv.get_id());
             return false;
         }
     } else {
         if to_msgpack(&new_indv, &mut new_state).is_ok() && primary_storage.put_kv_raw(StorageId::Individuals, new_indv.get_id(), new_state.clone()) {
             if use_backup_db {
                 if backup_storage.put_kv_raw(StorageId::Individuals, new_indv.get_id(), new_state.clone()) {
-                    info!("backup storage: update, id={}", new_indv.get_id());
+                    info!("backup storage: update, id = {}", new_indv.get_id());
                 } else {
-                    error!("backup storage: fail update individual, id={}", new_indv.get_id());
+                    error!("backup storage: failed to update individual, id = {}", new_indv.get_id());
                 }
             }
 
-            info!("update, id={}, event_id={}, src={}", new_indv.get_id(), event_id.unwrap_or_default(), src.unwrap_or_default());
+            info!("update, id = {}, event_id = {}, src = {}", new_indv.get_id(), event_id.unwrap_or_default(), src.unwrap_or_default());
         } else {
-            error!("fail update individual, id={}", new_indv.get_id());
+            error!("failed to update individual, id = {}", new_indv.get_id());
             return false;
         }
     }
@@ -572,17 +572,17 @@ fn to_storage_and_queue(
 
         let mut raw1: Vec<u8> = Vec::new();
         if let Err(e) = to_msgpack(&queue_element, &mut raw1) {
-            error!("fail serialize, err={:?}", e);
+            error!("failed to serialize, err = {:?}", e);
             return false;
         }
         if let Err(e) = queue_out.push(&raw1, MsgType::String) {
-            error!("fail push into queue, err={:?}", e);
+            error!("failed to push message to queue, err = {:?}", e);
             return false;
         }
     }
     *op_id += 1;
     if let Err(e) = mstorage_info.put_info(*op_id, *op_id) {
-        error!("fail put info, error={:?}", e);
+        error!("failed to put info, err = {:?}", e);
         return false;
     }
 

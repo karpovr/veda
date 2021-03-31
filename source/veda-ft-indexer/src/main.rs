@@ -35,11 +35,11 @@ fn main() -> Result<(), XError> {
         if batch_size == 0 {
             batch_size = BATCH_SIZE_OF_TRANSACTION as u32;
         }
-        info!("BATCH_SIZE = {}", batch_size);
+        info!("batch size = {}", batch_size);
 
         module.max_batch_size = Some(batch_size);
         if let Err(e) = index(&mut module) {
-            error!("indexer, err={:?}", e);
+            error!("failed to index batch, err = {:?}", e);
         }
 
         batch_size = batch_size / 2;
@@ -59,7 +59,7 @@ fn index(module: &mut Module) -> Result<(), XError> {
     let mut queue_consumer = Consumer::new(&format!("./{}/queue", BASE_PATH), "fulltext_indexer0", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new(BASE_PATH, "fulltext_indexer", true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
     let mut onto = Onto::default();
@@ -84,15 +84,15 @@ fn index(module: &mut Module) -> Result<(), XError> {
             failed_ids: Default::default(),
         };
 
-        info!("Rusty search-index: start listening to queue");
+        info!("started listening to queue");
 
         if let Err(e) = ctx.init("") {
             match e {
                 XError::Xapian(c) => {
-                    error!("fail init index base, err={}", get_xapian_err_type(c));
+                    error!("failed to init index base, err = {}", get_xapian_err_type(c));
                 }
                 _ => {
-                    error!("fail init index base, err={:?}", e);
+                    error!("failed to init index base, err = {:?}", e);
                 }
             }
             return Err(e);
@@ -120,17 +120,17 @@ fn index(module: &mut Module) -> Result<(), XError> {
             &mut (heartbeat as fn(&mut Module, &mut Indexer) -> Result<(), PrepareError>),
         );
     } else {
-        error!("fail init ft-query");
+        error!("failed to init ft-query");
     }
 
-    info!("Rusty search-index: end listening to queue");
+    info!("stopped listening to queue");
     Ok(())
 }
 
 fn heartbeat(_module: &mut Module, ctx: &mut Indexer) -> Result<(), PrepareError> {
     if ctx.committed_time.elapsed().as_millis() > TIMEOUT_BETWEEN_COMMITS {
         if let Err(e) = ctx.commit_all_db() {
-            error!("fail commit, err={:?}", e);
+            error!("failed to commit, err = {:?}", e);
             return Err(PrepareError::Fatal);
         }
     }
@@ -143,16 +143,16 @@ fn before(_module: &mut Module, _ctx: &mut Indexer, _batch_size: u32) -> Option<
 
 fn after(_module: &mut Module, ctx: &mut Indexer, processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = ctx.commit_all_db() {
-        error!("fail commit, err={:?}", e);
+        error!("failed to commit, err = {:?}", e);
 
         if processed_batch_size == 1 {
             if !ctx.last_indexed_id.is_empty() {
                 if let Ok(mut f) = OpenOptions::new().write(true).append(true).create(true).open(format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME)) {
                     if let Err(e) = writeln!(f, "{}", ctx.last_indexed_id) {
-                        error!("write, err={:?}", e);
+                        error!("failed to write, err = {:?}", e);
                     }
                 } else {
-                    error!("failed to open {}", format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME));
+                    error!("failed to open file {}", format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME));
                 }
             }
         }
@@ -165,7 +165,7 @@ fn after(_module: &mut Module, ctx: &mut Indexer, processed_batch_size: u32) -> 
 fn process(module: &mut Module, ctx: &mut Indexer, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
-        error!("cmd is none");
+        error!("skip queue message: cmd is none");
         return Ok(true);
     }
 
@@ -178,12 +178,12 @@ fn process(module: &mut Module, ctx: &mut Indexer, queue_element: &mut Individua
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
     if !ctx.failed_ids.is_empty() && ctx.failed_ids.contains(new_state.get_id()) {
-        warn!("in failed list, skip: {}", new_state.get_id());
+        warn!("individual is found in failed list, skip: {}", new_state.get_id());
         return Ok(false);
     }
 
     if let Err(e) = ctx.index_msg(&mut new_state, &mut prev_state, cmd.unwrap(), op_id, module) {
-        error!("fail index msg, err={:?}", e);
+        error!("failed to index individual, err = {:?}", e);
     }
 
     ctx.last_indexed_id = new_state.get_id().to_owned();

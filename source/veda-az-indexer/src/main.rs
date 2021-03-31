@@ -19,7 +19,7 @@ fn main() -> Result<(), i32> {
 
     let module_info = ModuleInfo::new("./data", "acl_preparer", true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         return Err(-1);
     }
 
@@ -53,7 +53,7 @@ fn main() -> Result<(), i32> {
         }
     }
 
-    info!("USE INDEX FORMAT V{}", ctx.version_of_index_format);
+    info!("use index format version {}", ctx.version_of_index_format);
 
     module.listen_queue(
         &mut queue_consumer,
@@ -76,7 +76,7 @@ fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> O
 
 fn after_batch(_module: &mut Module, ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     if (ctx.permission_statement_counter + ctx.membership_counter) % 100 == 0 {
-        info!("count prepared: permissions={}, memberships={}", ctx.permission_statement_counter, ctx.membership_counter);
+        info!("count processed: permissions = {}, memberships = {}", ctx.permission_statement_counter, ctx.membership_counter);
     }
     Ok(false)
 }
@@ -84,7 +84,7 @@ fn after_batch(_module: &mut Module, ctx: &mut Context, _prepared_batch_size: u3
 fn prepare(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
-        error!("cmd is none");
+        error!("skip queue message: cmd is none");
         return Ok(true);
     }
 
@@ -107,7 +107,7 @@ fn prepare(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individu
     }
 
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("fail write module_info, op_id={}, err={:?}", op_id, e);
+        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
         return Err(PrepareError::Fatal);
     }
 

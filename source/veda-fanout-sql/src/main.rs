@@ -34,7 +34,7 @@ fn main() {
     let mut queue_consumer = Consumer::new("./data/queue", "fanout_sql", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new("./data", "fanout_sql", true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
     let mut module = Module::default();
@@ -79,13 +79,13 @@ fn void(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> 
 fn process(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
-        error!("Queue element cmd is none. Skip element.");
+        error!("queue message cmd is none, skip");
         return Ok(true);
     }
 
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("Failed to write module_info, op_id={}, err={:?}", op_id, e);
+        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
     }
 
     let mut prev_state = Individual::default();
@@ -111,13 +111,13 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
 
     let is_version = types.contains(&"v-s:Version".to_owned());
     if is_version {
-        info!("{} skip version.", uri);
+        info!("skip version: {}", uri);
         return Ok(true);
     }
 
     let mut conn = match ctx.pool.get_conn() {
         Err(e) => {
-            error!("Get connection failed. {:?}", e);
+            error!("failed to get connection, err = {:?}", e);
             return Err(PrepareError::Recoverable);
         }
         Ok(conn) => conn,
@@ -125,7 +125,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
 
     let mut transaction = match conn.start_transaction(true, Some(mysql::IsolationLevel::ReadCommitted), None) {
         Err(e) => {
-            error!("Transaction start failed. {:?}", e);
+            error!("failed to start transaction, err = {:?}", e);
             return Err(PrepareError::Recoverable);
         }
         Ok(transaction) => transaction,
@@ -142,12 +142,12 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
                     predicate.truncate(64);
                     // Check or create table before delete
                     if check_create_predicate_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
-                        error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
+                        error!("failed to to create table, export aborted, property = {}, uri = {}", predicate, uri);
                         tr_error = true;
                     }
                     let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", predicate, uri);
                     if let Err(e) = transaction.query(query) {
-                        error!("Delete individual `{}` from property table `{}` failed. {:?}", uri, predicate, e);
+                        error!("failed to delete individual, uri = {}, property table = {}, err = {:?}", uri, predicate, e);
                         tr_error = true;
                     }
                 }
@@ -172,7 +172,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
                 predicate.truncate(64);
                 // Check or create table before insert
                 if resource.order == 0 && check_create_predicate_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
-                    error!("Unable to create table for property: `{}`, export aborted for individual: `{}`.", predicate, uri);
+                    error!("failed to create table, export aborted, property = {}, uri = {}", predicate, uri);
                     tr_error = true;
                 }
 
@@ -197,7 +197,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
                 );
                 //info!("Query: {}", query);
                 if let Err(e) = transaction.query(query) {
-                    error!("Insert individual `{}` to property table `{}` failed. {:?}", uri, predicate, e);
+                    error!("failed to insert individual, uri = {}, property table = {}, err = {:?}", uri, predicate, e);
                     tr_error = true;
                 }
             });
@@ -207,11 +207,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
     if tr_error {
         match transaction.rollback() {
             Ok(_) => {
-                info!("Transaction rolled back for `{}`", uri);
+                info!("transaction rolled back for `{}`", uri);
                 return Ok(true);
             }
             Err(e) => {
-                error!("Transaction roll back failed for `{}`. {:?}", uri, e);
+                error!("failed to roll back transaction, uri = {}, err = {:?}", uri, e);
                 return Err(PrepareError::Fatal);
             }
         }
@@ -219,11 +219,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
 
     match transaction.commit() {
         Ok(_) => {
-            info!("`{}` Ok", uri);
+            info!("Ok, uri = {}", uri);
             Ok(true)
         }
         Err(e) => {
-            error!("Transaction commit failed for `{}`. {:?}", uri, e);
+            error!("failed to commit transaction, uri = {}, err = {:?}", uri, e);
             Err(PrepareError::Fatal)
         }
     }
@@ -250,7 +250,7 @@ fn check_create_predicate_table(
             sql_value_index = "";
         }
         DataType::Uri => sql_type = "CHAR(128)",
-        _unsupported => error!("Unsupported property value type: {:#?}", _unsupported),
+        _unsupported => error!("unsupported property value type: {:#?}", _unsupported),
     }
     let query = format!(
         "CREATE TABLE `{}` ( \
@@ -273,8 +273,8 @@ fn check_create_predicate_table(
             Ok(())
         }
         Err(e) => {
-            error!("Error creating property table: {}", e);
-            Err("Unable to create table")
+            error!("failed to create property table, err = {}", e);
+            Err("failed to create property table")
         }
     }
 }
@@ -289,7 +289,7 @@ fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str
         debug!("Existing tables: {:?}", tables);
         return Ok(tables);
     }
-    Err("Read existing tables error")
+    Err("failed to read existing tables")
 }
 
 fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mysql::Pool, &'static str> {
@@ -300,24 +300,24 @@ fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mys
                 if module.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:deleted", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
                         if transport == "mysql" {
-                            info!("Found configuration to connect to MySQL: {}", connection.get_id());
+                            info!("found configuration to connect to MySQL: {}", connection.get_id());
                             let host = connection.get_first_literal("v-s:host").unwrap_or_default();
                             let port = connection.get_first_integer("v-s:port").unwrap_or(3306) as u16;
                             let login = connection.get_first_literal("v-s:login").unwrap();
                             let pass = connection.get_first_literal("v-s:password").unwrap();
                             let db = connection.get_first_literal("v-s:sql_database").unwrap();
-                            info!("Trying to connect to mysql, host: {}, port: {}, login: {}, pass: {}, db: {}", host, port, login, pass, db);
+                            info!("trying to connect to mysql, host: {}, port: {}, login: {}, pass: {}, db: {}", host, port, login, pass, db);
                             let mut builder = mysql::OptsBuilder::new();
                             builder.ip_or_hostname(Some(host)).tcp_port(port).user(Some(login)).pass(Some(pass)).db_name(Some(db));
                             let opts: mysql::Opts = builder.into();
                             match mysql::Pool::new(opts) {
                                 Ok(pool) => {
-                                    info!("Connection to MySQL established successfully");
+                                    info!("connection to MySQL established successfully");
                                     return Ok(pool);
                                 }
                                 Err(e) => {
-                                    error!("Connection to MySQL failed. {:?}", e);
-                                    return Err("Connection to MySQL failed");
+                                    error!("failed to connect to MySQL, err = {:?}", e);
+                                    return Err("failed to connect to MySQL");
                                 }
                             }
                         }
@@ -329,10 +329,10 @@ fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mys
     if tries != 0 {
         let tries = tries - 1;
         thread::sleep(time::Duration::from_millis(timeout));
-        error!("Configuration not found yet, retry.");
+        error!("failed to find configuration, retry.");
         connect_to_mysql(module, tries, timeout)
     } else {
-        error!("Configuration to connect to mysql not found");
-        Err("Configuration to connect to mysql not found")
+        error!("failed to find configuration to connect to mysql");
+        Err("failed to find configuration to connect to mysql")
     }
 }

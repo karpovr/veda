@@ -70,15 +70,15 @@ fn main() {
 
     match Tools::process() {
         Tools::QueryToQueue(query) => {
-            info!("query={}", query);
-            export_from_query(&query).expect("fail create query from queue");
+            info!("query = {}", query);
+            export_from_query(&query).expect("failed to create query from queue");
         }
         Tools::StorageCleaner {
             module,
             operation,
             report,
         } => {
-            info!("module={}", module);
+            info!("module = {}", module);
             clean(module, operation, report);
         }
         Tools::QueueToStorage {
@@ -86,14 +86,14 @@ fn main() {
             part_id,
             check_counter,
         } => {
-            info!("queue_path={}, part_id={:?}", queue_path, part_id);
+            info!("queue_path = {}, part_id = {:?}", queue_path, part_id);
             queue_to_veda(queue_path, part_id, check_counter);
         }
         Tools::QueueToJson {
             queue_path,
             part_id,
         } => {
-            info!("queue_path={}, part_id={:?}", queue_path, part_id);
+            info!("queue_path = {}, part_id = {:?}", queue_path, part_id);
             queue_to_json(queue_path, part_id);
         }
     }

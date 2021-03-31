@@ -72,7 +72,7 @@ impl Context {
         let cmd = get_cmd(queue_element);
 
         if cmd.is_none() {
-            error!("Queue element cmd is none. Skip element.");
+            error!("queue message cmd is none, skip");
             return;
         }
 
@@ -159,7 +159,7 @@ impl Context {
                 }
             }
             if committed_types_ops.len() > 0 {
-                info!("Found {:#?} committed individuals", committed_types_ops.len());
+                info!("found {:#?} committed individuals", committed_types_ops.len());
             }
 
             for (type_name, batch) in self.typed_batch.iter_mut() {
@@ -172,7 +172,7 @@ impl Context {
             fs::remove_file(BATCH_LOG_FILE_NAME)?;
             self.typed_batch.clear();
             stats.last = Instant::now();
-            info!("Batch processed in {} ms", now.elapsed().as_millis());
+            info!("batch processed in {} ms", now.elapsed().as_millis());
         }
         Ok(())
     }
@@ -188,9 +188,9 @@ impl Context {
     ) -> Result<(), Error> {
         let now = Instant::now();
 
-        info!("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        info!("---------------------------------------------------------");
 
-        info!("Processing class batch: {}, count: {}", type_name, batch.len().clone());
+        info!("processing class batch: {}, count: {}", type_name, batch.len().clone());
 
         let mut id_column: Vec<String> = Vec::new();
 
@@ -219,11 +219,11 @@ impl Context {
                 type_ops.ops.push(signed_op);
                 committed_ops.insert(signed_op);
             } else {
-                info!("Skip already exported individual, uri = {}, type = {}, op_id = {}", individual.get_id(), type_name, signed_op);
+                info!("skip already exported individual, uri = {}, type = {}, op_id = {}", individual.get_id(), type_name, signed_op);
             }
         }
 
-        info!("Batch prepared in {} us", now.elapsed().as_micros());
+        info!("batch prepared in {} us", now.elapsed().as_micros());
 
         stats.total_prepare_duration += now.elapsed().as_millis() as usize;
 
@@ -234,7 +234,7 @@ impl Context {
         let block = Context::mk_block(type_name, id_column, sign_column, version_column, text_column, &mut columns, client, db_type_tables).await?;
 
         if block.row_count() == 0 {
-            info!("Block is empty! Nothing to insert");
+            info!("block is empty! nothing to insert");
             return Ok(());
         }
 
@@ -253,7 +253,7 @@ impl Context {
 
         let cps = (rows * 1000 / insert_duration) as f64;
 
-        info!("Block inserted successfully! Rows = {}, columns = {}, duration = {} ms, cps = {}", rows, columns.keys().len() + 2, insert_duration, cps);
+        info!("block inserted successfully, rows = {}, columns = {}, duration = {} ms, cps = {}", rows, columns.keys().len() + 2, insert_duration, cps);
 
         stats.total_insert_duration += insert_duration;
 
@@ -271,7 +271,7 @@ impl Context {
         let uptime_cps = (stats.total_rows * 1000 / uptime_ms) as f64;
 
         info!(
-            "Total rows inserted = {}, total prepare duration = {} ms, total insert duration = {} ms, avg. insert cps = {}, uptime = {}h {}m {}s, avg. uptime cps = {}, inserts count = {}",
+            "total rows inserted = {}, total prepare duration = {} ms, total insert duration = {} ms, avg. insert cps = {}, uptime = {}h {}m {}s, avg. uptime cps = {}, inserts count = {}",
             stats.total_rows,
             stats.total_prepare_duration,
             stats.total_insert_duration,
@@ -440,7 +440,7 @@ impl Context {
                         }
                     }
                     _ => {
-                        error!("Value type is not supported");
+                        error!("value type is not supported");
                     }
                 }
             }
@@ -511,7 +511,7 @@ fn main() -> Result<(), Error> {
     let mut queue_consumer = Consumer::new("./data/queue", "search_index_tt", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
     let module_info = ModuleInfo::new("./data", "search_index_tt", true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
     let mut module = Module::default();
@@ -523,7 +523,7 @@ fn main() -> Result<(), Error> {
 
     let db_type_tables = block_on(read_type_tables(&mut pool))?;
 
-    info!("Tables: {:?}", db_type_tables);
+    info!("tables: {:?}", db_type_tables);
 
     let typed_batch: TypedBatch = HashMap::new();
     let stats = Stats {
@@ -546,7 +546,7 @@ fn main() -> Result<(), Error> {
 
     load_onto(&mut module.storage, &mut ctx.onto);
 
-    info!("Rusty search-index: start listening to queue");
+    info!("started listening to queue");
 
     module.listen_queue(
         &mut queue_consumer,
@@ -567,7 +567,7 @@ fn before(_module: &mut Module, _ctx: &mut Context, _batch_size: u32) -> Option<
 
 fn after(_module: &mut Module, ctx: &mut Context, _processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = block_on(ctx.process_typed_batch()) {
-        error!("Error processing batch: {}", e);
+        error!("error processing batch, err = {}", e);
         process::exit(101);
     }
     Ok (true)
@@ -576,7 +576,7 @@ fn after(_module: &mut Module, ctx: &mut Context, _processed_batch_size: u32) ->
 fn process(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("Failed to write module_info, op_id={}, err={:?}", op_id, e);
+        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
     }
     ctx.add_to_typed_batch(queue_element);
     Ok(false)

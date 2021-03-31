@@ -42,19 +42,19 @@ fn main() -> Result<(), i32> {
         warn!("param [redis_addr] not found in veda.properties");
         "redis://127.0.0.1/".to_owned()
     };
-    info!("redis addr={:?}", &redis_addr);
+    info!("redis addr = {:?}", &redis_addr);
 
     let client = redis::Client::open(redis_addr.as_str());
 
     if let Err(e) = client {
-        error!("fail create client redis {}, err={:?}", redis_addr.to_string(), e);
+        error!("failed to create client redis {}, err = {:?}", redis_addr.to_string(), e);
         return Err(-1);
     }
 
     let wgeo_index = client.unwrap().get_connection();
 
     if let Err(e) = wgeo_index {
-        error!("fail connect to redis {}, err={:?}", redis_addr.to_string(), e);
+        error!("failed to connect to redis {}, err = {:?}", redis_addr.to_string(), e);
         return Err(-1);
     }
 
@@ -88,7 +88,7 @@ fn main() -> Result<(), i32> {
         }
 
         if size_batch > 0 {
-            info!("queue: batch size={}", size_batch);
+            info!("queue: batch size = {}", size_batch);
         }
 
         for _it in 0..size_batch {
@@ -158,7 +158,7 @@ fn prepare_queue_element(msg: &mut Individual, geo_index: &mut Connection) -> Re
                             info!("index {} {} {}", indv.get_id(), label.unwrap_or_default(), nn);
                         }
                         Err(e) => {
-                            error!("fail index {} {} {:?}", indv.get_id(), label.unwrap_or_default(), e);
+                            error!("failed to index {} {} {:?}", indv.get_id(), label.unwrap_or_default(), e);
                         }
                     }
                 }

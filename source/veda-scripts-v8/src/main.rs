@@ -84,7 +84,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     let mut module = Module::default();
 
     while !module.api.connect() {
-        error!("main module not ready, sleep and repeat");
+        error!("failed to connect to main module, sleep and repeat");
         thread::sleep(time::Duration::from_millis(1000));
     }
 
@@ -93,7 +93,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
 
     let w_sys_ticket = module.get_sys_ticket_id();
     if w_sys_ticket.is_err() {
-        error!("system ticket not found");
+        error!("failed to get system ticket");
         return Ok(());
     }
 
@@ -112,7 +112,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
 
     let module_info = ModuleInfo::new("./data", &process_name, true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         return Err(-1);
     }
 
@@ -130,7 +130,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
             module_info: module_info.unwrap(),
         };
 
-        info!("use VM id={}", process_name);
+        info!("use VM id = {}", process_name);
 
         if vm_id == "lp" {
             ctx.vm_id = "V8.LowPriority".to_owned();
@@ -165,7 +165,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
             &mut (heartbeat as fn(&mut Module, &mut MyContext<'a>) -> Result<(), PrepareError>),
         );
     } else {
-        error!("fail init ft-query");
+        error!("failed to init ft-query");
     }
     Ok(())
 }
@@ -198,7 +198,7 @@ fn prepare(_module: &mut Module, ctx: &mut MyContext, queue_element: &mut Indivi
     match prepare_for_js(ctx, queue_element) {
         Ok(op_id) => {
             if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-                error!("fail write module_info, op_id={}, err={:?}", op_id, e);
+                error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
                 return Err(PrepareError::Fatal);
             }
         }
@@ -219,7 +219,7 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
 
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
-        error!("cmd is none");
+        error!("cmd is none, skip");
         return Ok(op_id);
     }
 
@@ -381,7 +381,7 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
                 info!("{} end: {}", ctx.count_exec, script_id);
 
                 if res != ResultCode::Ok {
-                    info!("fail exec event script : {}, result={:?}", script_id, res);
+                    error!("failed to execute event script: {}, result = {:?}", script_id, res);
                     return Err(PrepareError::Fatal);
                 }
             }
@@ -475,6 +475,6 @@ pub(crate) fn prepare_script(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, ev_in
         scr_inf.compile_script(ev_indv.get_id(), scope);
         wp.scripts.insert(scr_inf.id.to_string(), scr_inf);
     } else {
-        error!("v-s:script no found");
+        error!("failed to read v-s:script attribute");
     }
 }

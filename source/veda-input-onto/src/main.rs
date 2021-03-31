@@ -61,7 +61,7 @@ fn main() -> NotifyResult<()> {
 
     let module_info = ModuleInfo::new("./data", "input-onto", true);
     if module_info.is_err() {
-        error!("{:?}", module_info.err());
+        error!("failed to start, err = {:?}", module_info.err());
         return Ok(());
     }
     let mut module_info = module_info.unwrap();
@@ -69,18 +69,18 @@ fn main() -> NotifyResult<()> {
     let mut module = Module::default();
 
     while !module.api.connect() {
-        info!("wait for start of main module ...");
+        info!("waiting for start of main module...");
         thread::sleep(std::time::Duration::from_millis(100));
     }
 
     let onto_path = "ontology".to_owned();
 
     let mut onto = Onto::default();
-    info!("load onto start");
+    info!("start loading ontology");
     load_onto(&mut module.storage, &mut onto);
-    info!("load onto end");
+    info!("finish loading ontology");
 
-    info!("start prepare files");
+    info!("start processing files");
 
     let systicket;
     if let Ok(t) = module.get_sys_ticket_id() {
@@ -191,10 +191,10 @@ fn store_hash_list(new_hashes_set: &FileHash, path_files_hashes: &str) {
     if !new_hashes_set.data.is_empty() {
         if let Ok(mut file) = File::create(path_files_hashes) {
             if let Err(e) = file.write_all(to_string_pretty(&new_hashes_set, PrettyConfig::default()).unwrap_or_default().as_bytes()) {
-                error!("failed to write hashes of ttl files, err={}", e);
+                error!("failed to write hashes for ttl files, err = {}", e);
             }
         } else {
-            error!("failed to create hashes of ttl files");
+            error!("failed to create hashes for ttl files");
         }
     }
 }
@@ -233,7 +233,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
     }
 
     if let Err(e) = module_info.put_info(cur_op_id, cur_op_id) {
-        info!("failed to write module info, err={}", e);
+        info!("failed to write module info, err = {}", e);
     }
 
     let mut count_prepared_ttl_files = 0;
@@ -267,7 +267,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
         let new_hash = match get_hash_of_file(path) {
             Ok(new_h) => {
-                info!("HASH:{}", new_h);
+                info!("HASH: {}", new_h);
                 hash_list.remove(&file_path);
                 hash_list.insert(file_path, new_h.clone());
                 count_prepared_ttl_files += 1;
@@ -281,7 +281,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                 Some(new_h)
             }
             Err(e) => {
-                error!("failed to calculate HASH of file {}, err={}", &path, e);
+                error!("failed to calculate HASH for file {}, err = {}", &path, e);
                 None
             }
         };
@@ -294,7 +294,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                 full_file_info_indv(&onto_id, individuals, &mut file_info_indv, new_hash, path, name);
                 priority_list.push((load_priority, onto_id, path.to_owned()));
             } else {
-                error!("failed to parse");
+                error!("failed to parse file");
             }
         }
     }
@@ -330,12 +330,12 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                     // thread::sleep(std::time::Duration::from_millis(100));
 
                     if res.result != ResultCode::Ok {
-                        error!("failed to update, {}, file={}, uri={}, result_code={:?}", load_priority, path, indv_file.get_id(), res.result);
+                        error!("failed to update, priority = {}, file = {}, uri = {}, result_code = {:?}", load_priority, path, indv_file.get_id(), res.result);
                     } else {
-                        info!("successful update, {}, file={}, uri={}", load_priority, path, indv_file.get_id());
+                        info!("successful update, priority = {}, file = {}, uri = {}", load_priority, path, indv_file.get_id());
                         cur_op_id = res.op_id;
                         if let Err(e) = module_info.put_info(cur_op_id, committed_op_id) {
-                            info!("failed to write module info, err={}", e);
+                            info!("failed to write module info, err = {}", e);
                         }
                     }
                 }
@@ -365,7 +365,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
     committed_op_id = cur_op_id;
     if let Err(e) = module_info.put_info(committed_op_id, committed_op_id) {
-        info!("failed to write module info, err={}", e);
+        info!("failed to write module info, err = {}", e);
     }
 
     info!("end prepare {} files", file2indv.len());
@@ -420,7 +420,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
 
                 let s = to_prefix_form(&subject, &prefixes.namespaces2id);
                 if s.is_empty() {
-                    error!("invalid subject={:?}", subject);
+                    error!("invalid subject = {:?}", subject);
                 }
 
                 let indv = individuals.entry(s.to_owned()).or_default();
@@ -456,21 +456,21 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                                 if let Ok(v) = value.parse::<i64>() {
                                     indv.add_integer(&predicate, v);
                                 } else {
-                                    error!("fail parse [{}] to integer", value);
+                                    error!("failed to parse [{}] to integer", value);
                                 }
                             }
                             "http://www.w3.org/2001/XMLSchema/integer" => {
                                 if let Ok(v) = value.trim().parse::<i64>() {
                                     indv.add_integer(&predicate, v);
                                 } else {
-                                    error!("fail parse [{}] to integer", value);
+                                    error!("failed to parse [{}] to integer", value);
                                 }
                             }
                             "http://www.w3.org/2001/XMLSchema/boolean" => {
                                 if let Ok(v) = value.parse::<bool>() {
                                     indv.add_bool(&predicate, v);
                                 } else {
-                                    error!("fail parse [{}] to bool", value);
+                                    error!("failed to parse [{}] to bool", value);
                                 }
                             }
                             "http://www.w3.org/2001/XMLSchema/decimal" => {
@@ -491,7 +491,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
             });
 
             if let Err(e) = res {
-                error!("fail parse {}, err={}", file_path, e);
+                error!("failed to parse {}, err = {}", file_path, e);
                 break;
             }
 
