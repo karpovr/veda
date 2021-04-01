@@ -355,7 +355,10 @@ v-fc:BlankTemplate
       object.present(objectContainer, object_template, "edit")
         .then(function (objectTemplate) {
           objectTemplate.one("cancel", cancelHandler);
-          objectTemplate.one("save", saveHandler);
+          object.one("afterSave", saveHandler);
+          objectTemplate.one("remove", function () {
+            object.off("afterSave", saveHandler);
+          })
         });
     } else {
       $("#no-rights", template).removeClass("hidden");
@@ -369,7 +372,7 @@ v-fc:BlankTemplate
       setTimeout(function () {
         delete self.object;
         riot.route("#/" + object.id);
-      }, 250);
+      }, 1000);
     }
   });
 
