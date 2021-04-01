@@ -1,3 +1,4 @@
+use crc32fast::Hasher;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::*;
 use v_module::module::{Module, PrepareError};
@@ -139,6 +140,54 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
 
         queue_consumer.next(false);
     }
+}
+
+pub fn queue_crc(queue_path: String, part_id: Option<u32>) {
+    let mut queue_consumer = Consumer::new(&queue_path, "queue2crc", "individuals-flow").expect("!!!!!!!!! FAIL OPEN QUEUE");
+
+    if let Some(id) = part_id {
+        queue_consumer.id = id;
+        queue_consumer.queue.open_part(id).expect(&format!("fail open part id={}", id));
+    }
+    // read queue current part info
+    if let Err(e) = queue_consumer.queue.get_info_of_part(queue_consumer.id, true) {
+        error!("get_info_of_part {}: {}", queue_consumer.id, e.as_str());
+        return;
+    }
+
+    let mut hash = Hasher::new();
+    let mut count = 0;
+
+    loop {
+        let size_batch = queue_consumer.get_batch_size();
+        if size_batch == 0 {
+            break;
+        }
+        for idx in 0..size_batch + 1 {
+            // пробуем взять из очереди заголовок сообщения
+            if !queue_consumer.pop_header() {
+                break;
+            }
+
+            let mut raw = RawObj::new(vec![0; (queue_consumer.header.msg_length) as usize]);
+
+            // заголовок взят успешно, занесем содержимое сообщения в структуру Individual
+            if let Err(_e) = queue_consumer.pop_body(&mut raw.data) {
+                info!("fail get body");
+                break;
+            }
+
+            hash.update(&raw.data);
+            count += 1;
+            if idx % 100000 == 0 {
+                info!("queue part={}, part_count={}, total_count={}", queue_consumer.id, idx, count);
+            }
+
+            queue_consumer.next(false);
+        }
+    }
+
+    info!("total count record={}, CRC={}", count, hash.finalize());
 }
 
 pub fn queue_to_json(queue_path: String, part_id: Option<u32>) {

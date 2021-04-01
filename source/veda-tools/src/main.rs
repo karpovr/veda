@@ -11,7 +11,7 @@ mod v_wf_process;
 #[macro_use]
 extern crate log;
 
-use crate::queue_tools::{export_from_query, queue_to_json, queue_to_veda};
+use crate::queue_tools::{export_from_query, queue_crc, queue_to_json, queue_to_veda};
 use cleaner::clean;
 use type_cli::CLI;
 use v_module::module::init_log;
@@ -46,9 +46,19 @@ enum Tools {
         #[optional]
         part_id: Option<u32>,
     },
+    #[help = "Calculate queue CRC"]
+    QueueCrc {
+        #[named]
+        #[help = "path to queue"]
+        queue_path: String,
+
+        #[named]
+        #[help = "queue part id"]
+        #[optional]
+        part_id: Option<u32>,
+    },
     #[help = "Build queue from query"]
     QueryToQueue(String),
-
     #[help = "Run cleaner"]
     StorageCleaner {
         #[named]
@@ -70,15 +80,15 @@ fn main() {
 
     match Tools::process() {
         Tools::QueryToQueue(query) => {
-            info!("query = {}", query);
-            export_from_query(&query).expect("failed to create query from queue");
+            info!("query={}", query);
+            export_from_query(&query).expect("fail create query from queue");
         }
         Tools::StorageCleaner {
             module,
             operation,
             report,
         } => {
-            info!("module = {}", module);
+            info!("module={}", module);
             clean(module, operation, report);
         }
         Tools::QueueToStorage {
@@ -86,15 +96,22 @@ fn main() {
             part_id,
             check_counter,
         } => {
-            info!("queue_path = {}, part_id = {:?}", queue_path, part_id);
+            info!("queue_path={}, part_id={:?}", queue_path, part_id);
             queue_to_veda(queue_path, part_id, check_counter);
         }
         Tools::QueueToJson {
             queue_path,
             part_id,
         } => {
-            info!("queue_path = {}, part_id = {:?}", queue_path, part_id);
+            info!("queue_path={}, part_id={:?}", queue_path, part_id);
             queue_to_json(queue_path, part_id);
+        }
+        Tools::QueueCrc {
+            queue_path,
+            part_id,
+        } => {
+            info!("queue_path={}, part_id={:?}", queue_path, part_id);
+            queue_crc(queue_path, part_id);
         }
     }
 }
