@@ -62,10 +62,10 @@ v-s:EmployeeValidationBundle
   rdfs:label "В организацию уже введен сотрудик с данными ФИО и датой рождения"@ru ;
   rdfs:label "The organization has already entered an employee with this full name and date of birth"@en ;
 .
-v-s:FullNameBundle
+v-s:FullNameOrgBundle
   rdf:type v-s:Bundle ;
-  rdfs:label "В организацию уже введен сотрудик с данными ФИО и датой рождения"@ru ;
-  rdfs:label "The organization has already entered an employee with this full name and date of birth"@en ;
+  rdfs:label "Полное наименование"@ru ;
+  rdfs:label "Full name"@en ;
 .
 
 
@@ -487,7 +487,7 @@ v-s:OrganizationTemplate
         <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
       </div>
       <div class="col-md-8">
-        <em about="v-s:FullNameBundle" property="rdfs:label"></em>
+        <em about="v-s:FullNameOrgBundle" property="rdfs:label"></em>
         <div property="v-s:title" class="view -edit -search"></div>
         <veda-control data-type="string" property="v-s:title" class="-view edit search"></veda-control>
       </div>
@@ -839,7 +839,7 @@ v-s:SubsidiaryTemplate
 
     <hr class="view -edit -search">
 
-    <em about="v-s:FullNameBundle" property="rdfs:label"></em>
+    <em about="v-s:FullNameOrgBundle" property="rdfs:label"></em>
     <div property="v-s:title" class="view -edit -search"></div>
     <veda-control data-type="string" property="v-s:title" class="-view edit search"></veda-control>
 

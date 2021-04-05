@@ -1223,18 +1223,37 @@ v-s:RightsApplication
   #v-s:hasImage v-s:OrganizationStructureImage ;
   #v-s:hasIcon v-s:OrganizationStructureIcon ;
   v-ui:hasTemplate v-s:ApplicationTemplate ;
+  v-s:hasCreate v-s:MembershipCreate ;
+  v-s:hasCreate v-s:PermissionStatementCreate ;
   v-s:hasRegistry v-s:MembershipRegistry ;
   v-s:hasRegistry v-s:PermissionStatementRegistry ;
   v-s:hasRegistry v-s:GroupGeneratorRegistry ;
   v-s:hasRegistry v-s:PermissionGeneratorRegistry ;
 .
-
+v-s:TS_Membership
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:MembershipTemplate;
+  v-ui:forClass v-s:Membership
+.
+v-s:TS_PermissionStatement
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:PermissionStatementTemplate;
+  v-ui:forClass v-s:PermissionStatement
+.
 
 v-s:MembershipBlank
   a v-fc:Blank ;
   rdfs:label "Запись о включении в группу"@ru ;
   rdfs:label "Membership"@en ;
   v-fc:targetType v-s:Membership ;
+.
+v-s:MembershipCreate
+  a v-fc:Create ;
+  rdfs:label "Запись о включении в группу"@ru ;
+  rdfs:label "Membership"@en ;
+  v-fc:hasBlank v-s:MembershipBlank ;
 .
 v-s:MembershipRegistry
   a v-fs:AttributiveSearch ;
@@ -1258,7 +1277,12 @@ v-s:PermissionStatementBlank
   rdfs:label "Permission"@en ;
   v-fc:targetType v-s:PermissionStatement ;
 .
-
+v-s:PermissionStatementCreate
+  a v-fc:Create ;
+  rdfs:label "Запись о выдаче прав"@ru ;
+  rdfs:label "Permission"@en ;
+  v-fc:hasBlank v-s:PermissionStatementBlank ;
+.
 v-s:PermissionStatementRegistry
   a v-fs:AttributiveSearch ;
   rdfs:label "Запись о выдаче прав"@ru ;
@@ -1275,7 +1299,92 @@ v-s:PermissionStatementRegistryBlank
   v-fc:targetType v-s:PermissionStatement ;
 .
 
+v-s:MembershipTemplate
+rdf:type v-ui:ClassTemplate ;
+v-ui:forClass v-s:Membership ;
+rdfs:label "Шаблон для класса v-s:Membership"@ru ;
+rdfs:label "Template for v-s:Membership class"@en ;
+v-ui:template """
+<div class="container sheet">
+  <h2 about="v-s:Membership" property="rdfs:label"></h2>
+  <hr>
+  <em about="rdfs:label" property="rdfs:label"></em>
+  <div property="rdfs:label" class="view -edit -search"></div>
+  <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
 
+  <em about="rdfs:comment" property="rdfs:label"></em>
+  <div property="rdfs:comment" class="view -edit -search"></div>
+  <veda-control data-type="text" rows="2" property="rdfs:comment" class="-view edit search"></veda-control>
+
+  <em about="v-s:memberOf" property="rdfs:label"></em>
+  <div rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="memberOf" type="text" class="-vew edit search form-control" />
+
+  <em about="v-s:resource" property="rdfs:label"></em>
+  <div rel="v-s:resource" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="resource" type="text" class="-vew edit search form-control" />
+
+  <em about="v-s:updateCounter" property="rdfs:label"></em>
+  <div property="v-s:updateCounter" class="view edit search"></div>
+  <veda-control data-type="integer" property="v-s:updateCounter" class="-view edit search"></veda-control>
+
+  <hr>
+
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+      <em about="v-s:canCreate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+      <em about="v-s:canRead" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+      <em about="v-s:canUpdate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+      <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <hr>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div>
+  <br>
+  <div class="actions view edit -search">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
+      data-buttons="edit save cancel delete"></span>
+  </div>
+  
+</div>
+<script>
+  $("#memberOf", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:memberOf"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:memberOf"] = [];
+    }
+  });
+
+  $("#resource", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:resource"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:resource"] = [];
+    }
+  });
+  //# sourceURL=v-s:MembershipRegistryTemplate_post
+</script>
+""" ;
+.
 v-s:MembershipRegistryTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Membership ;
@@ -1405,7 +1514,77 @@ v-s:MembershipRegistryResultTemplate
   """ ;
 .
 
+v-s:PermissionStatementTemplate
+rdf:type v-ui:ClassTemplate ;
+v-ui:forClass v-s:PermissionStatement;
+rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+rdfs:label "Template for v-s:PermissionStatement class"@en ;
+v-ui:template """
+<div class="container sheet">
+  <h2 about="v-s:PermissionStatement" property="rdfs:label"></h2>
+  <hr>
+  <em about="v-s:permissionObject" property="rdfs:label"></em>
+  <div rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="object" type="text" class="-view edit search form-control" />
+  <em about="v-s:permissionSubject" property="rdfs:label"></em>
+  <div rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="subject" type="text" class="-view edit search form-control" />
+  <hr>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+      <em about="v-s:canCreate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+      <em about="v-s:canRead" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+      <em about="v-s:canUpdate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+      <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <hr>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div>
+  <br>
+  <div class="actions view edit -search">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
+      data-buttons="edit save cancel delete"></span>
+  </div>
+</div>
+<script>
+  $("#object", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:permissionObject"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:permissionObject"] = [];
+    }
+  });
 
+  $("#subject", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:permissionSubject"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:permissionSubject"] = [];
+    }
+  });
+
+  //# sourceURL=v-s:PermissionStatementRegistryTemplate_post
+</script>
+""" ;
+.
 
 v-s:PermissionStatementRegistryTemplate
   rdf:type v-ui:ClassTemplate ;
