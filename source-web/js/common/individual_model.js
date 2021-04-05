@@ -480,7 +480,7 @@ proto.load = function () {
  * Save current individual to database
  * @return {Promise<IndividualModel>}
  */
-proto.save = function() {
+proto.save = function(isAtomic) {
   // Do not save individual to server if nothing changed
   if (this.isSync()) {
     return Promise.resolve(this);
@@ -499,7 +499,7 @@ proto.save = function() {
   const original = this.original ? JSON.parse(this.original) : {'@': this.id};
   const delta = Util.diff(this.properties, original);
 
-  const promise = (this.isNew() ?
+  const promise = (this.isNew() || isAtomic ?
     Backend.put_individual(veda.ticket, this.properties) :
     Promise.all([
       delta.added && Object.keys(delta.added).length ? (delta.added['@'] = this.id, Backend.add_to_individual(veda.ticket, delta.added)) : undefined,
