@@ -621,11 +621,14 @@ v-fs:AttributiveSearchTemplate
 </div>
 <script>
   // Append additional actions
-  setTimeout(function () {
-    var additionalActions = $(".additional-actions", template);
-    var searchActions = $(".search-actions", template);
+  var additionalActions = $(".additional-actions", template);
+  var searchActions = $(".search-actions", template);
+  if (searchActions.length) {
     additionalActions.appendTo(searchActions);
-  }, 100);
+  } else {
+    additionalActions.remove();
+    return;
+  }
 
   // Export table to 'blob' or 'xls'
   var exportTable = (function () {
@@ -1186,7 +1189,7 @@ v-fs:AttributiveSearchInlineTemplate
   // Ctrl + Enter triggers search
   function ctrlEnterHandler (e) {
     if (e.ctrlKey && e.keyCode === 13) {
-      searchHandler.call( searchButton.get(0) );
+      searchHandler();
     }
   }
   $(window).on("keyup", ctrlEnterHandler);
