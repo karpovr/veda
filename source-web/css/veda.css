@@ -1490,13 +1490,3 @@ svg.process-path-highlight path
     font-weight: bold;
   }
 }
-
-#line-status {
-  font-size: 0.7em;
-  margin: 0.7em 0 -2em;
-}
-#line-status.online > *:not(.online),
-#line-status.offline > *:not(.offline),
-#line-status.limited > *:not(.limited) {
-  display: none;
-}

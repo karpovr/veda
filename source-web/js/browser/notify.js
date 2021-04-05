@@ -6,7 +6,6 @@ import veda from '../common/veda.js';
 
 export default veda.Notify = Notify;
 
-
 /**
  * Notify singleton constructor
  * @return {Function} notify function

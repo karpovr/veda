@@ -346,7 +346,7 @@ Util.transformation = function (individuals, transform) {
     individuals = [individuals];
   }
 
-  const rules = transform['v-wf:transformRule'].map(rule => rule.data);
+  const rules = transform['v-wf:transformRule'].map((rule) => rule.data);
 
   if (!rules.length) {
     return Promise.resolve();
