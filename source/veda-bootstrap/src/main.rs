@@ -5,6 +5,8 @@ use chrono::prelude::*;
 use env_logger::Builder;
 use ini::Ini;
 use log::LevelFilter;
+use nix::sys::signal::{self, Signal};
+use nix::unistd::Pid;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
@@ -15,10 +17,10 @@ use std::process::{Child, Command};
 use std::time::SystemTime;
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
-use v_module::module::*;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::*;
 use v_module::v_onto::individual::*;
+use v_module::veda_backend::*;
 
 pub const MSTORAGE_ID: i64 = 1;
 
@@ -45,7 +47,7 @@ struct App {
     modules_info: HashMap<String, VedaModule>,
     modules_start_order: Vec<String>,
     started_modules: Vec<(String, Child)>,
-    module: Module,
+    backend: Backend,
     systicket: String,
 }
 
@@ -80,7 +82,7 @@ impl App {
 
         if success_started < self.started_modules.len() {
             for (name, process) in self.started_modules.iter_mut() {
-                if let Ok(_0) = process.kill() {
+                if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
                     warn!("stop process {} {}", process.id(), name);
                 }
             }
@@ -134,15 +136,13 @@ impl App {
                 true
             };
 
-
             let mut sys = sysinfo::System::new();
             sys.refresh_processes();
             for (name, process) in self.started_modules.iter_mut() {
-
                 let (mut is_ok, memory) = is_ok_process(&mut sys, process.id());
 
                 if !mstorage_ready {
-                    if let Ok(_0) = process.kill() {
+                    if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
                         warn!("attempt stop module {} {}", process.id(), name);
                         is_ok = false;
                     }
@@ -158,8 +158,8 @@ impl App {
 
                     if exit_code != ModuleError::Fatal as i32 {
                         error!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code);
-                        if let Ok(_0) = process.kill() {
-                            warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
+                        if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
+                            warn!("@1 attempt to stop module, process = {}, name = {}", process.id(), name);
                         }
 
                         if let Some(module) = self.modules_info.get(name) {
@@ -181,14 +181,14 @@ impl App {
                     if let Some(memory_limit) = module.memory_limit {
                         if memory > memory_limit {
                             warn!("process = {}, memory = {} KiB, limit = {} KiB", name, memory, memory_limit);
-                            if let Ok(_0) = process.kill() {
+                            if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
                                 warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                             }
                         }
                     }
                 } else {
                     info!("process {} does not exist in the configuration, it will be killed", name);
-                    if let Ok(_0) = process.kill() {
+                    if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
                         warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                     }
                 }
@@ -213,18 +213,18 @@ impl App {
         }
     }
 
-    fn mstorage_watchdog_check(&mut self) -> bool{
+    fn mstorage_watchdog_check(&mut self) -> bool {
         if self.systicket.is_empty() {
-            while !self.module.api.connect() {
+            while !self.backend.api.connect() {
                 info!("waiting for main module start...");
                 thread::sleep(std::time::Duration::from_millis(100));
             }
 
-            let mut systicket = self.module.get_sys_ticket_id();
+            let mut systicket = self.backend.get_sys_ticket_id();
             while systicket.is_err() {
                 info!("waiting for systicket...");
                 thread::sleep(std::time::Duration::from_millis(100));
-                systicket = self.module.get_sys_ticket_id();
+                systicket = self.backend.get_sys_ticket_id();
             }
             self.systicket = systicket.unwrap();
         }
@@ -233,7 +233,7 @@ impl App {
         let mut test_indv = Individual::default();
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
-        if self.module.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &mut test_indv).result != ResultCode::Ok {
+        if self.backend.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &mut test_indv).result != ResultCode::Ok {
             error!("failed to store test individual, uri = {}", test_indv.get_id());
             return false;
         }
@@ -373,7 +373,7 @@ fn main() {
         modules_info: HashMap::new(),
         modules_start_order: vec![],
         started_modules: vec![],
-        module: Default::default(),
+        backend: Default::default(),
         systicket: "".to_string(),
     };
 

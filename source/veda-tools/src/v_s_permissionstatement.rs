@@ -23,7 +23,7 @@ pub fn clean_invalid_permissionstatement(ctx: &mut CleanerContext) {
             for id in res.result.iter() {
                 pos += 1;
                 let mut indv: Individual = Individual::default();
-                if ctx.module.storage.get_individual(id, &mut indv) {
+                if ctx.backend.storage.get_individual(id, &mut indv) {
                     if !(indv.is_exists("v-s:canRead") || indv.is_exists("v-s:canCreate") || indv.is_exists("v-s:canUpdate") || indv.is_exists("v-s:canDelete")) {
                         info!("not found rights field");
                         remove(&mut indv, ctx);
@@ -32,7 +32,7 @@ pub fn clean_invalid_permissionstatement(ctx: &mut CleanerContext) {
 
                     for p in ["v-s:permissionObject", "v-s:permissionSubject"].iter() {
                         let link_value = &indv.get_first_literal(p).unwrap_or_default();
-                        if !ctx.module.get_individual(link_value, &mut Individual::default()).is_some() {
+                        if !ctx.backend.get_individual(link_value, &mut Individual::default()).is_some() {
                             info!("{}->{}[{}] linked object not exist", id, p, link_value);
                             remove(&mut indv, ctx);
                             continue;

@@ -10,13 +10,13 @@ use std::fs::{File, OpenOptions};
 use std::thread;
 use std::time::*;
 use v_module::common::load_onto;
-use v_module::module::Module;
 use v_module::ticket::Ticket;
 use v_module::v_onto::onto::Onto;
 use v_module::v_search::clickhouse_client::*;
+use v_module::veda_backend::*;
 
 pub struct CleanerContext {
-    pub(crate) module: Module,
+    pub(crate) backend: Backend,
     pub(crate) onto: Onto,
     pub(crate) ch_client: CHClient,
     pub(crate) sys_ticket: Ticket,
@@ -30,13 +30,13 @@ pub fn clean(modules: String, operations: String, report: String) {
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
 
-    let mut module = Module::default();
+    let mut backend = Backend::default();
 
     let mut onto = Onto::default();
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
 
     let mut ctx = CleanerContext {
-        module,
+        backend,
         onto,
         ch_client: CHClient::new(query_search_db.to_owned()),
         sys_ticket: Ticket::default(),
@@ -77,8 +77,8 @@ pub fn clean(modules: String, operations: String, report: String) {
 
     info!("started cleaner");
 
-    if let Ok(t) = ctx.module.get_sys_ticket_id() {
-        ctx.sys_ticket = ctx.module.get_ticket_from_db(&t);
+    if let Ok(t) = ctx.backend.get_sys_ticket_id() {
+        ctx.sys_ticket = ctx.backend.get_ticket_from_db(&t);
         {
             if cleaner_modules.contains("email") {
                 clean_email(&mut ctx);

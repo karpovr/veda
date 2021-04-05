@@ -28,6 +28,7 @@ use v_module::v_api::*;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::*;
+use v_module::veda_backend::*;
 
 #[derive(Serialize, Deserialize)]
 struct FileHash {
@@ -66,9 +67,9 @@ fn main() -> NotifyResult<()> {
     }
     let mut module_info = module_info.unwrap();
 
-    let mut module = Module::default();
+    let mut backend = Backend::default();
 
-    while !module.api.connect() {
+    while !backend.api.connect() {
         info!("waiting for start of main module...");
         thread::sleep(std::time::Duration::from_millis(100));
     }
@@ -77,13 +78,13 @@ fn main() -> NotifyResult<()> {
 
     let mut onto = Onto::default();
     info!("start loading ontology");
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
     info!("finish loading ontology");
 
     info!("start processing files");
 
     let systicket;
-    if let Ok(t) = module.get_sys_ticket_id() {
+    if let Ok(t) = backend.get_sys_ticket_id() {
         systicket = t;
     } else {
         error!("failed to get systicket");
@@ -148,7 +149,7 @@ fn main() -> NotifyResult<()> {
     }
 
     if !list_candidate_files.is_empty() {
-        processing_files(list_candidate_files, &mut new_hashes_set.data, &mut module, &systicket, &mut module_info);
+        processing_files(list_candidate_files, &mut new_hashes_set.data, &mut backend, &systicket, &mut module_info);
         store_hash_list(&new_hashes_set, &path_files_hashes);
     }
 
@@ -165,7 +166,7 @@ fn main() -> NotifyResult<()> {
                 Ok(event) => match event {
                     DebouncedEvent::Create(ref path) | DebouncedEvent::Write(ref path) => {
                         info!("changed: {:?}", event);
-                        if processing_files(vec![path.clone()], &mut new_hashes_set.data, &mut module, &systicket, &mut module_info) > 0 {
+                        if processing_files(vec![path.clone()], &mut new_hashes_set.data, &mut backend, &systicket, &mut module_info) > 0 {
                             store_hash_list(&new_hashes_set, &path_files_hashes);
                         }
                         prepared_count += 1;
@@ -223,7 +224,7 @@ fn extract_path_and_name(path: &PathBuf) -> Option<(&str, &str)> {
     None
 }
 
-fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, String>, module: &mut Module, systicket: &str, module_info: &mut ModuleInfo) -> i32 {
+fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, String>, backend: &mut Backend, systicket: &str, module_info: &mut ModuleInfo) -> i32 {
     let mut committed_op_id = 0;
     let mut cur_op_id = 0;
 
@@ -271,7 +272,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                 hash_list.remove(&file_path);
                 hash_list.insert(file_path, new_h.clone());
                 count_prepared_ttl_files += 1;
-                if module.get_individual(&new_id, &mut file_info_indv).is_some() {
+                if backend.get_individual(&new_id, &mut file_info_indv).is_some() {
                     if let Some(old_h) = file_info_indv.get_first_literal("v-s:hash") {
                         if old_h == new_h {
                             file_need_for_load = false;
@@ -313,7 +314,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                     continue;
                 }
 
-                let is_need_store = if let Some(indv_db) = module.get_individual(indv_file.get_id(), &mut Individual::default()) {
+                let is_need_store = if let Some(indv_db) = backend.get_individual(indv_file.get_id(), &mut Individual::default()) {
                     indv_db.parse_all();
                     !indv_db.compare(indv_file, vec!["v-s:updateCounter", "v-s:previousVersion", "v-s:actualVersion", "v-s:fullUrl"])
                 } else {
@@ -325,7 +326,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                         loaded_owl_ontology.insert(indv_file.get_id().to_owned());
                     }
 
-                    let res = module.api.update(systicket, IndvOp::Put, &indv_file);
+                    let res = backend.api.update(systicket, IndvOp::Put, &indv_file);
 
                     // thread::sleep(std::time::Duration::from_millis(100));
 
@@ -356,7 +357,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
             }
 
             prefix_indv.set_string("v-s:fullUrl", &url, Lang::NONE);
-            let res = module.api.update(systicket, IndvOp::Put, &prefix_indv);
+            let res = backend.api.update(systicket, IndvOp::Put, &prefix_indv);
             if res.result != ResultCode::Ok {
                 error!("failed to store {}", prefix_indv.get_obj().as_json_str());
             }

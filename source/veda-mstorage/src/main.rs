@@ -22,6 +22,7 @@ use v_module::v_onto::individual2msgpack::to_msgpack;
 use v_module::v_onto::json2individual::parse_json_to_individual;
 use v_module::v_onto::parser::parse_raw;
 use v_module::v_storage::storage::*;
+use v_module::veda_backend::*;
 use v_queue::queue::Queue;
 use v_queue::record::{Mode, MsgType};
 

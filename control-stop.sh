@@ -16,7 +16,7 @@ for f in "$target"/*
 do
     pid=`cat $target/$(basename $f)`
     echo STOP $pid $target/$(basename $f)
-    kill -kill $pid
+    kill -s SIGTERM $pid
     let count=count+1
 done
 echo ""

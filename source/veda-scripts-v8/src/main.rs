@@ -15,6 +15,8 @@ use v_module::v_api::{APIClient, IndvOp};
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
 use v_module::v_search::common::FTQuery;
+use v_module::v_storage::storage::*;
+use v_module::veda_backend::*;
 use v_queue::consumer::Consumer;
 use v_queue::record::Mode;
 use v_v8::callback::*;
@@ -71,7 +73,7 @@ fn main() -> Result<(), i32> {
 
     let isolate = &mut v8::Isolate::new(Default::default());
 
-    info! ("V8 version {}", v8::V8::get_version());
+    info!("V8 version {}", v8::V8::get_version());
 
     main0(isolate)
 }
@@ -81,17 +83,17 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
         wait_module("ontologist", wait_load_ontology());
     }
 
-    let mut module = Module::default();
+    let mut backend = Backend::create(StorageMode::ReadOnly, false);
 
-    while !module.api.connect() {
+    while !backend.api.connect() {
         error!("failed to connect to main module, sleep and repeat");
         thread::sleep(time::Duration::from_millis(1000));
     }
 
     let mut onto = Onto::default();
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
 
-    let w_sys_ticket = module.get_sys_ticket_id();
+    let w_sys_ticket = backend.get_sys_ticket_id();
     if w_sys_ticket.is_err() {
         error!("failed to get system ticket");
         return Ok(());
@@ -116,7 +118,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
         return Err(-1);
     }
 
-    if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
+    if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = MyContext {
             api_client: APIClient::new(Module::get_property("main_module_url").unwrap_or_default()),
             workplace: ScriptsWorkPlace::new(isolate),
@@ -143,6 +145,8 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
         load_event_scripts(&mut ctx.workplace, &mut ctx.xr);
 
+        let mut module = Module::default();
+
         let mut queue_consumer = Consumer::new("./data/queue", consumer_name, main_queue_name).expect("!!!!!!!!! FAIL OPEN RW CONSUMER");
 
         if vm_id == "lp" || vm_id == "lp1" {
@@ -159,10 +163,11 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
         module.listen_queue(
             &mut queue_consumer,
             &mut ctx,
-            &mut (before_batch as fn(&mut Module, &mut MyContext<'a>, batch_size: u32) -> Option<u32>),
-            &mut (prepare as fn(&mut Module, &mut MyContext<'a>, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after_batch as fn(&mut Module, &mut MyContext<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-            &mut (heartbeat as fn(&mut Module, &mut MyContext<'a>) -> Result<(), PrepareError>),
+            &mut (before_batch as fn(&mut Backend, &mut MyContext<'a>, batch_size: u32) -> Option<u32>),
+            &mut (prepare as fn(&mut Backend, &mut MyContext<'a>, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Backend, &mut MyContext<'a>, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Backend, &mut MyContext<'a>) -> Result<(), PrepareError>),
+            &mut backend,
         );
     } else {
         error!("failed to init ft-query");
@@ -170,19 +175,19 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _ctx: &mut MyContext) -> Result<(), PrepareError> {
+fn heartbeat(_module: &mut Backend, _ctx: &mut MyContext) -> Result<(), PrepareError> {
     Ok(())
 }
 
-fn before_batch(_module: &mut Module, _ctx: &mut MyContext, _size_batch: u32) -> Option<u32> {
+fn before_batch(_module: &mut Backend, _ctx: &mut MyContext, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _ctx: &mut MyContext, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+fn after_batch(_module: &mut Backend, _ctx: &mut MyContext, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     Ok(false)
 }
 
-fn prepare(_module: &mut Module, ctx: &mut MyContext, queue_element: &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare(_module: &mut Backend, ctx: &mut MyContext, queue_element: &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError> {
     if let Some(main_cs_r) = &mut ctx.main_queue_cs {
         while my_consumer.count_popped > main_cs_r.count_popped && main_cs_r.id == my_consumer.id || my_consumer.id > main_cs_r.id {
             main_cs_r.get_info();
@@ -404,11 +409,11 @@ var queue_elements_processed = get_env_num_var ('$queue_elements_processed');
 var _event_id = '?';";
 
 pub(crate) fn load_event_scripts(wp: &mut ScriptsWorkPlace<ScriptInfoContext>, xr: &mut XapianReader) {
-    let res = xr.query(FTQuery::new_with_user("cfg:VedaSystem", "'rdf:type' === 'v-s:Event'"), &mut wp.module.storage);
+    let res = xr.query(FTQuery::new_with_user("cfg:VedaSystem", "'rdf:type' === 'v-s:Event'"), &mut wp.backend.storage);
 
     if res.result_code == ResultCode::Ok && res.count > 0 {
         for id in &res.result {
-            if let Some(ev_indv) = wp.module.get_individual(id, &mut Individual::default()) {
+            if let Some(ev_indv) = wp.backend.get_individual(id, &mut Individual::default()) {
                 prepare_script(wp, ev_indv);
             }
         }

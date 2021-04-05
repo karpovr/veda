@@ -22,10 +22,10 @@ pub fn clean_invalid_membership(ctx: &mut CleanerContext) {
             for id in res.result.iter() {
                 pos += 1;
                 let mut indv: Individual = Individual::default();
-                if ctx.module.storage.get_individual(id, &mut indv) {
+                if ctx.backend.storage.get_individual(id, &mut indv) {
                     for p in ["v-s:memberOf", "v-s:resource"].iter() {
                         let link_value = &indv.get_first_literal(p).unwrap_or_default();
-                        if !ctx.module.get_individual(link_value, &mut Individual::default()).is_some() {
+                        if !ctx.backend.get_individual(link_value, &mut Individual::default()).is_some() {
                             info!("{}->{}[{}] linked object not exist", id, p, link_value);
                             remove(&mut indv, ctx);
                             continue;

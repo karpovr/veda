@@ -35,8 +35,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
         if res.result_code == ResultCode::Ok {
             for id in res.result.iter() {
                 pos += 1;
-                if let Some(rindv) = ctx.module.get_individual(id, &mut Individual::default()) {
-                    if let Some(process) = ctx.module.get_individual(&rindv.get_first_literal("v-wf:forProcess").unwrap_or_default(), &mut Individual::default()) {
+                if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
+                    if let Some(process) = ctx.backend.get_individual(&rindv.get_first_literal("v-wf:forProcess").unwrap_or_default(), &mut Individual::default()) {
                         let mut process_elements = HashMap::new();
 
                         if !process.is_exists("v-wf:parentWorkOrder") {
@@ -70,7 +70,7 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                             indvs.push(s);
                                         }
                                         None => {
-                                            if let Some(mut s) = ctx.module.get_individual_h(&id) {
+                                            if let Some(mut s) = ctx.backend.get_individual_h(&id) {
                                                 if ctx.operations.contains("to_ttl") {
                                                     s.parse_all();
                                                 }
@@ -202,14 +202,14 @@ fn collect_work_items(process: &mut Individual, process_elements: &mut HashMap<S
 }
 
 fn collect_work_orders_and_vars(work_item_id: &str, process_elements: &mut HashMap<String, ProcessElement>, parent_id: &str, ctx: &mut CleanerContext) {
-    if let Some(mut work_item) = ctx.module.get_individual_h(work_item_id) {
+    if let Some(mut work_item) = ctx.backend.get_individual_h(work_item_id) {
         if let Some(v_ids) = work_item.get_literals("v-wf:inVars") {
             for v_id in v_ids.iter() {
                 add_to_collect(v_id, "InVar", work_item.get_id(), process_elements, None);
             }
         }
         for work_order_id in work_item.get_literals("v-wf:workOrderList").unwrap_or_default().iter() {
-            if let Some(mut work_order) = ctx.module.get_individual_h(&work_order_id) {
+            if let Some(mut work_order) = ctx.backend.get_individual_h(&work_order_id) {
                 if let Some(v_ids) = work_order.get_literals("v-wf:outVars") {
                     for var_id in v_ids.iter() {
                         add_to_collect(var_id, "OutVar", work_order.get_id(), process_elements, None);
@@ -217,7 +217,7 @@ fn collect_work_orders_and_vars(work_item_id: &str, process_elements: &mut HashM
                 }
 
                 if let Some(inner_process_id) = work_order.get_first_literal("v-wf:isProcess") {
-                    if let Some(process) = ctx.module.get_individual(&inner_process_id, &mut Individual::default()) {
+                    if let Some(process) = ctx.backend.get_individual(&inner_process_id, &mut Individual::default()) {
                         collect_process_elements(work_order.get_id(), process, process_elements, ctx);
                     }
                 }

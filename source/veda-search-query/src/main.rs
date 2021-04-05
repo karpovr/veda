@@ -7,9 +7,10 @@ use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::*;
 use std::{str, thread};
-use v_module::v_api::app::{ResultCode, OptAuthorize};
-use v_module::module::{init_log, Module};
+use v_module::module::init_log;
+use v_module::v_api::app::{OptAuthorize, ResultCode};
 use v_module::v_search::clickhouse_client::*;
+use v_module::veda_backend::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -21,7 +22,7 @@ async fn main() -> Result<(), Error> {
 
     let query_url = section.get("search_query_url").expect("param [search_query_url] not found in veda.properties");
 
-    let mut module = Module::default();
+    let mut backend = Backend::default();
 
     let mut ch_client = CHClient::new(query_search_db.to_owned());
 
@@ -40,7 +41,7 @@ async fn main() -> Result<(), Error> {
 
     loop {
         if let Ok(recv_msg) = server.recv() {
-            let out_msg = req_prepare(&mut module, &recv_msg, &mut ch_client);
+            let out_msg = req_prepare(&mut backend, &recv_msg, &mut ch_client);
             if let Err(e) = server.send(out_msg) {
                 error!("failed to send answer, err = {:?}", e);
             }
@@ -54,7 +55,7 @@ const TOP: usize = 5;
 const LIMIT: usize = 6;
 const FROM: usize = 7;
 
-fn req_prepare(module: &mut Module, request: &Message, ch_client: &mut CHClient) -> Message {
+fn req_prepare(backend: &mut Backend, request: &Message, ch_client: &mut CHClient) -> Message {
     if let Ok(s) = str::from_utf8(request.as_slice()) {
         let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
             v
@@ -72,7 +73,7 @@ fn req_prepare(module: &mut Module, request: &Message, ch_client: &mut CHClient)
 
             let mut user_uri = "cfg:Guest".to_owned();
             if !ticket_id.is_empty() {
-                let ticket = module.get_ticket_from_db(&ticket_id);
+                let ticket = backend.get_ticket_from_db(&ticket_id);
                 if ticket.result == ResultCode::Ok {
                     user_uri = ticket.user_uri;
                 }

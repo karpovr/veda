@@ -7,11 +7,12 @@ use nng::{Error, Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::Duration;
 use std::{env, str};
+use v_ft_xapian::xapian_reader::XapianReader;
+use v_module::module::init_log;
 use v_module::v_api::app::OptAuthorize;
 use v_module::v_api::app::ResultCode;
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{init_log, Module};
 use v_module::v_search::common::FTQuery;
+use v_module::veda_backend::*;
 
 fn main() {
     init_log("FT_QUERY");
@@ -30,7 +31,7 @@ fn main() {
         }
     }
 
-    let mut module = Module::default();
+    let mut module = Backend::default();
 
     if let Some(mut xr) = XapianReader::new("russian", &mut module.storage) {
         let mut count = 0;
@@ -100,7 +101,7 @@ const TOP: usize = 5;
 const LIMIT: usize = 6;
 const FROM: usize = 7;
 
-fn req_prepare(module: &mut Module, s: &str, xr: &mut XapianReader) -> Message {
+fn req_prepare(module: &mut Backend, s: &str, xr: &mut XapianReader) -> Message {
     let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
         v
     } else {

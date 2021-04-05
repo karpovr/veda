@@ -18,7 +18,7 @@ pub fn clean_email(ctx: &mut CleanerContext) {
     if res.result_code == ResultCode::Ok {
         for id in res.result.iter() {
             let mut rindv: Individual = Individual::default();
-            if ctx.module.storage.get_individual(id, &mut rindv) {
+            if ctx.backend.storage.get_individual(id, &mut rindv) {
                 if !rindv.is_exists("v-s:creator") {
                     info!(
                         "remove {}, created = {}, id = {}",
@@ -26,7 +26,7 @@ pub fn clean_email(ctx: &mut CleanerContext) {
                         NaiveDateTime::from_timestamp(rindv.get_first_datetime("v-s:created").unwrap_or_default(), 0).format("%d.%m.%Y %H:%M:%S"),
                         id,
                     );
-                    ctx.module.api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(id));
+                    ctx.backend.api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(id));
                 }
             }
         }

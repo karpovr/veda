@@ -28,12 +28,12 @@ pub fn remove_membership2(ctx: &mut CleanerContext) {
                 }
 
                 let mut indv: Individual = Individual::default();
-                if ctx.module.storage.get_individual(id, &mut indv) {
+                if ctx.backend.storage.get_individual(id, &mut indv) {
                     if &indv.get_first_literal("rdfs:comment").unwrap_or_default() == "создано автоматически в обработчике cfg:Event_1"
                         && &indv.get_first_literal("v-s:memberOf").unwrap_or_default() == "cfg:TTLResourcesGroup"
                     {
                         let resource_id = &indv.get_first_literal("v-s:resource").unwrap_or_default();
-                        if let Some(r) = ctx.module.get_individual(resource_id, &mut Individual::default()) {
+                        if let Some(r) = ctx.backend.get_individual(resource_id, &mut Individual::default()) {
                             if r.any_exists(
                                 "rdfs:isDefinedBy",
                                 &[

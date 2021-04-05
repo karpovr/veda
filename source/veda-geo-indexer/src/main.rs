@@ -126,7 +126,6 @@ fn main() -> Result<(), i32> {
 
 fn prepare_queue_element(msg: &mut Individual, geo_index: &mut Connection) -> Result<(), i32> {
     if parse_raw(msg).is_ok() {
-
         let new_state = msg.get_first_binobj("new_state");
         if new_state.is_none() {
             return Err(-1);
@@ -134,7 +133,6 @@ fn prepare_queue_element(msg: &mut Individual, geo_index: &mut Connection) -> Re
 
         let mut indv = Individual::new_raw(RawObj::new(new_state.unwrap_or_default()));
         if parse_raw(&mut indv).is_ok() {
-
             let mut is_found_spatial = false;
             //let is_found_spatial = indv.any_exists(&mut raw, "rdf:type", &spatial_types);
 

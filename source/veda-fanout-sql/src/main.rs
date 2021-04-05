@@ -6,22 +6,23 @@ use chrono::prelude::*;
 use std::collections::HashMap;
 use std::{process, thread, time};
 
+use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::common::load_onto;
 use v_module::v_onto::datatype::DataType;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::*;
 use v_module::v_onto::onto::Onto;
 use v_module::v_onto::resource::Resource;
 use v_module::v_onto::resource::Value;
+use v_module::veda_backend::*;
 use v_queue::consumer::*;
 
 pub struct Context {
     onto: Onto,
     pool: mysql::Pool,
     tables: HashMap<String, bool>,
-    module_info: ModuleInfo
+    module_info: ModuleInfo,
 }
 
 fn main() {
@@ -38,8 +39,9 @@ fn main() {
         process::exit(101);
     }
     let mut module = Module::default();
+    let mut backend = Backend::default();
 
-    let pool = match connect_to_mysql(&mut module, 5, 20000) {
+    let pool = match connect_to_mysql(&mut backend, 5, 20000) {
         Err(_) => process::exit(101),
         Ok(pool) => pool,
     };
@@ -53,30 +55,33 @@ fn main() {
         onto: Onto::default(),
         pool,
         tables,
-        module_info: module_info.unwrap()
+        module_info: module_info.unwrap(),
     };
 
-    load_onto(&mut module.storage, &mut ctx.onto);
+    load_onto(&mut backend.storage, &mut ctx.onto);
 
     module.listen_queue(
         &mut queue_consumer,
         &mut ctx,
-        &mut (before_bath as fn(&mut Module, &mut Context, size_batch: u32) -> Option<u32>),
-        &mut (process as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (void as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
+        &mut (before_bath as fn(&mut Backend, &mut Context, size_batch: u32) -> Option<u32>),
+        &mut (process as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (void as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+        &mut backend,
     );
 }
 
-fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
-fn before_bath(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
+fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
+    Ok(())
+}
+fn before_bath(_module: &mut Backend, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
-fn void(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
-    Ok (false)
+fn void(_module: &mut Backend, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok(false)
 }
 
-fn process(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("queue message cmd is none, skip");
@@ -292,12 +297,12 @@ fn read_tables(pool: &mysql::Pool) -> Result<HashMap<String, bool>, &'static str
     Err("failed to read existing tables")
 }
 
-fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mysql::Pool, &'static str> {
-    if let Some(node) = module.get_individual("cfg:standart_node", &mut Individual::default()) {
+fn connect_to_mysql(backend: &mut Backend, tries: i64, timeout: u64) -> Result<mysql::Pool, &'static str> {
+    if let Some(node) = backend.get_individual("cfg:standart_node", &mut Individual::default()) {
         if let Some(v) = node.get_literals("v-s:push_individual_by_event") {
             for el in v {
                 let mut connection = Individual::default();
-                if module.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:deleted", true) {
+                if backend.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:deleted", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
                         if transport == "mysql" {
                             info!("found configuration to connect to MySQL: {}", connection.get_id());
@@ -330,7 +335,7 @@ fn connect_to_mysql(module: &mut Module, tries: i64, timeout: u64) -> Result<mys
         let tries = tries - 1;
         thread::sleep(time::Duration::from_millis(timeout));
         error!("failed to find configuration, retry.");
-        connect_to_mysql(module, tries, timeout)
+        connect_to_mysql(backend, tries, timeout)
     } else {
         error!("failed to find configuration to connect to mysql");
         Err("failed to find configuration to connect to mysql")

@@ -8,6 +8,7 @@ use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::v_onto::individual::*;
 use v_module::v_storage::storage::*;
+use v_module::veda_backend::*;
 use v_queue::consumer::*;
 
 mod common;
@@ -16,6 +17,7 @@ fn main() -> Result<(), i32> {
     init_log("AZ_INDEXER");
 
     let mut module = Module::default();
+    let mut backend = Backend::create(StorageMode::ReadOnly, false);
 
     let module_info = ModuleInfo::new("./data", "acl_preparer", true);
     if module_info.is_err() {
@@ -58,30 +60,31 @@ fn main() -> Result<(), i32> {
     module.listen_queue(
         &mut queue_consumer,
         &mut ctx,
-        &mut (before_batch as fn(&mut Module, &mut Context, batch_size: u32) -> Option<u32>),
-        &mut (prepare as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
+        &mut (before_batch as fn(&mut Backend, &mut Context, batch_size: u32) -> Option<u32>),
+        &mut (prepare as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (after_batch as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+        &mut backend,
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> {
+fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
     Ok(())
 }
 
-fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
+fn before_batch(_module: &mut Backend, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+fn after_batch(_module: &mut Backend, ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     if (ctx.permission_statement_counter + ctx.membership_counter) % 100 == 0 {
         info!("count processed: permissions = {}, memberships = {}", ctx.permission_statement_counter, ctx.membership_counter);
     }
     Ok(false)
 }
 
-fn prepare(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");

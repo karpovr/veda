@@ -15,7 +15,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 use v_module::v_onto::individual::*;
 use v_module::v_storage::storage::*;
-use v_module::module::*;
+use v_module::veda_backend::*;
 
 mod server;
 use crate::server::CMessage;

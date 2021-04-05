@@ -7,13 +7,14 @@ use std::num::NonZeroU32;
 use v_authorization::common::Trace;
 use v_az_lmdb::_authorize;
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{create_new_ticket, Module};
+use v_module::module::create_new_ticket;
 use v_module::ticket::Ticket;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
 use v_module::v_search::common::{FTQuery, QueryResult};
+use v_module::veda_backend::*;
 
 pub const EMPTY_SHA256_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 pub const ALLOW_TRUSTED_GROUP: &str = "cfg:TrustedAuthenticationUserGroup";
@@ -57,7 +58,7 @@ impl Default for AuthConf {
     }
 }
 
-pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, login: Option<&str>, xr: &mut XapianReader, module: &mut Module) -> Ticket {
+pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, login: Option<&str>, xr: &mut XapianReader, module: &mut Backend) -> Ticket {
     let login = login.unwrap_or_default();
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
 
@@ -138,7 +139,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
     tr_ticket
 }
 
-pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Module, xr: &mut XapianReader) -> QueryResult {
+pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Backend, xr: &mut XapianReader) -> QueryResult {
     lazy_static! {
         static ref RE: Regex = Regex::new("[-]").unwrap();
     }
@@ -148,7 +149,7 @@ pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Module, xr:
     xr.query(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage)
 }
 
-pub(crate) fn create_new_credential(systicket: &str, module: &mut Module, credential: &mut Individual, account: &mut Individual) -> bool {
+pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, credential: &mut Individual, account: &mut Individual) -> bool {
     let password = account.get_first_literal("v-s:password").unwrap_or_default();
 
     credential.set_id(&(account.get_id().to_owned() + "-crdt"));
@@ -194,7 +195,7 @@ pub(crate) fn set_password(credential: &mut Individual, password: &str) {
     }
 }
 
-pub(crate) fn remove_secret(uses_credential: &mut Individual, person_id: &str, module: &mut Module, systicket: &str) {
+pub(crate) fn remove_secret(uses_credential: &mut Individual, person_id: &str, module: &mut Backend, systicket: &str) {
     if uses_credential.get_first_literal("v-s:secret").is_some() {
         uses_credential.remove("v-s:secret");
 
@@ -216,7 +217,7 @@ pub(crate) fn read_duration_param(indv: &mut Individual, param: &str) -> Option<
     None
 }
 
-pub(crate) fn read_auth_configuration(module: &mut Module) -> AuthConf {
+pub(crate) fn read_auth_configuration(module: &mut Backend) -> AuthConf {
     let mut res = AuthConf::default();
 
     let mut node = Individual::default();

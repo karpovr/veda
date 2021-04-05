@@ -1,7 +1,7 @@
 use crc32fast::Hasher;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::module::*;
-use v_module::module::{Module, PrepareError};
+use v_module::module::PrepareError;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::individual::Individual;
@@ -12,21 +12,22 @@ use v_module::v_search::common::FTQuery;
 use v_queue::consumer::Consumer;
 use v_queue::queue::Queue;
 use v_queue::record::{Mode, MsgType};
+use v_module::veda_backend::*;
 
 pub fn export_from_query(query: &str) -> Result<(), PrepareError> {
-    let mut module = Module::default();
+    let mut backend = Backend::default();
 
     let mut queue_out = Queue::new("./data/out", "tools-extract", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
-    if let Some(mut xr) = XapianReader::new("russian", &mut module.storage) {
+    if let Some(mut xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ftq = FTQuery::new_with_user("cfg:VedaSystem", query);
         ftq.top = 1000000;
         ftq.limit = 1000000;
         info!("execute query [{:?}]", ftq);
-        let res = xr.query(ftq, &mut module.storage);
+        let res = xr.query(ftq, &mut backend.storage);
         if res.result_code == ResultCode::Ok && res.count > 0 {
             for id in &res.result {
-                if let Some(indv) = module.get_individual(id, &mut Individual::default()) {
+                if let Some(indv) = backend.get_individual(id, &mut Individual::default()) {
                     let msg_id = indv.get_id().to_string();
                     indv.parse_all();
                     add_to_queue(&mut queue_out, IndvOp::Put, indv, &msg_id)?;
@@ -64,9 +65,9 @@ fn add_to_queue(queue_out: &mut Queue, cmd: IndvOp, new_state_indv: &mut Individ
 }
 
 pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bool) {
-    let mut module = Module::default();
+    let mut backend = Backend::default();
 
-    let sys_ticket = module.get_sys_ticket_id();
+    let sys_ticket = backend.get_sys_ticket_id();
 
     if sys_ticket.is_err() {
         error!("failed to read systicket, exit");
@@ -112,7 +113,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
             if !new_state.is_empty() {
                 let mut indv_from_db = Individual::default();
                 if check_counter {
-                    if module.storage.get_individual(new_state.get_id(), &mut indv_from_db) {
+                    if backend.storage.get_individual(new_state.get_id(), &mut indv_from_db) {
                         let db_indv_counter = new_state.get_first_integer("v-s:updateCounter").unwrap_or(0);
                         let queue_indv_counter = indv_from_db.get_first_integer("v-s:updateCounter").unwrap_or(0);
 
@@ -127,7 +128,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
                 }
 
                 if is_update {
-                    let res = module.api.update(&sys_ticket, IndvOp::Put, &mut new_state);
+                    let res = backend.api.update(&sys_ticket, IndvOp::Put, &mut new_state);
                     if res.result != ResultCode::Ok {
                         error!("failed to store individual, id = {}", new_state.get_id());
                         return;

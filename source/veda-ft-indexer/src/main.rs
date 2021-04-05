@@ -17,6 +17,8 @@ use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::v_onto::individual::*;
 use v_module::v_onto::onto::Onto;
+use v_module::v_storage::storage::*;
+use v_module::veda_backend::*;
 use v_queue::consumer::*;
 use xapian_rusty::*;
 
@@ -28,6 +30,7 @@ fn main() -> Result<(), XError> {
     init_log("FT_INDEXER");
     let mut batch_size = 0;
     loop {
+        let mut backend = Backend::create(StorageMode::ReadOnly, false);
         let mut module = Module::default();
         if batch_size == 0 {
             batch_size = module.max_batch_size.unwrap_or_default();
@@ -38,7 +41,7 @@ fn main() -> Result<(), XError> {
         info!("batch size = {}", batch_size);
 
         module.max_batch_size = Some(batch_size);
-        if let Err(e) = index(&mut module) {
+        if let Err(e) = index(&mut backend, &mut module) {
             error!("failed to index batch, err = {:?}", e);
         }
 
@@ -51,7 +54,7 @@ fn main() -> Result<(), XError> {
     Ok(())
 }
 
-fn index(module: &mut Module) -> Result<(), XError> {
+fn index(backend: &mut Backend, module: &mut Module) -> Result<(), XError> {
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
         wait_module("input-onto", wait_load_ontology());
     }
@@ -63,9 +66,9 @@ fn index(module: &mut Module) -> Result<(), XError> {
         process::exit(101);
     }
     let mut onto = Onto::default();
-    load_onto(&mut module.storage, &mut onto);
+    load_onto(&mut backend.storage, &mut onto);
 
-    if let Some(xr) = XapianReader::new("russian", &mut module.storage) {
+    if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = Indexer {
             onto,
             index_dbs: Default::default(),
@@ -114,10 +117,11 @@ fn index(module: &mut Module) -> Result<(), XError> {
         module.listen_queue(
             &mut queue_consumer,
             &mut ctx,
-            &mut (before as fn(&mut Module, &mut Indexer, u32) -> Option<u32>),
-            &mut (process as fn(&mut Module, &mut Indexer, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-            &mut (after as fn(&mut Module, &mut Indexer, u32) -> Result<bool, PrepareError>),
-            &mut (heartbeat as fn(&mut Module, &mut Indexer) -> Result<(), PrepareError>),
+            &mut (before as fn(&mut Backend, &mut Indexer, u32) -> Option<u32>),
+            &mut (process as fn(&mut Backend, &mut Indexer, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after as fn(&mut Backend, &mut Indexer, u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Backend, &mut Indexer) -> Result<(), PrepareError>),
+            backend,
         );
     } else {
         error!("failed to init ft-query");
@@ -127,7 +131,7 @@ fn index(module: &mut Module) -> Result<(), XError> {
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, ctx: &mut Indexer) -> Result<(), PrepareError> {
+fn heartbeat(_module: &mut Backend, ctx: &mut Indexer) -> Result<(), PrepareError> {
     if ctx.committed_time.elapsed().as_millis() > TIMEOUT_BETWEEN_COMMITS {
         if let Err(e) = ctx.commit_all_db() {
             error!("failed to commit, err = {:?}", e);
@@ -137,11 +141,11 @@ fn heartbeat(_module: &mut Module, ctx: &mut Indexer) -> Result<(), PrepareError
     Ok(())
 }
 
-fn before(_module: &mut Module, _ctx: &mut Indexer, _batch_size: u32) -> Option<u32> {
+fn before(_module: &mut Backend, _ctx: &mut Indexer, _batch_size: u32) -> Option<u32> {
     None
 }
 
-fn after(_module: &mut Module, ctx: &mut Indexer, processed_batch_size: u32) -> Result<bool, PrepareError> {
+fn after(_module: &mut Backend, ctx: &mut Indexer, processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = ctx.commit_all_db() {
         error!("failed to commit, err = {:?}", e);
 
@@ -162,7 +166,7 @@ fn after(_module: &mut Module, ctx: &mut Indexer, processed_batch_size: u32) -> 
     Ok(true)
 }
 
-fn process(module: &mut Module, ctx: &mut Indexer, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn process(backend: &mut Backend, ctx: &mut Indexer, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");
@@ -182,7 +186,7 @@ fn process(module: &mut Module, ctx: &mut Indexer, queue_element: &mut Individua
         return Ok(false);
     }
 
-    if let Err(e) = ctx.index_msg(&mut new_state, &mut prev_state, cmd.unwrap(), op_id, module) {
+    if let Err(e) = ctx.index_msg(&mut new_state, &mut prev_state, cmd.unwrap(), op_id, backend) {
         error!("failed to index individual, err = {:?}", e);
     }
 

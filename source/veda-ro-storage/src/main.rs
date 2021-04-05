@@ -4,9 +4,10 @@ extern crate log;
 use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use std::str;
+use v_module::module::*;
 use v_module::v_onto::individual::Individual;
 use v_module::v_storage::storage::*;
-use v_module::module::*;
+use v_module::veda_backend::*;
 
 /**
  * storage service
@@ -18,15 +19,14 @@ use v_module::module::*;
  */
 
 fn main() -> std::io::Result<()> {
-
-    init_log ("RO_STORAGE");
+    init_log("RO_STORAGE");
 
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
 
     let ro_storage_url = section.get("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
 
-    let mut storage = get_storage_use_prop (StorageMode::ReadOnly);
+    let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
     let server = Socket::new(Protocol::Rep0)?;
     if let Err(e) = server.listen(&ro_storage_url) {

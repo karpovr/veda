@@ -8,12 +8,13 @@ use std::num::NonZeroU32;
 use std::str::from_utf8;
 use uuid::Uuid;
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{create_new_ticket, Module};
+use v_module::module::create_new_ticket;
 use v_module::ticket::Ticket;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::Individual;
+use v_module::veda_backend::*;
 
 pub(crate) struct AuthWorkPlace<'a> {
     pub conf: &'a AuthConf,
@@ -22,7 +23,7 @@ pub(crate) struct AuthWorkPlace<'a> {
     pub secret: &'a str,
     pub sys_ticket: &'a str,
     pub xr: &'a mut XapianReader,
-    pub module: &'a mut Module,
+    pub module: &'a mut Backend,
     pub user_stat: &'a mut UserStat,
     pub stored_password: String,
     pub stored_salt: String,

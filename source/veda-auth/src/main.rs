@@ -14,8 +14,9 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{create_sys_ticket, init_log, Module};
+use v_module::module::{create_sys_ticket, init_log};
 use v_module::v_storage::storage::StorageMode;
+use v_module::veda_backend::*;
 
 fn main() -> std::io::Result<()> {
     init_log("AUTH");
@@ -31,24 +32,24 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
-    let mut module = Module::new(StorageMode::ReadWrite, false);
+    let mut backend = Backend::create(StorageMode::ReadWrite, false);
 
-    let systicket = if let Ok(t) = module.get_sys_ticket_id() {
+    let systicket = if let Ok(t) = backend.get_sys_ticket_id() {
         t
     } else {
         error!("failed to get systicket, create new");
 
-        create_sys_ticket(&mut module.storage).id
+        create_sys_ticket(&mut backend.storage).id
     };
 
     let mut suspicious: HashMap<String, UserStat> = HashMap::new();
 
-    let conf = read_auth_configuration(&mut module);
+    let conf = read_auth_configuration(&mut backend);
 
-    if let Some(mut xr) = XapianReader::new("russian", &mut module.storage) {
+    if let Some(mut xr) = XapianReader::new("russian", &mut backend.storage) {
         loop {
             if let Ok(recv_msg) = server.recv() {
-                let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut module, &mut suspicious);
+                let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut backend, &mut suspicious);
                 if let Err(e) = server.send(res) {
                     error!("failed to send, err = {:?}", e);
                 }
@@ -60,7 +61,7 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut XapianReader, module: &mut Module, suspicious: &mut HashMap<String, UserStat>) -> Message {
+fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut XapianReader, module: &mut Backend, suspicious: &mut HashMap<String, UserStat>) -> Message {
     let v: JSONValue = if let Ok(v) = serde_json::from_slice(request.as_slice()) {
         v
     } else {

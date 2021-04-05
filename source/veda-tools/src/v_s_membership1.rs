@@ -28,12 +28,12 @@ pub fn remove_membership1(ctx: &mut CleanerContext) {
                 }
 
                 let mut indv: Individual = Individual::default();
-                if ctx.module.storage.get_individual(id, &mut indv) {
+                if ctx.backend.storage.get_individual(id, &mut indv) {
                     if &indv.get_first_literal("rdfs:comment").unwrap_or_default() == "выдан cfg:Event_5"
                         && &indv.get_first_literal("v-s:memberOf").unwrap_or_default() == "cfg:AllUsersGroup"
                     {
                         let resource_id = &indv.get_first_literal("v-s:resource").unwrap_or_default();
-                        if let Some(r) = ctx.module.get_individual(resource_id, &mut Individual::default()) {
+                        if let Some(r) = ctx.backend.get_individual(resource_id, &mut Individual::default()) {
                             if r.any_exists("rdf:type", &["v-s:Version", "mnd-s:Pass"]) {
                                 remove(&mut indv, ctx);
                             }

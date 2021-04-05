@@ -8,12 +8,12 @@ use v_ft_xapian::key2slot::{Key2Slot, XAPIAN_INFO_PATH};
 use v_ft_xapian::to_lower_and_replace_delimiters;
 use v_ft_xapian::xapian_reader::XapianReader;
 use v_module::info::ModuleInfo;
-use v_module::module::Module;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::{DataType, Lang};
 use v_module::v_onto::individual::Individual;
 use v_module::v_onto::onto::Onto;
 use v_module::v_onto::resource::Resource;
+use v_module::veda_backend::*;
 use xapian_rusty::*;
 
 pub const BATCH_SIZE_OF_TRANSACTION: i64 = 5000;
@@ -87,7 +87,7 @@ impl Indexer {
     //        self.idx_prop.load(true, &self.onto, module);
     //    }
 
-    pub(crate) fn index_msg(&mut self, new_indv: &mut Individual, prev_indv: &mut Individual, cmd: IndvOp, op_id: i64, module: &mut Module) -> Result<()> {
+    pub(crate) fn index_msg(&mut self, new_indv: &mut Individual, prev_indv: &mut Individual, cmd: IndvOp, op_id: i64, backend: &mut Backend) -> Result<()> {
         if cmd == IndvOp::Remove {
             return Ok(());
         }
@@ -104,7 +104,7 @@ impl Indexer {
             false
         };
 
-        self.idx_schema.load(false, &self.onto, module, &mut self.xr);
+        self.idx_schema.load(false, &self.onto, backend, &mut self.xr);
 
         if !new_indv.is_empty() {
             let is_draft_of = new_indv.get_first_literal("v-s:is_draft_of");
@@ -198,10 +198,10 @@ impl Indexer {
                 for oo in resources {
                     for _type in types.iter() {
                         if let Some(id) = self.idx_schema.get_index_id_of_uri_and_property(_type, predicate) {
-                            self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
+                            self.prepare_index(backend, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
                         } else {
                             if let Some(id) = self.idx_schema.get_index_id_of_property(predicate) {
-                                self.prepare_index(module, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
+                                self.prepare_index(backend, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
                             }
                         }
                     }
@@ -326,7 +326,7 @@ impl Indexer {
 
     fn prepare_index(
         &mut self,
-        module: &mut Module,
+        module: &mut Backend,
         iwp: &mut IndexDocWorkplace,
         idx_id: &str,
         predicate: &str,

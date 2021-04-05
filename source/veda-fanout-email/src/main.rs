@@ -8,14 +8,15 @@ use lettre_email::mime::IMAGE_JPEG;
 use lettre_email::{Email, Mailbox};
 use std::collections::HashMap;
 use std::path::Path;
-use v_module::v_api::app::ResultCode;
+use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::common::load_onto;
+use v_module::v_api::app::ResultCode;
 use v_module::v_onto::individual::*;
 use v_module::v_onto::onto::Onto;
-use v_queue::consumer::*;
 use v_module::v_search::common::FTQuery;
+use v_module::veda_backend::*;
+use v_queue::consumer::*;
 
 const ATTACHMENTS_DB_PATH: &str = "data/files";
 
@@ -25,7 +26,7 @@ pub struct Context {
     default_mail_sender: String,
     always_use_mail_sender: bool,
     sys_ticket: String,
-    module_info: ModuleInfo
+    module_info: ModuleInfo,
 }
 
 fn main() -> Result<(), i32> {
@@ -42,7 +43,8 @@ fn main() -> Result<(), i32> {
     }
 
     let mut module = Module::default();
-    let systicket = module.get_sys_ticket_id();
+    let mut backend = Backend::default();
+    let systicket = backend.get_sys_ticket_id();
 
     let mut ctx = Context {
         onto: Onto::default(),
@@ -50,37 +52,40 @@ fn main() -> Result<(), i32> {
         default_mail_sender: String::default(),
         always_use_mail_sender: false,
         sys_ticket: systicket.unwrap_or_default(),
-        module_info: module_info.unwrap()
+        module_info: module_info.unwrap(),
     };
 
-    connect_to_smtp(&mut ctx, &mut module);
+    connect_to_smtp(&mut ctx, &mut backend);
 
     info!("load ontology start");
-    load_onto(&mut module.storage, &mut ctx.onto);
+    load_onto(&mut backend.storage, &mut ctx.onto);
     info!("load ontology end");
 
     module.listen_queue(
         &mut queue_consumer,
         &mut ctx,
-        &mut (before_batch as fn(&mut Module, &mut Context, size_batch: u32) -> Option<u32>),
-        &mut (prepare as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Module, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
+        &mut (before_batch as fn(&mut Backend, &mut Context, size_batch: u32) -> Option<u32>),
+        &mut (prepare as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (after_batch as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+        &mut backend,
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
+fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
+    Ok(())
+}
 
-fn before_batch(_module: &mut Module, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
+fn before_batch(_module: &mut Backend, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
-fn after_batch(_module: &mut Module, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
-    Ok (false)
+fn after_batch(_module: &mut Backend, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+    Ok(false)
 }
 
-fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare(backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");
@@ -108,7 +113,7 @@ fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individua
 
         for itype in types {
             if ctx.onto.is_some_entered(&itype, &["v-s:Deliverable"]) {
-                prepare_deliverable(&mut new_state, module, ctx);
+                prepare_deliverable(&mut new_state, backend, ctx);
                 break;
             }
         }
@@ -117,7 +122,7 @@ fn prepare(module: &mut Module, ctx: &mut Context, queue_element: &mut Individua
     Ok(true)
 }
 
-fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx: &mut Context) -> ResultCode {
+fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> ResultCode {
     let is_deleted = prepared_indv.is_exists("v-s:deleted");
 
     if is_deleted {
@@ -154,7 +159,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
         if ctx.always_use_mail_sender && !ctx.default_mail_sender.is_empty() && ctx.default_mail_sender.len() > 5 {
             info!("use default mail sender: {}", ctx.default_mail_sender);
             if !ctx.default_mail_sender.contains('@') {
-                if let Some(r) = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, module).pop() {
+                if let Some(r) = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend).pop() {
                     email_from = r;
                 } else {
                     error!("failed to extract email from default_mail_sender {}", ctx.default_mail_sender);
@@ -165,13 +170,13 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
         } else {
             if !from.is_empty() {
                 info!("extract from: {}", from);
-                if let Some(r) = extract_email(&None, &from, ctx, module).pop() {
+                if let Some(r) = extract_email(&None, &from, ctx, backend).pop() {
                     email_from = r;
                 }
             }
 
             if (email_from.address.is_empty() || email_from.address.len() < 5) && !ctx.default_mail_sender.is_empty() {
-                let mut emails = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, module);
+                let mut emails = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend);
                 if !emails.is_empty() {
                     email_from = emails.pop().unwrap();
                 }
@@ -188,7 +193,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
 
         let mut rr_email_to_hash = HashMap::new();
         for elt in to {
-            for r in extract_email(&has_message_type, &elt, ctx, module) {
+            for r in extract_email(&has_message_type, &elt, ctx, backend) {
                 rr_email_to_hash.insert(r.address.to_owned(), r);
             }
         }
@@ -199,7 +204,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
 
         let mut rr_reply_to_hash = HashMap::new();
         for elt in reply_to.unwrap_or_default() {
-            for r in extract_email(&has_message_type, &elt, ctx, module) {
+            for r in extract_email(&has_message_type, &elt, ctx, backend) {
                 rr_reply_to_hash.insert(r.address.to_owned(), r);
             }
         }
@@ -208,7 +213,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
             let mut email = Email::builder();
 
             for id in attachments.unwrap_or_default().iter() {
-                if let Some(file_info) = module.get_individual(id, &mut Individual::default()) {
+                if let Some(file_info) = backend.get_individual(id, &mut Individual::default()) {
                     let path = file_info.get_first_literal("v-s:filePath");
                     let file_uri = file_info.get_first_literal("v-s:fileUri");
                     let file_name = file_info.get_first_literal("v-s:fileName");
@@ -277,7 +282,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, module: &mut Module, ctx:
     ResultCode::InternalServerError
 }
 
-fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Individual, module: &mut Module) -> Vec<Mailbox> {
+fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Individual, backend: &mut Backend) -> Vec<Mailbox> {
     if ap.any_exists("v-s:hasDelegationPurpose", &["d:delegate_Control"]) {
         return vec![];
     }
@@ -288,7 +293,7 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
     }
 
     let mut prs = Individual::default();
-    if module.get_individual(&p_uri, &mut prs).is_none() {
+    if backend.get_individual(&p_uri, &mut prs).is_none() {
         return vec![];
     }
 
@@ -302,7 +307,7 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
 
     if let Some(has_message_type) = has_message_type {
         if let Some(preference_uri) = prs.get_first_literal("v-ui:hasPreferences") {
-            if let Some(preference) = module.get_individual(&preference_uri, &mut Individual::default()) {
+            if let Some(preference) = backend.get_individual(&preference_uri, &mut Individual::default()) {
                 info!("found preferences, uri = {}, has message type = {}", p_uri, has_message_type);
 
                 let mut need_send = true;
@@ -334,7 +339,7 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
         return vec![];
     }
 
-    if let Some(ac) = module.get_individual(&ac_uri.unwrap(), &mut Individual::default()) {
+    if let Some(ac) = backend.get_individual(&ac_uri.unwrap(), &mut Individual::default()) {
         if ac.is_exists_bool("v-s:deleted", true) {
             return vec![];
         }
@@ -350,27 +355,27 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
     }
 }
 
-fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Context, module: &mut Module) -> Vec<Mailbox> {
+fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Context, backend: &mut Backend) -> Vec<Mailbox> {
     let mut res = Vec::new();
     let label;
-    if ap_id.is_empty()  {
+    if ap_id.is_empty() {
         return vec![];
     }
 
-    if let Some(indv) = module.get_individual(ap_id, &mut Individual::default()) {
+    if let Some(indv) = backend.get_individual(ap_id, &mut Individual::default()) {
         label = indv.get_first_literal("rdfs:label").unwrap_or_default();
 
         if indv.any_exists("rdf:type", &["v-s:Appointment"]) {
-            return get_emails_from_appointment(&has_message_type, indv, module);
+            return get_emails_from_appointment(&has_message_type, indv, backend);
         } else if indv.any_exists("rdf:type", &["v-s:Position"]) {
-            let l_individuals = module
+            let l_individuals = backend
                 .fts
                 .query(FTQuery::new_with_ticket(&ctx.sys_ticket, &("'rdf:type' == 'v-s:Appointment' && 'v-s:occupation' == '".to_string() + indv.get_id() + "'")));
 
             for id in l_individuals.result {
-                if let Some(individual) = module.get_individual(&id, &mut Individual::default()) {
+                if let Some(individual) = backend.get_individual(&id, &mut Individual::default()) {
                     if !individual.is_exists_bool("v-s:deleted", true) {
-                        res.append(&mut get_emails_from_appointment(has_message_type, individual, module));
+                        res.append(&mut get_emails_from_appointment(has_message_type, individual, backend));
                     }
                 }
             }
@@ -380,7 +385,7 @@ fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Conte
                     return vec![];
                 }
 
-                if let Some(ac) = module.get_individual(&ac_uri, &mut Individual::default()) {
+                if let Some(ac) = backend.get_individual(&ac_uri, &mut Individual::default()) {
                     if !ac.is_exists_bool("v-s:delete", true) {
                         for el in ac.get_literals("v-s:mailbox").unwrap_or_default() {
                             res.push(Mailbox::new_with_name(label.to_owned(), el));
@@ -396,7 +401,7 @@ fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Conte
     res
 }
 
-fn connect_to_smtp(ctx: &mut Context, module: &mut Module) -> bool {
+fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
     if let Some(node) = module.get_individual("cfg:standart_node", &mut Individual::default()) {
         if let Some(v) = node.get_literals("v-s:send_an_email_individual_by_event") {
             for el in v {

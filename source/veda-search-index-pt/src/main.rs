@@ -15,15 +15,16 @@ use clickhouse_rs::{errors::Error, Block, ClientHandle, Pool};
 use futures::executor::block_on;
 use std::time::Instant;
 
-use v_module::v_api::IndvOp;
+use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
-use v_module::common::load_onto;
+use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::DataType;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::*;
 use v_module::v_onto::onto::Onto;
 use v_module::v_onto::resource::Value;
+use v_module::veda_backend::*;
 use v_queue::consumer::*;
 
 type TypedBatch = HashMap<String, Batch>;
@@ -54,7 +55,7 @@ pub struct Context {
     db_predicate_tables: HashMap<String, HashMap<String, String>>,
     typed_batch: TypedBatch,
     stats: Stats,
-    module_info: ModuleInfo
+    module_info: ModuleInfo,
 }
 
 #[derive(Debug)]
@@ -547,9 +548,9 @@ fn main() -> Result<(), Error> {
         process::exit(101);
     }
     let mut module = Module::default();
+    let mut backend = Backend::default();
 
-    let mut pool = Pool::new(Module::get_property("query_indexer_db")
-        .unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
+    let mut pool = Pool::new(Module::get_property("query_indexer_db").unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
 
     block_on(init_clickhouse(&mut pool))?;
 
@@ -571,39 +572,42 @@ fn main() -> Result<(), Error> {
         db_predicate_tables,
         typed_batch,
         stats,
-        module_info: module_info.unwrap()
+        module_info: module_info.unwrap(),
     };
 
-    load_onto(&mut module.storage, &mut ctx.onto);
+    load_onto(&mut backend.storage, &mut ctx.onto);
 
     info!("start listening to queue");
 
     module.listen_queue(
         &mut queue_consumer,
         &mut ctx,
-        &mut (before as fn(&mut Module, &mut Context, u32) -> Option<u32>),
-        &mut (process as fn(&mut Module, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after as fn(&mut Module, &mut Context, u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Module, &mut Context) -> Result<(), PrepareError>),
+        &mut (before as fn(&mut Backend, &mut Context, u32) -> Option<u32>),
+        &mut (process as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+        &mut (after as fn(&mut Backend, &mut Context, u32) -> Result<bool, PrepareError>),
+        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+        &mut backend,
     );
     Ok(())
 }
 
-fn heartbeat(_module: &mut Module, _ctx: &mut Context) -> Result<(), PrepareError> { Ok (()) }
+fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
+    Ok(())
+}
 
-fn before(_module: &mut Module, _ctx: &mut Context, _batch_size: u32) -> Option<u32> {
+fn before(_module: &mut Backend, _ctx: &mut Context, _batch_size: u32) -> Option<u32> {
     Some(BATCH_SIZE)
 }
 
-fn after(_module: &mut Module, ctx: &mut Context, _processed_batch_size: u32) -> Result<bool, PrepareError> {
+fn after(_module: &mut Backend, ctx: &mut Context, _processed_batch_size: u32) -> Result<bool, PrepareError> {
     if let Err(e) = block_on(ctx.process_typed_batch()) {
         error!("failed to process a batch: {}", e);
         process::exit(101);
     }
-    Ok (true)
+    Ok(true)
 }
 
-fn process(_module: &mut Module, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
         error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
