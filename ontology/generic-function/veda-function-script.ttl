@@ -284,7 +284,7 @@ v-s:UserScriptTemplate
   $(".action#run", template).click(function () {
     if ( individual.hasValue("v-s:executeAt", "Server") ) {
       individual["v-s:toBeRun"] = [ true ];
-      individual.save();
+      individual.save(true);
     } else {
       individual["v-s:lastRun"] = [ new Date() ];
       individual["v-s:output"] = [];
