@@ -48,6 +48,15 @@ v-s:hasCommunicationMeanTarget
 # v-s:description
 # rdfs:comment
 
+#телефонный код страны
+v-s:countryCallingCode
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Телефонный код страны"@ru ;
+  rdfs:label "Сountry сalling сode"@en ;
+  rdfs:range xsd:string ;
+  rdfs:domain v-s:CommunicationMean;
+.
+
 # ------------------------------------------------------------ КЛАССЫ --
 v-s:CommunicationMeanChannel
   rdf:type owl:Class ;
