@@ -1411,6 +1411,14 @@ v-s:EmployeeEmbeddedTemplate
       <veda-control data-type="string" property="v-s:tabNumber"></veda-control>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-6">
+      <em about="v-s:phone" property="rdfs:label"></em>
+    </div>
+    <div class="col-md-6">
+      <veda-control data-type="string" property="v-s:phone"></veda-control>
+    </div>
+  </div>
 </div>
   """ ;
 .
