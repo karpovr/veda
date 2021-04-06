@@ -144,15 +144,15 @@ function UpdateService() {
     self.restore();
     veda.trigger('ccus-online');
 
-    pingInterval = setInterval(function (that) {
+    pingInterval = setInterval(() => {
       if (Date.now() - lastPing > 2 * pingTimeout) {
         console.log('client: ping missed, close socket');
         veda.trigger('ccus-offline');
         clearInterval(pingInterval);
-        that.close();
+        this.close();
         return;
       }
-    }, pingTimeout, this);
+    }, pingTimeout);
   }
 
   /**

@@ -612,7 +612,7 @@ System.import('moment').then(function (module) {
  */
 function veda_multilingual (options) {
   const opts = $.extend( {}, veda_multilingual.defaults, options );
-  const that = this;
+  const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri;
   const spec = opts.spec;
@@ -638,7 +638,7 @@ function veda_multilingual (options) {
         'name': (individual.hasValue('rdf:type') ? individual['rdf:type'].pop().id + '_' + property_uri : property_uri).toLowerCase().replace(/[-:]/g, '_'),
       })
       .on('change focusout', function () {
-        const values = that.find('.form-control').map(function (i, el) {
+        const values = self.find('.form-control').map(function (i, el) {
           return opts.parser( el.value, el );
         }).get();
         individual.set(property_uri, values);
@@ -659,13 +659,13 @@ function veda_multilingual (options) {
       }
     });
 
-    that.append( localedInput );
+    self.append( localedInput );
   });
 
-  const input = that.find('.form-control');
+  const input = self.find('.form-control');
 
   individual.on(property_uri, handler);
-  that.one('remove', function () {
+  self.one('remove', function () {
     individual.off(property_uri, handler);
   });
 
@@ -697,22 +697,22 @@ function veda_multilingual (options) {
    */
   function handler (values) {
     input.each(function (i, el) {
-      const that = el;
+      const self = el;
       const lang = el.lang;
       individual.get(property_uri).forEach(function (value) {
-        if ( value.language === lang || !value.language && that.value != value) {
+        if ( value.language === lang || !value.language && self.value != value) {
           try {
-            if (that === document.activeElement) {
-              const start_shift = that.selectionStart - that.value.length;
-              const end_shift = that.selectionEnd - that.value.length;
-              that.value = value;
-              that.selectionStart = value.length + start_shift;
-              that.selectionEnd = value.length + end_shift;
+            if (self === document.activeElement) {
+              const start_shift = self.selectionStart - self.value.length;
+              const end_shift = self.selectionEnd - self.value.length;
+              self.value = value;
+              self.selectionStart = value.length + start_shift;
+              self.selectionEnd = value.length + end_shift;
             } else {
-              that.value = value;
+              self.value = value;
             }
           } catch (ex) {
-            that.value = value;
+            self.value = value;
             console.log('selectionStart/End error:', property_uri, value, typeof value);
           }
         }
@@ -720,11 +720,11 @@ function veda_multilingual (options) {
     });
   }
 
-  that.on('view edit search', function (e) {
+  self.on('view edit search', function (e) {
     e.stopPropagation();
   });
 
-  that.val = function (value) {
+  self.val = function (value) {
     if (!value) {
       return parser( input.val() );
     }
@@ -736,23 +736,23 @@ function veda_multilingual (options) {
   };
 
   if (spec && spec.hasValue('v-ui:tooltip')) {
-    that.tooltip({
+    self.tooltip({
       title: spec['v-ui:tooltip'].join(', '),
       placement: 'bottom',
       container: 'body',
       trigger: 'manual',
       animation: false,
     }).one('remove', function () {
-      that.tooltip('destroy');
+      self.tooltip('destroy');
     });
     input.on('focusin', function () {
-      that.tooltip('show');
+      self.tooltip('show');
     }).on('focusout change', function () {
-      that.tooltip('hide');
+      self.tooltip('hide');
     });
   }
 
-  return that;
+  return self;
 };
 veda_multilingual.defaults = {
   parser: function (input, el) {
@@ -771,14 +771,14 @@ veda_multilingual.defaults = {
 // Multilingual string control
 $.fn.veda_multilingualString = function (options) {
   const opts = $.extend( {}, $.fn.veda_multilingualString.defaults, options );
-  const that = $(this);
+  const self = $(this);
   const init = function () {
-    that.empty();
-    veda_multilingual.call(that, opts);
+    self.empty();
+    veda_multilingual.call(self, opts);
   };
   init();
   veda.on('language:changed', init);
-  that.one('remove', function () {
+  self.one('remove', function () {
     veda.off('language:changed', init);
   });
   return this;
@@ -790,23 +790,23 @@ $.fn.veda_multilingualString.defaults = {
 // Multilingual text control
 $.fn.veda_multilingualText = function (options) {
   const opts = $.extend( {}, $.fn.veda_multilingualText.defaults, options );
-  const that = $(this);
+  const self = $(this);
   const init = function () {
-    that.empty();
-    veda_multilingual.call(that, opts);
-    const ta = $('textarea', that);
-    ta.attr('rows', that.attr('rows'));
+    self.empty();
+    veda_multilingual.call(self, opts);
+    const ta = $('textarea', self);
+    ta.attr('rows', self.attr('rows'));
     autosize(ta);
-    that.on('edit', function () {
+    self.on('edit', function () {
       autosize.update(ta);
     });
-    that.one('remove', function () {
+    self.one('remove', function () {
       autosize.destroy(ta);
     });
   };
   init();
   veda.on('language:changed', init);
-  that.one('remove', function () {
+  self.one('remove', function () {
     veda.off('language:changed', init);
   });
   return this;
@@ -960,9 +960,9 @@ $.fn.veda_actor = function( options ) {
   // Full name check label & handler
   $('[name=\'full-name\']', control).each(function (i, el) {
     const label = new veda.IndividualModel(el.value);
-    const that = el;
+    const self = el;
     label.load().then(function (label) {
-      $(that).parent().append( new veda.IndividualModel(that.value).toString() );
+      $(self).parent().append( new veda.IndividualModel(self.value).toString() );
     });
   }).change(function () {
     fullName = $(el).is(':checked') ? true : false;
@@ -974,9 +974,9 @@ $.fn.veda_actor = function( options ) {
 
   $('[name=\'only-deleted\']', control).each(function (i, el) {
     const label = new veda.IndividualModel(el.value);
-    const that = el;
+    const self = el;
     label.load().then(function (label) {
-      $(that).parent().append( new veda.IndividualModel(that.value).toString() );
+      $(self).parent().append( new veda.IndividualModel(self.value).toString() );
     });
   }).change(function () {
     onlyDeleted = $(el).is(':checked') ? true : false;
@@ -1132,6 +1132,11 @@ $.fn.veda_actor = function( options ) {
   }());
   fulltext.on('keydown', inputHandler);
 
+  /**
+   * Evaluate query prefix expression
+   * @param {String} prefix
+   * @return {Promise<String>}
+   */
   function evalQueryPrefix(prefix) {
     return new Promise(function (resolve, reject) {
       try {
@@ -1166,8 +1171,8 @@ $.fn.veda_actor = function( options ) {
         }).join('\n');
       }
     }
-    
-    let ftQueryPromise = evalQueryPrefix(queryPrefix).then(function(evaledPrefix) {
+
+    const ftQueryPromise = evalQueryPrefix(queryPrefix).then(function(evaledPrefix) {
       if (onlyDeleted) {
         return ftQuery(evaledPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
       } else {
@@ -1690,7 +1695,7 @@ $.fn.veda_select.defaults = {
 
 $.fn.veda_checkbox = function (params) {
   const opts = $.extend( {}, $.fn.veda_checkbox.defaults, params );
-  const that = this;
+  const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
   const spec = opts.spec;
@@ -1784,12 +1789,12 @@ $.fn.veda_checkbox = function (params) {
    * @return {Promise}
    */
   function renderOptions(options) {
-    that.empty();
+    self.empty();
     const optionsPromises = options.map(function (value, index) {
       if (index >= 100) {
         return;
       }
-      const hld = $(opts.template).appendTo(that);
+      const hld = $(opts.template).appendTo(self);
       return renderValue(value).then(function (rendered) {
         const lbl = $('label', hld).append( rendered );
         const chk = $('input', lbl).data('value', value);
@@ -1819,7 +1824,7 @@ $.fn.veda_checkbox = function (params) {
    * @return {void}
    */
   function handler() {
-    $('input', that).each(function (i, el) {
+    $('input', self).each(function (i, el) {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
       $(el).prop('checked', hasValue);
@@ -1867,7 +1872,7 @@ $.fn.veda_checkbox.defaults = {
 
 $.fn.veda_radio = function (params) {
   const opts = $.extend( {}, $.fn.veda_radio.defaults, params );
-  const that = this;
+  const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
   const spec = opts.spec;
@@ -1961,12 +1966,12 @@ $.fn.veda_radio = function (params) {
    * @return {void}
    */
   function renderOptions(options) {
-    that.empty();
+    self.empty();
     options.forEach(function (value, index) {
       if (index >= 100) {
         return;
       }
-      const hld = $(opts.template).appendTo(that);
+      const hld = $(opts.template).appendTo(self);
       return renderValue(value).then(function (rendered) {
         const lbl = $('label', hld).append( rendered );
         const rad = $('input', lbl).data('value', value);
@@ -1995,7 +2000,7 @@ $.fn.veda_radio = function (params) {
    * @return {void}
    */
   function handler() {
-    $('input', that).each(function (i, el) {
+    $('input', self).each(function (i, el) {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
       $(el).prop('checked', hasValue);
@@ -2043,7 +2048,7 @@ $.fn.veda_radio.defaults = {
 
 $.fn.veda_booleanRadio = function (params) {
   const opts = $.extend( {}, $.fn.veda_booleanRadio.defaults, params );
-  const that = this;
+  const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
   const spec = opts.spec;
@@ -2078,9 +2083,9 @@ $.fn.veda_booleanRadio = function (params) {
    * @return {void}
    */
   function renderOptions() {
-    that.empty();
+    self.empty();
     options.map(function (option) {
-      const hld = $(opts.template).appendTo(that);
+      const hld = $(opts.template).appendTo(self);
       option.label.then(function(label) {
         const lbl = $('label', hld).append( label );
         const rad = $('input', lbl).data('value', option.value);
@@ -2104,7 +2109,7 @@ $.fn.veda_booleanRadio = function (params) {
    * @return {void}
    */
   function handler() {
-    $('input', that).each(function (i, el) {
+    $('input', self).each(function (i, el) {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
       $(el).prop('checked', hasValue);
@@ -2147,7 +2152,6 @@ $.fn.veda_booleanRadio.defaults = {
 
 // SOURCE CODE CONTROL
 $.fn.veda_source = function (options) {
-  const self = this;
   const opts = $.extend( {}, $.fn.veda_source.defaults, options );
   const control = $(opts.template);
   const individual = opts.individual;
@@ -2159,7 +2163,7 @@ $.fn.veda_source = function (options) {
     individual.set(property_uri, [value]);
   };
 
-  if (typeof self.attr('data-mode') !== 'undefined') opts.sourceMode = self.attr('data-mode');
+  if (typeof this.attr('data-mode') !== 'undefined') opts.sourceMode = this.attr('data-mode');
   if (property_uri === 'v-s:script') opts.sourceMode = 'ace/mode/javascript';
   if (property_uri === 'v-ui:template') opts.sourceMode = 'ace/mode/html';
 
@@ -2173,7 +2177,7 @@ $.fn.veda_source = function (options) {
     };
   };
 
-  System.import('ace').then(function (module) {
+  System.import('ace').then((module) => {
     const ace = module.default;
 
     const editor = ace.edit(editorEl, {
@@ -2184,7 +2188,7 @@ $.fn.veda_source = function (options) {
       value: opts.value,
     });
 
-    self.on('view edit search', function (e) {
+    this.on('view edit search', function (e) {
       e.stopPropagation();
       e.type === 'view' ? ( editor.setReadOnly(true) ) :
         e.type === 'edit' ? ( editor.setReadOnly(false) ) :
@@ -2209,7 +2213,7 @@ $.fn.veda_source = function (options) {
     const debouncedIndividualHandler = debounce(individualHandler, 100);
 
     individual.on(property_uri, debouncedIndividualHandler);
-    self.one('remove', function () {
+    this.one('remove', function () {
       individual.off(property_uri, debouncedIndividualHandler);
       editor.destroy();
     });
@@ -2220,7 +2224,7 @@ $.fn.veda_source = function (options) {
   });
 
   this.append(control);
-  return self;
+  return this;
 };
 $.fn.veda_source.defaults = {
   value: '',
@@ -2445,9 +2449,9 @@ $.fn.veda_file = function( options ) {
   };
 
   fileInput.change(function (e) {
-    const that = e.delegateTarget;
+    const self = e.delegateTarget;
     const fileIndividualPromises = [];
-    for (let i = 0, file; (file = that.files && that.files[i]); i++) {
+    for (let i = 0, file; (file = self.files && self.files[i]); i++) {
       const fileIndividualPromise = createFileIndividual(file, undefined, individual);
       fileIndividualPromises.push(fileIndividualPromise);
     }
@@ -2460,7 +2464,7 @@ $.fn.veda_file = function( options ) {
       .then(function (fileIndividuals) {
         control.removeClass('disabled');
         fileInput.removeAttr('disabled');
-        that.value = '';
+        self.value = '';
         indicatorSpinner.empty().hide();
         indicatorPercentage.empty().hide();
         if (isSingle) {

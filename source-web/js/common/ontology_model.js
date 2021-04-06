@@ -36,34 +36,33 @@ function OntologyModel () {
 const proto = OntologyModel.prototype;
 
 proto.init = function () {
-  const self = this;
   if (typeof window !== 'undefined') {
     return Backend.loadFile('/ontology.json')
-      .then(function (ontologyJSON) {
-        self.ontology = JSON.parse(ontologyJSON);
-        return self.processOntology();
+      .then((ontologyJSON) => {
+        this.ontology = JSON.parse(ontologyJSON);
+        return this.processOntology();
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log('Ontology load error.', error.stack);
-        return error;
+        throw error;
       });
   } else {
     return Backend.query(veda.ticket, '\'rdf:type\' == \'owl:Ontology\' || \'rdf:type\' == \'rdfs:Class\' || \'rdf:type\' == \'rdf:Property\' || \'rdf:type\' == \'rdfs:Datatype\' || \'rdf:type\' == \'v-ui:PropertySpecification\' || \'rdf:type\' == \'v-ui:ClassModel\'')
-      .then(function (queryResult) {
+      .then((queryResult) => {
         const ontology_uris = queryResult.result;
         return Backend.get_individuals(veda.ticket, ontology_uris);
       })
-      .then(function (ontology) {
-        self.ontology = ontology;
+      .then((ontology) => {
+        this.ontology = ontology;
         console.log('Ontology length:', ontology.length);
-        return self.processOntology();
+        return this.processOntology();
       });
   }
 };
 
 proto.getClassProperties = function (_class_uri) {
   const classTree = this.classTree;
-  const getProps = function (_class_uri) {
+  const getProps = (_class_uri) => {
     const _class = classTree[_class_uri];
     let props;
     if (_class) {
@@ -78,13 +77,13 @@ proto.getClassProperties = function (_class_uri) {
 
 proto.getClassSpecifications = function (_class_uri) {
   const classTree = this.classTree;
-  const getSpecs = function (_class_uri) {
+  const getSpecs = (_class_uri) => {
     const _class = classTree[_class_uri];
     let specs;
     if (_class) {
       specs = _class.specifications;
       const superSpecsArray = _class.superClasses.map( getSpecs );
-      superSpecsArray.map( function (superSpecs) {
+      superSpecsArray.map((superSpecs) => {
         for (const property_uri in superSpecs) {
           if ( !specs[property_uri] ) {
             specs[property_uri] = superSpecs[property_uri];
@@ -106,7 +105,6 @@ proto.getClassTemplate = function (_class_uri) {
 };
 
 proto.processOntology = function () {
-  const self = this;
   const ontology = this.ontology;
   const ontologies = this.ontologies;
   const datatypes = this.datatypes;
@@ -118,14 +116,14 @@ proto.processOntology = function () {
   const templates = this.templates;
 
   // Allocate ontology objects
-  const ontologyIndividuals = ontology.map( function (json) {
+  const ontologyIndividuals = ontology.map((json) => {
     if (JSON.stringify(json) === '{"@":""}') {
       return;
     }
     return new IndividualModel(json, 1, false);
   });
 
-  ontologyIndividuals.forEach( function (individual) {
+  ontologyIndividuals.forEach((individual) => {
     try {
       if ( !individual ) {
         return;
@@ -178,7 +176,7 @@ proto.processOntology = function () {
   });
 
   // Process classes
-  Object.keys(classes).forEach( function (uri) {
+  Object.keys(classes).forEach((uri) => {
     try {
       const _class = classes[uri];
       // populate classTree
@@ -197,7 +195,7 @@ proto.processOntology = function () {
       if ( !_class.hasValue('rdfs:subClassOf') ) {
         _class['rdfs:subClassOf'] = [classes['rdfs:Resource']];
       }
-      _class['rdfs:subClassOf'].map( function ( superClass ) {
+      _class['rdfs:subClassOf'].map((superClass) => {
         classTree[_class.id].superClasses.push( superClass.id );
       });
     } catch (error) {
@@ -206,13 +204,13 @@ proto.processOntology = function () {
   });
 
   // Process properties
-  Object.keys(properties).forEach( function (uri) {
+  Object.keys(properties).forEach((uri) => {
     try {
       const property = properties[uri];
       if (!property['rdfs:domain']) {
         return;
       }
-      property['rdfs:domain'].map( function ( _class ) {
+      property['rdfs:domain'].map(( _class ) => {
         classTree[_class.id].properties.push(property.id);
       });
     } catch (error) {
@@ -221,14 +219,14 @@ proto.processOntology = function () {
   });
 
   // Process specifications
-  Object.keys(specifications).forEach( function (uri) {
+  Object.keys(specifications).forEach((uri) => {
     try {
       const spec = specifications[uri];
       if (!spec['v-ui:forClass']) {
         return;
       }
-      spec['v-ui:forClass'].map( function ( _class ) {
-        spec['v-ui:forProperty'].map( function (prop) {
+      spec['v-ui:forClass'].map((_class) => {
+        spec['v-ui:forProperty'].map((prop) => {
           classTree[_class.id].specifications[prop.id] = spec.id;
         });
       });
@@ -238,9 +236,9 @@ proto.processOntology = function () {
   });
 
   // Process template specifications
-  Object.keys(templates).forEach(function (uri) {
+  Object.keys(templates).forEach((uri) => {
     try {
-      templates[uri] = templates[uri].sort(function(cur, prev) {
+      templates[uri] = templates[uri].sort((cur, prev) => {
         if (cur.properties['v-s:loadPriority']) {
           if (prev.properties['v-s:loadPriority']) {
             return cur.properties['v-s:loadPriority'][0].data - prev.properties['v-s:loadPriority'][0].data;
@@ -250,28 +248,22 @@ proto.processOntology = function () {
         } else {
           return 1;
         }
-      }).map(function(templateSpec) {
-        return templateSpec.properties['v-ui:defaultTemplate'][0].data;
-      });
+      }).map((templateSpec) => templateSpec.properties['v-ui:defaultTemplate'][0].data);
     } catch (error) {
       console.log('Ontology init error, uri =', uri, error.stack);
     }
   });
 
   // Init ontology individuals
-  const initPromises = ontologyIndividuals.map( function (individual, i) {
+  const initPromises = ontologyIndividuals.map((individual, i) => {
     return individual.init()
-      .catch(function (error) {
-        console.log('Ontology individual init error, uri =', individual.id, error.stack);
-      });
+      .catch((error) => console.log('Ontology individual init error, uri =', individual.id, error.stack));
   });
 
   if (typeof window !== 'undefined') {
-    return Promise.all(initPromises).then(function () {
-      return self;
-    });
+    return Promise.all(initPromises).then(() => this);
   } else {
-    return Promise.resolve(self);
+    return Promise.resolve(this);
   }
 };
 

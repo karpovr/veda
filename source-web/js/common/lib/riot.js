@@ -43,18 +43,12 @@ riot.observable = function(el) {
 
   el.trigger = function(name) {
     var args = slice.call(arguments, 1),
-      fns = callbacks[name] || [];
-
-    for (var i = 0, fn; (fn = fns[i]); ++i) {
-      //if (!fn.busy) {
-        //fn.busy = true;
-        fn.apply(el, fn.typed ? [name].concat(args) : args);
-        if (fn.one) { fns.splice(i, 1); i--; }
-        //fn.busy = false;
-      //}
-    }
-
-    return el;
+      fns = callbacks[name] || [],
+      c = 0;
+    return fns.reduce((p, fn, i) => p.then(() => {
+      if (fn.one) { fns.splice(i - c, 1); c++; }
+      return fn.apply(el, fn.typed ? [name].concat(args) : args);
+    }), Promise.resolve()).then(() => el);
   };
 
   return el;

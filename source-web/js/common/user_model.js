@@ -12,9 +12,7 @@ export default veda.UserModel = UserModel;
  * @return {UserModel}
  */
 function UserModel(uri) {
-  const self = IndividualModel.call(this, uri);
-
-  return self;
+  return IndividualModel.call(this, uri);
 };
 
 UserModel.prototype = Object.create(IndividualModel.prototype);
@@ -28,55 +26,52 @@ proto.getLanguage = function () {
 };
 
 proto._init = function () {
-  const self = this;
   return this.load()
-    .then(self.initAspect.bind(self))
-    .then(self.initAppointment.bind(self))
-    .then(self.initPreferences.bind(self))
-    .then(self.initLanguage.bind(self))
-    .then(function () {
-      if ( self.id !== 'cfg:Guest' ) {
-        return self.save();
+    .then(this.initAspect.bind(this))
+    .then(this.initAppointment.bind(this))
+    .then(this.initPreferences.bind(this))
+    .then(this.initLanguage.bind(this))
+    .then(() => {
+      if ( this.id !== 'cfg:Guest' ) {
+        return this.save();
       }
     })
-    .catch(function (error) {
+    .catch((error) => {
       console.log('User init error', error.stack);
     });
 };
 
 proto.initAspect = function () {
-  const self = this;
-  if ( self.hasValue('v-s:hasAspect') ) {
-    self.aspect = self['v-s:hasAspect'][0];
-    return self.aspect.load();
+  if ( this.hasValue('v-s:hasAspect') ) {
+    this.aspect = this['v-s:hasAspect'][0];
+    return this.aspect.load();
   } else {
-    const aspect_id = self.id + '_aspect';
-    return new IndividualModel(aspect_id).load().then(function(loadedAspect) {
+    const aspect_id = this.id + '_aspect';
+    return new IndividualModel(aspect_id).load().then((loadedAspect) => {
       if (loadedAspect.hasValue('rdf:type', 'rdfs:Resource')) {
-        self.aspect = new IndividualModel(aspect_id);
-        self.aspect['rdf:type'] = [new IndividualModel('v-s:PersonalAspect')];
-        self.aspect['v-s:owner'] = [self];
-        self.aspect['rdfs:label'] = ['PersonalAspect_' + self.id];
-        self['v-s:hasAspect'] = [self.aspect];
-        if ( self.id !== 'cfg:Guest' ) {
-          return self.aspect.save();
+        this.aspect = new IndividualModel(aspect_id);
+        this.aspect['rdf:type'] = [new IndividualModel('v-s:PersonalAspect')];
+        this.aspect['v-s:owner'] = [this];
+        this.aspect['rdfs:label'] = ['PersonalAspect_' + this.id];
+        this['v-s:hasAspect'] = [this.aspect];
+        if ( this.id !== 'cfg:Guest' ) {
+          return this.aspect.save();
         }
       } else {
-        self.aspect = loadedAspect;
-        self['v-s:hasAspect'] = [self.aspect];
-        return self.aspect;
+        this.aspect = loadedAspect;
+        this['v-s:hasAspect'] = [this.aspect];
+        return this.aspect;
       }
     });
   }
 };
 
 proto.initAppointment = function () {
-  const self = this;
-  if (self.hasValue('v-s:defaultAppointment')) {
-    veda.appointment = self['v-s:defaultAppointment'][0];
-  } else if (self.hasValue('v-s:hasAppointment')) {
-    self['v-s:defaultAppointment'] = [self['v-s:hasAppointment'][0]];
-    veda.appointment = self['v-s:defaultAppointment'][0];
+  if (this.hasValue('v-s:defaultAppointment')) {
+    veda.appointment = this['v-s:defaultAppointment'][0];
+  } else if (this.hasValue('v-s:hasAppointment')) {
+    this['v-s:defaultAppointment'] = [this['v-s:hasAppointment'][0]];
+    veda.appointment = this['v-s:defaultAppointment'][0];
   } else {
     return veda.appointment = undefined;
   }
@@ -92,24 +87,22 @@ proto.initAppointment = function () {
 };
 
 proto.initPreferences = function () {
-  const self = this;
-  if ( self.hasValue('v-ui:hasPreferences') ) {
-    self.preferences = self['v-ui:hasPreferences'][0];
-    return self.preferences.load();
+  if ( this.hasValue('v-ui:hasPreferences') ) {
+    this.preferences = this['v-ui:hasPreferences'][0];
+    return this.preferences.load();
   } else {
-    const preferences_id = self.id + '_pref';
-    self.preferences = new IndividualModel(preferences_id);
-    self.preferences['v-s:owner'] = [self];
-    self.preferences['rdf:type'] = [new IndividualModel('v-ui:Preferences')];
-    self.preferences['rdfs:label'] = ['Preferences_' + self.id];
-    self['v-ui:hasPreferences'] = [self.preferences];
-    return self.preferences;
+    const preferences_id = this.id + '_pref';
+    this.preferences = new IndividualModel(preferences_id);
+    this.preferences['v-s:owner'] = [this];
+    this.preferences['rdf:type'] = [new IndividualModel('v-ui:Preferences')];
+    this.preferences['rdfs:label'] = ['Preferences_' + this.id];
+    this['v-ui:hasPreferences'] = [this.preferences];
+    return this.preferences;
   }
 };
 
 proto.initLanguage = function (preferences) {
-  const self = this;
-  const setLanguage = function () {
+  const setLanguage = () => {
     preferences.language = preferences['v-ui:preferredLanguage'].reduce( function (acc, lang) {
       acc[lang.id.substr(lang.id.indexOf(':') + 1)] = lang;
       return acc;
@@ -119,8 +112,8 @@ proto.initLanguage = function (preferences) {
   const setDisplayedElements = function () {
     preferences.displayedElements = preferences['v-ui:displayedElements'][0] || 10;
   };
-  const updatePreferences = function () {
-    if ( self.id !== 'cfg:Guest' ) {
+  const updatePreferences = () => {
+    if ( this.id !== 'cfg:Guest' ) {
       preferences.save();
     }
   };

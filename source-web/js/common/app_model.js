@@ -14,12 +14,12 @@ import UpdateService from '../browser/update_service.js';
  * @return {AppModel}
  */
 export default function AppModel(manifest) {
-  const self = riot.observable(this);
+  riot.observable(this);
 
-  self.manifest = manifest;
-  self.ticket = self.ticket || '';
-  self.ontology = {};
-  self.cache = {
+  this.manifest = manifest;
+  this.ticket = this.ticket || '';
+  this.ontology = {};
+  this.cache = {
     limit: 20000,
     count: 0,
     delta: 1000,
@@ -29,7 +29,6 @@ export default function AppModel(manifest) {
       return this.storage[key];
     },
     set: function (obj, expires) {
-      const that = this;
       let count = this.count;
       const limit = this.limit;
       const delta = this.delta;
@@ -37,11 +36,11 @@ export default function AppModel(manifest) {
         const keys = Object.keys(this.expire);
         // First key is for ontology objects
         for (let i = 1, key; (key = keys[i]) && (limit - count < delta); i++) {
-          this.expire[key] = this.expire[key].filter(function (obj) {
+          this.expire[key] = this.expire[key].filter((obj) => {
             if (limit - count >= delta) {
               return true;
             }
-            delete that.storage[obj.id];
+            delete this.storage[obj.id];
             count--;
             return false;
           });
@@ -97,14 +96,14 @@ export default function AppModel(manifest) {
   };
 
   // Load ontology
-  self.init = function (user) {
+  this.init = function (user) {
     const ontology = new OntologyModel();
-    return ontology.then(function (ontology) {
-      self.ontology = ontology;
-      self.user = new UserModel(user);
-      return self.user._init();
+    return ontology.then((ontology) => {
+      this.ontology = ontology;
+      this.user = new UserModel(user);
+      return this.user._init();
     });
   };
 
-  return self;
+  return this;
 };
