@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate log;
 
-use futures::io::Error;
 use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
@@ -12,8 +11,7 @@ use v_module::v_api::app::{OptAuthorize, ResultCode};
 use v_module::v_search::clickhouse_client::*;
 use v_module::veda_backend::*;
 
-#[tokio::main]
-async fn main() -> Result<(), Error> {
+fn main() {
     init_log("SEARCH_QUERY");
 
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
@@ -36,7 +34,7 @@ async fn main() -> Result<(), Error> {
     let server = Socket::new(Protocol::Rep0).unwrap();
     if let Err(e) = server.listen(&query_url) {
         error!("failed to listen {}, err = {:?}", query_url, e);
-        return Ok(());
+        return;
     }
 
     loop {
