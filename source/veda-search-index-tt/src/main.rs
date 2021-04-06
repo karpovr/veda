@@ -16,17 +16,14 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter};
 use std::time::Instant;
 use std::{fs, process};
-use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::datatype::DataType;
 use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::*;
-use v_module::v_onto::onto::Onto;
 use v_module::v_onto::resource::Value;
-use v_module::veda_backend::*;
-use v_queue::consumer::*;
+use v_module::veda_module::*;
 
 type TypedBatch = HashMap<String, Batch>;
 type Batch = Vec<BatchElement>;
@@ -46,15 +43,6 @@ pub struct Stats {
     last: Instant,
 }
 
-pub struct Context {
-    onto: Onto,
-    pool: Pool,
-    db_type_tables: HashMap<String, HashMap<String, String>>,
-    typed_batch: TypedBatch,
-    stats: Stats,
-    module_info: ModuleInfo,
-}
-
 enum ColumnData {
     Str(Vec<Vec<String>>),
     Date(Vec<Vec<DateTime<Tz>>>),
@@ -68,7 +56,15 @@ pub struct TypeOps {
     ops: Vec<i64>,
 }
 
-impl Context {
+pub struct TTIndexer {
+    pool: Pool,
+    db_type_tables: HashMap<String, HashMap<String, String>>,
+    typed_batch: TypedBatch,
+    stats: Stats,
+    module_info: ModuleInfo,
+}
+
+impl TTIndexer {
     fn add_to_typed_batch(&mut self, queue_element: &mut Individual) {
         let cmd = get_cmd(queue_element);
 
@@ -168,9 +164,9 @@ impl Context {
             for (type_name, batch) in self.typed_batch.iter_mut() {
                 while batch.len() > BLOCK_LIMIT {
                     let mut slice = batch.drain(0..BLOCK_LIMIT).collect();
-                    Context::process_batch(&type_name, &mut slice, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
+                    TTIndexer::process_batch(&type_name, &mut slice, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
                 }
-                Context::process_batch(&type_name, batch, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
+                TTIndexer::process_batch(&type_name, batch, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
             }
             fs::remove_file(BATCH_LOG_FILE_NAME)?;
             self.typed_batch.clear();
@@ -218,7 +214,7 @@ impl Context {
         for (op_id, individual, sign) in batch {
             let signed_op = (*op_id) * (*sign as i64);
             if !committed_ops.contains(&signed_op) {
-                Context::add_to_table(individual, *sign, &mut id_column, &mut sign_column, &mut version_column, &mut text_column, &mut columns);
+                TTIndexer::add_to_table(individual, *sign, &mut id_column, &mut sign_column, &mut version_column, &mut text_column, &mut columns);
                 type_ops.ops.push(signed_op);
                 committed_ops.insert(signed_op);
             } else {
@@ -234,7 +230,7 @@ impl Context {
 
         let rows = id_column.len();
 
-        let block = Context::mk_block(type_name, id_column, sign_column, version_column, text_column, &mut columns, client, db_type_tables).await?;
+        let block = TTIndexer::mk_block(type_name, id_column, sign_column, version_column, text_column, &mut columns, client, db_type_tables).await?;
 
         if block.row_count() == 0 {
             info!("block is empty! nothing to insert");
@@ -502,31 +498,55 @@ impl Context {
     }
 }
 
-fn main() -> Result<(), Error> {
-    init_log("SEARCH_INDEX_TT");
-
-    //return test().await;
-
-    if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
-        wait_module("fulltext_indexer", wait_load_ontology());
+impl VedaQueueModule for TTIndexer {
+    fn before_batch(&mut self, _size_batch: u32) -> Option<u32> {
+        Some(BATCH_SIZE)
     }
 
-    let mut queue_consumer = Consumer::new("./data/queue", "search_index_tt", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
+    fn prepare(&mut self, queue_element: &mut Individual) -> Result<bool, PrepareError> {
+        let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+        if let Err(e) = self.module_info.put_info(op_id, op_id) {
+            error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
+        }
+        self.add_to_typed_batch(queue_element);
+        Ok(false)
+    }
+
+    fn after_batch(&mut self, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+        if let Err(e) = block_on(self.process_typed_batch()) {
+            error!("error processing batch, err = {}", e);
+            process::exit(101);
+        }
+        Ok(true)
+    }
+
+    fn heartbeat(&mut self) -> Result<(), PrepareError> {
+        Ok(())
+    }
+
+    fn before_start(&mut self) {
+        info!("start module TT");
+    }
+
+    fn before_exit(&mut self) {
+        info!("exit module TT");
+    }
+}
+
+fn main() -> Result<(), Error> {
+    let mut module = Module::new_with_name("search_index_tt");
+
     let module_info = ModuleInfo::new("./data", "search_index_tt", true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
-    let mut module = Module::default();
-    let mut backend = Backend::default();
 
     let mut pool = Pool::new(Module::get_property("query_indexer_db").unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
 
     block_on(init_clickhouse(&mut pool))?;
 
     let db_type_tables = block_on(read_type_tables(&mut pool))?;
-
-    info!("tables: {:?}", db_type_tables);
 
     let typed_batch: TypedBatch = HashMap::new();
     let stats = Stats {
@@ -538,8 +558,7 @@ fn main() -> Result<(), Error> {
         last: Instant::now(),
     };
 
-    let mut ctx = Context {
-        onto: Onto::default(),
+    let mut tt_indexer = TTIndexer {
         pool,
         db_type_tables,
         typed_batch,
@@ -547,45 +566,9 @@ fn main() -> Result<(), Error> {
         module_info: module_info.unwrap(),
     };
 
-    load_onto(&mut backend.storage, &mut ctx.onto);
+    module.prepare_queue(&mut tt_indexer);
 
-    info!("started listening to queue");
-
-    module.listen_queue(
-        &mut queue_consumer,
-        &mut ctx,
-        &mut (before as fn(&mut Backend, &mut Context, u32) -> Option<u32>),
-        &mut (process as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after as fn(&mut Backend, &mut Context, u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
-        &mut backend,
-    );
     Ok(())
-}
-
-fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
-    Ok(())
-}
-
-fn before(_module: &mut Backend, _ctx: &mut Context, _batch_size: u32) -> Option<u32> {
-    Some(BATCH_SIZE)
-}
-
-fn after(_module: &mut Backend, ctx: &mut Context, _processed_batch_size: u32) -> Result<bool, PrepareError> {
-    if let Err(e) = block_on(ctx.process_typed_batch()) {
-        error!("error processing batch, err = {}", e);
-        process::exit(101);
-    }
-    Ok(true)
-}
-
-fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
-    let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-    if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
-    }
-    ctx.add_to_typed_batch(queue_element);
-    Ok(false)
 }
 
 async fn create_type_predicate_column(

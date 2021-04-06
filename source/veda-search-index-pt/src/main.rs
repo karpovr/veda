@@ -25,7 +25,7 @@ use v_module::v_onto::individual::*;
 use v_module::v_onto::onto::Onto;
 use v_module::v_onto::resource::Value;
 use v_module::veda_backend::*;
-use v_queue::consumer::*;
+use v_module::veda_module::*;
 
 type TypedBatch = HashMap<String, Batch>;
 type Batch = Vec<BatchElement>;
@@ -49,15 +49,6 @@ pub struct Stats {
     last: Instant,
 }
 
-pub struct Context {
-    onto: Onto,
-    pool: Pool,
-    db_predicate_tables: HashMap<String, HashMap<String, String>>,
-    typed_batch: TypedBatch,
-    stats: Stats,
-    module_info: ModuleInfo,
-}
-
 #[derive(Debug)]
 enum ColumnData {
     Str(Vec<Vec<String>>),
@@ -73,7 +64,16 @@ pub struct TypePropOps {
     ops: Vec<i64>,
 }
 
-impl Context {
+pub struct PTIndexer {
+    onto: Onto,
+    pool: Pool,
+    db_predicate_tables: HashMap<String, HashMap<String, String>>,
+    typed_batch: TypedBatch,
+    stats: Stats,
+    module_info: ModuleInfo,
+}
+
+impl PTIndexer {
     fn add_to_typed_batch(&mut self, queue_element: &mut Individual) {
         let cmd = get_cmd(queue_element);
         if cmd.is_none() {
@@ -184,9 +184,9 @@ impl Context {
             for (type_name, batch) in self.typed_batch.iter_mut() {
                 while batch.len() > BLOCK_LIMIT {
                     let mut slice = batch.drain(0..BLOCK_LIMIT).collect();
-                    Context::process_batch(&type_name, &mut slice, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
+                    PTIndexer::process_batch(&type_name, &mut slice, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
                 }
-                Context::process_batch(&type_name, batch, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
+                PTIndexer::process_batch(&type_name, batch, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
             }
             fs::remove_file(BATCH_LOG_FILE_NAME)?;
             self.typed_batch.clear();
@@ -216,7 +216,7 @@ impl Context {
         info!("processing class batch: {}, count: {}", type_name, rows);
 
         for (op_id, individual, sign) in batch {
-            Context::add_to_tables(individual, type_name, *sign, &mut predicate_tables, *op_id, committed_types_props_ops);
+            PTIndexer::add_to_tables(individual, type_name, *sign, &mut predicate_tables, *op_id, committed_types_props_ops);
         }
 
         let elapsed = now.elapsed().as_millis();
@@ -228,7 +228,7 @@ impl Context {
         let now = Instant::now();
 
         for (predicate, predicate_table) in predicate_tables {
-            let (block, type_prop_ops) = Context::mk_block(type_name, predicate.clone(), predicate_table, client, db_predicate_tables).await?;
+            let (block, type_prop_ops) = PTIndexer::mk_block(type_name, predicate.clone(), predicate_table, client, db_predicate_tables).await?;
 
             let table = format!("{}.`{}`", DB, predicate);
 
@@ -307,7 +307,7 @@ impl Context {
             let ops = committed_props_ops.get_mut(&predicate).unwrap();
             let signed_op = op_id * (sign as i64);
             if !ops.contains(&signed_op) {
-                Context::add_to_predicate_table(&id, version, sign, created, type_name, individual, &predicate, predicate_tables, &mut text_content, op_id);
+                PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, &predicate, predicate_tables, &mut text_content, op_id);
                 ops.insert(signed_op);
             } else {
                 info!("skip already exported, uri = {}, type= {}, predicate = {}, op_id = {}", id, type_name, predicate, signed_op);
@@ -318,7 +318,7 @@ impl Context {
             let text_predicate = String::from("text");
             let text = text_content.join(" ");
             individual.set_string(&text_predicate, &text, Lang::NONE);
-            Context::add_to_predicate_table(&id, version, sign, created, type_name, individual, &text_predicate, predicate_tables, &mut text_content, op_id);
+            PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, &text_predicate, predicate_tables, &mut text_content, op_id);
         }
     }
 
@@ -532,23 +532,50 @@ impl Context {
     }
 }
 
+impl VedaQueueModule for PTIndexer {
+    fn before_batch(&mut self, _size_batch: u32) -> Option<u32> {
+        Some(BATCH_SIZE)
+    }
+
+    fn prepare(&mut self, queue_element: &mut Individual) -> Result<bool, PrepareError> {
+        let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+        if let Err(e) = self.module_info.put_info(op_id, op_id) {
+            error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
+        }
+        self.add_to_typed_batch(queue_element);
+        Ok(false)
+    }
+
+    fn after_batch(&mut self, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
+        if let Err(e) = block_on(self.process_typed_batch()) {
+            error!("failed to process a batch: {}", e);
+            process::exit(101);
+        }
+        Ok(true)
+    }
+
+    fn heartbeat(&mut self) -> Result<(), PrepareError> {
+        Ok(())
+    }
+
+    fn before_start(&mut self) {}
+
+    fn before_exit(&mut self) {}
+}
+
 fn main() -> Result<(), Error> {
-    init_log("SEARCH_INDEX_PT");
+    let mut module = Module::new_with_name("search_index_pt");
+    let mut backend = Backend::default();
 
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
         wait_module("fulltext_indexer", wait_load_ontology());
     }
 
-    let consumer_name = "search_index_pt".to_string();
-
-    let mut queue_consumer = Consumer::new("./data/queue", &consumer_name, "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
-    let module_info = ModuleInfo::new("./data", &consumer_name, true);
+    let module_info = ModuleInfo::new("./data", "search_index_pt", true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
-    let mut module = Module::default();
-    let mut backend = Backend::default();
 
     let mut pool = Pool::new(Module::get_property("query_indexer_db").unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
 
@@ -566,7 +593,7 @@ fn main() -> Result<(), Error> {
         last: Instant::now(),
     };
 
-    let mut ctx = Context {
+    let mut pt_indexer = PTIndexer {
         onto: Onto::default(),
         pool,
         db_predicate_tables,
@@ -575,45 +602,11 @@ fn main() -> Result<(), Error> {
         module_info: module_info.unwrap(),
     };
 
-    load_onto(&mut backend.storage, &mut ctx.onto);
+    load_onto(&mut backend.storage, &mut pt_indexer.onto);
 
-    info!("start listening to queue");
+    module.prepare_queue(&mut pt_indexer);
 
-    module.listen_queue(
-        &mut queue_consumer,
-        &mut ctx,
-        &mut (before as fn(&mut Backend, &mut Context, u32) -> Option<u32>),
-        &mut (process as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after as fn(&mut Backend, &mut Context, u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
-        &mut backend,
-    );
     Ok(())
-}
-
-fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
-    Ok(())
-}
-
-fn before(_module: &mut Backend, _ctx: &mut Context, _batch_size: u32) -> Option<u32> {
-    Some(BATCH_SIZE)
-}
-
-fn after(_module: &mut Backend, ctx: &mut Context, _processed_batch_size: u32) -> Result<bool, PrepareError> {
-    if let Err(e) = block_on(ctx.process_typed_batch()) {
-        error!("failed to process a batch: {}", e);
-        process::exit(101);
-    }
-    Ok(true)
-}
-
-fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
-    let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-    if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
-        error!("failed to write module_info, op_id = {}, err = {:?}", op_id, e);
-    }
-    ctx.add_to_typed_batch(queue_element);
-    Ok(false)
 }
 
 async fn create_predicate_table(
