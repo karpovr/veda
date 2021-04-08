@@ -3194,7 +3194,7 @@ v-s:AccountEmbeddedTemplate
 </div>
 <script>
 
-  if(mode === "edit" && individual.isNew()){
+    if(mode === "edit" && individual.isNew()){
     individual["v-s:authOrigin"]=["veda"];
   }
 
