@@ -1538,7 +1538,13 @@ v-s:Dictionary
   rdfs:label "Справочник"@ru ;
   rdfs:label "Dictionary"@en ;
 .
-
+#------------------------------------------------------
+v-s:Deletable
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Удаляемый"@ru ;
+  rdfs:label "Deletable"@en ;
+.
 
 ### ------------------------------------------------------------
 v-s:Hierarchical
