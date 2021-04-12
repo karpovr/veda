@@ -178,6 +178,7 @@ v-ui:optionValue
   rdfs:label "Option value"@en ;
   rdfs:range rdfs:Resource ;
 .
+
 v-ui:DatatypePropertySpecification
   rdf:type owl:Class ;
   rdfs:subClassOf v-ui:PropertySpecification ;
@@ -1225,18 +1226,23 @@ v-ui:AppointmentPopoverTemplate
   rdfs:label "Appointment template with photo"@en ;
   v-ui:template """
 <script>
-  return individual.getChainValue("v-s:employee", "v-s:hasImage").then(function (image) {
-    if (!image.length) {
-      $(".media-left", template).remove();
-    }
-  });
+  if (individual.hasValue("v-s:employee")) {
+    return individual["v-s:employee"][0].load().then(function(employee) {
+      if (!employee.hasValue("v-s:hasImage")) {
+        $(".media-left", template).remove();
+      };
+      if (!employee.hasValue("v-s:dateAbsenceTo")) {
+        $(".absence-block", template).remove();
+      };
+      return true;
+    })
+  };
+  //# sourceURL=v-ui:AppointmentPopoverTemplate
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
   <div class="media-left" about="@" rel="v-s:employee" style="width:96px">
-    <a href="#/@" about="@" rel="v-s:hasImage">
-      <div about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></div>
-    </a>
+    <a href="#/@" about="@" rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></a>
   </div>
   <div class="media-body" style="width:auto;">
     <strong class="media-heading" about="@" rel="v-s:employee">
@@ -1259,7 +1265,23 @@ v-ui:AppointmentPopoverTemplate
           <small about="@" property="v-s:description"></small>
         </div>
       </div>
+      <div class="absence-block">
+        <hr class="no-margin">
+        <div>
+          <small>
+            <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
+            <span about="@" property="v-s:dateAbsenceTo"></span>
+          </small>  
+        </div>
+        <div>
+          <small>
+            <span about="v-s:delegate" property="rdfs:label"></span>
+            <span about="@" rel="v-s:delegate" data-template="v-ui:LabelTemplate"></span>
+          </small>
+        </div>
+      </div>
     </div>
+    
   </div>
 </div>
   """ ;
@@ -1274,13 +1296,17 @@ v-ui:PersonPopoverTemplate
   if (!individual.hasValue("v-s:hasImage")) {
     $(".media-left", template).remove();
   }
+  if (!employee.hasValue("v-s:dateAbsenceTo")) {
+    $(".absence-block", template).remove();
+  };
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
   <div class="media-left" style="width:96px">
-    <a href="#/@" about="@" rel="v-s:hasImage">
+    <a href="#/@" about="@" rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></a>
+    <!-- <a href="#/@" about="@" rel="v-s:hasImage">
       <div about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></div>
-    </a>
+    </a> -->
   </div>
   <div class="media-body" style="width:auto">
     <strong class="media-heading" about="@" property="rdfs:label"></strong>
@@ -1293,6 +1319,21 @@ v-ui:PersonPopoverTemplate
     <div about="@" rel="v-s:hasCommunicationMean">
       <div>
         <small about="@" property="v-s:description"></small>
+      </div>
+    </div>
+    <div class="absence-block">
+      <hr class="no-margin">
+      <div>
+        <small>
+          <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
+          <span about="@" property="v-s:dateAbsenceTo"></span>
+        </small>  
+      </div>
+      <div>
+        <small>
+          <span about="v-s:delegate" property="rdfs:label"></span>
+          <span about="@" rel="v-s:delegate" data-template="v-ui:LabelTemplate"></span>
+        </small>
       </div>
     </div>
   </div>
@@ -2616,37 +2657,43 @@ v-ui:DocumentEventTemplate
     $(".non-start-process", template).hide();
     var process = individual.get('v-wf:onProcess')[0];
     process.load().then(function (process) {
+      if (process.hasValue("v-wf:isStopped", true)) {
+        $(".process-id", template).addClass('text-danger');
+        $(".process-stopped", template).show();
+        $(".start-process > #exp", template).trigger("click");
+      };
       if (
         (!process.hasValue("v-wf:isStopped") || process.hasValue("v-wf:isStopped", false)) &&
         (!process.hasValue("v-wf:isCompleted") || process.hasValue("v-wf:isCompleted", false))
       ) {
         var actor = individual['v-s:actor'][0];
         var doc = individual['v-s:onDocument'][0];
-        doc.canDelete().then(function(canDelete) {
-          if (actor) {
-            if (veda.appointment.id === actor.id || veda.appointment.id === 'cfg:AdministratorAppointment' || canDelete) {
-              $(".stop-process", template).show();
-            }
+        var isMemberPromise = veda.user.isMemberOf("v-s:FunctionProcessBreak_Group");
+        return Promise.all([doc.canDelete(), isMemberPromise]).then(function(results) {
+          var canDelete = results[0];
+          var isProcessBreakMember = results[1];
+          if (!actor) {
+            console.log("Unexpected behavior: can't read v-s:actor from individual");
+            return false;
           }
-        });
-        $(".stop-process", template).on("click", function (e) {
-          var self = this;
-          e.preventDefault();
-          var warn = new veda.IndividualModel("v-s:AreYouSure");
-          warn.load().then(function (warn) {
-            warn = warn["rdfs:label"].map(veda.Util.formatValue).join(" ");
-            if ( confirm(warn) ) {
-              process['v-wf:isStopped'] = [ true ];
-              $(self).remove();
-              process.save();
-            }
-          });
-        });
-      }
-      if (process.hasValue("v-wf:isStopped", true)) {
-        $(".process-id", template).addClass('text-danger');
-        $(".process-stopped", template).show();
-        $(".start-process > #exp", template).trigger("click");
+          if ( (veda.appointment.id === actor.id || veda.appointment.id === "cfg:AdministratorAppointment") || 
+              (canDelete && isProcessBreakMember) ) {
+            $(".stop-process", template).show();
+            $(".stop-process", template).on("click", function (e) {
+              e.preventDefault();
+              var self = this;
+              var warn = new veda.IndividualModel("v-s:AreYouSure");
+              warn.load().then(function (warn) {
+                warn = warn["rdfs:label"].map(veda.Util.formatValue).join(" ");
+                if ( confirm(warn) ) {
+                  process['v-wf:isStopped'] = [ true ];
+                  $(self).remove();
+                  process.save();
+                }
+              });
+            });
+          };
+        })
       }
     });
   }
