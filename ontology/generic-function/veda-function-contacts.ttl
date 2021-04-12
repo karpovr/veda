@@ -67,37 +67,270 @@ v-s:ContactsSearchRegistryBlank
   v-fc:targetType v-s:Person ;
 .
 
+v-s:ContactsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Контакты"@ru ;
+  rdfs:label "Contacts"@en ;
+.
+
+v-s:SearchTextBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Фамилия, должность, телефон, email"@ru ;
+  rdfs:label "Name, position, phone, email"@en ;
+.
+
 v-s:ContactsTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон функции контакты"@ru ;
   rdfs:label "Contacts function template"@en ;
   v-ui:template """
 <script>
-  if (!individual.hasValue("v-s:managedOrganization")) {
-    return veda.appointment.getOrganization().then(function (managedOrganization) {
-      individual["v-s:managedOrganization"] = [ managedOrganization ];
+  var loadIndicator = $("#load-indicator");
+
+  var tabs = $("#box-tabs li[data-type]", template);
+  tabs.click(function(e){
+    e.preventDefault();
+    loadIndicator.show();
+
+    var self = $(this);
+    tabs.removeClass("active");
+    self.addClass("active");
+    individual["activeTab"] = self.data("type");
+    $(".tabContainer", template).empty();
+
+
+    if (individual["activeTab"] == "search") {
+      return new veda.IndividualModel("v-s:Contacts")
+        .present($(".tabContainer", template), "v-s:ContactsStructureTemplate")
+        .then(function(){
+          loadIndicator.hide();
+        });
+    } else  if (individual["activeTab"] == "my"){
+      return veda.user.aspect
+        .present($(".tabContainer", template), "v-s:FavoriteContactTemplate")
+        .then(function(){
+          loadIndicator.hide();
+        });
+    }
+    var targetIndidivUri = self.find("a").attr("about");
+    var targetIndidiv = new veda.IndividualModel(targetIndidivUri);
+  });
+
+  if (!individual["activeTab"]) {
+    individual["activeTab"] = "search";
+  }
+  $("#box-tabs li[data-type='"+individual["activeTab"]+"']", template).click();
+
+  //# sourceURL=v-s:MultiFunctionalSearchTemplate_pre
+</script>
+<div class="container-fluid sheet">
+  <br>
+  <ul id="box-tabs" class="nav nav-tabs nav-right" role="tablist">
+    <li class="pull-left"><h2 id="currentTab" class="no-margin" about="@" property="rdfs:label"></h2></li>
+    <li data-type="my" role="presentation"><a href="#" about="v-ft:MyBundle" property="rdfs:label"></a></li>
+    <li data-type="search" role="presentation" class="active"><a href="#" about="v-s:ContactsBundle" property="rdfs:label"></a></li>
+  </ul>
+  <br>
+  <div class="tabContainer"></div>
+</div>
+"""
+.
+
+v-s:FavoriteContactTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон избранных контактов"@ru ;
+  rdfs:label "Favorite contacts template"@en ;
+  v-ui:template """
+<div>
+  <table class="table table-hover">
+    <thead>
+      <th width="7%"><span class="glyphicon glyphicon-chevron-down"></span></th>
+      <th width="60%"><span about="rdfs:label" property="rdfs:label"></span></th>
+      <th width="28%"><span about="v-s:ContactsBundle" property="rdfs:label"></th>
+      <th></th>
+    </thead>
+    <tbody about="@" rel="v-s:hasFavoriteContact" data-template="v-s:ContactCardTemplate">
+      <script>
+        $(".open-structure").remove();
+      </script>
+    </tbody>
+  </table>
+</div>
+<script>
+  
+</script>
+"""
+.
+
+v-ui:CompactCommunicationMeanTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "CompactCommunicationMeanTemplate"@ru ;
+  rdfs:label "CompactCommunicationMeanTemplate"@en ;
+  v-ui:template """
+<div>
+  <strong about="@" rel="v-s:hasCommunicationMeanChannel">
+    <span about="@" property="v-s:shortLabel"></span>
+  </strong>
+  <span class="simple-text" about="@" property="v-s:description"></span>
+  <a class="email-link" style="cursor: pointer;"><span about="@" property="v-s:description"></span></a>
+</div>
+<script>
+  //email
+  if (individual.hasValue("v-s:hasCommunicationMeanChannel", "d:a1iwni0b54fvcz41vuts08bxqsh")) { 
+    $(".simple-text", template).remove();
+    var mailto = individual["v-s:description"][0];
+    $("a.email-link", template).attr("href", "mailto:"+mailto);
+  } else {
+    $("a.email-link", template).remove();
+  }
+  //# sourceURL=v-ui:CompactCommunicationMeanTemplate_post
+</script>
+"""
+.
+
+v-s:ContactCardTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон функции контакты"@ru ;
+  rdfs:label "Contacts function template"@en ;
+  v-ui:template """
+<script>
+  if (individual.hasValue("rdf:type", "v-s:Appointment")) {
+    $("#orgLabel", template).remove();
+    $("span.unit-icon", template).remove();
+    $("div.logo-image", template).remove();
+    return individual.getPropertyChain("v-s:employee", "v-s:hasImage").then(function(image) {
+      if (image.length == 0) {
+        individual["v-s:employee"][0]["v-s:hasImage"] = [new veda.IndividualModel("v-s:DefaultPhoto")];
+      }
+      return true;
+    });
+  } else {
+    var icon = "fa fa-lg";
+    if (individual.hasValue('rdf:type', 'v-s:Organization')) {
+      $("span.unit-icon", template).remove();
+    } else if (individual.hasValue('rdf:type', 'v-s:Department' ) || individual.hasValue('rdf:type', 'v-s:OrgGroup')) {
+      icon = icon+" fa-folder-o";
+      $("span.unit-icon", template).addClass(icon);
+      $("div.logo-image", template).remove();
+    }
+    $("div.unit-image", template).remove();
+    $("#appLabel", template).remove();
+  };
+  //# sourceURL=v-s:ContactCardTemplate_pre
+</script>
+<tr>
+  <td>
+    <div class="unit-image" about="@" rel="v-s:employee">
+      <div about="@" rel="v-s:hasImage" style="width:60px; height:80px">
+        <div class="img-thumbnail pointer" about="@" data-template="v-ui:ImageTemplate"></div>
+      </div>
+    </div>
+    <div class="logo-image" about="@" rel="v-s:hasImage" style="width:50px; height:50px">
+      <div class="img-thumbnail" about="@" data-template="v-ui:ImageTemplate"></div>
+    </div>
+    <span class="unit-icon"></span>
+  </td>
+  <td>
+    <div class="col-md-8">
+      <div id="orgLabel" about="@" property="rdfs:label"></div>
+      <div id="appLabel">
+        <div about="@" rel="v-s:employee">
+          <span about="@" property="v-s:lastName"></span>
+          <span about="@" property="v-s:firstName"></span>
+          <span about="@" property="v-s:middleName"></span>
+        </div>
+        <div about="@" rel="v-s:occupation">
+          <span about="@" property="rdfs:label"></span>
+        </div>
+        <div class="absenceBlock" about="@" rel="v-s:employee">
+          <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span><span about="@" property="v-s:dateAbsenceTo"></span>
+          <div about="@" rel="v-s:delegate">
+            <span about="v-s:delegate" property="rdfs:label"></span><span property="rdfs:label"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="hideInStructure">
+        <span class="fa fa-lg fa-sitemap open-structure pointer margin-sm-h"></span>
+        <span about="@" rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></span>
+      </div>
+    </div>
+  </td>
+  <td>
+    <div class="col-md-11">
+      <div about="@" rel="v-s:employee">
+        <div about="@" rel="v-s:hasCommunicationMean" data-template="v-ui:CompactCommunicationMeanTemplate"></div>
+      </div>
+      <div about="@" rel="v-s:hasCommunicationMean" data-template="v-ui:CompactCommunicationMeanTemplate"></div>
+    </div>
+    <div class="col-md-1">
+      <span class="hidden faviconIcon pointer fa fa-lg fa-star-o"></span>  
+    </div>  
+  </td>
+  <td>
+    <div>
+      <span about="@" class="zoom hidden" data-template="v-ui:IconModalTemplate"></span>
+    </div>
+  </td>
+</tr>
+<script>
+  var isOrgHasComm = false;
+  var isAppHasComm = false;
+  if (individual.hasValue("v-s:employee")) {
+    isAppHasComm = individual["v-s:employee"][0].hasValue("v-s:hasCommunicationMean");
+    if (!individual["v-s:employee"][0].hasValue("v-s:dateAbsenceTo")) {
+      $(".absenceBlock", template).remove();
+    }
+  } else {
+    isOrgHasComm = individual.hasValue("v-s:hasCommunicationMean");
+  };
+  if (isOrgHasComm || isAppHasComm) {
+    var faviconIcon = $("span.faviconIcon", template);
+    faviconIcon.removeClass("hidden");
+    var contactHolder = faviconIcon.closest("tr").attr("resource");
+    if (veda.user.aspect.hasValue("v-s:hasFavoriteContact", contactHolder)) {
+      faviconIcon.toggleClass("fa-star-o fa-star");
+    };
+
+    faviconIcon.click(function(){
+      if (faviconIcon.hasClass("fa-star-o")) {
+        veda.user.aspect.addValue("v-s:hasFavoriteContact", new veda.IndividualModel(contactHolder));
+      } else if (faviconIcon.hasClass("fa-star")) {
+        veda.user.aspect.removeValue("v-s:hasFavoriteContact", new veda.IndividualModel(contactHolder));
+      };
+      veda.user.aspect.save();
+      faviconIcon.toggleClass("fa-star-o fa-star");
     });
   };
-//# sourceURL=v-s:ContactsTemplate_pre
+  //# sourceURL=v-s:ContactCardTemplate_post
 </script>
-<div class="container sheet">
+"""
+.
+
+v-s:ContactsStructureTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон функции контакты"@ru ;
+  rdfs:label "Contacts function template"@en ;
+  v-ui:template """
+<script>
+  if (veda.user && veda.user.hasValue("v-s:parentOrganization")) {
+    var selfOrg = veda.user["v-s:parentOrganization"][0];
+    return selfOrg.present($("#selfOrg", template), "v-ui:LabelTemplate");  
+  } else {
+    $("#selfOrg", template).remove();
+  }
+//# sourceURL=v-s:ContactsStructureTemplate_pre
+</script>
+<div>
   <style>
-    table {
-      max-width: 250px;
-    }
-    td {
-      white-space: nowrap;
-    }
-    /*div.value-row {
-      margin-top: 5px;
-    }*/
     div.value-row > div.item {
       padding: 8px;
     }
     div.item:hover {
       background-color: #fcf8e3;
     }
-    div.item.warning {
+    div.warning {
       background-color: #faf2cc;
     }
     #searchText input {
@@ -109,155 +342,401 @@ v-s:ContactsTemplate
       padding-left: 8px;
       margin-left: 14px;
     }
+    #orgTree {
+      border-right: 1px solid #ccc;
+    }
+    .result-table thead {
+      background-color: #f5f5f5;
+    }
+
   </style>
-  <h2 about="@" property="rdfs:label"></h2>
-  <veda-control data-type="link" rel="v-s:managedOrganization" class="fulltext dropdown"></veda-control>
-  <br>
-  <div>
-    <div class="input-group">
+  <div class="row  margin-md">
+    <div class="col-md-5">
       <veda-control id="searchText" property="*" data-type="string"></veda-control>
-      <span class="input-group-btn">
-        <button id="searchButton" class="btn btn-primary" type="button" about="v-fs:Find" property="rdfs:label"></button>
+      <span class="text-muted padding-lg" about="v-fs:CtrlEnterBundle" property="rdfs:label"></span>
+    </div>
+    <div class="col-md-4">
+      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{individual['rdfs:label'].join(' ') + ', ' + individual['v-s:taxId'][0]}" class="fulltext" data-query-prefix="('rdf:type' === 'v-s:Organization')"></veda-control>
+      <span id="selfOrg" class="btn btn-xs btn-primary margin-sm"></span>
+      <span id="tenant" class="btn btn-xs btn-primary margin-sm" about="v-s:vedaInfo" rel="v-s:tenant" data-template="v-ui:LabelTemplate"></span>
+    </div>
+    <div class="col-md-1">
+      <div class="checkbox margin-sm">
+        <label id="deleted-checkbox">
+          <input type="checkbox"/>
+          <span about="v-s:deleted" property="rdfs:label"></span>
+        </label>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <button id="searchButton" class="btn btn-primary" type="button" about="v-fs:Find" property="rdfs:label"></button>
         <button id="resetButton" class="btn btn-warning" type="button" about="v-s:Reset" property="rdfs:label"></button>
-      </span>
     </div>
   </div>
+  <!-- <button class="btn btn-sm btn-default">Скрыть результаты</button> -->
+  <!-- <br> -->
+  <div class="not-found alert alert-warning hidden">
+    <strong about="v-fs:Empty" property="rdfs:label"></strong>
+    <span about="v-fs:NothingFound" property="rdfs:label"></span>
+  </div>
+  <table class="table result-table" id="resultOrg" style="display:none">
+    <thead>
+      <th width="7%"><span class="glyphicon glyphicon-chevron-down"></span></th>
+      <th width="60%">
+        <label about="v-s:OrganizationsBundle" property="rdfs:label"></label>
+        <small class="result-info-container margin-md-h" style="color:black; font-weight: normal">
+          <span about="v-fs:cursor" property="rdfs:label"></span>
+          <span class="badge"></span>&nbsp;&nbsp;
+          <span about="v-fs:estimated" property="rdfs:label"></span>
+          <span class="badge"></span>  
+        </small>
+      </th>
+      <th width="28%"></th>
+      <th></th>
+    </thead>
+    <tbody></tbody>
+    <tfoot class="result-info-container">
+      <tr>
+        <td><button class="btn btn-primary more-results" data-search-type="org" about="v-fs:MoreResults" property="rdfs:label"></button></td>
+        <td>
+          <small style="color:black;">
+            <span about="v-fs:cursor" property="rdfs:label"></span>
+            <span class="badge"></span>&nbsp;&nbsp;
+            <span about="v-fs:estimated" property="rdfs:label"></span>
+            <span class="badge"></span>  
+          </small>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  
+  <table class="table result-table" id="resultDep" style="display:none">
+    <thead>
+      <th width="7%"><span class="glyphicon glyphicon-chevron-down"></span></th>
+      <th width="60%">
+        <label about="v-s:DepartmentsBundle" property="rdfs:label"></label>
+        <small class="result-info-container margin-md-h" style="color:black; font-weight: normal">
+          <span about="v-fs:cursor" property="rdfs:label"></span>
+          <span class="badge"></span>&nbsp;&nbsp;
+          <span about="v-fs:estimated" property="rdfs:label"></span>
+          <span class="badge"></span>  
+        </small>
+      </th>
+      <th width="28%"></th>
+      <th></th>
+    </thead>
+    <tbody></tbody>
+    <tfoot class="result-info-container">
+      <tr>
+        <td><button class="btn btn-primary more-results" data-search-type="dep" about="v-fs:MoreResults" property="rdfs:label"></button></td>
+        <td>
+          <small style="color:black">
+            <span about="v-fs:cursor" property="rdfs:label"></span>
+            <span class="badge"></span>&nbsp;&nbsp;
+            <span about="v-fs:estimated" property="rdfs:label"></span>
+            <span class="badge"></span>  
+          </small>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  <table class="table result-table" id="resultApp" style="display:none">
+    <thead>
+      <th width="7%"><span class="glyphicon glyphicon-chevron-down"></span></th>
+      <th width="60%">
+        <label about="v-s:AppointmentsBundle" property="rdfs:label"></label>
+        <small class="result-info-container margin-md-h" style="color:black; font-weight: normal">
+          <span about="v-fs:cursor" property="rdfs:label"></span>
+          <span class="badge"></span>&nbsp;&nbsp;
+          <span about="v-fs:estimated" property="rdfs:label"></span>
+          <span class="badge"></span>  
+        </small>
+      </th>
+      <th width="28%"></th>
+      <th></th>
+    </thead>
+    <tbody></tbody>
+    <tfoot class="result-info-container">
+      <tr>
+        <td><button class="btn btn-primary more-results" data-search-type="app" about="v-fs:MoreResults" property="rdfs:label"></button></td>
+        <td>
+          <small style="color:black">
+            <span about="v-fs:cursor" property="rdfs:label"></span>
+            <span class="badge"></span>&nbsp;&nbsp;
+            <span about="v-fs:estimated" property="rdfs:label"></span>
+            <span class="badge"></span>  
+          </small>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  <table class="table result-table" id="resultPos" style="display:none">
+    <thead>
+      <th width="7%"><span class="glyphicon glyphicon-chevron-down"></span></th>
+      <th width="60%">
+        <label about="v-s:PositionsBundle" property="rdfs:label"></label>
+        <small class="result-info-container margin-md-h" style="color:black; font-weight: normal">
+          <span about="v-fs:cursor" property="rdfs:label"></span>
+          <span class="badge"></span>&nbsp;&nbsp;
+          <span about="v-fs:estimated" property="rdfs:label"></span>
+          <span class="badge"></span>  
+        </small>
+      </th>
+      <th width="28%"></th>
+      <th></th>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td><button class="btn btn-primary more-results" data-search-type="pos" about="v-fs:MoreResults" property="rdfs:label"></button></td>
+        <td>
+          <small style="color:black">
+            <span about="v-fs:cursor" property="rdfs:label"></span>
+            <span class="badge"></span>&nbsp;&nbsp;
+            <span about="v-fs:estimated" property="rdfs:label"></span>
+            <span class="badge"></span>  
+          </small>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
   <br>
-  <div class="orgTree"></div>
+  <div class="row">
+    <div class="col-md-4" id="orgTree"></div>
+    <div class="col-md-8" id="orgContent">
+      <div id="parentContainer" class="warning padding-md">
+        <div about="@" property="rdfs:label"></div>
+        <div about="@" rel="v-s:hasCommunicationMean">
+          <div>
+            <strong about="@" rel="v-s:hasCommunicationMeanChannel" data-template="v-ui:LabelTemplate"></strong>
+            <span about="@" property="v-s:description"></span>  
+          </div>
+        </div>
+      </div>
+      <table class="table table-hover">
+        <thead>
+          <th width="10%"></th>
+          <th width="45%"><span about="rdfs:label" property="rdfs:label"></span></th>
+          <th width="45%"><span about="v-s:ContactsBundle" property="rdfs:label"></span></th>
+          <th></th>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td>
+              <button id="showMoreCards" class="btn btn-primary" about="v-fs:MoreResults" property="rdfs:label"></button>
+              <small class="margin-md-h" style="color:black">
+                <span about="v-fs:cursor" property="rdfs:label"></span>
+                <span class="badge"></span>&nbsp;&nbsp;
+                <span about="v-fs:estimated" property="rdfs:label"></span>
+                <span class="badge"></span>  
+              </small>
+            </td>
+            <td></td><td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
 </div>
 <script>
-  var orgTree = $(".orgTree", template);
-  var controlBlock = '<div class="controlButtons" style="float:right"><div class="btn create btn-xs btn-primary"><i class="glyphicon glyphicon-plus"></i></div><div class="btn edit btn-xs btn-default"><i class="glyphicon glyphicon-pencil"></i></div><div class="btn remove btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i></div></div>';
-  var zoomIn = '<a href="#" class="zoomIn glyphicon glyphicon-zoom-in margin-sm-h"></a>';
-  var controlButtons = "";
-  var appointmentButtons = "";
-  var departmentButtons = "";
-
-  function generateDepartmentControls() {
-    var buttons = [];
-    var controls = $('<div class="controlButtons" style="float:right"></div>');
-    var addDepartmentControl = '<button id="add-Department" class="btn btn-xs margin-sm-h btn-primary">Добавить отдел</button>';
-    var addAppointmentControl = '<button id="add-Appointment" class="btn btn-xs margin-sm-h btn-info">Назначить сотрудника</button>';
-    if (veda.appointment.id !== 'cfg:AdministratorAppointment') {
-      if ( !veda.appointment['v-s:parentOrganization'] ) {
-        return Promise.resolve(controls);
-      }
-      var parentOrg = veda.appointment['v-s:parentOrganization'][0];
-      var allowedOrganizations = [parentOrg];
-      return parentOrg.getPropertyChain("v-s:hasContractorProfileSafety", "mnd-s:subContractor").then(function (subContractors) {
-        return allowedOrganizations.concat(subContractors);
-      }).then(function (allowedOrganizations) {
-        var isAllowedOrg = allowedOrganizations.some(function(org) {
-          return org.id === individual['v-s:managedOrganization'][0].id;
-        });
-        if ( isAllowedOrg ) {
-          var department =  new veda.IndividualModel("v-s:Department");
-          var appointment =  new veda.IndividualModel("v-s:Appointment");
-          var position =  new veda.IndividualModel("v-s:Position");
-          var person =  new veda.IndividualModel("v-s:Person");
-
-          return Promise.all([department.canCreate(), appointment.canCreate(), position.canCreate(), person.canCreate()]).then(function (rights) {
-            var canCreateDepartment = rights[0];
-            var canCreateAppointment = rights[1];
-            var canCreatePosition = rights[2];
-            var canCreatePerson = rights[3];
-            if (canCreateDepartment) {
-              controls.append(addDepartmentControl);
-            }
-            if (canCreateAppointment && canCreatePosition && canCreatePerson) {
-              controls.append(addAppointmentControl);
-            }
-            return controls;
-          });
-        }
-      });
-    } else {
-      controls.append(addDepartmentControl);
-      controls.append(addAppointmentControl);
-    }
-    return Promise.resolve(controls);
+  var loadIndicator = $("#load-indicator");
+  var findDeleted = false;
+  var searchOrgMode = "allOrg";
+  var isContactManager = false;
+  var userDisplayedElements;
+  if (veda.user.preferences.hasValue("v-ui:displayedElements")) {
+    userDisplayedElements = veda.user.preferences["v-ui:displayedElements"][0];
+  } else {
+    userDisplayedElements = 10;
   }
-
-  /*function generateAppointmentControls(targetAppointment){
-    var controls = $('<div class="controlButtons" style="float:right"></div>');
-    var delAppointmentControl = '<button id="delete-Appointment" class="btn btn-xs margin-sm-h btn-danger">Удалить назначение</button>';
-    if (veda.appointment.id !== 'cfg:AdministratorAppointment') {
-      if (!veda.appointment['v-s:parentOrganization']) {
-        return Promise.resolve(controls);
-      }
-      if (veda.appointment['v-s:parentOrganization'][0].id == individual['v-s:managedOrganization'][0].id) {
-        var appointment =  new veda.IndividualModel(targetAppointment);
-        appointment.canDelete().then(function (canDeleteAppointment) {
-          if (canDeleteAppointment) {
-            controls.append(delAppointmentControl);
-          }
-          return controls;
-        });
-      }
+  new veda.IndividualModel("v-s:vedaInfo").load().then(function(vedaInfo) {
+    if (vedaInfo.hasValue("v-s:tenant")) {
+      $("#tenant", template).click(function(){
+        individual["v-s:managedOrganization"] = vedaInfo["v-s:tenant"];
+      });    
     } else {
-      controls.append(delAppointmentControl);
-    }
-    return Promise.resolve(controls);
-  }*/
+      $("#tenant", template).remove();
+    };
+  });
 
-  function initialStructure() {
-    orgTree.empty();
-    if ( individual.hasValue('v-s:managedOrganization') ) {
-      generateDepartmentControls().then(function (generatedButtons) {
-        departmentButtons = generatedButtons;
-        var org = individual['v-s:managedOrganization'][0];
-        getTemplate(org).then(function (tmpl) {
-          return org.present(orgTree, tmpl);
-        }).then(function (rendered) {
-          $('.value-row a.expand.glyphicon-chevron-right', template).click();
-        });
-      });
-    }
-  }
+  veda.user.isMemberOf("cfg:ContactManagerGroup").then(function(isMember) {
+    isContactManager = isMember;
+  });
+  
+  $("#selfOrg", template).click(function(){
+    individual["v-s:managedOrganization"] = veda.user["v-s:parentOrganization"];
+  });
 
-  function drawChildren(parentUri, rootElement, filteredItems) {
-    if (filteredItems) {
-      orgTree.empty();
-      rootElement.append('<div class="children"></div>');
-      childrenContainer = rootElement.children('.children');
-      filteredItems.forEach(function (item) {
-        getTemplate(item).then(function (tmpl) {
-          item.present(childrenContainer, tmpl);
+  $(".result-table thead", template).click(function(){
+    var self = $(this);
+    $("span.glyphicon", self).toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
+    self.siblings().toggle();
+  });
+
+  template.on("click", ".img-thumbnail", function(e){
+    e.preventDefault();
+    var uri = $(this).attr("resource");
+    var modal = veda.Util.showSmallModal(new veda.IndividualModel(uri), "v-ui:ImageTemplate");
+    modal.find(".modal-dialog").removeClass("modal-lg").addClass("modal-sm");
+  });
+
+  $("#deleted-checkbox", template).click(function(){
+    var checkbox = $("#deleted-checkbox input", template);
+    findDeleted = checkbox.is(':checked');
+  });
+
+  var orgTree = $("#orgTree", template);
+  var orgContent = $("#orgContent", template);
+
+  var parentContainerTmpl = 
+    '<div class="row">'+
+      '<div class="col-md-7">'+
+        '<strong about="@" property="rdfs:label"></strong>'+
+        '<small class="margin-md-h" style="color:black">'+
+          '<span about="v-fs:cursor" property="rdfs:label"></span>'+
+          '<span class="margin-sm-h badge"></span>&nbsp;&nbsp;'+
+          '<span about="v-fs:estimated" property="rdfs:label"></span>'+
+          '<span class="margin-sm-h badge"></span>'+
+        '</small>'+
+      '</div>'+
+      '<div class="col-md-5" about="@" rel="v-s:hasCommunicationMean">'+
+        '<div>'+
+          '<strong about="@" rel="v-s:hasCommunicationMeanChannel" data-template="v-ui:LabelTemplate"></strong>'+
+          '<span about="@" property="v-s:description"></span>  '+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  
+  function drawCards(parent, from) {
+    loadIndicator.show();
+    var isNeedBtnMore = false;
+    var limit = userDisplayedElements;
+    if (from == undefined) {
+      $("tbody", orgContent).empty();
+      orgContent.show();
+      from = 0;
+    }
+    $("#parentContainer", orgContent).empty();
+
+    //parent already has list of all children
+    return parent.present($("#parentContainer", orgContent), parentContainerTmpl).then(function(loaded) {
+      return getChildren(parent);
+    }).then(function(childrenUris){
+      var endIndex = childrenUris.length > from + limit ? from + limit : childrenUris.length;
+      var promises = [];
+      for (var i = from; i < endIndex; i++) {
+        var uri = childrenUris[i];
+        promises.push(new veda.IndividualModel(uri).present($("<div></div>"), "v-s:ContactCardTemplate"));
+      };
+      if (endIndex != childrenUris.length) {
+        isNeedBtnMore = true;
+      };
+      $("span.badge:nth-child(4)", orgContent).text(childrenUris.length);
+      $("span.badge:nth-child(2)", orgContent).text(endIndex);
+      if (promises.length == 0) {
+        var emptyIndivid = new veda.IndividualModel("v-fs:Empty");
+        promises.push(emptyIndivid.present($("<div></div>"), "v-s:ContactCardTemplate"));
+      };
+      return Promise.all(promises);
+    }).then(function(templates) {
+      for (var i = 0; i < templates.length; i++){
+        $(".hideInStructure", templates[i]).remove();
+        $("tbody", orgContent).append(templates[i]);
+        if (isContactManager) $(".zoom.hidden", templates[i]).removeClass("hidden");
+      }
+      if (isNeedBtnMore) {
+        $("tfoot", orgContent).show();
+        $("tfoot #showMoreCards", orgContent).off("click");
+        $("tfoot #showMoreCards", orgContent).click(function(){
+          drawCards(parent, from+limit);
         });
-      });
-    } else {
-      var childrenContainer = rootElement.children('.children');
-      if (childrenContainer.length) {
-        childrenContainer.show();
       } else {
-        rootElement.append('<div class="children"></div>');
-        childrenContainer = rootElement.children('.children');
-        getChildren(new veda.IndividualModel(parentUri), true).then(function (childrenUris) {
-          childrenUris.forEach(function(childUri) {
-            var child = new veda.IndividualModel(childUri);
-            getTemplate(child).then(function (tmpl) {
-              child.present(childrenContainer, tmpl);
-            });
-          });
-        });
+        $("tfoot", orgContent).hide();
       }
+      loadIndicator.hide();
+      return orgContent;
+    });
+  }
+
+  function initialStructure(org) {
+    orgTree.empty();
+    orgContent.hide();
+    if (org == undefined) {
+      org = individual.hasValue('v-s:managedOrganization')? individual['v-s:managedOrganization'][0] : null;
+    }
+    if ( org ) {
+      return getRowTemplate(org).then(function (tmpl) {
+        return org.present(orgTree, tmpl);
+      }).then(function (rendered) {
+        var row = $("#orgTree div.value-row", template);
+        return openRow(row).then(function() {
+          //drawCards(org);
+          return rendered;
+        })
+      });
+    } else {
+      return Promise.resolve(false);
     }
   }
 
-  function getChildren(parent, refresh) {
-    if (parent.children && !refresh) {
-      return Promise.resolve(parent.children);
+  function getRowTemplate(value) {
+    return value.load().then(function (value) {
+      var rowTmpl = "<div class='value-row'>" +
+                      "<div class='item'>" +
+                        "<a href='#' class='expand glyphicon glyphicon-chevron-right'></a>" +
+                        "<span style='margin:0 5px;' class='fa fa-lg {icon}'></span>" +
+                        "<span about='@' data-template='v-ui:LabelTemplate'></span>" +
+                      "</div>" +
+                    "</div>";
+      var icon = "";
+      if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
+        return null;
+      };
+      if ( value.hasValue('rdf:type', 'v-s:Organization') ) {
+        icon = 'fa-sitemap';
+      }
+      if ( value.hasValue('rdf:type', 'v-s:Department' ) || value.hasValue('rdf:type', 'v-s:OrgGroup') ) {
+        icon = 'fa-folder-o';
+      }
+      return rowTmpl.replace("{icon}", icon);
+      // else {
+      //   return getChildren(value, false).then(function (children) {
+      //     if ( value.treeChildrens > 0 ) {
+      //       expand = "<a href='#' class='expand glyphicon glyphicon-chevron-right'></a>";
+      //     }
+      //   });
+      // }
+      // return rowTmpl.replace("{icon}", icon).replace("{expand}", expand);
+    });
+  }
+
+  function getChildren(parent, refresh, mode) {
+    if (parent.allChildren && !refresh) {
+      return Promise.resolve(parent.allChildren);
     }
     var childrenUris = [];
     if (parent.hasValue('rdf:type','v-s:Appointment')) {
       return Promise.resolve([]);
     }
+    loadIndicator.show();
     var parentUri = parent.id;
-    var parentOrgUri = individual["v-s:managedOrganization"][0].id;
     var queryPattern = "'v-s:parentUnit'=='" + parentUri + "' && ";
 
     var queryDepartments = queryPattern + "'rdf:type'=='v-s:Department'";
     var queryAppointment = queryPattern + "'rdf:type'=='v-s:Appointment' && 'v-s:official'=='true'";
+    if (mode == "notAppointment") {
+      queryAppointment = null;
+    };
     var queryStringArray = [];
     if (parent.hasValue('rdf:type', 'v-s:Department')) {
       queryStringArray = [queryDepartments, queryAppointment];
@@ -270,61 +749,378 @@ v-s:ContactsTemplate
       queryStringArray = [queryOrganization, querySubsidiary, queryDepartments, queryOrgGroup, queryAppointment];
     }
 
-    var sort = "'rdfs:label' desc";
+    var sort = "'rdfs:label_ru' asc";
     var queries = queryStringArray.map(function (queryString) {
+      if (queryString == null) return Promise.resolve({result:[]});
       return veda.Backend.query({ticket: veda.ticket, query: queryString, sort: sort});
     });
     return Promise.all(queries).then(function (queryResults) {
-      queryResults.forEach(function (queryResult) {
+      parent.treeChildrens = 0;
+      queryResults.forEach(function (queryResult, i) {
+        if (i+1 != queryResults.length) parent.treeChildrens+=queryResult.count;
         childrenUris = childrenUris.concat(queryResult.result);
       });
       childrenUris = veda.Util.unique(childrenUris);
-      parent.children = childrenUris;
+      parent.allChildren = childrenUris;
+      loadIndicator.hide();
       return childrenUris;
     });
   }
 
+  function drawChildren(parentUri, rootElement) {
+    var childrenContainer = rootElement.children(".children");
+    if (childrenContainer.length) {
+      childrenContainer.removeClass("hidden");
+      return Promise.resolve(childrenContainer.length);
+    } else {
+      rootElement.append("<div class='children'></div>");
+      loadIndicator.show();
+      return getChildren(new veda.IndividualModel(parentUri), true).then(function (childrenUris) {
+        var promises = childrenUris.map(function(childUri) {
+          var child = new veda.IndividualModel(childUri);
+          return getRowTemplate(child).then(function (tmpl) {
+            if (tmpl == null) {
+              return Promise.resolve();
+            }
+            return child.present(rootElement.children(".children"), tmpl);
+          });
+        })
+        return Promise.all(promises);
+      }).then(function(result) {
+        loadIndicator.hide();
+        return result.length;
+      });
+    };
+  }
 
-  function getTemplate(value) {
-    return value.load().then(function (value) {
-      var rowTmpl = "<div class='value-row'>" +
-                      "<div class='item'>" +
-                        "{expand}" +
-                        "<span style='margin:0 5px;' class='fa fa-lg {icon}'></span>" +
-                        "<span about='@' data-template='v-ui:LabelTemplate'></span>" +
-                      "</div>" +
-                    "</div>";
-      var icon = "";
-      var expand = "";
-      if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
-        icon = "fa-user-o";
-        return rowTmpl.replace("{icon}", icon).replace("{expand}", expand);
+  function openFromStructure(targetUri) {
+    var targetToCards;
+    var isInRoot = false;
+    var targetIndivid = new veda.IndividualModel(targetUri);
+    return getParentUnitChain(targetIndivid).then(function(chain) {
+      var rootOrg;
+      if (chain.length == 0) {
+        //isInRoot = true;
+        rootOrg = targetIndivid;
       } else {
-        return getChildren(value).then(function (children) {
-          if ( children.length > 0 ) {
-            expand = "<a href='#' class='expand glyphicon glyphicon-chevron-right'></a>";
-          }
-          if ( value.hasValue('rdf:type', 'v-s:Organization') ) {
-            icon = 'fa-sitemap';
-          }
-          if ( value.hasValue('rdf:type', 'v-s:Department' ) || value.hasValue('rdf:type', 'v-s:OrgGroup') ) {
-            icon = 'fa-folder-o';
-          }
-          return rowTmpl.replace("{icon}", icon).replace("{expand}", expand);
-        });
+        rootOrg = chain.pop();
+        chain.unshift(targetIndivid);
       }
+      targetToCards = targetIndivid;
+      return initialStructure(rootOrg).then(function(tmpl) {
+        return chain.reduceRight(function(pr, cur) {
+          return pr.then(function(){
+            var row = $("div.value-row[resource='"+cur.id+"']", tmpl);
+            return openRow(row);
+          });
+        }, Promise.resolve());
+      });
+    }).then(function() {
+      var targetRow = $("div.value-row[resource='"+targetUri+"'] > .item", template);
+      targetRow.addClass("warning");
+      return isInRoot? true : drawCards(new veda.IndividualModel(targetUri));
+    }).then(function(){
+      var position = orgContent.offset().top;
+      if (position > 0) {
+        $("html, body").animate({
+          scrollTop: position
+        });
+      };
+      individual.targetToCards = targetUri;
     });
   }
 
-  template.on("click", "a.expand.glyphicon-chevron-right", function (e) {
+  function getParentUnitChain(target, acc) {
+    if (acc == undefined) acc = [];
+    return target.load().then(function(){
+      if (target.hasValue("v-s:parentUnit")) {
+        var parentUnit = target["v-s:parentUnit"][0];
+        acc.push(parentUnit);
+        return getParentUnitChain(parentUnit, acc);
+      } else {
+        return acc;
+      }; 
+    });
+  }
+  var searchTextBundle = new veda.IndividualModel("v-s:SearchTextBundle").load().then(function(bundle) {
+    $("#searchText input", template).attr("placeholder", bundle["rdfs:label"].map(veda.Util.formatValue).join(" "));  
+  });
+
+  $("#searchButton", template).click(function(){
+    var searchText = $("#searchText input", template).val();
+    if (!searchText) return;
+    searchText = searchText.trim();
+    setSearchHelperObjToDefault();
+    loadIndicator.show();
+    
+    var isPhoneSearch = false;
+    var isEmailSearch = false;
+
+    var queryString;
+    var resultOrg = $("#resultOrg", template).hide();
+    $("tbody", resultOrg).empty();
+    var resultDep = $("#resultDep", template).hide();
+    $("tbody", resultDep).empty();
+    var resultApp = $("#resultApp", template).hide();
+    $("tbody", resultApp).empty();
+    var resultPos = $("#resultPos", template).hide();
+    $("tbody", resultPos).empty();
+    
+    isPhoneSearch = searchText.match("^"+String.fromCharCode(92)+"+?["+String.fromCharCode(92)+"d-"+String.fromCharCode(92)+"s]*$") != null;
+    isEmailSearch = searchText.match("^.*@{1}") != null;
+
+    var searchPromise = [];
+    if (isPhoneSearch) {
+      var queryPart = "('v-s:description'=='+"+searchText+"*' || 'rdfs:comment'=='+"+searchText+"*')";
+      queryString = "'rdf:type'=='v-s:CommunicationMean' && 'v-s:hasCommunicationMeanChannel'=='d:o3q2gagyvfwh430io88vvb8vel' && "+queryPart;
+      searchPromise.push(searchAndLoad("phone", queryString, 0));
+    } else if (isEmailSearch) {
+      queryString = "'rdf:type'=='v-s:CommunicationMean' && 'v-s:hasCommunicationMeanChannel'=='d:a1iwni0b54fvcz41vuts08bxqsh' && 'v-s:description'=='+"+searchText+"*'";
+      searchPromise.push(searchAndLoad("email", queryString, 0));
+    } else {
+      //TODO modify searchText
+      searchText = searchText.split(" ").reduce(function(acc, part) {
+        return part == ""? acc : acc+" +"+part+"*";
+      }, "");
+      var queryTmpl = "'rdfs:label'=='"+searchText+"'";
+      if (findDeleted) {
+        queryTmpl+=" && 'v-s:deleted'=='true'";
+      }
+      if (searchOrgMode == "targetOrg") {
+        queryTmpl = queryTmpl + " && 'v-s:parentOrganization'=='"+individual['v-s:managedOrganization'][0].id+"'";
+      };
+      var orgQuery = "('rdf:type'==='v-s:Organization') && "+queryTmpl;
+      searchPromise.push(searchAndLoad("org", orgQuery, 0));
+      var depQuery = "('rdf:type'==='v-s:Department') && "+queryTmpl;
+      searchPromise.push(searchAndLoad("dep", depQuery, 0));
+      var appQuery = "('rdf:type'==='v-s:Appointment' && 'v-s:official'=='true') && "+queryTmpl;
+      searchPromise.push(searchAndLoad("app", appQuery, 0));
+      var posQuery = "('rdf:type'=='v-s:Position' && 'v-s:origin'=='noname') && "+queryTmpl;
+      searchPromise.push(searchAndLoad("pos", posQuery, 0));
+    }
+    orgTree.empty();
+    //$("tbody", orgContent).empty();
+    orgContent.hide();
+    return Promise.all(searchPromise).then(function (results) {
+      var finded = results.reduce(function(acc, cur) {
+        return acc + cur.length;
+      }, 0);
+      if (finded == 0) {
+        $(".not-found", template).removeClass("hidden");
+      } else {
+        $(".not-found", template).addClass("hidden");
+      }
+      var presentPromises = [];
+      var orgObj = [], depObj = [], appObj = [], posObj = [];
+      if (isPhoneSearch || isEmailSearch) {
+        results[0].map(function(item) {
+          var type = item["rdf:type"][0].id;
+          if (item.hasValue("rdf:type", "v-s:Organization")) {
+            orgObj.push(item);
+          } else if (item.hasValue("rdf:type", "v-s:Department")) {
+            depObj.push(item);
+          } else if (item.hasValue("rdf:type", "v-s:Appointment")) {
+            appObj.push(item);
+          } else if (item.hasValue("rdf:type", "v-s:Position")) {
+            posObj.push(item);
+          }
+        });
+        searchHelperObj["org"].estimated = searchHelperObj["org"].handlered = orgObj.length;
+        searchHelperObj["dep"].estimated = searchHelperObj["dep"].handlered = depObj.length;
+        searchHelperObj["app"].estimated = searchHelperObj["app"].handlered = appObj.length;
+        searchHelperObj["pos"].estimated = searchHelperObj["pos"].handlered = posObj.length;
+      } else {
+        orgObj = results[0];
+        depObj = results[1];
+        appObj = results[2];
+        posObj = results[3];
+      };
+      if (orgObj.length > 0) resultOrg.show();
+      if (depObj.length > 0) resultDep.show();
+      if (appObj.length > 0) resultApp.show();
+      if (posObj.length > 0) resultPos.show();
+      presentPromises.push(presentSearchResult("org", resultOrg, orgObj));
+      presentPromises.push(presentSearchResult("dep", resultDep, depObj));
+      presentPromises.push(presentSearchResult("app", resultApp, appObj));
+      presentPromises.push(presentSearchResult("pos", resultPos, posObj));
+      return Promise.all(presentPromises);
+    }).then(function(){
+      console.log("searchHelperObj: ", searchHelperObj);
+      loadIndicator.hide();
+      return true;
+    });
+  });
+
+  function presentSearchResult(objType, container, items) {
+    var promises = items.map(function(item) {
+      return item.present($("<div></div>"), "v-s:ContactCardTemplate");
+    });
+    return Promise.all(promises).then(function(templates){
+      templates.forEach(function(tmpl) {
+        if (isContactManager) $(".zoom.hidden", tmpl).removeClass("hidden");
+        $("tbody", container).append(tmpl);
+      });      
+      $("span.badge:nth-child(4)", container).text(searchHelperObj[objType].estimated);
+      $("span.badge:nth-child(2)", container).text(searchHelperObj[objType].handlered);
+      if ($("tbody tr", container).length < searchHelperObj[objType].estimated) {
+        $("tfoot", container).removeClass("hidden");
+      } else {
+        $("tfoot", container).addClass("hidden");
+      };
+    });
+  }
+
+  var searchHelperObj = {};
+
+  function setSearchHelperObjToDefault(){
+    searchHelperObj = {
+      org:{
+        handlered: 0
+      },
+      dep:{
+        handlered: 0
+      },
+      app:{
+        handlered: 0
+      },
+      phone:{
+        handlered: 0
+      },
+      email:{
+        handlered: 0
+      },
+      pos:{
+        handlered: 0
+      }
+    };
+  }
+
+  function searchAndLoad(objType, queryString, from){
+    var sort;
+    if (objType == "app") {
+      sort = "'rdfs:label_ru' asc";
+    } else {
+      sort = "'rdfs:label' asc";
+    }
+    var limit = userDisplayedElements;
+    if (!limit) limit = 10;
+    //TODO непонятный алгоритм действий с такими типами
+    if (objType == "phone" || objType == "email") limit = limit*3;
+    var searchObj = {
+      ticket: veda.ticket,
+      query: queryString,
+      sort: sort,
+      from: from,
+      limit: limit,
+      async: true
+    };
+    searchHelperObj[objType].query = queryString;
+    return veda.Backend.query(searchObj).then(function(searchResult) {
+      searchHelperObj[objType].estimated = searchResult.estimated;
+      searchHelperObj[objType].handlered = searchHelperObj[objType].handlered + searchResult.count;
+      var loadPromises = [];
+      loadPromises = searchResult.result.map(function(uri) {
+        return new veda.IndividualModel(uri).load();
+      });
+      if (objType == "phone" || objType == "email") {
+        return Promise.all(loadPromises).then(function(loaded){
+          var temp = loaded.reduce(function(acc,curItem) {
+            if (curItem.hasValue("v-s:parent")) {
+              var parentPromise = curItem["v-s:parent"][0].load().then(function(parent) {
+                if (parent.hasValue("rdf:type", "v-s:Person")) {
+                  if (!parent.hasValue("v-s:defaultAppointment")) {
+                    console.log("Unexpected behavior: empty defaultAppointment in ", parent.id);
+                    return parent;
+                  }
+                  return parent["v-s:defaultAppointment"][0].load();
+                } else {
+                  return parent;
+                }
+              })
+              acc.push(parentPromise);
+            }
+            return acc;
+          }, []);
+          return Promise.all(temp);
+        });
+      };
+      return Promise.all(loadPromises);
+    });
+  }
+
+  function openRow(row) {
+    var uri = row.attr('resource');
+    return drawChildren(uri, row).then(function(childrenCount) {
+      var chevron = row.children(".item").find("a");
+      if (childrenCount == 0) {
+        chevron.removeClass("glyphicon-chevron-right");
+      } else {
+        chevron.toggleClass("expanded glyphicon-chevron-right glyphicon-chevron-down");
+      }
+      return true;
+    });
+  }
+
+  function initPopover(target) {
+    var uri = target.closest("[resource]").attr("resource");
+    var tmpl = "<div><a tabindex='0' role='button' class='to-structure' about='@' property='rdfs:label'/></div>";
+    return getParentUnitChain(new veda.IndividualModel(uri)).then(function(chain) {
+      var presentPromises = chain.map(function(parent) {
+        return parent.present($("<div></div>"), tmpl);
+      });
+      if (presentPromises.length == 0) {
+        presentPromises.push(new veda.IndividualModel(uri).present($("<div></div>"), tmpl));
+      };
+      return Promise.all(presentPromises);
+    }).then(function(templates){
+      var cntr = templates.reduceRight(function(acc, curTmpl, i){
+        curTmpl.css("margin-left", 20*(templates.length-(i+1)));
+        return acc.append(curTmpl);
+      }, $("<div><span class='close'>&nbsp;&times;</span></div>"));
+      return cntr;
+    });
+  }
+
+  template.on("click", "span.open-structure", function(e) {
     e.stopPropagation();
     e.preventDefault();
     var self = $(this);
-    var row = self.closest('div.value-row');
-    var uri = row.attr('resource');
-    self.toggleClass("expanded glyphicon-chevron-right glyphicon-chevron-down");
-    drawChildren(uri, row);
-    return false;
+    if (self.data("popovered") == undefined) {
+      initPopover($(this)).then(function(content) {
+        self.popover({
+          trigger: "manual",
+          placement: "auto left",
+          html: true,
+          content: content
+        }).popover("show");
+        self.data("popovered", true);
+        content.on("click", ".close", function (e) {
+          e.stopPropagation();
+          self.popover("hide");
+          self.data("popovered", false);
+        });
+      });
+    } else if (self.data("popovered") == true) {
+      self.popover("hide");
+      self.data("popovered", false);
+    } else {
+      self.popover("show");
+      self.data("popovered", true);
+    };
+    //return openFromStructure(uri);
+  })
+
+  template.on("click", "a.to-structure", function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    var uri = $(this).attr("about");
+    return openFromStructure(uri);
+  })
+  template.on("click", "a.expand.glyphicon-chevron-right", function (e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var row = $(this).closest('div.value-row');
+    return openRow(row);
   });
 
   template.on("click", "a.expanded.glyphicon-chevron-down", function (e) {
@@ -332,29 +1128,8 @@ v-s:ContactsTemplate
     e.preventDefault();
     var self = $(this);
     self.toggleClass("expanded glyphicon-chevron-right glyphicon-chevron-down");
-    var row = self.closest('div.value-row');
-    row.children('div.children').hide();
-    return false;
-  });
-
-  template.on("click", "a.glyphicon-zoom-in", function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    var self = $(this);
-    var row = self.closest('div.value-row');
-    var uri = row.attr('resource');
-    var obj = new veda.IndividualModel(uri);
-    var tmpl;
-    if (obj.hasValue('rdf:type', 'v-s:Appointment')) {
-      obj = obj['v-s:employee'][0];
-      tmpl = undefined;
-    } else if (obj.hasValue('rdf:type', 'v-s:Department')) {
-      tmpl = 'v-s:DepartmentTemplate';
-    } else if (obj.hasValue('rdf:type', 'v-s:Organization')) {
-      tmpl = undefined;
-    }
-    riot.route( ["#", obj.id, "#main", tmpl].join("/") );
-    //veda.Util.showModal(obj, tmpl);
+    var row = self.closest("div.value-row");
+    row.children("div.children").addClass("hidden");
     return false;
   });
 
@@ -362,182 +1137,125 @@ v-s:ContactsTemplate
     e.stopPropagation();
     e.preventDefault();
     var self = $(this);
+
     var item = self.children('.item');
     if (!item.hasClass('warning')) {
       $('.item.warning', template).removeClass('warning');
-      $('.controlButtons', template).remove();
-      $('.zoomIn', template).remove();
       item.addClass('warning');
-      item.append(zoomIn);
-      if (self.attr('typeof') == 'v-s:Appointment') {
-        generateAppointmentControls(self.attr('resource')).then(function (appointmentButtons) {
-          item.append(appointmentButtons);
-        });
-      } else {
-        item.append(departmentButtons);
+    }
+    var uri = self.attr("resource");
+    return drawCards(new veda.IndividualModel(uri));
+  });
+
+  template.on("dblclick", "#orgContent tbody tr" , function(e) {
+    var uri = $(this).attr("resource");
+    if (uri == undefined) {
+      console.log("Unexpected behavior: empty attr[resource]");
+      return false;
+    }
+    return  new veda.IndividualModel(uri).load().then(function(loaded) {
+      if (!loaded.hasValue("rdf:type", "v-s:Department")) {
+        return false;
       }
-    }
-    return false;
+      return Promise.resolve().then(function(){
+        var rowInTree = $("#orgTree .children:not(.hidden)>div.value-row[resource='"+uri+"']", template);
+        if (rowInTree.length == 0) {
+          var parent = $("#orgTree div.item.warning", template).parent();
+          return openRow(parent).then(function(){
+            return $("div.value-row[resource='"+uri+"']", parent);
+          });
+        }
+        return rowInTree;
+      }).then(function(row) {
+        row.click();
+        return true;
+      })     
+    })
   });
 
-  template.on("click", "#add-Department", function (e) {
-    e.stopPropagation();
-    e.preventDefault();
+  template.on("click", "tfoot .more-results", function (e) {
     var self = $(this);
-    var row = self.closest('div.value-row');
-    var parentUri = row.attr('resource');
-
-    var NewDepartment = new veda.IndividualModel();
-    var _class = new veda.IndividualModel('v-s:Department');
-    var tmpl = 'v-s:DepartmentTemplate';
-    NewDepartment['rdf:type'] = [_class];
-    NewDepartment['v-s:parentUnit'] = [new veda.IndividualModel(parentUri)];
-    NewDepartment['v-s:parentOrganization'] = individual['v-s:managedOrganization'];
-    var modal = veda.Util.showModal(NewDepartment, tmpl, "edit");
-
-    NewDepartment.one("afterSave", saveHandler)
-    NewDepartment.one("afterReset", resetHandler);
-    template.one("remove", function () {
-      NewDepartment.off("afterSave", saveHandler);
-      NewDepartment.off("afterReset", resetHandler);
-    });
-    function saveHandler() {
-      modal.modal("hide").remove();
-      setTimeout(function () {
-        row.find('.children').remove();
-        drawChildren(parentUri, row);
-      }, 2000);
-    }
-    function resetHandler() {
-      modal.modal("hide").remove();
-    }
-    return false;
-  });
-
-  template.on("click", "#add-Appointment", function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    var self = $(this);
-    var row = self.closest('div.value-row');
-    var parentUri = row.attr('resource');
-
-    var NewAppointment = new veda.IndividualModel();
-    var _class = new veda.IndividualModel('v-s:Appointment');
-    var tmpl = new veda.IndividualModel('v-s:NewAppointmentTemplate');
-    NewAppointment['rdf:type'] = [_class];
-    NewAppointment['v-s:parentUnit'] = [new veda.IndividualModel(parentUri)];
-    NewAppointment['v-s:parentOrganization'] = individual['v-s:managedOrganization'];
-
-    var modal = veda.Util.showModal(NewAppointment, tmpl, "edit");
-    NewAppointment.one("afterSave", saveHandler);
-    NewAppointment.one("afterReset", resetHandler);
-    template.one("remove", function () {
-      NewAppointment.off("afterSave", saveHandler);
-      NewAppointment.off("afterReset", resetHandler);
-    });
-    function saveHandler() {
-      modal.modal("hide").remove();
-      setTimeout(function () {
-        row.find('.children').remove();
-        drawChildren(parentUri, row);
-      }, 2000);
-    }
-    function resetHandler() {
-      modal.modal("hide").remove();
-    }
-    return false;
-  });
-
-  /*template.on("click", "#delete-Appointment", function (e) {
-    e.stopPropagation();
-    e.preventDefault();
-    var self = $(this);
-    var currentRow = self.closest('div.value-row');
-    var parentRow = currentRow.parent().closest("[resource]");
-    var warning = new veda.IndividualModel("v-s:AreYouSure")["rdfs:label"].map(veda.Util.formatValue).join(" ");
-    if ( !confirm(warning) ) { return; }
-    currentRow.closest("[resource]").trigger('delete');
-    setTimeout(function () {
-      parentRow.find('.children').remove();
-      drawChildren(parentRow.attr('resource'), parentRow);
-    }, 2000);
-    return false;
-  });*/
-
-  initialStructure();
-  individual.on('v-s:managedOrganization', initialStructure);
-  template.one('remove', function(){
-    individual.off('v-s:managedOrganization', initialStructure);
-  });
-
-  $('#searchButton', template).click(function(){
-    var searchText = $('#searchText input', template).val();
-    if (!searchText) return;
-    var sort = "'rdfs:label' desc";
-    var q = "('rdf:type'==='v-s:OrgGroup' || 'rdf:type'==='v-s:Department' || 'rdf:type'==='v-s:Organization' || ('rdf:type'==='v-s:Appointment' && 'v-s:official'=='true')) && 'v-s:parentOrganization'=='"+ individual['v-s:managedOrganization'][0].id +"' && 'rdfs:label'=='"+ searchText +"*'";
-    veda.Backend.query({
-      ticket: veda.ticket,
-      query: q,
-      sort: sort,
-      async: true
-    }).then(function (queryResult) {
-      var unique = veda.Util.unique( queryResult.result );
-      var items = [];
-      unique.forEach(function (item) {
-        var temp = new veda.IndividualModel(item);
-        items.push(new veda.IndividualModel(item));
-      });
-      drawChildren(undefined, orgTree, items);
-      return items;
+    var type = self.data("search-type");
+    var query = searchHelperObj[type].query;
+    var from = searchHelperObj[type].handlered;
+    return searchAndLoad(type, query, from).then(function(result) {
+      var container = self.closest("table");
+      return presentSearchResult(type, container, result);
     });
   });
 
-  $('#resetButton', template).click(function () {
-    $('#searchText input', template).val('');
-    initialStructure();
+  template.on("click", "a.glyphicon-zoom-in", function (e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var self = $(this);
+    var row = self.closest("tr");
+    var uri = row.attr("resource");
+    var obj = new veda.IndividualModel(uri);
+    var tmpl;
+    if (obj.hasValue("rdf:type", "v-s:Appointment")) {
+      obj = obj["v-s:employee"][0];
+      tmpl = undefined;
+    } else if (obj.hasValue("rdf:type", "v-s:Department")) {
+      tmpl = "v-s:DepartmentTemplate";
+    } else if (obj.hasValue("rdf:type", "v-s:Organization")) {
+      tmpl = undefined;
+    }
+    //riot.route( ["#", obj.id, "#main", tmpl].join("/") );
+    veda.Util.showModal(obj, tmpl);
+    return false;
   });
-  //# sourceURL=v-s:ContactsTemplate_post
+
+  // Ctrl + Enter triggers search
+  function ctrlEnterHandler (e) {
+    if (e.ctrlKey && e.keyCode === 13) {
+      $("#searchButton", template).click();
+    }
+  }
+  $(window).on("keyup", ctrlEnterHandler);
+  template.one("remove", function () {
+    $(window).off("keyup", ctrlEnterHandler);
+  });
+
+  function dropResultTables() {
+    var resultOrg = $("#resultOrg", template).hide();
+    $("tbody", resultOrg).empty();
+    var resultDep = $("#resultDep", template).hide();
+    $("tbody", resultDep).empty();
+    var resultApp = $("#resultApp", template).hide();
+    $("tbody", resultApp).empty();
+  }
+  
+  individual.on("v-s:managedOrganization", function(){
+    //$('#searchText input', template).val('');
+    searchOrgMode = individual.hasValue("v-s:managedOrganization")? "targetOrg" : "allOrg";
+    dropResultTables();
+    initialStructure().then(function(result) {
+      if (result == false) return;
+      return drawCards(individual["v-s:managedOrganization"][0]);
+    });
+  });
+
+  template.one("remove", function(){
+    individual.off("v-s:managedOrganization");
+  });
+
+  $("#resetButton", template).click(function () {
+    $("#searchText input", template).val("");
+    individual["v-s:managedOrganization"] = [];
+  });
+
+  if (individual.targetToCards) {
+    return openFromStructure(individual.targetToCards);
+  } else {
+    return initialStructure().then(function(result) {
+      if (result == false) return;
+      return drawCards(individual["v-s:managedOrganization"][0]);
+    });
+  }
+
+  //# sourceURL=v-s:ContactsStructureTemplate_post
 </script>
-  """
-.
-
-v-s:ContactsSearchBlankTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон бланка поиска контактов"@ru ;
-  rdfs:label "Contacts search blank template"@en ;
-  v-ui:template """
-<div>
-  <style>
-    .input-group input {
-      border-top-left-radius: 4px!important;
-      border-bottom-left-radius: 4px!important;
-    }
-  </style>
-  <div class="input-group">
-    <veda-control property="*" data-type="string"></veda-control>
-    <span class="input-group-btn">
-      <button class="btn btn-primary custom-find" type="button" about="v-fs:Find" property="rdfs:label"></button>
-    </span>
-  </div>
-  <br>
-</div>
-<script>
-  container.siblings("br").remove();
-  var find = container.siblings(".search-actions").find(".search-button").addClass("hidden");
-  var customFind = $(".custom-find", template);
-  customFind.click(function () {
-    find.click();
-  });
-  $("input", template).keydown(function (e) {
-    if (e.which === 13) {
-      var value = this.value;
-      individual.set("*", [value]);
-      find.click();
-    }
-  });
-//# sourceURL=v-s:ContactsSearchBlankTemplate_post
-</script>
-  """ ;
+"""
 .
 
 v-s:ContactsSearchResultTemplate
