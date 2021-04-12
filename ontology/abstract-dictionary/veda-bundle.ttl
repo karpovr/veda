@@ -410,3 +410,32 @@ v-s:ChangeSizeBundle
   rdfs:label "Change size"@en ;
 .
 
+v-s:AbsenceUntilBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Отстутствует до:"@ru ;
+  rdfs:label "Absence until:"@en ;
+.
+
+v-s:OrganizationsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Организации"@ru ;
+  rdfs:label "Organizations"@en ;
+.
+
+v-s:DepartmentsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Подразделения"@ru ;
+  rdfs:label "Departments"@en ;
+.
+
+v-s:AppointmentsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Назначения"@ru ;
+  rdfs:label "Appointments"@en ;
+.
+
+v-s:PositionsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Позиции"@ru ;
+  rdfs:label "Positions"@en ;
+.
