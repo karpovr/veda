@@ -1237,7 +1237,7 @@ v-ui:AppointmentPopoverTemplate
       return true;
     })
   };
-  //# sourceURL=v-ui:AppointmentPopoverTemplate
+  //# sourceURL=v-ui:AppointmentPopoverTemplate_pre
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1296,9 +1296,10 @@ v-ui:PersonPopoverTemplate
   if (!individual.hasValue("v-s:hasImage")) {
     $(".media-left", template).remove();
   }
-  if (!employee.hasValue("v-s:dateAbsenceTo")) {
+  if (!individual.hasValue("v-s:dateAbsenceTo")) {
     $(".absence-block", template).remove();
   };
+  //# sourceURL=v-ui:PersonPopoverTemplate_pre
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
