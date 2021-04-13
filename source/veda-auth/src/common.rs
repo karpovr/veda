@@ -123,14 +123,18 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
                         info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;
+                    } else {
+                        warn!("trusted authenticate: account {} not pass, login {}", account_id, login);
                     }
                 }
+            } else {
+                error!("failed trusted authentication: not found users for login {}", login);
             }
         } else {
             error!("failed trusted authentication: user {} must be a member of group {}", tr_ticket.user_uri, ALLOW_TRUSTED_GROUP);
         }
     } else {
-        warn!("trusted authenticate: problem ticket {}", tr_ticket_id);
+        error!("trusted authenticate: problem ticket {}", tr_ticket_id);
     }
 
     tr_ticket.result = ResultCode::AuthenticationFailed;
