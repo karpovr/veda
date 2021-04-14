@@ -14,8 +14,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter};
-use std::time::Instant;
-use std::{fs, process};
+use std::time::{Instant, Duration};
+use std::{fs, process, thread};
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::v_api::IndvOp;
@@ -544,7 +544,16 @@ fn main() -> Result<(), Error> {
 
     let mut pool = Pool::new(Module::get_property("query_indexer_db").unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
 
-    block_on(init_clickhouse(&mut pool))?;
+    println!("connecting to clickhouse...");
+    loop {
+        match block_on(init_clickhouse(&mut pool)) {
+            Ok(()) => break,
+            Err(err) => {
+                println!("failed to connect to clickhouse, err = {:?}", err);
+                thread::sleep(Duration::from_secs(10));
+            }
+        }
+    }
 
     let db_type_tables = block_on(read_type_tables(&mut pool))?;
 
