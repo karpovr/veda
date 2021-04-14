@@ -33,6 +33,7 @@ type CommittedTypesOps = HashMap<String, HashSet<i64>>;
 const BATCH_SIZE: u32 = 3_000_000;
 const BLOCK_LIMIT: usize = 20_000;
 const BATCH_LOG_FILE_NAME: &str = "data/batch-log-index-tt";
+const DEFAULT_CONNECTION_URL: &str = "tcp://default:123@127.0.0.1:9000/?connection_timeout=10s";
 
 pub struct Stats {
     total_prepare_duration: usize,
@@ -542,7 +543,8 @@ fn main() -> Result<(), Error> {
         process::exit(101);
     }
 
-    let mut pool = Pool::new(Module::get_property("query_indexer_db").unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
+    let url = &Module::get_property("query_indexer_db").unwrap_or(String::from(DEFAULT_CONNECTION_URL));
+    let mut pool = Pool::new(url.to_string());
 
     println!("connecting to clickhouse...");
     loop {
