@@ -575,7 +575,7 @@ fn main() -> Result<(), Error> {
 
     let module_info = ModuleInfo::new("./data", "search_index_pt", true);
     if module_info.is_err() {
-        error!("failed to start, err = {:?}", module_info.err());
+        println!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
     }
 
