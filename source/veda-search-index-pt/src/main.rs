@@ -13,7 +13,8 @@ use chrono::prelude::*;
 use chrono_tz::Tz;
 use clickhouse_rs::{errors::Error, Block, ClientHandle, Pool};
 use futures::executor::block_on;
-use std::time::Instant;
+use std::time::{Instant, Duration};
+use std::thread;
 
 use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
@@ -39,6 +40,7 @@ const BLOCK_LIMIT: usize = 20_000;
 const EXPORTED_TYPE: [&str; 1] = ["v-s:Exportable"];
 const DB: &str = "veda_pt";
 const BATCH_LOG_FILE_NAME: &str = "data/batch-log-index-pt";
+const DEFAULT_CONNECTION_URL: &str = "tcp://default:123@127.0.0.1:9000/?connection_timeout=10s";
 
 pub struct Stats {
     total_prepare_duration: usize,
@@ -577,9 +579,19 @@ fn main() -> Result<(), Error> {
         process::exit(101);
     }
 
-    let mut pool = Pool::new(Module::get_property("query_indexer_db").unwrap_or(String::from("tcp://default:123@127.0.0.1:9000/?connection_timeout=10s")));
+    let url = &Module::get_property("query_indexer_db").unwrap_or(String::from(DEFAULT_CONNECTION_URL));
+    let mut pool = Pool::new(url.to_string());
 
-    block_on(init_clickhouse(&mut pool))?;
+    println!("connecting to clickhouse...");
+    loop {
+        match block_on(init_clickhouse(&mut pool)) {
+            Ok(()) => break,
+            Err(err) => {
+                println!("failed to connect to clickhouse, err = {:?}", err);
+                thread::sleep(Duration::from_secs(10));
+            }
+        }
+    }
 
     let db_predicate_tables = block_on(read_predicate_tables(&mut pool))?;
 

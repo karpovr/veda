@@ -32,6 +32,7 @@ type CommittedTypesOps = HashMap<String, HashSet<i64>>;
 
 const BATCH_SIZE: u32 = 3_000_000;
 const BLOCK_LIMIT: usize = 20_000;
+const DB: &str = "veda_tt";
 const BATCH_LOG_FILE_NAME: &str = "data/batch-log-index-tt";
 const DEFAULT_CONNECTION_URL: &str = "tcp://default:123@127.0.0.1:9000/?connection_timeout=10s";
 
@@ -238,7 +239,7 @@ impl TTIndexer {
             return Ok(());
         }
 
-        let table = format!("veda_tt.`{}`", type_name);
+        let table = format!("{}.`{}`", DB, type_name);
 
         client.insert(table, block).await?;
 
@@ -596,7 +597,7 @@ async fn create_type_predicate_column(
         if table_columns.get(column_name).is_some() {
             return Ok(());
         } else {
-            let query = format!("ALTER TABLE veda_tt.`{}` ADD COLUMN IF NOT EXISTS `{}` {}", type_name, column_name, column_type);
+            let query = format!("ALTER TABLE {}.`{}` ADD COLUMN IF NOT EXISTS `{}` {}", DB, type_name, column_name, column_type);
             client.execute(query).await?;
             table_columns.insert(column_name.to_string(), column_type.to_string());
         }
@@ -610,7 +611,7 @@ async fn create_type_table(type_name: &str, client: &mut ClientHandle, db_type_t
     }
     let query = format!(
         r"
-        CREATE TABLE IF NOT EXISTS veda_tt.`{}` (
+        CREATE TABLE IF NOT EXISTS {}.`{}` (
             id String,
             sign Int8 DEFAULT 1,
             version UInt32,
@@ -622,7 +623,7 @@ async fn create_type_table(type_name: &str, client: &mut ClientHandle, db_type_t
         ORDER BY (`v_s_created_date`[1], id)
         PARTITION BY (toYear(`v_s_created_date`[1]))
     ",
-        type_name
+        DB, type_name
     );
     client.execute(query).await?;
     let mut table_columns: HashMap<String, String> = HashMap::new();
@@ -637,13 +638,13 @@ async fn create_type_table(type_name: &str, client: &mut ClientHandle, db_type_t
 }
 
 async fn read_type_tables(pool: &mut Pool) -> Result<HashMap<String, HashMap<String, String>>, Error> {
-    let read_tables_query = "SELECT name from system.tables where database = 'veda_tt'";
+    let read_tables_query = format!("SELECT name from system.tables where database = '{}'", DB);
     let mut tables: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut client = pool.get_handle().await?;
     let tables_block = client.query(read_tables_query).fetch_all().await?;
     for row_table in tables_block.rows() {
         let table_name: String = row_table.get("name")?;
-        let read_columns = format!("DESCRIBE veda_tt.`{}`", table_name);
+        let read_columns = format!("DESCRIBE {}.`{}`", DB, table_name);
         let mut table_columns: HashMap<String, String> = HashMap::new();
         let columns_block = client.query(read_columns).fetch_all().await?;
         for row_column in columns_block.rows() {
@@ -657,7 +658,7 @@ async fn read_type_tables(pool: &mut Pool) -> Result<HashMap<String, HashMap<Str
 }
 
 async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
-    let init_veda_db = "CREATE DATABASE IF NOT EXISTS veda_tt";
+    let init_veda_db = format!("CREATE DATABASE IF NOT EXISTS {}", DB);
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
     Ok(())
