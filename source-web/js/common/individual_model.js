@@ -384,7 +384,7 @@ proto.load = function () {
           .then(() => this.trigger('afterLoad'));
       }).catch((error) => {
         this.isLoading(false);
-        console.log('load individual error', this.id, error);
+        console.log('load individual error', this.id, error.stack);
         if (error.code === 422 || error.code === 404) {
           this.isNew(true);
           this.isSync(false);
