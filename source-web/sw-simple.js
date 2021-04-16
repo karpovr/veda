@@ -1,6 +1,6 @@
 // This is the "Simple offline" service worker
 
-const veda_version = 20210416182334;
+const veda_version = 20210416202615;
 
 const FILES = 'files';
 const STATIC = 'static';
