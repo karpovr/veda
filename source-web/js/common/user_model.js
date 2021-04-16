@@ -114,7 +114,7 @@ proto.initLanguage = function (preferences) {
   };
   const updatePreferences = () => {
     if ( this.id !== 'cfg:Guest' ) {
-      preferences.save();
+      return preferences.save();
     }
   };
   if ( !preferences.hasValue('v-ui:preferredLanguage') || !preferences.hasValue('v-ui:displayedElements')) {
@@ -122,11 +122,11 @@ proto.initLanguage = function (preferences) {
     const defaultLanguage = new IndividualModel('v-ui:RU');
     preferences['v-ui:preferredLanguage'] = [defaultLanguage];
     preferences['v-ui:displayedElements'] = [defaultDisplayedElements];
-    updatePreferences();
   }
   preferences.on('v-ui:preferredLanguage', setLanguage);
   preferences.on('v-ui:displayedElements', setDisplayedElements);
   preferences.on('v-ui:preferredLanguage v-ui:displayedElements', updatePreferences);
   setLanguage();
   setDisplayedElements();
+  return updatePreferences();
 };

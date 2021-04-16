@@ -29,10 +29,12 @@ const template = `
   </style>
   <div id="update-overlay">
     <div>
-      <h3>Ваш браузер устарел ($BROWSER).<br>
-      <small>Пожалуйста, обновите браузер или используйте альтернативный.</small></h3>
-      <h3>Your browser is out of date ($BROWSER).<br>
-      <small>Please, update your browser or use an alternative one.</small></h3>
+      <h3>Ваш браузер устарел ($BROWSER)<br>
+      <small>Пожалуйста, обновите браузер или используйте альтернативный *</small></h3>
+      <h3>Your browser is out of date ($BROWSER)<br>
+      <small>Please, update your browser or use an alternative one *</small></h3>
+      <hr>
+      * Edge 80+, Chrome 80+, Firefox 65+, Opera 65+, Safari 11+, Yandex 80+
     </div>
   </div>
 `;
