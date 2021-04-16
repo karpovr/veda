@@ -263,10 +263,11 @@ func main() {
 
   // Request handler
   requestHandler := func (ctx *fasthttp.RequestCtx) {
-    ctx.Response.Header.Set("server", "nginx/1.19.6")
+    ctx.Response.Header.Set("Server", "nginx/1.19.6")
     ctx.Response.Header.Set("X-XSS-Protection", "1; mode=block")
     ctx.Response.Header.Set("X-Content-Type-Options", "nosniff")
     ctx.Response.Header.Set("X-Frame-Options", "sameorigin")
+    ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate, private")
 
     routeParts := strings.Split(string(ctx.Path()[:]), "/")
     if len(routeParts) >= 2 && routeParts[1] == "files" {
@@ -276,72 +277,50 @@ func main() {
 
     switch string(ctx.Path()[:]) {
       case "/get_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getIndividual(ctx)
       case "/reset_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getIndividual(ctx)
       case "/get_individuals":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getIndividuals(ctx)
       case "/put_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         putIndividual(ctx)
       case "/put_individuals":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         putIndividuals(ctx)
       case "/remove_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         removeIndividual(ctx)
       case "/remove_from_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         removeFromIndividual(ctx)
       case "/set_in_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         setInIndividual(ctx)
       case "/add_to_individual":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         addToIndividual(ctx)
       case "/authenticate":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         authenticate(ctx)
       case "/get_rights":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getRights(ctx)
       case "/get_rights_origin":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getAclData(ctx, GetRightsOrigin)
       case "/get_membership":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getAclData(ctx, GetMembership)
       case "/get_ticket_trusted":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getTicketTrusted(ctx)
       case "/is_ticket_valid":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         isTicketValid(ctx)
       case "/query":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         query(ctx)
       case "/send_to_module":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         sendToModule(ctx)
       case "/get_operation_state":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         getOperationState(ctx)
       case "/ping":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         ctx.Response.Header.Set("Content-Type", "text/plain; charset=utf-8")
         ctx.Response.SetStatusCode(int(Ok))
         ctx.WriteString("pong")
       case "/tests":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         ctx.SendFile("public/tests.html")
       case "/ontology.json":
-        ctx.Response.Header.Set("Cache-Control", "max-age=43200, no-cache, must-revalidate, private")
         ctx.SendFile("public/ontology.json")
       case "/manifest":
-        ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
         ctx.SendFile("public/manifest")
       default:
         if len(routeParts) >= 2 && routeParts[1] == "apps" {
@@ -350,7 +329,6 @@ func main() {
             ctx.SendFile("public/index.html")
             return;
           } else {
-            ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
             ctx.SendFile("public/" + string(ctx.Path()[:]))
             return;
           }
