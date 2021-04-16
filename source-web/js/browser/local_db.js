@@ -59,6 +59,10 @@ proto.initDB = function () {
       reject(error);
     };
 
+    openReq.onblocked = function(event) {
+      alert("Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!");
+    };
+
     openReq.onupgradeneeded = (event) => {
       const db = event.target.result;
       if (db.objectStoreNames.contains(this.store_name)) {
