@@ -198,7 +198,6 @@ if (isJournaling) {
     }
     journal_record['v-s:actor'] = veda.Util.newUri(actor_uri);
     veda.Util.logToJournal(ticket, journal_uri, journal_record);
-    veda.Util.addToGroup(ticket, journal_uri, journal_record['@'], ['v-s:canRead']);
 
   } else {
     // CREATE DOCUMENT
@@ -209,7 +208,6 @@ if (isJournaling) {
       'v-s:actor': veda.Util.newUri(actor_uri),
     };
     put_individual(ticket, new_journal, _event_id);
-    veda.Util.addToGroup(ticket, document['@'], journal_uri, ['v-s:canRead']);
 
     var journal_record = veda.Util.newJournalRecord(new_journal['@']);
     if (document['v-s:actualVersion'] && document['v-s:actualVersion'][0].data == document['@']) {
@@ -218,7 +216,6 @@ if (isJournaling) {
     journal_record['rdf:type'] = veda.Util.newUri('v-s:DocumentCreated');
     journal_record['v-s:actor'] = veda.Util.newUri(actor_uri);
     veda.Util.logToJournal(ticket, journal_uri, journal_record);
-    veda.Util.addToGroup(ticket, journal_uri, journal_record['@'], ['v-s:canRead']);
   }
 }
   """ ;
