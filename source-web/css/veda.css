@@ -202,6 +202,10 @@ body {
   }
 }
 
+img {
+  image-orientation: none;
+}
+
 /* HORIZONTAL CARD */
 .horizontal-card {
   width: 330px;
