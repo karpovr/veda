@@ -8,13 +8,15 @@ import Sha256 from '../common/lib/sha256.js';
 
 import riot from '../common/lib/riot.js';
 
+import Mustache from 'mustache';
+
 const Util = veda.Util || {};
 
 export default veda.Util = Util;
 
 Util.Sha256 = Sha256;
 
-Util.riot = riot;
+Util.Mustache = Mustache;
 
 Util.addToGroup = function (ticket, group, resource, allow, deny) {
   const new_membership_uri = Util.genUri() + '-mbh';
