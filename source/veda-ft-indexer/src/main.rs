@@ -25,13 +25,15 @@ use xapian_rusty::*;
 const BASE_PATH: &str = "./data";
 const FAILED_LIST_FILE_NAME: &str = "ft-indexer-failed-ids-list.dat";
 const TIMEOUT_BETWEEN_COMMITS: u128 = 100;
+const MODULE_NAME: &str = "FT_INDEXER";
+const MODULE_ID: i64 = 4;
 
 fn main() -> Result<(), XError> {
-    init_log("FT_INDEXER");
+    init_log(MODULE_NAME);
     let mut batch_size = 0;
     loop {
         let mut backend = Backend::create(StorageMode::ReadOnly, false);
-        let mut module = Module::default();
+        let mut module = Module::create(Some(MODULE_ID), MODULE_NAME);
         if batch_size == 0 {
             batch_size = module.max_batch_size.unwrap_or_default();
         }
