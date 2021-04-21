@@ -13,7 +13,7 @@ chrono = "0.4"
 url = "2.2.0"
 
 v_queue = "0.1.7"
-v_authorization = "=0.1.0"
+v_authorization = "=0.1.1"
 
-v_az_lmdb = { package = "v-common-az-lmdb", version = "=0.1.1" }
-v_module = { package = "v-common-module", version = "0.1.32" }
+v_az_lmdb = { package = "v-common-az-lmdb", version = "=0.1.2" }
+v_module = { package = "v-common-module", version = "0.1.33" }
