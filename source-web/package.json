@@ -60,7 +60,7 @@
     "vis-network": "^8.5.2"
   },
   "scripts": {
-    "build": "npm run clean && npm run update-version && npm run build-browser-scripts && npm run build-server-scripts",
+    "build": "npm run clean && npm run build-browser-scripts && npm run update-version && npm run build-server-scripts",
     "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel . --out-dir ../public --source-maps --copy-files --ignore 'node_modules'",
     "update-version": "chmod +x ./update-version.sh && ./update-version.sh",
