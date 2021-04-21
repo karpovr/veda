@@ -327,8 +327,8 @@ var view = {
   "docUrl": "http://optiflow.mp.local:8080/#/"+doc['@']
 };
 //print("view=", veda.Util.toJson(view));
-var subject = Mustache.render(subjectTemplate, view).replace (/&#x2F;/g, '/');
-var message = Mustache.render(bodyTemplate, view).replace (/&#x2F;/g, '/');
+var subject = veda.Util.Mustache.render(subjectTemplate, view).replace (/&#x2F;/g, '/');
+var message = veda.Util.Mustache.render(bodyTemplate, view).replace (/&#x2F;/g, '/');
 
 var recepients = [];
 var handleredSubscriptions = {};
