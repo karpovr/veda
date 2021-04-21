@@ -46,7 +46,7 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
     container = $(container);
   }
 
-  const reg_uri = /^[a-z-0-9]+:([a-zA-Z0-9-_])*$/;
+  const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
   // const reg_file = /\.html\s*$/;
 
   return this.load()
