@@ -11,4 +11,4 @@ chrono = "0.4"
 
 v_queue = "0.1.7"
 
-v_module = { package = "v-common-module", version = "0.1.31" }
+v_module = { package = "v-common-module", version = "0.1.32" }
