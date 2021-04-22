@@ -17,7 +17,6 @@ import '../server/util.js';
 import '../server/bpmn.js';
 
 try {
-
   veda.ticket = get_env_str_var('$ticket');
 
   AppModel.call(veda);
@@ -25,11 +24,8 @@ try {
   veda.init('cfg:VedaSystem');
 
   console.log('user:', veda.user.id, '| ticket:', veda.ticket);
-
 } catch (error) {
-
   console.log('Veda init error', error.stack);
-
 }
 
 export default veda;

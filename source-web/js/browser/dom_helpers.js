@@ -6,6 +6,7 @@
  * @param {string} event - event id
  * @param {string} delegateSelector - delegate selector
  * @param {function} handler - event handler
+ * @param {boolean} useCapture
  * @return {void}
  */
 function delegateHandler(el, event, delegateSelector, handler, useCapture) {

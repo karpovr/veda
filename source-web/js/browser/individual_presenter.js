@@ -26,8 +26,6 @@ IndividualModel.prototype.present = IndividualPresenter;
 
 export default IndividualPresenter;
 
-//~ const counters = {};
-
 /**
  * Individual presenter method for IndividualModel class
  * @param {Element} container - container to render individual to
@@ -690,18 +688,8 @@ function processTemplate (individual, container, template, mode) {
   };
   individual.on('propertyModified', triggerValidation);
 
-  //~ counters.on = (counters.on || 0) + 1;
-  //~ counters[individual.id] = counters[individual.id] || {};
-  //~ counters[individual.id].on = (counters[individual.id].on || 0) + 1;
-  //~ console.log('triggerValidation on', counters);
-
   template.one('remove', function () {
     individual.off('propertyModified', triggerValidation);
-
-    //~ counters.off = (counters.off || 0) + 1;
-    //~ counters[individual.id] = counters[individual.id] || {};
-    //~ counters[individual.id].off = (counters[individual.id].off || 0) + 1;
-    //~ console.log('triggerValidation off', counters);
   });
   template.on('edit', triggerValidation);
 

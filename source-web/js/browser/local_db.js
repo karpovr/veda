@@ -60,7 +60,7 @@ proto.initDB = function () {
     };
 
     openReq.onblocked = function(event) {
-      alert("Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!");
+      alert('Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!');
     };
 
     openReq.onupgradeneeded = (event) => {

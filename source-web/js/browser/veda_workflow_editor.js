@@ -271,15 +271,17 @@ jsWorkflow.ready(function() {
     instance.bind('connection', function(info) {
       const source = new veda.IndividualModel(info.sourceId);
       const flowExists = source.get('v-wf:hasFlow').filter(function(flow) {
-         return flow.hasValue('v-wf:flowsInto', info.targetId);
+        return flow.hasValue('v-wf:flowsInto', info.targetId);
       }).length;
-      if (flowExists) { return; }
+      if (flowExists) {
+        return;
+      }
 
       const flow = new veda.IndividualModel(); // Create Flow individual
       flow['rdf:type'] = 'v-wf:Flow';
       flow['v-wf:flowsInto'] = info.targetId; // Set Flow target
       net.addValue('v-wf:consistsOf', flow); // Add new Flow to Net
-      source.addValue('v-wf:hasFlow',flow); // Add new Flow to source
+      source.addValue('v-wf:hasFlow', flow); // Add new Flow to source
       info.connection.setData(flow.id);
     });
 
