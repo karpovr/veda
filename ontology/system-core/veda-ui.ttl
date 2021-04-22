@@ -1501,7 +1501,7 @@ v-ui:LabelTemplate
           delay: { "show": 750, "hide": 100 },
           placement: "auto top",
           html: true,
-          container: this,
+          container: 'body',
           content: cntr
         }).popover("show");
         cntr.on("click", ".close", function (e) {
@@ -2138,7 +2138,7 @@ v-ui:FileTemplate
   rdfs:label "Шаблон для файла"@ru ;
   rdfs:label "File template"@en ;
   v-ui:template """
-<div class="panel panel-default" style="word-wrap:break-word; display: inline-block; margin:5px 5px 0 0; overflow: hidden"">
+<div class="panel panel-default" style="word-wrap:break-word; display: inline-block; margin:5px 5px 0 0; overflow: hidden">
   <div class="panel-body" style="padding:7px;">
     <span id="icon" class="label label-primary"></span>
     <a href="/files/@">
