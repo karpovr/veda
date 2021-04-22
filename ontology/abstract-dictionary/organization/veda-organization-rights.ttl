@@ -126,21 +126,25 @@ v-s:OrganizationsWithVedaAccount_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:OrganizationsWithVedaAccount ;
   rdfs:label "Включение в группу компаний созданных в Veda" ;
+  v-s:deleted true;
 .
 v-s:OrganizationsWithADAccount_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:OrganizationsWithADAccount ;
   rdfs:label "Включение в группу компаний созданных в AD" ;
+  v-s:deleted true;
 .
 v-s:OrganizationsWithLimitedClassTypes_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:OrganizationsWithLimitedClassTypes ;
   rdfs:label "Включение в группу компаний с ограниченным доступом к просмотру документов" ;
+  v-s:deleted true;
 .
 v-s:OrganizationsWithoutLimitedClassTypes_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:OrganizationsWithoutLimitedClassTypes ;
   rdfs:label "Включение в группу компаний с потенциальным доступом к просмотру документов" ;
+  v-s:deleted true;
 .
 
 

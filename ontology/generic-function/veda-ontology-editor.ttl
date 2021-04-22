@@ -1318,11 +1318,11 @@ v-ui:template """
 
   <em about="v-s:memberOf" property="rdfs:label"></em>
   <div rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="memberOf" type="text" class="-vew edit search form-control" />
+  <input id="memberOf" type="text" class="-view edit search form-control" />
 
   <em about="v-s:resource" property="rdfs:label"></em>
   <div rel="v-s:resource" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="resource" type="text" class="-vew edit search form-control" />
+  <input id="resource" type="text" class="-view edit search form-control" />
 
   <em about="v-s:updateCounter" property="rdfs:label"></em>
   <div property="v-s:updateCounter" class="view edit search"></div>
@@ -1381,7 +1381,7 @@ v-ui:template """
       individual["v-s:resource"] = [];
     }
   });
-  //# sourceURL=v-s:MembershipRegistryTemplate_post
+  //# sourceURL=v-s:MembershipTemplate_post
 </script>
 """ ;
 .
@@ -1404,11 +1404,11 @@ v-s:MembershipRegistryTemplate
 
   <em about="v-s:memberOf" property="rdfs:label"></em>
   <div rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="memberOf" type="text" class="-vew edit search form-control"/>
+  <input id="memberOf" type="text" class="-view edit search form-control"/>
 
   <em about="v-s:resource" property="rdfs:label"></em>
   <div rel="v-s:resource" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="resource" type="text" class="-vew edit search form-control"/>
+  <input id="resource" type="text" class="-view edit search form-control"/>
 
   <em about="v-s:updateCounter" property="rdfs:label"></em>
   <div property="v-s:updateCounter" class="view edit search"></div>
@@ -1460,7 +1460,7 @@ v-s:MembershipRegistryTemplate
       individual["v-s:resource"] = [];
     }
   });
-  //# sourceURL=v-s:MembershipRegistryTemplate_post
+  //# sourceURL=v-s:MembershipTemplate_post
 </script>
 """ ;
 .
