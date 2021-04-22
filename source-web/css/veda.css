@@ -358,14 +358,6 @@ hr.black {
   float: right;
 }
 
-#login-form {
-  max-width: 400px;
-  padding: 15px;
-  margin-top: 5%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 #main {
   margin-bottom: 120px;
 }

@@ -31,6 +31,11 @@ export default function Auth() {
     }
   });
 
+  delegateHandler(loginForm, 'click', '.show-password', function (e) {
+    const passwords = loginForm.querySelectorAll('.password');
+    passwords.forEach((input) => input.type = input.type === 'password' ? 'text' : 'password');
+  });
+
   /**
    * Submit credentials handler
    * @param {Event} event

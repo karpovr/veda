@@ -75,7 +75,7 @@
     </div>
 
     <!-- Login form -->
-    <form style="display:none;" id="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
+    <form style="display:none; max-width: 400px; margin: 10% auto; padding: 2em;" id="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
       <h3>Войдите / Sign in</h3>
       <div id="unavailable-error" style="display:none;" class="alert alert-danger">
         <p><strong>Ошибка!</strong> Система недоступна.</p>
@@ -133,13 +133,28 @@
       <button style="display:none;" class="ok btn btn-lg btn-block btn-primary">Ok</button>
       <fieldset id="enter-login-password">
         <input class="form-control input-lg" id="login" placeholder="Логин / login" type="text" name="login" autofocus="autofocus"/>
-        <input class="form-control input-lg margin-lg" id="password" placeholder="Пароль / password" type="password" name="password"/>
+        <div class="input-group margin-lg">
+          <input class="form-control input-lg password" id="password" placeholder="Пароль / password" type="password" name="password"/>
+          <span class="input-group-btn">
+            <button class="btn btn-default btn-lg show-password" type="button">&#128065;</button>
+          </span>
+        </div>
         <button type="submit" id="submit-login-password" class="btn btn-lg btn-primary btn-block margin-lg">Войти / Sign in</button>
         <button type="submit" id="change-password" class="btn btn-link btn-block btn-sm">Изменить пароль / Change password</button>
       </fieldset>
       <fieldset id="enter-new-password" style="display:none;">
-        <input class="form-control input-lg" id="new-password" placeholder="Новый пароль / New password" type="password" name="new-password" autocomplete="off"/>
-        <input class="form-control input-lg margin-lg" id="confirm-new-password" placeholder="Повторите пароль / Confirm password" type="password" name="confirm-new-password" autocomplete="off"/>
+        <div class="input-group">
+          <input class="form-control input-lg password" id="new-password" placeholder="Новый пароль / New password" type="password" name="new-password" autocomplete="off"/>
+          <span class="input-group-btn">
+            <button class="btn btn-default btn-lg show-password" type="button">&#128065;</button>
+          </span>
+        </div>
+        <div class="input-group margin-lg">
+          <input class="form-control input-lg password" id="confirm-new-password" placeholder="Повторите пароль / Confirm password" type="password" name="confirm-new-password" autocomplete="off"/>
+          <span class="input-group-btn">
+            <button class="btn btn-default btn-lg show-password" type="button">&#128065;</button>
+          </span>
+        </div>
         <span class="help-block password-strength" style="display:none;">Не менее 6 символов, должен содержать минимум 1 латинскую строчную букву, 1 латинскую прописную букву, 1 цифру</span>
         <span class="help-block password-strength" style="display:none;">At least 6 characters and contain at least 1 lowercase latin letter, 1 uppercase latin letter, 1 digit</span>
         <span class="help-block password-must-match" style="display:none;">Пароли должны совпадать</span>
