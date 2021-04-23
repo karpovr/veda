@@ -76,10 +76,12 @@ proto.initAppointment = function () {
     return veda.appointment = undefined;
   }
   const setAppointment = () => {
-    const appointment = this['v-s:defaultAppointment'][0];
-    appointment.load().then(function (appointment) {
-      veda.appointment = appointment;
-    });
+    const appointment = this.hasValue('v-s:defaultAppointment') && this['v-s:defaultAppointment'][0];
+    if (appointment) {
+      appointment.load().then((appointment) => {
+        veda.appointment = appointment;
+      });
+    }
     this.save();
   };
   this.on('v-s:defaultAppointment', setAppointment);
