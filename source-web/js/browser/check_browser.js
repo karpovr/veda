@@ -34,7 +34,7 @@ const template = `
       <h3>Your browser is out of date ($BROWSER)<br>
       <small>Please, update your browser or use an alternative one *</small></h3>
       <hr>
-      * Edge 80+, Chrome 80+, Firefox 65+, Opera 65+, Safari 11+, Yandex 80+
+      * Edge 80+, Chrome 80+, Firefox 65+, Opera 65+, Safari 11+, Yandex 20+
     </div>
   </div>
 `;
@@ -48,7 +48,7 @@ const isOk = browser.satisfies({
   firefox: '>=65',
   opera: '>=65',
   safari: '>=11',
-  yandex: '>=80',
+  yandex: '>=20',
 });
 
 if (!isOk) {
