@@ -187,7 +187,7 @@ function parser(value) {
 
 const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
 const reg_date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
-const reg_ml_string = /^(.*)@([a-z]{2})$/i;
+const reg_ml_string = /^(.*)@([a-z]{2})$/ims;
 
 /**
  * Serialize value
