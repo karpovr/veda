@@ -15,13 +15,13 @@ processDirectory(rootDirectory, templateExtractor);
  */
 function templateExtractor(fileName) {
   const ttlRE = /\.ttl$/i;
-  const templateRE = /v-ui:template\s+"""(.*?)"""/gmis;
+  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$(?:\n +[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*\n +v-ui:template +"""(.*?)"""/gmis;
   if ( ttlRE.test(fileName) ) {
     console.log('Processing file:', fileName);
     const content = fs.readFileSync(fileName, {encoding: 'utf8', flag: 'r'});
     const templates = content.match(templateRE);
     if (templates !== null) {
-      console.log(templates[0]);
+      console.log(templates);
     }
   }
 }
