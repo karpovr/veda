@@ -21,6 +21,10 @@ struct ProcessElement {
 }
 
 pub fn clean_process(ctx: &mut CleanerContext) {
+    if ctx.operations.is_empty() {
+        println! ("remove, to_ttl");
+    }
+
     let module_info = ModuleInfo::new("./data", "clean_process", true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", &module_info.err());

@@ -63,15 +63,18 @@ enum Tools {
     StorageCleaner {
         #[named]
         #[help = "name of executing cleaning algorithm"]
-        module: String,
+        #[optional]
+        module: Option<String>,
 
         #[named]
         #[help = "operation"]
-        operation: String,
+        #[optional]
+        operation: Option<String>,
 
         #[named]
         #[help = "type of report"]
-        report: String,
+        #[optional]
+        report: Option<String>,
     },
 }
 
@@ -88,7 +91,6 @@ fn main() {
             operation,
             report,
         } => {
-            info!("module={}", module);
             clean(module, operation, report);
         }
         Tools::QueueToStorage {

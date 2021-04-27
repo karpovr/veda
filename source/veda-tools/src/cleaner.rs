@@ -5,7 +5,7 @@ use crate::v_s_membership2::*;
 use crate::v_s_permissionstatement::*;
 use crate::v_wf_process::*;
 use ini::Ini;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use std::fs::{File, OpenOptions};
 use std::thread;
 use std::time::*;
@@ -25,7 +25,28 @@ pub struct CleanerContext {
     pub(crate) operations: HashSet<String>,
 }
 
-pub fn clean(modules: String, operations: String, report: String) {
+pub fn clean(modules: Option<String>, operations: Option<String>, report: Option<String>) {
+    let mut cleaner_modules = HashSet::new();
+
+    if let Some (m) = modules {
+        for s in m.split(',') {
+            cleaner_modules.insert(s.to_owned());
+        }
+    }
+
+    let mut cleaners = HashMap::new();
+    cleaners.insert("email", clean_email as for<'r> fn(&'r mut CleanerContext));
+    cleaners.insert("permissionstatement", clean_invalid_permissionstatement as for<'r> fn(&'r mut CleanerContext));
+    cleaners.insert("membership", clean_invalid_membership as for<'r> fn(&'r mut CleanerContext));
+    cleaners.insert("membership1", remove_membership1 as for<'r> fn(&'r mut CleanerContext));
+    cleaners.insert("membership2", remove_membership2 as for<'r> fn(&'r mut CleanerContext));
+    cleaners.insert("process", clean_process as for<'r> fn(&'r mut CleanerContext));
+
+    if cleaner_modules.is_empty() {
+        println! ("{:?}", cleaners.keys());
+        return;
+    }
+
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
     let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
@@ -45,16 +66,12 @@ pub fn clean(modules: String, operations: String, report: String) {
         operations: Default::default(),
     };
 
-    let mut cleaner_modules = HashSet::new();
+    ctx.report_type = report.unwrap_or(String::default());
 
-    for s in modules.split(',') {
-        cleaner_modules.insert(s);
-    }
-
-    ctx.report_type = report.to_owned();
-
-    for s in operations.split(',') {
-        ctx.operations.insert(s.to_string());
+    if let Some (op) = operations {
+        for s in op.split(',') {
+            ctx.operations.insert(s.to_string());
+        }
     }
 
     if !ctx.report_type.is_empty() {
@@ -75,11 +92,15 @@ pub fn clean(modules: String, operations: String, report: String) {
         thread::sleep(Duration::from_millis(10000));
     }
 
-    info!("started cleaner");
-
     if let Ok(t) = ctx.backend.get_sys_ticket_id() {
         ctx.sys_ticket = ctx.backend.get_ticket_from_db(&t);
         {
+            for module in cleaner_modules.iter() {
+                if let Some(f) = cleaners.get(module.as_str()) {
+                    f (&mut ctx);
+                }
+            }
+/*
             if cleaner_modules.contains("email") {
                 clean_email(&mut ctx);
             } else if cleaner_modules.contains("permissionstatement") {
@@ -94,6 +115,7 @@ pub fn clean(modules: String, operations: String, report: String) {
                 clean_process(&mut ctx);
             }
             //thread::sleep(Duration::from_millis(1000));
+*/
         }
     }
 }
