@@ -402,6 +402,7 @@ fn operation_prepare(
         prev_indv.set_integer("v-s:updateCounter", upd_counter);
 
         if !to_storage_and_queue(
+            &cmd,
             IndvOp::Put,
             op_id,
             ticket,
@@ -423,6 +424,7 @@ fn operation_prepare(
     } else {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
         if !to_storage_and_queue(
+            &cmd,
             IndvOp::Put,
             op_id,
             ticket,
@@ -446,7 +448,8 @@ fn operation_prepare(
     if cmd == IndvOp::Remove {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
         if !to_storage_and_queue(
-            cmd,
+            &cmd,
+            IndvOp::Remove,
             op_id,
             ticket,
             event_id,
@@ -470,6 +473,7 @@ fn operation_prepare(
 }
 
 fn to_storage_and_queue(
+    orig_cmd: &IndvOp,
     cmd: IndvOp,
     op_id: &mut i64,
     ticket: &Ticket,
@@ -513,7 +517,14 @@ fn to_storage_and_queue(
                 }
             }
 
-            info!("update, id = {}, event_id = {}, src = {}", new_indv.get_id(), event_id.unwrap_or_default(), src.unwrap_or_default());
+            info!(
+                "update:{}, id={}, op_id={}, event_id={}, src={}",
+                orig_cmd.as_string(),
+                new_indv.get_id(),
+                op_id,
+                event_id.unwrap_or_default(),
+                src.unwrap_or_default()
+            );
         } else {
             error!("failed to update individual, id = {}", new_indv.get_id());
             return false;
