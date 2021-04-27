@@ -467,6 +467,7 @@ proto.save = function(isAtomic) {
   if ( this.isSaving() && this.isSync() && typeof window !== 'undefined' ) {
     return this.isSaving();
   }
+  if (isAtomic == undefined) isAtomic = true;
   return this.trigger('beforeSave').then(() => {
     Object.keys(this.properties).reduce((acc, property_uri) => {
       if (property_uri === '@') return acc;
