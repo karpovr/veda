@@ -1607,6 +1607,23 @@ v-s:hasMaintainedObjectTemplate
 """ ;
 .
 
+v-s:TS_Deletable
+  rdf:type v-ui:TemplateSpecification ;
+  v-s:loadPriority 15 ;
+  v-ui:defaultTemplate v-s:DeletableTemplate ;
+  v-ui:forClass v-s:Deletable ;
+.
+
+#--------------Template--------------------------------
+#----v-s:Deletable ствится вторым классом, рядом с классом документа, чтобы 2 шаблона не отображались на экране 
+v-s:DeletableTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон объектов для класса  v-s:Deletable(Удаляемый)"@ru ;
+  rdfs:label "Template for class  v-s:Deletable(Удаляемый)"@en ;
+  v-ui:template """
+<div></div>
+""" ;
+.
 # ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
 v-s:PsHasRoleInContract_ContractParticipantCustomer
   rdf:type v-ui:ObjectPropertySpecification ;
