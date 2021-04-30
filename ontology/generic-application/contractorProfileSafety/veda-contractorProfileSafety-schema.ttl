@@ -118,6 +118,20 @@ v-s:attachDocumentsForIndustrialSafety
   rdfs:range v-s:ContractorProfileFile;
   rdfs:domain v-s:ContractorProfileSafety;
 .
+v-s:attachDocumentsForWorkingInConfinedSpaces
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за проведение работ в ограниченных и замкнутых пространствах."@ru ;
+  rdfs:label "Disposal documents for working in confined spaces "@en ;
+  rdfs:range v-s:ContractorProfileFile;
+  rdfs:domain v-s:ContractorProfileSafety;
+.
+v-s:isResponsibleForWorkingInConfinedSpaces
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Pass ;
+  rdfs:label "Есть ответственный за работы в ограниченных пространствах?"@ru ;
+  rdfs:label "Есть ответственный за работы в ограниченных пространствах?"@en ;
+  rdfs:range xsd:boolean ;
+.
 v-s:attachDocumentsForTheRightToOrganizeOtherWorks
   rdf:type owl:ObjectProperty ;
   rdfs:label "Прочие документы"@ru ;
@@ -306,6 +320,13 @@ v-s:hasDiverCertificate
   rdfs:domain v-s:EmployeeProfile ;
   rdfs:label "Удостоверение/протокол водолазов"@ru ;
   rdfs:label "Diver certificate"@en ;
+  rdfs:range v-s:CertificationDocument ;
+.
+v-s:hasWorkingInConfinedSpaces
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:EmployeeProfile ;
+  rdfs:label "Удостоверение/протокол по работам в ограниченных и замкнутых пространствах"@ru ;
+  rdfs:label "Working in confined spaces certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
 .
 v-s:hasOtherCertificate
