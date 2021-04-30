@@ -39,12 +39,12 @@ v-s:AdministrationImage
 v-s:OrganizationStructureApplication 
   rdf:type v-s:Application;
   rdfs:label "Управление оргструктурой"@ru, "Organization structure"@en;
-  v-s:hasCreate v-s:AppointmentCreate, v-s:OccupationCreate, v-s:EmployeeCreate;
+  v-s:hasCreate v-s:AppointmentCreate, v-s:OccupationCreate, v-s:EmployeeCreate, v-s:DepartmentCreate;
   v-s:hasIcon v-s:OrganizationStructureIcon;
-  v-s:hasRegistry v-s:AppointmentSearch, v-s:OccupationSearch, v-s:EmployeeSearch;
-  v-s:shortLabel "Контракты"@ru, "Contracts"@en;
+  v-s:hasRegistry v-s:AppointmentSearch, v-s:OccupationSearch, v-s:EmployeeSearch, v-s:DepartmentSearch;
   v-ui:hasTemplate v-s:ApplicationTemplate;
 .
+#---------------Создание------------
   v-s:EmployeeCreate 
     rdf:type v-fc:Create;
     rdfs:label "Персона"@ru, "Person"@en;
@@ -75,6 +75,19 @@ v-s:OrganizationStructureApplication
     rdfs:label "Назначение"@ru, "Appointment"@en;
     v-fc:targetType v-s:Appointment;
   .
+  v-s:DepartmentCreate 
+    rdf:type v-fc:Create;
+    rdfs:label "Подразделение"@ru, "Department"@en;
+    v-fc:hasBlank v-s:DepartmentBlank;
+  .
+  v-s:DepartmentBlank 
+    rdf:type v-fc:Blank;
+    rdfs:label "Подразделение"@ru, "Department"@en;
+    v-fc:targetType v-s:Department;
+  .
+
+
+#---------------Поиск------------
   v-s:EmployeeSearch 
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Персона"@ru, "Person"@en;
@@ -110,6 +123,18 @@ v-s:OrganizationStructureApplication
     rdf:type v-fc:Blank;
     rdfs:label "Должность"@ru, "Position"@en;
     v-fc:targetType v-s:Position;
+  .
+  v-s:DepartmentSearch 
+    rdf:type v-fs:AttributiveSearch;
+    rdfs:label "Подразделение"@ru, "Department"@en;
+    v-fs:searchBlank v-s:DepartmentSearchBlank;
+    v-fs:searchBlankTemplate v-s:DepartmentTemplate;
+    v-fs:searchResultTemplate v-s:DepartmentSearchResultTemplate;
+  .
+  v-s:DepartmentSearchBlank 
+    rdf:type v-fc:Blank;
+    rdfs:label "Подразделение"@ru, "Department"@en;
+    v-fc:targetType v-s:Department;
   .
 
 
@@ -1125,6 +1150,36 @@ v-s:OccupationSearchResultTemplate
     <thead class="result-header">
       <tr>
         <th colspan="8" about="v-s:Person" property="rdfs:label"></th>
+      </tr>
+      <tr class="active">
+        <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+        <th width="10%"><span about="v-s:creator" property="rdfs:label"></span></th>
+        <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
+        <th><span about="rdfs:label" property="rdfs:label"></span></th>
+        <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
+    </thead>
+    <tbody class="result-container">
+      <tr>
+        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+        <td rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
+        <td property="v-s:created"></td>
+        <td property="rdfs:label"></td>
+        <td rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></td>
+      </tr>
+    </tbody>
+  </table>
+  """ ;
+.
+
+v-s:DepartmentSearchResultTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Шаблон для класса v-s:Department (Подразделение)"@ru, "Template for v-s:Department (Подразделение) class"@en;
+  v-ui:template """
+
+  <table class="table table-bordered">
+    <thead class="result-header">
+      <tr>
+        <th colspan="8" about="v-s:Department" property="rdfs:label"></th>
       </tr>
       <tr class="active">
         <th width="1%"><span class="glyphicon glyphicon-search"></span></th>

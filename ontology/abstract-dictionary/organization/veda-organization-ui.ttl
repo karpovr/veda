@@ -924,10 +924,10 @@ v-s:DepartmentTemplate
         <span property="v-s:taxId"></span> - <span property="v-s:shortLabel"></span> - <span property="v-s:legalAddress"></span>
       </a>
     </div>
-    <!-- <veda-control data-type="link" rel="v-s:parentOrganization" class="-view edit search fulltext"></veda-control> -->
+    <veda-control data-type="link" rel="v-s:parentOrganization" class="-view edit search fulltext"></veda-control>
     <em about="v-s:parentUnit" property="rdfs:label"></em>
     <div rel="v-s:parentUnit" class="view -edit -search" data-template="v-ui:LabelLinkTemplate"></div>
-    <veda-control data-type="link" rel="v-s:parentUnit" class="-view edit search fulltext dropdown"></veda-control>
+    <veda-control data-type="link" rel="v-s:parentUnit" class="-view edit search fulltext dropdown" data-query-prefix="('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{individual['v-s:parentOrganization'][0].id}') || '@'=='{individual['v-s:parentOrganization'][0].id}'"></veda-control>
     <hr class="view -edit -search">
     <em about="rdfs:label" property="rdfs:label"></em>
     <div property="rdfs:label" class="view -edit -search"></div>
@@ -2613,6 +2613,7 @@ v-s:AppointmentEmbeddedTableTemplate
   });
 
   $("#deleteAppointment", template).click(function() {
+     individual["rdf:type"] = individual["rdf:type"].concat("v-s:Deletable");
     individual["v-s:deleted"] = [true];
     individual.save();
     });
