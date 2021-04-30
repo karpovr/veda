@@ -334,6 +334,12 @@ v-s:EffectList
   rdfs:label "Список эффектов"@ru ;
   rdfs:label "Effect list"@en ;
 .
+v-s:CS_EffectList
+  rdf:type v-s:ClassSpecification ;
+  v-s:hasClass v-s:EffectList ;
+  v-s:listProperties v-s:hasEffect ;
+.
+
 v-s:hasTotalPlanYearEffect
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Итоговый плановый годовой эффект"@ru ;
@@ -455,6 +461,13 @@ v-s:ProjectPlan
   rdfs:label "План мероприятий проекта"@ru ;
   rdfs:label "Project plan"@en ;
 .
+v-s:CS_ProjectPlan
+  rdf:type v-s:ClassSpecification ;
+  v-s:hasClass v-s:ProjectPlan ;
+  v-s:listProperties v-s:hasProjectMilestone, v-s:hasProjectPhase ;
+.
+
+
 v-s:hasProjectMilestone
   rdf:type owl:ObjectProperty ;
   rdfs:label "Контрольная точка проекта"@ru ;

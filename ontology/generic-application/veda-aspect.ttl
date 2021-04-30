@@ -33,6 +33,13 @@ v-s:PersonalAspect
   rdfs:label "Персональный аспект"@ru ;
   rdfs:label "Personal aspect"@en ;
 .
+v-s:CS_PersonalAspect
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
+  v-s:hasClass v-s:PersonalAspect ;
+  v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
+  v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
+.
 
 v-s:BusinessAspect
   rdf:type owl:Class ;
