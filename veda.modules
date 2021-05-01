@@ -1,6 +1,6 @@
 mstorage
 
-#ro-storage
+ro-storage
 
 auth
 
@@ -50,3 +50,9 @@ gowebserver
     args = --use_clickhouse=false --http_port=8080
 
 input-onto
+
+#camunda-event-handler
+
+#camunda-external-task-worker 
+
+#camunda-process-controller
