@@ -248,6 +248,9 @@ function processTemplate (individual, container, template, mode) {
   const callModelMethod = function (method, parent) {
     return embedded.reduce(function (p, item) {
       return p.then(function () {
+        if (!item.data('callModelMethod')) {
+          return;
+        }
         return item.data('callModelMethod')(method, individual.id);
       });
     }, Promise.resolve())
