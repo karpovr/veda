@@ -42,6 +42,7 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
     cleaners.insert("membership2", remove_membership2 as for<'r> fn(&'r mut CleanerContext));
     cleaners.insert("process", clean_process as for<'r> fn(&'r mut CleanerContext));
 
+    println! ("choose one or more module(s): --module []");
     if cleaner_modules.is_empty() {
         println! ("{:?}", cleaners.keys());
         return;
@@ -100,22 +101,6 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
                     f (&mut ctx);
                 }
             }
-/*
-            if cleaner_modules.contains("email") {
-                clean_email(&mut ctx);
-            } else if cleaner_modules.contains("permissionstatement") {
-                clean_invalid_permissionstatement(&mut ctx);
-            } else if cleaner_modules.contains("membership") {
-                clean_invalid_membership(&mut ctx);
-            } else if cleaner_modules.contains("membership1") {
-                remove_membership1(&mut ctx);
-            } else if cleaner_modules.contains("membership2") {
-                remove_membership2(&mut ctx);
-            } else if cleaner_modules.contains("process") {
-                clean_process(&mut ctx);
-            }
-            //thread::sleep(Duration::from_millis(1000));
-*/
         }
     }
 }
