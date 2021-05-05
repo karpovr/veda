@@ -518,8 +518,9 @@ fn to_storage_and_queue(
             }
 
             info!(
-                "update:{}, id={}, op_id={}, event_id={}, src={}",
+                "update:{}, id={}, ticket={}, op_id={}, event_id={}, src={}",
                 orig_cmd.as_string(),
+                ticket.id,
                 new_indv.get_id(),
                 op_id,
                 event_id.unwrap_or_default(),
