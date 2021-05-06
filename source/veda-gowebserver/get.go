@@ -59,32 +59,8 @@ func getIndividual(ctx *fasthttp.RequestCtx) {
 
   if strings.Index(uri, queueStatePrefix) == 0 {
     queueName := string(uri[len(queueStatePrefix):])
-    var main_queue *Queue
-    var main_cs *Consumer
-
     main_queue_name := "individuals-flow"
-    main_queue = NewQueue(main_queue_name, R, "")
-    if !main_queue.open(CURRENT) {
-      log.Println("ERR! OPENING QUEUE: ", queueName)
-      ctx.Response.SetStatusCode(int(InvalidIdentifier))
-      trail(ticket.Id, ticket.UserURI, "get_individual", make(map[string]interface{}), "{}", InvalidIdentifier, timestamp)
-      return
-    }
-
-    main_cs = NewConsumer(main_queue, queueName, R)
-    if !main_cs.open() {
-      log.Println("ERR! OPENING CONSUMER: ", queueName)
-      ctx.Response.SetStatusCode(int(InvalidIdentifier))
-      trail(ticket.Id, ticket.UserURI, "get_individual", make(map[string]interface{}), "{}", InvalidIdentifier, timestamp)
-      return
-    }
-
-    if !main_cs.get_info() {
-      log.Println("ERR! GETTING INFO: ", queueName)
-      ctx.Response.SetStatusCode(int(InternalServerError))
-      trail(ticket.Id, ticket.UserURI, "get_individual", make(map[string]interface{}), "{}", InternalServerError, timestamp)
-      return
-    }
+    info := get_consumer_info ("./data/queue", queueName, main_queue_name)
 
     individual := make(map[string]interface{})
     individual["@"] = uri
@@ -92,8 +68,8 @@ func getIndividual(ctx *fasthttp.RequestCtx) {
     individual["v-s:created"] = []map[string]interface{}{{"data": time.Now().Format("2006-01-02T15:04:05Z"),
       "type": "Datetime"}}
     individual["srv:queue"] = []map[string]interface{}{{"data": "srv:" + queueName, "type": "Uri"}}
-    individual["srv:total_count"] = []map[string]interface{}{{"data": main_queue.count_pushed, "type": "Integer"}}
-    individual["srv:current_count"] = []map[string]interface{}{{"data": main_cs.count_popped, "type": "Integer"}}
+    individual["srv:total_count"] = []map[string]interface{}{{"data": info.total_count, "type": "Integer"}}
+    individual["srv:current_count"] = []map[string]interface{}{{"data": info.current_count, "type": "Integer"}}
     individualJSON, err := json.Marshal(individual)
     if err != nil {
       log.Println("ERR! GET_INDIVIDUAL: #1 ENCODING INDIVIDUAL TO JSON ", err)

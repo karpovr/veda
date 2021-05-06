@@ -141,16 +141,6 @@ else
     echo "--- NANOMSG INSTALLED ---"
 fi
 
-    echo "--- MAKE LIBAUTHORIZATION ---"
-
-    cd $INSTALL_PATH
-    cd source/libauthorization
-    cargo build --release
-    cd ..
-    cd ..
-    sudo cp ./source/lib64/libauthorization.so /usr/local/lib
-
-
 sudo libtool --mode=install install -c $INSTALL_PATH/source/lib64/libxapianm/libxapianm.la /usr/local/lib/libxapianm.la
 sudo ldconfig
 

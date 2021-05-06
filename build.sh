@@ -64,6 +64,13 @@ if [ -z $1 ] || [ $1 == "az" ] || [ $1 == "veda-az" ] || [ $1 == "basic" ] || [ 
     cp $CARGO_TARGET_DIR/release/libauthorization.so ./source/lib64/libauthorization.so
     cp $CARGO_TARGET_DIR/release/libauthorization.a ./source/lib64/libauthorization.a
     cp $CARGO_TARGET_DIR/release/libauthorization.so $VEDA_BIN/lib
+
+    build_server_module "libvqueueinfo2c"
+
+    cp $CARGO_TARGET_DIR/release/libvqueueinfo2c.so ./source/lib64/libvqueueinfo2c.so
+    cp $CARGO_TARGET_DIR/release/libvqueueinfo2c.a ./source/lib64/libvqueueinfo2c.a
+    cp $CARGO_TARGET_DIR/release/libvqueueinfo2c.so $VEDA_BIN/lib
+
 fi
 
 if [ -z $1 ] || [ $1 == "bootstrap" ] || [ $1 == "veda" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
