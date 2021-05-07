@@ -83,7 +83,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
                 secret,
                 sys_ticket: systicket,
                 xr,
-                module,
+                backend: module,
                 user_stat,
                 stored_password: "".to_owned(),
                 stored_salt: "".to_string(),

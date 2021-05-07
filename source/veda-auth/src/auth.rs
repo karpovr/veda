@@ -23,7 +23,7 @@ pub(crate) struct AuthWorkPlace<'a> {
     pub secret: &'a str,
     pub sys_ticket: &'a str,
     pub xr: &'a mut XapianReader,
-    pub module: &'a mut Backend,
+    pub backend: &'a mut Backend,
     pub user_stat: &'a mut UserStat,
     pub stored_password: String,
     pub stored_salt: String,
@@ -69,7 +69,7 @@ impl<'a> AuthWorkPlace<'a> {
             }
         }
 
-        let candidate_account_ids = get_candidate_users_of_login(self.login, self.module, self.xr);
+        let candidate_account_ids = get_candidate_users_of_login(self.login, self.backend, self.xr);
         if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
             for account_id in &candidate_account_ids.result {
                 if self.prepare_candidate_account(account_id, &mut ticket) {
@@ -84,7 +84,7 @@ impl<'a> AuthWorkPlace<'a> {
     }
 
     fn prepare_candidate_account(&mut self, account_id: &str, ticket: &mut Ticket) -> bool {
-        if let Some(account) = self.module.get_individual(&account_id, &mut Individual::default()) {
+        if let Some(mut account) = self.backend.get_individual_s(&account_id) {
             account.parse_all();
 
             let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
@@ -105,12 +105,12 @@ impl<'a> AuthWorkPlace<'a> {
             }
 
             let mut person = Individual::default();
-            if self.module.get_individual(&user_id, &mut person).is_none() {
+            if self.backend.get_individual(&user_id, &mut person).is_none() {
                 error!("user {} not found", user_id);
                 return false;
             }
 
-            self.get_credential(account);
+            self.get_credential(&mut account);
 
             if !self.secret.is_empty() && self.secret.len() > 5 {
                 return self.prepare_secret_code(ticket, &person);
@@ -128,7 +128,7 @@ impl<'a> AuthWorkPlace<'a> {
                 };
 
                 if is_request_new_password {
-                    let res = self.request_new_password(&mut person, self.edited, account);
+                    let res = self.request_new_password(&mut person, self.edited, &mut account);
                     if res != ResultCode::Ok {
                         ticket.result = res;
                         return true;
@@ -137,7 +137,7 @@ impl<'a> AuthWorkPlace<'a> {
 
                 // ATTEMPT AUTHENTICATION
                 if !self.stored_password.is_empty() && !self.password.is_empty() && self.password.len() > 63 && self.verify_password() {
-                    create_new_ticket(self.login, &user_id, self.conf.ticket_lifetime, ticket, &mut self.module.storage);
+                    create_new_ticket(self.login, &user_id, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
                     self.user_stat.wrong_count_login = 0;
                     self.user_stat.last_wrong_login_date = 0;
                     return true;
@@ -161,14 +161,14 @@ impl<'a> AuthWorkPlace<'a> {
         if old_secret.is_empty() {
             error!("update password: secret not found, user = {}", person.get_id());
             ticket.result = ResultCode::InvalidSecret;
-            remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
+            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
             return false;
         }
 
         if self.secret != old_secret {
             error!("request for update password: sent secret not equal to request secret {}, user = {}", self.secret, person.get_id());
             ticket.result = ResultCode::InvalidSecret;
-            remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
+            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
             return false;
         }
 
@@ -182,14 +182,14 @@ impl<'a> AuthWorkPlace<'a> {
         if self.stored_password == self.password {
             error!("update password: password equals to previous password, reject, user = {}", person.get_id());
             ticket.result = ResultCode::NewPasswordIsEqualToOld;
-            remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
+            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
             return false;
         }
 
         if self.password == EMPTY_SHA256_HASH {
             error!("update password: password is empty, reject, user = {}", person.get_id());
             ticket.result = ResultCode::EmptyPassword;
-            remove_secret(&mut self.credential, person.get_id(), self.module, self.sys_ticket);
+            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
             return false;
         }
 
@@ -206,16 +206,16 @@ impl<'a> AuthWorkPlace<'a> {
         self.credential.remove("v-s:secret");
         self.credential.remove("v-s:SecretDateFrom");
 
-        let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
+        let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
         if res.result != ResultCode::Ok {
             ticket.result = ResultCode::AuthenticationFailed;
             error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
-            return false;
+            false
         } else {
-            create_new_ticket(self.login, &person.get_id(), self.conf.ticket_lifetime, ticket, &mut self.module.storage);
+            create_new_ticket(self.login, &person.get_id(), self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
             self.user_stat.attempt_change_pass = 0;
             info!("updated password, password = {}, user = {}", self.password, person.get_id());
-            return true;
+            true
         }
     }
 
@@ -245,7 +245,7 @@ impl<'a> AuthWorkPlace<'a> {
 
         match account.get_first_literal("v-s:usesCredential") {
             Some(uses_credential_uri) => {
-                if let Some(_credential) = self.module.get_individual(&uses_credential_uri, &mut self.credential) {
+                if let Some(_credential) = self.backend.get_individual(&uses_credential_uri, &mut self.credential) {
                     _credential.parse_all();
                     self.stored_password = _credential.get_first_literal("v-s:password").unwrap_or_default();
                     self.stored_salt = _credential.get_first_literal("v-s:salt").unwrap_or_default();
@@ -253,14 +253,14 @@ impl<'a> AuthWorkPlace<'a> {
                     self.is_permanent = _credential.get_first_bool("v-s:isPermanent").unwrap_or(false);
                 } else {
                     error!("failed to read credential {}", uses_credential_uri);
-                    create_new_credential(self.sys_ticket, self.module, &mut self.credential, account);
+                    create_new_credential(self.sys_ticket, self.backend, &mut self.credential, account);
                 }
             }
             None => {
                 warn!("failed to find credential, create new");
                 self.stored_password = account.get_first_literal("v-s:password").unwrap_or_default();
 
-                create_new_credential(self.sys_ticket, self.module, &mut self.credential, account);
+                create_new_credential(self.sys_ticket, self.backend, &mut self.credential, account);
             }
         }
     }
@@ -307,7 +307,7 @@ impl<'a> AuthWorkPlace<'a> {
         self.credential.set_string("v-s:secret", &n_secret, Lang::NONE);
         self.credential.set_datetime("v-s:SecretDateFrom", now);
 
-        let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
+        let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
         if res.result != ResultCode::Ok {
             error!("failed to store new secret, user = {}, result = {:?}", user.get_id(), res);
             return ResultCode::InternalServerError;
@@ -317,16 +317,16 @@ impl<'a> AuthWorkPlace<'a> {
             let mailbox = account.get_first_literal("v-s:mailbox").unwrap_or_default();
 
             if !mailbox.is_empty() && mailbox.len() > 3 {
-                let app_name = match self.module.get_individual("v-s:vedaInfo", &mut Individual::default()) {
-                    Some(app_info) => {
+                let app_name = match self.backend.get_individual_s("v-s:vedaInfo") {
+                    Some(mut app_info) => {
                         app_info.parse_all();
-                        app_info.get_first_literal("rdfs:label").unwrap_or("Veda".to_string())
+                        app_info.get_first_literal("rdfs:label").unwrap_or_else(|| "Veda".to_string())
                     }
                     None => "Veda".to_string(),
                 };
 
                 user.parse_all();
-                let user_name = user.get_first_literal("rdfs:label").unwrap_or(user.get_id().to_string());
+                let user_name = user.get_first_literal("rdfs:label").unwrap_or_else(|| user.get_id().to_string());
 
                 let map = MapBuilder::new().insert_str("app_name", &app_name).insert_str("secret_code", n_secret.clone()).insert_str("user_name", user_name).build();
 
@@ -355,7 +355,7 @@ impl<'a> AuthWorkPlace<'a> {
                 mail_with_secret.add_string("v-s:subject", from_utf8(subject.as_slice()).unwrap_or_default(), Lang::NONE);
                 mail_with_secret.add_string("v-s:messageBody", from_utf8(body.as_slice()).unwrap_or_default(), Lang::NONE);
 
-                let res = self.module.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
+                let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
                 if res.result != ResultCode::Ok {
                     error!("failed to store email with new secret, user = {}", account.get_id());
                     return ResultCode::AuthenticationFailed;

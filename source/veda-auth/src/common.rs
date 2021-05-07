@@ -221,12 +221,10 @@ pub(crate) fn read_duration_param(indv: &mut Individual, param: &str) -> Option<
     None
 }
 
-pub(crate) fn read_auth_configuration(module: &mut Backend) -> AuthConf {
+pub(crate) fn read_auth_configuration(backend: &mut Backend) -> AuthConf {
     let mut res = AuthConf::default();
 
-    let mut node = Individual::default();
-
-    if module.storage.get_individual("cfg:standart_node", &mut node) {
+    if let Some(mut node) = backend.get_individual_s("cfg:standart_node") {
         if let Some(d) = read_duration_param(&mut node, "cfg:user_password_lifetime") {
             res.pass_lifetime = d.as_secs() as i64;
         }
@@ -253,7 +251,7 @@ pub(crate) fn read_auth_configuration(module: &mut Backend) -> AuthConf {
         }
 
         if let Some(v) = node.get_first_literal("cfg:expired_pass_notification_template") {
-            if let Some(mut i) = module.get_individual_h(&v) {
+            if let Some(mut i) = backend.get_individual_s(&v) {
                 if let Some(ss) = i.get_first_literal("v-s:notificationSubject") {
                     if let Some(sb) = i.get_first_literal("v-s:notificationBody") {
                         res.expired_pass_notification_template = Some((ss, sb));
