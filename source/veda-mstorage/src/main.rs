@@ -131,7 +131,7 @@ fn main() -> std::io::Result<()> {
                 let mut data = vec![];
                 for el in v.iter() {
                     let mut out_el = JSONValue::default();
-                    out_el["result"] = json!(el.res.clone() as u32);
+                    out_el["result"] = json!(el.res as u32);
                     out_el["op_id"] = json!(el.op_id);
                     data.push(out_el);
 
@@ -143,10 +143,8 @@ fn main() -> std::io::Result<()> {
                     }
                 }
                 out_msg["data"] = json!(data);
-            } else {
-                if let Some(err_code) = resp.err() {
-                    out_msg["result"] = json!(err_code as u32);
-                }
+            } else if let Some(err_code) = resp.err() {
+                out_msg["result"] = json!(err_code as u32);
             }
 
             if let Err(e) = server.send(Message::from(out_msg.to_string().as_bytes())) {
@@ -345,11 +343,9 @@ fn operation_prepare(
                         error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", ticket.user_uri, new_indv.get_id());
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
-                } else {
-                    if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanUpdate as u8 {
-                        error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", ticket.user_uri, new_indv.get_id());
-                        return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
-                    }
+                } else if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanUpdate as u8 {
+                    error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", ticket.user_uri, new_indv.get_id());
+                    return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
             }
 
