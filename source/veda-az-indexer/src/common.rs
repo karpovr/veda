@@ -103,7 +103,7 @@ pub fn index_right_sets(prev_state: &mut Individual, new_state: &mut Individual,
         // IS UPDATE
         let mut cache = HashMap::new();
         if !pre_resc.is_empty() {
-            add_or_del_right_sets(id, &use_filter, &pre_resc, &pre_in_set, &vec![], &vec![], marker, p_acs, p_acs, true, prefix, ctx, &mut cache, &Cache::None);
+            add_or_del_right_sets(id, &use_filter, &pre_resc, &pre_in_set, &[], &[], marker, p_acs, p_acs, true, prefix, ctx, &mut cache, &Cache::None);
         }
 
         add_or_del_right_sets(id, &use_filter, &resc, &in_set, &pre_resc, &pre_in_set, marker, p_acs, n_acs, false, prefix, ctx, &mut cache, &Cache::Read);
@@ -119,11 +119,11 @@ enum Cache {
 
 fn add_or_del_right_sets(
     id: &str,
-    use_filter: &String,
-    resource: &Vec<String>,
-    in_set: &Vec<String>,
-    prev_resource: &Vec<String>,
-    prev_in_set: &Vec<String>,
+    use_filter: &str,
+    resource: &[String],
+    in_set: &[String],
+    prev_resource: &[String],
+    prev_in_set: &[String],
     marker: char,
     prev_access: u8,
     new_access: u8,
@@ -169,7 +169,7 @@ fn update_right_set(
         let key = prefix.to_owned() + filter + rs;
 
         debug!("APPLY ACCESS = {}", new_access);
-        if is_deleted == true {
+        if is_deleted {
             debug!("IS DELETED");
         }
 
@@ -178,11 +178,9 @@ fn update_right_set(
         if let Some(prev_data_str) = cache.get(&key) {
             debug!("PRE(MEM): {} {} {:?}", source_id, rs, prev_data_str);
             decode_rec_to_rightset(&prev_data_str, &mut new_right_set);
-        } else {
-            if let Some(prev_data_str) = ctx.storage.get_value(StorageId::Az, &key) {
-                debug!("PRE(STORAGE): {} {} {:?}", source_id, rs, prev_data_str);
-                decode_rec_to_rightset(&prev_data_str, &mut new_right_set);
-            }
+        } else if let Some(prev_data_str) = ctx.storage.get_value(StorageId::Az, &key) {
+            debug!("PRE(STORAGE): {} {} {:?}", source_id, rs, prev_data_str);
+            decode_rec_to_rightset(&prev_data_str, &mut new_right_set);
         }
 
         for in_set_id in in_set.iter() {
