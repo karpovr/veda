@@ -201,11 +201,11 @@ impl CCUSServer {
 
                     if registered_counter > counter {
                         if !changes.is_empty() {
-                            changes.push_str(",");
+                            changes.push(',');
                         }
 
                         changes.push_str(&uri.to_owned());
-                        changes.push_str("=");
+                        changes.push('=');
                         changes.push_str(&registered_counter.to_string());
                     }
                 }
@@ -319,11 +319,11 @@ impl Actor for CCUSServer {
 
                 for (uri, counter) in el.1.iter() {
                     if !changes.is_empty() {
-                        changes.push_str(",");
+                        changes.push(',');
                     }
 
                     changes.push_str(&uri.to_owned());
-                    changes.push_str("=");
+                    changes.push('=');
                     changes.push_str(&counter.to_string());
                 }
 

@@ -219,7 +219,7 @@ fn main() -> std::io::Result<()> {
     let sys = System::new("ws-ccus");
 
     // Start ccus server actor
-    let server = server::CCUSServer::new(sbscr_tx.clone()).start();
+    let server = server::CCUSServer::new(sbscr_tx).start();
 
     // Create Http server with websocket support
     HttpServer::new(move || {
