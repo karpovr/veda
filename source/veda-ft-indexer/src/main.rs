@@ -47,7 +47,7 @@ fn main() -> Result<(), XError> {
             error!("failed to index batch, err = {:?}", e);
         }
 
-        batch_size = batch_size / 2;
+        batch_size /= 2;
 
         if batch_size < 1 {
             break;
@@ -151,15 +151,13 @@ fn after(_module: &mut Backend, ctx: &mut Indexer, processed_batch_size: u32) ->
     if let Err(e) = ctx.commit_all_db() {
         error!("failed to commit, err = {:?}", e);
 
-        if processed_batch_size == 1 {
-            if !ctx.last_indexed_id.is_empty() {
-                if let Ok(mut f) = OpenOptions::new().write(true).append(true).create(true).open(format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME)) {
-                    if let Err(e) = writeln!(f, "{}", ctx.last_indexed_id) {
-                        error!("failed to write, err = {:?}", e);
-                    }
-                } else {
-                    error!("failed to open file {}", format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME));
+        if processed_batch_size == 1 && !ctx.last_indexed_id.is_empty() {
+            if let Ok(mut f) = OpenOptions::new().write(true).append(true).create(true).open(format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME)) {
+                if let Err(e) = writeln!(f, "{}", ctx.last_indexed_id) {
+                    error!("failed to write, err = {:?}", e);
                 }
+            } else {
+                error!("failed to open file {}", format!("{}/{}", BASE_PATH, FAILED_LIST_FILE_NAME));
             }
         }
 

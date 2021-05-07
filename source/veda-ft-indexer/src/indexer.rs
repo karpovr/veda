@@ -199,10 +199,8 @@ impl Indexer {
                     for _type in types.iter() {
                         if let Some(id) = self.idx_schema.get_index_id_of_uri_and_property(_type, predicate) {
                             self.prepare_index(backend, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
-                        } else {
-                            if let Some(id) = self.idx_schema.get_index_id_of_property(predicate) {
-                                self.prepare_index(backend, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
-                            }
+                        } else if let Some(id) = self.idx_schema.get_index_id_of_property(predicate) {
+                            self.prepare_index(backend, &mut iwp, &id, predicate, oo, predicate, 0, &mut prepared_links)?;
                         }
                     }
 
@@ -353,73 +351,65 @@ impl Indexer {
                 // 1. считать индивид по ссылке
                 if let Some(inner_indv) = module.get_individual(rs.get_uri(), &mut Individual::default()) {
                     for predicate in idx.get_predicates_nm() {
-                        if predicate == "vdi:inherited_index" {
-                            if let Some(values) = idx.get_literals_nm(&predicate) {
-                                for value in values.iter() {
-                                    // ссылка на наследуемый индекс, переходим вниз
-                                    if let Some(inhr_idx) = self.idx_schema.get_index(value) {
-                                        debug!("[{}] ссылка на наследуемый индекс, переходим вниз по иерархии индекса [{}]", value, &inhr_idx.get_id());
+                        if predicate != "vdi:inherited_index" {
+                            continue;
+                        }
+                        if let Some(values) = idx.get_literals_nm(&predicate) {
+                            for value in values.iter() {
+                                // ссылка на наследуемый индекс, переходим вниз
+                                if let Some(inhr_idx) = self.idx_schema.get_index(value) {
+                                    debug!("[{}] ссылка на наследуемый индекс, переходим вниз по иерархии индекса [{}]", value, &inhr_idx.get_id());
 
-                                        if let Some(for_properties) = inhr_idx.get_literals_nm("vdi:forProperty") {
-                                            for for_property in for_properties.iter() {
-                                                if let Some(links) = inner_indv.get_obj().get_resources().get(for_property) {
-                                                    debug!("forProperty = [{}], links = [{:?}]", for_property, links);
-                                                    for link in links {
-                                                        self.prepare_index(
-                                                            module,
-                                                            iwp,
-                                                            value,
-                                                            &predicate,
-                                                            link,
-                                                            &(ln.to_owned() + "." + &for_property),
-                                                            level + 1,
-                                                            prep,
-                                                        )?;
-                                                    }
+                                    if let Some(for_properties) = inhr_idx.get_literals_nm("vdi:forProperty") {
+                                        for for_property in for_properties.iter() {
+                                            if let Some(links) = inner_indv.get_obj().get_resources().get(for_property) {
+                                                debug!("forProperty = [{}], links = [{:?}]", for_property, links);
+                                                for link in links {
+                                                    self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + &for_property), level + 1, prep)?;
                                                 }
                                             }
-                                        } else {
-                                            // в этом индексе не указанно на какое свойство будет индексация,
-                                            // значит берем поля указанные vdi:indexed_field в текущем индивиде
+                                        }
+                                    } else {
+                                        // в этом индексе не указанно на какое свойство будет индексация,
+                                        // значит берем поля указанные vdi:indexed_field в текущем индивиде
 
-                                            if let Some(indexed_fields) = inhr_idx.get_literals_nm("vdi:indexed_field") {
-                                                for indexed_field in indexed_fields.iter() {
-                                                    inner_indv.get_first_literal(indexed_field);
-                                                    if let Some(rrc) = inner_indv.get_obj().get_resources().get(indexed_field) {
-                                                        for rc in rrc {
-                                                            debug!("index {}.{} = {:?} ", ln, indexed_field, rc);
+                                        if let Some(indexed_fields) = inhr_idx.get_literals_nm("vdi:indexed_field") {
+                                            for indexed_field in indexed_fields.iter() {
+                                                inner_indv.get_first_literal(indexed_field);
+                                                if let Some(rrc) = inner_indv.get_obj().get_resources().get(indexed_field) {
+                                                    for rc in rrc {
+                                                        debug!("index {}.{} = {:?} ", ln, indexed_field, rc);
 
-                                                            match rc.rtype {
-                                                                DataType::Uri => {
-                                                                    iwp.index_uri(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                                }
-                                                                DataType::String => {
-                                                                    iwp.index_string(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                                }
-
-                                                                DataType::Integer => {
-                                                                    iwp.index_integer(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                                }
-
-                                                                DataType::Datetime => {
-                                                                    iwp.index_date(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                                }
-
-                                                                DataType::Decimal => {
-                                                                    iwp.index_double(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                                }
-
-                                                                DataType::Boolean => {
-                                                                    iwp.index_boolean(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                                }
-
-                                                                DataType::Binary => {}
+                                                        match rc.rtype {
+                                                            DataType::Uri => {
+                                                                iwp.index_uri(self, &format!("{}.{}", ln, indexed_field), rc)?;
                                                             }
-                                                        }
+                                                            DataType::String => {
+                                                                iwp.index_string(self, &format!("{}.{}", ln, indexed_field), rc)?;
+                                                            }
 
-                                                        if !rrc.is_empty() {
-                                                            iwp.index_boolean(self, &format!("{}.{}.isExists", ln, indexed_field), &Resource::new_bool(true))?;
+                                                            DataType::Integer => {
+                                                                iwp.index_integer(self, &format!("{}.{}", ln, indexed_field), rc)?;
+                                                            }
+
+                                                            DataType::Datetime => {
+                                                                iwp.index_date(self, &format!("{}.{}", ln, indexed_field), rc)?;
+                                                            }
+
+                                                            DataType::Decimal => {
+                                                                iwp.index_double(self, &format!("{}.{}", ln, indexed_field), rc)?;
+                                                            }
+
+                                                            DataType::Boolean => {
+                                                                iwp.index_boolean(self, &format!("{}.{}", ln, indexed_field), rc)?;
+                                                            }
+
+                                                            DataType::Binary => {}
                                                         }
+                                                    }
+
+                                                    if !rrc.is_empty() {
+                                                        iwp.index_boolean(self, &format!("{}.{}.isExists", ln, indexed_field), &Resource::new_bool(true))?;
                                                     }
                                                 }
                                             }
