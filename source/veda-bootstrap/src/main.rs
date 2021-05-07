@@ -82,7 +82,7 @@ impl App {
 
         if success_started < self.started_modules.len() {
             for (name, process) in self.started_modules.iter_mut() {
-                if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
+                if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
                     warn!("stop process {} {}", process.id(), name);
                 }
             }
@@ -141,11 +141,9 @@ impl App {
             for (name, process) in self.started_modules.iter_mut() {
                 let (mut is_ok, memory) = is_ok_process(&mut sys, process.id());
 
-                if !mstorage_ready {
-                    if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
-                        warn!("attempt stop module {} {}", process.id(), name);
-                        is_ok = false;
-                    }
+                if !mstorage_ready && signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
+                    warn!("attempt stop module {} {}", process.id(), name);
+                    is_ok = false;
                 }
 
                 debug!("name={}, memory={}", name, memory);
@@ -158,7 +156,7 @@ impl App {
 
                     if exit_code != ModuleError::Fatal as i32 {
                         error!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code);
-                        if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
+                        if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
                             warn!("@1 attempt to stop module, process = {}, name = {}", process.id(), name);
                         }
 
@@ -181,14 +179,14 @@ impl App {
                     if let Some(memory_limit) = module.memory_limit {
                         if memory > memory_limit {
                             warn!("process = {}, memory = {} KiB, limit = {} KiB", name, memory, memory_limit);
-                            if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
+                            if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
                                 warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                             }
                         }
                     }
                 } else {
                     info!("process {} does not exist in the configuration, it will be killed", name);
-                    if let Ok(_) = signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM) {
+                    if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
                         warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                     }
                 }
@@ -233,7 +231,7 @@ impl App {
         let mut test_indv = Individual::default();
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
-        if self.backend.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &mut test_indv).result != ResultCode::Ok {
+        if self.backend.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).result != ResultCode::Ok {
             error!("failed to store test individual, uri = {}", test_indv.get_id());
             return false;
         }
