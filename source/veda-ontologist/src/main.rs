@@ -49,10 +49,8 @@ impl VedaQueueModule for OntologistModule {
                 if let Err(e) = self.onto_index.remove(&id) {
                     error!("failed to remove individual from ontology index, err = {:?}", e);
                 }
-            } else {
-                if let Err(e) = self.onto_index.set(&id, &counter) {
-                    error!("failed to update ontology index, err = {:?}", e);
-                }
+            } else if let Err(e) = self.onto_index.set(&id, &counter) {
+                error!("failed to update ontology index, err = {:?}", e);
             }
         }
 
@@ -61,7 +59,7 @@ impl VedaQueueModule for OntologistModule {
             return Err(PrepareError::Fatal);
         }
 
-        return Ok(true);
+        Ok(true)
     }
 
     fn after_batch(&mut self, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
@@ -79,12 +77,8 @@ impl VedaQueueModule for OntologistModule {
         if !Path::new(&self.ontology_file_path).exists() {
             self.generate_turtle_file();
             self.generate_json_file();
-        } else {
-            if self.is_need_generate && Instant::now().duration_since(self.last_found_changes).as_secs() > 5 {
-                if self.generate_json_file() {
-                    self.is_need_generate = false;
-                }
-            }
+        } else if self.is_need_generate && Instant::now().duration_since(self.last_found_changes).as_secs() > 5 && self.generate_json_file() {
+            self.is_need_generate = false;
         }
 
         Ok(())
@@ -235,7 +229,7 @@ fn main() -> std::io::Result<()> {
         }
         query.push_str("'rdf:type' === '");
         query.push_str(el);
-        query.push_str("'");
+        query.push('\'');
     }
 
     let ontology_file_path = "public/ontology.json";
@@ -269,7 +263,7 @@ fn main() -> std::io::Result<()> {
             backend,
         };
 
-        if my_module.onto_index.len() == 0 {
+        if my_module.onto_index.is_empty() {
             my_module.recover_index_from_ft();
             if let Err(e) = my_module.onto_index.dump() {
                 error!("failed to flush ontology index, err = {:?}", e);
@@ -284,13 +278,9 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-fn test_on_onto(queue_element: &mut Individual, onto_types: &Vec<String>) -> Option<(String, i64, bool)> {
+fn test_on_onto(queue_element: &mut Individual, onto_types: &[String]) -> Option<(String, i64, bool)> {
     if parse_raw(queue_element).is_ok() {
-        let wcmd = queue_element.get_first_integer("cmd");
-        if wcmd.is_none() {
-            return None;
-        }
-        let cmd = IndvOp::from_i64(wcmd.unwrap_or_default());
+        let cmd = IndvOp::from_i64(queue_element.get_first_integer("cmd")?);
 
         let mut prev_state = Individual::default();
         get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
@@ -304,11 +294,9 @@ fn test_on_onto(queue_element: &mut Individual, onto_types: &Vec<String>) -> Opt
                 info!("found ontology changes from storage, uri = {}", new_state.get_id());
                 return Some((new_state.get_id().to_owned(), new_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), is_deleted));
             }
-        } else {
-            if prev_state.any_exists_v("rdf:type", &onto_types) {
-                info!("found ontology changes from storage, uri = {}", prev_state.get_id());
-                return Some((prev_state.get_id().to_owned(), prev_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), true));
-            }
+        } else if prev_state.any_exists_v("rdf:type", &onto_types) {
+            info!("found ontology changes from storage, uri = {}", prev_state.get_id());
+            return Some((prev_state.get_id().to_owned(), prev_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), true));
         }
     }
 
