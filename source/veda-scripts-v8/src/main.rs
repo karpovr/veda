@@ -258,10 +258,8 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
         //}
     }
 
-    if !prepare_if_is_script {
-        if ctx.workplace.scripts.contains_key(&doc_id) {
-            prepare_if_is_script = true;
-        }
+    if !prepare_if_is_script && ctx.workplace.scripts.contains_key(&doc_id) {
+        prepare_if_is_script = true;
     }
 
     if prepare_if_is_script {
@@ -283,7 +281,7 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
 
     let mut last_part_event_id = "";
     let te = event_id.to_owned();
-    let full_path_els: Vec<&str> = te.split(";").collect();
+    let full_path_els: Vec<&str> = te.split(';').collect();
 
     if let Some(s) = full_path_els.get(0) {
         last_part_event_id = s;
@@ -328,28 +326,26 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
 
                 if script.context.is_unsafe {
                     warn!("this script is UNSAFE!, {}", script.id);
-                } else {
-                    if !event_id.is_empty() {
-                        if last_part_event_id == run_script_id || last_part_event_id == "IGNORE" {
-                            error!("skip script, found looped sequence, path: {}", last_part_event_id);
-                            continue;
-                        }
+                } else if !event_id.is_empty() {
+                    if last_part_event_id == run_script_id || last_part_event_id == "IGNORE" {
+                        error!("skip script, found looped sequence, path: {}", last_part_event_id);
+                        continue;
+                    }
 
-                        let mut count_loops = 0;
-                        for el in full_path_els.iter() {
-                            if **el == run_script_id {
-                                count_loops += 1;
-                            }
+                    let mut count_loops = 0;
+                    for el in full_path_els.iter() {
+                        if **el == run_script_id {
+                            count_loops += 1;
                         }
+                    }
 
-                        if count_loops > MAX_COUNT_LOOPS {
-                            error!("skip script, counted ({}) loops in sequencee > {}, path: [{}]", count_loops, MAX_COUNT_LOOPS, event_id);
-                            continue;
-                        }
+                    if count_loops > MAX_COUNT_LOOPS {
+                        error!("skip script, counted ({}) loops in sequencee > {}, path: [{}]", count_loops, MAX_COUNT_LOOPS, event_id);
+                        continue;
+                    }
 
-                        if count_loops > 1 {
-                            warn!("found [{}] loops in sequence, path: [{}]", count_loops, event_id);
-                        }
+                    if count_loops > 1 {
+                        warn!("found [{}] loops in sequence, path: [{}]", count_loops, event_id);
                     }
                 }
 
