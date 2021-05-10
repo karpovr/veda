@@ -104,49 +104,49 @@ impl<'a> AuthWorkPlace<'a> {
                 return false;
             }
 
-            let mut person = Individual::default();
-            if self.backend.get_individual(&user_id, &mut person).is_none() {
+            if let Some(mut person) = self.backend.get_individual_s(&user_id) {
+                self.get_credential(&mut account);
+
+                if !self.secret.is_empty() && self.secret.len() > 5 {
+                    return self.prepare_secret_code(ticket, &person);
+                } else {
+                    let now = Utc::now().naive_utc().timestamp();
+
+                    let is_request_new_password = if self.secret == "?" {
+                        warn!("request for new password, user = {}", account.get_id());
+                        true
+                    } else if !self.is_permanent && self.conf.pass_lifetime > 0 && self.edited > 0 && now - self.edited > self.conf.pass_lifetime {
+                        error!("password is old, lifetime > {} days, user = {}", self.conf.pass_lifetime, account.get_id());
+                        true
+                    } else {
+                        false
+                    };
+
+                    if is_request_new_password {
+                        let res = self.request_new_password(&mut person, self.edited, &mut account);
+                        if res != ResultCode::Ok {
+                            ticket.result = res;
+                            return true;
+                        }
+                    }
+
+                    // ATTEMPT AUTHENTICATION
+                    if !self.stored_password.is_empty() && !self.password.is_empty() && self.password.len() > 63 && self.verify_password() {
+                        create_new_ticket(self.login, &user_id, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
+                        self.user_stat.wrong_count_login = 0;
+                        self.user_stat.last_wrong_login_date = 0;
+                        return true;
+                    } else {
+                        self.user_stat.wrong_count_login += 1;
+                        self.user_stat.last_wrong_login_date = Utc::now().timestamp();
+                        warn!("request passw not equal with exist, user={}", account.get_id());
+                    }
+                }
+            } else {
                 error!("user {} not found", user_id);
                 return false;
             }
 
-            self.get_credential(&mut account);
-
-            if !self.secret.is_empty() && self.secret.len() > 5 {
-                return self.prepare_secret_code(ticket, &person);
-            } else {
-                let now = Utc::now().naive_utc().timestamp();
-
-                let is_request_new_password = if self.secret == "?" {
-                    warn!("request for new password, user = {}", account.get_id());
-                    true
-                } else if !self.is_permanent && self.conf.pass_lifetime > 0 && self.edited > 0 && now - self.edited > self.conf.pass_lifetime {
-                    error!("password is old, lifetime > {} days, user = {}", self.conf.pass_lifetime, account.get_id());
-                    true
-                } else {
-                    false
-                };
-
-                if is_request_new_password {
-                    let res = self.request_new_password(&mut person, self.edited, &mut account);
-                    if res != ResultCode::Ok {
-                        ticket.result = res;
-                        return true;
-                    }
-                }
-
-                // ATTEMPT AUTHENTICATION
-                if !self.stored_password.is_empty() && !self.password.is_empty() && self.password.len() > 63 && self.verify_password() {
-                    create_new_ticket(self.login, &user_id, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
-                    self.user_stat.wrong_count_login = 0;
-                    self.user_stat.last_wrong_login_date = 0;
-                    return true;
-                } else {
-                    self.user_stat.wrong_count_login += 1;
-                    self.user_stat.last_wrong_login_date = Utc::now().timestamp();
-                    warn!("request passw not equal with exist, user={}", account.get_id());
-                }
-            }
             warn!("user {} not pass", account.get_id());
         } else {
             error!("failed to read, uri = {}", &account_id);
