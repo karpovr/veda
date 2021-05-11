@@ -1,8 +1,15 @@
 /**
- * Usage example
+ * Utility script for processing all files in a directory and its subdirectories
  *
- * node ./process-dir.js ./1 templateExtractor templateRemover
- * node ./process-dir.js ./1 uriToFileReplacerTTL uriToFileReplacerHTML
+ * Usage:
+ * node process-dir.js DIR [FN...]
+ * DIR - directory to process
+ * FN - name of a function to apply to each file in directory
+ *
+ * Example:
+ * node process-dir.js 1 templateExtractor
+ * node process-dir.js 1 templateRemover
+ * node process-dir.js 1 uriToFileReplacerTTL uriToFileReplacerHTML
  *
  */
 
@@ -33,7 +40,6 @@ processDirectory(rootDirectory, ...processors);
  * @return {void}
  */
 function processDirectory(dir, ...processFns) {
-  // Loop through all the files in the temp directory
   fs.readdir(dir, function (err, files) {
     if (err) {
       console.error('Could not list the directory.', err);
@@ -57,7 +63,7 @@ function processDirectory(dir, ...processFns) {
   });
 }
 
-/* =========================== UTILITIES =========================== */
+/* =============================== FN =============================== */
 
 /**
  * Simple filename printer
@@ -78,16 +84,21 @@ function templateExtractor(dir, file) {
   if ( ttlRE.test(filePath) ) {
     console.log('Extracting templates from file:', filePath);
     let counter = 0;
-    const content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'r'});
-    content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
+    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
+    content = content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
       const templateFileName = templateUri.replace(':', '_') + '.html';
-      const templateFilePath = [dir, templateFileName].join('/');
+      const templatesDir = [dir, 'templates'].join('/');
+      if (!fs.existsSync(templatesDir)) {
+        fs.mkdirSync(templatesDir);
+      }
+      const templateFilePath = [templatesDir, templateFileName].join('/');
       templateContent = templateContent.trim();
       fs.writeFileSync(templateFilePath, templateContent, 'utf-8');
       counter++;
       return templateUri + otherProps + '\n  v-ui:template "' + templateFileName + '"';
     });
     console.log(`Extracted ${counter} templates`);
+    fs.writeFileSync(filePath, content, 'utf-8');
   }
 }
 
@@ -98,7 +109,7 @@ function templateExtractor(dir, file) {
 function templateRemover(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
-  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n(?: +| *# *)[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"""(.*?)"""(\s*;\n|\n)\./gmis;
+  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n(?: +| *# *)[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"(.*?)"(\s*;\n|\n)\.\n*/gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Removing templates from file:', filePath);
     let counter = 0;
@@ -119,7 +130,7 @@ function templateRemover(dir, file) {
 function uriToFileReplacerTTL(dir, file) {
   const filePath = [dir, file].join('/');
   const filter = /\.ttl$/i;
-  const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate) +(.*?) *(?:;|\n)/gi;
+  const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate) +([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*) *(?:;|\n)/gi;
   if ( filter.test(filePath) ) {
     console.log('Replacing templates URIs to files in file:', filePath);
     let counter = 0;
@@ -141,7 +152,7 @@ function uriToFileReplacerTTL(dir, file) {
 function uriToFileReplacerHTML(dir, file) {
   const filePath = [dir, file].join('/');
   const filter = /\.html$/i;
-  const templateRE = /data-template="(.+?)"/gi;
+  const templateRE = /data-template="([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)"/gi;
   if ( filter.test(filePath) ) {
     console.log('Replacing templates URIs to files in file:', filePath);
     let counter = 0;
