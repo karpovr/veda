@@ -1,3 +1,11 @@
+/**
+ * Usage example
+ *
+ * node ./process-dir.js ./1 templateExtractor templateRemover
+ * node ./process-dir.js ./1 uriToFileReplacerTTL uriToFileReplacerHTML
+ *
+ */
+
 const fs = require('fs');
 const process = require('process');
 
@@ -66,18 +74,20 @@ function printer(dir, file) {
 function templateExtractor(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
-  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n +[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"""(.*?)"""/gmis;
+  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n(?: +| *# *)[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"""(.*?)"""/gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Extracting templates from file:', filePath);
-    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'r'});
-
-    content = content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
+    let counter = 0;
+    const content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'r'});
+    content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
       const templateFileName = templateUri.replace(':', '_') + '.html';
       const templateFilePath = [dir, templateFileName].join('/');
       templateContent = templateContent.trim();
       fs.writeFileSync(templateFilePath, templateContent, 'utf-8');
+      counter++;
       return templateUri + otherProps + '\n  v-ui:template "' + templateFileName + '"';
     });
+    console.log(`Extracted ${counter} templates`);
   }
 }
 
@@ -88,30 +98,60 @@ function templateExtractor(dir, file) {
 function templateRemover(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
-  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n +[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"""(.*?)"""\s*?;\s*?\n\s*\.\n*/gmis;
+  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n(?: +| *# *)[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"""(.*?)"""(\s*;\n|\n)\./gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Removing templates from file:', filePath);
+    let counter = 0;
     let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
-    content = content.replace(templateRE, '');
+    content = content.replace(templateRE, (match) => {
+      counter++;
+      return '';
+    });
+    console.log(`Removed ${counter} templates`);
     fs.writeFileSync(filePath, content, 'utf-8');
   }
 }
 
 /**
- * Template replacer function
+ * Template uri to filename replacer function
  *
  */
-function templateToFileReplacer(dir, file) {
+function uriToFileReplacerTTL(dir, file) {
   const filePath = [dir, file].join('/');
-  const filter = /\.(ttl|html)$/i;
-  const templateRE = /^\s*v-ui:hasTemplate +(.*?)\s*?;\s*?\n\s*\./gmis;
+  const filter = /\.ttl$/i;
+  const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate) +(.*?) *(?:;|\n)/gi;
   if ( filter.test(filePath) ) {
-    console.log('Replacing templates uris to files in file:', filePath);
+    console.log('Replacing templates URIs to files in file:', filePath);
+    let counter = 0;
+    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
+    content = content.replace(templateRE, function (match, predicate, templateUri) {
+      const templateFileName = templateUri.replace(':', '_') + '.html';
+      counter++;
+      return `  ${predicate} "${templateFileName}" ;`;
+    });
+    fs.writeFileSync(filePath, content, 'utf-8');
+    console.log(`Replaced ${counter} URIs`);
+  }
+}
+
+/**
+ * Template uri to filename replacer function
+ *
+ */
+function uriToFileReplacerHTML(dir, file) {
+  const filePath = [dir, file].join('/');
+  const filter = /\.html$/i;
+  const templateRE = /data-template="(.+?)"/gi;
+  if ( filter.test(filePath) ) {
+    console.log('Replacing templates URIs to files in file:', filePath);
+    let counter = 0;
     let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
     content = content.replace(templateRE, function (match, templateUri) {
       const templateFileName = templateUri.replace(':', '_') + '.html';
+      counter++;
+      return `data-template="${templateFileName}"`;
     });
-
     fs.writeFileSync(filePath, content, 'utf-8');
+    console.log(`Replaced ${counter} URIs`);
   }
 }
