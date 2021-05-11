@@ -80,7 +80,7 @@ function printer(dir, file) {
 function templateExtractor(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
-  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n(?: +| *# *)[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"""(.*?)"""/gmis;
+  const templateRE = /^\s*([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)\s*$((?:[\s#]*[a-z][a-z-0-9]*:[a-zA-Z0-9-_]*\s+[^\n]*$)*)\s*v-ui:template\s+"""(.*?)"""/gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Extracting templates from file:', filePath);
     let counter = 0;
@@ -109,7 +109,7 @@ function templateExtractor(dir, file) {
 function templateRemover(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
-  const templateRE = /^([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)$((?:\n(?: +| *# *)[a-z][a-z-0-9]*:[a-zA-Z0-9-_]* +[^\n]*$)*)\n +v-ui:template +"(.*?)"(\s*;\n|\n)\.\n*/gmis;
+  const templateRE = /^\s*([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)\s*$((?:[\s#]*[a-z][a-z-0-9]*:[a-zA-Z0-9-_]*\s+[^\n]*$)*)\s*v-ui:template\s+"(.*?)"\s*;?\s*\.\n*/gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Removing templates from file:', filePath);
     let counter = 0;
