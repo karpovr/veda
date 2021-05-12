@@ -14,6 +14,7 @@
  */
 
 const fs = require('fs');
+const fsAsync = fs.promises;
 const process = require('process');
 
 const rootDirectory = process.argv[2];
@@ -31,7 +32,8 @@ if (!processors.length) {
   processors = processors.map(name => eval(name));
 }
 
-processDirectory(rootDirectory, ...processors);
+console.time('duration');
+processDirectory(rootDirectory, ...processors).then(() => console.timeEnd('duration'));
 
 /**
  * Function to process all files in a directory
@@ -39,28 +41,29 @@ processDirectory(rootDirectory, ...processors);
  * @param {function} processFn
  * @return {void}
  */
-function processDirectory(dir, ...processFns) {
-  fs.readdir(dir, function (err, files) {
-    if (err) {
-      console.error('Could not list the directory.', err);
-      process.exit(1);
-    }
+async function processDirectory(dir, ...processors) {
+  try {
+    const entries = await fsAsync.readdir(dir);
+    return Promise.all(entries.map(processEntry));
+  } catch (err) {
+    console.error('Could not list the directory.', err);
+    process.exit(1);
+  }
 
-    files.forEach(function (file) {
-      const filePath = [dir, file].join('/');
-      fs.stat(filePath, function (error, stat) {
-        if (error) {
-          console.error('Error stating file.', error);
-          return;
-        }
-        if (stat.isFile()) {
-          processFns.forEach(fn => fn(dir, file));
-        } else if (stat.isDirectory()) {
-          processDirectory(filePath, ...processFns);
-        }
-      });
-    });
-  });
+  async function processEntry(entry) {
+    const entryPath = [dir, entry].join('/');
+    try {
+      const stat = await fsAsync.stat(entryPath);
+      if (stat.isFile()) {
+        return processors.reduce((p, fn) => p.then(() => fn(dir, entry)), Promise.resolve());
+      } else if (stat.isDirectory()) {
+        return processDirectory(entryPath, ...processors);
+      }
+    } catch (err) {
+      console.error('Error stating file.', error);
+      return;
+    }
+  }
 }
 
 /* =============================== FN =============================== */
@@ -69,36 +72,49 @@ function processDirectory(dir, ...processFns) {
  * Simple filename printer
  *
  */
-function printer(dir, file) {
-  console.log(dir, file);
+async function printer(dir, file) {
+  console.log(`${dir}/${file}`);
 }
 
 /**
  * Template extractor function
  *
  */
-function templateExtractor(dir, file) {
+async function templateExtractor(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
   const templateRE = /^\s*([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)\s*$((?:[\s#]*[a-z][a-z-0-9]*:[a-zA-Z0-9-_]*\s+[^\n]*$)*)\s*v-ui:template\s+"""(.*?)"""/gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Extracting templates from file:', filePath);
     let counter = 0;
-    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
-    content = content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
-      const templateFileName = templateUri.replace(':', '_') + '.html';
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
       const templatesDir = [dir, 'templates'].join('/');
-      if (!fs.existsSync(templatesDir)) {
-        fs.mkdirSync(templatesDir);
-      }
-      const templateFilePath = [templatesDir, templateFileName].join('/');
-      templateContent = templateContent.trim();
-      fs.writeFileSync(templateFilePath, templateContent, 'utf-8');
-      counter++;
-      return templateUri + otherProps + '\n  v-ui:template "' + templateFileName + '"';
-    });
-    console.log(`Extracted ${counter} templates`);
-    fs.writeFileSync(filePath, content, 'utf-8');
+      const templatesDirExists = fs.existsSync(templatesDir);
+      content = content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
+        const templateFileName = templateUri.replace(':', '_') + '.html';
+        if (!counter && !templatesDirExists) {
+          try {
+            fs.mkdirSync(templatesDir);
+          } catch (err) {
+            console.log(`Error creating templates directory`, err);
+          }
+        }
+        const templateFilePath = [templatesDir, templateFileName].join('/');
+        templateContent = templateContent.trim();
+        try {
+          fs.writeFileSync(templateFilePath, templateContent, 'utf-8');
+          counter++;
+        } catch (err) {
+          console.log(`Error creating template file`, err);
+        }
+        return templateUri + otherProps + '\n  v-ui:template "' + templateFileName + '"';
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+      console.log(`Extracted ${counter} templates`);
+    } catch (err) {
+      console.log(`Error reading/writing TTL file ${filePath}`, err);
+    }
   }
 }
 
@@ -106,20 +122,24 @@ function templateExtractor(dir, file) {
  * Template remover function
  *
  */
-function templateRemover(dir, file) {
+async function templateRemover(dir, file) {
   const filePath = [dir, file].join('/');
   const ttlRE = /\.ttl$/i;
   const templateRE = /^\s*([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)\s*$((?:[\s#]*[a-z][a-z-0-9]*:[a-zA-Z0-9-_]*\s+[^\n]*$)*)\s*v-ui:template\s+"(.*?)"\s*;?\s*\.\n*/gmis;
   if ( ttlRE.test(filePath) ) {
     console.log('Removing templates from file:', filePath);
     let counter = 0;
-    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
-    content = content.replace(templateRE, (match) => {
-      counter++;
-      return '';
-    });
-    console.log(`Removed ${counter} templates`);
-    fs.writeFileSync(filePath, content, 'utf-8');
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
+      content = content.replace(templateRE, (match) => {
+        counter++;
+        return '';
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+      console.log(`Removed ${counter} templates`);
+    } catch (err) {
+      console.log(`Error reading/writing TTL file ${filePath}`, err);
+    }
   }
 }
 
@@ -127,21 +147,25 @@ function templateRemover(dir, file) {
  * Template uri to filename replacer function
  *
  */
-function uriToFileReplacerTTL(dir, file) {
+async function uriToFileTTL(dir, file) {
   const filePath = [dir, file].join('/');
   const filter = /\.ttl$/i;
   const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate) +([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*) *(?:;|\n)/gi;
   if ( filter.test(filePath) ) {
     console.log('Replacing templates URIs to files in file:', filePath);
     let counter = 0;
-    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
-    content = content.replace(templateRE, function (match, predicate, templateUri) {
-      const templateFileName = templateUri.replace(':', '_') + '.html';
-      counter++;
-      return `  ${predicate} "${templateFileName}" ;`;
-    });
-    fs.writeFileSync(filePath, content, 'utf-8');
-    console.log(`Replaced ${counter} URIs`);
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
+      content = content.replace(templateRE, function (match, predicate, templateUri) {
+        const templateFileName = templateUri.replace(':', '_') + '.html';
+        counter++;
+        return `  ${predicate} "${templateFileName}" ;`;
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+      console.log(`Replaced ${counter} URIs`);
+    } catch (err) {
+      console.log(`Error reading/writing TTL file ${filePath}`, err);
+    }
   }
 }
 
@@ -149,20 +173,55 @@ function uriToFileReplacerTTL(dir, file) {
  * Template uri to filename replacer function
  *
  */
-function uriToFileReplacerHTML(dir, file) {
+async function uriToFileHTML(dir, file) {
   const filePath = [dir, file].join('/');
   const filter = /\.html$/i;
   const templateRE = /data-template="([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)"/gi;
   if ( filter.test(filePath) ) {
     console.log('Replacing templates URIs to files in file:', filePath);
     let counter = 0;
-    let content = fs.readFileSync(filePath, {encoding: 'utf8', flag: 'rs+'});
-    content = content.replace(templateRE, function (match, templateUri) {
-      const templateFileName = templateUri.replace(':', '_') + '.html';
-      counter++;
-      return `data-template="${templateFileName}"`;
-    });
-    fs.writeFileSync(filePath, content, 'utf-8');
-    console.log(`Replaced ${counter} URIs`);
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
+      content = content.replace(templateRE, function (match, templateUri) {
+        const templateFileName = templateUri.replace(':', '_') + '.html';
+        counter++;
+        return `data-template="${templateFileName}"`;
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+      console.log(`Replaced ${counter} URIs`);
+    } catch (err) {
+      console.log(`Error reading/writing HTML file ${filePath}`, err);
+    }
+  }
+}
+
+/**
+ * Template uri to filename replacer function
+ *
+ */
+async function uriToFile(dir, file) {
+  const filePath = [dir, file].join('/');
+  const filter = /\.(ttl|html)$/i;
+  const templateRE = /(\b[a-z][a-z-0-9]*:[a-zA-Z0-9-_]*Template\b)/gi;
+  if ( filter.test(filePath) ) {
+    console.log('Replacing templates URIs to filenames in file:', filePath);
+    let counter = 0;
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
+      content = content.replace(templateRE, function (match, templateUri) {
+        const templateFileName = templateUri.replace(':', '_') + '.html';
+        const templateFilePath = process.env.PWD + '/public/templates/' + templateFileName;
+        const templateFileExists = fs.existsSync(templateFilePath);
+        if (templateFileExists) {
+          counter++;
+          return templateFileName;
+        }
+        return match;
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+      console.log(`Replaced ${counter} URIs`);
+    } catch (err) {
+      console.log(`Error reading/writing file ${filePath}`, err);
+    }
   }
 }
