@@ -892,7 +892,21 @@ browserBackend.uploadFile = function (params, tries) {
   });
 };
 
-browserBackend.loadFile = function (url) {
+const memoize = (fn) => {
+  const cache = {};
+  return (...args) => {
+    const n = args[0];
+    if (n in cache) {
+      return cache[n];
+    } else {
+      const result = fn(n);
+      cache[n] = result;
+      return result;
+    }
+  };
+};
+
+browserBackend.loadFile = memoize(function (url) {
   return new Promise(function (resolve, reject) {
     const done = () => {
       if (xhr.status === 200) {
@@ -913,7 +927,7 @@ browserBackend.loadFile = function (url) {
     xhr.ontimeout = fail;
     xhr.send();
   });
-};
+});
 
 // //////////////////////////////////////////////////////////////////////
 
