@@ -150,7 +150,7 @@ async function templateRemover(dir, file) {
 async function uriToFileTTL(dir, file) {
   const filePath = [dir, file].join('/');
   const filter = /\.ttl$/i;
-  const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate) +([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*) *(?:;|\n)/gi;
+  const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate|v-fs:searchBlankTemplate|v-fs:searchResultTemplate) +([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*) *(?:;|\n)/gi;
   if ( filter.test(filePath) ) {
     console.log('Replacing templates URIs to files in file:', filePath);
     let counter = 0;
@@ -197,24 +197,25 @@ async function uriToFileHTML(dir, file) {
 
 /**
  * Template uri to filename replacer function
- *
+ * function checks if corresponding filename exists in public/templates directory
  */
 async function uriToFile(dir, file) {
   const filePath = [dir, file].join('/');
   const filter = /\.(ttl|html)$/i;
-  const templateRE = /(\b[a-z][a-z-0-9]*:[a-zA-Z0-9-_]*Template\b)/gi;
+  const templateRE = /('|")([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*Template)('|")/gi;
   if ( filter.test(filePath) ) {
     console.log('Replacing templates URIs to filenames in file:', filePath);
     let counter = 0;
     try {
       let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
-      content = content.replace(templateRE, function (match, templateUri) {
+      content = content.replace(templateRE, function (match, beg, templateUri, end) {
         const templateFileName = templateUri.replace(':', '_') + '.html';
         const templateFilePath = process.env.PWD + '/public/templates/' + templateFileName;
         const templateFileExists = fs.existsSync(templateFilePath);
+        console.log(templateFileName, templateFilePath, templateFileExists);
         if (templateFileExists) {
           counter++;
-          return templateFileName;
+          return beg + templateFileName + end;
         }
         return match;
       });

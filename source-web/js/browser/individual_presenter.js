@@ -45,7 +45,7 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
   }
 
   const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
-  // const reg_file = /\.html\s*$/;
+  const reg_file = /\.html$/;
 
   return this.load()
     .then(function (individual) {
@@ -63,15 +63,17 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
           } else if (template instanceof HTMLElement) {
             templateString = template.outerHTML;
           }
-          const uri = Util.simpleHash(templateString).toString();
-          template = veda.cache.get(uri) ? veda.cache.get(uri) : new IndividualModel({
-            '@': uri,
-            'v-ui:template': [{data: templateString, type: 'String'}],
-          }, 1);
+          return renderTemplate(individual, container, templateString, mode, extra, toAppend);
         }
         return template.load().then(function (template) {
-          template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
-          return renderTemplate(individual, container, template, mode, extra, toAppend);
+          const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+          if (reg_file.test(templateString)) {
+            return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
+              return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+            });
+          } else {
+            return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+          }
         });
       } else {
         const isClass = individual.hasValue('rdf:type', 'owl:Class') || individual.hasValue('rdf:type', 'rdfs:Class');
@@ -82,8 +84,14 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
             if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
               throw new Error('Template type violation!');
             }
-            template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
-            return renderTemplate(individual, container, template, mode, extra, toAppend);
+            const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+            if (reg_file.test(templateString)) {
+              return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
+                return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+              });
+            } else {
+              return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+            }
           });
         } else {
           const ontology = veda.ontology;
@@ -103,8 +111,14 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
             return Promise.all(templatesPromises);
           }).then(function (templates) {
             const renderedTemplatesPromises = templates.map( function (template) {
-              template = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
-              return renderTemplate(individual, container, template, mode, extra, toAppend);
+              const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+              if (reg_file.test(templateString)) {
+                return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
+                  return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+                });
+              } else {
+                return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+              }
             });
             return Promise.all(renderedTemplatesPromises);
           }).then(function (renderedTemplates) {
@@ -120,16 +134,6 @@ function IndividualPresenter(container, template, mode, extra, toAppend) {
       console.log('Presenter error', error);
     });
 }
-
-/**
- * Get template
- * @param {IndividualModel} individual - individual to render
- * @param {IndividualModel|string} template - template to render individual with
- * @return {Promise}
- */
-/* function getTemplate(individual, template) {
-  return template;
-}*/
 
 /**
  * Render template
