@@ -2,7 +2,7 @@
 extern crate log;
 
 use std::collections::{HashMap, HashSet};
-use std::{fs, process};
+use std::{env, fs, process};
 
 use bincode::{deserialize_from, serialize_into};
 use serde::{Deserialize, Serialize};
@@ -13,8 +13,8 @@ use chrono::prelude::*;
 use chrono_tz::Tz;
 use clickhouse_rs::{errors::Error, Block, ClientHandle, Pool};
 use futures::executor::block_on;
-use std::time::{Instant, Duration};
 use std::thread;
+use std::time::{Duration, Instant};
 
 use v_module::common::load_onto;
 use v_module::info::ModuleInfo;
@@ -38,7 +38,6 @@ type CommittedTypesPropsOps = HashMap<String, HashMap<String, HashSet<i64>>>;
 const BATCH_SIZE: u32 = 3_000_000;
 const BLOCK_LIMIT: usize = 20_000;
 const EXPORTED_TYPE: [&str; 1] = ["v-s:Exportable"];
-const DB: &str = "veda_pt";
 const BATCH_LOG_FILE_NAME: &str = "data/batch-log-index-pt";
 const DEFAULT_CONNECTION_URL: &str = "tcp://default:123@127.0.0.1:9000/?connection_timeout=10s";
 
@@ -67,6 +66,7 @@ pub struct TypePropOps {
 }
 
 pub struct PTIndexer {
+    db_name: String,
     onto: Onto,
     pool: Pool,
     db_predicate_tables: HashMap<String, HashMap<String, String>>,
@@ -186,9 +186,10 @@ impl PTIndexer {
             for (type_name, batch) in self.typed_batch.iter_mut() {
                 while batch.len() > BLOCK_LIMIT {
                     let mut slice = batch.drain(0..BLOCK_LIMIT).collect();
-                    PTIndexer::process_batch(&type_name, &mut slice, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
+                    PTIndexer::process_batch(&self.db_name, &type_name, &mut slice, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file)
+                        .await?;
                 }
-                PTIndexer::process_batch(&type_name, batch, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
+                PTIndexer::process_batch(&self.db_name, &type_name, batch, client, db_predicate_tables, stats, &mut committed_types_props_ops, &batch_log_file).await?;
             }
             fs::remove_file(BATCH_LOG_FILE_NAME)?;
             self.typed_batch.clear();
@@ -199,6 +200,7 @@ impl PTIndexer {
     }
 
     async fn process_batch(
+        db_name: &str,
         type_name: &str,
         batch: &mut Batch,
         client: &mut ClientHandle,
@@ -230,9 +232,9 @@ impl PTIndexer {
         let now = Instant::now();
 
         for (predicate, predicate_table) in predicate_tables {
-            let (block, type_prop_ops) = PTIndexer::mk_block(type_name, predicate.clone(), predicate_table, client, db_predicate_tables).await?;
+            let (block, type_prop_ops) = PTIndexer::mk_block(db_name, type_name, predicate.clone(), predicate_table, client, db_predicate_tables).await?;
 
-            let table = format!("{}.`{}`", DB, predicate);
+            let table = format!("{}.`{}`", db_name, predicate);
 
             client.insert(table, block).await?;
 
@@ -475,6 +477,7 @@ impl PTIndexer {
     }
 
     async fn mk_block(
+        db_name: &str,
         type_name: &str,
         predicate: String,
         predicate_table: PredicateTable,
@@ -528,7 +531,7 @@ impl PTIndexer {
                 column.append(&mut empty);
                 block = block.column(&column_name, column.to_owned());
             }
-            create_predicate_value_column(&predicate, column_name, column_type, client, db_predicate_tables).await?;
+            create_predicate_value_column(db_name, &predicate, column_name, column_type, client, db_predicate_tables).await?;
         }
         Ok((block, predicate_ops))
     }
@@ -550,7 +553,7 @@ impl VedaQueueModule for PTIndexer {
 
     fn after_batch(&mut self, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
         if let Err(e) = block_on(self.process_typed_batch()) {
-            error!("failed to process a batch: {}", e);
+            error!("failed to process a batch: {:?}", e);
             process::exit(101);
         }
         Ok(true)
@@ -563,6 +566,20 @@ impl VedaQueueModule for PTIndexer {
     fn before_start(&mut self) {}
 
     fn before_exit(&mut self) {}
+}
+
+fn get_value_from_args(param: &str) -> Option<String> {
+    let args: Vec<String> = env::args().collect();
+
+    for el in args.iter() {
+        if el.starts_with(&("--".to_owned() + param)) {
+            let p: Vec<&str> = el.split('=').collect();
+            if let Some(v) = p.get(1) {
+                return Some(v.to_string());
+            }
+        }
+    }
+    None
 }
 
 fn main() -> Result<(), Error> {
@@ -582,9 +599,11 @@ fn main() -> Result<(), Error> {
     let url = &Module::get_property("query_indexer_db").unwrap_or(String::from(DEFAULT_CONNECTION_URL));
     let mut pool = Pool::new(url.to_string());
 
+    let db_name = get_value_from_args("db_name").unwrap_or("veda_pt".to_owned());
+
     println!("connecting to clickhouse...");
     loop {
-        match block_on(init_clickhouse(&mut pool)) {
+        match block_on(init_clickhouse(&db_name, &mut pool)) {
             Ok(()) => break,
             Err(err) => {
                 println!("failed to connect to clickhouse, err = {:?}", err);
@@ -593,7 +612,7 @@ fn main() -> Result<(), Error> {
         }
     }
 
-    let db_predicate_tables = block_on(read_predicate_tables(&mut pool))?;
+    let db_predicate_tables = block_on(read_predicate_tables(&db_name, &mut pool))?;
 
     let typed_batch: TypedBatch = HashMap::new();
     let stats = Stats {
@@ -606,6 +625,7 @@ fn main() -> Result<(), Error> {
     };
 
     let mut pt_indexer = PTIndexer {
+        db_name,
         onto: Onto::default(),
         pool,
         db_predicate_tables,
@@ -622,6 +642,7 @@ fn main() -> Result<(), Error> {
 }
 
 async fn create_predicate_table(
+    db_name: &str,
     predicate_name: &str,
     client: &mut ClientHandle,
     db_predicate_tables: &mut HashMap<String, HashMap<String, String>>,
@@ -642,7 +663,7 @@ async fn create_predicate_table(
         ORDER BY (`rdf_type_str`, `v_s_created_date`, id)
         PARTITION BY (`rdf_type_str`)
     ",
-        DB, predicate_name
+        db_name, predicate_name
     );
     client.execute(query).await?;
     let mut table_columns: HashMap<String, String> = HashMap::new();
@@ -656,6 +677,7 @@ async fn create_predicate_table(
 }
 
 async fn create_predicate_value_column(
+    db_name: &str,
     predicate_name: &str,
     column_name: &str,
     column_type: &str,
@@ -663,13 +685,13 @@ async fn create_predicate_value_column(
     db_predicate_tables: &mut HashMap<String, HashMap<String, String>>,
 ) -> Result<(), Error> {
     if None == db_predicate_tables.get_mut(predicate_name) {
-        create_predicate_table(predicate_name, client, db_predicate_tables).await?;
+        create_predicate_table(db_name, predicate_name, client, db_predicate_tables).await?;
     }
     if let Some(table_columns) = db_predicate_tables.get_mut(predicate_name) {
         if table_columns.get(column_name).is_some() {
             return Ok(());
         } else {
-            let query = format!("ALTER TABLE {}.`{}` ADD COLUMN IF NOT EXISTS `{}` {}", DB, predicate_name, column_name, column_type);
+            let query = format!("ALTER TABLE {}.`{}` ADD COLUMN IF NOT EXISTS `{}` {}", db_name, predicate_name, column_name, column_type);
             client.execute(query).await?;
             table_columns.insert(column_name.to_owned(), column_type.to_owned());
         }
@@ -677,14 +699,14 @@ async fn create_predicate_value_column(
     Ok(())
 }
 
-async fn read_predicate_tables(pool: &mut Pool) -> Result<HashMap<String, HashMap<String, String>>, Error> {
-    let read_tables_query = format!("SELECT name from system.tables where database = '{}'", DB);
+async fn read_predicate_tables(db_name: &str, pool: &mut Pool) -> Result<HashMap<String, HashMap<String, String>>, Error> {
+    let read_tables_query = format!("SELECT name from system.tables where database = '{}'", db_name);
     let mut tables: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut client = pool.get_handle().await?;
     let tables_block = client.query(read_tables_query).fetch_all().await?;
     for row_table in tables_block.rows() {
         let table_name: String = row_table.get("name")?;
-        let read_columns = format!("DESCRIBE {}.`{}`", DB, table_name);
+        let read_columns = format!("DESCRIBE {}.`{}`", db_name, table_name);
         let mut table_columns: HashMap<String, String> = HashMap::new();
         let columns_block = client.query(read_columns).fetch_all().await?;
         for row_column in columns_block.rows() {
@@ -697,8 +719,8 @@ async fn read_predicate_tables(pool: &mut Pool) -> Result<HashMap<String, HashMa
     Ok(tables)
 }
 
-async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
-    let init_veda_db = format!("CREATE DATABASE IF NOT EXISTS {}", DB);
+async fn init_clickhouse(db_name: &str, pool: &mut Pool) -> Result<(), Error> {
+    let init_veda_db = format!("CREATE DATABASE IF NOT EXISTS {}", db_name);
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
     Ok(())

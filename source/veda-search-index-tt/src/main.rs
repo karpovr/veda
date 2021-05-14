@@ -14,8 +14,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter};
-use std::time::{Instant, Duration};
-use std::{fs, process, thread};
+use std::time::{Duration, Instant};
+use std::{env, fs, process, thread};
 use v_module::info::ModuleInfo;
 use v_module::module::*;
 use v_module::v_api::IndvOp;
@@ -32,7 +32,6 @@ type CommittedTypesOps = HashMap<String, HashSet<i64>>;
 
 const BATCH_SIZE: u32 = 3_000_000;
 const BLOCK_LIMIT: usize = 20_000;
-const DB: &str = "veda_tt";
 const BATCH_LOG_FILE_NAME: &str = "data/batch-log-index-tt";
 const DEFAULT_CONNECTION_URL: &str = "tcp://default:123@127.0.0.1:9000/?connection_timeout=10s";
 
@@ -59,6 +58,7 @@ pub struct TypeOps {
 }
 
 pub struct TTIndexer {
+    db_name: String,
     pool: Pool,
     db_type_tables: HashMap<String, HashMap<String, String>>,
     typed_batch: TypedBatch,
@@ -166,9 +166,9 @@ impl TTIndexer {
             for (type_name, batch) in self.typed_batch.iter_mut() {
                 while batch.len() > BLOCK_LIMIT {
                     let mut slice = batch.drain(0..BLOCK_LIMIT).collect();
-                    TTIndexer::process_batch(&type_name, &mut slice, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
+                    TTIndexer::process_batch(&self.db_name, &type_name, &mut slice, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
                 }
-                TTIndexer::process_batch(&type_name, batch, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
+                TTIndexer::process_batch(&self.db_name, &type_name, batch, client, db_type_tables, stats, &mut committed_types_ops, &batch_log_file).await?;
             }
             fs::remove_file(BATCH_LOG_FILE_NAME)?;
             self.typed_batch.clear();
@@ -179,6 +179,7 @@ impl TTIndexer {
     }
 
     async fn process_batch(
+        db_name: &str,
         type_name: &str,
         batch: &mut Batch,
         client: &mut ClientHandle,
@@ -232,14 +233,14 @@ impl TTIndexer {
 
         let rows = id_column.len();
 
-        let block = TTIndexer::mk_block(type_name, id_column, sign_column, version_column, text_column, &mut columns, client, db_type_tables).await?;
+        let block = TTIndexer::mk_block(db_name, type_name, id_column, sign_column, version_column, text_column, &mut columns, client, db_type_tables).await?;
 
         if block.row_count() == 0 {
             info!("block is empty! nothing to insert");
             return Ok(());
         }
 
-        let table = format!("{}.`{}`", DB, type_name);
+        let table = format!("{}.`{}`", db_name, type_name);
 
         client.insert(table, block).await?;
 
@@ -451,6 +452,7 @@ impl TTIndexer {
     }
 
     async fn mk_block(
+        db_name: &str,
         type_name: &str,
         id_column: Vec<String>,
         sign_column: Vec<i8>,
@@ -494,7 +496,7 @@ impl TTIndexer {
                 //info!("column: {}, size: {}, {:?}", column_name, column.len(), column);
                 block = block.column(&column_name, column.to_owned());
             }
-            create_type_predicate_column(type_name, &column_name, &column_type, client, db_type_tables).await?;
+            create_type_predicate_column(db_name, type_name, &column_name, &column_type, client, db_type_tables).await?;
         }
         Ok(block)
     }
@@ -516,7 +518,7 @@ impl VedaQueueModule for TTIndexer {
 
     fn after_batch(&mut self, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
         if let Err(e) = block_on(self.process_typed_batch()) {
-            error!("error processing batch, err = {}", e);
+            error!("error processing batch, err = {:?}", e);
             process::exit(101);
         }
         Ok(true)
@@ -535,6 +537,20 @@ impl VedaQueueModule for TTIndexer {
     }
 }
 
+fn get_value_from_args(param: &str) -> Option<String> {
+    let args: Vec<String> = env::args().collect();
+
+    for el in args.iter() {
+        if el.starts_with(&("--".to_owned() + param)) {
+            let p: Vec<&str> = el.split('=').collect();
+            if let Some(v) = p.get(1) {
+                return Some(v.to_string());
+            }
+        }
+    }
+    None
+}
+
 fn main() -> Result<(), Error> {
     let mut module = Module::new_with_name("search_index_tt");
 
@@ -547,9 +563,11 @@ fn main() -> Result<(), Error> {
     let url = &Module::get_property("query_indexer_db").unwrap_or(String::from(DEFAULT_CONNECTION_URL));
     let mut pool = Pool::new(url.to_string());
 
+    let db_name = get_value_from_args("db_name").unwrap_or("veda_tt".to_owned());
+
     println!("connecting to clickhouse...");
     loop {
-        match block_on(init_clickhouse(&mut pool)) {
+        match block_on(init_clickhouse(&db_name, &mut pool)) {
             Ok(()) => break,
             Err(err) => {
                 println!("failed to connect to clickhouse, err = {:?}", err);
@@ -558,7 +576,7 @@ fn main() -> Result<(), Error> {
         }
     }
 
-    let db_type_tables = block_on(read_type_tables(&mut pool))?;
+    let db_type_tables = block_on(read_type_tables(&db_name, &mut pool))?;
 
     let typed_batch: TypedBatch = HashMap::new();
     let stats = Stats {
@@ -571,6 +589,7 @@ fn main() -> Result<(), Error> {
     };
 
     let mut tt_indexer = TTIndexer {
+        db_name,
         pool,
         db_type_tables,
         typed_batch,
@@ -584,6 +603,7 @@ fn main() -> Result<(), Error> {
 }
 
 async fn create_type_predicate_column(
+    db_name: &str,
     type_name: &str,
     column_name: &str,
     column_type: &str,
@@ -591,13 +611,13 @@ async fn create_type_predicate_column(
     db_type_tables: &mut HashMap<String, HashMap<String, String>>,
 ) -> Result<(), Error> {
     if None == db_type_tables.get_mut(type_name) {
-        create_type_table(type_name, client, db_type_tables).await?;
+        create_type_table(db_name, type_name, client, db_type_tables).await?;
     }
     if let Some(table_columns) = db_type_tables.get_mut(type_name) {
         if table_columns.get(column_name).is_some() {
             return Ok(());
         } else {
-            let query = format!("ALTER TABLE {}.`{}` ADD COLUMN IF NOT EXISTS `{}` {}", DB, type_name, column_name, column_type);
+            let query = format!("ALTER TABLE {}.`{}` ADD COLUMN IF NOT EXISTS `{}` {}", db_name, type_name, column_name, column_type);
             client.execute(query).await?;
             table_columns.insert(column_name.to_string(), column_type.to_string());
         }
@@ -605,7 +625,12 @@ async fn create_type_predicate_column(
     Ok(())
 }
 
-async fn create_type_table(type_name: &str, client: &mut ClientHandle, db_type_tables: &mut HashMap<String, HashMap<String, String>>) -> Result<(), Error> {
+async fn create_type_table(
+    db_name: &str,
+    type_name: &str,
+    client: &mut ClientHandle,
+    db_type_tables: &mut HashMap<String, HashMap<String, String>>,
+) -> Result<(), Error> {
     if db_type_tables.get(type_name).is_some() {
         return Ok(());
     }
@@ -623,7 +648,7 @@ async fn create_type_table(type_name: &str, client: &mut ClientHandle, db_type_t
         ORDER BY (`v_s_created_date`[1], id)
         PARTITION BY (toYear(`v_s_created_date`[1]))
     ",
-        DB, type_name
+        db_name, type_name
     );
     client.execute(query).await?;
     let mut table_columns: HashMap<String, String> = HashMap::new();
@@ -637,14 +662,14 @@ async fn create_type_table(type_name: &str, client: &mut ClientHandle, db_type_t
     Ok(())
 }
 
-async fn read_type_tables(pool: &mut Pool) -> Result<HashMap<String, HashMap<String, String>>, Error> {
-    let read_tables_query = format!("SELECT name from system.tables where database = '{}'", DB);
+async fn read_type_tables(db_name: &str, pool: &mut Pool) -> Result<HashMap<String, HashMap<String, String>>, Error> {
+    let read_tables_query = format!("SELECT name from system.tables where database = '{}'", db_name);
     let mut tables: HashMap<String, HashMap<String, String>> = HashMap::new();
     let mut client = pool.get_handle().await?;
     let tables_block = client.query(read_tables_query).fetch_all().await?;
     for row_table in tables_block.rows() {
         let table_name: String = row_table.get("name")?;
-        let read_columns = format!("DESCRIBE {}.`{}`", DB, table_name);
+        let read_columns = format!("DESCRIBE {}.`{}`", db_name, table_name);
         let mut table_columns: HashMap<String, String> = HashMap::new();
         let columns_block = client.query(read_columns).fetch_all().await?;
         for row_column in columns_block.rows() {
@@ -657,8 +682,8 @@ async fn read_type_tables(pool: &mut Pool) -> Result<HashMap<String, HashMap<Str
     Ok(tables)
 }
 
-async fn init_clickhouse(pool: &mut Pool) -> Result<(), Error> {
-    let init_veda_db = format!("CREATE DATABASE IF NOT EXISTS {}", DB);
+async fn init_clickhouse(db_name: &str, pool: &mut Pool) -> Result<(), Error> {
+    let init_veda_db = format!("CREATE DATABASE IF NOT EXISTS {}", db_name);
     let mut client = pool.get_handle().await?;
     client.execute(init_veda_db).await?;
     Ok(())
