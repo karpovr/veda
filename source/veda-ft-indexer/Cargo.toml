@@ -7,10 +7,10 @@ edition = "2018"
 [dependencies]
 chrono = "0.4"
 log = "0.4"
-xapian-rusty = "=0.0.47"
+xapian-rusty = "=0.0.48"
 #xapian-rusty = { path = "../xapian-rusty" }
 
 v_queue = "0.1.7"
 
 v_module = { package = "v-common-module", version = "=0.1.38" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.39" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.42" }
