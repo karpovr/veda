@@ -52,6 +52,14 @@ v-s:hasAction
   rdfs:subPropertyOf v-s:hasActivity ;
   rdfs:domain v-s:Activity ;
 .
+v-s:hasPreliminaryAction
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Предварительное мероприятие"@ru ;
+  rdfs:label "Preliminary action"@en ;
+  rdfs:range v-s:Action ;
+  rdfs:subPropertyOf v-s:hasActivity ;
+  rdfs:domain v-s:Activity ;
+.
 v-s:activityApprover
   rdf:type owl:ObjectProperty ;
   rdfs:label "Утверждающий"@ru ;
