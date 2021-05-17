@@ -1541,7 +1541,7 @@ v-s:Dictionary
 #------------------------------------------------------
 v-s:Deletable
   rdf:type owl:Class ;
-  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:SystemThing ;
   rdfs:label "Удаляемый"@ru ;
   rdfs:label "Deletable"@en ;
 .
