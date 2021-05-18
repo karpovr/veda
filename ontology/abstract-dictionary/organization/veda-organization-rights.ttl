@@ -4,6 +4,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
 
 <http://semantic-machines.com/veda/veda-organization-rights>
   rdf:type owl:Ontology ;
@@ -13,96 +14,47 @@
   v-s:loadPriority 6 ;
 .
 
-# ------------------------------------------------------------ ГРУППЫ --
 
-v-s:Organization_Environment
-  rdf:type v-s:Group ;
-  rdfs:label "Окружение Organization - схема и индивиды" ;
-.
-v-s:OrganizationStructure_Environment
-  rdf:type v-s:Group ;
-  rdfs:label "Окружение OrganizationStructure - схема и индивиды" ;
-.
-v-s:Organization_Admin
-  rdf:type v-s:Group ;
-  rdfs:label "Администраторы v-s:Organization" ;
-.
-v-s:Organization_BaseUser
-  rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи Organization" ;
-.
-v-s:Organization_ReadUser
-  rdf:type v-s:Group ;
-  rdfs:label "Пользователи с правами просмотра всех Organization" ;
-.
-v-s:OrganizationStructure_BaseUser
-  rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи OrganizationStructure" ;
-.
-# ------------------------------------------------------------ ПРАВА --
-
-v-s:Organization_Admin_permission
+# ----------------------------------------------------------- УПРАВЛЕНИЕ ПРАВАМИ ------------
+#------------------------------------------------------------------Создание------------------
+#C
+v-s:Perm_OrgStr_ContactManagerGroup_C
   rdf:type v-s:PermissionStatement ;
-  v-s:permissionObject v-s:Organization_Environment ;
-  v-s:permissionSubject v-s:Organization_Admin ;
+  v-s:permissionObject v-s:Position ;
+  v-s:permissionObject v-s:Appointment ;
+  v-s:permissionObject v-s:Person ;
+  v-s:permissionObject v-s:CommunicationMean ; 
+  v-s:permissionSubject cfg:ContactManagerGroup;
   v-s:canCreate "true"^^xsd:boolean ;
+  rdfs:label "Группа админов контактного справочника С Должность, Назначение, Персона, Средство связи" ;
+.
+
+#RU
+v-s:Perm_OrgStr_ContactManagerGroup_RU
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Organization_group ;
+  v-s:permissionObject v-s:Department_group ;
+  v-s:permissionObject v-s:Subsidiary_group;
+  v-s:permissionSubject cfg:ContactManagerGroup;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:canUpdate "true"^^xsd:boolean ;
+  rdfs:label "Группа админов контактного справочника RU Организация, Подразделение, Филиал" ;
+.
+
+#RUD
+v-s:Perm_OrgStr_ContactManagerGroup_RUD
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Position_group ;
+  v-s:permissionObject v-s:Appointment_group ;
+  v-s:permissionObject v-s:Person_group ;
+  v-s:permissionObject v-s:CommunicationMean_group ;
+  v-s:permissionSubject cfg:ContactManagerGroup;
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
   v-s:canDelete "true"^^xsd:boolean ;
-  rdfs:label "CRUD. Администраторы Organization. Окружение Organization" ;
+  rdfs:label "Группа админов контактного справочника RUD Средство связи" ;
 .
-v-s:Organization_BaseUser_permission
-  rdf:type v-s:PermissionStatement ;
-  v-s:permissionObject v-s:Organization_Environment ;
-  v-s:permissionSubject v-s:Organization_BaseUser ;
-  v-s:canCreate "true"^^xsd:boolean ;
-  v-s:canRead "true"^^xsd:boolean ;
-  v-s:canUpdate "true"^^xsd:boolean ;
-  rdfs:label "CRU. Основные пользователи Organization. Окружение Organization справочники, справочники Veda" ;
-.
-v-s:Organization_ReadUser_permission
-  rdf:type v-s:PermissionStatement ;
-  v-s:permissionObject v-s:Organization_Environment ;
-  v-s:permissionSubject v-s:Organization_ReadUser ;
-  v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "R. Все пользователи Organization. Окружение Organization" ;
-.
-v-s:OrganizationStructure_BaseUser_permission
-  rdf:type v-s:PermissionStatement ;
-  v-s:permissionObject v-s:OrganizationStructure_Environment ;
-  v-s:permissionSubject v-s:OrganizationStructure_BaseUser ;
-  v-s:canCreate "true"^^xsd:boolean ;
-  #v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "CR. Основные пользователи OrganizationStructure. Окружение OrganizationStructure" ;
-.
-# ------------------------------------------------------------ ВКЛЮЧЕНИЯ В ГРУППЫ --
 
-v-s:Organization_Environment_membership
-  rdf:type v-s:Membership ;
-  v-s:memberOf v-s:Organization_Environment ;
-  v-s:resource v-s:Organization ;
-  v-s:resource v-s:Organization_group ;
-  v-s:resource v-s:Subsidiary ;
-  v-s:resource v-s:Subsidiary_group ;
-  v-s:resource v-s:CommunicationMean ;
-  v-s:resource v-s:CommunicationMean_group ;  
-  rdfs:label "Члены группы Окружение Organization - схема и индивиды" ;
-.
-v-s:OrganizationStructure_Environment_membership
-  rdf:type v-s:Membership ;
-  v-s:memberOf v-s:OrganizationStructure_Environment ;
-  v-s:resource v-s:Department ;
-  v-s:resource v-s:Department_group ;  
-  v-s:resource v-s:Position ;
-  v-s:resource v-s:Position_group ;  
-  v-s:resource v-s:Appointment ;
-  v-s:resource v-s:Appointment_group ;  
-  v-s:resource v-s:Person ;
-  v-s:resource v-s:Person_group ;  
-  v-s:resource v-s:CommunicationMean ;
-  v-s:resource v-s:CommunicationMean_group ;  
-  rdfs:label "Члены группы Окружение OrganizationStructure - схема и индивиды" ;
-.
 
 #-----------------------------------------------Группы для внешних организаций
 v-s:OrganizationsWithVedaAccount
@@ -121,31 +73,60 @@ v-s:OrganizationsWithoutLimitedClassTypes
   rdf:type v-s:Group ;
   rdfs:label "Компании с потенциальным доступом к просмотру документов" ;
 .
-#-------------------------------------------
-v-s:OrganizationsWithVedaAccount_membership
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------ ВКЛЮЧЕНИЯ В ГРУППЫ --
+
+v-s:Organization_Environment_membership
   rdf:type v-s:Membership ;
-  v-s:memberOf v-s:OrganizationsWithVedaAccount ;
-  rdfs:label "Включение в группу компаний созданных в Veda" ;
+  v-s:memberOf v-s:Organization_Environment ;
+  v-s:resource v-s:Organization ;
+  v-s:resource v-s:Organization_group ;
+  v-s:resource v-s:Subsidiary ;
+  v-s:resource v-s:Subsidiary_group ;
+  v-s:resource v-s:CommunicationMean ;
+  v-s:resource v-s:CommunicationMean_group ;  
+  rdfs:label "Члены группы Окружение Organization - схема и индивиды " ;
   v-s:deleted true;
 .
-v-s:OrganizationsWithADAccount_membership
+v-s:OrganizationStructure_Environment_membership
   rdf:type v-s:Membership ;
-  v-s:memberOf v-s:OrganizationsWithADAccount ;
-  rdfs:label "Включение в группу компаний созданных в AD" ;
+  v-s:memberOf v-s:OrganizationStructure_Environment ;
+  v-s:resource v-s:Department ;
+  v-s:resource v-s:Department_group ;  
+  v-s:resource v-s:Position ;
+  v-s:resource v-s:Position_group ;  
+  v-s:resource v-s:Appointment ;
+  v-s:resource v-s:Appointment_group ;  
+  v-s:resource v-s:Person ;
+  v-s:resource v-s:Person_group ;  
+  v-s:resource v-s:CommunicationMean ;
+  v-s:resource v-s:CommunicationMean_group ;  
+  rdfs:label "Члены группы Окружение OrganizationStructure - схема и индивиды " ;
   v-s:deleted true;
 .
-v-s:OrganizationsWithLimitedClassTypes_membership
-  rdf:type v-s:Membership ;
-  v-s:memberOf v-s:OrganizationsWithLimitedClassTypes ;
-  rdfs:label "Включение в группу компаний с ограниченным доступом к просмотру документов" ;
-  v-s:deleted true;
-.
-v-s:OrganizationsWithoutLimitedClassTypes_membership
-  rdf:type v-s:Membership ;
-  v-s:memberOf v-s:OrganizationsWithoutLimitedClassTypes ;
-  rdfs:label "Включение в группу компаний с потенциальным доступом к просмотру документов" ;
-  v-s:deleted true;
-.
+
+
+
 
 
   
+
+
+
+
+

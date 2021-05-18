@@ -307,3 +307,64 @@ v-s:ContractorLock_Environment_membership
   v-s:resource v-s:ContractorLock_group ;
   rdfs:label "Члены группы Окружение ContractorLock - схема и индивиды" ;
 .
+#----пока здесь. нужно переписать права на точечные permission
+v-s:Organization_BaseUser_permission
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Organization_Environment ;
+  v-s:permissionSubject v-s:Organization_BaseUser ;
+  v-s:canCreate "true"^^xsd:boolean ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:canUpdate "true"^^xsd:boolean ;
+  rdfs:label "CRU. Основные пользователи Organization. Окружение Organization справочники, справочники Veda " ;
+.
+v-s:Organization_ReadUser_permission
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Organization_Environment ;
+  v-s:permissionSubject v-s:Organization_ReadUser ;
+  v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "R. Все пользователи Organization. Окружение Organization" ;
+.
+v-s:Organization_Admin_permission
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Organization_Environment ;
+  v-s:permissionSubject v-s:Organization_Admin ;
+  v-s:canCreate "true"^^xsd:boolean ;
+  v-s:canRead "true"^^xsd:boolean ;
+  v-s:canUpdate "true"^^xsd:boolean ;
+  v-s:canDelete "true"^^xsd:boolean ;
+  rdfs:label "CRUD. Администраторы Organization. Окружение Organization" ;
+.
+v-s:Organization_Admin
+  rdf:type v-s:Group ;
+  rdfs:label "Администраторы v-s:Organization " ;
+.
+v-s:Organization_BaseUser
+  rdf:type v-s:Group ;
+  rdfs:label "Основные пользователи Organization " ;
+.
+v-s:Organization_ReadUser
+  rdf:type v-s:Group ; 
+  rdfs:label "Пользователи с правами просмотра всех Organization " ;
+.
+v-s:Organization_Environment
+  rdf:type v-s:Group ;
+  rdfs:label "Окружение Organization - схема и индивиды " ;
+ .
+v-s:OrganizationStructure_Environment
+  rdf:type v-s:Group ;
+  rdfs:label "Окружение OrganizationStructure - схема и индивиды " ;
+.
+
+v-s:OrganizationStructure_BaseUser
+  rdf:type v-s:Group ;
+  rdfs:label "Основные пользователи OrganizationStructure " ;
+.
+
+v-s:OrganizationStructure_BaseUser_permission
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:OrganizationStructure_Environment ;
+  v-s:permissionSubject v-s:OrganizationStructure_BaseUser ;
+  v-s:canCreate "true"^^xsd:boolean ;
+  #v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "CR. Основные пользователи OrganizationStructure. Окружение OrganizationStructure " ;
+.
