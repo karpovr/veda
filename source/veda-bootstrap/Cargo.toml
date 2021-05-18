@@ -13,5 +13,5 @@ rust-ini = "0.16"
 parse_duration = "2.1.0"
 nix = "0.20.0"
 
-v_module = { package = "v-common-module", version = "=0.1.38" }
+v_module = { package = "v-common-module", version = "=0.1.39" }
 

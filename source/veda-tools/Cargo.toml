@@ -20,5 +20,5 @@ crc32fast = "1.2.0"
 v_authorization = "=0.1.1"
 v_queue = "0.1.7"
 
-v_module = { package = "v-common-module", version = "=0.1.38" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.42" }
+v_module = { package = "v-common-module", version = "=0.1.39" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.43" }
