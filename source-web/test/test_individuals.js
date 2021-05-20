@@ -1101,11 +1101,11 @@ for (i = 0; i < 1; i++) {
             //#10
             test_fail_read(assert, ticket_user1, new_test_doc1['@'], new_test_doc1);
 
-            res = Backend.remove_individual(ticket_user1.id, new_test_doc2['@']);
+            res = Backend.remove_individual(ticket_user2.id, new_test_doc2['@']);
             //Backend.wait_module(m_scripts, res.op_id);
 
             //#11
-            test_fail_read(assert, ticket_user1, new_test_doc2['@'], new_test_doc2);
+            test_fail_read(assert, ticket_user2, new_test_doc2['@'], new_test_doc2);
 
             res = Backend.remove_individual(ticket_user1.id, new_test_doc3['@']);
             //Backend.wait_module(m_scripts, res.op_id);
@@ -1216,7 +1216,7 @@ for (i = 0; i < 1; i++) {
             //#4
             assert.ok(compare(new_test_doc1_set1, read_individual));
 
-			/////////////////////// ADD TO (2)
+      /////////////////////// ADD TO (2)
             var new_test_set1 = {
                 '@': new_test_doc1_uri,
                 'v-s:author': newUri('td:test-e2')
@@ -1239,7 +1239,7 @@ for (i = 0; i < 1; i++) {
             //#5
             assert.ok(compare(new_test_doc1_set1, read_individual));
 
-			/////////////////////// ADD TO (3)
+      /////////////////////// ADD TO (3)
             var new_test_set1 = {
                 '@': new_test_doc1_uri,
                 'v-s:author': newUri('td:test-e3')
@@ -2083,17 +2083,17 @@ for (i = 0; i < 1; i++) {
             'v-s:triggerByType': newUri('rdfs:Resource1'),
             'v-s:script': newStr('if (parent_script_id != "") return;' +
                 'document["v-s:created"]= veda.Util.newDate(new Date("2017-03-03"))[0];' +
-                'put_individual(ticket, document, _event_id);' +                
+                'put_individual(ticket, document, _event_id);' +
                 'var document1 = {' +
-                '"@": document["@"],' + 
+                '"@": document["@"],' +
                 '"v-s:test_Obj": veda.Util.newDate(new Date("2017-03-03"))[0]};'+
                 'set_in_individual(ticket, document1, _event_id);' +
                 'var document2 = {' +
-                '"@": document["@"],' + 
+                '"@": document["@"],' +
                 '"v-s:test_ArArObj": [veda.Util.newInt(20000001)]};'+
                 'add_to_individual(ticket, document2, _event_id);' +
                 'var document3 = {' +
-                '"@": document["@"],' + 
+                '"@": document["@"],' +
                 '"v-s:test_datetime0": veda.Util.newDate(new Date("2017-01-03"))};'+
                 'set_in_individual(ticket, document3, _event_id);'
                 ),
@@ -3080,4 +3080,44 @@ for (i = 0; i < 1; i++) {
 
     });
 
+    QUnit.test("#055 Individual store user1 and remove user2", function (assert) {
+        var ticket_user1 = get_user1_ticket();
+
+        var ticket_user2 = get_user2_ticket();
+
+        //#1
+        assert.ok(ticket_user1.id != "");
+
+        //#2
+        assert.ok(ticket_user2.id != "");
+
+        var new_test_doc1_uri = "test6:" + guid();
+        var new_test_doc1 = {
+            '@': new_test_doc1_uri,
+            'rdf:type': newUri('rdfs:Resource'),
+            'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
+            'v-s:created': newDate(new Date()),
+            'v-s:test_field': newStr('test data', 'NONE')
+        };
+
+        var res = Backend.put_individual(ticket_user1.id, new_test_doc1);
+        Backend.wait_module(m_scripts, res.op_id);
+        Backend.wait_module(m_acl, res.op_id);
+
+        var read_individual1 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri);
+
+        //#3
+        assert.ok(compare(new_test_doc1, read_individual1));
+
+        try {
+            res = Backend.remove_individual(ticket_user2.id, new_test_doc1['@']);
+        } catch (e) {
+            assert.ok(true);
+        }
+
+        var read_individual2 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri);
+
+        //#4
+        assert.ok(compare(new_test_doc1, read_individual2));
+    });
 }
