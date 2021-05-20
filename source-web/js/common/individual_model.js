@@ -208,7 +208,7 @@ function serializer (value) {
   } else if (value instanceof Date) {
     return {
       type: 'Datetime',
-      data: value.toISOString(),
+      data: value.toISOString().split('.')[0]+"Z",
     };
   } else if (value instanceof IndividualModel) {
     return {

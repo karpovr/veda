@@ -592,6 +592,7 @@ System.import('moment').then(function (module) {
         if (input) {
           const timestamp = moment(input, 'DD.MM.YYYY HH:mm').toDate();
           const absolutDate = new Date(timestamp);
+          absolutDate.setSeconds(1);
           absolutDate.setMilliseconds(1);
           return absolutDate;
         }
