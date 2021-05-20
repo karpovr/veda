@@ -950,7 +950,15 @@ v-fs:AttributiveSearchInlineTemplate
     searchResultTemplate = new veda.IndividualModel("v-fs:MinimalSearchResultTemplate");
   }
   return searchResultTemplate.load().then(function (searchResultTemplate) {
-    searchResultTemplate = $( searchResultTemplate["v-ui:template"][0].toString() );
+    var file_reg = /\\.html$/;
+    var templateString = searchResultTemplate["v-ui:template"][0].toString();
+    if (file_reg.test(templateString)) {
+      return veda.Backend.loadFile('/templates/' + templateString);
+    } else {
+      return templateString;
+    }
+  }).then(function (templateString) {
+    var searchResultTemplate = $( templateString );
     var resultContainer = $(".result-container", searchResultTemplate);
     var resultTemplate = resultContainer.html();
     individual.resultTemplate = resultTemplate;
