@@ -346,20 +346,22 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
     for (prefix, full_url) in prefixes.id2namespaces.iter() {
         if !loaded_owl_ontology.contains(prefix) {
-            warn!("prefix not found {}, generate individual", prefix);
-            let mut prefix_indv = Individual::default();
-            prefix_indv.set_id(prefix);
-            prefix_indv.set_uri("rdf:type", "owl:Ontology");
-            let mut url = full_url.to_owned();
+            if !backend.storage.get_individual(prefix, &mut Individual::default()) {
+                warn!("prefix not found {}, generate individual", prefix);
+                let mut prefix_indv = Individual::default();
+                prefix_indv.set_id(prefix);
+                prefix_indv.set_uri("rdf:type", "owl:Ontology");
+                let mut url = full_url.to_owned();
 
-            if !full_url.ends_with('/') {
-                url += "/";
-            }
+                if !full_url.ends_with('/') {
+                    url += "/";
+                }
 
-            prefix_indv.set_string("v-s:fullUrl", &url, Lang::NONE);
-            let res = backend.api.update(systicket, IndvOp::Put, &prefix_indv);
-            if res.result != ResultCode::Ok {
-                error!("failed to store {}", prefix_indv.get_obj().as_json_str());
+                prefix_indv.set_string("v-s:fullUrl", &url, Lang::NONE);
+                let res = backend.api.update(systicket, IndvOp::Put, &prefix_indv);
+                if res.result != ResultCode::Ok {
+                    error!("failed to store {}", prefix_indv.get_obj().as_json_str());
+                }
             }
         }
     }
