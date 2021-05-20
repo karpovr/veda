@@ -328,28 +328,17 @@ for (i = 0; i < 1; i++) {
             //#1
             assert.ok(res["@"] == "owl:");
 
-            var labels = res["rdfs:label"];
-
-            var ee;
-            for (var key in labels) {
-                if (labels[key].lang == "RU") {
-                    ee = labels[key];
-                    break;
-                }
-            }
+            var type = res["rdf:type"][0];
 
             //#2
-            assert.ok(ee != null);
-
-            //#3
-            assert.ok(ee.data == "Словарь OWL 2 Schema (OWL 2)");
+            assert.ok(type.data == "owl:Ontology");
         });
 
     QUnit.test(
         "#003 Query '@' == 'owl:' ++ Get individual 'owl:'",
         function (assert) {
             var ticket = get_user1_ticket();
-            var data = Backend.query(ticket.id, "owl:").result;
+            var data = Backend.query(ticket.id, "'@'=='owl:'").result;
 
             //#1
             assert.ok(data.indexOf("owl:") >= 0);
