@@ -1019,7 +1019,7 @@ for (i = 0; i < 1; i++) {
             var new_test_doc2 = {
                 '@': new_test_doc1_uri_2,
                 'rdf:type': newUri('rdfs:Resource'),
-                'v-s:author': newUri('td:ValeriyBushenev-Programmer2'),
+                'v-s:author': newUri('td:AndreyBychin-Analyst2'),
                 'v-s:created': newDate(new Date()),
                 'v-s:test_field': newUri(test_data)
             };
