@@ -3111,13 +3111,15 @@ for (i = 0; i < 1; i++) {
 
         try {
             res = Backend.remove_individual(ticket_user2.id, new_test_doc1['@']);
+            assert.ok(false);
         } catch (e) {
+            //#4
             assert.ok(true);
         }
 
         var read_individual2 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri);
 
-        //#4
+        //#5
         assert.ok(compare(new_test_doc1, read_individual2));
     });
 }
