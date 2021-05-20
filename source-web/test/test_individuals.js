@@ -1065,7 +1065,7 @@ for (i = 0; i < 1; i++) {
             data = Backend.query(ticket_user2.id, test_data_uid, undefined, undefined, true).result;
 
             //#4
-            assert.ok(compare(data.length, 0));
+            assert.ok(compare(data.length, 1));
 
             data = Backend.query(ticket_user1.id, "'v-s:test_field' === '" + test_data_uid + "'", undefined, undefined, true).result;
 
