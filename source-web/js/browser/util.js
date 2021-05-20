@@ -10,6 +10,8 @@ import Backend from '../common/backend.js';
 
 import Notify from '../browser/notify.js';
 
+import riot from '../common/lib/riot.js';
+
 const Util = veda.Util || {};
 
 export default veda.Util = Util;
