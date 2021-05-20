@@ -346,7 +346,7 @@ export default function Auth() {
     case 473: // Authentication failed
       loginFailedError.style.display = 'block';
       enterLoginPassword.style.display = 'none';
-      reCAPTCHA(onSuccess, onExpired, onSuccess);
+      reCAPTCHA(onSuccess, undefined, onSuccess);
       break;
     default:
       unavailableError.style.display = 'block';
