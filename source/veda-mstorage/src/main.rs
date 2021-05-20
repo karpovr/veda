@@ -332,7 +332,7 @@ fn operation_prepare(
         if cmd == IndvOp::Remove {
             if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8 {
                 error!("operation [Remove], Not Authorized, user = {}, request [can delete], uri = {} ", ticket.user_uri, new_indv.get_id());
-                //return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
+                return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
             }
         } else {
             if !prev_state.is_empty() {
