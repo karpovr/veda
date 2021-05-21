@@ -411,7 +411,7 @@ v-s:PersonalPreferencesTemplate
     <div class="form-group">
       <label about="v-ui:displayedElements" property="rdfs:label"></label>:
       <span class="view -edit -search" about="@" property="v-ui:displayedElements"></span>
-      <veda-control property="v-ui:displayedElements" data-type="select" data-source="{[5,10,20]}" class="-view edit search"></veda-control>
+      <veda-control property="v-ui:displayedElements" data-type="select" data-source="{{[5,10,20]}}" class="-view edit search"></veda-control>
     </div>
   </div>
   <br/>

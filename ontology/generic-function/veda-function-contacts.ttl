@@ -157,7 +157,7 @@ v-s:FavoriteContactTemplate
   </table>
 </div>
 <script>
-  
+
 </script>
 """
 .
@@ -176,7 +176,7 @@ v-ui:CompactCommunicationMeanTemplate
 </div>
 <script>
   //email
-  if (individual.hasValue("v-s:hasCommunicationMeanChannel", "d:a1iwni0b54fvcz41vuts08bxqsh")) { 
+  if (individual.hasValue("v-s:hasCommunicationMeanChannel", "d:a1iwni0b54fvcz41vuts08bxqsh")) {
     $(".simple-text", template).remove();
     var mailto = individual["v-s:description"][0];
     $("a.email-link", template).attr("href", "mailto:"+mailto);
@@ -265,8 +265,8 @@ v-s:ContactCardTemplate
       <div about="@" rel="v-s:hasCommunicationMean" data-template="v-ui:CompactCommunicationMeanTemplate"></div>
     </div>
     <div class="col-md-1">
-      <span class="hidden faviconIcon pointer fa fa-lg fa-star-o"></span>  
-    </div>  
+      <span class="hidden faviconIcon pointer fa fa-lg fa-star-o"></span>
+    </div>
   </td>
   <td>
     <div>
@@ -316,7 +316,7 @@ v-s:ContactsStructureTemplate
 <script>
   if (veda.user && veda.user.hasValue("v-s:parentOrganization")) {
     var selfOrg = veda.user["v-s:parentOrganization"][0];
-    return selfOrg.present($("#selfOrg", template), "v-ui:LabelTemplate");  
+    return selfOrg.present($("#selfOrg", template), "v-ui:LabelTemplate");
   } else {
     $("#selfOrg", template).remove();
   }
@@ -356,7 +356,7 @@ v-s:ContactsStructureTemplate
       <span class="text-muted padding-lg" about="v-fs:CtrlEnterBundle" property="rdfs:label"></span>
     </div>
     <div class="col-md-4">
-      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{individual['rdfs:label'].join(' ') + ', ' + individual['v-s:taxId'][0]}" class="fulltext" data-query-prefix="('rdf:type' === 'v-s:Organization')"></veda-control>
+      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext" data-query-prefix="('rdf:type' === 'v-s:Organization')"></veda-control>
       <span id="selfOrg" class="btn btn-xs btn-primary margin-sm"></span>
       <span id="tenant" class="btn btn-xs btn-primary margin-sm" about="v-s:vedaInfo" rel="v-s:tenant" data-template="v-ui:LabelTemplate"></span>
     </div>
@@ -388,7 +388,7 @@ v-s:ContactsStructureTemplate
           <span about="v-fs:cursor" property="rdfs:label"></span>
           <span class="badge"></span>&nbsp;&nbsp;
           <span about="v-fs:estimated" property="rdfs:label"></span>
-          <span class="badge"></span>  
+          <span class="badge"></span>
         </small>
       </th>
       <th width="28%"></th>
@@ -403,7 +403,7 @@ v-s:ContactsStructureTemplate
             <span about="v-fs:cursor" property="rdfs:label"></span>
             <span class="badge"></span>&nbsp;&nbsp;
             <span about="v-fs:estimated" property="rdfs:label"></span>
-            <span class="badge"></span>  
+            <span class="badge"></span>
           </small>
         </td>
         <td></td>
@@ -411,7 +411,7 @@ v-s:ContactsStructureTemplate
       </tr>
     </tfoot>
   </table>
-  
+
   <table class="table result-table" id="resultDep" style="display:none">
     <thead>
       <th width="7%"><span class="glyphicon glyphicon-chevron-down"></span></th>
@@ -421,7 +421,7 @@ v-s:ContactsStructureTemplate
           <span about="v-fs:cursor" property="rdfs:label"></span>
           <span class="badge"></span>&nbsp;&nbsp;
           <span about="v-fs:estimated" property="rdfs:label"></span>
-          <span class="badge"></span>  
+          <span class="badge"></span>
         </small>
       </th>
       <th width="28%"></th>
@@ -436,7 +436,7 @@ v-s:ContactsStructureTemplate
             <span about="v-fs:cursor" property="rdfs:label"></span>
             <span class="badge"></span>&nbsp;&nbsp;
             <span about="v-fs:estimated" property="rdfs:label"></span>
-            <span class="badge"></span>  
+            <span class="badge"></span>
           </small>
         </td>
         <td></td>
@@ -453,7 +453,7 @@ v-s:ContactsStructureTemplate
           <span about="v-fs:cursor" property="rdfs:label"></span>
           <span class="badge"></span>&nbsp;&nbsp;
           <span about="v-fs:estimated" property="rdfs:label"></span>
-          <span class="badge"></span>  
+          <span class="badge"></span>
         </small>
       </th>
       <th width="28%"></th>
@@ -468,7 +468,7 @@ v-s:ContactsStructureTemplate
             <span about="v-fs:cursor" property="rdfs:label"></span>
             <span class="badge"></span>&nbsp;&nbsp;
             <span about="v-fs:estimated" property="rdfs:label"></span>
-            <span class="badge"></span>  
+            <span class="badge"></span>
           </small>
         </td>
         <td></td>
@@ -485,7 +485,7 @@ v-s:ContactsStructureTemplate
           <span about="v-fs:cursor" property="rdfs:label"></span>
           <span class="badge"></span>&nbsp;&nbsp;
           <span about="v-fs:estimated" property="rdfs:label"></span>
-          <span class="badge"></span>  
+          <span class="badge"></span>
         </small>
       </th>
       <th width="28%"></th>
@@ -500,7 +500,7 @@ v-s:ContactsStructureTemplate
             <span about="v-fs:cursor" property="rdfs:label"></span>
             <span class="badge"></span>&nbsp;&nbsp;
             <span about="v-fs:estimated" property="rdfs:label"></span>
-            <span class="badge"></span>  
+            <span class="badge"></span>
           </small>
         </td>
         <td></td>
@@ -517,7 +517,7 @@ v-s:ContactsStructureTemplate
         <div about="@" rel="v-s:hasCommunicationMean">
           <div>
             <strong about="@" rel="v-s:hasCommunicationMeanChannel" data-template="v-ui:LabelTemplate"></strong>
-            <span about="@" property="v-s:description"></span>  
+            <span about="@" property="v-s:description"></span>
           </div>
         </div>
       </div>
@@ -538,7 +538,7 @@ v-s:ContactsStructureTemplate
                 <span about="v-fs:cursor" property="rdfs:label"></span>
                 <span class="badge"></span>&nbsp;&nbsp;
                 <span about="v-fs:estimated" property="rdfs:label"></span>
-                <span class="badge"></span>  
+                <span class="badge"></span>
               </small>
             </td>
             <td></td><td></td>
@@ -563,7 +563,7 @@ v-s:ContactsStructureTemplate
     if (vedaInfo.hasValue("v-s:tenant")) {
       $("#tenant", template).click(function(){
         individual["v-s:managedOrganization"] = vedaInfo["v-s:tenant"];
-      });    
+      });
     } else {
       $("#tenant", template).remove();
     };
@@ -572,7 +572,7 @@ v-s:ContactsStructureTemplate
   veda.user.isMemberOf("cfg:ContactManagerGroup").then(function(isMember) {
     isContactManager = isMember;
   });
-  
+
   $("#selfOrg", template).click(function(){
     individual["v-s:managedOrganization"] = veda.user["v-s:parentOrganization"];
   });
@@ -598,7 +598,7 @@ v-s:ContactsStructureTemplate
   var orgTree = $("#orgTree", template);
   var orgContent = $("#orgContent", template);
 
-  var parentContainerTmpl = 
+  var parentContainerTmpl =
     '<div class="row">'+
       '<div class="col-md-7">'+
         '<strong about="@" property="rdfs:label"></strong>'+
@@ -616,7 +616,7 @@ v-s:ContactsStructureTemplate
         '</div>'+
       '</div>'+
     '</div>';
-  
+
   function drawCards(parent, from) {
     loadIndicator.show();
     var isNeedBtnMore = false;
@@ -839,11 +839,11 @@ v-s:ContactsStructureTemplate
         return getParentUnitChain(parentUnit, acc);
       } else {
         return acc;
-      }; 
+      };
     });
   }
   var searchTextBundle = new veda.IndividualModel("v-s:SearchTextBundle").load().then(function(bundle) {
-    $("#searchText input", template).attr("placeholder", bundle["rdfs:label"].map(veda.Util.formatValue).join(" "));  
+    $("#searchText input", template).attr("placeholder", bundle["rdfs:label"].map(veda.Util.formatValue).join(" "));
   });
 
   $("#searchButton", template).click(function(){
@@ -852,7 +852,7 @@ v-s:ContactsStructureTemplate
     searchText = searchText.trim();
     setSearchHelperObjToDefault();
     loadIndicator.show();
-    
+
     var isPhoneSearch = false;
     var isEmailSearch = false;
 
@@ -865,7 +865,7 @@ v-s:ContactsStructureTemplate
     $("tbody", resultApp).empty();
     var resultPos = $("#resultPos", template).hide();
     $("tbody", resultPos).empty();
-    
+
     isPhoneSearch = searchText.match("^"+String.fromCharCode(92)+"+?["+String.fromCharCode(92)+"d-"+String.fromCharCode(92)+"s]*$") != null;
     isEmailSearch = searchText.match("^.*@{1}") != null;
 
@@ -959,7 +959,7 @@ v-s:ContactsStructureTemplate
       templates.forEach(function(tmpl) {
         if (isContactManager) $(".zoom.hidden", tmpl).removeClass("hidden");
         $("tbody", container).append(tmpl);
-      });      
+      });
       $("span.badge:nth-child(4)", container).text(searchHelperObj[objType].estimated);
       $("span.badge:nth-child(2)", container).text(searchHelperObj[objType].handlered);
       if ($("tbody tr", container).length < searchHelperObj[objType].estimated) {
@@ -1169,7 +1169,7 @@ v-s:ContactsStructureTemplate
       }).then(function(row) {
         row.click();
         return true;
-      })     
+      })
     })
   });
 
@@ -1224,7 +1224,7 @@ v-s:ContactsStructureTemplate
     var resultApp = $("#resultApp", template).hide();
     $("tbody", resultApp).empty();
   }
-  
+
   individual.on("v-s:managedOrganization", function(){
     //$('#searchText input', template).val('');
     searchOrgMode = individual.hasValue("v-s:managedOrganization")? "targetOrg" : "allOrg";

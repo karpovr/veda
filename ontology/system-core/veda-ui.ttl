@@ -1271,7 +1271,7 @@ v-ui:AppointmentPopoverTemplate
           <small>
             <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
             <span about="@" property="v-s:dateAbsenceTo"></span>
-          </small>  
+          </small>
         </div>
         <div>
           <small>
@@ -1281,7 +1281,7 @@ v-ui:AppointmentPopoverTemplate
         </div>
       </div>
     </div>
-    
+
   </div>
 </div>
   """ ;
@@ -1328,7 +1328,7 @@ v-ui:PersonPopoverTemplate
         <small>
           <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
           <span about="@" property="v-s:dateAbsenceTo"></span>
-        </small>  
+        </small>
       </div>
       <div>
         <small>
@@ -2677,7 +2677,7 @@ v-ui:DocumentEventTemplate
             console.log("Unexpected behavior: can't read v-s:actor from individual");
             return false;
           }
-          if ( (veda.appointment.id === actor.id || veda.appointment.id === "cfg:AdministratorAppointment") || 
+          if ( (veda.appointment.id === actor.id || veda.appointment.id === "cfg:AdministratorAppointment") ||
               (canDelete && isProcessBreakMember) ) {
             $(".stop-process", template).show();
             $(".stop-process", template).on("click", function (e) {
@@ -3489,7 +3489,7 @@ v-ui:generic
       </div>
       <div class="col-md-8 col-xs-7">
         <div rel="rdf:type" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-        <veda-control rel="rdf:type" data-type="link" data-template="{individual['rdf:type'][0]['rdfs:label'].join(' ')+': '+individual['rdfs:label'].join(' ')}" class='-view edit search fulltext dropdown'></veda-control>
+        <veda-control rel="rdf:type" data-type="link" data-template="{@.rdf:type.rdfs:label} : {@.rdfs:label}" class='-view edit search fulltext dropdown'></veda-control>
       </div>
     </div>
     <hr style="margin: 10px 0px"/>

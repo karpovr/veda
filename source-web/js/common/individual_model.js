@@ -976,7 +976,7 @@ proto.getChainValue = function (...properties) {
   });
   return Promise.all(promises).then(function (individuals) {
     const children = individuals.reduce(function (acc, individual) {
-      return acc.concat(individual.get(property_uri));
+      return acc.concat(individual[property_uri]);
     }, []);
     if ( !properties.length ) {
       return children;
