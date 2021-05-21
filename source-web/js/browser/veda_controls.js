@@ -1135,25 +1135,6 @@ $.fn.veda_actor = function( options ) {
   fulltext.on('keydown', inputHandler);
 
   /**
-   * Evaluate query prefix expression
-   * @param {String} prefix
-   * @return {Promise<String>}
-   */
-  function evalQueryPrefix(prefix) {
-    return new Promise(function (resolve, reject) {
-      try {
-        const result = prefix.replace(/{\s*.*?\s*}/g, function (match) {
-          return eval(match);
-        });
-        resolve(result);
-      } catch (error) {
-        console.log('Query prefix evaluation error', error);
-        reject(error);
-      }
-    });
-  }
-
-  /**
    * Search actors
    * @param {string} value
    * @return {void}
@@ -1174,11 +1155,11 @@ $.fn.veda_actor = function( options ) {
       }
     }
 
-    const ftQueryPromise = evalQueryPrefix(queryPrefix).then(function(evaledPrefix) {
+    const ftQueryPromise = interpolate(queryPrefix, individual).then(function(queryPrefix) {
       if (onlyDeleted) {
-        return ftQuery(evaledPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
+        return ftQuery(queryPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
       } else {
-        return ftQuery(evaledPrefix, value, sort, withDeleted);
+        return ftQuery(queryPrefix, value, sort, withDeleted);
       };
     });
 
@@ -2634,20 +2615,6 @@ $.fn.veda_link = function( options ) {
       }
     });
 
-    const evalQueryPrefix = function () {
-      return new Promise(function (resolve, reject) {
-        try {
-          const result = queryPrefix.replace(/{\s*.*?\s*}/g, function (match) {
-            return eval(match);
-          });
-          resolve(result);
-        } catch (error) {
-          console.log('Query prefix evaluation error', error);
-          reject(error);
-        }
-      });
-    };
-
     const performSearch = function (value) {
       if (source) {
         return Promise.resolve(eval(source))
@@ -2656,7 +2623,7 @@ $.fn.veda_link = function( options ) {
             console.log('Source error', source);
           });
       } else {
-        evalQueryPrefix().then(function (queryPrefix) {
+        interpolate(queryPrefix, individual).then(function (queryPrefix) {
           ftQuery(queryPrefix, value, sort, withDeleted)
             .then(renderResults)
             .catch(function (error) {
