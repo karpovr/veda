@@ -280,8 +280,7 @@ function formatDate (date) {
   const UTChours = date.getUTCHours();
   const UTCmins = date.getUTCMinutes();
   const UTCsecs = date.getUTCSeconds();
-  const UTCmillis = date.getUTCMilliseconds();
-  if ( (UTChours + UTCmins + UTCsecs + UTCmillis) === 0 ) {
+  if ( (UTChours + UTCmins + UTCsecs) === 0 ) {
     return [zeroPref(day), zeroPref(month), year].join('.');
   }
   const fdate = [zeroPref(day), zeroPref(month), year].join('.');

@@ -592,7 +592,7 @@ System.import('moment').then(function (module) {
         if (input) {
           const timestamp = moment(input, 'DD.MM.YYYY HH:mm').toDate();
           const absolutDate = new Date(timestamp);
-          if (!absolutDate.getSeconds()) {
+          if ((absolutDate.getUTCHours() + absolutDate.getUTCMinutes() + absolutDate.getUTCSeconds()) === 0) {
             absolutDate.setSeconds(1);
           }
           return absolutDate;
