@@ -5,7 +5,7 @@ use crate::v_s_membership2::*;
 use crate::v_s_permissionstatement::*;
 use crate::v_wf_process::*;
 use ini::Ini;
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 use std::fs::{File, OpenOptions};
 use std::thread;
 use std::time::*;
@@ -28,7 +28,7 @@ pub struct CleanerContext {
 pub fn clean(modules: Option<String>, operations: Option<String>, report: Option<String>) {
     let mut cleaner_modules = HashSet::new();
 
-    if let Some (m) = modules {
+    if let Some(m) = modules {
         for s in m.split(',') {
             cleaner_modules.insert(s.to_owned());
         }
@@ -42,9 +42,9 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
     cleaners.insert("membership2", remove_membership2 as for<'r> fn(&'r mut CleanerContext));
     cleaners.insert("process", clean_process as for<'r> fn(&'r mut CleanerContext));
 
-    println! ("choose one or more module(s): --module []");
+    println!("choose one or more module(s): --module []");
     if cleaner_modules.is_empty() {
-        println! ("{:?}", cleaners.keys());
+        println!("{:?}", cleaners.keys());
         return;
     }
 
@@ -69,7 +69,7 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
 
     ctx.report_type = report.unwrap_or(String::default());
 
-    if let Some (op) = operations {
+    if let Some(op) = operations {
         for s in op.split(',') {
             ctx.operations.insert(s.to_string());
         }
@@ -98,7 +98,7 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
         {
             for module in cleaner_modules.iter() {
                 if let Some(f) = cleaners.get(module.as_str()) {
-                    f (&mut ctx);
+                    f(&mut ctx);
                 }
             }
         }

@@ -22,7 +22,7 @@ struct ProcessElement {
 
 pub fn clean_process(ctx: &mut CleanerContext) {
     if ctx.operations.is_empty() {
-        println! ("choose one of these operations: remove, to_ttl");
+        println!("choose one of these operations: remove, to_ttl");
     }
 
     let module_info = ModuleInfo::new("./data", "clean_process", true);
@@ -35,6 +35,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
     let mut header = Individual::default();
     header.set_id("<http://semantic-machines.com/veda/data>");
     header.set_uri("rdf:type", "owl:Ontology");
+
+    let mut total_count = 0;
 
     if let Some((mut pos, _)) = module_info.read_info() {
         let query = get_query_for_work_item(ctx);
@@ -108,6 +110,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                     }
                                 }
 
+                                total_count += indvs.len();
+
                                 if ctx.operations.contains("to_ttl") {
                                     indvs.push(Individual::new_from_obj(header.get_obj()));
                                     if let Ok(buf) = to_turtle(indvs, &mut ctx.onto.prefixes) {
@@ -124,6 +128,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                         }
                                     }
                                 }
+
+                                info!("total_count : {}", total_count);
                             }
                         }
                     } else {
@@ -140,8 +146,14 @@ pub fn clean_process(ctx: &mut CleanerContext) {
 }
 
 fn get_query_for_work_item(ctx: &mut CleanerContext) -> String {
-    let output_conditions_list =
-        ctx.ch_client.select(&ctx.sys_ticket.user_uri, "SELECT DISTINCT id FROM veda_tt.`v-wf:OutputCondition` ORDER BY v_s_created_date ASC", MAX_SIZE_BATCH, MAX_SIZE_BATCH, 0, OptAuthorize::NO);
+    let output_conditions_list = ctx.ch_client.select(
+        &ctx.sys_ticket.user_uri,
+        "SELECT DISTINCT id FROM veda_tt.`v-wf:OutputCondition` ORDER BY v_s_created_date ASC",
+        MAX_SIZE_BATCH,
+        MAX_SIZE_BATCH,
+        0,
+        OptAuthorize::NO,
+    );
 
     let mut q0 = String::default();
     for el in output_conditions_list.result.iter() {
@@ -203,6 +215,7 @@ fn collect_process_elements(parent_id: &str, process: &mut Individual, process_e
         NaiveDateTime::from_timestamp(process.get_first_datetime("v-s:created").unwrap_or_default(), 0).format("%d.%m.%Y %H:%M:%S"),
         process.get_id()
     );
+    process.parse_all();
     add_to_collect(process.get_id(), "Process", parent_id, process_elements, Some(Individual::new_from_obj(process.get_obj())));
     collect_work_items(process, process_elements, ctx);
 }

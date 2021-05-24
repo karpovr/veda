@@ -1,7 +1,8 @@
+use chrono::{TimeZone, Utc};
 use crc32fast::Hasher;
 use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::*;
 use v_module::module::PrepareError;
+use v_module::module::*;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::IndvOp;
 use v_module::v_onto::individual::Individual;
@@ -9,10 +10,10 @@ use v_module::v_onto::individual::*;
 use v_module::v_onto::individual2msgpack::to_msgpack;
 use v_module::v_onto::parser::*;
 use v_module::v_search::common::FTQuery;
+use v_module::veda_backend::*;
 use v_queue::consumer::Consumer;
 use v_queue::queue::Queue;
 use v_queue::record::{Mode, MsgType};
-use v_module::veda_backend::*;
 
 pub fn export_from_query(query: &str) -> Result<(), PrepareError> {
     let mut backend = Backend::default();
@@ -224,11 +225,21 @@ pub fn queue_to_json(queue_path: String, part_id: Option<u32>) {
         if parse_raw(&mut queue_element).is_ok() {
             let uri = queue_element.get_first_literal("uri").unwrap_or_default();
             let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+            let date = queue_element.get_first_datetime("date").unwrap_or_default();
             let src = queue_element.get_first_literal("src").unwrap_or_default();
             let cmd = get_cmd(&mut queue_element);
             let event_id = queue_element.get_first_literal("event_id").unwrap_or_default();
             let user_id = queue_element.get_first_literal("user_uri").unwrap_or_default();
-            println!("uri=\"{}\", op_id={}, src={}, cmd={:?}, event_id={}, user_id={}", uri, op_id, src, cmd, event_id, user_id);
+            println!(
+                "{:?}, uri=\"{}\", op_id={}, src={}, cmd={:?}, event_id={}, user_id={}",
+                &format!("{:?}", &Utc.timestamp(date, 0)),
+                uri,
+                op_id,
+                src,
+                cmd,
+                event_id,
+                user_id
+            );
 
             let mut prev_state = Individual::default();
             get_inner_binobj_as_individual(&mut queue_element, "prev_state", &mut prev_state);
