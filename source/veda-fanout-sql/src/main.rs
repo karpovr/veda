@@ -109,12 +109,24 @@ fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     Ok(true)
 }
 
-fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[String], is_new: bool, ctx: &mut Context) -> Result<bool, PrepareError> {
+fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[String], is_new: bool, ctx: &mut Context) -> Result<bool, PrepareError> {
     let uri = new_state.get_id().to_string();
 
-    let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
+    let mut types = vec![];
+    let mut is_deleted = false;
+    for t in in_types {
+        if t == "v-s:Deletable" {
+            is_deleted = true;
+        } else {
+            types.push(t);
+        }
+    }
 
-    let is_version = types.contains(&"v-s:Version".to_owned());
+    if !is_deleted {
+        is_deleted = new_state.is_exists_bool("v-s:deleted", true);
+    }
+
+    let is_version = types.contains(&&"v-s:Version".to_owned());
     if is_version {
         info!("skip version: {}", uri);
         return Ok(true);
@@ -192,6 +204,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, types: &[Stri
                     Value::Datetime(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(*timestamp, 0)),
                     _ => String::from("NULL"),
                 };
+
+                if value == "'v-s:Deletable'" {
+                    return;
+                }
+
                 let lang = match &resource.get_lang() {
                     Lang::NONE => String::from("'NO'"),
                     lang => format!("'{}'", lang.to_string().to_uppercase()),
