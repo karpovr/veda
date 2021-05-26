@@ -2413,6 +2413,11 @@ $.fn.veda_link = function( options ) {
   const createValue = function () {
     const newVal = new veda.IndividualModel();
     newVal['rdf:type'] = rangeRestriction ? [rangeRestriction] : [(new veda.IndividualModel(rel_uri))['rdfs:range'][0]];
+    newVal["v-s:backwardTarget"] = [individual];
+    newVal["v-s:backwardProperty"] = [opts.property_uri];
+    newVal["v-s:canRead"] = [true];
+    newVal["v-s:canUpdate"] = [true];
+    newVal["v-s:canDelete"] = [true];
     return newVal;
   };
 
