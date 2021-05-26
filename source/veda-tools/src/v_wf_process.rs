@@ -2,10 +2,16 @@ use crate::common::remove;
 
 use crate::cleaner::CleanerContext;
 use chrono::prelude::*;
+use flate2::write::GzEncoder;
+use flate2::Compression;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
 use std::ops::Sub;
+use std::thread;
+use std::time::Duration as std_Duration;
+use stopwatch::Stopwatch;
+use systemstat::{Platform, System};
 use time::Duration;
 use v_module::info::ModuleInfo;
 use v_module::v_api::app::{OptAuthorize, ResultCode};
@@ -38,15 +44,20 @@ pub fn clean_process(ctx: &mut CleanerContext) {
 
     let mut total_count = 0;
 
+    let sys = System::new();
+    let max_load = num_cpus::get()/2;
+
     if let Some((mut pos, _)) = module_info.read_info() {
         let query = get_query_for_work_item(ctx);
         let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, pos, OptAuthorize::NO);
 
         if res.result_code == ResultCode::Ok {
             for id in res.result.iter() {
+                let sw = Stopwatch::start_new();
+
                 pos += 1;
                 if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
-                    if let Some(mut process) = ctx.backend.get_individual(&rindv.get_first_literal("v-wf:forProcess").unwrap_or_default(), &mut Individual::default()) {
+                    if let Some(process) = ctx.backend.get_individual(&rindv.get_first_literal("v-wf:forProcess").unwrap_or_default(), &mut Individual::default()) {
                         let mut process_elements = HashMap::new();
 
                         if !process.is_exists("v-wf:parentWorkOrder") {
@@ -115,16 +126,29 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                 if ctx.operations.contains("to_ttl") {
                                     indvs.push(Individual::new_from_obj(header.get_obj()));
                                     if let Ok(buf) = to_turtle(indvs, &mut ctx.onto.prefixes) {
-                                        let file_path = format!("./out/{}.ttl", process.get_id().replace(':', "_"));
-                                        if let Ok(mut file) = File::create(&(file_path)) {
-                                            file.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
-                                            if let Err(e) = file.write_all(buf.as_slice()) {
-                                                error!("failed to write to file, err = {:?}", e);
-                                            } else {
-                                                info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
-                                            }
+                                        let mut ze = GzEncoder::new(Vec::new(), Compression::default());
+
+                                        ze.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
+                                        if let Err(e) = ze.write_all(buf.as_slice()) {
+                                            error!("failed compress, err = {:?}", e);
+                                            return;
                                         } else {
-                                            error!("failed to create file {}", file_path);
+                                            if let Ok(compressed_bytes) = ze.finish() {
+                                                let file_path = format!("./out/{}.ttl.gz", process.get_id().replace(':', "_"));
+                                                if let Ok(mut file) = File::create(&(file_path)) {
+                                                    if let Err(e) = file.write_all(&compressed_bytes) {
+                                                        error!("failed to write to file {}, {:?}", file_path, e);
+                                                        return;
+                                                    }
+                                                    info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
+                                                } else {
+                                                    error!("failed to create file {}", file_path);
+                                                    return;
+                                                }
+                                            } else {
+                                                error!("failed compress");
+                                                return;
+                                            }
                                         }
                                     }
                                 }
@@ -134,6 +158,17 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                         }
                     } else {
                         error!("invalid workitem {}", id);
+                    }
+                }
+                if sw.elapsed_ms() > 1000 {
+                    match sys.load_average() {
+                        Ok(loadavg) => {
+                            println!("\nLoad average: {} {} {}", loadavg.one, loadavg.five, loadavg.fifteen);
+                            if loadavg.one > max_load as f32 {
+                                thread::sleep(std_Duration::from_millis(10000));
+                            }
+                        }
+                        Err(x) => println!("\nLoad average: error: {}", x),
                     }
                 }
             }
