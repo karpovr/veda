@@ -583,6 +583,7 @@ proto.delete = function () {
       return this.trigger('afterDelete');
     }
     this['v-s:deleted'] = [true];
+    this['rdf:type'] = this['rdf:type'].concat(new veda.IndividualModel('v-s:Deletable'));
     return this.save();
   }).then(() => this.trigger('afterDelete'));
 };
@@ -609,7 +610,7 @@ proto.remove = function () {
  */
 proto.recover = function () {
   return this.trigger('beforeRecover').then(() => {
-    this['v-s:deleted'] = [];
+    this['v-s:deleted'] = [false];
     return this.save();
   }).then(() => this.trigger('afterRecover'));
 };

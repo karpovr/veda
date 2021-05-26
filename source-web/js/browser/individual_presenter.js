@@ -250,15 +250,20 @@ function processTemplate (individual, container, template, mode) {
    * @return {Promise<void>}
    */
   const callModelMethod = function (method, parent) {
-    return embedded.reduce(function (p, item) {
-      return p.then(function () {
-        if (typeof item.data('callModelMethod') !== 'function') {
-          return;
-        }
-        return item.data('callModelMethod')(method, individual.id);
-      });
-    }, Promise.resolve())
-      .then(function () {
+    var returnPromise;
+    if (method == "delete" || method == "recover") {
+      returnPromise = Promise.resolve();
+    } else {
+      returnPromise = embedded.reduce(function (p, item) {
+        return p.then(function () {
+          if (typeof item.data('callModelMethod') !== 'function') {
+            return;
+          }
+          return item.data('callModelMethod')(method, individual.id);
+        });
+      }, Promise.resolve());
+    };
+    return returnPromise.then(function () {
         if (parent === individual.id) {
           return Promise.resolve();
         } else {

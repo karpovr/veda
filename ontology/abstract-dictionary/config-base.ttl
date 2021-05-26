@@ -99,27 +99,31 @@ var doc_uri = document['@'],
     owner_properties = ["v-s:owner", "v-s:author", "v-s:publisher", "v-s:creator"];
 
 owner_properties.map(function (property_uri) {
-  var owner_uri = veda.Util.getUri( document[property_uri] );
-  if (owner_uri && owner_uri !== "cfg:VedaSystem") {
-    var owner = get_individual(ticket, owner_uri);
-    if (owner) {
-      var owner_type = veda.Util.getUri(owner["rdf:type"]);
-      if (owner_type === "v-s:Person" || owner_type === "v-s:Position") {
-        var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + owner_uri.split(':').join('_') + "_event2";
-        addPermission(permission_uri, owner_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
-      } else if (owner_type === "v-s:Appointment") {
-        var position_uri = veda.Util.getUri(owner["v-s:occupation"]);
-        if (position_uri) {
-          var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + position_uri.split(':').join('_') + "_event2";
-          addPermission(permission_uri, position_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
-        }
-        var person_uri = veda.Util.getUri(owner["v-s:employee"]);
-        if (person_uri) {
-          var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + person_uri.split(':').join('_') + "_event2";
-          addPermission(permission_uri, person_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
+  if (document[property_uri]) {
+    document[property_uri].map(function(value) {
+      var owner_uri = value.data;
+      if (owner_uri && owner_uri !== "cfg:VedaSystem") {
+        var owner = get_individual(ticket, owner_uri);
+        if (owner) {
+          var owner_type = veda.Util.getUri(owner["rdf:type"]);
+          if (owner_type === "v-s:Person" || owner_type === "v-s:Position") {
+            var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + owner_uri.split(':').join('_') + "_event2";
+            addPermission(permission_uri, owner_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
+          } else if (owner_type === "v-s:Appointment") {
+            var position_uri = veda.Util.getUri(owner["v-s:occupation"]);
+            if (position_uri) {
+              var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + position_uri.split(':').join('_') + "_event2";
+              addPermission(permission_uri, position_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
+            }
+            var person_uri = veda.Util.getUri(owner["v-s:employee"]);
+            if (person_uri) {
+              var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + person_uri.split(':').join('_') + "_event2";
+              addPermission(permission_uri, person_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
+            }
+          }
         }
       }
-    }
+    })
   }
 });
 
@@ -453,20 +457,21 @@ if (deleted) {
 }
 
 // Delete embedded tree
-if (deleted) {
-  Object.keys(document).map(function (property_uri) {
-    if (property_uri === "@") { return; }
-    document[property_uri].map(function (value) {
-      if (value.type !== "Uri") { return; }
-      var embedded = get_individual(ticket, value.data);
-      if (embedded && veda.Util.hasValue(embedded, "v-s:parent", {data: doc_uri, type: "Uri"}) && !veda.Util.hasValue(embedded, "v-s:deleted", {data: true, type: "Boolean"}) ) {
-        embedded["v-s:deleted"] = veda.Util.newBool(true);
-        put_individual (ticket, embedded, _event_id);
-        //print("embedded deleted:", embedded["@"]);
-      }
-    });
-  });
-}
+// 29.04.2021 - теперь должно происходить в эвенте cfg:Event_Document_Deleting_Restoring
+// if (deleted) {
+//   Object.keys(document).map(function (property_uri) {
+//     if (property_uri === "@") { return; }
+//     document[property_uri].map(function (value) {
+//       if (value.type !== "Uri") { return; }
+//       var embedded = get_individual(ticket, value.data);
+//       if (embedded && veda.Util.hasValue(embedded, "v-s:parent", {data: doc_uri, type: "Uri"}) && !veda.Util.hasValue(embedded, "v-s:deleted", {data: true, type: "Boolean"}) ) {
+//         embedded["v-s:deleted"] = veda.Util.newBool(true);
+//         put_individual (ticket, embedded, _event_id);
+//         //print("embedded deleted:", embedded["@"]);
+//       }
+//     });
+//   });
+// }
   """ ;
 .
 
@@ -836,7 +841,7 @@ cfg:Event_16
     var backwardTargetUri = backwardTargetUris[i],
         backwardTarget = get_individual(ticket, backwardTargetUri),
         backwardTarget_original = JSON.stringify(backwardTarget);
-    if (!backwardTarget) { return; }
+    if (!backwardTarget) { continue; }
 
     if (canRead || canUpdate || canDelete) {
       var membershipUri = "d:backward_membership_" + backwardLinkUri.split(":").join('_') + '_' + backwardTargetUri.split(':').join('_');
@@ -993,5 +998,197 @@ var comment_id = document["@"],
     comment_target = veda.Util.getUri(document["v-s:backwardTarget"]),
     stakeholder = veda.Util.getUri(comment_target["v-s:author"]);
 //print("cfg:Event_18", "caught", "comment", comment_id, "target", comment_target);
+  """ ;
+.
+
+cfg:Event_Document_Deleting_Restoring
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystemAppointment ;
+  rdfs:label "Скрипт каскадного удаления-восстановления документа и его вложений" ;
+  v-s:triggerByType v-s:Deletable ;
+  v-s:script """
+var types = document["rdf:type"];
+//print("***document_deleting");
+var isDeletingAction = veda.Util.hasValue(document, "v-s:deleted")? document["v-s:deleted"][0].data : undefined;
+print("document[v-s:deleted]=", isDeletingAction);
+for (var i = 0; i < types.length; i++) {
+  var type = types[i];
+  print("type.data: ", type.data);
+  if (type.data == "v-s:Deletable") continue;
+  var querySpec = "'rdf:type'=='v-s:ClassSpecification' && 'v-s:hasClass'==='"+type.data+"'";
+  print("  querySpec: ", querySpec);
+  var result = query(veda.ticket, querySpec).result;
+  for (var specInd = 0; specInd < result.length;specInd++) {
+    print("  spec: ", result[specInd]);
+    var spec = get_individual(veda.ticket, result[specInd]);
+    if (spec["v-s:listProperties"] == undefined) continue;
+    for (var propInd = 0; propInd < spec["v-s:listProperties"].length; propInd++) {
+      var property = spec["v-s:listProperties"][propInd];
+      print("    property.data: ", property.data);
+      if (!veda.Util.hasValue(document, property.data)) continue;
+      var propValues = document[property.data];
+      print("      propValues.length: ", propValues.length);
+      for (var valueInd = 0; valueInd < propValues.length; valueInd++) {
+        if (isDeletingAction) {
+          var add_to_value = {
+            "@": propValues[valueInd].data,
+            "rdf:type": veda.Util.newUri("v-s:Deletable"),
+            "v-s:deleted": veda.Util.newBool(isDeletingAction)
+          };
+          print("      add 'deletable' for value: ", propValues[valueInd].data);
+          add_to_individual(veda.ticket, add_to_value);
+        } else {
+          var set_in_value = {
+            "@": propValues[valueInd].data,
+            "v-s:deleted": veda.Util.newBool(isDeletingAction)
+          };
+          print("      set 'deleted:false' in value: ", propValues[valueInd].data);
+          set_in_individual(veda.ticket, set_in_value);
+        }
+        
+      }
+    }
+  }
+}
+
+if (isDeletingAction == false) {
+  var remove_from_doc = {
+    "@": document["@"],
+    "rdf:type": veda.Util.newUri("v-s:Deletable"),
+    "v-s:deleted": veda.Util.newBool(isDeletingAction)
+  };
+  remove_from_individual(veda.ticket, remove_from_doc);
+}
+""" ;
+.
+
+cfg:Event_Document_Archiving
+  rdf:type v-s:Event ;
+  rdfs:label "Удаление-архивирование старых документов" ;
+  v-s:triggerByUid cfg:monthly ;
+  #v-s:disabled true;
+  v-s:runAt "V8.LowPriority";
+  v-s:script """
+print("[cfg:Event_Document_Archiving] ************************** START **************************");
+
+var scriptInfo = get_individual(ticket, "cfg:Event_Document_Archiving_Info");
+if (!scriptInfo) {
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  scriptInfo = {
+    "@": "cfg:Event_Document_Archiving_Info",
+    "rdf:type": veda.Util.newUri('v-s:CronScriptsInfo'),
+    "v-s:lastDateOfExecuting":  veda.Util.newDate(yesterday)
+  };
+}
+var msInDay = 86400000;
+var lastDate = new Date(scriptInfo['v-s:lastDateOfExecuting'][0].data);
+var today = new Date();
+
+var queryString = "'rdf:type'=='v-s:ClassSpecification'";
+var result = query(veda.ticket, queryString).result;
+print("count spec: ", result.length);
+for (var i = 0; i < result.length; i++) {
+  print("***********spec: ", result[i]);
+  if (result[i]) {
+    var spec = get_individual(veda.ticket, result[i]);
+    if (!veda.Util.hasValue(spec, "v-s:isShelfLifeAlways", { data: false, type: "Boolean" })) {
+      print("Skip " + result[i] + ": isShelfLifeAlways not false");
+      continue;
+    }
+    if (!veda.Util.hasValue(spec, "v-s:shelfLife")) {
+      print("Skip " + result[i] + ": empty shelfLife");
+      continue; 
+    };
+    if (!veda.Util.hasValue(spec, "v-s:hasClass")) {
+      print("Skip " + result[i] + ": empty hasClass");
+      continue; 
+    };
+
+    var dateProperty = veda.Util.hasValue(spec, "v-s:dateProperties")? spec["v-s:dateProperties"][0].data : "v-s:created";
+    var forClass = spec["v-s:hasClass"][0].data;
+    var timeLife = spec["v-s:shelfLife"][0].data;
+    var listProperties = spec["v-s:listProperties"];
+    
+    // print("forClass: ", forClass);
+    // print("timeLife: ", timeLife);
+    // print("listProperties: ", veda.Util.toJson(listProperties));
+
+    var datePeriod = [new Date(+lastDate-msInDay*(365)*timeLife-1), new Date(+today-msInDay*365*timeLife)];
+    var docQueryString = "'rdf:type'==='"+forClass+"' && '"+dateProperty+"'==["+ datePeriod[0].toISOString() +","+ datePeriod[1].toISOString() +"]";
+    //print("docQueryString: ", docQueryString);
+    var docsForArchive = query(veda.ticket, docQueryString).result;
+    print("docsForArchive size: ", docsForArchive.length);
+
+    for (var docInd = 0;docInd < docsForArchive.length; docInd++) {
+      print("docUri: ", docsForArchive[docInd]);
+
+      var doc = get_individual(veda.ticket, docsForArchive[docInd]);
+      var isDeleted = veda.Util.hasValue(doc, "v-s:deleted")? doc["v-s:deleted"][0].data : false;
+      if (isDeleted) {
+        print("Skip doc ", doc, " is already deleted");
+        continue;
+      }
+      // var isBuzy = true;
+      // var triedCount = 0;
+      // while (isBuzy) {
+      //   var mainQ = get_individual(veda.ticket, "srv:queue-state-scripts_main0");
+      //   var mainQCount;
+      //   if (mainQ == undefined) {
+      //     print("Break queue handler, srv:queue-state-scripts_main0 is undefined");
+      //     break;
+      //   }
+      //   if ((mainQ["srv:current_count"] && mainQ["srv:current_count"].length > 0) && 
+      //       (mainQ["srv:total_count"] && mainQ["srv:total_count"].length > 0 )) {
+      //     mainQCount = mainQ["srv:total_count"][0].data - mainQ["srv:current_count"][0].data;
+      //   } else {
+      //     print("Break queue handler, can't calculate count from srv:queue-state-scripts_main0");
+      //     break;
+      //   }
+      //   print("mainQCount=", mainQCount);
+      //   if (mainQCount > 100) {
+      //     print("mainQCount > 100, waiting");
+      //   } else {
+      //     isBuzy = false;
+      //   }
+      //   var lowQ = get_individual(veda.ticket, "srv:queue-state-scripts_lp0");
+      //   var lowQCount;
+      //   if (mainQ == undefined) {
+      //     print("Break queue handler, srv:queue-state-scripts_lp0 is undefined");
+      //     break;
+      //   }
+      //   if ((lowQ["srv:current_count"] && lowQ["srv:current_count"].length > 0) && 
+      //       (lowQ["srv:total_count"] && lowQ["srv:total_count"].length > 0 )) {
+      //     lowQCount = lowQ["srv:total_count"][0].data - lowQ["srv:current_count"][0].data;
+      //   } else {
+      //     print("Break queue handler, can't calculate count from srv:queue-state-scripts_lp0");
+      //     break;
+      //   };
+      //   print("lowQCount=", lowQCount);
+      //   if (lowQCount > 100) {
+      //     print("lowQCount > 100, waiting");
+      //     isBuzy = true;
+      //   } else {
+      //     isBuzy = false;
+      //   };
+      //   print("tried count ", ++triedCount);
+      // }
+      var types = doc["rdf:type"].concat(veda.Util.newUri("v-s:Deletable"));
+      var setInDoc = {
+        "@": docsForArchive[docInd],
+        "v-s:deleted": veda.Util.newBool(true),
+        "v-s:archived": veda.Util.newBool(true),
+        "rdf:type": types
+      };
+      set_in_individual(veda.ticket, setInDoc);
+      print(docsForArchive[docInd], " archived");
+    } 
+  }
+}
+
+scriptInfo['v-s:lastDateOfExecuting'] = veda.Util.newDate(new Date());
+put_individual(ticket, scriptInfo, _event_id);
+
+print("[cfg:Event_Document_Archiving] ************************** END **************************");
   """ ;
 .
