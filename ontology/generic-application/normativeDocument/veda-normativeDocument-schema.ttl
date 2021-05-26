@@ -43,6 +43,7 @@ v-s:NormativeDocumentRequirement
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:NormativeDocument ;
   rdfs:label "Нормативный документ"@ru ;
   rdfs:label "Normative document requirement"@en ;

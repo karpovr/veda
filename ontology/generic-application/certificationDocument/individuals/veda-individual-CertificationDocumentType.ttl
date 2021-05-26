@@ -15,6 +15,7 @@ v-s:CertificationDocumentType
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;  
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Тип удостоверяющего документа"@ru ;
   rdfs:label "Certification document type"@en ;
 .

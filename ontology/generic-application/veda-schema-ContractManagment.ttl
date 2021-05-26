@@ -22,6 +22,7 @@ v-s:Price
   rdfs:subClassOf v-s:Measurable ;
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Стоимость"@ru ;
   rdfs:label "Price"@en ;
 .

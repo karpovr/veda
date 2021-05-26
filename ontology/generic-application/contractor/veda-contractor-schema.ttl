@@ -81,6 +81,7 @@ v-s:ContractorLock
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Блокировка контрагента"@ru ;
   rdfs:label "Contractor lock"@en ;
 .

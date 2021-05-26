@@ -19,6 +19,7 @@ v-s:Asset
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Registered ;
   rdfs:subClassOf v-s:Vehicle ;
   rdfs:label "Основное средство"@ru ;
@@ -30,6 +31,7 @@ v-s:RegistrationCertificate
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Registered ;
   rdfs:subClassOf v-s:Spatial ;
   rdfs:label "Свидетельство о регистрации"@ru ;

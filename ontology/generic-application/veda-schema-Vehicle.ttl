@@ -83,6 +83,7 @@ v-s:hasVehicleCategory
 v-s:Pts
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Registered ;
   rdfs:subClassOf v-s:Vehicle ;
   rdfs:label "Паспорт транспортного средства"@ru ;
@@ -121,6 +122,7 @@ v-s:cabinNumber
 v-s:Psm
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Registered ;
   rdfs:subClassOf v-s:Vehicle ;
   rdfs:label "Паспорт самоходной машины"@ru ;

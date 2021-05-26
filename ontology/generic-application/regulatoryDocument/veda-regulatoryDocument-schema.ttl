@@ -97,6 +97,7 @@ v-s:VersionOfLocalRegulatoryDocument
   rdfs:subClassOf v-s:Contractual ;
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:Embedded;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Версия локального нормативного документа"@ru ;
   rdfs:label "Verions of local regulatory document"@en ;
   v-s:labelPattern "{@.v-s:registrationNumber} - {@.v-s:title}" ;
@@ -133,6 +134,7 @@ v-s:DescriptionOfChange
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Описание изменений"@ru ;
   rdfs:label "Description of changes"@en ;
 .

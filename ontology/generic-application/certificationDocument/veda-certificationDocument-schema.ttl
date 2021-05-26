@@ -26,6 +26,7 @@ v-s:CertificationDocument
   rdfs:subClassOf v-s:Registered ;
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Удостоверяющий документ"@ru ;
   rdfs:label "Certification document"@en ;
 .

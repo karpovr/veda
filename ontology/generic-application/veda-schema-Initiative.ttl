@@ -407,6 +407,7 @@ v-s:WorkGroup
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Рабочая группа"@ru ;
   rdfs:label "Work group"@en ;
 .
@@ -436,6 +437,7 @@ v-s:MemberOfWorkGroup
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:HRRecord ;
   rdfs:subClassOf v-s:WorkGroup ;
   rdfs:label "Член рабочей группы в Проекте"@ru ;
@@ -457,6 +459,7 @@ v-s:ProjectPlan
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Measurable ;
   rdfs:label "План мероприятий проекта"@ru ;
   rdfs:label "Project plan"@en ;
@@ -487,6 +490,7 @@ v-s:ProjectPhase
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Projectable ;  
   rdfs:label "Фаза проекта"@ru ;
@@ -511,6 +515,7 @@ v-s:ProjectMilestone
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Projectable ;   
   rdfs:label "Контрольная точка проекта"@ru ;
@@ -521,6 +526,7 @@ v-s:ProjectPhaseCost
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Measurable ;
   rdfs:label "Затраты на фазу проекта"@ru ;
   rdfs:label "Project phase costs"@en ;
@@ -531,6 +537,7 @@ v-s:ProjectPhaseRisk
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Риски фазы проекта"@ru ;
   rdfs:label "Project phase risks"@en ;
 .

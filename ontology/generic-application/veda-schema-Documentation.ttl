@@ -22,6 +22,7 @@ v-s:Risk
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Measurable ;
   rdfs:label "Риск"@ru ;
   rdfs:label "Risk"@en ;
@@ -48,6 +49,7 @@ v-s:Observation
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Measurable ;
   rdfs:subClassOf v-s:AutomaticallyVersioned ;
   rdfs:subClassOf v-s:Controlled ;
@@ -114,6 +116,7 @@ v-s:WorkReport
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Measurable ;
   rdfs:subClassOf v-s:AutomaticallyVersioned ;
   rdfs:subClassOf v-s:Controlled ;
@@ -126,6 +129,7 @@ v-s:Request
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Journaling ;
 #  rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
 #  rdfs:subClassOf v-s:AutomaticallyVersioned ;
   rdfs:subClassOf v-s:Measurable ;
   rdfs:subClassOf v-s:Registered ;

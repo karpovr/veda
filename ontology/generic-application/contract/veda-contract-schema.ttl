@@ -19,6 +19,7 @@ v-s:Contract
   rdfs:subClassOf v-s:Enumerated ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Contractual ;
   rdfs:subClassOf v-s:Financial ;
   rdfs:subClassOf v-s:ClassifiedRus ;

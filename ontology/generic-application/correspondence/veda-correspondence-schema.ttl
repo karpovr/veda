@@ -19,6 +19,7 @@ v-s:Correspondent
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Корреспондент"@ru ;
   rdfs:label "Correspondent"@en ;
 .
@@ -169,6 +170,7 @@ v-s:LetterRegistrationRecordSender
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Embedded ;
   rdfs:subClassOf v-s:RegistrationRecord ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Регистрационная запись отправителя письма"@ru ;
   rdfs:label "Letter registration record sender"@en ;
   v-s:hasNumeration v-s:RegistrationNumberSimpleNumerationYear ;
@@ -179,6 +181,7 @@ v-s:LetterRegistrationRecordRecipient
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Embedded ;
   rdfs:subClassOf v-s:RegistrationRecord ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Регистрационная запись получателя письма"@ru ;
   rdfs:label "Letter registration record recipient"@en ;
   v-s:hasNumeration v-s:RegistrationNumberSimpleNumerationYear ;

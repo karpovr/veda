@@ -21,6 +21,7 @@ v-s:File
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:Exportable ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Файл"@ru ;
   rdfs:label "File"@en ;
 .

@@ -363,6 +363,7 @@ v-ui:Preferences
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:SystemThing ;
   rdfs:subClassOf v-s:Embedded ;
+  rdfs:subClassOf v-s:BackwardLink ;
   rdfs:label "Предпочтения"@ru ;
   rdfs:label "Preferences"@en ;
 .
