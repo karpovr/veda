@@ -1147,6 +1147,13 @@ v-s:rating
   rdfs:range xsd:decimal ;
   rdfs:domain v-s:Measurable ;
 .
+v-s:weight
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Вес, кг"@ru ;
+  rdfs:label "Weight"@en ;
+  rdfs:range xsd:decimal ;
+  rdfs:domain v-s:Measurable ;
+.
 ### ------------------------------------------------------
 v-s:ClassifiedRus
   rdf:type owl:Class ;
