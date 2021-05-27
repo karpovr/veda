@@ -7,12 +7,10 @@ use flate2::Compression;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
-use std::ops::Sub;
 use std::thread;
 use std::time::Duration as std_Duration;
 use stopwatch::Stopwatch;
 use systemstat::{Platform, System};
-use time::Duration;
 use v_module::info::ModuleInfo;
 use v_module::v_api::app::{OptAuthorize, ResultCode};
 use v_module::v_onto::individual::Individual;
@@ -45,10 +43,10 @@ pub fn clean_process(ctx: &mut CleanerContext) {
     let mut total_count = 0;
 
     let sys = System::new();
-    let max_load = num_cpus::get()/2;
+    let max_load = num_cpus::get() / 2;
 
     if let Some((mut pos, _)) = module_info.read_info() {
-        let query = get_query_for_work_item(ctx);
+        let query = get_query_for_work_item_in_output_condition(ctx);
         let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, pos, OptAuthorize::NO);
 
         if res.result_code == ResultCode::Ok {
@@ -180,7 +178,7 @@ pub fn clean_process(ctx: &mut CleanerContext) {
     }
 }
 
-fn get_query_for_work_item(ctx: &mut CleanerContext) -> String {
+fn get_query_for_work_item_in_output_condition(ctx: &mut CleanerContext) -> String {
     let output_conditions_list = ctx.ch_client.select(
         &ctx.sys_ticket.user_uri,
         "SELECT DISTINCT id FROM veda_tt.`v-wf:OutputCondition` ORDER BY v_s_created_date ASC",
@@ -200,16 +198,25 @@ fn get_query_for_work_item(ctx: &mut CleanerContext) -> String {
         q0.push_str("'")
     }
 
-    let date_before = Utc::now().naive_utc().sub(Duration::days(0));
+    let df = if let Some(d) = &ctx.date_from {
+        format!(" AND v_s_created_date[1] >= toDateTime ({}) ", d.timestamp())
+    } else {
+        "".to_owned()
+    };
+
+    let dt = if let Some(d) = &ctx.date_to {
+        format!(" AND v_s_created_date[1] < toDateTime ({}) ", d.timestamp())
+    } else {
+        "".to_owned()
+    };
 
     format!(
         "SELECT distinct id
     FROM veda_tt.`v-wf:WorkItem`
     WHERE ({})
     AND v_wf_isCompleted_int[1] = 1
-    AND v_s_created_date[1] < toDateTime ({})",
-        q0,
-        date_before.timestamp()
+    {} {} ORDER BY v_s_created_date ASC",
+        q0, dt, df
     )
 }
 

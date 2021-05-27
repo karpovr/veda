@@ -20,6 +20,7 @@ flate2 = "1.0"
 systemstat = "0.1.7"
 stopwatch = "0.0.7"
 num_cpus = "1.0"
+diligent-date-parser = "0.1.2"
 
 v_authorization = "=0.1.1"
 v_queue = "0.1.7"

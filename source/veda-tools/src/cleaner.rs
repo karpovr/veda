@@ -4,6 +4,8 @@ use crate::v_s_membership1::*;
 use crate::v_s_membership2::*;
 use crate::v_s_permissionstatement::*;
 use crate::v_wf_process::*;
+use chrono::NaiveDateTime;
+use diligent_date_parser::parse_date;
 use ini::Ini;
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, OpenOptions};
@@ -23,9 +25,11 @@ pub struct CleanerContext {
     pub(crate) report_type: String,
     pub(crate) report: Option<File>,
     pub(crate) operations: HashSet<String>,
+    pub(crate) date_from: Option<NaiveDateTime>,
+    pub(crate) date_to: Option<NaiveDateTime>,
 }
 
-pub fn clean(modules: Option<String>, operations: Option<String>, report: Option<String>) {
+pub fn clean(modules: Option<String>, operations: Option<String>, report: Option<String>, date_from: Option<String>, date_to: Option<String>) {
     let mut cleaner_modules = HashSet::new();
 
     if let Some(m) = modules {
@@ -65,7 +69,21 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
         report_type: "".to_owned(),
         report: None,
         operations: Default::default(),
+        date_from: None,
+        date_to: None,
     };
+
+    if let Some(ds) = date_from {
+        if let Some(d) = parse_date(&ds) {
+            ctx.date_from = Some(d.naive_utc());
+        }
+    }
+
+    if let Some(ds) = date_to {
+        if let Some(d) = parse_date(&ds) {
+            ctx.date_to = Some(d.naive_utc());
+        }
+    }
 
     ctx.report_type = report.unwrap_or(String::default());
 

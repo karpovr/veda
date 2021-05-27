@@ -75,6 +75,16 @@ enum Tools {
         #[help = "type of report"]
         #[optional]
         report: Option<String>,
+
+        #[named]
+        #[help = "date from"]
+        #[optional]
+        date_from: Option<String>,
+
+        #[named]
+        #[help = "date to"]
+        #[optional]
+        date_to: Option<String>,
     },
 }
 
@@ -90,8 +100,10 @@ fn main() {
             module,
             operation,
             report,
+            date_from,
+            date_to,
         } => {
-            clean(module, operation, report);
+            clean(module, operation, report, date_from, date_to);
         }
         Tools::QueueToStorage {
             queue_path,
