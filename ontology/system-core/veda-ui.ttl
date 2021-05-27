@@ -1221,6 +1221,31 @@ v-ui:IconPersonTemplate
 """ ;
 .
 
+v-ui:OrganizationPopoverTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон организации"@ru ;
+  rdfs:label "Organization template with photo"@en ;
+  v-ui:template """
+<div class="media" style="margin-top:0px;">
+  <span class="close">&nbsp;&times;</span>
+  <div class="media-body" style="width:auto;">
+    <div>
+      <strong about="v-s:taxId" property="rdfs:label"></strong>
+      <small about="@" property="v-s:taxId"></small>
+    </div>
+    <div>
+      <strong about="v-s:legalAddress" property="rdfs:label"></strong>
+      <small about="@" property="v-s:legalAddress"></small>
+    </div>
+    <div>
+      <strong about="v-s:postalAddress" property="rdfs:label"></strong>
+      <small about="@" property="v-s:postalAddress"></small>
+    </div>
+  </div>
+</div>
+  """ ;
+.
+
 v-ui:AppointmentPopoverTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон назначения с фотографией"@ru ;
@@ -1475,7 +1500,7 @@ v-ui:LabelTemplate
     var done;
     var initPopoverTimeout;
     var type = individual.hasValue("rdf:type") && individual["rdf:type"][0].id;
-    if ( type === "v-s:Appointment" || type === "v-s:Person" || type === "v-s:Position" ) {
+    if ( type === "v-s:Appointment" || type === "v-s:Person" || type === "v-s:Position" || type === "v-s:Organization" ) {
       template.mouseenter(function () {
         if (done || initPopoverTimeout) { return; }
         initPopoverTimeout = setTimeout(initPopover, 750);
@@ -1492,6 +1517,8 @@ v-ui:LabelTemplate
         tmpl = "v-ui:AppointmentPopoverTemplate";
       } else if (type === "v-s:Person") {
         tmpl = "v-ui:PersonPopoverTemplate";
+      } else if (type === "v-s:Organization") {
+        tmpl = "v-ui:OrganizationPopoverTemplate";
       } else {
         tmpl = "v-ui:PositionPopoverTemplate";
       }
