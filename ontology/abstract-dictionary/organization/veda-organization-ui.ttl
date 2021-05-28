@@ -1,4 +1,3 @@
-
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -1060,7 +1059,7 @@ v-s:AppointmentTemplate
       </div>
       <div class="col-sm-9 col-xs-7">
         <div about="@" rel="v-s:parentSubsidiary" class="view -edit -search" data-template="v-ui:LabelLinkTemplate"></div>
-        <veda-control rel="v-s:parentSubsidiary" data-query-prefix = "(('rdf:type'==='v-s:Subsidiary') && 'v-s:parentOrganization'=='{individual['v-s:parentOrganization'][0].id}') || '@'=='{individual['v-s:parentOrganization'][0].id}'" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+        <veda-control rel="v-s:parentSubsidiary" data-query-prefix = "(('rdf:type'==='v-s:Subsidiary') && 'v-s:parentOrganization'=='{@.v-s:parentOrganization.id}') || '@'=='{@.v-s:parentOrganization.id}'" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
       </div>
     </div>
     <div class="row row-attribute">
@@ -1069,7 +1068,7 @@ v-s:AppointmentTemplate
       </div>
       <div class="col-sm-9 col-xs-7">
         <div about="@" rel="v-s:parentUnit" class="view -edit -search" data-template="v-ui:LabelLinkTemplate"></div>
-        <veda-control rel="v-s:parentUnit" data-query-prefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{individual['v-s:parentOrganization'][0].id}') || '@'=='{individual['v-s:parentOrganization'][0].id}'" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+        <veda-control rel="v-s:parentUnit" data-query-prefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{@.v-s:parentOrganization.id}') || '@'=='{@.v-s:parentOrganization.id}'" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
       </div>
     </div>
     <section id="Employee" class="hide">
@@ -2042,7 +2041,7 @@ v-s:PositionTemplate
       </div>
       <div class="col-sm-9 col-xs-7">
         <div about="@" rel="v-s:parentUnit" class="view edit search" data-template="v-ui:LabelLinkTemplate"></div>
-        <veda-control rel="v-s:parentUnit" data-query-prefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{individual['v-s:parentOrganization'][0].id}') || '@'=='{individual['v-s:parentOrganization'][0].id}'" data-type="link" class="-view edit search fulltext dropdown notEditForUsers"></veda-control>
+        <veda-control rel="v-s:parentUnit" data-query-prefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{@.v-s:parentOrganization.id}') || '@'=='{@.v-s:parentOrganization.id}'" data-type="link" class="-view edit search fulltext dropdown notEditForUsers"></veda-control>
       </div>
     </div>
     <div class="row row-attribute">
@@ -2172,7 +2171,7 @@ v-s:PositionMinimalTemplate
       </div>
       <div class="col-sm-9 col-xs-7">
         <div about="@" rel="v-s:parentUnit" class="view edit search" data-template="v-ui:LabelLinkTemplate"></div>
-        <veda-control rel="v-s:parentUnit" data-query-prefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{individual['v-s:parentOrganization'][0].id}') || '@'=='{individual['v-s:parentOrganization'][0].id}'" data-type="link" class="-view edit search fulltext dropdown notEditForUsers"></veda-control>
+        <veda-control rel="v-s:parentUnit" data-query-prefix = "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='{@.v-s:parentOrganization.id}') || '@'=='{@.v-s:parentOrganization.id}'" data-type="link" class="-view edit search fulltext dropdown notEditForUsers"></veda-control>
       </div>
     </div>
     <div class="row row-attribute">
