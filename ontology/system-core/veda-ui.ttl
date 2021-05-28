@@ -1745,16 +1745,16 @@ v-ui:RabbitHole
   var defaultProperties = "v-s:backwardTarget v-s:parent";
   var allowedProperties = (container.data("properties") || defaultProperties).split(" ");
   var name = mkName(individual);
-  var visited, text;
+  var visited;
   for (var i = 0, property; (property = allowedProperties[i]); i++ ) {
     if ( individual.hasValue(property) ) {
       var temp=$("h5", template);
       individual[property].forEach(function(prop){
-        text = "<span title='" + name.title + "'>" + name.label + "</span>";
+        var text = "<span title='" + name.title + "'>" + name.label + "</span>";
         visited = [ individual.id ];
         var wrapper = temp.clone();
-        travel( prop ).then(function(){
-          $("small", wrapper).append(text);
+        travel( prop,text).then(function(rText){
+          $("small", wrapper).append(rText);
           template.append(wrapper);
         });
       })
@@ -1762,7 +1762,7 @@ v-ui:RabbitHole
     }
   }
 
-  function travel(individual) {
+  function travel(individual, text) {
     if ( visited.indexOf(individual.id) >= 0 ) {
       return Promise.resolve();
     } else {
@@ -1773,10 +1773,11 @@ v-ui:RabbitHole
       text = "<a href='#/" + individual.id + "' title='" + name.title + "'>" + name.label + "</a>" + " / " + text;
       for (var i = 0, property; (property = allowedProperties[i]); i++ ) {
         if ( individual.hasValue(property) ) {
-          travel( individual[property][0] );
-          break;
+          return travel( individual[property][0], text);
+          //break;
         }
       }
+      return text;
     })
   }
   function mkName(individual) {
