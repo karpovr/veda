@@ -135,13 +135,13 @@ v-cal:FunctionCalendarTemplate
   <div id="fullcalendar"></div>
 </div>
 <script>
-  System.import("moment").then(function (module) {
+  return System.import("moment").then(function (module) {
     var moment = module.default;
-    System.import("fullcalendar").then(function (module) {
+    return System.import("fullcalendar").then(function (module) {
       var fullCalendar = module.default;
-      System.import("fullcalendar-locale").then(function (module) {
+      return System.import("fullcalendar-locale").then(function (module) {
         var locale = module.default;
-        System.import("fullcalendar-style").then(function (module) {
+        return System.import("fullcalendar-style").then(function (module) {
           var rulesTxt = "";
           var list = module.default.cssRules || module.default.rules;
           var len = list.length;
@@ -200,14 +200,12 @@ v-cal:FunctionCalendarTemplate
             }
           };
 
-          setTimeout(function () {
-            var calendar = $('#fullcalendar', template);
-            calendar.fullCalendar(fullCalendarOptions);
+          var calendar = $('#fullcalendar', template);
+          calendar.fullCalendar(fullCalendarOptions);
+          template.one("remove", function () {
+            calendar.fullCalendar("destroy");
+          });
 
-            template.one("remove", function () {
-              calendar.fullCalendar("destroy");
-            });
-          }, 0);
         });
       });
     });
