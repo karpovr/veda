@@ -9,6 +9,7 @@ log = "0.4"
 chrono = "0.4"
 lazy_static = "1.4.0"
 rust_decimal = "1.7.0"
+align-data = "0.1.0"
 
 v_queue = "0.1.7"
 
