@@ -14,5 +14,5 @@ log = "0.4"
 
 v_queue = "0.1.7"
 
-v_module = { package = "v-common-module", version = "=0.1.40" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.44" }
+v_module = { package = "v-common-module", version = "=0.1.42" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.45" }

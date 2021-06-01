@@ -22,5 +22,5 @@ mustache = "0.9.0"
 v_authorization = "=0.1.1"
 
 v_az_lmdb = { package = "v-common-az-lmdb", version = "=0.1.2" }
-v_module = { package = "v-common-module", version = "=0.1.40" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.44" }
+v_module = { package = "v-common-module", version = "=0.1.42" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.45" }

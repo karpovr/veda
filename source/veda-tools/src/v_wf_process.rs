@@ -2,11 +2,13 @@ use crate::common::remove;
 
 use crate::cleaner::CleanerContext;
 use chrono::prelude::*;
+use chrono::Duration;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
+use std::ops::Sub;
 use std::thread;
 use std::time::Duration as std_Duration;
 use stopwatch::Stopwatch;
@@ -46,7 +48,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
     let max_load = num_cpus::get() / 2;
 
     if let Some((mut pos, _)) = module_info.read_info() {
-        let query = get_query_for_work_item_in_output_condition(ctx);
+        let output_condition_list = get_list_of_output_condition(ctx);
+        let query = get_query_for_work_item_in_output_condition(ctx, &output_condition_list);
         let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, pos, OptAuthorize::NO);
 
         if res.result_code == ResultCode::Ok {
@@ -55,7 +58,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
 
                 pos += 1;
                 if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
-                    if let Some(process) = ctx.backend.get_individual(&rindv.get_first_literal("v-wf:forProcess").unwrap_or_default(), &mut Individual::default()) {
+                    let f_for_process = &rindv.get_first_literal("v-wf:forProcess").unwrap_or_default();
+                    if let Some(process) = ctx.backend.get_individual(f_for_process, &mut Individual::default()) {
                         let mut process_elements = HashMap::new();
 
                         if !process.is_exists("v-wf:parentWorkOrder") {
@@ -105,6 +109,11 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                 }
                                 let indvs_count = indvs.len();
 
+                                if !check_subprocesses(&mut indvs, &output_condition_list) {
+                                    warn!("process {} content not pass subprocesses", process.get_id());
+                                    continue;
+                                }
+
                                 if ctx.report_type == "ids" {
                                     if let Some(report) = &mut ctx.report {
                                         for id in indv_ids.iter() {
@@ -113,17 +122,9 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                     }
                                 }
 
-                                if ctx.operations.contains("remove") {
-                                    for s in indvs.iter_mut() {
-                                        remove(s, ctx);
-                                    }
-                                }
-
-                                total_count += indvs.len();
-
                                 if ctx.operations.contains("to_ttl") {
                                     indvs.push(Individual::new_from_obj(header.get_obj()));
-                                    if let Ok(buf) = to_turtle(indvs, &mut ctx.onto.prefixes) {
+                                    if let Ok(buf) = to_turtle(&indvs, &mut ctx.onto.prefixes) {
                                         let mut ze = GzEncoder::new(Vec::new(), Compression::default());
 
                                         ze.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
@@ -151,11 +152,19 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                     }
                                 }
 
+                                if ctx.operations.contains("remove") {
+                                    for s in indvs.iter_mut() {
+                                        remove(s, ctx);
+                                    }
+                                }
+
+                                total_count += indvs.len();
+
                                 info!("total_count : {}", total_count);
                             }
                         }
                     } else {
-                        error!("invalid workitem {}", id);
+                        error!("not found {}[{}={}]", id, "v-wf:forProcess", f_for_process);
                     }
                 }
                 if sw.elapsed_ms() > 1000 {
@@ -178,7 +187,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
     }
 }
 
-fn get_query_for_work_item_in_output_condition(ctx: &mut CleanerContext) -> String {
+fn get_list_of_output_condition(ctx: &mut CleanerContext) -> Vec<String> {
+    let mut res = vec![];
     let output_conditions_list = ctx.ch_client.select(
         &ctx.sys_ticket.user_uri,
         "SELECT DISTINCT id FROM veda_tt.`v-wf:OutputCondition` ORDER BY v_s_created_date ASC",
@@ -187,9 +197,15 @@ fn get_query_for_work_item_in_output_condition(ctx: &mut CleanerContext) -> Stri
         0,
         OptAuthorize::NO,
     );
-
-    let mut q0 = String::default();
     for el in output_conditions_list.result.iter() {
+        res.push(el.to_string());
+    }
+    res
+}
+
+fn get_query_for_work_item_in_output_condition(ctx: &mut CleanerContext, output_conditions_list: &[String]) -> String {
+    let mut q0 = String::default();
+    for el in output_conditions_list.iter() {
         if q0.len() > 0 {
             q0.push_str(" OR ");
         }
@@ -251,12 +267,12 @@ fn collect_permission_statement(process_elements: &mut HashMap<String, ProcessEl
 }
 
 fn collect_process_elements(parent_id: &str, process: &mut Individual, process_elements: &mut HashMap<String, ProcessElement>, ctx: &mut CleanerContext) {
-    info!(
-        "{}, created = {}, id = {}",
-        process.get_first_literal("rdf:type").unwrap_or_default(),
-        NaiveDateTime::from_timestamp(process.get_first_datetime("v-s:created").unwrap_or_default(), 0).format("%d.%m.%Y %H:%M:%S"),
-        process.get_id()
-    );
+    //info!(
+    //    "{}, created = {}, id = {}",
+    //    process.get_first_literal("rdf:type").unwrap_or_default(),
+    //    NaiveDateTime::from_timestamp(process.get_first_datetime("v-s:created").unwrap_or_default(), 0).format("%d.%m.%Y %H:%M:%S"),
+    //    process.get_id()
+    //);
     process.parse_all();
     add_to_collect(process.get_id(), "Process", parent_id, process_elements, Some(Individual::new_from_obj(process.get_obj())));
     collect_work_items(process, process_elements, ctx);
@@ -307,4 +323,48 @@ fn add_to_collect(id: &str, name: &str, parent_id: &str, process_elements: &mut 
             },
         );
     }
+}
+
+fn check_subprocesses(indvs: &mut Vec<Individual>, output_conditions_list: &[String]) -> bool {
+    let date_before = Utc::now().naive_utc().sub(Duration::days(365));
+
+    let mut wp = HashMap::new();
+
+    for el in indvs {
+        let date_created = el.get_first_datetime("v-s:created").unwrap_or_default();
+        if date_created > date_before.timestamp() {
+            warn!("{} date created {} > {}", el.get_id(), NaiveDateTime::from_timestamp(date_created, 0), date_before);
+            return false;
+        }
+
+        match el.get_first_literal("rdf:type").unwrap_or_default().as_str() {
+            "v-wf:Process" => {
+                if !wp.contains_key(el.get_id()) {
+                    wp.insert(el.get_id().to_owned(), false);
+                }
+            }
+            "v-wf:WorkItem" => {
+                let date_created = el.get_first_datetime("v-s:created").unwrap_or_default();
+                if date_created < date_before.timestamp() {
+                } else {
+                }
+
+                if let Some(ne) = el.get_first_literal("v-wf:forNetElement") {
+                    if output_conditions_list.contains(&ne) {
+                        if let Some(p) = el.get_first_literal("v-wf:forProcess") {
+                            wp.insert(p, true);
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    for (_process_id, is_complete) in wp {
+        if !is_complete {
+            return false;
+        }
+    }
+    true
 }

@@ -142,7 +142,7 @@ impl OntologistModule {
             }
         }
 
-        if let Ok(buf) = to_turtle(indvs, &mut prefixes) {
+        if let Ok(buf) = to_turtle(&indvs, &mut prefixes) {
             let file_path = self.ontology_file_path.clone() + ".ttl";
             if let Ok(mut file) = File::create(&(file_path)) {
                 if let Err(e) = file.write_all(buf.as_slice()) {
