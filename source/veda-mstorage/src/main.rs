@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate log;
 
+mod transaction;
+
+use crate::transaction::{Transaction, TransactionItem};
 use chrono::Utc;
 use ini::Ini;
 use nng::{Message, Protocol, Socket};
@@ -8,7 +11,6 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::str;
-use url::*;
 use v_authorization::common::{Access, Trace};
 use v_az_lmdb::_authorize;
 use v_module::info::ModuleInfo;
@@ -16,7 +18,6 @@ use v_module::module::*;
 use v_module::ticket::Ticket;
 use v_module::v_api::app::ResultCode;
 use v_module::v_api::IndvOp;
-use v_module::v_onto::datatype::Lang;
 use v_module::v_onto::individual::{Individual, RawObj};
 use v_module::v_onto::individual2msgpack::to_msgpack;
 use v_module::v_onto::json2individual::parse_json_to_individual;
@@ -24,7 +25,7 @@ use v_module::v_onto::parser::parse_raw;
 use v_module::v_storage::storage::*;
 use v_module::veda_backend::*;
 use v_queue::queue::Queue;
-use v_queue::record::{Mode, MsgType};
+use v_queue::record::Mode;
 
 pub const MSTORAGE_ID: i64 = 1;
 
@@ -52,28 +53,6 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
-    let mut backup_storage: VStorage = VStorage::none();
-    let mut use_backup_db = false;
-
-    if let Some(s) = section.get("backup_db_connection") {
-        if let Ok(conn) = Url::parse(s) {
-            if conn.scheme() == "tcp" {
-                let conn_str = format!("{}:{}", conn.host().expect("invalid backup_db_connection"), conn.port().unwrap_or(0));
-                info!("BACKUP DB: TARANTOOL {}", conn);
-                backup_storage = VStorage::new_tt(conn_str, conn.username(), conn.password().unwrap_or_default());
-                use_backup_db = true;
-                primary_storage.get_value(StorageId::Individuals, "?");
-            } else if conn.scheme() == "file" {
-                let path = format!(".{}", conn.path());
-                info!("BACKUP DB: LMDB {}", path);
-                backup_storage = VStorage::new_lmdb(&path, StorageMode::ReadWrite);
-                use_backup_db = true;
-                backup_storage.get_value(StorageId::Individuals, "?");
-            }
-        } else {
-            error!("failed to parse backup_db_connection string: {}", s);
-        }
-    }
 
     let mut sys_ticket = Ticket::default();
     if let Ok(ticket_id) = Module::get_sys_ticket_id_from_db(&mut primary_storage) {
@@ -116,17 +95,7 @@ fn main() -> std::io::Result<()> {
         if let Ok(recv_msg) = server.recv() {
             let mut out_msg = JSONValue::default();
             out_msg["type"] = json!("OpResult");
-            let resp = request_prepare(
-                &sys_ticket,
-                &mut op_id,
-                &recv_msg,
-                &mut primary_storage,
-                use_backup_db,
-                &mut backup_storage,
-                &mut queue_out,
-                &mut mstorage_info,
-                &mut tickets_cache,
-            );
+            let resp = request_prepare(&sys_ticket, &mut op_id, &recv_msg, &mut primary_storage, &mut queue_out, &mut mstorage_info, &mut tickets_cache);
             if let Ok(v) = resp {
                 let mut data = vec![];
                 for el in v.iter() {
@@ -177,8 +146,6 @@ fn request_prepare(
     op_id: &mut i64,
     request: &Message,
     primary_storage: &mut VStorage,
-    use_backup_db: bool,
-    backup_storage: &mut VStorage,
     queue_out: &mut Queue,
     mstorage_info: &mut ModuleInfo,
     tickets_cache: &mut HashMap<String, Ticket>,
@@ -241,31 +208,35 @@ fn request_prepare(
     }
 
     if let Some(jindividuals) = v["individuals"].as_array() {
+        let mut transaction = Transaction {
+            sys_ticket: sys_ticket.id.to_owned(),
+            id: *op_id,
+            event_id,
+            src,
+            queue: vec![],
+            assigned_subsystems,
+            ticket,
+        };
+
         let mut res_of_id = vec![];
         for el in jindividuals {
             let mut indv = Individual::default();
             if !parse_json_to_individual(el, &mut indv) {
                 error!("failed to parse individual from json");
-                res_of_id.push(Response::new("", ResultCode::BadRequest, -1, -1));
+                return Err(ResultCode::InternalServerError);
             } else {
-                res_of_id.push(operation_prepare(
-                    cmd.clone(),
-                    op_id,
-                    &ticket,
-                    event_id,
-                    src,
-                    assigned_subsystems,
-                    &mut indv,
-                    primary_storage,
-                    use_backup_db,
-                    backup_storage,
-                    queue_out,
-                    mstorage_info,
-                    sys_ticket,
-                ));
+                let resp = operation_prepare(cmd.clone(), op_id, &mut indv, primary_storage, sys_ticket, &mut transaction);
+                if resp.res != ResultCode::Ok {
+                    return Err(resp.res);
+                }
+                res_of_id.push(resp);
             }
         }
-        return Ok(res_of_id);
+
+        if let Ok(res_op_id) = transaction.commit(primary_storage, queue_out, mstorage_info) {
+            *op_id = res_op_id;
+            return Ok(res_of_id);
+        }
     } else {
         error!("field [individuals] is empty");
     }
@@ -276,19 +247,12 @@ fn request_prepare(
 fn operation_prepare(
     cmd: IndvOp,
     op_id: &mut i64,
-    ticket: &Ticket,
-    event_id: Option<&str>,
-    src: Option<&str>,
-    assigned_subsystems: Option<i64>,
     new_indv: &mut Individual,
     primary_storage: &mut VStorage,
-    use_backup_db: bool,
-    backup_storage: &mut VStorage,
-    queue_out: &mut Queue,
-    my_info: &mut ModuleInfo,
     sys_ticket: &Ticket,
+    transaction: &mut Transaction,
 ) -> Response {
-    let is_need_authorize = sys_ticket.user_uri != ticket.user_uri;
+    let is_need_authorize = sys_ticket.user_uri != transaction.ticket.user_uri;
 
     if new_indv.get_id().is_empty() || new_indv.get_id().len() < 2 {
         return Response::new(new_indv.get_id(), ResultCode::InvalidIdentifier, -1, -1);
@@ -330,21 +294,24 @@ fn operation_prepare(
 
     if is_need_authorize {
         if cmd == IndvOp::Remove {
-            if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8 {
-                error!("operation [Remove], Not Authorized, user = {}, request [can delete], uri = {} ", ticket.user_uri, new_indv.get_id());
+            if _authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8 {
+                error!("operation [Remove], Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
                 return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
             }
         } else {
             if !prev_state.is_empty() {
                 if let Some(is_deleted) = new_indv.get_first_bool("v-s:deleted") {
                     if is_deleted
-                        && _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8
+                        && _authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0)
+                            != Access::CanDelete as u8
                     {
-                        error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", ticket.user_uri, new_indv.get_id());
+                        error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
-                } else if _authorize(new_indv.get_id(), &ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanUpdate as u8 {
-                    error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", ticket.user_uri, new_indv.get_id());
+                } else if _authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0)
+                    != Access::CanUpdate as u8
+                {
+                    error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
                     return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
             }
@@ -368,13 +335,13 @@ fn operation_prepare(
                         }
                     }
                 } else if cmd == IndvOp::Put {
-                    error!("failed to update, not found type for new individual, user = {}, id = {} ", ticket.user_uri, new_indv.get_id());
+                    error!("failed to update, not found type for new individual, user = {}, id = {} ", transaction.ticket.user_uri, new_indv.get_id());
                     return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
 
                 for type_id in added_types.iter() {
-                    if _authorize(type_id, &ticket.user_uri, Access::CanCreate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanCreate as u8 {
-                        error!("failed to update, Not Authorized, user = {}, request [can create], type = {}", ticket.user_uri, type_id);
+                    if _authorize(type_id, &transaction.ticket.user_uri, Access::CanCreate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanCreate as u8 {
+                        error!("failed to update, Not Authorized, user = {}, request [can create], type = {}", transaction.ticket.user_uri, type_id);
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
                 }
@@ -397,45 +364,13 @@ fn operation_prepare(
         indv_apply_cmd(&cmd, &mut prev_indv, new_indv);
         prev_indv.set_integer("v-s:updateCounter", upd_counter);
 
-        if !to_storage_and_queue(
-            &cmd,
-            IndvOp::Put,
-            op_id,
-            ticket,
-            event_id,
-            src,
-            assigned_subsystems,
-            &mut prev_indv,
-            prev_state,
-            upd_counter,
-            primary_storage,
-            use_backup_db,
-            backup_storage,
-            my_info,
-            queue_out,
-        ) {
+        if !add_to_transaction(IndvOp::Put, &cmd, &mut prev_indv, prev_state, upd_counter, transaction) {
             error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
     } else {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
-        if !to_storage_and_queue(
-            &cmd,
-            IndvOp::Put,
-            op_id,
-            ticket,
-            event_id,
-            src,
-            assigned_subsystems,
-            new_indv,
-            prev_state,
-            upd_counter,
-            primary_storage,
-            use_backup_db,
-            backup_storage,
-            my_info,
-            queue_out,
-        ) {
+        if !add_to_transaction(IndvOp::Put, &cmd, new_indv, prev_state, upd_counter, transaction) {
             error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
@@ -443,23 +378,7 @@ fn operation_prepare(
 
     if cmd == IndvOp::Remove {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
-        if !to_storage_and_queue(
-            &cmd,
-            IndvOp::Remove,
-            op_id,
-            ticket,
-            event_id,
-            src,
-            assigned_subsystems,
-            new_indv,
-            vec![],
-            upd_counter,
-            primary_storage,
-            use_backup_db,
-            backup_storage,
-            my_info,
-            queue_out,
-        ) {
+        if !add_to_transaction(IndvOp::Remove, &cmd, new_indv, vec![], upd_counter, transaction) {
             error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
@@ -468,132 +387,25 @@ fn operation_prepare(
     Response::new(new_indv.get_id(), ResultCode::Ok, *op_id, upd_counter)
 }
 
-fn to_storage_and_queue(
-    orig_cmd: &IndvOp,
-    cmd: IndvOp,
-    op_id: &mut i64,
-    ticket: &Ticket,
-    event_id: Option<&str>,
-    src: Option<&str>,
-    assigned_subsystems: Option<i64>,
-    new_indv: &mut Individual,
-    prev_state: Vec<u8>,
-    update_counter: i64,
-    primary_storage: &mut VStorage,
-    use_backup_db: bool,
-    backup_storage: &mut VStorage,
-    mstorage_info: &mut ModuleInfo,
-    queue_out: &mut Queue,
-) -> bool {
-    // update main DB
-
+fn add_to_transaction(cmd: IndvOp, original_cmd: &IndvOp, new_indv: &mut Individual, prev_state: Vec<u8>, update_counter: i64, transaction: &mut Transaction) -> bool {
     let mut new_state: Vec<u8> = Vec::new();
     if cmd == IndvOp::Remove {
-        if primary_storage.remove(StorageId::Individuals, new_indv.get_id()) {
-            info!("remove individual, id = {}", new_indv.get_id());
-
-            if use_backup_db {
-                if backup_storage.remove(StorageId::Individuals, new_indv.get_id()) {
-                    info!("backup storage: remove individual, id = {}", new_indv.get_id());
-                } else {
-                    error!("backup storage: failed to remove individual, id = {}", new_indv.get_id());
-                }
-            }
-        } else {
-            error!("failed to remove individual, id = {}", new_indv.get_id());
-            return false;
-        }
     } else {
-        if to_msgpack(&new_indv, &mut new_state).is_ok() && primary_storage.put_kv_raw(StorageId::Individuals, new_indv.get_id(), new_state.clone()) {
-            if use_backup_db {
-                if backup_storage.put_kv_raw(StorageId::Individuals, new_indv.get_id(), new_state.clone()) {
-                    info!("backup storage: update, id = {}", new_indv.get_id());
-                } else {
-                    error!("backup storage: failed to update individual, id = {}", new_indv.get_id());
-                }
-            }
-
-            info!(
-                "update:{}, id={}, ticket={}, op_id={}, event_id={}, src={}",
-                orig_cmd.as_string(),
-                new_indv.get_id(),
-                ticket.id,
-                op_id,
-                event_id.unwrap_or_default(),
-                src.unwrap_or_default()
-            );
-        } else {
+        if to_msgpack(&new_indv, &mut new_state).is_err() {
             error!("failed to update individual, id = {}", new_indv.get_id());
             return false;
         }
     }
-
-    // add to queue
-    let store_to_queue = if let Some(i) = assigned_subsystems {
-        i != 1
-    } else {
-        true
+    let ti = TransactionItem {
+        indv_id: new_indv.get_id().to_owned(),
+        cmd,
+        original_cmd: original_cmd.clone(),
+        new_state,
+        prev_state,
+        update_counter,
     };
 
-    if store_to_queue {
-        let mut queue_element = Individual::default();
-        queue_element.set_id(&format!("{}", op_id));
-        queue_element.set_integer("cmd", cmd.to_i64());
-        queue_element.set_uri("uri", new_indv.get_id());
-
-        if !ticket.user_uri.is_empty() {
-            queue_element.set_uri("user_uri", &ticket.user_uri);
-        }
-
-        if !new_state.is_empty() {
-            queue_element.set_binary("new_state", new_state);
-        }
-
-        if !prev_state.is_empty() {
-            queue_element.set_binary("prev_state", prev_state);
-        }
-
-        if let Some(v) = event_id {
-            queue_element.set_string("event_id", v, Lang::NONE);
-        }
-
-        queue_element.set_integer("tnx_id", *op_id);
-
-        let src = if let Some(v) = src {
-            if v.is_empty() {
-                "?"
-            } else {
-                v
-            }
-        } else {
-            "?"
-        };
-        queue_element.set_string("src", src, Lang::NONE);
-        queue_element.add_datetime("date", Utc::now().naive_utc().timestamp());
-        queue_element.add_integer("op_id", *op_id + 1);
-        queue_element.add_integer("u_count", update_counter);
-
-        if let Some(i) = assigned_subsystems {
-            queue_element.add_integer("assigned_subsystems", i);
-        }
-
-        debug!("add to queue: uri={}", new_indv.get_id());
-
-        let mut raw1: Vec<u8> = Vec::new();
-        if let Err(e) = to_msgpack(&queue_element, &mut raw1) {
-            error!("failed to serialize, err = {:?}", e);
-            return false;
-        }
-        if let Err(e) = queue_out.push(&raw1, MsgType::String) {
-            error!("failed to push message to queue, err = {:?}", e);
-            return false;
-        }
-    }
-    *op_id += 1;
-    if let Err(e) = mstorage_info.put_info(*op_id, *op_id) {
-        error!("failed to put info, err = {:?}", e);
-        return false;
-    }
+    transaction.add_item(ti);
 
     true
 }
