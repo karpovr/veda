@@ -888,29 +888,55 @@ cfg:Event_16
         put_individual(ticket, mMembership, _event_id);
       };
     };
-
+    
     if (isDeleted) {
-      for (var property_uri in backwardTarget) {
-        if (property_uri === "@") { continue; }
-        backwardTarget[property_uri] = backwardTarget[property_uri].filter(function (value) {
-          return (value.data !== backwardLinkUri);
-        });
+      if (backwardPropertyUri && veda.Util.hasValue(backwardTarget, backwardPropertyUri, { data: backwardLinkUri, type: "Uri" })) {
+        // backwardTarget[backwardPropertyUri] = backwardTarget[backwardPropertyUri].filter(function (value) {
+        //   return (value.data !== backwardLinkUri);
+        // });
+        var remove_from_backward = {
+          "@" : backwardTarget["@"]
+        };
+        remove_from_backward[backwardPropertyUri] = veda.Util.newUri(backwardLinkUri);
+
+        print("remove_from_backward: ", veda.Util.toJson(remove_from_backward));
+        remove_from_individual(ticket, remove_from_backward, _event_id);
       }
+      // for (var property_uri in backwardTarget) {
+      //   if (property_uri === "@") { continue; }
+      //   backwardTarget[property_uri] = backwardTarget[property_uri].filter(function (value) {
+      //     return (value.data !== backwardLinkUri);
+      //   });
+      // }
     } else if (backwardPropertyUri) {
+      var set_to_backward = {
+        "@": backwardTarget["@"]
+      };
+      var isChanged = false;
       var alreadyThere = veda.Util.hasValue(backwardTarget, backwardPropertyUri, { data: backwardLinkUri, type: "Uri" });
       //print( "BL already there =", alreadyThere );
       if ( !alreadyThere ) {
-        backwardTarget[backwardPropertyUri] = backwardTarget[backwardPropertyUri] || [];
-        backwardTarget[backwardPropertyUri].push({type: "Uri", data: backwardLinkUri});
+        // backwardTarget[backwardPropertyUri] = backwardTarget[backwardPropertyUri] || [];
+        // backwardTarget[backwardPropertyUri].push({type: "Uri", data: backwardLinkUri});
+        set_to_backward[backwardPropertyUri] = backwardTarget[backwardPropertyUri] || [];
+        set_to_backward[backwardPropertyUri].push({type: "Uri", data: backwardLinkUri});
+        isChanged = true;
+      }
+
+      backwardReplaceUris.forEach(function (replaceUri) {
+        //backwardTarget[replaceUri] = document[replaceUri];
+        set_to_backward[replaceUri] = document[replaceUri];
+        isChanged = true;
+      });
+      if (isChanged || forceUpdate) {
+        print("set_to_backward: ", veda.Util.toJson(set_to_backward));
+        set_in_individual(ticket, set_to_backward, _event_id);
       }
     }
-    backwardReplaceUris.forEach(function (replaceUri) {
-      backwardTarget[replaceUri] = document[replaceUri];
-    });
-    if (forceUpdate || JSON.stringify(backwardTarget) !== backwardTarget_original) {
-      put_individual(ticket, backwardTarget, _event_id);
-      //print( "BL target updated =", JSON.stringify(backwardTarget) );
-    }
+    // if (forceUpdate || JSON.stringify(backwardTarget) !== backwardTarget_original) {
+    //   put_individual(ticket, backwardTarget, _event_id);
+    //   print( "BL target updated =", JSON.stringify(backwardTarget) );
+    // }
   }
   """ ;
 .
