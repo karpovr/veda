@@ -430,8 +430,8 @@ v-s:DepartmentsBundle
 
 v-s:AppointmentsBundle
   rdf:type v-s:Bundle;
-  rdfs:label "Назначения"@ru ;
-  rdfs:label "Appointments"@en ;
+  rdfs:label "Сотрудники"@ru ;
+  rdfs:label "Employees"@en ;
 .
 
 v-s:PositionsBundle
