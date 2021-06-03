@@ -32,7 +32,7 @@ export default class basic {
       .click('div.input-group.date input.form-control[name="v_s_person_v_s_birthday"]')
       .pressKey('ctrl+a delete')
       .typeText('div.input-group.date input.form-control[name="v_s_person_v_s_birthday"]', birthDate)
-      .click('span[data-template="v-ui:StandardButtonsTemplate"] span[typeof="v-s:Person"] button#save')
+      .click('span[data-template="v-ui_StandardButtonsTemplate.html"] span[typeof="v-s:Person"] button#save')
       .wait(1000)
   }
 
