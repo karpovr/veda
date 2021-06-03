@@ -53,8 +53,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
         let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, pos, OptAuthorize::NO);
 
         if res.result_code == ResultCode::Ok {
+            let mut sw = Stopwatch::start_new();
             for id in res.result.iter() {
-                let sw = Stopwatch::start_new();
 
                 pos += 1;
                 if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
@@ -168,14 +168,22 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                     }
                 }
                 if sw.elapsed_ms() > 1000 {
-                    match sys.load_average() {
-                        Ok(loadavg) => {
-                            println!("\nLoad average: {} {} {}", loadavg.one, loadavg.five, loadavg.fifteen);
-                            if loadavg.one > max_load as f32 {
-                                thread::sleep(std_Duration::from_millis(10000));
+                    loop {
+                        match sys.load_average() {
+                            Ok(loadavg) => {
+                                if loadavg.one > max_load as f32 {
+                                    info!("Load average one: {} > {}, sleep", loadavg.one, max_load);
+                                    thread::sleep(std_Duration::from_millis(10000));
+                                    sw = Stopwatch::start_new();
+                                } else {
+                                    break;
+                                }
                             }
+                            Err(x) => {
+                                info!("\nLoad average: error: {}", x);
+                                break;
+                            },
                         }
-                        Err(x) => println!("\nLoad average: error: {}", x),
                     }
                 }
             }
