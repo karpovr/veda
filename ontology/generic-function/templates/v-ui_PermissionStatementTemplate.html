@@ -1,0 +1,75 @@
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui_CommonOntologyTemplate.html"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:permissionSubject" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-s:permissionSubject" data-template="v-ui_ClassNameLabelLinkTemplate.html"></div>
+      <veda-control property="v-s:permissionSubject" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:permissionObject" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-s:permissionObject" data-template="v-ui_ClassNameLabelLinkTemplate.html"></div>
+      <veda-control property="v-s:permissionObject" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+          <em about="v-s:canCreate" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+          <em about="v-s:canRead" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+          <em about="v-s:canUpdate" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+          <em about="v-s:canDelete" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui_StandardButtonsTemplate.html" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>

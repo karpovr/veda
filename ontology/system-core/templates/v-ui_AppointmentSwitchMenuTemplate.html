@@ -1,0 +1,35 @@
+<a href="#" about="@">
+  <span href="#" about="@" rel="v-s:defaultAppointment">
+    <span href="#" about="@" rel="v-s:occupation">
+      <span class="no-margin">
+        <span class="short-label"></span> &udarr;
+      </span>
+      <script>
+        if (individual.hasValue('rdfs:label')) {
+          var label = individual['rdfs:label'][0].replace(/^(.{20}).{5,}$/, '$1...');
+          template.find('.short-label').text(label);
+        } else {
+          template.remove();
+        }
+      </script>
+    </span>
+  </span>
+</a>
+<script>
+  return veda.Backend.query({
+    ticket: veda.ticket,
+    query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
+  }).then(function (result) {
+    var apps = result.result;
+    if (apps.length > 1) {
+      template.on('click', function (e) {
+        e.preventDefault();
+        $('.switch-appointment').modal('show');
+      });
+    } else {
+      template.remove();
+      container.remove();
+    }
+  });
+  //# sourceURL=v-ui_AppointmentSwitchMenuTemplate.html_pre
+</script>

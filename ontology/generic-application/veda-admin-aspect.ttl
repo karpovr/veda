@@ -26,7 +26,7 @@ v-s:AdministrationAspect
   v-s:shortLabel "Администрирование"@ru ;
   v-s:shortLabel "Administration"@en ;
   v-s:hasImage v-s:AdministrationImage ;
-  v-ui:hasTemplate v-ui:AdministrationAspectTemplate ;
+  v-ui:hasTemplate "v-ui_AdministrationAspectTemplate.html" ;
 .
 
 v-s:AdministrationImage
@@ -42,7 +42,7 @@ v-s:OrganizationStructureApplication
   v-s:hasCreate v-s:AppointmentCreate, v-s:OccupationCreate, v-s:EmployeeCreate, v-s:DepartmentCreate;
   v-s:hasIcon v-s:OrganizationStructureIcon;
   v-s:hasRegistry v-s:AppointmentSearch, v-s:OccupationSearch, v-s:EmployeeSearch, v-s:DepartmentSearch;
-  v-ui:hasTemplate v-s:ApplicationTemplate;
+  v-ui:hasTemplate "v-s_ApplicationTemplate.html";
 .
 #---------------Создание------------
   v-s:EmployeeCreate 
@@ -92,8 +92,8 @@ v-s:OrganizationStructureApplication
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Персона"@ru, "Person"@en;
     v-fs:searchBlank v-s:EmployeeSearchBlank;
-    v-fs:searchBlankTemplate v-s:PersonTemplate;
-    v-fs:searchResultTemplate v-s:EmployeeSearchResultTemplate;
+    v-fs:searchBlankTemplate "v-s_PersonTemplate.html";
+    v-fs:searchResultTemplate "v-s_EmployeeSearchResultTemplate.html";
   .
   v-s:EmployeeSearchBlank 
     rdf:type v-fc:Blank;
@@ -104,8 +104,8 @@ v-s:OrganizationStructureApplication
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Назначение"@ru, "Appointment"@en;
     v-fs:searchBlank v-s:AppointmentSearchBlank;
-    v-fs:searchBlankTemplate v-s:AppointmentTemplate;
-    v-fs:searchResultTemplate v-s:AppointmentSearchResultTemplate;
+    v-fs:searchBlankTemplate "v-s_AppointmentTemplate.html";
+    v-fs:searchResultTemplate "v-s_AppointmentSearchResultTemplate.html";
   .
   v-s:AppointmentSearchBlank 
     rdf:type v-fc:Blank;
@@ -116,8 +116,8 @@ v-s:OrganizationStructureApplication
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Должность"@ru, "Position"@en;
     v-fs:searchBlank v-s:OccupationSearchBlank;
-    v-fs:searchBlankTemplate v-s:PositionTemplate;
-    v-fs:searchResultTemplate v-s:OccupationSearchResultTemplate;
+    v-fs:searchBlankTemplate "v-s_PositionTemplate.html";
+    v-fs:searchResultTemplate "v-s_OccupationSearchResultTemplate.html";
   .
   v-s:OccupationSearchBlank 
     rdf:type v-fc:Blank;
@@ -128,8 +128,8 @@ v-s:OrganizationStructureApplication
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Подразделение"@ru, "Department"@en;
     v-fs:searchBlank v-s:DepartmentSearchBlank;
-    v-fs:searchBlankTemplate v-s:DepartmentTemplate;
-    v-fs:searchResultTemplate v-s:DepartmentSearchResultTemplate;
+    v-fs:searchBlankTemplate "v-s_DepartmentTemplate.html";
+    v-fs:searchResultTemplate "v-s_DepartmentSearchResultTemplate.html";
   .
   v-s:DepartmentSearchBlank 
     rdf:type v-fc:Blank;
@@ -153,8 +153,8 @@ v-s:OntologyRegistry
   rdfs:label "Онтологии"@ru ;
   rdfs:label "Ontologies"@en ;
   v-fs:searchBlank v-s:OntologyRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -178,8 +178,8 @@ v-s:ClassRegistry
   rdfs:label "Классы"@ru ;
   rdfs:label "Classes"@en ;
   v-fs:searchBlank v-s:ClassRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -204,8 +204,8 @@ v-s:PropertyRegistry
   rdfs:label "Свойства"@ru ;
   rdfs:label "Properties"@en ;
   v-fs:searchBlank v-s:PropertyRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -231,8 +231,8 @@ v-s:ClassTemplateRegistry
   rdfs:label "Шаблоны"@ru ;
   rdfs:label "Templates"@en ;
   v-fs:searchBlank v-s:ClassTemplateRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -256,8 +256,8 @@ v-s:PersonRegistry
   rdfs:label "Пользователи"@ru ;
   rdfs:label "Users"@en ;
   v-fs:searchBlank v-s:PersonRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:sortOrder "'rdfs:label' asc";
 .
 v-s:PersonRegistryBlank
@@ -280,8 +280,8 @@ v-s:GroupRegistry
   rdfs:label "Группы"@ru ;
   rdfs:label "Groups"@en ;
   v-fs:searchBlank v-s:GroupRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:sortOrder "'rdfs:label' asc";
 .
 v-s:GroupRegistryBlank
@@ -304,8 +304,8 @@ v-s:NetRegistry
   rdfs:label "Сети"@ru ;
   rdfs:label "Nets"@en ;
   v-fs:searchBlank v-s:NetRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -329,10 +329,10 @@ v-s:UserScriptRegistry
   rdfs:label "Скрипты"@ru ;
   rdfs:label "Scripts"@en ;
   v-fs:searchBlank v-s:UserScriptRegistryBlank ;
-#  v-fs:searchBlankTemplate v-s:UserScriptTemplate ;
-#  v-fs:searchResultTemplate v-s:UserScriptResultTemplate ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+#  v-fs:searchBlankTemplate "v-s_UserScriptTemplate.html" ;
+#  v-fs:searchResultTemplate "v-s_UserScriptResultTemplate.html" ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -350,8 +350,8 @@ v-s:OperationRegistry
   rdfs:label "Операции"@ru ;
   rdfs:label "Operations"@en ;
   v-fs:searchBlank v-s:OperationRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -377,8 +377,8 @@ v-s:ModulesRegistry
   rdfs:label "Установленные модули"@ru ;
   rdfs:label "Installed modules"@en ;
   v-fs:searchBlank v-s:ModulesRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:ModulesBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:ModulesResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_ModulesBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_ModulesResultTemplate.html" ;
   v-fs:searchOnLoad true ;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -401,8 +401,8 @@ v-s:EventRegistry
   rdfs:label "События"@ru ;
   rdfs:label "Events"@en ;
   v-fs:searchBlank v-s:EventRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -427,8 +427,8 @@ v-s:FunctionRegistry
   rdfs:label "Функции"@ru ;
   rdfs:label "Functions"@en ;
   v-fs:searchBlank v-s:FunctionRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -453,8 +453,8 @@ v-s:BlankRegistry
   rdfs:label "Бланки"@ru ;
   rdfs:label "Blanks"@en ;
   v-fs:searchBlank v-s:BlankRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -477,8 +477,8 @@ v-s:RegistryRegistry
   rdfs:label "Реестры"@ru ;
   rdfs:label "Registries"@en ;
   v-fs:searchBlank v-s:RegistryRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:searchOnLoad true;
   v-fs:sortOrder "'rdfs:label' asc";
 .
@@ -505,8 +505,8 @@ v-s:GroupGeneratorRegistry_Admin
   rdfs:label "Генераторы групп авторизации"@ru ;
   rdfs:label "Auth group generators"@en ;
   v-fs:searchBlank v-s:GroupGeneratorBlank_Admin ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
 .
 
 v-s:PermissionGeneratorBlank_Admin
@@ -521,8 +521,8 @@ v-s:PermissionGeneratorRegistry_Admin
   rdfs:label "Генераторы групп авторизации"@ru ;
   rdfs:label "Auth group generators"@en ;
   v-fs:searchBlank v-s:PermissionGeneratorBlank_Admin ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
 .
 
 # -- ОШИБКИ --
@@ -532,8 +532,8 @@ v-s:BugReportRegistry
   rdfs:label "Сообщения об ошибках"@ru ;
   rdfs:label "Bug reports"@en ;
   v-fs:searchBlank v-s:BugReportBlank ;
-  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
-  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchBlankTemplate "v-ui_AdminBlankTemplate.html" ;
+  v-fs:searchResultTemplate "v-ui_AdminResultTemplate.html" ;
   v-fs:sortOrder "'rdfs:label' asc" ;
   v-fs:searchOnLoad true ;
 .
@@ -548,7 +548,7 @@ v-s:TrustedTicket
   rdf:type rdfs:Resource ;
   rdfs:label "Вход"@ru ;
   rdfs:label "Sign in"@en ;
-  v-ui:hasTemplate v-ui:TrustedTicketTemplate ;
+  v-ui:hasTemplate "v-ui_TrustedTicketTemplate.html" ;
 .
 
 
@@ -557,177 +557,8 @@ v-s:TrustedTicket
 # -- ШАБЛОНЫ --
 
 # -- ШАБЛОН ОТОБРАЖЕНИЯ РЕЕСТРА ПОЛЬЗОВАТЕЛЬСКИХ СКРИПТОВ --
-v-s:UserScriptResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон отображения результатов реестра скриптов"@ru ;
-  rdfs:label "Scripts registry result template "@en ;
-  v-ui:template """
-<table class="table table-bordered">
-  <thead class="result-header">
-    <tr>
-      <th colspan="7" about="v-s:UserScript" property="rdfs:label"></th>
-    </tr>
-    <tr class="active">
-      <th width="1%">#</th>
-      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-      <th class="orderby" data-orderby="rdfs:label"><span about="rdfs:label" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:creator"><span about="v-s:creator" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:lastEditor"><span about="v-s:lastEditor" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:edited"><span about="v-s:edited" property="rdfs:label"></span></th>
-    </tr>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td class="serial-number"></td>
-      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-      <td property="rdfs:label"></td>
-      <td rel="v-s:creator"><span property="rdfs:label"></span></td>
-      <td property="v-s:created"></td>
-      <td rel="v-s:lastEditor"><span property="rdfs:label"></span></td>
-      <td property="v-s:edited"></td>
-    </tr>
-  </tbody>
-</table>
-  """ ;
-.
-
 # -- ШАБЛОНЫ ДЛЯ ПОИСКА В АСПЕКТЕ АДМИНИСТРИРОВАНИЯ --
-
-v-ui:AdminBlankTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон бланка поиска персоны"@ru ;
-  rdfs:label "Person search blank template"@en ;
-  v-ui:template """
-<div>
-  <veda-control property="*" data-type="string"></veda-control>
-</div>
-<script>
-  $("input", template).keydown(function (e) {
-    if (e.which === 13) {
-      var value = this.value;
-      individual.set("*", [value]);
-      container.siblings(".search-button").click();
-    }
-  });
-  //# sourceURL=v-ui:AdminBlankTemplate_post
-</script>
-  """ ;
-.
-
-v-ui:AdminResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон отображения результатов поиска для админов"@ru ;
-  rdfs:label "Admin search result template"@en ;
-  v-ui:template """
-<table class="table table-condensed">
-  <thead class="result-header">
-    <tr class="active">
-      <th width="1%">#</th>
-      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-      <th width="40%">@</th>
-      <!--th class="orderby" data-orderby="rdf:type"><span about="rdf:type" property="rdfs:label"></span></th-->
-      <th class="orderby" data-orderby="rdfs:label"><span about="rdfs:label" property="rdfs:label"></span></th>
-      <!--th width="5%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-      <th width="5%" class="orderby" data-orderby="v-s:creator"><span about="v-s:creator" property="rdfs:label"></span></th-->
-    </tr>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td class="serial-number"></td>
-      <td about="@" data-template="v-ui:IconModalTemplate"></td>
-      <td property="@" style="word-wrap: break-word; max-width:100px;"></td>
-      <!--td about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></td-->
-      <td about="@" property="rdfs:label"></td>
-      <!--td about="@" property="v-s:created"></td>
-      <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td-->
-    </tr>
-  </tbody>
-</table>
-  """ ;
-.
-
 # -- ШАБЛОНЫ ДЛЯ ПОИСКА МОДУЛЕЙ В АСПЕКТЕ АДМИНИСТРИРОВАНИЯ --
-
-v-ui:ModulesBlankTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон бланка поиска персоны"@ru ;
-  rdfs:label "Person search blank template"@en ;
-  v-ui:template """
-<script>
-  container.siblings(".search-button.pull-right").remove();
-</script>
-  """ ;
-.
-
-v-ui:ModulesResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон отображения результатов поиска модулей для админов"@ru ;
-  rdfs:label "Admin search result template for modules"@en ;
-  v-ui:template """
-<style>
-  .hasImage {
-    background-color: #f0f0f0;
-  }
-  .hasImage>img {
-    height: 100%;
-  }
-</style>
-<div class="result-container row">
-  <div class="col-md-4">
-    <div class="thumbnail">
-      <div class="hasImage" about="@" rel="v-s:hasImage" style="height:200px;" data-template="v-ui:ImageTemplate"></div>
-      <div>
-        <span id="test" about="@" data-template="v-ui:IconModalTemplate"></span>
-        <span style="font-weight: bold;" property="@"></span>
-      </div>
-      <div>
-        <span style="font-weight: bold;" about="v-s:moduleVersion" property="rdfs:label"></span>
-        <span>:</span>
-        <span property="v-s:moduleVersion"></span>
-      </div>
-      <div class="actions">
-        <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="delete"></span>
-      </div>
-    </div>
-  </div>
-</div>
-  """ ;
-.
-
-v-ui:TrustedTicketTemplate
-   rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон карты"@ru ;
-  rdfs:label "Map template"@en ;
-  v-ui:template """
-<div>
-  <h4>Логин для входа</h4>
-  <input class="form-control input-lg" id="login" placeholder="login" type="text" name="login" autofocus="autofocus"/>
-  <br>
-  <button id="submit-login" class="btn btn-lg btn-primary btn-block">Войти</button>
-</div>
-<script>
-  $("#submit-login", template).click(submitLogin);
-  $("#login", template).keydown(function (e) {
-    if (e.which === 13) {
-      submitLogin(e);
-    }
-  });
-  function submitLogin (e) {
-    e.preventDefault();
-    var useLogin = $("#login", template).val();
-    veda.Backend.get_ticket_trusted(veda.ticket, useLogin).then(function(result) {
-      veda.end_time = localStorage["end_time"] = Math.floor((result["end_time"] - 621355968000000000) / 10000 );
-      veda.ticket = localStorage["ticket"] = result["id"];
-      veda.user_uri = localStorage["user_uri"] = result["user_uri"];
-      location.assign(location.origin);
-    });
-  }
-  //# sourceURL=v-ui:TrustedTicketTemplate_post
-</script>
-""" ;
-  .
-
 # -- ШАБЛОН АСПЕКТА АДМИНИСТРИРОВАНИЯ --
 
 v-s:ClassesBundle
@@ -829,374 +660,4 @@ v-s:TrustedTicketBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Доверенный вход"@ru ;
   rdfs:label "Trusted ticket"@en ;
-.
-
-v-ui:AdministrationAspectTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для класса Аспекта администирования"@ru ;
-  rdfs:label "Template for Administration aspect class"@en ;
-  v-ui:forClass v-s:AdministrationAspect ;
-  v-ui:template """
-<div class="container sheet" style="position:relative;">
-  <h2 about="@" property="rdfs:label"></h2>
-  <br>
-  <ul id="admin-tabs" class="nav nav-pills" role="tablist">
-    <li role="presentation"><a href="#Classes" aria-controls="Classes" role="tab" data-toggle="tab" about="v-s:ClassesBundle" property="rdfs:label"></a></li>
-    <!--li role="presentation"><a href="#Blanks" aria-controls="Blanks" role="tab" data-toggle="tab" about="v-s:BlanksBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#Registries" aria-controls="Registries" role="tab" data-toggle="tab" about="v-s:RegistriesBundle" property="rdfs:label"></a></li-->
-    <li role="presentation"><a href="#Nets" aria-controls="Nets" role="tab" data-toggle="tab" about="v-s:NetsBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#Rights" aria-controls="Rights" role="tab" data-toggle="tab" about="v-s:RightsManagementBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#Scripts" aria-controls="Scripts" role="tab" data-toggle="tab" about="v-s:ScriptsBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#Modules" aria-controls="Modules" role="tab" data-toggle="tab" about="v-s:ModulesBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#BugReports" aria-controls="BugReports" role="tab" data-toggle="tab" about="v-s:BugReportsBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#News" aria-controls="News" role="tab" data-toggle="tab" about="v-s:NewsBundle" property="rdfs:label"></a></li>
-    <li role="presentation"><a href="#OrgStructure" aria-controls="OrgStructure" role="tab" data-toggle="tab" about="v-s:OrgStructureBundle" property="rdfs:label"></a></li>
-    <li role="presentation" class="trusted-ticket"><a href="#TrustedTicket" aria-controls="TrustedTicket" role="tab" data-toggle="tab" about="v-s:TrustedTicketBundle" property="rdfs:label"></a></li>
-  </ul>
-  <br>
-  <!-- Tab panes -->
-  <div class="tab-content">
-
-    <div role="tabpanel" class="tab-pane" id="Classes">
-
-      <div class="row">
-        <div class="col-md-6">
-          <h3 about="v-s:ClassesBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:ClassRegistry" property="rdfs:label"></span><a href="#/v-s:ClassBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:ClassRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <h3 about="v-s:PropertiesBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:PropertyRegistry" property="rdfs:label"></span><a href="#/v-s:PropertyBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:PropertyRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
-          <h3 about="v-s:TemplatesBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:ClassTemplateRegistry" property="rdfs:label"></span><a href="#/v-s:ClassTemplateBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:ClassTemplateRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!--div role="tabpanel" class="tab-pane" id="Blanks">
-      <h3 about="v-s:BlanksBundle" property="rdfs:label"></h3>
-      <div class="panel panel-default">
-        <div class="panel-heading"><span about="v-s:BlankRegistry" property="rdfs:label"></span><a href="#/v-s:BlankBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-        <div class="panel-body" about="v-s:BlankRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-      </div>
-
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="Registries">
-      <h3 about="v-s:RegistriesBundle" property="rdfs:label"></h3>
-      <div class="panel panel-default">
-        <div class="panel-heading"><span about="v-s:RegistryRegistry" property="rdfs:label"></span><a href="#/v-s:RegistryBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-        <div class="panel-body" about="v-s:RegistryRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-      </div>
-
-    </div-->
-
-    <div role="tabpanel" class="tab-pane" id="Nets">
-      <h3 about="v-s:NetsBundle" property="rdfs:label"></h3>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <span about="v-s:NetRegistry" property="rdfs:label"></span>
-          <a href="#/v-s:NetBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
-        </div>
-        <div class="panel-body" about="v-s:NetRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-      </div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="Rights">
-      <div class="panel panel-default">
-        <div about="v-s:RightsApplication" data-template="v-s:ApplicationTemplate"></div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <h3 about="v-s:GroupsBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:GroupRegistry" property="rdfs:label"></span><a href="#/v-s:GroupBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:GroupRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <h3 about="v-s:UsersBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:PersonRegistry" property="rdfs:label"></span><a href="#/v-s:PersonBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:PersonRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-      </div>
-      <!--div class="row">
-        <div class="col-md-6">
-          <h3 about="v-s:PermissionStatementsBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:PermissionStatementRegistry" property="rdfs:label"></span><a href="#/v-s:PermissionStatementBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:PermissionStatementRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-      </div-->
-      <div class="row">
-        <div class="col-md-6">
-          <h3 about="v-s:AuthGroupGeneratorsBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:GroupGenerator" property="rdfs:label"></span><a href="#/v-s:GroupGeneratorBlank_Admin" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:GroupGeneratorRegistry_Admin" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <h3 about="v-s:PermissionGeneratorsBundle" property="rdfs:label"></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading"><span about="v-s:PermissionGeneratorRegistry" property="rdfs:label"></span><a href="#/v-s:PermissionGeneratorBlank_Admin" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-            <div class="panel-body" about="v-s:PermissionGeneratorRegistry_Admin" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="Scripts">
-      <div class="row">
-        <div class="col-md-6">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <span about="v-s:UserScriptRegistry" property="rdfs:label"></span>
-              <a href="#/v-s:UserScriptBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
-            </div>
-            <div class="panel-body" about="v-s:UserScriptRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <span about="v-s:OperationRegistry" property="rdfs:label"></span>
-            </div>
-            <div class="panel-body" about="v-s:OperationRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="Modules">
-      <h3 about="v-s:ModulesBundle" property="rdfs:label"></h3>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-md-10">
-              <div class="input-group">
-                <span about="v-s:moduleUrl" property='rdfs:label' class="input-group-addon"></span>
-                <input id="moduleUrl" type="text" class="form-control">
-              </div>
-            </div>
-            <div class="col-md-2">
-              <button type="submit" class="action btn btn-primary btn-block view pull-right" id="install-Module">Установить</button>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div about="v-s:ModulesRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-        </div>
-      </div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="BugReports">
-      <h3 about="v-s:BugReportsBundle" property="rdfs:label"></h3>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <span about="v-s:BugReportRegistry" property="rdfs:label"></span>
-          <a href="#/v-s:BugReportBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
-        </div>
-        <div class="panel-body" about="v-s:BugReportRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-      </div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="News">
-      <h3 about="v-s:NewsBundle" property="rdfs:label"></h3>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <span about="v-s:NewsSearch" property="rdfs:label"></span>
-          <a href="#/v-s:NewsBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
-        </div>
-        <div class="panel-body" about="v-s:NewsSearch" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
-      </div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="OrgStructure">
-      <div about="v-s:OrganizationStructureApplication" data-template="v-s:ApplicationTemplate"></div>
-    </div>
-
-    <div role="tabpanel" class="tab-pane trusted-ticket" id="TrustedTicket">
-      <!-- <h3 about="v-s:TrustedTicketBundle" property="rdfs:label"></h3> -->
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <span about="v-s:TrustedTicketBundle" property="rdfs:label"></span>
-        </div>
-        <div class="panel-body" about="v-s:TrustedTicket" data-template="v-ui:TrustedTicketTemplate"></div>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-  if (veda.user.id !== "cfg:Administrator") {
-    $(".trusted-ticket", template).remove();
-  }
-  $("#install-Module").click(function(){
-    let url=$("#moduleUrl",template).val();
-    if (url) {
-      var Module = new veda.IndividualModel();
-      Module["rdf:type"] = [ new veda.IndividualModel("v-s:RequestToModulesManager") ];
-      Module["v-s:moduleUrl"]=[ url ];
-      Module.save();
-      $("#moduleUrl",template).val("");
-    };
-  });
-
-  setTimeout(function () {
-    $("#admin-tabs", template).on("click", "a", function (e) {
-      e.preventDefault();
-      individual.activeTab = $(this).attr("href");
-    });
-    if (individual.activeTab) {
-      $("#admin-tabs a[href='" + individual.activeTab + "']", template).tab("show");
-    } else {
-      $("#admin-tabs a:first", template).tab("show");
-    }
-  }, 0);
-  //# sourceURL=v-ui:AdministrationAspectTemplate_post
-</script>
-  """ ;
-.
-
-
-
-v-s:EmployeeSearchResultTemplate 
-  rdf:type v-ui:ClassTemplate;
-  rdfs:label "Шаблон для класса v-s:Person (Персона)"@ru, "Template for v-s:Person class"@en;
-  v-ui:template """
-
-  <table class="table table-bordered">
-    <thead class="result-header">
-      <tr>
-        <th colspan="8" about="v-s:Person" property="rdfs:label"></th>
-      </tr>
-      <tr class="active">
-        <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-        <th width="10%"><span about="v-s:creator" property="rdfs:label"></span></th>
-        <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-        <th><span about="rdfs:label" property="rdfs:label"></span></th>
-        <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
-    </thead>
-    <tbody class="result-container">
-      <tr>
-        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-        <td rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-        <td property="v-s:created"></td>
-        <td property="rdfs:label"></td>
-        <td rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></td>
-      </tr>
-    </tbody>
-  </table>
-  """ ;
-.
-v-s:AppointmentSearchResultTemplate
-  rdf:type v-ui:ClassTemplate;
-  rdfs:label "Шаблон для класса v-s:Appointment (Назначение)"@ru, "Template for v-s:Appointment class"@en;
-  v-ui:template """
-
-  
-<table class="table table-bordered">
-  <thead class="result-header">
-    <tr>
-      <th colspan="8" about="v-s:Appointment" property="rdfs:label"></th>
-    </tr>
-    <tr class="active">
-      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-      <th width="10%"><span about="v-s:creator" property="rdfs:label"></span></th>
-      <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-      <th><span about="rdfs:label" property="rdfs:label"></span></th>
-      <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
-      <th><span about="v-s:parentUnit" property="rdfs:label"></span></th>
-      <th><span about="v-s:origin" property="rdfs:label"></span></th>
-    </tr>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-      <td rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-      <td property="v-s:created"></td>
-      <td property="rdfs:label"></td>
-      <td rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></td>
-      <td rel="v-s:parentUnit" data-template="v-ui:LabelTemplate"></td>
-      <td property="v-s:origin"></td>
-    </tr>
-  </tbody>
-</table>
-  """ ;
-.
-v-s:OccupationSearchResultTemplate
-  rdf:type v-ui:ClassTemplate;
-  rdfs:label "Шаблон для класса v-s:Position (Должность)"@ru, "Template for v-s:Position class"@en;
-  v-ui:template """
-
-  <table class="table table-bordered">
-    <thead class="result-header">
-      <tr>
-        <th colspan="8" about="v-s:Person" property="rdfs:label"></th>
-      </tr>
-      <tr class="active">
-        <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-        <th width="10%"><span about="v-s:creator" property="rdfs:label"></span></th>
-        <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-        <th><span about="rdfs:label" property="rdfs:label"></span></th>
-        <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
-    </thead>
-    <tbody class="result-container">
-      <tr>
-        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-        <td rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-        <td property="v-s:created"></td>
-        <td property="rdfs:label"></td>
-        <td rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></td>
-      </tr>
-    </tbody>
-  </table>
-  """ ;
-.
-
-v-s:DepartmentSearchResultTemplate
-  rdf:type v-ui:ClassTemplate;
-  rdfs:label "Шаблон для класса v-s:Department (Подразделение)"@ru, "Template for v-s:Department (Подразделение) class"@en;
-  v-ui:template """
-
-  <table class="table table-bordered">
-    <thead class="result-header">
-      <tr>
-        <th colspan="8" about="v-s:Department" property="rdfs:label"></th>
-      </tr>
-      <tr class="active">
-        <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-        <th width="10%"><span about="v-s:creator" property="rdfs:label"></span></th>
-        <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-        <th><span about="rdfs:label" property="rdfs:label"></span></th>
-        <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
-    </thead>
-    <tbody class="result-container">
-      <tr>
-        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-        <td rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-        <td property="v-s:created"></td>
-        <td property="rdfs:label"></td>
-        <td rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></td>
-      </tr>
-    </tbody>
-  </table>
-  """ ;
 .

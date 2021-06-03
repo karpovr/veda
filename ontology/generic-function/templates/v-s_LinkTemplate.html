@@ -1,0 +1,25 @@
+<div class="container sheet">
+  <h3 about="v-s:Link" property="rdfs:label"></h3>
+  <div class="row">
+    <div class="col-md-3">
+      <em about="v-s:from" property="rdfs:label"></em>
+      <div about="@" rel="v-s:from" data-template="v-ui_ClassNameLabelLinkTemplate.html"></div>
+    </div>
+    <div class="col-md-3">
+      <em about="v-s:to" property="rdfs:label"></em>
+      <div about="@" rel="v-s:to" data-template="v-ui_ClassNameLabelLinkTemplate.html"></div>
+    </div>
+    <div class="col-md-3">
+      <em about="rdfs:comment" property="rdfs:label"></em>
+      <div about="@" property="rdfs:comment"></div>
+    </div>
+    <div class="col-md-3">
+      <div class="checkbox disabled">
+        <label>
+          <veda-control property="v-s:mutualMembership" data-type="boolean"></veda-control>
+          <strong about="v-s:mutualMembership" property="rdfs:label"></strong>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>

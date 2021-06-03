@@ -1,0 +1,13 @@
+<div>
+  <veda-control property="*" data-type="string"></veda-control>
+</div>
+<script>
+  $("input", template).keydown(function (e) {
+    if (e.which === 13) {
+      var value = this.value;
+      individual.set("*", [value]);
+      container.siblings(".search-button").click();
+    }
+  });
+  //# sourceURL=v-fs_MinimalSearchBlankTemplate.html_post
+</script>

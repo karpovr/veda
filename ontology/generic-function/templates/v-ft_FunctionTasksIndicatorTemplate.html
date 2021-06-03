@@ -1,0 +1,17 @@
+<script>
+  /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
+  $("#counter", template).attr("about", counter_uri);*/
+  return new veda.IndividualModel("v-s:TaskBundle").load().then(function(taskBundle) {
+    template.tooltip({
+      container: template,
+      placement: "bottom",
+      trigger: "hover",
+      title: taskBundle["rdfs:label"].map(veda.Util.formatValue).join(" ")
+    });
+  })
+  //# sourceURL=v-ft_FunctionTasksIndicatorTemplate.html_pre
+</script>
+<a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
+  <span class="fa fa-envelope-o fa-lg"></span>
+  <!--span id="counter" class="label label-danger" property="v-ft:inboxCount"></span-->
+</a>

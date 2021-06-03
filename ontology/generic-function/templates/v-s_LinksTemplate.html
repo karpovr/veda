@@ -1,0 +1,31 @@
+<script>
+  template.one("remove", function () {
+    individual.activeTab = $("#links-tabs li.active a", template).attr("href");
+  });
+  individual.activeTab = individual.activeTab || "#links-list";
+  $("#links-tabs a[href='" + individual.activeTab + "']", template).parent().addClass("active");
+  $("#links-tabs-content " + individual.activeTab, template).addClass("active");
+
+//# sourceURL=v-s_LinksTemplate.html_pre
+</script>
+<div>
+  <br>
+  <ul class="nav nav-tabs nav-right" role="tablist" id="links-tabs">
+    <li role="presentation" class="pull-left"><h3 class="no-margin" about="v-s:hasLink" property="rdfs:label"></h3></li>
+    <!--li role="presentation"><a href="#links-graph" role="tab" data-toggle="tab" about="v-s:LinksGraphBundle" property="rdfs:comment"></a></li-->
+    <li role="presentation"><a href="#links-tree" role="tab" data-toggle="tab" about="v-s:LinksTreeBundle" property="rdfs:comment"></a></li>
+    <li role="presentation"><a href="#links-list" role="tab" data-toggle="tab" about="v-s:LinksListBundle" property="rdfs:comment"></a></li>
+  </ul>
+  <br>
+  <div class="tab-content" id="links-tabs-content">
+    <div role="tabpanel" class="tab-pane" id="links-list">
+      <div about="@" data-template="v-s_LinksListTemplate.html"></div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="links-tree">
+      <div about="@" data-template="v-s_LinksTreeTemplate.html"></div>
+    </div>
+    <!--div role="tabpanel" class="tab-pane" id="links-graph">
+      <div about="@" data-template="v-s_LinksGraphTemplate.html"></div>
+    </div-->
+  </div>
+</div>

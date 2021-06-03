@@ -1,0 +1,7 @@
+<a class="label-template" href="#/@"><span about="@" property="rdfs:label"></span></a>
+  <script>
+    if (!individual.hasValue("rdfs:label")) {
+      template.children().first().text(individual.id);
+    }
+    //# sourceURL=v-ui_LabelLinkTemplate.html
+  </script>

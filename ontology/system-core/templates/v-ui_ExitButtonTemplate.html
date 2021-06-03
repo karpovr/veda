@@ -1,0 +1,15 @@
+<script>
+  template.tooltip({
+    container: template,
+    placement: "bottom",
+    trigger: "hover",
+    title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
+  });
+  template.click(function(e) {
+    e.preventDefault();
+  });
+  //# sourceURL=v-ui_ExitButtonTemplate.html_pre
+</script>
+<a id="logout" class="logout" href="#" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
+  <span class="glyphicon glyphicon-log-out"></span> <span class="label label-default"></span>
+</a>

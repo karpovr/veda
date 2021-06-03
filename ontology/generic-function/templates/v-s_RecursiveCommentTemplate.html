@@ -1,0 +1,84 @@
+<script>
+  var actions = $("#edit-comment, #delete", template);
+  individual.rights.then(function (rights) {
+    if ( !rights.hasValue("v-s:canUpdate", true) ) {
+      actions.remove();
+    }
+  });
+
+  $(".action", template).click(function (e) {
+    e.preventDefault();
+    var actionId = this.id;
+    var warning = new veda.IndividualModel("v-s:AreYouSure");
+    warning.load().then(function (warning) {
+      warning = warning["rdfs:label"].map(veda.Util.formatValue).join(" ");
+      if ( actionId === "delete" && !confirm(warning) ) { return; }
+      template.trigger(actionId);
+    });
+  });
+
+  individual.on("v-s:hasComment", commentHandler);
+  individual.on("v-s:linkedObject", linkedHandler);
+  template.one("remove", function () {
+    individual.off("v-s:hasComment", commentHandler);
+    individual.off("v-s:linkedObject", linkedHandler);
+  });
+  commentHandler(individual["v-s:hasComment"]);
+  linkedHandler(individual["v-s:linkedObject"]);
+
+  function commentHandler (values) {
+    values.length ? actions.hide() : actions.show();
+  }
+  function linkedHandler (values) {
+    values.length ? $(".linked-object", template).show() : $(".linked-object", template).hide();
+  }
+  //# sourceURL=v-s_RecursiveCommentTemplate.html
+</script>
+<div class="media" style="overflow:initial;">
+  <div class="media-left" rel="v-s:creator">
+    <div about="@" rel="v-s:employee">
+      <script>
+        individual.hasValue("v-s:hasImage") ? $(".no-image", template).remove() : $(".has-image", template).remove() ;
+      </script>
+      <div style="width:50px;">
+        <div class="has-image" about="@" rel="v-s:hasImage" data-template="v-ui_ImageTemplate.html"></div>
+        <div class="no-image"><span class="text-muted fa fa-user fa-4x"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="media-body" style="overflow:initial;">
+    <div id="comment-content">
+      <div>
+        <span rel="v-s:creator">
+          <span>
+            <strong rel="v-s:employee" data-template="v-ui_LabelTemplate.html"></strong>
+            <small rel="v-s:occupation" data-template="v-ui_LabelTemplate.html"></small>
+          </span>
+        </span>
+        <small>
+          <span>&bullet;&nbsp;&nbsp;</span>
+          <span property="v-s:created"></span>
+        </small>
+        <br>
+        <span property="rdfs:label"></span>
+      </div>
+      <div rel="v-s:attachment" data-template="v-ui_FileTemplate.html"></div>
+      <div class="linked-object">
+        <em about="v-s:linkedObject" property="rdfs:label"></em>
+        <ul rel="v-s:linkedObject">
+          <li about="@" data-template="v-ui_ClassNameLabelLinkTemplate.html"></li>
+        </ul>
+      </div>
+      <small>
+        <a href="#" id="reply" class="action" about="v-s:Reply" property="rdfs:label"></a>
+        &nbsp;
+        <a href="#" id="edit-comment" class="action" about="v-s:Edit" property="rdfs:label"></a>
+        &nbsp;
+        <a href="#" id="delete" class="action" about="v-s:Delete" property="rdfs:label"></a>
+      </small>
+    </div>
+    <div id="new-reply"></div>
+    <hr class="margin-sm">
+    <div about="@" rel="v-s:hasComment" data-template="v-s_RecursiveCommentTemplate.html"></div>
+  </div>
+</div>

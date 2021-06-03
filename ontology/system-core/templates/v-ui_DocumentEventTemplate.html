@@ -1,0 +1,113 @@
+<script>
+  if (individual.hasValue("v-s:actor", "cfg:VedaSystem")) { template.empty(); }
+  $("#exp", template).click(function (e) {
+    e.preventDefault();
+    $("div[rel='v-s:processJournal']", template).toggle();
+    $(this).children(":first").toggleClass("glyphicon-chevron-down glyphicon-chevron-right");
+  });
+  //# sourceURL=v-ui_DocumentEventTemplate.html_pre
+</script>
+<div class="journal-record">
+  <hr class="margin-sm">
+  <div class="row">
+    <div class="col-md-2 col-sm-3 event-type">
+      <span class="start-process" href="#" style="display:none">
+        <a href="#" id="exp"><span class="glyphicon glyphicon-chevron-down"></span></a>
+        <strong about="@" rel="rdf:type" data-template="v-ui_LabelTemplate.html"></strong>
+      </span>
+      <span class="non-start-process" about="@" rel="rdf:type" data-template="v-ui_LabelTemplate.html"></span>
+    </div>
+    <div class="col-md-8 col-sm-6 event-desc">
+      <div about="@" rel="v-s:documentVersion" data-template="v-ui_LabelLinkTemplate.html"></div>
+      <div about="@" rel="v-wf:onProcess">
+        <script>
+          if ( individual.hasValue("v-wf:hasStartForm") ) {
+            var startForm = individual["v-wf:hasStartForm"][0];
+            $("[about='start-form']", template).attr("about", startForm.id);
+          } else { // Проверим наличие переменной стартовой формы
+            var inVars = individual["v-wf:inVars"].map(function (inVar) {
+              return inVar.load();
+            });
+            if (inVars.length) {
+              return Promise.all(inVars).then(function (inVars) {
+                var startFormVar = inVars.filter(function (inVar) {
+                  return inVar.hasValue("v-wf:variableName",  "startForm_id");
+                });
+                var startForm = startFormVar[0]["v-wf:variableValue"][0];
+                $("[about='start-form']", template).attr("about", startForm.id);
+              }).catch(function () {
+                $("[about='start-form']", template).remove();
+              });
+            } else {
+              $("[about='start-form']", template).remove();
+            }
+          }
+          //# sourceURL=v-ui_DocumentEventTemplate.html_inline
+        </script>
+        <div>
+          <a about="@" class="process-id" href="#/@" rel="v-wf:instanceOf" data-template="v-ui_LabelTemplate.html"></a>
+          <a href="#" class="stop-process glyphicon glyphicon-remove text-danger" style="display:none;"></a>
+          <span class="process-stopped glyphicon glyphicon-minus-sign text-danger" style="display:none;"></span>
+          <span about="start-form">
+            <span>
+              &nbsp;&nbsp;(<a href="#/@" about="@" rel="rdf:type" data-template="v-ui_LabelTemplate.html"></a>)
+            </span>
+          </span>
+        </div>
+      </div>
+      <span about="@" rel="v-s:actor" data-template="v-ui_LabelTemplate.html"></span>
+    </div>
+    <div class="col-md-2 col-sm-3 event-date text-right">
+      <span about="@" property="v-s:created"></span>
+    </div>
+  </div>
+  <div about="@" rel="v-s:processJournal" data-template="v-ui_SubJournalTemplate.html"></div>
+</div>
+<script>
+  if ( individual.hasValue("rdf:type", "v-s:ProcessStarted") ) {
+    $(".start-process", template).show();
+    $(".non-start-process", template).hide();
+    var process = individual.get('v-wf:onProcess')[0];
+    process.load().then(function (process) {
+      if (process.hasValue("v-wf:isStopped", true)) {
+        $(".process-id", template).addClass('text-danger');
+        $(".process-stopped", template).show();
+        $(".start-process > #exp", template).trigger("click");
+      };
+      if (
+        (!process.hasValue("v-wf:isStopped") || process.hasValue("v-wf:isStopped", false)) &&
+        (!process.hasValue("v-wf:isCompleted") || process.hasValue("v-wf:isCompleted", false))
+      ) {
+        var actor = individual['v-s:actor'][0];
+        var doc = individual['v-s:onDocument'][0];
+        var isMemberPromise = veda.user.isMemberOf("v-s:FunctionProcessBreak_Group");
+        return Promise.all([doc.canDelete(), isMemberPromise]).then(function(results) {
+          var canDelete = results[0];
+          var isProcessBreakMember = results[1];
+          if (!actor) {
+            console.log("Unexpected behavior: can't read v-s:actor from individual");
+            return false;
+          }
+          if ( (veda.appointment.id === actor.id || veda.appointment.id === "cfg:AdministratorAppointment") ||
+              (canDelete && isProcessBreakMember) ) {
+            $(".stop-process", template).show();
+            $(".stop-process", template).on("click", function (e) {
+              e.preventDefault();
+              var self = this;
+              var warn = new veda.IndividualModel("v-s:AreYouSure");
+              warn.load().then(function (warn) {
+                warn = warn["rdfs:label"].map(veda.Util.formatValue).join(" ");
+                if ( confirm(warn) ) {
+                  process['v-wf:isStopped'] = [ true ];
+                  $(self).remove();
+                  process.save();
+                }
+              });
+            });
+          };
+        })
+      }
+    });
+  }
+  //# sourceURL=v-ui_DocumentEventTemplate.html_post
+</script>

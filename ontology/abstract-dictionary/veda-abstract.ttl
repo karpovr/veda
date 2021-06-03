@@ -1575,62 +1575,15 @@ v-s:parentUnit
   owl:inverseOf v-s:childUnit ;
 .
 #--------------Template--------------------------------
-
-v-s:hasMaintainedObjectTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон объектов ТОРО"@ru ;
-  rdfs:label "Шаблон объектов ТОРО"@en ;
-  rdfs:comment "Объекты ТОРО"@ru ;
-  rdfs:comment "Объекты ТОРО"@en ;
-  v-ui:template """
-<div>
-  <em about="v-s:hasMaintainedObject" property="rdfs:label"></em>
-  <table class="table table-condensed table-bordered">
-    <thead>
-      <tr class="active">
-        <th about="rdfs:label" property="rdfs:label"></th>
-        <th></th>
-        <th about="v-s:hasParentLinkBundle" property="rdfs:label"></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody rel="v-s:hasMaintainedObject">
-      <tr>
-        <td property="rdfs:label" class="view edit search"></td>
-        <td property="v-s:shortLabel" class="view edit search"></td>
-        <td rel="v-s:hasParentLink" data-template="v-ui:LabelTemplate" class="view edit search"></td>
-        <td>
-          <div about="@" rel="v-s:hasParentLink" class="view edit search">
-            <div property="v-s:shortLabel" class="view edit search"></div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-    <tfoot class="-view edit search"><tr><td colspan="5">
-      <veda-control data-type="link" rel="v-s:hasMaintainedObject" class="-view edit search fulltext tree"></veda-control>
-    </tfoot>
-  </table>
-</div>
-""" ;
-.
-
 v-s:TS_Deletable
   rdf:type v-ui:TemplateSpecification ;
   v-s:loadPriority 15 ;
-  v-ui:defaultTemplate v-s:DeletableTemplate ;
+  v-ui:defaultTemplate "v-s_DeletableTemplate.html" ;
   v-ui:forClass v-s:Deletable ;
 .
 
 #--------------Template--------------------------------
 #----v-s:Deletable ствится вторым классом, рядом с классом документа, чтобы 2 шаблона не отображались на экране 
-v-s:DeletableTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон объектов для класса  v-s:Deletable(Удаляемый)"@ru ;
-  rdfs:label "Template for class  v-s:Deletable(Удаляемый)"@en ;
-  v-ui:template """
-<div></div>
-""" ;
-.
 # ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
 v-s:PsHasRoleInContract_ContractParticipantCustomer
   rdf:type v-ui:ObjectPropertySpecification ;

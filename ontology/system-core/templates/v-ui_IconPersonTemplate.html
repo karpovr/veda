@@ -1,0 +1,14 @@
+<script>
+  if (individual.hasValue("v-s:hasAspect")) {
+    template.attr("href", "#/" + individual["v-s:hasAspect"][0].id);
+  }
+  return new veda.IndividualModel("v-s:PersonalInfo").load().then(function(personalInfo) {
+    template.tooltip({
+      container: template,
+      placement: "bottom",
+      trigger: "hover",
+      title: personalInfo["rdfs:label"].map(veda.Util.formatValue).join(" ")
+    });
+  })
+</script>
+<a href="#/@" about="@" property="rdfs:label"></a>

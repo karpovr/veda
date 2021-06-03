@@ -1,0 +1,12 @@
+<div class="pull-right">
+  <span class="glyphicon glyphicon-chevron-down"></span>
+</div>
+<script>
+  $("span.glyphicon", template).click(function(){
+    var self = $(this);
+    self.toggleClass("glyphicon-chevron-left glyphicon-chevron-down");
+    var parentHeader = self.closest(".section-header");
+    parentHeader.siblings(".section-content").toggle();
+  });
+  //# sourceURL=v-ui_SectionHeaderTemplate.html_post
+</script>

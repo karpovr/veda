@@ -1009,7 +1009,7 @@ $.fn.veda_actor = function( options ) {
 
   // Tree feature
   $('.tree', control).on('click keydown', function (e) {
-    const treeTmpl = new veda.IndividualModel('v-ui:TreeTemplate');
+    const treeTmpl = 'v-ui_TreeTemplate.html';
     const modal = $('#individual-modal-template').html();
     if (e.type !== 'click' && e.which !== 13 && e.which !== 32) {
       return;
@@ -1187,7 +1187,7 @@ $.fn.veda_actor = function( options ) {
         }
         let tmpl;
         if ( chosenActorType === 'v-s:Department' && result.hasValue('rdf:type', 'v-s:Appointment') ) {
-          tmpl = '<span about=\'@\' rel=\'v-s:parentUnit\' data-template=\'v-ui:LabelTemplate\'></span>';
+          tmpl = '<span about=\'@\' rel=\'v-s:parentUnit\' data-template=\'v-ui_LabelTemplate.html\'></span>';
         } else {
           tmpl = '<span about=\'@\' property=\'rdfs:label\'></span>';
         }
@@ -2515,7 +2515,7 @@ $.fn.veda_link = function( options ) {
   // Tree feature
   const tree = $('.tree', control);
   if ( this.hasClass('tree') || this.hasClass('full') ) {
-    const treeTmpl = new veda.IndividualModel('v-ui:TreeTemplate');
+    const treeTmpl = 'v-ui_TreeTemplate.html';
     const modal = $('#individual-modal-template').html();
     tree.on('click keydown', function (e) {
       if (e.type !== 'click' && e.which !== 13 && e.which !== 32) {

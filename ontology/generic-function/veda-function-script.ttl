@@ -178,133 +178,9 @@ v-s:ClearBundle
 v-s:TS_UserScript
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:UserScriptTemplate;
+  v-ui:defaultTemplate "v-s_UserScriptTemplate.html";
   v-ui:forClass v-s:UserScript
 .
-
-v-s:UserScriptTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:UserScript ;
-  rdfs:label "Шаблон для класса v-s:UserScript"@ru ;
-  rdfs:label "Template for v-s:UserScript class"@en ;
-  v-ui:template """
-<div class="container sheet">
-  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
-  <div class="row">
-    <div class="col-md-2 view -edit -search">
-      <em about="v-s:lastRun" property="rdfs:label"></em>
-      <div about="@" property="v-s:lastRun"></div>
-    </div>
-    <div class="col-md-2 view -edit -search">
-      <em about="v-s:updateCounter" property="rdfs:label"></em>
-      <div about="@" property="v-s:updateCounter"></div>
-    </div>
-    <div class="col-md-2 view -edit -search">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:toBeRun" data-type="boolean"></veda-control>
-          <em about="v-s:toBeRun" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-    <div class="col-md-2 view edit -search">
-      <em about="v-s:executeAt" property="rdfs:label"></em>
-      <div property="v-s:executeAt" class="view -edit -search"></div>
-      <veda-control property="v-s:executeAt" data-type="radio" class="-view edit search"></veda-control>
-    </div>
-  </div>
-  <hr>
-  <div class="row">
-    <div class="col-md-6">
-      <em about="v-s:script" property="rdfs:label" class="view edit -search"></em>
-      <veda-control property="v-s:script" data-type="source" class="view edit -search"></veda-control>
-    </div>
-    <div class="col-md-6">
-      <em about="v-s:output" property="rdfs:label" class="view edit -search"></em>
-      <pre about="@" property="v-s:output" class="view edit -search" style="height:300px; overflow:auto"></pre>
-    </div>
-  </div>
-  <hr>
-  <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
-  <br>
-  <div class="actions view edit -search clearfix">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
-    <div class="pull-right">
-      <button type="button" class="action btn btn-warning view -edit -search" id="run" about="v-s:RunBundle" property="rdfs:label"></button>
-      <button type="button" class="action btn btn-default -view edit -search" id="clear" about="v-s:ClearBundle" property="rdfs:label"></button>
-    </div>
-  </div>
-</div>
-<script>
-  // Clear output on save
-  individual.on("beforeSave", clearOutput);
-  template.one("remove", function () {
-    individual.off("beforeSave", clearOutput);
-  });
-  function clearOutput () {
-    this["v-s:output"] = [];
-  }
-
-  var nativeConsole = window.console;
-  var nativePrint = window.print;
-  var _print = function () {
-    var output = individual["v-s:output"][0] || "";
-    for (var i = 0; i < arguments.length; i++) {
-      var arg = arguments[i] ;
-      var argString = typeof arg !== "undefined" ? arg.toString() : "undefined" ;
-      if (i === 0) {
-        output += argString;
-      } else {
-        output += " " + argString;
-      }
-    }
-    output += String.fromCharCode(13, 10);
-    individual["v-s:output"] = [output];
-  }
-  var _console = {
-    log: _print,
-    error: _print,
-    info: _print,
-    time: function (timer) {
-      this[timer] = new Date();
-    },
-    timeEnd: function (timer) {
-      var delta = new Date() - this[timer];
-      this.log(timer, delta, "msec");
-    }
-  };
-
-  window.console = _console;
-  window.print = _print;
-  template.one("remove", function () {
-    window.console = nativeConsole;
-    window.print = nativePrint;
-  });
-
-  $(".action#run", template).click(function () {
-    if ( individual.hasValue("v-s:executeAt", "Server") ) {
-      individual["v-s:toBeRun"] = [ true ];
-      individual.save(true);
-    } else {
-      individual["v-s:lastRun"] = [ new Date() ];
-      individual["v-s:output"] = [];
-      var script = new Function("veda", individual["v-s:script"][0] || "return;");
-      try {
-        script(veda);
-      } catch (err) {
-        print(err);
-      }
-    }
-  });
-  $(".action#clear", template).click(function () {
-    individual["v-s:output"] = [];
-  });
-
-  //# sourceURL=v-s:UserScriptTemplate_post
-</script>
-  """
-.
-
 # --------------------------User operations-----------------------------
 
 v-s:Operation
@@ -429,7 +305,7 @@ v-s:OperationUpdate
   rdfs:label "Обновить"@ru ;
   rdfs:label "Update"@en ;
   v-ui:hasModel v-s:OperationUpdateModel ;
-  v-ui:hasTemplate v-s:OperationTemplate ;
+  v-ui:hasTemplate "v-s_OperationTemplate.html" ;
 .
 
 v-s:OperationUpdateModel
@@ -453,286 +329,39 @@ v-s:StopBundle
 v-s:TS_Operation
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:defaultTemplate "v-s_OperationTemplate.html";
   v-ui:forClass v-s:Operation
 .
 v-s:TS_GenericOperation
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:defaultTemplate "v-s_OperationTemplate.html";
   v-ui:forClass v-s:GenericOperation
 .
 v-s:TS_OperationDelete
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:defaultTemplate "v-s_OperationTemplate.html";
   v-ui:forClass v-s:OperationDelete
 .
 v-s:TS_OperationRemove
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:defaultTemplate "v-s_OperationTemplate.html";
   v-ui:forClass v-s:OperationRemove
 .
 v-s:TS_OperationRestore
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:defaultTemplate "v-s_OperationTemplate.html";
   v-ui:forClass v-s:OperationRestore
 .
 v-s:TS_OperationUpdate
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:defaultTemplate "v-s_OperationTemplate.html";
   v-ui:forClass v-s:OperationUpdate
 .
-
-v-s:OperationTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:Operation ;
-  rdfs:label "Шаблон для класса v-s:Operation"@ru ;
-  rdfs:label "Template for v-s:Operation class"@en ;
-  v-ui:template """
-<div class="container sheet">
-  <div about="@" data-template="v-s:OperationHeaderTemplate"></div>
-  <div about="@" data-template="v-s:OperationFooterTemplate"></div>
-</div>
-  """ ;
-.
-
-v-s:OperationHeaderTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для класса v-s:Operation"@ru ;
-  rdfs:label "Template for v-s:Operation class"@en ;
-  v-ui:template """
-<div>
-  <div class="clearfix">
-    <h4 class="pull-left margin-sm" about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></h4>
-    <div class="pull-left margin-md-h" style="margin-top:5px;" about="@" data-template="v-s:OperationProgressTemplate"></div>
-  </div>
-  <hr class="margin-md" />
-  <div class="row margin-md">
-    <div class="col-sm-6" style="border-right: 1px solid #ddd;">
-      <!--em about="v-s:dataQuery" property="rdfs:label"></em>
-      <div style="overflow:auto;" about="@" property="v-s:dataQuery"></div-->
-      <em about="v-s:dateFrom" property="rdfs:label"></em>
-      <span about="@" property="v-s:dateFrom"></span>
-      <em about="v-s:duration" property="rdfs:label"></em>
-      <span about="@" property="v-s:duration"></span> sec
-      <em about="v-s:processed" property="rdfs:label"></em>
-      <span about="@" property="v-s:processed"></span>
-      <em about="v-s:creator" property="rdfs:label"></em>
-      <span about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></span>
-    </div>
-    <div class="col-sm-6" style="border-left: 1px solid #ddd; margin-left: -1px;">
-      <em about="v-s:data" property="rdfs:label"></em>
-      <ul rel="v-s:data" class="view edit search" data-limit="5" data-more="true">
-        <li about="@" data-template="v-ui:LabelTemplate"></li>
-      </ul>
-    </div>
-  </div>
-</div>
-  """ ;
-.
-
-v-s:OperationFooterTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:Operation ;
-  rdfs:label "Шаблон для класса v-s:Operation"@ru ;
-  rdfs:label "Template for v-s:Operation class"@en ;
-  v-ui:template """
-<script>
-  $(".action#start", template).click(function () {
-    individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusStarted")];
-    individual.save();
-  });
-  $(".action#stop", template).click(function () {
-    veda.Backend.set_in_individual(veda.ticket, {
-      "@": individual.id,
-      "v-s:hasStatus": [{
-        type: "Uri",
-        data: "v-s:StatusStopped"
-      }]
-    });
-  });
-  $(".action#restart", template).click(function () {
-    individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusRestarted")];
-    individual["v-s:output"] = [""];
-    individual["v-s:progress"] = [0];
-    individual.save();
-  });
-
-  statusHandler();
-  individual.on("v-s:hasStatus", statusHandler);
-  template.one("remove", function () {
-    individual.off("v-s:hasStatus", statusHandler);
-  });
-  individual.on("v-s:hasStatus", statusHandler);
-
-  function statusHandler () {
-    var start = $(".action#start", template),
-        stop = $(".action#stop", template),
-        restart = $(".action#restart", template),
-        status = individual.hasValue("v-s:hasStatus") ? individual["v-s:hasStatus"][0].id : undefined;
-
-    switch (status) {
-      case "v-s:StatusStarted":
-      case "v-s:StatusExecution":
-        start.addClass("hidden");
-        stop.removeClass("hidden");
-        restart.addClass("hidden");
-        break;
-      case "v-s:StatusExecuted":
-        start.addClass("hidden");
-        stop.addClass("hidden");
-        restart.removeClass("hidden");
-        break;
-      default:
-        start.removeClass("hidden");
-        stop.addClass("hidden");
-        restart.addClass("hidden");
-        break;
-    }
-  }
-//# sourceURL=v-s:OperationFooterTemplate_pre
-</script>
-<div class="actions view edit -search clearfix">
-  <div class="pull-left">
-    <button type="button" class="action btn btn-success view -edit -search" id="start" about="v-s:StartBundle" property="rdfs:label"></button>
-    <button type="button" class="action btn btn-info view -edit -search" id="restart" about="v-s:RestartBundle" property="rdfs:label"></button>
-    <button type="button" class="action btn btn-danger view -edit -search" id="stop" about="v-s:StopBundle" property="rdfs:label"></button>
-  </div>
-</div>
-  """ ;
-.
-
-v-s:OperationStatusTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:Operation ;
-  rdfs:label "Шаблон для класса v-s:Operation"@ru ;
-  rdfs:label "Template for v-s:Operation class"@en ;
-  v-ui:template """
-<script>
-  $(".action#start", template).click(function () {
-    individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusStarted")];
-    individual.save();
-  });
-  $(".action#stop", template).click(function () {
-    veda.Backend.set_in_individual(veda.ticket, {
-      "@": individual.id,
-      "v-s:hasStatus": [{
-        type: "Uri",
-        data: "v-s:StatusStopped"
-      }]
-    });
-  });
-  $(".action#restart", template).click(function () {
-    individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusRestarted")];
-    individual["v-s:output"] = [""];
-    individual["v-s:progress"] = [0];
-    individual.save();
-  });
-
-  statusHandler();
-  individual.on("v-s:hasStatus", statusHandler);
-  template.one("remove", function () {
-    individual.off("v-s:hasStatus", statusHandler);
-  });
-  individual.on("v-s:hasStatus", statusHandler);
-
-  function statusHandler () {
-    var start = $(".action#start", template),
-        stop = $(".action#stop", template),
-        restart = $(".action#restart", template),
-        status = individual.hasValue("v-s:hasStatus") ? individual["v-s:hasStatus"][0].id : undefined;
-
-    switch (status) {
-      case "v-s:StatusStarted":
-      case "v-s:StatusExecution":
-        start.addClass("hidden");
-        stop.removeClass("hidden");
-        restart.addClass("hidden");
-        break;
-      case "v-s:StatusExecuted":
-        start.addClass("hidden");
-        stop.addClass("hidden");
-        restart.removeClass("hidden");
-        break;
-      default:
-        start.removeClass("hidden");
-        stop.addClass("hidden");
-        restart.addClass("hidden");
-        break;
-    }
-  }
-
-  $(".show-operation-modal", template).click(function (e) {
-    e.preventDefault();
-    veda.Util.showSmallModal(individual);
-  })
-
-//# sourceURL=v-s:OperationStatusTemplate_pre
-</script>
-<div class="pull-left">
-  <h5 class="pull-left margin-sm">
-    <a class="show-operation-modal text-muted" href="#" about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></a>
-  </h5>
-  <div class="pull-left" about="@" data-template="v-s:OperationProgressTemplate"></div>
-  <button class="action btn btn-xs btn-success pull-left" id="start"><span class="glyphicon glyphicon-play"></span></button>
-  <button class="action btn btn-xs btn-info pull-left" id="restart"><span class="glyphicon glyphicon-repeat"></span></button>
-  <button class="action btn btn-xs btn-danger pull-left" id="stop"><span class="glyphicon glyphicon-stop"></span></button>
-</div>
-  """ ;
-.
-
-v-s:OperationProgressTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:Operation ;
-  rdfs:label "Шаблон для класса v-s:Operation"@ru ;
-  rdfs:label "Template for v-s:Operation class"@en ;
-  v-ui:template """
-<script>
-  progressHandler();
-  statusHandler();
-  individual.on("v-s:progress", progressHandler);
-  individual.on("v-s:hasStatus", statusHandler);
-  template.one("remove", function () {
-    individual.off("v-s:progress", progressHandler);
-    individual.off("v-s:hasStatus", statusHandler);
-  });
-
-  function progressHandler () {
-    var progress = individual.hasValue("v-s:progress") && individual["v-s:progress"][0] || 0;
-    $(".progress-bar", template).css({"width": progress + "%"});
-  }
-  function statusHandler () {
-    var progressBar = $(".progress-bar", template),
-        status = individual.hasValue("v-s:hasStatus") ? individual["v-s:hasStatus"][0].id : undefined;
-    switch (status) {
-      case "v-s:StatusStarted":
-      case "v-s:StatusExecution":
-        progressBar.addClass("progress-bar-success active").removeClass("progress-bar-danger");
-        break;
-      case "v-s:StatusExecuted":
-        progressBar.addClass("progress-bar-success").removeClass("progress-bar-danger active");
-        break;
-      default:
-        progressBar.addClass("progress-bar-danger").removeClass("progress-bar-success active");
-        break;
-    }
-  }
-//# sourceURL=v-s:OperationProgressTemplate_pre
-</script>
-<div class="pull-left">
-  <div class="progress pull-left" style="display: inline-block; height: 22px; width:100px; margin:0 5px;">
-    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%; padding-top:2px;">
-      <strong about="@" property="v-s:progress"></strong><strong>%</strong>
-    </div>
-  </div>
-</div>
-  """ ;
-.
-
 v-s:OperationEvent
   rdf:type v-s:Event ;
   v-s:triggerByType v-s:Operation ;

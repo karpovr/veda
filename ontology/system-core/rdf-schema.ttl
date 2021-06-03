@@ -12,7 +12,7 @@ rdfs:Class a rdfs:Class ;
     rdfs:comment "The class of classes." ;
     rdfs:isDefinedBy rdfs: ;
     rdfs:subClassOf rdfs:Resource ;
-    v-ui:hasTemplate v-ui:ClassClassTemplate ;
+    v-ui:hasTemplate "v-ui_ClassClassTemplate.html" ;
     v-ui:hasModel v-ui:ClassClassModel .
 
 rdfs:Container a rdfs:Class ;
@@ -47,7 +47,7 @@ rdfs:Resource a rdfs:Class ;
     rdfs:label "Resource"@en ;
     rdfs:comment "The class resource, everything." ;
     rdfs:isDefinedBy rdfs: ;
-    v-ui:hasTemplate v-ui:ResourceTemplate .
+    v-ui:hasTemplate "v-ui_ResourceTemplate.html" .
 
 rdfs:comment a rdf:Property ;
     rdfs:label "Комментарий"@ru ;

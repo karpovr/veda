@@ -1,0 +1,163 @@
+<script>
+  var renderedCount = 0;
+  var tbody = $("#tbody", template);
+  var task_template = tbody.html();
+  tbody.empty();
+  var doc_uri = this.id.replace(/.$/, "");
+  var doc = new veda.IndividualModel(doc_uri);
+  $("#refresh", template).click(buildJournal);
+  buildJournal();
+
+  function buildJournal() {
+    renderedCount = 0;
+    tbody.empty();
+    var tasks = veda.Backend.query({
+      ticket: veda.ticket,
+      query: "'rdf:type'=='v-wf:DecisionForm' && 'v-wf:onDocument'=='" + doc_uri + "'",
+      sort: "'v-s:created' desc"
+    })
+    .then(function (query_res) {
+      var tasks_uris = query_res.result;
+      if (tasks_uris.length) {
+        return veda.Backend.get_individuals({
+          ticket: veda.ticket,
+          uris: tasks_uris
+        });
+      }
+    })
+    .then(renderTasks);
+  };
+
+  function renderTasks(tasksJSONs) {
+    if (!tasksJSONs || !tasksJSONs.length) { return; }
+    var taskJSON = tasksJSONs.pop();
+    var task = new veda.IndividualModel(taskJSON);
+    task.present(tbody, task_template).then(function (renderedTemplate) {
+      $(".sequence-number", renderedTemplate).text(++renderedCount);
+    }).then(function () {
+      renderTasks(tasksJSONs);
+    });
+  };
+
+  $("#on-document", template).attr("about", doc_uri);
+
+  $('.createReport0', template).on('click', function () {
+    veda.Util.createReport('v-s:Journal_printBlank', doc);
+  });
+  //# sourceURL=v-ui_SimplifiedJournalTemplate.html_pre
+</script>
+<div class="container sheet">
+  <br>
+  <ul id="box-tabs" class="nav nav-tabs nav-right" role="tablist">
+    <li class="pull-left"><h2 class="no-margin" about="v-s:Journal" property="rdfs:label"></h2></li>
+    <li role="presentation"><a href="#/@//v-ui_JournalTemplate.html" class="btn btn-link"><span about="v-s:DetailedJournalBundle" property="rdfs:label"></span></a></li>
+    <li role="presentation" class="active"><a href="#/@//v-ui_SimplifiedJournalTemplate.html" class="btn btn-link"><span about="v-s:SimplifiedJournalBundle" property="rdfs:label"></span></a></li>
+  </ul>
+  <br>
+  <div class="clearfix">
+    <div class="pull-left">
+      <h4 id="on-document" data-template="v-ui_ClassNameLabelLinkTemplate.html"></h4>
+    </div>
+    <div class="pull-right">
+      <button type="button" class="action btn btn-info view -edit -search createReport0" about="v-s:PrintBlank" property="rdfs:label"></button>
+    </div>
+  </div>
+  <br>
+  <div id="tasks" class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th width="1%">#</th>
+          <th width="15%" about="v-wf:from" property="rdfs:label"></th>
+          <th width="15%" about="v-wf:to" property="rdfs:label"></th>
+          <th width="25%" about="v-s:description" property="rdfs:label"></th>
+          <th width="15%" about="v-s:created" property="rdfs:label"></th>
+          <th about="v-wf:takenDecision" property="rdfs:label"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <script>
+          if ( individual.hasValue("v-wf:isCompleted", true) ) {
+            template.children().first().addClass("success");
+            $(".docflow-buttons", template).remove();
+          } else {
+            var currentEmployee = veda.appointment["v-s:employee"][0];
+            var currentOcuppation = veda.appointment["v-s:occupation"][0];
+            var targetEmployee = individual["v-wf:from"][0];
+            var targetOccupation = individual["v-wf:from"][1]
+            var canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
+            var isDirectTask = individual.hasValue("v-wf:isDirectTask", true);
+            if (!canRevoke || !isDirectTask) {
+              $(".docflow-buttons", template).hide();
+            } else {
+              $(".docflow-buttons", template).show();
+              $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
+              $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
+            }
+          }
+
+          function takeDecision(takenDecision, label) {
+            var decisionClass = new veda.IndividualModel( takenDecision );
+            var decision = new veda.IndividualModel();
+            decision["rdf:type"] = [ decisionClass ];
+            decision["v-s:backwardTarget"] = [ individual ];
+            decision["rdfs:label"] = [ label ];
+            decision["v-s:backwardProperty"] = [ new veda.IndividualModel("v-wf:takenDecision") ];
+            decision["v-s:canRead"] = [ true ];
+            var modal = veda.Util.showModal(decision, undefined, "edit");
+
+            decision.one("afterReset", function () {
+              modal.modal("hide").remove();
+            });
+            decision.one("afterSave", function () {
+              modal.modal("hide").remove();
+              $(".docflow-buttons", template).hide();
+            });
+          }
+          //# sourceURL=v-ui_SimplifiedJournalTemplate.html_inline
+        </script>
+        <tr>
+          <td class="sequence-number"></td>
+          <td>
+            <div about="@" rel="v-wf:from" data-template="v-ui_LabelTemplate.html"></div>
+              <div about="@" rel="v-wf:redirect_from_task">
+                <script>
+                  if ( !individual.hasValue("v-wf:to") ) {
+                    template.empty();
+                  }
+                </script>
+              <div>
+              <hr class="no-margin">
+              <strong><small about="v-s:TaskIsRedirectedFrom" property="rdfs:label"></small></strong>
+              <small about="@" rel="v-wf:to" data-template="v-ui_LabelTemplate.html"></small>
+            </div>
+          </td>
+          <td about="@" rel="v-wf:to" data-template="v-ui_LabelTemplate.html"></td>
+          <td><a href="#/@" about="@" property="rdfs:label"></a><div about="@" property="v-s:description"></div></td>
+          <td about="@" property="v-s:created"></td>
+          <td>
+            <div about="@" rel="v-wf:takenDecision">
+              <div>
+                <strong about="@" property="rdfs:label"></strong>
+                <span about="@" rel="v-wf:to">
+                  <span>
+                    <span>&rarr;</span>
+                    <span about="@" data-template="v-ui_LabelTemplate.html"></span>
+                  </span>
+                </span>
+                <div><i about="@" property="rdfs:comment"></i></div>
+                <hr class="margin-sm">
+                <small about="@" rel="v-s:creator" data-template="v-ui_LabelTemplate.html"></small> &middot; <small aboout="@" property="v-s:created"></small>
+              </div>
+            </div>
+            <div class="docflow-buttons" style="display:none">
+              <button class="btn btn-sm btn-warning redirect" about="v-wf:DecisionRedirect_Bundle" property="rdfs:label"></button>
+              <button class="btn btn-sm btn-info revoke" about="v-wf:DecisionRevoke_Bundle" property="rdfs:label"></button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-default" id="refresh" about="v-s:RefreshBundle" property="rdfs:label"></button>
+  </div>
+</div>

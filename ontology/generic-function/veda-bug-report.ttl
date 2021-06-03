@@ -70,32 +70,6 @@ v-s:hasError
 v-s:TS_BugReport 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:BugReportTemplate;
+  v-ui:defaultTemplate "v-s_BugReportTemplate.html";
   v-ui:forClass v-s:BugReport
-.
-
-v-s:BugReportTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон графа"@ru ;
-  rdfs:label "Template graph"@en ;
-  v-ui:forClass v-s:BugReport ;
-  v-ui:template """
-<div class="container sheet">
-  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:resolved" data-type="boolean"></veda-control>
-      <em about="v-s:resolved" property="rdfs:label"></em>
-    </label>
-  </div>
-  <strong about="@" property="v-s:errorCode"></strong>: <strong about="@" property="v-s:errorName"></strong>
-  <br>
-  <i about="@" property="v-s:errorMessage"></i>
-  <em about="v-s:errorStack" property="rdfs:label"></em>
-  <pre about="@" property="v-s:errorStack" style="border:none; background-color:transparent;"></pre>
-
-  <hr>
-  <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
-</div>
-  """ ;
 .

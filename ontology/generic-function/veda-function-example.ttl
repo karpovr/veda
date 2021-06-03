@@ -50,26 +50,6 @@ v-fe:FunctionExampleModel
 v-s:TS_FunctionExample 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-fe:FunctionExampleTemplate;
+  v-ui:defaultTemplate "v-fe_FunctionExampleTemplate.html";
   v-ui:forClass v-fe:FunctionExample
-.
-v-fe:FunctionExampleTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон Функции-примера"@ru ;
-  rdfs:label "Function example template"@en ;
-  v-ui:forClass v-fe:FunctionExample ;
-  v-ui:template """
-    <div class="container sheet">
-      <h2>Example function instance</h2>
-      <span about="v-fe:exampleProperty" property="rdfs:label"></span>
-      <div property="v-fe:exampleProperty"></div>
-      <button id="press-me" class="btn btn-success">Press me</button>
-    </div>
-    <script>
-      $("#press-me", template).click(function () {
-        individual.press();
-      });
-      //# sourceURL=v-fe:FunctionExampleTemplate
-    </script>
-  """
 .

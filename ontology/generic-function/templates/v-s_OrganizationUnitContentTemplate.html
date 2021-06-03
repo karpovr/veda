@@ -1,0 +1,21 @@
+<script>
+  var blank = new veda.IndividualModel("v-s:ContactsInUnitSearchRegistryBlank");
+  return blank.load().then(function (blank) {
+    blank.initBlank().then(function (blankObject) {
+      if ( !blankObject.hasValue("v-s:parentUnit", individual) ) {
+        blankObject["v-s:parentUnit"] = [ individual ];
+        var search = new veda.IndividualModel("v-s:ContactsInUnitSearch");
+        return search.load().then(function (search) {
+          search["v-fs:searchResult"] = [];
+        });
+      }
+    });
+  });
+//# sourceURL=v-s_OrganizationUnitContentTemplate.html_pre
+</script>
+<div>
+  <h4><span about="@" property="rdfs:label"></span></h4>
+  <span about="@" data-template="v-ui_RabbitHole.html" data-properties="v-s:parentUnit"></span>
+  <hr>
+  <div about="v-s:ContactsInUnitSearch" data-template="v-fs_AttributiveSearchInlineTemplate.html"></div>
+</div>

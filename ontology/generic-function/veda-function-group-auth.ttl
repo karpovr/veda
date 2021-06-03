@@ -137,13 +137,13 @@ v-s:subjectGroupGeneratorValue
 v-s:TS_GroupGenerator
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:GroupGeneratorTemplate;
+  v-ui:defaultTemplate "v-s_GroupGeneratorTemplate.html";
   v-ui:forClass v-s:GroupGenerator
 .
 v-s:TS_PermissionGenerator
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:PermissionGeneratorTemplate;
+  v-ui:defaultTemplate "v-s_PermissionGeneratorTemplate.html";
   v-ui:forClass v-s:PermissionGenerator
 .
 
@@ -152,242 +152,6 @@ v-s:GroupGeneratorUri
   rdfs:label "URI группы авторизации для выбранного значения"@ru ;
   rdfs:label "Auth group URI for chosen value"@en ;
 .
-
-v-s:GroupGeneratorTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:GroupGenerator ;
-  rdfs:label "Шаблон для класса v-s:GroupGenerator"@ru ;
-  rdfs:label "Template for v-s:GroupGenerator class"@en ;
-  v-ui:template """
-<div class="container sheet">
-  <h2 about="v-s:GroupGenerator" property="rdfs:label"></h2>
-  <hr>
-  <em about="rdfs:label" property="rdfs:label"></em>
-  <div property="rdfs:label" class="view -edit -search"></div>
-  <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
-
-  <em about="rdfs:comment" property="rdfs:label"></em>
-  <div property="rdfs:comment" class="view -edit -search"></div>
-  <veda-control data-type="text" rows="2" property="rdfs:comment" class="-view edit search"></veda-control>
-
-  <em about="v-s:authClass" property="rdfs:label"></em>
-  <div about="@" rel="v-s:authClass" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
-  <div rel="v-s:authClass" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
-  <input id="authClass" type="text" class="-view edit search form-control"/>
-
-  <em about="v-s:authProperty" property="rdfs:label"></em>
-  <div about="@" rel="v-s:authProperty" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
-  <div rel="v-s:authProperty" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
-  <input id="authProperty" type="text" class="-view edit search form-control"/>
-
-  <em about="v-s:authFunction" property="rdfs:label"></em>
-  <div property="v-s:authFunction" class="view -edit -search"></div>
-  <veda-control data-type="text" rows="2" property="v-s:authFunction" class="-view edit search"></veda-control>
-
-  <em about="v-s:authValue" property="rdfs:label"></em>
-  <div property="v-s:authValue" class="view -edit -search"></div>
-  <veda-control data-type="generic" property="v-s:authValue" class="-view edit search"></veda-control>
-
-  <em about="v-s:authGroupFunction" property="rdfs:label"></em>
-  <div property="v-s:authGroupFunction" class="view -edit -search"></div>
-  <veda-control data-type="text" rows="2" property="v-s:authGroupFunction" class="-view edit search"></veda-control>
-
-  <em about="v-s:GroupGeneratorUri" property="rdfs:label"></em>
-  <code class="group-uri"></code>
-  <hr>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
-      <em about="v-s:canCreate" property="rdfs:label"></em>
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
-      <em about="v-s:canRead" property="rdfs:label"></em>
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
-      <em about="v-s:canUpdate" property="rdfs:label"></em>
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
-      <em about="v-s:canDelete" property="rdfs:label"></em>
-    </label>
-  </div>
-  <br>
-  <div class="actions view edit -search">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
-  </div>
-</div>
-<script>
-  System.import("sha256").then(function (module) {
-    var Sha256 = module.default;
-
-    $("#authClass", template).change(function() {
-      var uri = $(this).val();
-      if (uri) {
-        individual["v-s:authClass"] = [new veda.IndividualModel(uri)];
-      } else {
-        individual["v-s:authClass"] = [];
-      }
-    });
-
-    $("#authProperty", template).change(function() {
-      var uri = $(this).val();
-      if (uri) {
-        individual["v-s:authProperty"] = [new veda.IndividualModel(uri)];
-      } else {
-        individual["v-s:authProperty"] = [];
-      }
-    });
-
-    individual.on("propertyModified", handler);
-    template.one("remove", function () {
-      individual.off("propertyModified", handler);
-    });
-    handler();
-
-    function handler() {
-      var $groupUri = $(".group-uri", template);
-      if ( individual.hasValue("v-s:authValue") ) {
-        var group_concat_uri = individual.id + " " + individual["v-s:authValue"][0].toString();
-        var hash = Sha256.hash(group_concat_uri).substring(32);
-        var group_uri = "d:grp-" + hash;
-        $groupUri.text(group_uri);
-      } else {
-        $groupUri.text("");
-      }
-    }
-
-  });
-  //# sourceURL=v-s:GroupGeneratorTemplate_post
-</script>
-""" ;
-.
-
-v-s:PermissionGeneratorTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:GroupGenerator ;
-  rdfs:label "Шаблон для класса v-s:PermissionGenerator"@ru ;
-  rdfs:label "Template for v-s:PermissionGenerator class"@en ;
-  v-ui:template """
-<div class="container sheet">
-  <h2 about="v-s:PermissionGenerator" property="rdfs:label"></h2>
-  <hr>
-  <em about="rdfs:label" property="rdfs:label"></em>
-  <div property="rdfs:label" class="view -edit -search"></div>
-  <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
-
-  <em about="rdfs:comment" property="rdfs:label"></em>
-  <div property="rdfs:comment" class="view -edit -search"></div>
-  <veda-control data-type="text" rows="2" property="rdfs:comment" class="-view edit search"></veda-control>
-
-  <hr>
-
-  <em about="v-s:permissionSubject" property="rdfs:label"></em>
-  <div rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="subject" type="text" class="-view edit search form-control"/>
-
-  <em about="v-s:subjectGroupGenerator" property="rdfs:label"></em>
-  <div rel="v-s:subjectGroupGenerator" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="subjectGroup" type="text" class="-view edit search form-control"/>
-
-  <em about="v-s:subjectGroupGeneratorValue" property="rdfs:label"></em>
-  <div property="v-s:subjectGroupGeneratorValue" class="view -edit -search"></div>
-  <veda-control data-type="generic" property="v-s:subjectGroupGeneratorValue" class="-view edit search"></veda-control>
-
-  <hr>
-
-  <em about="v-s:permissionObject" property="rdfs:label"></em>
-  <div rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="object" type="text" class="-view edit search form-control"/>
-
-  <em about="v-s:objectGroupGenerator" property="rdfs:label"></em>
-  <div rel="v-s:objectGroupGenerator" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
-  <input id="objectGroup" type="text" class="-view edit search form-control"/>
-
-  <em about="v-s:objectGroupGeneratorValue" property="rdfs:label"></em>
-  <div property="v-s:objectGroupGeneratorValue" class="view -edit -search"></div>
-  <veda-control data-type="generic" property="v-s:objectGroupGeneratorValue" class="-view edit search"></veda-control>
-
-  <hr>
-
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
-      <em about="v-s:canCreate" property="rdfs:label"></em>
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
-      <em about="v-s:canRead" property="rdfs:label"></em>
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
-      <em about="v-s:canUpdate" property="rdfs:label"></em>
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
-      <em about="v-s:canDelete" property="rdfs:label"></em>
-    </label>
-  </div>
-  <br>
-  <div class="actions view edit -search">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
-  </div>
-</div>
-<script>
-  $("#subject", template).change(function() {
-    var uri = $(this).val();
-    if (uri) {
-      individual["v-s:permissionSubject"] = [new veda.IndividualModel(uri)];
-    } else {
-      individual["v-s:permissionSubject"] = [];
-    }
-  });
-
-  $("#subjectGroup", template).change(function() {
-    var uri = $(this).val();
-    if (uri) {
-      individual["v-s:subjectGroupGenerator"] = [new veda.IndividualModel(uri)];
-    } else {
-      individual["v-s:subjectGroupGenerator"] = [];
-    }
-  });
-
-  $("#object", template).change(function() {
-    var uri = $(this).val();
-    if (uri) {
-      individual["v-s:permissionObject"] = [new veda.IndividualModel(uri)];
-    } else {
-      individual["v-s:permissionObject"] = [];
-    }
-  });
-
-  $("#objectGroup", template).change(function() {
-    var uri = $(this).val();
-    if (uri) {
-      individual["v-s:objectGroupGenerator"] = [new veda.IndividualModel(uri)];
-    } else {
-      individual["v-s:objectGroupGenerator"] = [];
-    }
-  });
-
-  //# sourceURL=v-s:PermissionGeneratorTemplate_post
-</script>
-""" ;
-.
-
 # ------------- РЕЕСТРЫ ---------------
 
 v-s:GroupGeneratorBlank
@@ -402,59 +166,9 @@ v-s:GroupGeneratorRegistry
   rdfs:label "Генераторы групп авторизации"@ru ;
   rdfs:label "Auth group generators"@en ;
   v-fs:searchBlank v-s:GroupGeneratorBlank ;
-  v-fs:searchBlankTemplate v-s:GroupGeneratorTemplate ;
-  v-fs:searchResultTemplate v-s:GroupGeneratorRegistryResultTemplate ;
+  v-fs:searchBlankTemplate "v-s_GroupGeneratorTemplate.html" ;
+  v-fs:searchResultTemplate "v-s_GroupGeneratorRegistryResultTemplate.html" ;
 .
-
-v-s:GroupGeneratorRegistryResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон результатов реестра v-s:GroupGenerator"@ru ;
-  rdfs:label "v-s:GroupGenerator registry result template"@en ;
-  v-ui:template """
-<table class="table table-bordered">
-  <thead class="result-header">
-    <tr>
-      <th colspan="11" about="v-s:GroupGenerator" property="rdfs:label"></th>
-    </tr>
-    <tr class="active">
-      <th width="1%"><input type="checkbox" class="toggle-select-all"></th>
-      <th width="1%">#</th>
-      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-      <th class="orderby" data-orderby="v-s:authClass"><span about="v-s:authClass" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:authProperty"><span about="v-s:authProperty" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:authFunction"><span about="v-s:authFunction" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:authValue"><span about="v-s:authValue" property="rdfs:label"></span></th>
-      <th><span about="v-s:Rights" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:creator"><span about="v-s:creator" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-    </tr>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td><input type="checkbox" class="toggle-select"></td>
-      <td class="serial-number"></td>
-      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-      <td about="@" rel="v-s:authClass" data-template="v-ui:LabelTemplate"></td>
-      <td about="@" rel="v-s:authProperty" data-template="v-ui:LabelTemplate"></td>
-      <td about="@" property="v-s:authFunction"></td>
-      <td about="@" property="v-s:authValue"></td>
-      <td><strong class="rights"></strong></td>
-      <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-      <td about="@" property="v-s:created"></td>
-    </tr>
-    <script>
-      var rights = "";
-      rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
-      rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
-      rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
-      rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
-      $(".rights", template).text(rights);
-    </script>
-  </tbody>
-</table>
-  """ ;
-.
-
 v-s:PermissionGeneratorBlank
   a v-fc:Blank ;
   rdfs:label "Генератор прав"@ru ;
@@ -467,63 +181,9 @@ v-s:PermissionGeneratorRegistry
   rdfs:label "Генераторы прав"@ru ;
   rdfs:label "Permissions generators"@en ;
   v-fs:searchBlank v-s:PermissionGeneratorBlank ;
-  v-fs:searchBlankTemplate v-s:PermissionGeneratorTemplate ;
-  v-fs:searchResultTemplate v-s:PermissionGeneratorRegistryResultTemplate ;
+  v-fs:searchBlankTemplate "v-s_PermissionGeneratorTemplate.html" ;
+  v-fs:searchResultTemplate "v-s_PermissionGeneratorRegistryResultTemplate.html" ;
 .
-
-v-s:PermissionGeneratorRegistryResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон результатов реестра v-s:PermissionGenerator"@ru ;
-  rdfs:label "v-s:PermissionGenerator registry result template"@en ;
-  v-ui:template """
-<table class="table table-bordered">
-  <thead class="result-header">
-    <tr>
-      <th colspan="12" about="v-s:PermissionGenerator" property="rdfs:label"></th>
-    </tr>
-    <tr class="active">
-      <th width="1%"><input type="checkbox" class="toggle-select-all"></th>
-      <th width="1%">#</th>
-      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-      <th><span about="v-s:permissionSubject" property="rdfs:label"></span></th>
-      <th><span about="v-s:subjectGroupGenerator" property="rdfs:label"></span></th>
-      <th><span about="v-s:subjectGroupGeneratorValue" property="rdfs:label"></span></th>
-      <th><span about="v-s:Rights" property="rdfs:label"></span></th>
-      <th><span about="v-s:permissionObject" property="rdfs:label"></span></th>
-      <th><span about="v-s:objectGroupGenerator" property="rdfs:label"></span></th>
-      <th><span about="v-s:objectGroupGeneratorValue" property="rdfs:label"></span></th>
-      <th><span about="v-s:creator" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-    </tr>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td><input type="checkbox" class="toggle-select"></td>
-      <td class="serial-number"></td>
-      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-      <td about="@" rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate"></td>
-      <td about="@" rel="v-s:subjectGroupGenerator" data-template="v-ui:LabelLinkTemplate"></td>
-      <td about="@" property="v-s:subjectGroupGeneratorValue"></td>
-      <td><strong class="rights"></strong></td>
-      <td about="@" rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate"></td>
-      <td about="@" rel="v-s:objectGroupGenerator" data-template="v-ui:LabelLinkTemplate"></td>
-      <td about="@" property="v-s:objectGroupGeneratorValue"></td>
-      <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-      <td about="@" property="v-s:created"></td>
-    </tr>
-    <script>
-      var rights = "";
-      rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
-      rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
-      rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
-      rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
-      $(".rights", template).text(rights);
-    </script>
-  </tbody>
-</table>
-  """ ;
-.
-
 # ------------------------------------------------------------ УПРАВЛЕНИЕ ПРАВАМИ --
 
 v-s:GroupGenerator_BaseUser

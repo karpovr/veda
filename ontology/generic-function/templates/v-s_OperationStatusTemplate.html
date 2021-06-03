@@ -1,0 +1,70 @@
+<script>
+  $(".action#start", template).click(function () {
+    individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusStarted")];
+    individual.save();
+  });
+  $(".action#stop", template).click(function () {
+    veda.Backend.set_in_individual(veda.ticket, {
+      "@": individual.id,
+      "v-s:hasStatus": [{
+        type: "Uri",
+        data: "v-s:StatusStopped"
+      }]
+    });
+  });
+  $(".action#restart", template).click(function () {
+    individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusRestarted")];
+    individual["v-s:output"] = [""];
+    individual["v-s:progress"] = [0];
+    individual.save();
+  });
+
+  statusHandler();
+  individual.on("v-s:hasStatus", statusHandler);
+  template.one("remove", function () {
+    individual.off("v-s:hasStatus", statusHandler);
+  });
+  individual.on("v-s:hasStatus", statusHandler);
+
+  function statusHandler () {
+    var start = $(".action#start", template),
+        stop = $(".action#stop", template),
+        restart = $(".action#restart", template),
+        status = individual.hasValue("v-s:hasStatus") ? individual["v-s:hasStatus"][0].id : undefined;
+
+    switch (status) {
+      case "v-s:StatusStarted":
+      case "v-s:StatusExecution":
+        start.addClass("hidden");
+        stop.removeClass("hidden");
+        restart.addClass("hidden");
+        break;
+      case "v-s:StatusExecuted":
+        start.addClass("hidden");
+        stop.addClass("hidden");
+        restart.removeClass("hidden");
+        break;
+      default:
+        start.removeClass("hidden");
+        stop.addClass("hidden");
+        restart.addClass("hidden");
+        break;
+    }
+  }
+
+  $(".show-operation-modal", template).click(function (e) {
+    e.preventDefault();
+    veda.Util.showSmallModal(individual);
+  })
+
+//# sourceURL=v-s_OperationStatusTemplate.html_pre
+</script>
+<div class="pull-left">
+  <h5 class="pull-left margin-sm">
+    <a class="show-operation-modal text-muted" href="#" about="@" rel="rdf:type" data-template="v-ui_LabelTemplate.html"></a>
+  </h5>
+  <div class="pull-left" about="@" data-template="v-s_OperationProgressTemplate.html"></div>
+  <button class="action btn btn-xs btn-success pull-left" id="start"><span class="glyphicon glyphicon-play"></span></button>
+  <button class="action btn btn-xs btn-info pull-left" id="restart"><span class="glyphicon glyphicon-repeat"></span></button>
+  <button class="action btn btn-xs btn-danger pull-left" id="stop"><span class="glyphicon glyphicon-stop"></span></button>
+</div>

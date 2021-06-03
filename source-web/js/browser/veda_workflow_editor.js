@@ -83,7 +83,7 @@ jsWorkflow.ready(function() {
     if (mode === 'view') {
       const holder = $('<div>');
       propsHead.text(net['rdfs:label'].join(', '));
-      process.present(holder, 'v-wf:ProcessPropsTemplate');
+      process.present(holder, 'v-wf_ProcessPropsTemplate.html');
       props.empty().append(holder);
     }
 
@@ -165,13 +165,13 @@ jsWorkflow.ready(function() {
         if (mode === 'view') {
           holder = $('<div>');
           propsHead.text(net['rdfs:label'].join(', '));
-          process.present(holder, 'v-wf:ProcessPropsTemplate');
+          process.present(holder, 'v-wf_ProcessPropsTemplate.html');
           props.empty().append(holder);
         }
         if (mode === 'edit') {
           holder = $('<div>');
           propsHead.text(net['rdfs:label'].join(', '));
-          net.present(holder, 'v-wf:SimpleNetTemplate', 'edit');
+          net.present(holder, 'v-wf_SimpleNetTemplate.html', 'edit');
           props.empty().append(holder);
         }
       }
@@ -467,9 +467,9 @@ jsWorkflow.ready(function() {
           const about = new veda.IndividualModel(_this.id);
           const holder = $('<div>');
           if (about['rdf:type'][0].id == 'v-wf:Task') {
-            about.present(holder, 'v-wf:TaskTemplateAsProperties', 'edit');
+            about.present(holder, 'v-wf_TaskTemplateAsProperties.html', 'edit');
           } else {
-            about.present(holder, 'v-wf:ConditionTemplateAsProperties', 'edit');
+            about.present(holder, 'v-wf_ConditionTemplateAsProperties.html', 'edit');
           }
           props.append(holder);
           if ( about.hasValue('rdfs:label') ) propsHead.text(about['rdfs:label'].join(', '));
@@ -510,7 +510,7 @@ jsWorkflow.ready(function() {
                     });
                     instance.showProcessRunPath(wi, 0);
                     const holder = $('<div>');
-                    wi.present(holder, 'v-wf:WorkItemTemplate');
+                    wi.present(holder, 'v-wf_WorkItemTemplate.html');
                     props.append(holder);
                   };
                 })(wi),
@@ -534,7 +534,7 @@ jsWorkflow.ready(function() {
               });
               instance.showProcessRunPath(wi, 0);
               const holder = $('<div>');
-              wi.present(holder, new veda.IndividualModel('v-wf:WorkItemTemplate'));
+              wi.present(holder, new veda.IndividualModel('v-wf_WorkItemTemplate.html'));
               props.append(holder);
             });
           }
@@ -544,7 +544,7 @@ jsWorkflow.ready(function() {
       if (mode=='edit') {
         windows.bind('dblclick', function(e) {
           const _this = e.delegateTarget;
-          veda.Util.showModal(new veda.IndividualModel($(_this).attr('id')), 'v-wf:TaskTemplateAsModal', 'edit');
+          veda.Util.showModal(new veda.IndividualModel($(_this).attr('id')), 'v-wf_TaskTemplateAsModal.html', 'edit');
         });
 
         instance.draggable(windows, {
