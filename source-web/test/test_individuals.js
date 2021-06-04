@@ -2310,12 +2310,12 @@ for (i = 0; i < 1; i++) {
             try {
                 Backend.query();
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.query(ticket.id);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             Backend.query(ticket.id, {});
             Backend.query(ticket.id, 1);
@@ -2325,212 +2325,212 @@ for (i = 0; i < 1; i++) {
             try {
                 Backend.query(ticket, [{}]);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
 
             try {
                 Backend.put_individual();
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individual(ticket.id);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individual(ticket.id, {});
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "904");
             }
             try {
                 Backend.put_individual(ticket.id, 1);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individual(ticket.id, "1");
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individual(ticket.id, false);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individual(ticket.id, []);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individual(ticket.id, [{}]);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
 
             try {
                 Backend.put_individuals();
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id, {});
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id, 1);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id, "1");
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id, false);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id, []);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.put_individuals(ticket.id, [{}]);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "904");
             }
 
             try {
                 Backend.set_in_individual();
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.set_in_individual(ticket.id);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.set_in_individual(ticket.id, {});
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "904");
             }
             try {
                 Backend.set_in_individual(ticket.id, 1);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.set_in_individual(ticket.id, "1");
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.set_in_individual(ticket.id, false);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.set_in_individual(ticket, []);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.set_in_individual(ticket.id, [{}]);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
 
             try {
                 Backend.add_to_individual();
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.add_to_individual(ticket.id);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.add_to_individual(ticket.id, {});
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "904");
             }
             try {
                 Backend.add_to_individual(ticket.id, 1);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.add_to_individual(ticket.id, "1");
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.add_to_individual(ticket.id, false);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.add_to_individual(ticket, []);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.add_to_individual(ticket.id, [{}]);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
 
             try {
                 Backend.remove_from_individual();
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.remove_from_individual(ticket.id);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.remove_from_individual(ticket.id, {});
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "904");
             }
             try {
                 Backend.remove_from_individual(ticket.id, 1);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.remove_from_individual(ticket.id, "1");
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.remove_from_individual(ticket.id, false);
             } catch (e) {
-                assert.ok(e.message = "904");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.remove_from_individual(ticket, []);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
             try {
                 Backend.remove_from_individual(ticket.id, [{}]);
             } catch (e) {
-                assert.ok(e.message = "400");
+                assert.ok(e.message == "400");
             }
 
             ticket = get_user1_ticket();
@@ -2603,55 +2603,73 @@ for (i = 0; i < 1; i++) {
         });
     */
 
-    /*
-        QUnit.test("#041 test Backend.put_individuals (user1 stores three individuals)", function(assert)
-        {
-            var ticket_user1 = get_user1_ticket();
 
-            //#1
-            assert.ok(ticket_user1.id.length > 0);
+    QUnit.test("#041 test Backend.put_individuals (user1 stores three individuals)", function(assert)
+    {
+        var ticket_user1 = get_user1_ticket();
 
-            var new_test_doc1_uri_1 = "test21_1:" + guid();
+        //#1
+        assert.ok(ticket_user1.id.length > 0);
 
-            var test_data_uid = guid();
-            var test_data = 'testdata ' + test_data_uid;
+        var new_test_doc1_uri_1 = "test21_1:" + guid();
 
-            var new_test_doc1 = {
-                '@': new_test_doc1_uri_1,
-                'rdf:type': newUri('rdfs:Resource'),
-                'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
-                'v-s:test_field': newStr(test_data, 'NONE'),
-                'v-s:test_fieldA': newUri('BBB' + test_data_uid),
-                'v-s:test_fieldB': newUri('CCC' + test_data_uid)
-            };
+        var test_data_uid = guid();
+        var test_data = 'testdata ' + test_data_uid;
 
-            // document content author != user1
-            var new_test_doc1_uri_2 = "test21_2:" + guid();
-            var new_test_doc2 = {
-                '@': new_test_doc1_uri_2,
-                'rdf:type': newUri('rdfs:Resource'),
-                'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
-                'v-s:test_field': newUri(test_data)
-            };
+        var new_test_doc1 = {
+            '@': new_test_doc1_uri_1,
+            'rdf:type': newUri('rdfs:Resource'),
+            'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
+            'v-s:test_field': newStr(test_data, 'NONE'),
+            'v-s:test_fieldA': newUri('BBB' + test_data_uid),
+            'v-s:test_fieldB': newUri('CCC' + test_data_uid)
+        };
 
-            var new_test_doc1_uri_3 = "test21_3:" + guid();
-            var new_test_doc3 = {
-                '@': new_test_doc1_uri_3,
-                'rdf:type': newUri('rdfs:Resource'),
-                'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
-                'v-s:test_field': newUri(test_data),
-                'v-s:test_fieldA': newUri('BBB' + test_data_uid)
-            };
-            var res = Backend.put_individuals(ticket_user1.id, [new_test_doc1, new_test_doc2, new_test_doc3], false);
-            var read_individual1 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_1);
-            var read_individual2 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_2);
-            var read_individual3 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_3);
-            //#2
-            assert.ok(compare(new_test_doc1, read_individual1) && compare(new_test_doc2, read_individual2) &&
-                compare(new_test_doc3, read_individual3));
-        });
-    */
+        var new_test_doc1_uri_2 = "test21_2:" + guid();
+        var new_test_doc2 = {
+            '@': new_test_doc1_uri_2,
+            'rdf:type': newUri('rdfs:Resource'),
+            'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
+            'v-s:test_field': newUri(test_data)
+        };
 
+        var new_test_doc1_uri_3 = "test21_3:" + guid();
+        var new_test_doc3 = {
+            '@': new_test_doc1_uri_3,
+            'rdf:type': newUri('rdfs:Resource'),
+            'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
+            'v-s:test_field': newUri(test_data),
+            'v-s:test_fieldA': newUri('BBB' + test_data_uid)
+        };
+        var res = Backend.put_individuals(ticket_user1.id, [new_test_doc1, new_test_doc2, new_test_doc3], false);
+        var read_individual1 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_1);
+        var read_individual2 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_2);
+        var read_individual3 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_3);
+        //#2
+        assert.ok(compare(new_test_doc1, read_individual1) && compare(new_test_doc2, read_individual2) &&
+            compare(new_test_doc3, read_individual3));
+
+
+        var ticket_user2 = get_user1_ticket();
+
+        // document content author != user1
+        var new_test_doc1_uri_4 = "test21_4:" + guid();
+        var new_test_doc4 = {
+            '@': new_test_doc1_uri_4,
+            'rdf:type': newUri('rdfs:Resource'),
+            'v-s:author': newUri('td:AndreyBychin-Analyst2'),
+            'v-s:created': newDate(new Date()),
+            'v-s:test_field': newUri(test_data)
+        };
+        var res = Backend.put_individual(ticket_user2.id, new_test_doc4);
+        Backend.wait_module(m_acl, res.op_id);
+
+        try {
+            var res = Backend.put_individuals(ticket_user1.id, [new_test_doc1, new_test_doc2, new_test_doc3, new_test_doc4], false);
+        } catch (e) {
+            assert.ok(e.message == "472");
+        }
+    });
 
     QUnit.test("#051 test restrictions in subject groups", function (assert) {
         var ticket_admin = get_admin_ticket();
