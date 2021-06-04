@@ -7,9 +7,10 @@
  * FN - name of a function to apply to each file in directory
  *
  * Example:
- * node process-dir.js 1 templateExtractor
- * node process-dir.js 1 templateRemover
- * node process-dir.js 1 uriToFileReplacerTTL uriToFileReplacerHTML
+ * node process-dir.js ontology templateExtractor
+ * node process-dir.js ontology templateRemover
+ * node process-dir.js ontology uriToFile
+ * node process-dir.js ontology fixSourceURL
  *
  */
 
@@ -78,7 +79,8 @@ async function printer(dir, file) {
 
 /**
  * Template extractor function
- *
+ * Extracts templates contents from templates individuals
+ * and saves them to templates/ folder
  */
 async function templateExtractor(dir, file) {
   const filePath = [dir, file].join('/');
@@ -120,7 +122,7 @@ async function templateExtractor(dir, file) {
 
 /**
  * Template remover function
- *
+ * Removes templates individuals from TTL
  */
 async function templateRemover(dir, file) {
   const filePath = [dir, file].join('/');
@@ -145,77 +147,69 @@ async function templateRemover(dir, file) {
 
 /**
  * Template uri to filename replacer function
- *
- */
-async function uriToFileTTL(dir, file) {
-  const filePath = [dir, file].join('/');
-  const filter = /\.ttl$/i;
-  const templateRE = / *(v-ui:hasTemplate|v-ui:defaultTemplate|v-fs:searchBlankTemplate|v-fs:searchResultTemplate) +([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*) *(?:;|\n)/gi;
-  if ( filter.test(filePath) ) {
-    console.log('Replacing templates URIs to files in file:', filePath);
-    let counter = 0;
-    try {
-      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
-      content = content.replace(templateRE, function (match, predicate, templateUri) {
-        const templateFileName = templateUri.replace(':', '_') + '.html';
-        counter++;
-        return `  ${predicate} "${templateFileName}" ;`;
-      });
-      await fsAsync.writeFile(filePath, content, 'utf-8');
-      console.log(`Replaced ${counter} URIs`);
-    } catch (err) {
-      console.log(`Error reading/writing TTL file ${filePath}`, err);
-    }
-  }
-}
-
-/**
- * Template uri to filename replacer function
- *
- */
-async function uriToFileHTML(dir, file) {
-  const filePath = [dir, file].join('/');
-  const filter = /\.html$/i;
-  const templateRE = /data-template="([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)"/gi;
-  if ( filter.test(filePath) ) {
-    console.log('Replacing templates URIs to files in file:', filePath);
-    let counter = 0;
-    try {
-      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
-      content = content.replace(templateRE, function (match, templateUri) {
-        const templateFileName = templateUri.replace(':', '_') + '.html';
-        counter++;
-        return `data-template="${templateFileName}"`;
-      });
-      await fsAsync.writeFile(filePath, content, 'utf-8');
-      console.log(`Replaced ${counter} URIs`);
-    } catch (err) {
-      console.log(`Error reading/writing HTML file ${filePath}`, err);
-    }
-  }
-}
-
-/**
- * Template uri to filename replacer function
- * function checks if corresponding filename exists in public/templates directory
+ * Checks all individual uris in TTL and HTML files
+ * if corresponding filename exists in public/templates directory
+ * replaces it with template file name
  */
 async function uriToFile(dir, file) {
   const filePath = [dir, file].join('/');
-  const filter = /\.(ttl|html)$/i;
-  const templateRE = /('|")([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*Template)('|")/gi;
-  if ( filter.test(filePath) ) {
+  const filterTTL = /\.ttl$/i;
+  const filterHTML = /\.html$/i;
+  const isTTL = filterTTL.test(filePath);
+  const isHTML = filterHTML.test(filePath);
+  const templateRE = /\b([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)\b/g;
+  if ( isTTL || isHTML ) {
     console.log('Replacing templates URIs to filenames in file:', filePath);
     let counter = 0;
     try {
       let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
-      content = content.replace(templateRE, function (match, beg, templateUri, end) {
-        const templateFileName = templateUri.replace(':', '_') + '.html';
+      content = content.replace(templateRE, function (match) {
+        const templateFileName = match.replace(':', '_') + '.html';
         const templateFilePath = process.env.PWD + '/public/templates/' + templateFileName;
         const templateFileExists = fs.existsSync(templateFilePath);
         console.log(templateFileName, templateFilePath, templateFileExists);
         if (templateFileExists) {
           counter++;
-          return beg + templateFileName + end;
+          if (isTTL) {
+            return '"' + templateFileName + '"';
+          } else {
+            return templateFileName;
+          }
+        }
+        return match;
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+      console.log(`Replaced ${counter} URIs`);
+    } catch (err) {
+      console.log(`Error reading/writing file ${filePath}`, err);
+    }
+  }
+}
+
+/**
+ * Template uri to filename replacer function
+ * Checks individual uris in HTML in strings like `//# sourceURL=...`
+ * if corresponding filename exists in public/templates directory
+ * replaces it with template file name
+ */
+async function fixSourceURL(dir, file) {
+  const filePath = [dir, file].join('/');
+  const filterHTML = /\.html$/i;
+  const isHTML = filterHTML.test(filePath);
+  const templateRE = /(\/\/# sourceURL=)([a-z][a-z0-9\-]*:[a-zA-Z0-9\-\_]*)(_pre|_post|_inline|_centr)/g;
+  if ( isHTML ) {
+    console.log('Replacing templates URIs to filenames in sourceURL:', filePath);
+    let counter = 0;
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
+      content = content.replace(templateRE, function (match, beg, template, suffix) {
+        const templateFileName = template.replace(':', '_') + '.html';
+        const templateFilePath = process.env.PWD + '/public/templates/' + templateFileName;
+        const templateFileExists = fs.existsSync(templateFilePath);
+        console.log(templateFileName, templateFilePath, templateFileExists);
+        if (templateFileExists) {
+          counter++;
+          return beg + templateFileName + suffix;
         }
         return match;
       });
