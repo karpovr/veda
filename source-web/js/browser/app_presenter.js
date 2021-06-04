@@ -23,7 +23,7 @@ import '../browser/line_status_listener.js';
  */
 export default function AppPresenter() {
   /**
-   * Render individual under mouse pointer with special system template v-ui_ttl.html
+   * Render individual under mouse pointer with special system template v-ui:ttl
    * when Left mouse button with Ctrl + Alt keys are pressed
    * @param {Event} event
    * @this Element
@@ -34,7 +34,7 @@ export default function AppPresenter() {
     if (event.altKey && event.ctrlKey) {
       event.preventDefault();
       event.stopPropagation();
-      riot.route(`${hash}//v-ui_ttl.html`);
+      riot.route(`${hash}//v-ui:ttl`);
     }
   }
   delegateHandler(document.body, 'click', '[resource], [about]', specialTemplateHandler, true);
