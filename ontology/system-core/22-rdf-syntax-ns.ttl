@@ -30,7 +30,7 @@ rdf:Property a rdfs:Class ;
     rdfs:comment "The class of RDF properties." ;
     rdfs:isDefinedBy rdf: ;
     rdfs:subClassOf rdfs:Resource ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 rdf:Seq a rdfs:Class ;
     rdfs:label "Seq" ;

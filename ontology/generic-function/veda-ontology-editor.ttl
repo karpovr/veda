@@ -209,6 +209,191 @@ v-s:PropertySpecificationSearchBlank
   v-fc:targetType v-ui:DatatypePropertySpecification ;
   v-fc:targetType v-ui:ObjectPropertySpecification ;
 .
+
+v-ui:CommonOntologyTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Общий шаблон онтологии"@ru ;
+  rdfs:label "Common ontology template"@en ;
+  v-ui:template """
+<script>
+  if ( this.isNew() ) {
+    $("#uri", template)
+      .prop("placeholder", this.id)
+      .change(function () {
+        if (this.value) {
+          individual.id = this.value;
+        }
+      });
+  } else {
+    $("#uri", template).remove();
+  }
+  //# sourceURL=v-ui:CommonOntologyTemplate_pre
+</script>
+<div style="position:relative;">
+  <a style="position:absolute;top:10px;right:10px;" href="#/@//v-ui:Graph"><span class="glyphicon glyphicon-link"></span></a>
+  <h3><span about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span><br><small><span about="@" property="rdfs:label"></span> (<span property="@"></span>)</small></h3>
+  <input type="text" id="uri" class="form-control" />
+  <em about="rdfs:label" property="rdfs:label" class="-view edit search"></em>
+  <veda-control property="rdfs:label" data-type="multilingualString" class="-view edit search"></veda-control>
+  <em about="rdfs:comment" property="rdfs:label" class="-view edit search"></em>
+  <i property="rdfs:comment" class="view -edit -search"></i>
+  <veda-control property="rdfs:comment" data-type="multilingualText" rows="2" class="-view edit search"></veda-control>
+  <hr>
+</div>
+  """ ;
+.
+
+v-ui:ClassClassTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Шаблон класса Class"@ru ;
+  rdfs:label "Class class template"@en ;
+  v-ui:forClass owl:Class ;
+  v-ui:forClass rdfs:Class ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <veda-control rel="rdf:type" data-type="radio" class="-view edit search"></veda-control>
+  <br class="-view edit search">
+  <h4 about="v-s:SuperClassesBundle" property="rdfs:label"></h4>
+  <div rel="rdfs:subClassOf" data-template="v-ui:LabelLinkTemplate" class="view edit search"></div>
+  <veda-control rel="rdfs:subClassOf" class="-view edit search fulltext dropdown"></veda-control>
+  <br>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span about="v-s:PropertiesBundle" property="rdfs:label"></span>
+          <button type="button" class="action btn btn-xs btn-default pull-right -view edit -search" id="add-property" about="v-s:CreateBundle" property="rdfs:label"></button>
+        </div>
+        <div class="panel-body" style="height:400px; overflow:auto;">
+          <ol id="props"></ol>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <span class="panel-title" about="v-s:SpecificationsBundle" property="rdfs:label"></span>
+          <button type="button" class="action btn btn-xs btn-default pull-right -view edit -search" id="add-specification" about="v-s:CreateBundle" property="rdfs:label"></button>
+        </div>
+        <div class="panel-body" style="height:400px; overflow:auto;">
+          <ol id="specs"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h4 about="v-ui:hasTemplate" property="rdfs:label"></h4>
+      <div rel="v-ui:hasTemplate" data-template="v-ui:LabelLinkTemplate" class="view -edit -search"></div>
+      <veda-control rel="v-ui:hasTemplate" class="-view edit search fulltext dropdown"></veda-control>
+      <br>
+      <button type="button" class="action btn btn-xs btn-default pull-right -view edit -search" id="add-template" about="v-s:CreateBundle" property="rdfs:label"></button>
+    </div>
+    <div class="col-md-6">
+      <h4 about="v-ui:hasModel" property="rdfs:label"></h4>
+      <div rel="v-ui:hasModel" data-template="v-ui:LabelLinkTemplate" class="view -edit -search"></div>
+      <veda-control rel="v-ui:hasModel" class="-view edit search fulltext dropdown"></veda-control>
+      <br>
+      <button type="button" class="action btn btn-xs btn-default pull-right -view edit -search" id="add-model" about="v-s:CreateBundle" property="rdfs:label"></button>
+    </div>
+  </div>
+  <hr>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+<script>
+  var propsContainer = $("#props", template);
+  var specsContainer = $("#specs", template);
+  var tmplContainer = $("#tmpl", template);
+  var modal = $($("#notification-modal-template").html());
+  var objContainer = $(".holder", modal);
+  var labelTemplate = new veda.IndividualModel("v-ui:LabelLinkTemplate");
+
+  var props = veda.ontology.getClassProperties(this.id);
+  props.map(function (property_uri) {
+    var prop = new veda.IndividualModel(property_uri);
+    var li = $("<li></li>").appendTo(propsContainer);
+    prop.present(li, labelTemplate).then(function (li) {
+      if ( !prop.hasValue("rdfs:domain", individual) ) {
+        var small = $("<small class='text-muted'></small>").appendTo(li);
+        individual.getSuperClasses().then(function (superClasses) {
+          var origin = prop["rdfs:domain"].filter( function (item) {
+            return superClasses.indexOf(item) >= 0;
+          })[0];
+          small.text(origin.id);
+        });
+      }
+    });
+  });
+
+  var specs = veda.ontology.getClassSpecifications(this.id);
+  for (var property_uri in specs) {
+    var spec_uri = specs[property_uri];
+    var spec = new veda.IndividualModel(spec_uri);
+    var li = $("<li>").appendTo(specsContainer);
+    spec.present(li, labelTemplate).then(function (li) {
+      if ( !spec.hasValue("v-ui:forClass", individual) ) {
+        var small = $("<small class='text-muted'></small>").appendTo(li);
+        individual.getSuperClasses().then(function (superClasses) {
+          var origin = spec["v-ui:forClass"].filter( function (item) {
+            return superClasses.indexOf(item) >= 0;
+          })[0];
+          small.text(origin.id);
+        });
+      }
+    });
+  }
+
+  template.on("click", "a[href][resource]", function (e) {
+    e.preventDefault();
+    var target = $(this);
+    var uri = target.attr("href").split("/").pop();
+    var object = new veda.IndividualModel(uri);
+    objContainer.empty();
+    object.present(objContainer);
+    modal.modal("show");
+    e.stopPropagation();
+  });
+
+  $("#add-template", template).click(function () {
+    var _class = new veda.IndividualModel("v-ui:ClassTemplate"),
+        classTemplate = new veda.IndividualModel();
+    classTemplate["rdf:type"] = [_class];
+    classTemplate["v-ui:forClass"] = [ individual ];
+    riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
+  });
+
+  $("#add-model", template).click(function () {
+    var _class = new veda.IndividualModel("v-ui:ClassModel"),
+        classTemplate = new veda.IndividualModel();
+    classTemplate["rdf:type"] = [_class];
+    classTemplate["v-ui:forClass"] = [ individual ];
+    riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
+  });
+
+  $("#add-property", template).click(function () {
+    var _class = new veda.IndividualModel("rdf:Property"),
+        classTemplate = new veda.IndividualModel();
+    classTemplate["rdf:type"] = [_class];
+    classTemplate["rdfs:domain"] = [ individual ];
+    riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
+  });
+
+  $("#add-specification", template).click(function () {
+    var _class = new veda.IndividualModel("v-ui:PropertySpecification"),
+        classTemplate = new veda.IndividualModel();
+    classTemplate["rdf:type"] = [_class];
+    classTemplate["v-ui:forClass"] = [ individual ];
+    riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
+  });
+
+  //# sourceURL=v-ui:ClassClassTemplate_post
+</script>
+  """ ;
+.
+
 v-ui:PsTypeClassSpec
   rdf:type v-ui:ObjectPropertySpecification ;
   rdfs:label "Спецификация типа для класса Resource"@ru ;
@@ -221,6 +406,43 @@ v-ui:PsTypeClassSpec
   v-ui:minCardinality 1 ;
   v-ui:maxCardinality 1 ;
 .
+
+v-ui:PropertyClassTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Шаблон класса rdf:Property"@ru ;
+  rdfs:label "rdf:Property class template"@en ;
+  v-ui:forClass rdf:Property ;
+  v-ui:forClass owl:DatatypeProperty ;
+  v-ui:forClass owl:ObjectProperty ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <veda-control rel="rdf:type" data-type="radio" class="-view edit search"></veda-control>
+  <br class="-view edit search">
+  <h4 about="v-s:SuperPropertiesBundle" property="rdfs:label"></h4>
+  <div rel="rdfs:subPropertyOf" data-template="v-ui:LabelLinkTemplate" class="view edit search"></div>
+  <veda-control rel="rdfs:subPropertyOf" class="-view edit search fulltext dropdown"></veda-control>
+  <br>
+  <div class="row">
+    <div class="col-md-6">
+      <h4 about="rdfs:domain" property="rdfs:label"></h4>
+      <div rel="rdfs:domain" data-template="v-ui:LabelLinkTemplate"></div>
+      <veda-control rel="rdfs:domain" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+    <div class="col-md-6">
+      <h4 about="rdfs:range" property="rdfs:label"></h4>
+      <div rel="rdfs:range" data-template="v-ui:LabelLinkTemplate"></div>
+      <veda-control rel="rdfs:range" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-ui:PsTypePropertySpec
   rdf:type v-ui:ObjectPropertySpecification ;
   rdfs:label "Спецификация типа для класса Resource"@ru ;
@@ -239,21 +461,489 @@ v-ui:PsTypePropertySpec
 v-s:TS_PropertySpecification 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_PropertySpecificationTemplate.html";
+  v-ui:defaultTemplate v-ui:PropertySpecificationTemplate;
   v-ui:forClass v-ui:PropertySpecification
 .
+v-ui:PropertySpecificationTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Шаблон класса v-ui:PropertySpecification"@ru ;
+  rdfs:label "v-ui:PropertySpecification class template"@en ;
+  v-ui:forClass v-ui:PropertySpecification ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:forClass" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:forClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:forClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:forProperty" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:forProperty" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:forProperty" data-type="link" class="-view edit search fulltext dropdown" style="display: none;"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:tooltip" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:tooltip" class="view -edit -search"></div>
+      <veda-control property="v-ui:tooltip" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:placeholder" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:placeholder" class="view -edit -search"></div>
+      <veda-control property="v-ui:placeholder" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:alternativeName" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:alternativeName" class="view -edit -search"></div>
+      <veda-control property="v-ui:alternativeName" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:optionValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:optionValue"></div>
+      <veda-control property="v-ui:optionValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:defaultValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:defaultValue"></div>
+      <veda-control property="v-ui:defaultValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:minCardinality" property="rdfs:label" class="text-muted">Минимальная кардинальность</strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:minCardinality" class="view -edit -search"></div>
+      <veda-control property="v-ui:minCardinality" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:maxCardinality" property="rdfs:label" class="text-muted">Максимальная кардинальность</strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:maxCardinality" class="view -edit -search"></div>
+      <veda-control property="v-ui:maxCardinality" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-s:TS_DatatypePropertySpecification 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_DatatypePropertySpecificationTemplate.html";
+  v-ui:defaultTemplate v-ui:DatatypePropertySpecificationTemplate;
   v-ui:forClass v-ui:DatatypePropertySpecification
 .
+v-ui:DatatypePropertySpecificationTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Шаблон класса v-ui:PropertySpecification"@ru ;
+  rdfs:label "v-ui:PropertySpecification class template"@en ;
+  v-ui:forClass v-ui:DatatypePropertySpecification ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:forClass" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:forClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:forClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:forProperty" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:forProperty" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:forProperty" data-type="link" class="-view edit search fulltext dropdown" style="display: none;"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:minValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:minValue"></div>
+      <veda-control property="v-ui:minValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:maxValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:maxValue"></div>
+      <veda-control property="v-ui:maxValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:regexp" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:regexp" class="view -edit -search"></div>
+      <veda-control property="v-ui:regexp" data-type="string" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:minLength" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:minLength" class="view -edit -search"></div>
+      <veda-control property="v-ui:minLength" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:maxLength" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:maxLength" class="view -edit -search"></div>
+      <veda-control property="v-ui:maxLength" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:tooltip" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:tooltip" class="view -edit -search"></div>
+      <veda-control property="v-ui:tooltip" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:placeholder" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:placeholder" class="view -edit -search"></div>
+      <veda-control property="v-ui:placeholder" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:alternativeName" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:alternativeName" class="view -edit -search"></div>
+      <veda-control property="v-ui:alternativeName" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:optionValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:optionValue"></div>
+      <veda-control property="v-ui:optionValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:defaultValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:defaultValue"></div>
+      <veda-control property="v-ui:defaultValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:minCardinality" property="rdfs:label" class="text-muted">Минимальная кардинальность</strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:minCardinality" class="view -edit -search"></div>
+      <veda-control property="v-ui:minCardinality" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:maxCardinality" property="rdfs:label" class="text-muted">Максимальная кардинальность</strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:maxCardinality" class="view -edit -search"></div>
+      <veda-control property="v-ui:maxCardinality" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-s:TS_ObjectPropertySpecification 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_ObjectPropertySpecificationTemplate.html";
+  v-ui:defaultTemplate v-ui:ObjectPropertySpecificationTemplate;
   v-ui:forClass v-ui:ObjectPropertySpecification
 .
+v-ui:ObjectPropertySpecificationTemplate
+  rdf:type v-ui:ClassTemplate;
+  rdfs:label "Шаблон класса v-ui:PropertySpecification"@ru ;
+  rdfs:label "v-ui:PropertySpecification class template"@en ;
+  v-ui:forClass v-ui:ObjectPropertySpecification ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:forClass" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:forClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:forClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:forProperty" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:forProperty" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:forProperty" data-type="link" class="-view edit search fulltext dropdown" style="display: none;"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:tooltip" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:tooltip" class="view -edit -search"></div>
+      <veda-control property="v-ui:tooltip" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:placeholder" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:placeholder" class="view -edit -search"></div>
+      <veda-control property="v-ui:placeholder" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:alternativeName" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:alternativeName" class="view -edit -search"></div>
+      <veda-control property="v-ui:alternativeName" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:optionValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:optionValue"></div>
+      <veda-control property="v-ui:optionValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:defaultValue" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:defaultValue"></div>
+      <veda-control property="v-ui:defaultValue" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:minCardinality" property="rdfs:label" class="text-muted">Минимальная кардинальность</strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:minCardinality" class="view -edit -search"></div>
+      <veda-control property="v-ui:minCardinality" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:maxCardinality" property="rdfs:label" class="text-muted">Максимальная кардинальность</strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:maxCardinality" class="view -edit -search"></div>
+      <veda-control property="v-ui:maxCardinality" data-type="integer" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:rangeRestriction" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:rangeRestriction" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:rangeRestriction" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:queryPrefix" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:queryPrefix" class="view -edit -search"></div>
+      <veda-control property="v-ui:queryPrefix" data-type="string" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:sort" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:sort" class="view -edit -search"></div>
+      <veda-control property="v-ui:sort" data-type="string" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeRoot" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:treeRoot"></div>
+      <veda-control rel="v-ui:treeRoot" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeOutProperty" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:treeOutProperty" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:treeOutProperty" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeInProperty" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:treeInProperty" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:treeInProperty" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeAllowedClass" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:treeAllowedClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:treeAllowedClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeSelectableClass" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:treeSelectableClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:treeSelectableClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeSelectableFilter" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-ui:treeSelectableFilter" class="view -edit -search"></div>
+      <veda-control property="v-ui:treeSelectableFilter" data-type="source" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-ui:treeDisplayedProperty" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-ui:treeDisplayedProperty" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control rel="v-ui:treeDisplayedProperty" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-ui:PsMandatoryPropertiesForPropertySpec
   rdf:type v-ui:ObjectPropertySpecification ;
   rdfs:label "Спецификация свойств для класса PropertySpecifications"@ru ;
@@ -285,15 +975,57 @@ v-ui:PsMultiValuePropertiesForObjectPropertySpec
 v-s:TS_ClassTemplate 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_ClassTemplateTemplate.html";
+  v-ui:defaultTemplate v-ui:ClassTemplateTemplate;
   v-ui:forClass v-ui:ClassTemplate
 .
+v-ui:ClassTemplateTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса -Шаблон класса-"@ru ;
+  rdfs:label "Template for -Class template- class"@en ;
+  v-ui:forClass v-ui:ClassTemplate ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <h4 about="v-ui:forClass" property="rdfs:label"></h4>
+  <div rel="v-ui:forClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+  <veda-control rel="v-ui:forClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+  <br>
+  <veda-control property="v-ui:template" data-type="source"></veda-control>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-s:TS_ClassModel 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_ClassModelTemplate.html";
+  v-ui:defaultTemplate v-ui:ClassModelTemplate;
   v-ui:forClass v-ui:ClassModel
 .
+v-ui:ClassModelTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-ui:ClassModel"@ru ;
+  rdfs:label "Template for v-ui:ClassModel class"@en ;
+  v-ui:forClass v-ui:ClassModel ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <h4 about="v-ui:forClass" property="rdfs:label"></h4>
+  <div rel="v-ui:forClass" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+  <veda-control rel="v-ui:forClass" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+  <br>
+  <veda-control property="v-s:script" data-type="source"></veda-control>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-ui:PsForClassSpec
   rdf:type v-ui:ObjectPropertySpecification ;
   rdfs:label "Спецификация типа для класса Resource"@ru ;
@@ -310,15 +1042,176 @@ v-ui:PsForClassSpec
 v-s:TS_Event 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_EventTemplate.html";
+  v-ui:defaultTemplate v-ui:EventTemplate;
   v-ui:forClass v-s:Event
 .
+v-ui:EventTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:Event"@ru ;
+  rdfs:label "Template for v-s:Event class"@en ;
+  v-ui:forClass v-ui:ClassTemplate ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:triggerByUid" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-s:triggerByUid"></div>
+      <veda-control property="v-s:triggerByUid" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:triggerByType" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-s:triggerByType"><span class="value-holder"></div>
+      <veda-control property="v-s:triggerByType" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:preventByType" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-s:preventByType"><span class="value-holder"></div>
+      <veda-control property="v-s:preventByType" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:disabled" data-type="boolean"></veda-control>
+          <em about="v-s:disabled" property="rdfs:label" class="text-muted"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:script" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <veda-control property="v-s:script" data-type="source"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:dependency" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-s:dependency"></div>
+        <veda-control property="v-s:dependency" data-type="generic" class="-view edit search"></veda-control>
+      </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:runAt" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div property="v-s:runAt" class="view -edit -search"></div>
+      <veda-control property="v-s:runAt" data-type="multilingualText" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-s:TS_Module 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_ModuleTemplate.html";
+  v-ui:defaultTemplate v-ui:ModuleTemplate;
   v-ui:forClass v-s:Module
 .
+v-ui:ModuleTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для 'v-s:Module'"@ru ;
+  rdfs:label "Template for 'v-s:Module'"@en ;
+  v-ui:forClass v-s:Module ;
+  v-ui:template """
+<div class="container sheet">
+  <h2>
+    <span about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></span><br>
+    <small property="@"></small>
+  </h2>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-body bg-default">
+          <em about="v-s:moduleUrl" property="rdfs:label"></em>
+          <div property="v-s:moduleUrl" class="view -edit -search"></div>
+          <veda-control data-type="text" property="v-s:moduleUrl" class="-view edit search"></veda-control>
+          <em about="v-s:moduleVersion" property="rdfs:label"></em>
+          <div property="v-s:moduleVersion" class="view -edit -search"></div>
+          <veda-control data-type="text" property="v-s:moduleVersion" class="-view edit search"></veda-control>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div about="@" rel="v-s:hasImage" style="" data-template="v-ui:ImageTemplate"></div>
+    </div>
+  </div>
+  <div class="panel panel-default view -search -create">
+    <div class="panel-heading">
+      <span>Лог модуля</span>
+      <button type="button" class="btn btn-xs btn-default pull-right" id="copy-log">Скопировать</button>
+    </div>
+    <div class="panel-body">
+        <pre property="rdfs:comment" style="border:none; background-color:#fff; font-size: 0.8em; max-height: 500px; overflow-y: auto;"></pre>
+    </div>
+  </div>
+  <!-- заготовка для отображения созданных модулем классов -->
+  <!-- <div class="panel panel-default">
+    <div class="panel-heading">
+      <span>Связанные классы</span>
+    </div>
+    <div class="panel-body">
+
+    </div>
+  </div> -->
+  <hr>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="cancel delete"></span>
+  </div>
+</div>
+<script>
+  $("#copy-log", template).click(e=>{
+    let temp = $("<textarea>");
+    $(".modal").append(temp);
+    temp.val(individual['rdfs:comment'][0]).select();
+    document.execCommand("copy");
+    temp.remove();
+    return false;
+  });
+
+  $(".panel-heading", template).css("cursor", "pointer");
+  $(".panel-heading", template).click(e => {
+    $(e.target).siblings().slideToggle();
+  })
+
+  var dd = individual['rdfs:comment'][0];
+  var pre = $("pre", template);
+  var anchored = dd.replace(/([a-z0-9_-]+:[a-z0-9_-]*)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>");
+  pre.html(anchored);
+</script>
+  """ ;
+.
+
 # -- ПРАВА --
 
 v-s:RightsApplication
@@ -329,7 +1222,7 @@ v-s:RightsApplication
   v-s:shortLabel "Rights"@en ;
   #v-s:hasImage v-s:OrganizationStructureImage ;
   #v-s:hasIcon v-s:OrganizationStructureIcon ;
-  v-ui:hasTemplate "v-s_ApplicationTemplate.html" ;
+  v-ui:hasTemplate v-s:ApplicationTemplate ;
   v-s:hasCreate v-s:MembershipCreate ;
   v-s:hasCreate v-s:PermissionStatementCreate ;
   v-s:hasRegistry v-s:MembershipRegistry ;
@@ -340,13 +1233,13 @@ v-s:RightsApplication
 v-s:TS_Membership
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate "v-s_MembershipTemplate.html";
+  v-ui:defaultTemplate v-s:MembershipTemplate;
   v-ui:forClass v-s:Membership
 .
 v-s:TS_PermissionStatement
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate "v-s_PermissionStatementTemplate.html";
+  v-ui:defaultTemplate v-s:PermissionStatementTemplate;
   v-ui:forClass v-s:PermissionStatement
 .
 
@@ -367,8 +1260,8 @@ v-s:MembershipRegistry
   rdfs:label "Записи о включении в группу"@ru ;
   rdfs:label "Memberships"@en ;
   v-fs:searchBlank v-s:MembershipRegistryBlank ;
-  v-fs:searchBlankTemplate "v-s_MembershipRegistryTemplate.html" ;
-  v-fs:searchResultTemplate "v-s_MembershipRegistryResultTemplate.html" ;
+  v-fs:searchBlankTemplate v-s:MembershipRegistryTemplate ;
+  v-fs:searchResultTemplate v-s:MembershipRegistryResultTemplate ;
   v-fs:searchOnLoad true;
 .
 v-s:MembershipRegistryBlank
@@ -395,8 +1288,8 @@ v-s:PermissionStatementRegistry
   rdfs:label "Запись о выдаче прав"@ru ;
   rdfs:label "Permission"@en ;
   v-fs:searchBlank v-s:PermissionStatementRegistryBlank ;
-  v-fs:searchBlankTemplate "v-s_PermissionStatementRegistryTemplate.html" ;
-  v-fs:searchResultTemplate "v-s_PermissionStatementRegistryResultTemplate.html" ;
+  v-fs:searchBlankTemplate v-s:PermissionStatementRegistryTemplate ;
+  v-fs:searchResultTemplate v-s:PermissionStatementRegistryResultTemplate ;
   v-fs:searchOnLoad true;
 .
 v-s:PermissionStatementRegistryBlank
@@ -405,21 +1298,628 @@ v-s:PermissionStatementRegistryBlank
   rdfs:label "Permission"@en ;
   v-fc:targetType v-s:PermissionStatement ;
 .
+
+v-s:MembershipTemplate
+rdf:type v-ui:ClassTemplate ;
+v-ui:forClass v-s:Membership ;
+rdfs:label "Шаблон для класса v-s:Membership"@ru ;
+rdfs:label "Template for v-s:Membership class"@en ;
+v-ui:template """
+<div class="container sheet">
+  <h2 about="v-s:Membership" property="rdfs:label"></h2>
+  <hr>
+  <em about="rdfs:label" property="rdfs:label"></em>
+  <div property="rdfs:label" class="view -edit -search"></div>
+  <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
+
+  <em about="rdfs:comment" property="rdfs:label"></em>
+  <div property="rdfs:comment" class="view -edit -search"></div>
+  <veda-control data-type="text" rows="2" property="rdfs:comment" class="-view edit search"></veda-control>
+
+  <em about="v-s:memberOf" property="rdfs:label"></em>
+  <div rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="memberOf" type="text" class="-view edit search form-control" />
+
+  <em about="v-s:resource" property="rdfs:label"></em>
+  <div rel="v-s:resource" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="resource" type="text" class="-view edit search form-control" />
+
+  <em about="v-s:updateCounter" property="rdfs:label"></em>
+  <div property="v-s:updateCounter" class="view edit search"></div>
+  <veda-control data-type="integer" property="v-s:updateCounter" class="-view edit search"></veda-control>
+
+  <hr>
+
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+      <em about="v-s:canCreate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+      <em about="v-s:canRead" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+      <em about="v-s:canUpdate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+      <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <hr>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div>
+  <br>
+  <div class="actions view edit -search">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
+      data-buttons="edit save cancel delete"></span>
+  </div>
+  
+</div>
+<script>
+  $("#memberOf", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:memberOf"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:memberOf"] = [];
+    }
+  });
+
+  $("#resource", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:resource"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:resource"] = [];
+    }
+  });
+  //# sourceURL=v-s:MembershipTemplate_post
+</script>
+""" ;
+.
+v-s:MembershipRegistryTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:Membership ;
+  rdfs:label "Шаблон для класса v-s:Membership"@ru ;
+  rdfs:label "Template for v-s:Membership class"@en ;
+  v-ui:template """
+<div class="container sheet">
+  <h2 about="v-s:Membership" property="rdfs:label"></h2>
+  <hr>
+  <em about="rdfs:label" property="rdfs:label"></em>
+  <div property="rdfs:label" class="view -edit -search"></div>
+  <veda-control data-type="string" property="rdfs:label" class="-view edit search"></veda-control>
+
+  <em about="rdfs:comment" property="rdfs:label"></em>
+  <div property="rdfs:comment" class="view -edit -search"></div>
+  <veda-control data-type="text" rows="2" property="rdfs:comment" class="-view edit search"></veda-control>
+
+  <em about="v-s:memberOf" property="rdfs:label"></em>
+  <div rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="memberOf" type="text" class="-view edit search form-control"/>
+
+  <em about="v-s:resource" property="rdfs:label"></em>
+  <div rel="v-s:resource" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="resource" type="text" class="-view edit search form-control"/>
+
+  <em about="v-s:updateCounter" property="rdfs:label"></em>
+  <div property="v-s:updateCounter" class="view edit search"></div>
+  <veda-control data-type="integer" property="v-s:updateCounter" class="-view edit search"></veda-control>
+
+  <hr>
+
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+      <em about="v-s:canCreate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+      <em about="v-s:canRead" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+      <em about="v-s:canUpdate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+      <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div>
+</div>
+<script>
+  $("#memberOf", template).change(function() {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:memberOf"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:memberOf"] = [];
+    }
+  });
+
+  $("#resource", template).change(function() {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:resource"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:resource"] = [];
+    }
+  });
+  //# sourceURL=v-s:MembershipTemplate_post
+</script>
+""" ;
+.
+
+v-s:MembershipRegistryResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результатов реестра v-s:MembershipRegistry"@ru ;
+  rdfs:label "v-s:MembershipRegistry registry result template"@en ;
+  v-ui:template """
+<table class="table table-bordered">
+  <thead class="result-header">
+    <tr>
+      <th colspan="9" about="v-s:MembershipRegistry" property="rdfs:label"></th>
+    </tr>
+    <tr class="active">
+      <th width="1%"><input type="checkbox" class="toggle-select-all"></th>
+      <th width="1%">#</th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+      <th><span about="rdfs:label" property="rdfs:label"></span></th>
+      <th><span about="rdfs:comment" property="rdfs:label"></span></th>
+      <th><span about="v-s:memberOf" property="rdfs:label"></span></th>
+      <th><span about="v-s:resource" property="rdfs:label"></span></th>
+      <th><span about="v-s:Rights" property="rdfs:label"></span></th>
+      <th><span about="v-s:creator" property="rdfs:label"></span></th>
+      <th class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td><input type="checkbox" class="toggle-select"></td>
+      <td class="serial-number"></td>
+      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+      <td about="@" property="rdfs:label"></td>
+      <td about="@" property="rdfs:comment"></td>
+      <td about="@" rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate"></td>
+      <td about="@" rel="v-s:resource" data-template="v-ui:LabelLinkTemplate"></td>
+      <td><strong class="rights"></strong></td>
+      <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
+      <td about="@" property="v-s:created"></td>
+    </tr>
+    <script>
+      var rights = "";
+      rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
+      rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
+      rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
+      rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
+      $(".rights", template).text(rights);
+    </script>
+  </tbody>
+</table>
+  """ ;
+.
+
+v-s:PermissionStatementTemplate
+rdf:type v-ui:ClassTemplate ;
+v-ui:forClass v-s:PermissionStatement;
+rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+rdfs:label "Template for v-s:PermissionStatement class"@en ;
+v-ui:template """
+<div class="container sheet">
+  <h2 about="v-s:PermissionStatement" property="rdfs:label"></h2>
+  <hr>
+  <em about="v-s:permissionObject" property="rdfs:label"></em>
+  <div rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="object" type="text" class="-view edit search form-control" />
+  <em about="v-s:permissionSubject" property="rdfs:label"></em>
+  <div rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="subject" type="text" class="-view edit search form-control" />
+  <hr>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+      <em about="v-s:canCreate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+      <em about="v-s:canRead" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+      <em about="v-s:canUpdate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+      <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <hr>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div>
+  <br>
+  <div class="actions view edit -search">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
+      data-buttons="edit save cancel delete"></span>
+  </div>
+</div>
+<script>
+  $("#object", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:permissionObject"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:permissionObject"] = [];
+    }
+  });
+
+  $("#subject", template).change(function () {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:permissionSubject"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:permissionSubject"] = [];
+    }
+  });
+
+  //# sourceURL=v-s:PermissionStatementRegistryTemplate_post
+</script>
+""" ;
+.
+
+v-s:PermissionStatementRegistryTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:PermissionStatement;
+  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+  rdfs:label "Template for v-s:PermissionStatement class"@en ;
+  v-ui:template """
+<div class="container sheet">
+  <h2 about="v-s:PermissionStatement" property="rdfs:label"></h2>
+  <hr>
+  <em about="v-s:permissionObject" property="rdfs:label"></em>
+  <div rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="object" type="text" class="-vew edit search form-control"/>
+
+  <em about="v-s:permissionSubject" property="rdfs:label"></em>
+  <div rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate" class="view -edit search"></div>
+  <input id="subject" type="text" class="-vew edit search form-control"/>
+  <hr>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+      <em about="v-s:canCreate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+      <em about="v-s:canRead" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+      <em about="v-s:canUpdate" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+      <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+
+  <br>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div>
+</div>
+<script>
+  $("#object", template).change(function() {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:permissionObject"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:permissionObject"] = [];
+    }
+  });
+
+  $("#subject", template).change(function() {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:permissionSubject"] = [new veda.IndividualModel(uri)];
+    } else {
+      individual["v-s:permissionSubject"] = [];
+    }
+  });
+
+  //# sourceURL=v-s:PermissionStatementRegistryTemplate_post
+</script>
+""" ;
+.
+v-s:PermissionStatementRegistryResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результатов реестра v-s:PermissionStatementRegistry"@ru ;
+  rdfs:label "v-s:PermissionStatementRegistry registry result template"@en ;
+  v-ui:template """
+<table class="table table-bordered">
+  <thead class="result-header">
+    <tr>
+      <th colspan="9" about="v-s:PermissionStatementRegistry" property="rdfs:label"></th>
+    </tr>
+    <tr class="active">
+      <th width="1%"><input type="checkbox" class="toggle-select-all"></th>
+      <th width="1%">#</th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+      <th><span about="v-s:permissionObject" property="rdfs:label"></span></th>
+      <th><span about="v-s:permissionSubject" property="rdfs:label"></span></th>
+      <th><span about="v-s:Rights" property="rdfs:label"></span></th>
+      <th><span about="v-s:creator" property="rdfs:label"></span></th>
+      <th class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td><input type="checkbox" class="toggle-select"></td>
+      <td class="serial-number"></td>
+      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+      <td about="@" rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate"></td>
+      <td about="@" rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate"></td>
+      <td><strong class="rights"></strong></td>
+      <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
+      <td about="@" property="v-s:created"></td>
+    </tr>
+    <script>
+      var rights = "";
+      rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
+      rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
+      rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
+      rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
+      $(".rights", template).text(rights);
+    </script>
+  </tbody>
+</table>
+  """ ;
+.
+
 v-s:TS_Group 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_GroupTemplate.html";
+  v-ui:defaultTemplate v-ui:GroupTemplate;
   v-ui:forClass v-s:Group
 .
+v-ui:GroupTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:Group"@ru ;
+  rdfs:label "Template for v-s:Group class"@en ;
+  v-ui:forClass v-s:Group ;
+  v-ui:template """
+<script>
+  var membershipRegistryBlank = new veda.IndividualModel("v-s:MembershipRegistryBlank");
+  var membershipRegistryBlankPromise = membershipRegistryBlank.load().then(function (membershipRegistryBlank) {
+    delete membershipRegistryBlank.object;
+    membershipRegistryBlank["v-s:memberOf"] = [ individual ];
+    return membershipRegistryBlank.init();
+  });
+
+  var membershipBlank = new veda.IndividualModel("v-s:MembershipBlank");
+  var membershipBlankPromise = membershipBlank.load().then(function (membershipBlank) {
+    delete membershipBlank.object;
+    membershipBlank["v-s:memberOf"] = [ individual ];
+    return membershipBlank.init();
+  });
+
+  return Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
+  //# sourceURL=v-ui:GroupTemplate_pre
+</script>
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="panel panel-default">
+    <div class="panel-heading"><span about="v-s:MembershipRegistry" property="rdfs:label"></span><a href="#/v-s:MembershipBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
+    <div class="panel-body" about="v-s:MembershipRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-s:TS_PermissionStatement 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_PermissionStatementTemplate.html";
+  v-ui:defaultTemplate v-ui:PermissionStatementTemplate;
   v-ui:forClass v-s:PermissionStatement
 .
+v-ui:PermissionStatementTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+  rdfs:label "Template for v-s:PermissionStatement class"@en ;
+  v-ui:forClass v-s:PermissionStatement ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:permissionSubject" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-s:permissionSubject" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control property="v-s:permissionSubject" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:permissionObject" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-s:permissionObject" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control property="v-s:permissionObject" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+          <em about="v-s:canCreate" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+          <em about="v-s:canRead" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+          <em about="v-s:canUpdate" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+          <em about="v-s:canDelete" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
+.
+
 v-s:TS_Membership 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-ui_MembershipTemplate.html";
+  v-ui:defaultTemplate v-ui:MembershipTemplate;
   v-ui:forClass v-s:Membership
+.
+v-ui:MembershipTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+  rdfs:label "Template for v-s:PermissionStatement class"@en ;
+  v-ui:forClass v-s:Membership ;
+  v-ui:template """
+<div class="container sheet">
+  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:memberOf" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-s:memberOf" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control property="v-s:memberOf" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name">
+      <strong about="v-s:resource" property="rdfs:label" class="text-muted"></strong>
+    </div>
+    <div class="col-md-8 col-xs-7 value">
+      <div rel="v-s:resource" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+      <veda-control property="v-s:resource" data-type="generic" class="-view edit search"></veda-control>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
+          <em about="v-s:canCreate" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
+          <em about="v-s:canRead" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
+          <em about="v-s:canUpdate" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
+          <em about="v-s:canDelete" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <br>
+  <br>
+  <div class="actions">
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+  </div>
+</div>
+  """ ;
 .

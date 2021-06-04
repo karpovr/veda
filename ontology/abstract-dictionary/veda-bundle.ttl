@@ -439,33 +439,3 @@ v-s:PositionsBundle
   rdfs:label "Позиции"@ru ;
   rdfs:label "Positions"@en ;
 .
-
-v-s:DetailedJournalBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Детальный журнал"@ru ;
-  rdfs:label "Detailed journal"@en ;
-.
-
-v-s:SimplifiedJournalBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Упрощенный журнал"@ru ;
-  rdfs:label "Simplifed journal"@en ;
-.
-
-v-s:SystemPropertiesBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Системные свойства"@ru ;
-  rdfs:label "System properties"@en ;
-.
-
-v-s:VersionsBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Версии"@ru ;
-  rdfs:label "Versions"@en ;
-.
-
-v-s:LinksTreeBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Версии"@ru ;
-  rdfs:label "Versions"@en ;
-.

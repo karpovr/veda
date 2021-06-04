@@ -63,7 +63,7 @@ owl:Class a rdfs:Class ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdfs:Class ;
     rdfs:subClassOf v-s:Exportable ; 
-    v-ui:hasTemplate "v-ui_ClassClassTemplate.html" ;
+    v-ui:hasTemplate v-ui:ClassClassTemplate ;
     v-ui:hasModel v-ui:ClassClassModel .
 
 owl:DataRange a rdfs:Class ;
@@ -79,7 +79,7 @@ owl:DatatypeProperty a rdfs:Class ;
     rdfs:comment "The class of data properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:DeprecatedClass a rdfs:Class ;
     rdfs:label "Устаревший класс"@ru ;
@@ -94,7 +94,7 @@ owl:DeprecatedProperty a rdfs:Class ;
     rdfs:comment "The class of deprecated properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:FunctionalProperty a rdfs:Class ;
     rdfs:label "Функциональное свойство"@ru ;
@@ -102,7 +102,7 @@ owl:FunctionalProperty a rdfs:Class ;
     rdfs:comment "The class of functional properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:InverseFunctionalProperty a rdfs:Class ;
     rdfs:label "Обратное функциональное свойство"@ru ;
@@ -110,7 +110,7 @@ owl:InverseFunctionalProperty a rdfs:Class ;
     rdfs:comment "The class of inverse-functional properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:IrreflexiveProperty a rdfs:Class ;
     rdfs:label "Нерефлексивное свойство"@ru ;
@@ -118,7 +118,7 @@ owl:IrreflexiveProperty a rdfs:Class ;
     rdfs:comment "The class of irreflexive properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:NamedIndividual a rdfs:Class ;
     rdfs:label "Именованый индивид"@ru ;
@@ -139,7 +139,7 @@ owl:ObjectProperty a rdfs:Class ;
     rdfs:comment "The class of object properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:Ontology a rdfs:Class ;
     rdfs:label "Онтология"@ru ;
@@ -154,7 +154,7 @@ owl:OntologyProperty a rdfs:Class ;
     rdfs:comment "The class of ontology properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:ReflexiveProperty a rdfs:Class ;
     rdfs:label "Рефлексивное свойство"@ru ;
@@ -162,7 +162,7 @@ owl:ReflexiveProperty a rdfs:Class ;
     rdfs:comment "The class of reflexive properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:Restriction a rdfs:Class ;
     rdfs:label "Ограничение"@ru ;
@@ -177,7 +177,7 @@ owl:SymmetricProperty a rdfs:Class ;
     rdfs:comment "The class of symmetric properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:TransitiveProperty a rdfs:Class ;
     rdfs:label "Транзитивное свойство"@ru ;
@@ -185,7 +185,7 @@ owl:TransitiveProperty a rdfs:Class ;
     rdfs:comment "The class of transitive properties." ;
     rdfs:isDefinedBy owl: ;
     rdfs:subClassOf rdf:Property ;
-    v-ui:hasTemplate "v-ui_PropertyClassTemplate.html" .
+    v-ui:hasTemplate v-ui:PropertyClassTemplate .
 
 owl:Nothing a owl:Class ;
     rdfs:label "Ничто"@ru ;

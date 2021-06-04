@@ -74,10 +74,246 @@ v-s:AddComment
   rdfs:label "Добавить"@ru ;
   rdfs:label "Add"@en ;
 .
+
+v-s:CommentsTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для отображения комментариев"@ru ;
+  rdfs:label "Template for comments rendering"@en ;
+  v-ui:template """
+<div>
+  <h3 about="v-s:Comments" property="rdfs:label"></h3>
+  <div about="@" rel="v-s:hasComment" data-template="v-s:RecursiveCommentTemplate"></div>
+  <div id="new-comment"></div>
+  <button class="margin-sm btn btn-success" id="add-comment" about="v-s:AddComment" property="rdfs:label"></button>
+</div>
+<script>
+  $("#add-comment", template).click(function () {
+    var addComment = $(this).hide();
+    var _class = new veda.IndividualModel("v-s:Comment"),
+        comment = new veda.IndividualModel(),
+        cntr = $("#new-comment", template).empty(),
+        tmpl = "v-s:SingleCommentTemplate";
+    comment["rdf:type"] = [_class];
+    comment["v-s:backwardTarget"] = [individual];
+    comment["v-s:backwardProperty"] = [new veda.IndividualModel("v-s:hasComment")];
+    comment["v-s:canRead"] = [ true ];
+    comment.present(cntr, tmpl, "edit");
+    comment.one("afterSave beforeReset", function () {
+      addComment.show();
+      cntr.empty();
+    });
+  });
+
+  template.on("click", "#reply.action", function (e) {
+    e.preventDefault();
+    var commentTemplate = $(this).closest("[resource]"),
+        targetComment = new veda.IndividualModel( commentTemplate.attr("resource") ),
+        cntr = $("#new-reply", commentTemplate).first().empty(),
+        _class = new veda.IndividualModel("v-s:Comment"),
+        tmpl = new veda.IndividualModel("v-s:SingleCommentTemplate"),
+        reply = new veda.IndividualModel();
+    reply["rdf:type"] = [_class];
+    reply["v-s:backwardTarget"] = [targetComment];
+    reply["v-s:backwardProperty"] = [new veda.IndividualModel("v-s:hasComment")];
+    reply["v-s:canRead"] = [ true ];
+    reply.present(cntr, tmpl, "edit");
+    reply.one("afterSave beforeReset", function () {
+      cntr.empty();
+    });
+  });
+
+  template.on("click", "#edit-comment.action", function (e) {
+    e.preventDefault();
+    var tmpl = new veda.IndividualModel("v-s:SingleCommentTemplate"),
+        commentTemplate = $(this).closest("[resource]"),
+        comment = new veda.IndividualModel( commentTemplate.attr("resource") ),
+        cntr = $("#new-reply", commentTemplate).first().empty(),
+        commentContent = $("#comment-content", commentTemplate).hide();
+    comment.present(cntr, tmpl, "edit");
+    comment.one("afterSave beforeReset", function () {
+      commentContent.show();
+      cntr.empty();
+    });
+  });
+
+  //# sourceURL=v-s:CommentsTemplate
+</script>
+    """;
+.
+
 v-s:TS_Comment
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-s_SingleCommentTemplate.html";
+  v-ui:defaultTemplate v-s:SingleCommentTemplate;
   v-ui:forClass v-s:Comment
 .
+v-s:SingleCommentTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:Comment ;
+  rdfs:label "Шаблон для класса v-s:Comment"@ru ;
+  rdfs:label "Template for v-s:Comment class"@en ;
+  v-ui:template """
+<script>
+  $(".action", template).click(function (e) {
+    e.preventDefault();
+    template.trigger(this.id);
+  });
+</script>
+<div class="panel panel-default" style="margin-top: 20px">
+  <div class="panel-body">
+    <em about="rdfs:comment" property="rdfs:label"></em>
+    <div property="rdfs:label" class="view -edit -search"></div>
+    <veda-control data-type="text" rows="3" property="rdfs:label" class="-view edit -search"></veda-control>
+    <em about="v-s:attachment" property="rdfs:label">Вложение</em>
+    <div rel="v-s:attachment" data-template="v-ui:FileTemplate" data-embedded="true"></div>
+    <veda-control data-type="file" rel="v-s:attachment" class="-view edit -search"></veda-control>
+    <em about="v-s:linkedObject" property="rdfs:label">Вложение</em>
+    <div rel="v-s:linkedObject" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+    <veda-control data-type="link" rel="v-s:linkedObject" class="-view edit -search fulltext"></veda-control>
+    <br>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save edit cancel delete"></span>
+  </div>
+</div>
+  """ ;
+.
+
+v-s:EmbeddedSingleCommentTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:Comment ;
+  rdfs:label "Embedded шаблон для класса v-s:Comment"@ru ;
+  rdfs:label "Embedded template for v-s:Comment class"@en ;
+  v-ui:template """
+<script>
+  $(".action", template).click(function (e) {
+    e.preventDefault();
+    template.trigger(this.id);
+  });
+
+  template.on("validate", function () {
+    var result = {};
+    if ( !(individual.hasValue("rdfs:label") || individual.hasValue("v-s:attachment") || individual.hasValue("v-s:linkedObject")) ) {
+      result["rdfs:label"] = {
+        state: false,
+        cause: ["v-ui:minCardinality"]
+      };
+      result["v-s:attachment"] = {
+        state: false,
+        cause: ["v-ui:minCardinality"]
+      };
+      result["v-s:linkedObject"] = {
+        state: false,
+        cause: ["v-ui:minCardinality"]
+      };
+    }
+    template.trigger("validated", result);
+  });
+</script>
+<div class="panel panel-default" style="margin-top: 20px">
+  <div class="panel-body">
+    <em about="rdfs:comment" property="rdfs:label"></em>
+    <div property="rdfs:label" class="view -edit -search"></div>
+    <veda-control data-type="text" rows="3" property="rdfs:label" class="-view edit -search"></veda-control>
+    <em about="v-s:attachment" property="rdfs:label"></em>
+    <div rel="v-s:attachment" data-template="v-ui:FileTemplate" data-embedded="true"></div>
+    <veda-control data-type="file" rel="v-s:attachment" class="-view edit -search"></veda-control>
+    <em about="v-s:linkedObject" property="rdfs:label"></em>
+    <div rel="v-s:linkedObject" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+    <veda-control data-type="link" rel="v-s:linkedObject" class="-view edit -search fulltext"></veda-control>
+  </div>
+</div>
+  """ ;
+.
+
+v-s:RecursiveCommentTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:Comment"@ru ;
+  rdfs:label "Template for v-s:Comment class"@en ;
+  v-ui:template """
+<script>
+  var actions = $("#edit-comment, #delete", template);
+  individual.rights.then(function (rights) {
+    if ( !rights.hasValue("v-s:canUpdate", true) ) {
+      actions.remove();
+    }
+  });
+
+  $(".action", template).click(function (e) {
+    e.preventDefault();
+    var actionId = this.id;
+    var warning = new veda.IndividualModel("v-s:AreYouSure");
+    warning.load().then(function (warning) {
+      warning = warning["rdfs:label"].map(veda.Util.formatValue).join(" ");
+      if ( actionId === "delete" && !confirm(warning) ) { return; }
+      template.trigger(actionId);
+    });
+  });
+
+  individual.on("v-s:hasComment", commentHandler);
+  individual.on("v-s:linkedObject", linkedHandler);
+  template.one("remove", function () {
+    individual.off("v-s:hasComment", commentHandler);
+    individual.off("v-s:linkedObject", linkedHandler);
+  });
+  commentHandler(individual["v-s:hasComment"]);
+  linkedHandler(individual["v-s:linkedObject"]);
+
+  function commentHandler (values) {
+    values.length ? actions.hide() : actions.show();
+  }
+  function linkedHandler (values) {
+    values.length ? $(".linked-object", template).show() : $(".linked-object", template).hide();
+  }
+  //# sourceURL=v-s:RecursiveCommentTemplate
+</script>
+<div class="media" style="overflow:initial;">
+  <div class="media-left" rel="v-s:creator">
+    <div about="@" rel="v-s:employee">
+      <script>
+        individual.hasValue("v-s:hasImage") ? $(".no-image", template).remove() : $(".has-image", template).remove() ;
+      </script>
+      <div style="width:50px;">
+        <div class="has-image" about="@" rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></div>
+        <div class="no-image"><span class="text-muted fa fa-user fa-4x"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="media-body" style="overflow:initial;">
+    <div id="comment-content">
+      <div>
+        <span rel="v-s:creator">
+          <span>
+            <strong rel="v-s:employee" data-template="v-ui:LabelTemplate"></strong>
+            <small rel="v-s:occupation" data-template="v-ui:LabelTemplate"></small>
+          </span>
+        </span>
+        <small>
+          <span>&bullet;&nbsp;&nbsp;</span>
+          <span property="v-s:created"></span>
+        </small>
+        <br>
+        <span property="rdfs:label"></span>
+      </div>
+      <div rel="v-s:attachment" data-template="v-ui:FileTemplate"></div>
+      <div class="linked-object">
+        <em about="v-s:linkedObject" property="rdfs:label"></em>
+        <ul rel="v-s:linkedObject">
+          <li about="@" data-template="v-ui:ClassNameLabelLinkTemplate"></li>
+        </ul>
+      </div>
+      <small>
+        <a href="#" id="reply" class="action" about="v-s:Reply" property="rdfs:label"></a>
+        &nbsp;
+        <a href="#" id="edit-comment" class="action" about="v-s:Edit" property="rdfs:label"></a>
+        &nbsp;
+        <a href="#" id="delete" class="action" about="v-s:Delete" property="rdfs:label"></a>
+      </small>
+    </div>
+    <div id="new-reply"></div>
+    <hr class="margin-sm">
+    <div about="@" rel="v-s:hasComment" data-template="v-s:RecursiveCommentTemplate"></div>
+  </div>
+</div>
+  """ ;
+.
+
 # ------------  / Comments template ---------------

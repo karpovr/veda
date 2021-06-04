@@ -61,6 +61,89 @@ v-s:PS_comment_CommunicationMean
 v-s:TS_CommunicationMean 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate "v-s_CommunicationMeanTemplate.html";
+  v-ui:defaultTemplate v-s:CommunicationMeanTemplate;
   v-ui:forClass v-s:CommunicationMean
+.
+
+v-s:CommunicationMeanTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:CommunicationMean ;
+  rdfs:label "Шаблон для класса v-s:CommunicationMean"@ru ;
+  rdfs:label "Template for v-s:CommunicationMean class"@en ;
+  v-ui:template """
+<h2>
+  <span about="v-s:CommunicationMean" property="rdfs:label"></span>
+  <small about="@" property="rdfs:label"></small>
+</h2>
+<div class="panel panel-default">
+  <div class="panel-body">
+    <div class="row">
+      <div class="col-md-3">
+        <em about="v-s:hasCommunicationMeanChannel" property="rdfs:label"></em>
+        <veda-control rel="v-s:hasCommunicationMeanChannel" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+        <div rel="v-s:hasCommunicationMeanChannel" class="view -edit search" data-template="v-ui:LabelTemplate"></div>
+      </div>
+      <div class="col-md-3">
+        <em about="v-s:hasCommunicationMeanTarget" property="rdfs:label" class="view edit -search"></em>
+        <veda-control rel="v-s:hasCommunicationMeanTarget" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+        <div rel="v-s:hasCommunicationMeanTarget" class="view -edit -search" data-template="v-ui:LabelTemplate"></div>
+      </div>
+      <div class="col-md-3">
+        <em about="v-s:description" property="rdfs:label" class="view edit -search"></em>
+        <div property="v-s:description" class="view -edit -search"></div>
+        <veda-control property="v-s:description" data-type="string" class="-view edit -search"></veda-control>
+      </div>
+      <div class="col-md-3">
+        <em about="rdfs:comment" property="rdfs:label" class="view edit -search"></em>
+        <div property="rdfs:comment" class="view -edit -search"></div>
+        <veda-control property="rdfs:comment" data-type="string" class="-view edit -search"></veda-control>
+      </div>
+    </div>
+    <hr>
+    <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
+    <br>
+    <!-- BUTTONS -->
+    <div class="actions">
+      <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
+    </div>
+  </div>
+</div>
+  """ ;
+.
+
+v-s:CommunicationMeanTemplateEmbedded
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:CommunicationMean ;
+  rdfs:label "Шаблон для класса v-s:CommunicationMean"@ru ;
+  rdfs:label "Template for v-s:CommunicationMean class"@en ;
+  v-ui:template """
+<tr>
+  <td about="@" data-template="v-ui:IconModalTemplate"></td>
+  <td>
+    <div about="@" rel="v-s:hasCommunicationMeanChannel" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
+    <veda-control rel="v-s:hasCommunicationMeanChannel" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+  </td>
+  <td>
+    <div about="@" rel="v-s:hasCommunicationMeanTarget" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
+    <veda-control rel="v-s:hasCommunicationMeanTarget" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+  </td>
+  <td>
+    <a about="@" property="v-s:description" class="view -edit -search"></a>
+    <div about="@" property="v-s:description" class="view -edit -search"></div>
+    <veda-control property="v-s:description" data-type="string" class="-view edit search"></veda-control>
+  </td>
+  <td>
+    <div property="rdfs:comment" class="view -edit -search"></div>
+    <veda-control property="rdfs:comment" data-type="string" class="-view edit search"></veda-control>
+  </td>
+</tr>
+<script>
+  if (individual.hasValue('v-s:hasCommunicationMeanChannel', 'd:a1iwni0b54fvcz41vuts08bxqsh')) {
+    template.find('div[property="v-s:description"]').remove();
+    template.find('a[property="v-s:description"]').attr("href", "mailto:" + individual["v-s:description"][0]);
+  } else {
+    template.find('a[property="v-s:description"]').remove();
+  }
+</script>
+  """ ;
 .

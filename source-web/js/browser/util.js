@@ -183,7 +183,7 @@ Util.showRights = function (individual) {
     modal.remove();
   });
   $('body').append(modal);
-  individual.present(modalBody, 'v-ui_PermissionsTemplate.html');
+  individual.present(modalBody, 'v-ui:PermissionsTemplate');
 };
 
 Util.showModal = function (individual, template, mode) {

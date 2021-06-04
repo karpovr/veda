@@ -39,13 +39,13 @@ v-fc:CreateByType
   rdf:type v-fc:Create ;
   rdfs:label "Создать"@ru ;
   rdfs:label "Create"@en ;
-  v-ui:hasTemplate "v-fc_CreateByTypeTemplate.html" ;
+  v-ui:hasTemplate v-fc:CreateByTypeTemplate ;
 .
 v-fc:CreateByBlank
   rdf:type v-fc:Create ;
   rdfs:label "Создать"@ru ;
   rdfs:label "Create"@en ;
-  v-ui:hasTemplate "v-fc_CreateByBlankTemplate.html" ;
+  v-ui:hasTemplate v-fc:CreateByBlankTemplate ;
 .
 v-fc:ChooseType
   rdf:type v-s:Bundle ;
@@ -92,6 +92,58 @@ v-fc:hasBlank
   rdfs:domain v-fc:Create ;
   rdfs:range v-fc:Blank ;
 .
+v-fc:CreateByBlankTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для v-fc:CreateByBlank"@ru ;
+  rdfs:label "v-fc:CreateByBlank template"@en ;
+  v-ui:template """
+<div class="container">
+  <div class="sheet">
+    <h3 about="@" property="rdfs:label"></h3>
+    <em about="v-fc:ChooseBlank" property="rdfs:label"></em>
+    <veda-control data-type="link" rel="v-fc:targetBlank" class="fulltext dropdown"></veda-control>
+  </div>
+  <div rel="v-fc:targetBlank" data-template="v-fc:BlankTemplate"></div>
+</div>
+  """
+.
+
+v-fc:CreateByTypeTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для v-fc:CreateByType"@ru ;
+  rdfs:label "v-fc:CreateByType template"@en ;
+  v-ui:template """
+<div class="container">
+  <div class="sheet">
+    <h3 property="rdfs:label"></h3>
+    <em about="v-fc:ChooseType" property="rdfs:label"></em>
+    <veda-control rel="v-fc:targetType" data-type="link" class="fulltext dropdown"></veda-control>
+  </div>
+  <div id="holder"></div>
+</div>
+<script>
+  var self = individual;
+  function typeHandler(values) {
+    var holder = $("#holder", template).empty();
+    if (values.length) {
+      var blank = new veda.IndividualModel();
+      blank["v-fc:targetType"] = values;
+      blank["rdf:type"] = [ new veda.IndividualModel("v-fc:Blank") ];
+      blank.present(holder, "v-fc:BlankTemplate");
+    }
+  }
+  self.on("v-fc:targetType", typeHandler);
+  template.one("remove", function () {
+    self.off("v-fc:targetType", typeHandler);
+  });
+  if (self.hasValue("v-fc:targetType")) {
+    typeHandler(self["v-fc:targetType"]);
+  }
+  //# sourceURL=v-fc:CreateByTypeTemplate_post
+</script>
+  """
+.
+
 v-fc:BlankModel
   rdf:type v-ui:ClassModel ;
   rdfs:label "Модель класса v-fc:Blank"@ru ;
@@ -268,9 +320,67 @@ this.updateBlank = function () {
 v-s:TS_Blank
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-fc_BlankTemplate.html";
+  v-ui:defaultTemplate v-fc:BlankTemplate;
   v-ui:forClass v-fc:Blank
 .
+v-fc:BlankTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон класса v-fc:Blank"@ru ;
+  rdfs:label "V-fc:Blank class template"@en ;
+#  v-ui:forClass v-fc:Blank ;
+  v-ui:template """
+<script>
+  return individual.initBlank();
+
+  //# sourceURL=v-fc:BlankTemplate_pre
+</script>
+<div>
+  <div id="object-container"></div>
+  <div id="no-rights" class="alert alert-warning container hidden">
+    <strong about="v-s:Attention" property="rdfs:label"></strong> <span about="v-s:NoRightsForOperation" property="rdfs:label"></span>
+    <button class="btn btn-default" about="v-fc:Back" property="rdfs:label" onclick="window.history.back();"></button>
+  </div>
+</div>
+<script>
+  var self = individual,
+      objectContainer = $("#object-container", template),
+      object = self.object;
+
+  var _class = object["rdf:type"][0];
+
+  _class.rights.then(function (rights) {
+
+    if (rights.hasValue("v-s:canCreate", true)) {
+      var object_template = self.get("v-fc:targetTemplate")[0];
+      object.present(objectContainer, object_template, "edit")
+        .then(function (objectTemplate) {
+          objectTemplate.one("cancel", cancelHandler);
+          object.one("afterSave", saveHandler);
+          objectTemplate.one("remove", function () {
+            object.off("afterSave", saveHandler);
+          })
+        });
+    } else {
+      $("#no-rights", template).removeClass("hidden");
+    }
+
+    function cancelHandler () {
+      delete self.object;
+      window.history.back();
+    }
+    function saveHandler () {
+      setTimeout(function () {
+        delete self.object;
+        riot.route("#/" + object.id);
+      }, 1000);
+    }
+  });
+
+  //# sourceURL=v-fc:BlankTemplate_post
+</script>
+  """
+.
+
 v-fc:EnterLabel
   rdf:type v-s:Bundle ;
   rdfs:label "Введите название"@ru ;
@@ -311,15 +421,130 @@ v-fc:Back
 v-s:TS_Create
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-fc_CreateManagementTemplate.html";
+  v-ui:defaultTemplate v-fc:CreateManagementTemplate;
   v-ui:forClass v-fc:Create
 .
 v-s:TS_PersonalCreate
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate "v-fc_CreateManagementTemplate.html";
+  v-ui:defaultTemplate v-fc:CreateManagementTemplate;
   v-ui:forClass v-fc:PersonalCreate
 .
+
+v-fc:CreateManagementTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон класса v-fc:Create"@ru ;
+  rdfs:label "v-fc:Create class template"@en ;
+  v-ui:forClass v-fc:Blank ;
+  v-ui:template """
+<script>
+  var notify = new veda.Notify();
+
+  if ( !individual.hasValue("v-s:creator", veda.appointment || veda.user) ) {
+    $(".action.save-create", template).click(function () {
+      var enterLabel = new veda.IndividualModel("v-s:EnterLabel");
+      enterLabel.load().then(function (enterLabel) {
+        var personalLabel = prompt( enterLabel.toString(), individual.toString() );
+        if (!personalLabel) { return; }
+        individual.clone().then(function (personalCreate) {
+          personalCreate["rdf:type"] = [ new veda.IndividualModel("v-fc:PersonalCreate") ];
+          personalCreate["v-s:creator"] = [];
+          personalCreate["v-s:created"] = [];
+          personalCreate["rdfs:isDefinedBy"] = [];
+          personalCreate["rdfs:label"] = [ personalLabel ];
+          var createBlank = individual.hasValue("v-fc:hasBlank") ? individual["v-fc:hasBlank"][0] : undefined;
+          if (createBlank && createBlank.object) {
+            return createBlank.clone()
+            .then(function(personalCreateBlank) {
+              personalCreateBlank.object = createBlank.object;
+              return personalCreateBlank.updateBlank();
+            })
+            .then(function(personalCreateBlank) {
+              personalCreate["v-fc:hasBlank"] = [ personalCreateBlank ];
+              return personalCreate.save();
+            });
+          } else {
+            return personalCreate.save();
+          }
+        })
+        .then(function (personalCreate) {
+          return veda.user.aspect.load().then(function (aspect) {
+            aspect.addValue("v-s:hasCreate", personalCreate);
+            return aspect.save();
+          });
+        })
+        .then(function() {
+          return new veda.IndividualModel("v-fc:BlankSuccessfullySaved").load();
+        })
+        .then(function(message) {
+          notify("success", { message: message });
+        })
+        .catch(function (error) {
+          notify("danger", { message: error });
+        });
+      });
+    });
+  } else {
+    $(".action.save-create", template).remove();
+  }
+
+  individual.rights.then(function (rights) {
+    if ( rights.hasValue("v-s:canUpdate", true) ) {
+      $(".action.update-create", template).click(function () {
+        var createBlank = individual.hasValue("v-fc:hasBlank") ? individual["v-fc:hasBlank"][0] : undefined;
+        if (createBlank && createBlank.object) {
+          createBlank.updateBlank()
+          .then(function () {
+            return new veda.IndividualModel("v-fc:BlankSuccessfullyUpdated").load();
+          })
+          .then(function (message) {
+            notify("success", { message: message});
+          })
+          .catch(function (error) {
+            notify("danger", { message: error });
+          });
+        }
+      });
+    } else {
+      $(".action.update-create", template).remove();
+    }
+    if ( rights.hasValue("v-s:canDelete", true) ) {
+      $(".action.delete-create", template).click(function () {
+        veda.user.aspect.load().then(function (aspect) {
+          aspect.removeValue("v-s:hasCreate", individual);
+          return aspect.save();
+        }).then(function () {
+          return individual.delete();
+        }).then(function () {
+          return new veda.IndividualModel("v-fc:BlankSuccessfullyDeleted").load();
+        }).then(function (message) {
+          notify("success", { message: message });
+        }).catch(function (error) {
+          notify("danger", { message: error });
+        });
+      });
+    } else {
+      $(".action.delete-create", template).remove();
+    }
+  });
+//# sourceURL=v-fc:CreateManagementTemplate_pre
+</script>
+<div>
+  <div class="container sheet">
+    <div class="ribbon-wrapper top-left">
+      <div class="ribbon top-left success" about="v-fc:CreateBundle" property="rdfs:label"></div>
+    </div>
+    <div class="actions text-right">
+      <button class="action save-create btn btn-success" about="v-fc:SavePersonalBlank" property="rdfs:label"></button>
+      <button class="action update-create btn btn-success" about="v-fc:UpdatePersonalBlank" property="rdfs:label"></button>
+      <button class="action delete-create btn btn-link" about="v-s:Delete" property="rdfs:label"></button>
+    </div>
+  </div>
+  <div about="@" rel="v-fc:hasBlank" data-template="v-fc:BlankTemplate"></div>
+</div>
+  """
+.
+
 # ------------------------------------------------------------ УПРАВЛЕНИЕ ПРАВАМИ --
 
 v-fc:Blank_permission1
