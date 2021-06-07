@@ -2622,7 +2622,8 @@ for (i = 0; i < 1; i++) {
             'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
             'v-s:test_field': newStr(test_data, 'NONE'),
             'v-s:test_fieldA': newUri('BBB' + test_data_uid),
-            'v-s:test_fieldB': newUri('CCC' + test_data_uid)
+            'v-s:test_fieldB': newUri('CCC' + test_data_uid),
+    	    'v-s:created': newDate(new Date())
         };
 
         var new_test_doc1_uri_2 = "test21_2:" + guid();
@@ -2630,7 +2631,8 @@ for (i = 0; i < 1; i++) {
             '@': new_test_doc1_uri_2,
             'rdf:type': newUri('rdfs:Resource'),
             'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
-            'v-s:test_field': newUri(test_data)
+            'v-s:test_field': newUri(test_data),
+    	    'v-s:created': newDate(new Date())
         };
 
         var new_test_doc1_uri_3 = "test21_3:" + guid();
@@ -2639,7 +2641,8 @@ for (i = 0; i < 1; i++) {
             'rdf:type': newUri('rdfs:Resource'),
             'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
             'v-s:test_field': newUri(test_data),
-            'v-s:test_fieldA': newUri('BBB' + test_data_uid)
+            'v-s:test_fieldA': newUri('BBB' + test_data_uid),
+    	    'v-s:created': newDate(new Date())
         };
         var res = Backend.put_individuals(ticket_user1.id, [new_test_doc1, new_test_doc2, new_test_doc3], false);
         var read_individual1 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_1);
