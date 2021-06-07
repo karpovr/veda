@@ -272,19 +272,28 @@ function processTemplate (individual, container, template, mode) {
 
   /**
    * Reset individual and embedded individuals
+   * @param {string} parent id
+   * @param {Array} acc for individuals uris
    * @return {Promise<void>}
    */
-  function resetHandler () {
-    return embedded.reduce((p, item) => p.then(() => item.data('reset')()), Promise.resolve())
-      .then(() => individual.reset())
-      .then(() => template.trigger('view'));
+  function resetHandler (parent, acc) {
+    acc = acc || [];
+    acc = embedded.reduce((acc, item) => item.data('reset')(individual.id, acc), acc);
+    acc.push(individual.id);
+    if (parent) {
+      return acc;
+    }
+    const uris = Util.unique(acc);
+    return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset()), Promise.resolve())
+      .then(() => template.trigger('view'))
+      .catch(errorHandler);
   }
 
   /**
    * Save individual and embedded children individuals
    * @param {string} parent id
    * @param {Array} acc for individuals uris
-   * @return {Promise<Array>}
+   * @return {Promise<void>}
    */
   function saveHandler (parent, acc) {
     acc = acc || [];
@@ -303,7 +312,11 @@ function processTemplate (individual, container, template, mode) {
     }).filter(Boolean);
     return (individuals_properties.length ? Backend.put_individuals(veda.ticket, individuals_properties) : Promise.resolve())
       .then(() => {
-        uris.forEach((item) => new veda.IndividualModel(item).isSync(true));
+        uris.forEach((item) => {
+          const individual = new veda.IndividualModel(item);
+          individual.isNew(false);
+          individual.isSync(true);
+        });
       })
       .then(() => template.trigger('view'))
       .then(() => successHandler())
@@ -341,23 +354,26 @@ function processTemplate (individual, container, template, mode) {
   /**
    * Remove individual and embedded children individuals
    * @param {string} parent id
+   * @param {Array} acc for individuals uris
    * @return {Promise<void>}
    */
-  function removeHandler (parent) {
-    return embedded.reduce((p, item) => p.then(() => item.data('remove')(individual.id)), Promise.resolve())
-      .then(() => parent === individual.id ? Promise.resolve() : individual.remove())
-      .then(() => {
-        if (!parent) {
-          successHandler();
-        }
-      })
-      .catch(errorHandler)
+  function removeHandler (parent, acc) {
+    acc = acc || [];
+    acc = embedded.reduce((acc, item) => item.data('remove')(individual.id, acc), acc);
+    acc.push(individual.id);
+    if (parent) {
+      return acc;
+    }
+    const uris = Util.unique(acc);
+    return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).remove()), Promise.resolve())
+      .then(successHandler)
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
           template.empty().append(`<p class="bg-danger"><strong>${removedAlert.toString()}</strong></p>`);
         });
-      });
+      })
+      .catch(errorHandler);
   }
 
   /**
