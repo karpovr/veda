@@ -310,14 +310,16 @@ function processTemplate (individual, container, template, mode) {
         return individual.properties;
       }
     }).filter(Boolean);
-    return (individuals_properties.length ? Backend.put_individuals(veda.ticket, individuals_properties) : Promise.resolve())
+    return Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('beforeSave')))
+      .then(() => Backend.put_individuals(veda.ticket, individuals_properties))
       .then(() => {
-        uris.forEach((item) => {
-          const individual = new veda.IndividualModel(item);
+        individuals_properties.forEach((props) => {
+          const individual = new veda.IndividualModel(props['@']);
           individual.isNew(false);
           individual.isSync(true);
         });
       })
+      .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
       .then(() => template.trigger('view'))
       .then(() => successHandler())
       .catch(errorHandler);

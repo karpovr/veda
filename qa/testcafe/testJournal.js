@@ -48,8 +48,8 @@ import { Selector, t } from 'testcafe';
       .wait(1000)
       .click('li[role="presentation"] span[about="v-ui:JournalTemplate"]')
       .wait(5000)
-      .expect(documentUpdated).eql(1)
-      .expect(journal).eql(2)
+      .expect(documentUpdated).eql(2)
+      .expect(journal).eql(3)
       //Изменяем shortLabel -> Проверяем количество записей в журнале
       .click('div.pull-left span[about="v-s:Action"]')
       .click('button#edit')
@@ -59,6 +59,6 @@ import { Selector, t } from 'testcafe';
       .wait(1000)
       .click('li[role="presentation"] span[about="v-ui:JournalTemplate"]')
       .wait(5000)
-      .expect(documentUpdated).eql(2)
-      .expect(journal).eql(3)
+      .expect(documentUpdated).eql(3)
+      .expect(journal).eql(4)
 });
