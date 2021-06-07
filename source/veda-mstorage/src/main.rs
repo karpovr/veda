@@ -97,13 +97,7 @@ fn main() -> std::io::Result<()> {
             out_msg["type"] = json!("OpResult");
             let resp = request_prepare(&sys_ticket, &mut op_id, &recv_msg, &mut primary_storage, &mut queue_out, &mut mstorage_info, &mut tickets_cache);
             if let Ok(v) = resp {
-                let mut data = vec![];
                 for el in v.iter() {
-                    let mut out_el = JSONValue::default();
-                    out_el["result"] = json!(el.res as u32);
-                    out_el["op_id"] = json!(el.op_id);
-                    data.push(out_el);
-
                     if el.res == ResultCode::Ok {
                         let msg_to_modules = format!("#{};{};{}", el.id, el.counter, el.op_id);
                         if notify_soc.send(Message::from(msg_to_modules.as_bytes())).is_err() {
@@ -111,7 +105,10 @@ fn main() -> std::io::Result<()> {
                         }
                     }
                 }
-                out_msg["data"] = json!(data);
+                let mut out_el = JSONValue::default();
+                out_el["result"] = json!(ResultCode::Ok as u32);
+                out_el["op_id"] = json!(op_id);
+                out_msg["data"] = json!([out_el]);
             } else if let Some(err_code) = resp.err() {
                 out_msg["result"] = json!(err_code as u32);
             }
