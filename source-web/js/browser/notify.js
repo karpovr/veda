@@ -10,7 +10,7 @@ export default veda.Notify = Notify;
  * Notify singleton constructor
  * @return {Function} notify function
  */
-function Notify() {
+function Notify () {
   if (Notify.prototype._single) {
     return Notify.prototype._single;
   }

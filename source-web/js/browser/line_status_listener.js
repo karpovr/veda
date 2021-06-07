@@ -37,7 +37,7 @@ document.body.insertBefore(wrapper, document.body.firstChild);
  * Veda status event handler. Sets the line status indicator
  * @param {string} status
  */
-function statusHandler(status) {
+function statusHandler (status) {
   const lineStatus = document.getElementById('line-status');
   lineStatus.style.display = 'block';
   lineStatus.classList.remove('online', 'limited', 'offline');

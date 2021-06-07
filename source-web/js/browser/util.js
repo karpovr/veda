@@ -32,7 +32,7 @@ Util.escape4$ = function (str) {
 Util.toTTL = function (individualList, callback) {
   const prefixes = {};
 
-  const prefixer = function(value, prefixes) {
+  const prefixer = function (value, prefixes) {
     const reg_uri = /^([a-z-0-9]+:)[a-zA-Z0-9-_]*$/;
     const ontologies = veda.ontology.ontologies;
     const result = reg_uri.exec(value);
@@ -310,7 +310,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
  */
 Util.buildStartFormByTransformation = function (individual, transformation) {
   const promises = [individual.load(), transformation.load()];
-  return Promise.all(promises).then(function(loadedItems) {
+  return Promise.all(promises).then(function (loadedItems) {
     return Util.transformation(loadedItems[0].properties, loadedItems[1].properties);
   }).then(function (transformResult) {
     const startForm = new IndividualModel(transformResult[0]);
@@ -326,7 +326,7 @@ Util.buildStartFormByTransformation = function (individual, transformation) {
  * @param {string} uri
  * @return {Object} - individual properties object
  */
-function getSync(ticket, uri) {
+function getSync (ticket, uri) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', 'get_individual?uri=' + uri + '&ticket=' + ticket, false);
   xhr.send();
@@ -361,8 +361,8 @@ Util.transformation = function (individuals, transform) {
 
     /* PUT functions [BEGIN] */
 
-    const putFieldOfObject = (function() {
-      return function(name, field) {
+    const putFieldOfObject = (function () {
+      return function (name, field) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -377,8 +377,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const putUri = (function() {
-      return function(name, value) {
+    const putUri = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -397,7 +397,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setUri = function(name, value) {
+    const setUri = function (name, value) {
       out_data0_el[name] = [
         {
           data: value,
@@ -405,8 +405,8 @@ Util.transformation = function (individuals, transform) {
         }];
     };
 
-    const putString = (function() {
-      return function(name, value) {
+    const putString = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -425,8 +425,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setString = (function() {
-      return function(name, value) {
+    const setString = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -439,8 +439,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setDatetime = (function() {
-      return function(name, value) {
+    const setDatetime = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -453,8 +453,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const putDatetime = (function() {
-      return function(name, value) {
+    const putDatetime = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -473,8 +473,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const putBoolean = (function() {
-      return function(name, value) {
+    const putBoolean = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -493,8 +493,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setBoolean = (function() {
-      return function(name, value) {
+    const setBoolean = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -508,8 +508,8 @@ Util.transformation = function (individuals, transform) {
     })();
 
 
-    const putInteger = (function() {
-      return function(name, value) {
+    const putInteger = (function () {
+      return function (name, value) {
         let out_data0_el_arr = out_data0_el[name];
 
         if (!out_data0_el_arr) {
@@ -526,8 +526,8 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setInteger = (function() {
-      return function(name, value) {
+    const setInteger = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -548,8 +548,8 @@ Util.transformation = function (individuals, transform) {
         const individual = individuals[key];
 
         // print("#1.1 key=", key);
-        const objectContentStrValue = (function() {
-          return function(name, value) {
+        const objectContentStrValue = (function () {
+          return function (name, value) {
             if (individual[name]) {
               let result = false;
               for (const i in individual[name]) {
@@ -567,8 +567,8 @@ Util.transformation = function (individuals, transform) {
         for (let key2 = 0; key2 < iteratedObject.length; key2++) {
           const element = individual[iteratedObject[key2]];
 
-          const putValue = (function() {
-            return function(name) {
+          const putValue = (function () {
+            return function (name) {
               let out_data0_el_arr = out_data0_el[name];
 
               if (!out_data0_el_arr) {
@@ -597,8 +597,8 @@ Util.transformation = function (individuals, transform) {
             };
           })();
 
-          const putValueFrom = (function() {
-            return function(name, path, transform) {
+          const putValueFrom = (function () {
+            return function (name, path, transform) {
               let out_data0_el_arr = out_data0_el[name];
               if (!out_data0_el_arr) {
                 out_data0_el_arr = [];
@@ -629,8 +629,8 @@ Util.transformation = function (individuals, transform) {
             };
           })();
 
-          const putFrontValue = (function() {
-            return function(name) {
+          const putFrontValue = (function () {
+            return function (name) {
               let out_data0_el_arr = out_data0_el[name];
 
               if (!out_data0_el_arr) {
@@ -658,8 +658,8 @@ Util.transformation = function (individuals, transform) {
             };
           })();
 
-          const putElement = (function() {
-            return function() {
+          const putElement = (function () {
+            return function () {
               const name = iteratedObject[key2];
               if (name == '@') {
                 return;
@@ -687,14 +687,14 @@ Util.transformation = function (individuals, transform) {
           })();
 
           /* Segregate functions [BEGIN] */
-          const contentName = (function() {
-            return function(name) {
+          const contentName = (function () {
+            return function (name) {
               return iteratedObject[key2] == name;
             };
           })();
 
-          const elementContentStrValue = (function() {
-            return function(name, value) {
+          const elementContentStrValue = (function () {
+            return function (name, value) {
               if (iteratedObject[key2] !== name) {
                 return false;
               }
@@ -708,8 +708,8 @@ Util.transformation = function (individuals, transform) {
           })();
           /* Segregate functions [END] */
 
-          const getElement = (function() {
-            return function() {
+          const getElement = (function () {
+            return function () {
               return element;
             };
           })();

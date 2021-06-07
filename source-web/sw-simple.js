@@ -44,12 +44,12 @@ addEventListener('message', (event) => {
  * @param {Event} event
  * @return {void}
  */
-function clearCache(event) {
+function clearCache (event) {
   self.skipWaiting();
   console.log(`Service worker updated, veda_version = ${veda_version}. Clear cache.`);
   event.waitUntil(
-    caches.keys().then(function(keyList) {
-      return Promise.all(keyList.map(function(key) {
+    caches.keys().then(function (keyList) {
+      return Promise.all(keyList.map(function (key) {
         return caches.delete(key);
       }));
     }),
@@ -79,11 +79,11 @@ self.addEventListener('fetch', function (event) {
  * @param {string} CACHE
  * @return {Promise<Response>}
  */
-function handleFetch(event, CACHE) {
-  return caches.match(event.request).then(function(resp) {
-    return resp || fetch(event.request).then(function(response) {
+function handleFetch (event, CACHE) {
+  return caches.match(event.request).then(function (resp) {
+    return resp || fetch(event.request).then(function (response) {
       if (response.ok) {
-        return caches.open( CACHE ).then(function(cache) {
+        return caches.open( CACHE ).then(function (cache) {
           cache.put(event.request, response.clone());
           return response;
         });

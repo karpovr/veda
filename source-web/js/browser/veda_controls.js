@@ -149,7 +149,7 @@ veda_literal_input.defaults = {
 };
 
 // Generic input
-$.fn.veda_generic = function( options ) {
+$.fn.veda_generic = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_generic.defaults, options );
   const control = veda_literal_input.call(this, opts);
 
@@ -186,7 +186,7 @@ $.fn.veda_generic.defaults = {
 };
 
 // String input
-$.fn.veda_string = function( options ) {
+$.fn.veda_string = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_string.defaults, options );
   const control = veda_literal_input.call(this, opts);
 
@@ -208,7 +208,7 @@ $.fn.veda_string.defaults = {
 };
 
 // Uri input
-$.fn.veda_uri = function( options ) {
+$.fn.veda_uri = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_uri.defaults, options );
   const control = $( opts.template );
   const individual = opts.individual;
@@ -231,13 +231,13 @@ $.fn.veda_uri = function( options ) {
    * Input change handler
    * @return {void}
    */
-  function changeHandler() {
+  function changeHandler () {
     if (control.val()) {
       individual.id = control.val();
     };
   }
 
-  individual.on('idChanged', function() {
+  individual.on('idChanged', function () {
     control.attr('placeholder', individual.id);
   });
 
@@ -249,7 +249,7 @@ $.fn.veda_uri.defaults = {
 };
 
 // Text input
-$.fn.veda_text = function( options ) {
+$.fn.veda_text = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_text.defaults, options );
   const control = veda_literal_input.call(this, opts);
 
@@ -279,7 +279,7 @@ $.fn.veda_text.defaults = {
 };
 
 // Integer control
-$.fn.veda_integer = function( options ) {
+$.fn.veda_integer = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_integer.defaults, options );
   const control = veda_literal_input.call(this, opts);
 
@@ -307,7 +307,7 @@ $.fn.veda_integer.defaults = {
 };
 
 // WorkTime control
-$.fn.veda_worktime = function( options ) {
+$.fn.veda_worktime = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_worktime.defaults, options );
   const mainInput = veda_literal_input.call(this, opts);
 
@@ -358,7 +358,7 @@ $.fn.veda_worktime.defaults = {
 };
 
 // Decimal control
-$.fn.veda_decimal = function( options ) {
+$.fn.veda_decimal = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_decimal.defaults, options );
   const control = veda_literal_input.call(this, opts);
 
@@ -399,7 +399,7 @@ System.import('moment').then(function (module) {
      * @return {jQuery}
      * @this jQuery
      */
-    function veda_dateTime(options) {
+    function veda_dateTime (options) {
       const opts = $.extend( {}, veda_dateTime.defaults, options );
       const control = $(opts.template);
       const format = opts.format;
@@ -511,7 +511,7 @@ System.import('moment').then(function (module) {
     };
 
     // Date control
-    $.fn.veda_date = function( options ) {
+    $.fn.veda_date = function ( options ) {
       const opts = $.extend( {}, $.fn.veda_date.defaults, options );
       const control = veda_dateTime.call(this, opts);
 
@@ -543,7 +543,7 @@ System.import('moment').then(function (module) {
     };
 
     // Time control
-    $.fn.veda_time = function( options ) {
+    $.fn.veda_time = function ( options ) {
       const opts = $.extend( {}, $.fn.veda_time.defaults, options );
       const control = veda_dateTime.call(this, opts);
 
@@ -573,7 +573,7 @@ System.import('moment').then(function (module) {
     };
 
     // Date-Time control
-    $.fn.veda_dateTime = function( options ) {
+    $.fn.veda_dateTime = function ( options ) {
       const opts = $.extend( {}, $.fn.veda_dateTime.defaults, options );
       const control = veda_dateTime.call(this, opts);
 
@@ -818,7 +818,7 @@ $.fn.veda_multilingualText.defaults = {
 };
 
 // BOOLEAN CONTROL
-$.fn.veda_boolean = function( options ) {
+$.fn.veda_boolean = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_boolean.defaults, options );
   const control = $( opts.template );
   const individual = opts.individual;
@@ -892,7 +892,7 @@ $.fn.veda_boolean.defaults = {
 };
 
 // ACTOR CONTROL
-$.fn.veda_actor = function( options ) {
+$.fn.veda_actor = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_actor.defaults, options );
   const control = $( opts.template );
   const individual = opts.individual;
@@ -1139,7 +1139,7 @@ $.fn.veda_actor = function( options ) {
    * @param {string} value
    * @return {void}
    */
-  function performSearch(value) {
+  function performSearch (value) {
     if ( chosenActorType === 'v-s:Appointment' || chosenActorType === 'v-s:Person' || chosenActorType === 'v-s:Position' ) {
       if ( fullName ) {
         value = value.trim().split('\n').map(function (line) {
@@ -1155,7 +1155,7 @@ $.fn.veda_actor = function( options ) {
       }
     }
 
-    const ftQueryPromise = interpolate(queryPrefix, individual).then(function(queryPrefix) {
+    const ftQueryPromise = interpolate(queryPrefix, individual).then(function (queryPrefix) {
       if (onlyDeleted) {
         return ftQuery(queryPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
       } else {
@@ -1177,7 +1177,7 @@ $.fn.veda_actor = function( options ) {
    * @param {Array} results
    * @return {void}
    */
-  function renderResults(results) {
+  function renderResults (results) {
     selected = individual.get(rel_uri).concat(individual.get(rel_uri + '.v-s:employee'), individual.get(rel_uri + '.v-s:occupation'), individual.get(rel_uri + '.v-s:parentUnit'));
     if (results.length) {
       const renderedPromises = results.map(function (result) {
@@ -1251,7 +1251,7 @@ $.fn.veda_actor = function( options ) {
    * @param {Event} e
    * @return {void}
    */
-  function clickHandler(e) {
+  function clickHandler (e) {
     e.preventDefault();
     const tmpl = $(e.currentTarget);
     const suggestion_uri = tmpl.attr('resource');
@@ -1297,7 +1297,7 @@ $.fn.veda_actor = function( options ) {
    * @param {Event} e
    * @return {void}
    */
-  function dblclickHandler(e) {
+  function dblclickHandler (e) {
     e.preventDefault();
     if ( !$(e.target).hasClass('selected') ) {
       clickHandler(e);
@@ -1315,7 +1315,7 @@ $.fn.veda_actor = function( options ) {
    * @param {Event} e
    * @return {void}
    */
-  function clickOutsideMenuHandler(e) {
+  function clickOutsideMenuHandler (e) {
     if ( !$(e.target).closest(fulltextMenu).length && e.target !== fulltext[0] ) {
       if ( fulltextMenu.is(':visible') ) {
         if ( selected.length ) {
@@ -1333,7 +1333,7 @@ $.fn.veda_actor = function( options ) {
    * @param {Event} e
    * @return {void}
    */
-  function arrowHandler(e) {
+  function arrowHandler (e) {
     if ( e.which === 40 ) { // Down
       e.preventDefault();
       e.stopPropagation();
@@ -1364,7 +1364,7 @@ $.fn.veda_actor = function( options ) {
    * @param {Array} values
    * @return {void}
    */
-  function setValue(values) {
+  function setValue (values) {
     if ( complex ) {
       individual.clearValue(rel_uri);
       individual.clearValue(rel_uri + '.v-s:employee');
@@ -1446,10 +1446,10 @@ $.fn.veda_actor = function( options ) {
    * @param {Array} values
    * @return {void}
    */
-  function propertyModifiedHandler(values) {
+  function propertyModifiedHandler (values) {
     if ( isSingle && (individual.hasValue(rel_uri) || individual.hasValue(rel_uri + '.v-s:employee') || individual.hasValue(rel_uri + '.v-s:occupation') || individual.hasValue(rel_uri + '.v-s:parentUnit')) ) {
       const value = individual.get(rel_uri).concat(individual.get(rel_uri + '.v-s:employee'), individual.get(rel_uri + '.v-s:occupation'), individual.get(rel_uri + '.v-s:parentUnit')).filter(Boolean)[0];
-      value.load().then(function(value) {
+      value.load().then(function (value) {
         const newValueStr = value.toString();
         const oldValueStr = fulltext.val();
         if (newValueStr != oldValueStr) {
@@ -1542,7 +1542,7 @@ $.fn.veda_select = function (params) {
    * Populate options list
    * @return {Promise}
    */
-  function populate() {
+  function populate () {
     if (spec && spec.hasValue('v-ui:optionValue')) {
       options = spec['v-ui:optionValue'];
       return renderOptions(options);
@@ -1569,7 +1569,7 @@ $.fn.veda_select = function (params) {
    * @param {Array} options
    * @return {Promise}
    */
-  function renderOptions(options) {
+  function renderOptions (options) {
     control.empty();
     first_opt.text(placeholder).data('value', null).appendTo(control);
     const optionsPromises = options.map(function (value, index) {
@@ -1595,7 +1595,7 @@ $.fn.veda_select = function (params) {
    * Individual property modified handler to indicate chosen option
    * @return {void}
    */
-  function handler() {
+  function handler () {
     if (isSingle) {
       populate().then(function () {
         $('option', control).each(function (i, el) {
@@ -1672,7 +1672,7 @@ $.fn.veda_checkbox = function (params) {
    * Populate options list
    * @return {Promise}
    */
-  function populate() {
+  function populate () {
     if (spec && spec.hasValue('v-ui:optionValue')) {
       options = spec['v-ui:optionValue'];
       return renderOptions(options);
@@ -1699,7 +1699,7 @@ $.fn.veda_checkbox = function (params) {
    * @param {Array} options
    * @return {Promise}
    */
-  function renderOptions(options) {
+  function renderOptions (options) {
     self.empty();
     const optionsPromises = options.map(function (value, index) {
       if (index >= 100) {
@@ -1734,7 +1734,7 @@ $.fn.veda_checkbox = function (params) {
    * Individual property modified handler to indicate chosen option
    * @return {void}
    */
-  function handler() {
+  function handler () {
     $('input', self).each(function (i, el) {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
@@ -1813,7 +1813,7 @@ $.fn.veda_radio = function (params) {
    * Populate options list
    * @return {Promise}
    */
-  function populate() {
+  function populate () {
     if (spec && spec.hasValue('v-ui:optionValue')) {
       options = spec['v-ui:optionValue'];
       return renderOptions(options);
@@ -1840,7 +1840,7 @@ $.fn.veda_radio = function (params) {
    * @param {Array} options
    * @return {void}
    */
-  function renderOptions(options) {
+  function renderOptions (options) {
     self.empty();
     options.forEach(function (value, index) {
       if (index >= 100) {
@@ -1874,7 +1874,7 @@ $.fn.veda_radio = function (params) {
    * Individual property modified handler to indicate chosen option
    * @return {void}
    */
-  function handler() {
+  function handler () {
     $('input', self).each(function (i, el) {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
@@ -1930,7 +1930,7 @@ $.fn.veda_booleanRadio = function (params) {
   const trueOption = {
     label: spec && spec.hasValue('v-ui:trueLabel') ?
       Promise.resolve(spec.get('v-ui:trueLabel').map(Util.formatValue).join(' ')) :
-      (new veda.IndividualModel('v-s:YesBundle')).load().then(function(loaded) {
+      (new veda.IndividualModel('v-s:YesBundle')).load().then(function (loaded) {
         return loaded.get('rdfs:label').map(Util.formatValue).join(' ');
       }),
     value: true,
@@ -1938,7 +1938,7 @@ $.fn.veda_booleanRadio = function (params) {
   const falseOption = {
     label: spec && spec.hasValue('v-ui:falseLabel') ?
       Promise.resolve(spec.get('v-ui:falseLabel').map(Util.formatValue).join(' ')) :
-      (new veda.IndividualModel('v-s:NoBundle')).load().then(function(loaded) {
+      (new veda.IndividualModel('v-s:NoBundle')).load().then(function (loaded) {
         return loaded.get('rdfs:label').map(Util.formatValue).join(' ');
       }),
     value: false,
@@ -1957,11 +1957,11 @@ $.fn.veda_booleanRadio = function (params) {
    * @param {Array} options
    * @return {void}
    */
-  function renderOptions() {
+  function renderOptions () {
     self.empty();
     options.map(function (option) {
       const hld = $(opts.template).appendTo(self);
-      option.label.then(function(label) {
+      option.label.then(function (label) {
         const lbl = $('label', hld).append( label );
         const rad = $('input', lbl).data('value', option.value);
         const hasValue = individual.hasValue(property_uri, option.value);
@@ -1983,7 +1983,7 @@ $.fn.veda_booleanRadio = function (params) {
    * Individual property modified handler to indicate chosen option
    * @return {void}
    */
-  function handler() {
+  function handler () {
     $('input', self).each(function (i, el) {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
@@ -2044,7 +2044,7 @@ $.fn.veda_source = function (options) {
 
   const debounce = function (f, ms) {
     let skip = false;
-    return function(...args) {
+    return function (...args) {
       if (skip) return;
       skip = true;
       setTimeout(() => skip = false, ms);
@@ -2071,7 +2071,7 @@ $.fn.veda_source = function (options) {
             true;
     });
 
-    const editorHandler = function(delta) {
+    const editorHandler = function (delta) {
       const value = opts.parser( editor.session.getValue() );
       opts.change(value);
     };
@@ -2117,12 +2117,12 @@ $.fn.veda_source.defaults = {
  * @param {File} imageFile - value from file input
  * @return {Promise}
  */
-function loadImage(imageFile) {
+function loadImage (imageFile) {
   return new Promise(function (resolve, reject) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const image = new Image();
-      image.onload = function() {
+      image.onload = function () {
         resolve(image);
       };
       image.onerror = function () {
@@ -2182,7 +2182,7 @@ function resizeImage (image, maxWidth) {
  * @param {number} maxWidth
  * @return {Promise}
  */
-function cropImage(imageForCrop, ratio, maxWidth) {
+function cropImage (imageForCrop, ratio, maxWidth) {
   const modal = $( $('#confirm-modal-template').html() );
   modal.modal();
   $('body').append(modal);
@@ -2231,7 +2231,7 @@ function cropImage(imageForCrop, ratio, maxWidth) {
   });
 };
 
-$.fn.veda_file = function( options ) {
+$.fn.veda_file = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_file.defaults, options );
   const control = $(opts.template);
   const fileInput = control.find('input');
@@ -2292,12 +2292,12 @@ $.fn.veda_file = function( options ) {
               };
             };
             return image;
-          }).then(function(image) {
+          }).then(function (image) {
             if (image === false) {
               reject(Error('Cropper canceled'));
             } else {
               file = image;
-              return resizeImage(image, 256).then(function(thumbnail) {
+              return resizeImage(image, 256).then(function (thumbnail) {
                 createFileIndividual(thumbnail, 'thumbnail-' + fileName, fileIndividual)
                   .then(function (thumbnailIndividual) {
                     fileIndividual['v-s:thumbnail'] = [thumbnailIndividual];
@@ -2369,7 +2369,7 @@ $.fn.veda_file.defaults = {
 };
 
 // OBJECT PROPERTY CONTROL
-$.fn.veda_link = function( options ) {
+$.fn.veda_link = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_link.defaults, options );
   const control = $(opts.template);
   const template = this.attr('data-template') || '{@.rdfs:label}';
@@ -2413,11 +2413,11 @@ $.fn.veda_link = function( options ) {
   const createValue = function () {
     const newVal = new veda.IndividualModel();
     newVal['rdf:type'] = rangeRestriction ? [rangeRestriction] : [(new veda.IndividualModel(rel_uri))['rdfs:range'][0]];
-    newVal["v-s:backwardTarget"] = [individual];
-    newVal["v-s:backwardProperty"] = [opts.property_uri];
-    newVal["v-s:canRead"] = [true];
-    newVal["v-s:canUpdate"] = [true];
-    newVal["v-s:canDelete"] = [true];
+    newVal['v-s:backwardTarget'] = [individual];
+    newVal['v-s:backwardProperty'] = [opts.property_uri];
+    newVal['v-s:canRead'] = [true];
+    newVal['v-s:canUpdate'] = [true];
+    newVal['v-s:canDelete'] = [true];
     return newVal;
   };
 
@@ -2686,7 +2686,7 @@ $.fn.veda_link = function( options ) {
               tmpl.addClass('invalid');
             }
             return tmpl;
-          })
+          });
         });
         Promise.all(promises).then((renderedList) => {
           suggestions.append(renderedList);
@@ -2793,7 +2793,7 @@ $.fn.veda_link = function( options ) {
       }
     };
 
-    const arrowHandler = function(e) {
+    const arrowHandler = function (e) {
       if ( e.which === 40 ) { // Down
         e.preventDefault();
         const active = suggestions.find('.active').removeClass('active');
@@ -2955,7 +2955,7 @@ $.fn.veda_link.defaults = {
  * @param {Boolean} withDeleted
  * @return {Promise}
  */
-function ftQuery(prefix, input, sort, withDeleted) {
+function ftQuery (prefix, input, sort, withDeleted) {
   input = input ? input.trim() : '';
   let queryString = '';
   if ( input ) {
@@ -3024,7 +3024,7 @@ function ftQuery(prefix, input, sort, withDeleted) {
    * @param {Array} results
    * @return {Promise}
    */
-  function incrementalSearch(cursor, limit, results) {
+  function incrementalSearch (cursor, limit, results) {
     return veda.Backend.query({
       ticket: veda.ticket,
       query: queryString,
@@ -3048,9 +3048,10 @@ function ftQuery(prefix, input, sort, withDeleted) {
 /**
  * Render option value
  * @param {IndividualModel|string|number|Boolean|Date} value
+ * @param {string} template
  * @return {Promise<string>}
  */
-function renderValue(value, template) {
+function renderValue (value, template) {
   if (value instanceof veda.IndividualModel) {
     return value.load().then(function (value) {
       if (template) {
@@ -3066,7 +3067,8 @@ function renderValue(value, template) {
 
 /**
  * Interpolate string for rendering
- * @param {string} str
+ * @param {string} template
+ * @param {IndividualModel} individual
  * @return {Promise}
  */
 function interpolate (template, individual) {
@@ -3085,11 +3087,11 @@ function interpolate (template, individual) {
     } else {
       target = new veda.IndividualModel(target);
     }
-    const rendered = target.getChainValue(...properties).then(values => values.map(Util.formatValue).filter(Boolean).join(' '));
+    const rendered = target.getChainValue(...properties).then((values) => values.map(Util.formatValue).filter(Boolean).join(' '));
     promises.push(rendered);
     return '';
   });
-  return Promise.all(promises).then(fulfilled => {
+  return Promise.all(promises).then((fulfilled) => {
     return template.replace(re_evaluate, () => fulfilled.shift()).replace(re_interpolate, () => fulfilled.shift());
   });
 }

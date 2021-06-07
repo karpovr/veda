@@ -14,7 +14,7 @@ export default UpdateService;
  * Client in memory cache update service singleton constructor
  * @return {Promise} update service instance promise
  */
-function UpdateService() {
+function UpdateService () {
   const self = this;
 
   // Singleton pattern
@@ -41,7 +41,7 @@ function UpdateService() {
    * Initialize instance
    * @return {Promise} instance promise
    */
-  function initSocket() {
+  function initSocket () {
     return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort').then(function (ccusPortCfg) {
       const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
       const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
@@ -94,7 +94,7 @@ function UpdateService() {
    * @param {string} msg - received message
    * @return {void}
    */
-  function receiveMessage(msg) {
+  function receiveMessage (msg) {
     // console.log("server -> client:", msg);
     if (msg === '') {
       lastPing = Date.now();
@@ -137,7 +137,7 @@ function UpdateService() {
    * @this UpdateService
    * @return {void}
    */
-  function openedHandler(event) {
+  function openedHandler (event) {
     reconnectDelay = reconnectDelayInitial;
     console.log('client: websocket opened', event.target.url);
     this.sendMessage('ccus=' + veda.ticket);
@@ -161,7 +161,7 @@ function UpdateService() {
    * @this WebSocket
    * @return {void}
    */
-  function messageHandler(event) {
+  function messageHandler (event) {
     const msg = event.data;
     this.receiveMessage(msg);
   }
@@ -172,7 +172,7 @@ function UpdateService() {
    * @this WebSocket
    * @return {void}
    */
-  function errorHandler(event) {
+  function errorHandler (event) {
     console.log('client: ccus error', event);
     this.close();
   }
@@ -182,7 +182,7 @@ function UpdateService() {
    * @param {Event} event
    * @return {void}
    */
-  function closedHandler(event) {
+  function closedHandler (event) {
     reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
     console.log('client: websocket closed', event.target.url, '| re-connect in', reconnectDelay / 1000, 'sec');
     setTimeout(initSocket, reconnectDelay);

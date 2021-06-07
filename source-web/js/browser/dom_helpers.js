@@ -9,7 +9,7 @@
  * @param {boolean} useCapture
  * @return {void}
  */
-function delegateHandler(el, event, delegateSelector, handler, useCapture) {
+function delegateHandler (el, event, delegateSelector, handler, useCapture) {
   el.addEventListener(event, ancestorHandler, useCapture);
 
   /**
@@ -18,7 +18,7 @@ function delegateHandler(el, event, delegateSelector, handler, useCapture) {
    * @return {void}
    * @this Element
    */
-  function ancestorHandler(event) {
+  function ancestorHandler (event) {
     for (let {target} = event; target && target !== this; target = target.parentNode) {
       if (target.matches(delegateSelector)) {
         handler.call(target, event);

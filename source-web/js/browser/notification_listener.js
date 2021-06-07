@@ -18,7 +18,7 @@ veda.on('started', () => {
    * @this Individual
    * @return {void}
    */
-  function checkNotification() {
+  function checkNotification () {
     const clientNotification = this;
     let browserNotificationList;
     try {

@@ -24,7 +24,7 @@ export default LocalDB;
  * Local database singleton constructor
  * @return {Promise} database instance promise
  */
-function LocalDB() {
+function LocalDB () {
   this.veda_version = veda.manifest.veda_version;
   this.db_name = veda.manifest.short_name;
   this.store_name = 'store';
@@ -59,7 +59,7 @@ proto.initDB = function () {
       reject(error);
     };
 
-    openReq.onblocked = function(event) {
+    openReq.onblocked = function (event) {
       alert('Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!');
     };
 

@@ -277,7 +277,7 @@ BackendError.prototype.constructor = BackendError;
  * @param {Object} params
  * @return {Promise<Object>}
  */
-function call_server(params) {
+function call_server (params) {
   const method = params.method;
   const url = params.url;
   const data = params.data;
@@ -631,7 +631,7 @@ browserBackend.get_individuals = function (ticket, uris) {
       const results = [];
       const get_from_server = [];
       return params.data.uris.reduce(function (p, uri, i) {
-        return p.then(function() {
+        return p.then(function () {
           return db.get(uri).then(function (result) {
             if (typeof result !== 'undefined') {
               results[i] = result;
@@ -699,7 +699,7 @@ browserBackend.get_individuals = function (ticket, uris) {
  * @param {Object} params
  * @return {Promise<Object>}
  */
-function call_server_put(params) {
+function call_server_put (params) {
   return call_server(params).catch(function (BackendError) {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       return enqueueCall(params).then(function (queue) {
@@ -936,13 +936,13 @@ browserBackend.loadFile = memoize(function (url) {
  * @param {Object} params
  * @return {Promise}
  */
-function enqueueCall(params) {
+function enqueueCall (params) {
   if (typeof params === 'object') {
     params.ticket = undefined;
   }
   const localDB = new LocalDB();
   return localDB.then(function (db) {
-    return db.get('offline-queue').then(function(queue) {
+    return db.get('offline-queue').then(function (queue) {
       queue = queue || [];
       queue.push( JSON.stringify(params) );
       return db.put('offline-queue', queue);
@@ -954,10 +954,10 @@ function enqueueCall(params) {
  * Execute enqueued requests
  * @return {Promise}
  */
-function flushQueue() {
+function flushQueue () {
   const localDB = new LocalDB();
   return localDB.then(function (db) {
-    return db.get('offline-queue').then(function(queue) {
+    return db.get('offline-queue').then(function (queue) {
       if (queue && queue.length) {
         if (veda.ticket) {
           return browserBackend.is_ticket_valid(veda.ticket).then(function (isValid) {

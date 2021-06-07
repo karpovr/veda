@@ -17,7 +17,7 @@ import {delegateHandler} from '../browser/dom_helpers.js';
 /**
  * Authenticate user
  */
-export default function Auth() {
+export default function Auth () {
   const storage = window.localStorage;
 
   // Login invitation
@@ -41,7 +41,7 @@ export default function Auth() {
    * @param {Event} event
    * @return {void}
    */
-  function submitLoginPassword(event) {
+  function submitLoginPassword (event) {
     event.preventDefault();
     const passwordInput = loginForm.querySelector('#password');
     const login = loginForm.querySelector('#login').value;
@@ -60,7 +60,7 @@ export default function Auth() {
             xhr.open('POST', '/ad', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
             xhr.responseType = 'json';
-            xhr.onload = function() {
+            xhr.onload = function () {
               if (xhr.status === 200) {
                 resolve(xhr.response);
               } else {
@@ -92,7 +92,7 @@ export default function Auth() {
    * @param {Event} event
    * @return {void}
    */
-  function validateNewPassword() {
+  function validateNewPassword () {
     const submit = loginForm.querySelector('#submit-new-password');
     const newPassword = loginForm.querySelector('#new-password');
     const confirmNewPassword = loginForm.querySelector('#confirm-new-password');
@@ -166,11 +166,11 @@ export default function Auth() {
    * @param {Function} onError
    * @return {void}
    */
-  function reCAPTCHA(onSuccess, onExpired, onError) {
+  function reCAPTCHA (onSuccess, onExpired, onError) {
     if (!captchaRendered) {
       const reCAPTCHA_key = new IndividualModel('cfg:reCAPTCHA_client_key');
       reCAPTCHA_key.load().then(function (reCAPTCHA_key) {
-        window.captchaCallback = function() {
+        window.captchaCallback = function () {
           grecaptcha.render('recaptcha', {
             'sitekey': reCAPTCHA_key.get('rdf:value')[0].toString(),
             'theme': 'light',
@@ -194,7 +194,7 @@ export default function Auth() {
    * @param {Error} error
    * @return {void}
    */
-  function handleLoginError(error) {
+  function handleLoginError (error) {
     const enterLoginPassword = loginForm.querySelector('#enter-login-password');
     enterLoginPassword.style.display = 'none';
     const enterNewPassword = loginForm.querySelector('#enter-new-password');
@@ -367,7 +367,7 @@ export default function Auth() {
    * @param {Object} authResult
    * @return {void}
    */
-  function handleLoginSuccess(authResult) {
+  function handleLoginSuccess (authResult) {
     const enterLoginPassword = loginForm.querySelector('#enter-login-password');
 
     const alerts = loginForm.querySelectorAll('.alert');
@@ -390,7 +390,7 @@ export default function Auth() {
    * @param {number} expires
    * @return {void}
    */
-  function setTicketCookie(ticket, expires) {
+  function setTicketCookie (ticket, expires) {
     const cookie = 'ticket=' + ticket + '; expires=' + new Date(parseInt(expires)).toGMTString() + '; samesite=strict; path=/;' + (window.location.protocol === 'https:' ? 'secure;' : '');
     document.cookie = cookie;
   }
@@ -399,7 +399,7 @@ export default function Auth() {
    * Delete ticket cookie
    * @return {void}
    */
-  function delTicketCookie() {
+  function delTicketCookie () {
     setTicketCookie(null, 0);
   }
 

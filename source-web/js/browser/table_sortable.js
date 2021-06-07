@@ -6,7 +6,7 @@ System.import('moment').then(function (module) {
   const moment = module.default;
 
   $.fn.tableSortable = function (clicked) {
-    return this.each(function(i, el) {
+    return this.each(function (i, el) {
       const table = $(el);
       if ( table.hasClass('table-sortable-done') ) {
         return;

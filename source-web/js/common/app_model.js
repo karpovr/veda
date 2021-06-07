@@ -13,7 +13,7 @@ import UpdateService from '../browser/update_service.js';
  * @param {Object} manifest - app config
  * @return {AppModel}
  */
-export default function AppModel(manifest) {
+export default function AppModel (manifest) {
   riot.observable(this);
 
   this.manifest = manifest;

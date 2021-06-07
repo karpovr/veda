@@ -21,14 +21,14 @@ import '../browser/line_status_listener.js';
 /**
  * Application presenter
  */
-export default function AppPresenter() {
+export default function AppPresenter () {
   /**
    * Render individual under mouse pointer with special system template v-ui:ttl
    * when Left mouse button with Ctrl + Alt keys are pressed
    * @param {Event} event
    * @this Element
    */
-  function specialTemplateHandler(event) {
+  function specialTemplateHandler (event) {
     const uri = this.getAttribute('resource') || this.getAttribute('about');
     const hash = `#/${uri}`;
     if (event.altKey && event.ctrlKey) {
@@ -46,7 +46,7 @@ export default function AppPresenter() {
    * Unset title and remove outline from individual under mouse pointer
    * @param {Event} event
    */
-  function removeOutline(event) {
+  function removeOutline (event) {
     document.body.removeEventListener('mouseover', outline);
     if (outlined) {
       outlined.removeAttribute('title');
@@ -61,7 +61,7 @@ export default function AppPresenter() {
    * @param {Event} event
    * @this Element
    */
-  function outline(event) {
+  function outline (event) {
     if (event.altKey && event.ctrlKey) {
       event.stopPropagation();
       if (outlined) {
@@ -110,7 +110,7 @@ export default function AppPresenter() {
    * @this {Element}
    * @return {void}
    */
-  function anchorHandler(event) {
+  function anchorHandler (event) {
     event.preventDefault();
     const hash = this.getAttribute('href');
     return (hash === window.location.hash ? false : riot.route(hash));

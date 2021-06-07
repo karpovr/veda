@@ -178,9 +178,9 @@ Codelet.change_document_status = function (process, status) {
         } else if (status == 'v-s:StatusExecution') {
           const doc = get_individual(process.ticket, veda.Util.getUri(doc_id));
           if (doc && !doc['v-s:dateToPlan'] && (doc['v-s:count'] && doc['v-s:count'].length > 0)) {
-            set_in_document['v-s:dateFromPlan'] = veda.Util.newDate(new Date().setHours(0,0,0,0));
+            set_in_document['v-s:dateFromPlan'] = veda.Util.newDate(new Date().setHours(0, 0, 0, 0));
             const countDays = doc['v-s:count'][0].data;
-            const dueDate = new Date(Date.now() + countDays*86400000).setHours(0,0,0,0);
+            const dueDate = new Date(Date.now() + countDays*86400000).setHours(0, 0, 0, 0);
             set_in_document['v-s:dateToPlan'] = veda.Util.newDate(dueDate);
           }
         }
@@ -192,7 +192,7 @@ Codelet.change_document_status = function (process, status) {
   return [veda.Workflow.get_new_variable('status', veda.Util.newStr(status))];
 };
 
-Codelet.createPermissionStatement = function(process, stage) {
+Codelet.createPermissionStatement = function (process, stage) {
   print('###### Start Codelet.createPermissionStatement ######');
   const docId = process.getInputVariable('docId');
   print('docId:', veda.Util.toJson(docId));
@@ -230,7 +230,7 @@ Codelet.createPermissionStatement = function(process, stage) {
   return veda.Util.newStr(statementUri);
 };
 
-Codelet.deletePermissionStatement = function(process, stage) {
+Codelet.deletePermissionStatement = function (process, stage) {
   print('###### Start Codelet.deletePermissionStatement ######');
   const docId = process.getInputVariable('docId');
   print('docId:', veda.Util.toJson(docId));

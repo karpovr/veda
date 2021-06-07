@@ -63,6 +63,13 @@ const delay = 14 * 24 * 60 * 60 * 1000;
 
 const outdated = parseInt(window.localStorage.outdated) || 0;
 
+const okHandler = function (e) {
+  e.target.removeEventListener('click', okHandler);
+  const container = document.getElementById('outdated');
+  container.remove();
+  window.localStorage.outdated = Date.now();
+};
+
 if (!isOk && (Date.now() - outdated > delay)) {
   const name = browser.getBrowser().name;
   const vsn = browser.getBrowser().version;
@@ -72,11 +79,4 @@ if (!isOk && (Date.now() - outdated > delay)) {
   document.body.appendChild(container);
   const ok = document.getElementById('outdated-ok');
   ok.addEventListener('click', okHandler);
-}
-
-function okHandler() {
-  this.removeEventListener('click', okHandler);
-  const container = document.getElementById('outdated');
-  container.remove();
-  window.localStorage.outdated = Date.now();
 }

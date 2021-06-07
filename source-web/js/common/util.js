@@ -101,10 +101,10 @@ Util.decimalDatetimeReviver = function (key, value) {
   return key === 'data' && this.type === 'Datetime' ? new Date(value) : key === 'data' && this.type === 'Decimal' ? parseFloat(value) : value;
 };
 
-Util.hasValue = function(individual, property, value) {
+Util.hasValue = function (individual, property, value) {
   const any = !!(individual && individual[property] && individual[property].length);
   if (!value) return any;
-  return !!(any && individual[property].filter( function(i) {
+  return !!(any && individual[property].filter( function (i) {
     return (i.type === value.type && i.data.valueOf() === value.data.valueOf());
   }).length);
 };
@@ -232,7 +232,7 @@ Util.isInteger = function (n) {
  * @param {number} n
  * @return {string}
  */
-function zeroPref(n) {
+function zeroPref (n) {
   return n > 9 ? String(n) : '0' + n;
 }
 
@@ -301,7 +301,7 @@ Util.forSubIndividual = function (net, property, id, func) {
   if (net[property] === undefined) {
     return;
   }
-  net[property].forEach(function(el) {
+  net[property].forEach(function (el) {
     if (el.id == id) {
       func(el);
     }
@@ -361,15 +361,15 @@ Util.unique = function (arr) {
   return r;
 };
 
-Number.isFinite = Number.isFinite || function(value) {
+Number.isFinite = Number.isFinite || function (value) {
   return typeof value === 'number' && isFinite(value);
 };
-Number.isInteger = Number.isInteger || function(value) {
+Number.isInteger = Number.isInteger || function (value) {
   return typeof value === 'number' &&
     Number.isFinite(value) &&
     !(value % 1);
 };
-Number.isFloat = Number.isFloat || function(value) {
+Number.isFloat = Number.isFloat || function (value) {
   return typeof value === 'number' &&
     Number.isFinite(value) &&
     (value % 1);
@@ -704,7 +704,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
        * @param {string} sort
        * @return {string}
        */
-      function groupBy(sort) {
+      function groupBy (sort) {
         const by = 'id';
         let props;
         if (typeof sort === 'string' || sort instanceof String) {
@@ -738,7 +738,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
        * @param {string} sort
        * @return {string}
        */
-      function orderBy(sort) {
+      function orderBy (sort) {
         if (typeof sort === 'string' || sort instanceof String) {
           return sort.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri, dir) {
             const range = veda.ontology.properties[property_uri].get('rdfs:range')[0];
@@ -771,7 +771,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
        * @param {string} parent_prop
        * @param {number} type_index
        */
-      function buildQuery(individual, parent_prop, type_index) {
+      function buildQuery (individual, parent_prop, type_index) {
         if (!individual.hasValue('rdf:type')) {
           return;
         }
@@ -929,7 +929,7 @@ Util.queryFromIndividual = function (individual) {
         break;
       case 'String':
         oneProp = values
-          .filter(function(item) {
+          .filter(function (item) {
             return !!item && !!item.valueOf();
           })
           .map( function (value) {
@@ -955,7 +955,7 @@ Util.queryFromIndividual = function (individual) {
         break;
       case 'Uri':
         oneProp = values
-          .filter(function(item) {
+          .filter(function (item) {
             return !!item && !!item.valueOf();
           })
           .map( function (value) {
@@ -970,7 +970,7 @@ Util.queryFromIndividual = function (individual) {
       }
       return oneProp ? '( ' + oneProp + ' )' : undefined;
     })
-    .filter(function(item) {
+    .filter(function (item) {
       return typeof item !== undefined;
     })
     .join(' && ');
@@ -986,7 +986,7 @@ Util.queryFromIndividual = function (individual) {
  * @param {Array} visited
  * @return {Object} union
  */
-function flattenIndividual(object, prefix, union, visited) {
+function flattenIndividual (object, prefix, union, visited) {
   const uri = object['@'];
   union = typeof union !== 'undefined' ? union : {};
   prefix = typeof prefix !== 'undefined' ? prefix : '';
@@ -1046,7 +1046,7 @@ Util.complexLabel = function (individual) {
       const length = properties.length;
       if (i === length - 1) {
         const parts = [];
-        intermediates.forEach(function(item) {
+        intermediates.forEach(function (item) {
           if (item[property]) {
             const part = item[property].reduce(function (acc, value) {
               if ( !value.lang || value.lang === 'NONE' || value.lang.toLowerCase() === language.toLowerCase() ) {
@@ -1066,9 +1066,9 @@ Util.complexLabel = function (individual) {
         return parts.join(', ');
       }
       const temp = [];
-      intermediates.forEach(function(item) {
+      intermediates.forEach(function (item) {
         if (Util.hasValue(item, property)) {
-          item[property].forEach(function(propertyItem) {
+          item[property].forEach(function (propertyItem) {
             temp.push(get_cached(propertyItem.data));
           });
         }

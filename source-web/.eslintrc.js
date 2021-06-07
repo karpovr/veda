@@ -12,7 +12,7 @@ module.exports = {
     'sourceType': 'module',
   },
   'rules': {
-    'space-before-function-paren': ['off'],
+    'space-before-function-paren': ["error", "always"],
     'max-len': ['off'],
     'camelcase': ['off'],
     'no-unused-vars': ['warn'],

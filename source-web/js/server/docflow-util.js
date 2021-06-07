@@ -70,7 +70,7 @@ Workflow.WorkItemResult = function (_work_item_result) {
   this.work_item_result = _work_item_result;
 
   // ///////////////////////// functions prepare work_item_result
-  this.getValue = function(var_name) {
+  this.getValue = function (var_name) {
     for (const i in this.work_item_result) {
       if (Object.hasOwnProperty.call(this.work_item_result, i)) {
         return this.work_item_result[i][var_name];
@@ -78,7 +78,7 @@ Workflow.WorkItemResult = function (_work_item_result) {
     }
   };
 
-  this.compare = function(var_name, value) {
+  this.compare = function (var_name, value) {
     if (!value || value.length < 1) {
       return false;
     }
@@ -118,7 +118,7 @@ Workflow.WorkItemResult = function (_work_item_result) {
     return false;
   };
 
-  this.is_exists_result = function() {
+  this.is_exists_result = function () {
     if (!this.work_item_result || this.work_item_result.length < 1) {
       return false;
     }
@@ -132,7 +132,7 @@ Workflow.WorkItemResult = function (_work_item_result) {
     return false;
   };
 
-  this.is_all_executors_taken_decision = function(var_name, value) {
+  this.is_all_executors_taken_decision = function (var_name, value) {
     // print('BLABLABLA > '+veda.Util.toJson(this));
     if (!value || value.length < 1) {
       return false;
@@ -157,7 +157,7 @@ Workflow.WorkItemResult = function (_work_item_result) {
     }
   };
 
-  this.is_some_executor_taken_decision = function(var_name, value) {
+  this.is_some_executor_taken_decision = function (var_name, value) {
     if (!value || value.length < 1) {
       return false;
     }
@@ -196,23 +196,23 @@ Workflow.Context = function (_src_data, _ticket) {
   this.src_data = _src_data;
   this.ticket = _ticket;
 
-  this.getDecisionForms = function() {
+  this.getDecisionForms = function () {
     return this.src_data['v-wf:decisionFormList'];
   };
 
-  this.getExecutor = function() {
+  this.getExecutor = function () {
     return this.src_data['v-wf:executor'];
   };
 
-  this.getLabel = function() {
+  this.getLabel = function () {
     return this.src_data['rdfs:label'];
   };
 
-  this.get_results = function() {
+  this.get_results = function () {
     return this.src_data;
   };
 
-  this.if_all_executors_taken_decision = function(true_decision, false_decision) {
+  this.if_all_executors_taken_decision = function (true_decision, false_decision) {
     try {
       let count_agreed = 0;
       for (let i = 0; i < this.src_data.length; i++) {
@@ -241,19 +241,19 @@ Workflow.Context = function (_src_data, _ticket) {
     }
   };
 
-  this.getInputVariable = function(var_name) {
+  this.getInputVariable = function (var_name) {
     return this.getVariableValueIO(var_name, 'v-wf:inVars');
   };
 
-  this.getLocalVariable = function(var_name) {
+  this.getLocalVariable = function (var_name) {
     return this.getVariableValueIO(var_name, 'v-wf:localVars');
   };
 
-  this.getOutVariable = function(var_name) {
+  this.getOutVariable = function (var_name) {
     return this.getVariableValueIO(var_name, 'v-wf:outVars');
   };
 
-  this.getVariableValueIO = function(var_name, io) {
+  this.getVariableValueIO = function (var_name, io) {
     try {
       //          print ("CONTEXT::getVariableValueIO src_data=" + veda.Util.toJson (this.src_data));
       const variables = this.src_data[io];
@@ -284,7 +284,7 @@ Workflow.Context = function (_src_data, _ticket) {
     // print("[WORKFLOW]:getVariableValue: work_item=" + this.src_data['@'] + ", var_name=" + var_name + ", val=undefined");
   };
 
-  this.print_variables = function(io) {
+  this.print_variables = function (io) {
     try {
       const variables = this.src_data[io];
 
@@ -302,7 +302,7 @@ Workflow.Context = function (_src_data, _ticket) {
     }
   };
 
-  this.get_result_value = function(field1, type1) {
+  this.get_result_value = function (field1, type1) {
     try {
       if (this.src_data && this.src_data.length > 0) {
         const rr = this.src_data[0][field1];
@@ -613,7 +613,7 @@ Workflow.rsffiwit = function (ticket, work_item_list, compare_field, compare_val
 };
 
 // /////////////////////////////////////////// JOURNAL //////////////////////////////////////////////////
-Workflow.create_new_journal = function(ticket, new_journal_uri, parent_journal_uri, label, is_trace) {
+Workflow.create_new_journal = function (ticket, new_journal_uri, parent_journal_uri, label, is_trace) {
   try {
     const exists_journal = get_individual(ticket, new_journal_uri);
 

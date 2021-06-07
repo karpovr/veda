@@ -104,7 +104,7 @@ Numerator.numerate = function (ticket, individual, super_classes, prev_state, _e
  * @param {string} scope
  * @return {string}
  */
-function getNewValue(ticket, individual, rule, scope) {
+function getNewValue (ticket, individual, rule, scope) {
   try {
     // print("getNewValue: ticket", ticket, "| individual", JSON.stringify(individual), "| rule", JSON.stringify(rule), "| scope", JSON.stringify(scope));
     return eval(rule['v-s:numerationGetNextValue'][0].data)(ticket, scope);
@@ -121,7 +121,7 @@ function getNewValue(ticket, individual, rule, scope) {
  * @param {Object} rule
  * @return {string}
  */
-function getScope(ticket, individual, rule) {
+function getScope (ticket, individual, rule) {
   try {
     // print("getScope: ticket", ticket, "| individual", JSON.stringify(individual), "| rule", JSON.stringify(rule));
     return eval(rule['v-s:numerationScope'][0].data)(ticket, individual);
@@ -137,7 +137,7 @@ function getScope(ticket, individual, rule) {
  * @param {string} scopeId
  * @return {string}
  */
-function createScope(ticket, scopeId) {
+function createScope (ticket, scopeId) {
   // print("createScope: ticket", ticket, "| scopeId", JSON.stringify(scopeId));
   try {
     const scope = {
@@ -161,7 +161,7 @@ function createScope(ticket, scopeId) {
  * @param {string} _event_id
  * @return {boolean}
  */
-function commitValue(ticket, scope, value, _event_id) {
+function commitValue (ticket, scope, value, _event_id) {
   // print("commitValue: ticket", ticket, "| scope", JSON.stringify(scope), "| value", JSON.stringify(value));
   try {
     let nextInterval = null;
@@ -265,7 +265,7 @@ function commitValue(ticket, scope, value, _event_id) {
  * @param {string} _event_id
  * @return {void}
  */
-function revokeValue(ticket, scope, value, _event_id) {
+function revokeValue (ticket, scope, value, _event_id) {
   // print("revokeValue: ticket", ticket, "value", value);
   try {
     const intervals = [];
@@ -384,7 +384,7 @@ Numerator.getNextValueSimple = function (ticket, scope, FIRST_VALUE) {
     return ''+FIRST_VALUE;
   }
   let max = 0;
-  scope['v-s:numerationCommitedInterval'].forEach(function(interval) {
+  scope['v-s:numerationCommitedInterval'].forEach(function (interval) {
     const intervalUri = interval.data;
     try {
       interval = get_individual(ticket, intervalUri);

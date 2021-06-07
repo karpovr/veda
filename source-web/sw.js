@@ -46,12 +46,12 @@ addEventListener('message', (event) => {
  * @param {Event} event
  * @return {void}
  */
-function clearCache(event) {
+function clearCache (event) {
   self.skipWaiting();
   console.log(`Service worker updated, veda_version = ${veda_version}. Clear cache.`);
   event.waitUntil(
-    caches.keys().then(function(keyList) {
-      return Promise.all(keyList.map(function(key) {
+    caches.keys().then(function (keyList) {
+      return Promise.all(keyList.map(function (key) {
         return caches.delete(key);
       }));
     }),
@@ -82,11 +82,11 @@ self.addEventListener('fetch', function (event) {
  * @param {string} CACHE
  * @return {Promise<Response>}
  */
-function handleFetch(event, CACHE) {
-  return caches.match(event.request).then(function(resp) {
-    return resp || fetch(event.request).then(function(response) {
+function handleFetch (event, CACHE) {
+  return caches.match(event.request).then(function (resp) {
+    return resp || fetch(event.request).then(function (response) {
       if (response.ok) {
-        return caches.open( CACHE ).then(function(cache) {
+        return caches.open( CACHE ).then(function (cache) {
           cache.put(event.request, response.clone());
           return response;
         });
@@ -124,7 +124,7 @@ const OFFLINE_API_RESPONSE = {
  * @param {Response} response
  * @return {Response}
  */
-function handleError(response) {
+function handleError (response) {
   if (!response.ok) {
     throw response;
   }
@@ -136,7 +136,7 @@ function handleError(response) {
  * @param {Event} event
  * @return {Response}
  */
-function handleAPI(event) {
+function handleAPI (event) {
   const cloneRequest = event.request.method !== 'GET' && event.request.clone();
   const url = new URL(event.request.url);
   const fn = url.pathname.split('/').pop();
@@ -147,24 +147,24 @@ function handleAPI(event) {
       // Fetch first
       return fetch(event.request)
         .then(handleError)
-        .then(function(response) {
+        .then(function (response) {
           const clone = response.clone();
-          caches.open( API ).then(function(cache) {
+          caches.open( API ).then(function (cache) {
             cache.put(event.request, clone);
           });
           return response;
         });
     } else {
       // Cache first
-      return caches.match(event.request).then(function(resp) {
+      return caches.match(event.request).then(function (resp) {
         if (resp) {
           return resp;
         }
         return fetch(event.request)
           .then(handleError)
-          .then(function(response) {
+          .then(function (response) {
             const clone = response.clone();
-            caches.open( API ).then(function(cache) {
+            caches.open( API ).then(function (cache) {
               cache.put(event.request, clone);
             });
             return response;
@@ -182,7 +182,7 @@ function handleAPI(event) {
     // Fetch first
     return fetch(event.request)
       .then(handleError)
-      .then(function(response) {
+      .then(function (response) {
         const db = new LocalDB();
         return db.then(function (db) {
           Promise.all([serialize(cloneRequest), serialize(response)]).then(function (req_res) {
@@ -193,7 +193,7 @@ function handleAPI(event) {
           return response;
         });
       })
-      .catch(function(error) {
+      .catch(function (error) {
         return serialize(cloneRequest).then(function (request) {
           request = JSON.stringify(request);
           const db = new LocalDB();
@@ -202,7 +202,7 @@ function handleAPI(event) {
           });
         });
       })
-      .catch(function(error) {
+      .catch(function (error) {
         return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
       });
   } else if (event.request.method === 'PUT') {
@@ -223,11 +223,11 @@ function handleAPI(event) {
  * @param {Request} request
  * @return {Request}
  */
-function enqueueRequest(request) {
+function enqueueRequest (request) {
   const db = new LocalDB();
   return db.then(function (db) {
     return serialize(request).then(function (serializedRequest) {
-      return db.get('offline-queue').then(function(queue) {
+      return db.get('offline-queue').then(function (queue) {
         queue = queue || [];
         queue.push(serializedRequest);
         return db.put('offline-queue', queue);
@@ -240,10 +240,10 @@ function enqueueRequest(request) {
  * Flush offline PUT queue
  * @return {Promise<Number>}
  */
-function flushQueue() {
+function flushQueue () {
   const db = new LocalDB();
   return db.then(function (db) {
-    return db.get('offline-queue').then(function(queue) {
+    return db.get('offline-queue').then(function (queue) {
       if (queue && queue.length) {
         return queue.reduce(function (prom, request) {
           return prom.then(function () {
@@ -275,7 +275,7 @@ self.addEventListener('message', function (event) {
  * @param {Request|Response} subject
  * @return {JSON}
  */
-function serialize(subject) {
+function serialize (subject) {
   const headers = {};
   for (const entry of subject.headers.entries()) {
     headers[entry[0]] = entry[1];
@@ -303,7 +303,7 @@ function serialize(subject) {
       type: subject.type,
     };
   }
-  return subject.clone().text().then(function(body) {
+  return subject.clone().text().then(function (body) {
     serialized.body = body;
     return serialized;
   });
@@ -314,7 +314,7 @@ function serialize(subject) {
  * @param {JSON} subject
  * @return {Request|Response}
  */
-function deserialize(subject) {
+function deserialize (subject) {
   return subject.method ? new Request(subject.url, subject) : new Response(subject.body, subject);
 }
 
@@ -338,7 +338,7 @@ const fallback = {
  * Local database singleton constructor
  * @return {Promise} database instance promise
  */
-function LocalDB() {
+function LocalDB () {
   const self = this;
   this.db_name = 'Veda-sw';
   this.store_name = 'store';
@@ -354,9 +354,10 @@ function LocalDB() {
    * Initialize database instance
    * @param {string} db_name - database name
    * @param {string} store_name - database store name
+   * @param {integer} veda_version - database version
    * @return {Promise} database instance promise
    */
-  function initDB(db_name, store_name, veda_version) {
+  function initDB (db_name, store_name, veda_version) {
     return new Promise(function (resolve, reject) {
       const openReq = indexedDB.open(db_name, veda_version);
 
@@ -367,7 +368,7 @@ function LocalDB() {
         resolve(self);
       };
 
-      openReq.onerror = function errorHandler(error) {
+      openReq.onerror = function errorHandler (error) {
         console.log('DB open error', error);
         reject(error);
       };

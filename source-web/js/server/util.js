@@ -567,7 +567,7 @@ Util.recursiveCall = function (elem, path, ticket, _event_id) {
 
   path[elem['@']] = Object.keys(path).length;
   if (elem['v-wf:decisionFormList']) {
-    elem['v-wf:decisionFormList'].forEach(function(dfae) {
+    elem['v-wf:decisionFormList'].forEach(function (dfae) {
       const df = get_individual(ticket, dfae.data);
       if (!df['v-wf:isCompleted'] || df['v-wf:isCompleted'][0].data == false) {
         df['v-s:deleted'] = Util.newBool(true);
@@ -578,19 +578,19 @@ Util.recursiveCall = function (elem, path, ticket, _event_id) {
   }
 
   if (elem['v-wf:workItemList']) {
-    elem['v-wf:workItemList'].forEach(function(wi) {
+    elem['v-wf:workItemList'].forEach(function (wi) {
       Util.recursiveCall(get_individual(ticket, wi.data), path, ticket, _event_id);
     });
   }
 
   if (elem['v-wf:workOrderList']) {
-    elem['v-wf:workOrderList'].forEach(function(wo) {
+    elem['v-wf:workOrderList'].forEach(function (wo) {
       Util.recursiveCall(get_individual(ticket, wo.data), path, ticket, _event_id);
     });
   }
 
   if (elem['v-wf:isProcess']) {
-    elem['v-wf:isProcess'].forEach(function(p) {
+    elem['v-wf:isProcess'].forEach(function (p) {
       const df = get_individual(ticket, p.data);
       if (!df['v-wf:isCompleted'] || df['v-wf:isCompleted'][0].data == false) {
         df['v-wf:isStopped'] = Util.newBool(true);
@@ -666,8 +666,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
     let out_data0_el = {};
 
     /* PUT functions [BEGIN] */
-    const putFieldOfIndividFromElement = (function() {
-      return function(name, field) {
+    const putFieldOfIndividFromElement = (function () {
+      return function (name, field) {
         const rr = get_individual(ticket, Util.getUri(element));
         if (!rr) {
           return;
@@ -687,8 +687,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putFieldOfObject = (function() {
-      return function(name, field) {
+    const putFieldOfObject = (function () {
+      return function (name, field) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -703,8 +703,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putUri = (function() {
-      return function(name, value) {
+    const putUri = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -723,7 +723,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const setUri = function(name, value) {
+    const setUri = function (name, value) {
       out_data0_el[name] = [
         {
           data: value,
@@ -731,8 +731,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
         }];
     };
 
-    const putString = (function() {
-      return function(name, value) {
+    const putString = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -751,8 +751,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const setString = (function() {
-      return function(name, value) {
+    const setString = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -765,8 +765,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const setDatetime = (function() {
-      return function(name, value) {
+    const setDatetime = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -779,8 +779,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putDatetime = (function() {
-      return function(name, value) {
+    const putDatetime = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -799,8 +799,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putBoolean = (function() {
-      return function(name, value) {
+    const putBoolean = (function () {
+      return function (name, value) {
         let out_data0_el_arr;
 
         out_data0_el_arr = out_data0_el[name];
@@ -819,8 +819,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const setBoolean = (function() {
-      return function(name, value) {
+    const setBoolean = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -834,8 +834,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
     })();
 
 
-    const putInteger = (function() {
-      return function(name, value) {
+    const putInteger = (function () {
+      return function (name, value) {
         let out_data0_el_arr = out_data0_el[name];
 
         if (!out_data0_el_arr) {
@@ -852,8 +852,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const setInteger = (function() {
-      return function(name, value) {
+    const setInteger = (function () {
+      return function (name, value) {
         const out_data0_el_arr = [];
 
         out_data0_el_arr.push(
@@ -866,8 +866,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putExecutor = (function() {
-      return function(name) {
+    const putExecutor = (function () {
+      return function (name) {
         let out_data0_el_arr = out_data0_el[name];
 
         if (!out_data0_el_arr) {
@@ -888,8 +888,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putWorkOrder = (function() {
-      return function(name) {
+    const putWorkOrder = (function () {
+      return function (name) {
         let out_data0_el_arr = out_data0_el[name];
 
         if (!out_data0_el_arr) {
@@ -910,8 +910,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const putThisProcess = (function() {
-      return function(name) {
+    const putThisProcess = (function () {
+      return function (name) {
         let out_data0_el_arr = out_data0_el[name];
 
         if (!out_data0_el_arr) {
@@ -932,8 +932,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       };
     })();
 
-    const removeThisProcess = (function() {
-      return function(name) {
+    const removeThisProcess = (function () {
+      return function (name) {
         let out_data0_el_arr = out_data0_el[name];
 
         if (!out_data0_el_arr) {
@@ -966,8 +966,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
         const individual = individuals[key];
 
         // print("#1.1 key=", key);
-        const objectContentStrValue = (function() {
-          return function(name, value) {
+        const objectContentStrValue = (function () {
+          return function (name, value) {
             if (individual[name]) {
               let result = false;
               for (const i in individual[name]) {
@@ -985,8 +985,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
         for (let key2 = 0; key2 < iteratedObject.length; key2++) {
           element = individual[iteratedObject[key2]];
 
-          const putValue = (function() {
-            return function(name) {
+          const putValue = (function () {
+            return function (name) {
               let out_data0_el_arr = out_data0_el[name];
 
               if (!out_data0_el_arr) {
@@ -1015,8 +1015,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
             };
           })();
 
-          const putValueFrom = (function() {
-            return function(name, path, transform) {
+          const putValueFrom = (function () {
+            return function (name, path, transform) {
               let out_data0_el_arr = out_data0_el[name];
               if (!out_data0_el_arr) {
                 out_data0_el_arr = [];
@@ -1047,8 +1047,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
             };
           })();
 
-          const putFrontValue = (function() {
-            return function(name) {
+          const putFrontValue = (function () {
+            return function (name) {
               let out_data0_el_arr = out_data0_el[name];
 
               if (!out_data0_el_arr) {
@@ -1076,8 +1076,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
             };
           })();
 
-          const putElement = (function() {
-            return function() {
+          const putElement = (function () {
+            return function () {
               const name = iteratedObject[key2];
               if (name == '@') {
                 return;
@@ -1105,14 +1105,14 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
           })();
 
           /* Segregate functions [BEGIN] */
-          const contentName = (function() {
-            return function(name) {
+          const contentName = (function () {
+            return function (name) {
               return iteratedObject[key2] == name;
             };
           })();
 
-          const elementContentStrValue = (function() {
-            return function(name, value) {
+          const elementContentStrValue = (function () {
+            return function (name, value) {
               if (iteratedObject[key2] !== name) {
                 return false;
               }
@@ -1126,8 +1126,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
           })();
           /* Segregate functions [END] */
 
-          const getElement = (function() {
-            return function() {
+          const getElement = (function () {
+            return function () {
               return element;
             };
           })();

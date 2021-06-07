@@ -11,7 +11,7 @@ export default veda.UserModel = UserModel;
  * @param {string} uri
  * @return {UserModel}
  */
-function UserModel(uri) {
+function UserModel (uri) {
   return IndividualModel.call(this, uri);
 };
 
