@@ -261,7 +261,7 @@ Util.confirm = function (individual, template, mode) {
  */
 Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
-    (template.data('mode') === 'edit' ? individual.isSync(false) || template.data('save')() : Promise.resolve())
+    (template.data('mode') === 'edit' ? individual.isSync(false) || template.data('callModelMethod')('save') : Promise.resolve())
       .then(function () {
         const transform = new IndividualModel(transformId);
         return transform.load().then(function (transform) {
@@ -281,7 +281,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
       });
   } else {
     individual['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
-    template.data('save')()
+    template.data('callModelMethod')('save')
       .then(function () {
         template.closest('.modal').modal('hide').remove();
         const notify = new Notify();

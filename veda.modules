@@ -19,13 +19,13 @@ ft-query
 
 #fanout-email
 
-search-index-tt
+#search-index-tt
 
-search-index-pt
+#search-index-pt
     module = search-index-pt
     args = --max_timeout_between_batches=1000 --min_batch_size_to_cancel_timeout=1000
 
-search-query
+#search-query
 
 #fanout-sql
 
@@ -47,14 +47,12 @@ ccus
 
 gowebserver
     module = gowebserver
-    args = --use_clickhouse=true --http_port=8081
+    args = --use_clickhouse=false --http_port=8080
 
 input-onto
 
-camunda-process-controller
+#camunda-event-handler
 
-camunda-external-task-worker
+#camunda-external-task-worker 
 
-camunda-event-handler
-    module = camunda-event-handler
-    args = --notify_channel_read_timeout=1000
+#camunda-process-controller

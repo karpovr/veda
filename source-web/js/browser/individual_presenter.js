@@ -6,8 +6,6 @@ import veda from '../common/veda.js';
 
 import IndividualModel from '../common/individual_model.js';
 
-import Backend from '../common/backend.js';
-
 import Util from '../common/util.js';
 
 import '../browser/util.js';
@@ -37,7 +35,7 @@ export default IndividualPresenter;
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function IndividualPresenter (container, template, mode, extra, toAppend) {
+function IndividualPresenter(container, template, mode, extra, toAppend) {
   mode = mode || 'view';
 
   toAppend = typeof toAppend !== 'undefined' ? toAppend : true;
@@ -147,7 +145,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function renderTemplate (individual, container, template, mode, extra, toAppend) {
+function renderTemplate(individual, container, template, mode, extra, toAppend) {
   template = template.trim();
 
   // Extract pre script, template and post script
@@ -245,146 +243,77 @@ function processTemplate (individual, container, template, mode) {
 
   // Define handlers
 
-  template.data({
-    'reset': resetHandler,
-    'save': saveHandler,
-    'delete': deleteHandler,
-    'recover': recoverHandler,
-    'remove': removeHandler,
-  });
-  template.one('remove', function () {
-    template.removeData('reset', 'save', 'delete', 'recover', 'remove');
-  });
-  template.on('cancel save delete recover destroy', function (e) {
-    e.stopPropagation();
-    if (e.type === 'cancel') {
-      resetHandler();
-    } else if (e.type === 'save') {
-      saveHandler();
-    } else if (e.type === 'delete') {
-      deleteHandler();
-    } else if (e.type === 'recover') {
-      recoverHandler();
-    } else if (e.type === 'destroy') {
-      removeHandler();
-    }
-  });
-
   /**
-   * Reset individual and embedded individuals
+   * Call model method
+   * @param {string} method
+   * @param {string} parent
    * @return {Promise<void>}
    */
-  function resetHandler () {
-    return embedded.reduce((p, item) => p.then(() => item.data('reset')()), Promise.resolve())
-      .then(() => individual.reset())
-      .then(() => template.trigger('view'));
-  }
-
-  /**
-   * Save individual and embedded children individuals
-   * @param {string} parent id
-   * @param {Array} acc for individuals uris
-   * @return {Promise<Array>}
-   */
-  function saveHandler (parent, acc) {
-    acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('save')(individual.id, acc), acc);
-    acc.push(individual.id);
-    if (parent) {
-      return acc;
-    }
-    individual.isSync(false);
-    const uris = Util.unique(acc);
-    const individuals_properties = uris.map((item) => {
-      const individual = new veda.IndividualModel(item);
-      if (!individual.isSync()) {
-        return individual.properties;
-      }
-    }).filter(Boolean);
-    return (individuals_properties.length ? Backend.put_individuals(veda.ticket, individuals_properties) : Promise.resolve())
-      .then(() => {
-        uris.forEach((item) => new veda.IndividualModel(item).isSync(true));
-      })
-      .then(() => template.trigger('view'))
-      .then(() => successHandler())
-      .catch(errorHandler);
-  }
-
-  /**
-   * Delete individual and embedded children individuals
-   * @param {string} parent id
-   * @return {Promise<void>}
-   */
-  function deleteHandler () {
-    return individual.delete()
-      .then(() => {
-        template.trigger('view');
-        successHandler();
-      })
-      .catch(errorHandler);
-  }
-
-  /**
-   * Recover individual and embedded children individuals
-   * @param {string} parent id
-   * @return {Promise<void>}
-   */
-  function recoverHandler () {
-    return individual.recover()
-      .then(() => {
-        template.trigger('view');
-        successHandler();
-      })
-      .catch(errorHandler);
-  }
-
-  /**
-   * Remove individual and embedded children individuals
-   * @param {string} parent id
-   * @return {Promise<void>}
-   */
-  function removeHandler (parent) {
-    return embedded.reduce((p, item) => p.then(() => item.data('remove')(individual.id)), Promise.resolve())
-      .then(() => parent === individual.id ? Promise.resolve() : individual.remove())
-      .then(() => {
-        if (!parent) {
-          successHandler();
+  const callModelMethod = function (method, parent) {
+    var returnPromise;
+    if (method == "delete" || method == "recover") {
+      returnPromise = Promise.resolve();
+    } else {
+      returnPromise = embedded.reduce(function (p, item) {
+        return p.then(function () {
+          if (typeof item.data('callModelMethod') !== 'function') {
+            return;
+          }
+          return item.data('callModelMethod')(method, individual.id);
+        });
+      }, Promise.resolve());
+    };
+    return returnPromise.then(function () {
+        if (parent === individual.id) {
+          return Promise.resolve();
+        } else {
+          return individual[method]();
         }
       })
-      .catch(errorHandler)
-      .then(() => {
+      .then(function () {
+        template.trigger('view');
+        if (method === 'reset') {
+          return;
+        }
+        if (!parent) {
+          const successMsg = new IndividualModel('v-s:SuccessBundle').load();
+          successMsg.then(function (successMsg) {
+            const notify = Notify ? new Notify() : function () {};
+            notify('success', {name: successMsg.toString()});
+          });
+        } else if (parent !== individual.id) {
+          const parentIndividual = new IndividualModel(parent);
+          parentIndividual.isSync(false);
+        }
+      })
+      .catch(function (error) {
+        const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
+        errorMsg.then(function (errorMsg) {
+          const notify = Notify ? new Notify() : function () {};
+          notify('danger', {name: errorMsg.toString()});
+        });
+        throw error;
+      });
+  };
+  template.on('save cancel delete destroy recover', function (e) {
+    e.stopPropagation();
+    if (e.type === 'cancel') {
+      callModelMethod('reset');
+    } else if (e.type === 'destroy') {
+      template.data('callModelMethod')('remove').then(function (removed) {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
-          template.empty().append(`<p class="bg-danger"><strong>${removedAlert.toString()}</strong></p>`);
+          template.empty().append('<div class="container alert alert-danger"><strong>' + removedAlert.toString() + '</strong></div>');
         });
       });
-  }
-
-  /**
-   * Show success message
-   * @return {void}
-   */
-  function successHandler () {
-    const successMsg = new IndividualModel('v-s:SuccessBundle').load();
-    successMsg.then((successMsg) => {
-      const notify = Notify ? new Notify() : function () {};
-      notify('success', {name: successMsg.toString()});
-    }).catch(console.log);
-  }
-
-  /**
-   * Show error message
-   * @param {Error} error to handle
-   * @throw {Error}
-   */
-  function errorHandler (error) {
-    const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
-    errorMsg.then((errorMsg) => {
-      const notify = Notify ? new Notify() : function () {};
-      notify('danger', {name: errorMsg.toString()});
-    }).catch(console.log);
-    throw error;
-  }
+    } else {
+      callModelMethod(e.type);
+    }
+  });
+  template.data('callModelMethod', callModelMethod);
+  template.one('remove', function () {
+    template.removeData('callModelMethod');
+  });
 
   /**
    * Individual v-s:deleted handler. Shows deleted alert.
@@ -440,7 +369,7 @@ function processTemplate (individual, container, template, mode) {
   const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) && mode === 'view' ) {
       if ( (container.prop('id') === 'main' || container.hasClass('modal-body') ) && !template.hasClass('invalid') ) {
-        new IndividualModel('v-s:InvalidAlert').load().then(function (loaded) {
+        new IndividualModel('v-s:InvalidAlert').load().then(function(loaded) {
           const alert = loaded['rdfs:label'].map(Util.formatValue).join(' ');
           const invalidAlert = $(
             `<div id="invalid-alert" class="container sheet margin-lg">
@@ -893,7 +822,7 @@ function processTemplate (individual, container, template, mode) {
  * @param {string} mode - template mode
  * @return {void}
  */
-function renderPropertyValues (about, isAbout, property_uri, propertyContainer, template, mode) {
+function renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode) {
   propertyContainer.empty();
   about.get(property_uri).map( function (value) {
     const formattedValue = Util.formatValue(value);
@@ -943,7 +872,7 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
  * @param {Boolean} toAppend - flag defining either to append or replace the relContainer's content with rendered value template
  * @return {void}
  */
-function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend) {
+function renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend) {
   return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then(function (valTemplate) {
     if (isEmbedded) {
       valTemplate.data('isEmbedded', true);
@@ -1019,7 +948,7 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
  * @param {IndividualModel} spec - Property specification to validate values against
  * @return {Object} - validation result
  */
-function validate (individual, property_uri, spec) {
+function validate(individual, property_uri, spec) {
   let result = {
     state: true,
     cause: [],
@@ -1032,7 +961,7 @@ function validate (individual, property_uri, spec) {
   if (spec.hasValue('v-ui:minCardinality')) {
     const minCardinalityState = (values.length >= spec['v-ui:minCardinality'][0] &&
     // filter empty values
-    values.length === values.filter(function (item) {
+    values.length === values.filter(function(item) {
       return (
         typeof item === 'boolean' ? true :
           typeof item === 'number' ? true : !!item
@@ -1047,7 +976,7 @@ function validate (individual, property_uri, spec) {
     const maxCardinalityState = (
       values.length <= spec['v-ui:maxCardinality'][0] &&
       // filter empty values
-      values.length === values.filter(function (item) {
+      values.length === values.filter(function(item) {
         return (
           typeof item === 'boolean' ? true :
             typeof item === 'number' ? true : !!item
