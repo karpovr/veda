@@ -685,6 +685,11 @@ function processTemplate (individual, container, template, mode) {
               !value.hasValue('v-s:parent') // do not change parent
             ) {
               value['v-s:parent'] = [about];
+              value["v-s:backwardTarget"] = [about];
+              value["v-s:backwardProperty"] = [rel_uri];
+              value["v-s:canRead"] = [true];
+              value["v-s:canUpdate"] = [true];
+              value["v-s:canDelete"] = [true];
             }
           });
         }
