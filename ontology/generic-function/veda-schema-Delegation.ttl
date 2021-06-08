@@ -480,11 +480,18 @@ v-s:RequestDelegationRegistryBlank
 #C
 v-s:Perm_DelegationUser_AllUsersGroup_C
   rdf:type v-s:PermissionStatement ;
-  v-s:permissionObject v-s:RequestDelegation ;
-  v-s:permissionObject v-s:RequestDelegation_group ;
+  v-s:permissionObject v-s:RequestDelegationUser ;
   v-s:permissionSubject cfg:AllUsersGroup ;
   v-s:canCreate "true"^^xsd:boolean ;
   rdfs:label "Все пользователи имеют право создавать Заявку на делегирование" ;
+.
+#R
+v-s:Perm_DelegationUser_AllUsersGroup_R
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:RequestDelegation_group ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:canRead "true"^^xsd:boolean ;
+  rdfs:label "Все пользователи имеют право просматривать все Заявки на делегирование" ;
 .
 #RUD
 v-s:Perm_DelegationUser_AllUsersGroup_RUD
@@ -495,7 +502,9 @@ v-s:Perm_DelegationUser_AllUsersGroup_RUD
   v-s:canUpdate "true"^^xsd:boolean ;
   v-s:canDelete "true"^^xsd:boolean ;
   rdfs:label "Все пользователи имеют право создавать Заявку на делегирование" ;
+  v-s:deleted "true"^^xsd:boolean;
 .
+
 
 #------Старая нотификация - УДАЛЕННОЕ ----------
 
