@@ -47,7 +47,8 @@ v-s:hasExamType
 v-s:hasCertificationDocumentType
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:CertificationDocument ;
-  rdfs:label "Тип документа"^^xsd:string;
+  rdfs:label "Тип документа"@ru ;
+  rdfs:label "Document type"@en ;
   rdfs:range v-s:CertificationDocumentType ;
 .
 #-----Вид документа

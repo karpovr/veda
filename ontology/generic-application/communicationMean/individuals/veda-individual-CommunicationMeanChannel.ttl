@@ -29,48 +29,48 @@ d:xfyap1sy124and8tuuwknr1gi9
   a v-s:CommunicationMeanChannel;
   rdfs:label "Skype"@ru;
   rdfs:label "Skype"@en;
-  v-s:shortLabel "s"@ru;
-  v-s:shortLabel "s"@en;
+  v-s:shortLabel "Skype"@ru;
+  v-s:shortLabel "Skype"@en;
 .
 d:o3q2gagyvfwh430io88vvb8vel
   a v-s:CommunicationMeanChannel;
   rdfs:label "Телефон"@ru;
   rdfs:label "Phone"@en;
-  v-s:shortLabel "т.раб."@ru;
-  v-s:shortLabel "ph."@en;
+  v-s:shortLabel "Телефон"@ru;
+  v-s:shortLabel "Phone"@en;
 .
 d:yv087kzlo66g0cnm7p4b79fnet
   a v-s:CommunicationMeanChannel;
   rdfs:label "WhatsApp"@ru;
   rdfs:label "WhatsApp"@en;
-  v-s:shortLabel "w"@ru;
-  v-s:shortLabel "w"@en;
+  v-s:shortLabel "WhatsApp"@ru;
+  v-s:shortLabel "WhatsApp"@en;
 .
 d:m4vg7pkvcvke9e6loqtb937jhy
   a v-s:CommunicationMeanChannel;
   rdfs:label "Факс"@ru;
   rdfs:label "Fax"@en;
-  v-s:shortLabel "ф."@ru;
-  v-s:shortLabel "fax"@en;
+  v-s:shortLabel "Факс"@ru;
+  v-s:shortLabel "Fax"@en;
 .
 d:fpxx0hw2gyea8z1dcjc6mxtlg2
   a v-s:CommunicationMeanChannel;
   rdfs:label "Мобильный телефон"@ru;
   rdfs:label "Mobile phone"@en;
-  v-s:shortLabel "т.моб."@ru;
-  v-s:shortLabel "mob.ph."@en;
+  v-s:shortLabel "Мобильный телефон"@ru;
+  v-s:shortLabel "Mobile phone"@en;
 .
 d:zhercrddg5yotsbbzr33cfoqfc
   a v-s:CommunicationMeanChannel;
   rdfs:label "Личный телефон"@ru;
   rdfs:label "Personal phone"@en;
-  v-s:shortLabel "т.лич."@ru;
-  v-s:shortLabel "pers.ph."@en;
+  v-s:shortLabel "Личный телефон"@ru;
+  v-s:shortLabel "Personal phone"@en;
 .
 d:ghk8nfvsh6ne8mdi0dhvv19c79
   a v-s:CommunicationMeanChannel;
   rdfs:label "Телеграм"@ru;
   rdfs:label "Telegram"@en;
-  v-s:shortLabel "т."@ru;
-  v-s:shortLabel "t."@en;
+  v-s:shortLabel "Телеграм"@ru;
+  v-s:shortLabel "Telegram"@en;
 .
