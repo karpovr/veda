@@ -2429,6 +2429,8 @@ v-ui:SimplifiedJournalTemplate
           if ( individual.hasValue("v-wf:isCompleted", true) ) {
             template.children().first().addClass("success");
             $(".docflow-buttons", template).remove();
+          } else if ( individual.hasValue("v-wf:isEditable", false) ) {
+            $(".docflow-buttons", template).remove();
           } else {
             var currentEmployee = veda.appointment["v-s:employee"][0];
             var currentOcuppation = veda.appointment["v-s:occupation"][0];
