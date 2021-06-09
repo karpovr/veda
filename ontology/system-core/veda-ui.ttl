@@ -2432,19 +2432,22 @@ v-ui:SimplifiedJournalTemplate
           } else if ( individual.hasValue("v-wf:isEditable", false) ) {
             $(".docflow-buttons", template).remove();
           } else {
-            var currentEmployee = veda.appointment["v-s:employee"][0];
-            var currentOcuppation = veda.appointment["v-s:occupation"][0];
-            var targetEmployee = individual["v-wf:from"][0];
-            var targetOccupation = individual["v-wf:from"][1]
-            var canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
-            var isDirectTask = individual.hasValue("v-wf:isDirectTask", true);
-            if (!canRevoke || !isDirectTask) {
-              $(".docflow-buttons", template).hide();
-            } else {
-              $(".docflow-buttons", template).show();
-              $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
-              $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
-            }
+            veda.user.isMemberOf("cfg:SuperUser").then(function(isMemberSuperUser) {
+              var currentEmployee = veda.appointment["v-s:employee"][0];
+              var currentOcuppation = veda.appointment["v-s:occupation"][0];
+              var targetEmployee = individual["v-wf:from"][0];
+              var targetOccupation = individual["v-wf:from"][1]
+              var canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
+              var isDirectTask = individual.hasValue("v-wf:isDirectTask", true);
+              if (canRevoke || isDirectTask || isMemberSuperUser) {
+                $(".docflow-buttons", template).show();
+                $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
+                $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
+              } else {
+                $(".docflow-buttons", template).remove();
+              }
+            });
+            
           }
 
           function takeDecision(takenDecision, label) {
