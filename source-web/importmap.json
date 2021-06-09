@@ -1,7 +1,8 @@
 {
   "imports": {
-    "jquery": "/node_modules/jquery/dist/jquery.min.js",
-    "jquery-ui": "/node_modules/jquery-ui-dist/jquery-ui.min.js",
+    "regenerator-runtime/runtime":"/node_modules/regenerator-runtime/runtime.js",
+    "jquery":"/node_modules/jquery/dist/jquery.min.js",
+    "jquery-ui":"/node_modules/jquery-ui-dist/jquery-ui.min.js",
     "bootstrap":"/node_modules/bootstrap/dist/js/bootstrap.min.js",
     "cropper/":"/node_modules/cropperjs/dist/",
     "moment":"/node_modules/moment/min/moment-with-locales.min.js",
@@ -18,7 +19,7 @@
     "ace":"/node_modules/ace-builds/src-min/ace.js",
     "vis":"/node_modules/vis-network/standalone/umd/vis-network.min.js",
     "jsplumb":"/node_modules/jsplumb/dist/js/jsPlumb-1.7.9-min.js",
-    "main": "/js/browser/main.js",
+    "main":"/js/browser/main.js",
     "jsworkflow":"/js/browser/veda_workflow_editor.js",
     "tablesortable":"/js/browser/table_sortable.js",
     "sha256":"/js/common/lib/sha256.js",

@@ -12,6 +12,8 @@ import '../browser/install_sw.js';
 
 import '../browser/individual_presenter.js';
 
+import "regenerator-runtime/runtime";
+
 export default veda;
 
 System.import('jquery').then(function () {
