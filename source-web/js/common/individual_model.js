@@ -18,7 +18,7 @@ export default veda.IndividualModel = IndividualModel;
  * @param {boolean} cache Use cache true / false. If true or not set, then object will be return from application cache (veda.cache). If false or individual not found in application cache - than individual will be loaded from database
  * @param {boolean} init individual with class model at load. If true or not set, then individual will be initialized with class specific model upon load.
  */
-function IndividualModel(uri, cache, init) {
+function IndividualModel (uri, cache, init) {
   // IndividualModel({...})
   if (typeof uri === 'object' && !uri['@']) {
     cache = uri.cache;
@@ -76,7 +76,7 @@ function IndividualModel(uri, cache, init) {
  * Save handler. Sets creator & creation date
  * @this IndividualModel
  */
-function beforeSaveHandler() {
+function beforeSaveHandler () {
   const now = new Date();
   const user = veda.appointment ? veda.appointment : veda.user;
 
@@ -165,7 +165,7 @@ IndividualModel.defineProperty = function (property_uri) {
  * @param {Object} value
  * @return {string|number|Date|Boolean}
  */
-function parser(value) {
+function parser (value) {
   if (value.type === 'String' && value.data) {
     const string = new String(value.data);
     if (value.lang && value.lang !== 'NONE') {
@@ -208,7 +208,7 @@ function serializer (value) {
   } else if (value instanceof Date) {
     return {
       type: 'Datetime',
-      data: value.toISOString().split('.')[0]+"Z",
+      data: value.toISOString().split('.')[0]+'Z',
     };
   } else if (value instanceof IndividualModel) {
     return {
@@ -459,7 +459,7 @@ proto.load = function () {
  * @param {boolean} isAtomic
  * @return {Promise<IndividualModel>}
  */
-proto.save = function(isAtomic) {
+proto.save = function (isAtomic) {
   // Do not save individual to server if nothing changed
   if (this.isSync()) {
     return Promise.resolve(this);
@@ -675,7 +675,7 @@ proto.addValue = function (property_uri, values, silently) {
  * @return {void}
  * @this IndividualModel
  */
-function addSingleValue(property_uri, value) {
+function addSingleValue (property_uri, value) {
   if (value != undefined) {
     const serialized = serializer(value);
     this.properties[property_uri].push(serialized);
@@ -904,7 +904,7 @@ proto.isLoaded = function (value) {
   return ( typeof value !== 'undefined' ? this._.isLoaded = value : this._.isLoaded );
 };
 
-proto.isPending = function(operation, value) {
+proto.isPending = function (operation, value) {
   return ( typeof value !== 'undefined' ? this._.pending[operation] = value : this._.pending[operation] );
 };
 
@@ -1024,7 +1024,7 @@ proto.prefetch = function (depth, ...allowed_props) {
  * @return {Promise}
  * @this IndividualModel
  */
-function prefetch(result, depth, uris, ...allowed_props) {
+function prefetch (result, depth, uris, ...allowed_props) {
   uris = Util.unique( uris );
   const toGet = uris.filter((uri) => {
     const cached = veda.cache.get(uri);
