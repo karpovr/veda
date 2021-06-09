@@ -2234,7 +2234,16 @@ v-wf:isAutoCompleted
   rdfs:domain v-wf:DecisionForm ;
   rdfs:range xsd:boolean ;
 .
-
+v-wf:isEditable
+  rdf:type rdf:Property ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Задача редактируемая"@ru ;
+  rdfs:label "Task is editable"@en ;
+  rdfs:domain v-wf:WorkItem ;
+  rdfs:domain v-wf:Process ;
+  rdfs:domain v-wf:DecisionForm ;
+  rdfs:range xsd:boolean ;
+.
 
 # --------------------------- WorkOrder --------------------------
 v-wf:WorkOrder
