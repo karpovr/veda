@@ -12,28 +12,15 @@ import '../browser/install_sw.js';
 
 import '../browser/individual_presenter.js';
 
-import "regenerator-runtime/runtime";
+import 'regenerator-runtime/runtime';
 
 export default veda;
 
-System.import('jquery').then(function () {
-  System.import('bootstrap').then(function () {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function (e) {
-      const loadIndicator = document.getElementById('load-indicator');
-      loadIndicator.style.display = 'none';
-      if (this.status == 200) {
-        const manifest = JSON.parse(xhr.response);
-        appModel.call(veda, manifest);
-        auth();
-        appPresenter();
-      } else {
-        console.log(e);
-      }
-    };
-    xhr.onerror = console.log;
-    xhr.ontimeout = console.log;
-    xhr.open('GET', './manifest');
-    xhr.send();
-  });
-});
+(async () => {
+  await System.import('jquery');
+  await System.import('bootstrap');
+  const manifest = await fetch('./manifest');
+  appModel.call(veda, manifest);
+  auth();
+  appPresenter();
+})();
