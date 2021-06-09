@@ -19,7 +19,8 @@ export default veda;
 (async () => {
   await System.import('jquery');
   await System.import('bootstrap');
-  const manifest = await fetch('./manifest');
+  const response = await fetch('./manifest');
+  const manifest = await response.json();
   appModel.call(veda, manifest);
   auth();
   appPresenter();
