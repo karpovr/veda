@@ -72,7 +72,9 @@ impl<'a> AuthWorkPlace<'a> {
         let candidate_account_ids = get_candidate_users_of_login(self.login, self.backend, self.xr);
         if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
             for account_id in &candidate_account_ids.result {
-                if self.prepare_candidate_account(account_id, &mut ticket) {
+                let (op, res) = self.prepare_candidate_account(account_id, &mut ticket);
+                if op && res == ResultCode::Ok || res != ResultCode::Ok {
+                    ticket.result = res;
                     return ticket;
                 }
             }
@@ -83,32 +85,37 @@ impl<'a> AuthWorkPlace<'a> {
         ticket
     }
 
-    fn prepare_candidate_account(&mut self, account_id: &str, ticket: &mut Ticket) -> bool {
+    fn prepare_candidate_account(&mut self, account_id: &str, ticket: &mut Ticket) -> (bool, ResultCode) {
         if let Some(mut account) = self.backend.get_individual_s(&account_id) {
             account.parse_all();
 
             let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
             if user_id.is_empty() {
                 error!("user id is null, user_indv = {}", account);
-                return false;
+                return (false, ResultCode::Ok);
             }
 
             let user_login = account.get_first_literal("v-s:login").unwrap_or_default();
             if user_login.is_empty() {
                 error!("user login {:?} not equal to requested login {}", user_login, self.login);
-                return false;
+                return (false, ResultCode::Ok);
             }
 
             if user_login.to_lowercase() != self.login.to_lowercase() {
                 error!("user login {} not equal to requested login {}", user_login, self.login);
-                return false;
+                return (false, ResultCode::Ok);
             }
 
             if let Some(mut person) = self.backend.get_individual_s(&user_id) {
                 self.get_credential(&mut account);
 
                 if !self.secret.is_empty() && self.secret.len() > 5 {
-                    return self.prepare_secret_code(ticket, &person);
+                    let res = self.prepare_secret_code(ticket, &person);
+                    return if res != ResultCode::Ok {
+                        (false, res)
+                    } else {
+                        (true, ResultCode::Ok)
+                    }
                 } else {
                     let now = Utc::now().naive_utc().timestamp();
 
@@ -125,8 +132,8 @@ impl<'a> AuthWorkPlace<'a> {
                     if is_request_new_password {
                         let res = self.request_new_password(&mut person, self.edited, &mut account);
                         if res != ResultCode::Ok {
-                            ticket.result = res;
-                            return true;
+                            //                            ticket.result = res;
+                            return (true, res);
                         }
                     }
 
@@ -135,7 +142,7 @@ impl<'a> AuthWorkPlace<'a> {
                         create_new_ticket(self.login, &user_id, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
                         self.user_stat.wrong_count_login = 0;
                         self.user_stat.last_wrong_login_date = 0;
-                        return true;
+                        return (true, ResultCode::Ok);
                     } else {
                         self.user_stat.wrong_count_login += 1;
                         self.user_stat.last_wrong_login_date = Utc::now().timestamp();
@@ -144,59 +151,53 @@ impl<'a> AuthWorkPlace<'a> {
                 }
             } else {
                 error!("user {} not found", user_id);
-                return false;
+                return (false, ResultCode::Ok);
             }
 
             warn!("user {} not pass", account.get_id());
         } else {
             error!("failed to read, uri = {}", &account_id);
         }
-        false
+        return (false, ResultCode::Ok);
     }
 
-    fn prepare_secret_code(&mut self, ticket: &mut Ticket, person: &Individual) -> bool {
+    fn prepare_secret_code(&mut self, ticket: &mut Ticket, person: &Individual) -> ResultCode {
         let old_secret = self.credential.get_first_literal("v-s:secret").unwrap_or_default();
         let now = Utc::now().naive_utc().timestamp();
 
         if old_secret.is_empty() {
             error!("update password: secret not found, user = {}", person.get_id());
-            ticket.result = ResultCode::InvalidSecret;
             remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
-            return false;
+            return ResultCode::InvalidSecret;
         }
 
         if self.secret != old_secret {
             error!("request for update password: sent secret not equal to request secret {}, user = {}", self.secret, person.get_id());
-            ticket.result = ResultCode::InvalidSecret;
             remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
-            return false;
+            return ResultCode::InvalidSecret;
         }
 
         let prev_secret_date = self.credential.get_first_datetime("v-s:SecretDateFrom").unwrap_or_default();
         if now - prev_secret_date > self.conf.secret_lifetime {
-            ticket.result = ResultCode::SecretExpired;
             error!("request new password, secret expired, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
-            return false;
+            return ResultCode::SecretExpired;
         }
 
-        if self.stored_password == self.password {
+        if self.verify_password() {
             error!("update password: password equals to previous password, reject, user = {}", person.get_id());
-            ticket.result = ResultCode::NewPasswordIsEqualToOld;
             remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
-            return false;
+            return ResultCode::NewPasswordIsEqualToOld;
         }
 
         if self.password == EMPTY_SHA256_HASH {
             error!("update password: password is empty, reject, user = {}", person.get_id());
-            ticket.result = ResultCode::EmptyPassword;
             remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
-            return false;
+            return ResultCode::EmptyPassword;
         }
 
         if (now - self.edited > 0) && now - self.edited < self.conf.success_pass_change_lock_period {
-            ticket.result = ResultCode::Locked;
             error!("request new password: too many requests, login = {}, password = {}, secret = {}", self.login, self.password, self.secret);
-            return false;
+            return ResultCode::Locked;
         }
 
         // update password
@@ -208,14 +209,13 @@ impl<'a> AuthWorkPlace<'a> {
 
         let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
         if res.result != ResultCode::Ok {
-            ticket.result = ResultCode::AuthenticationFailed;
             error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
-            false
+            ResultCode::AuthenticationFailed
         } else {
             create_new_ticket(self.login, &person.get_id(), self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
             self.user_stat.attempt_change_pass = 0;
             info!("updated password, password = {}, user = {}", self.password, person.get_id());
-            true
+            ResultCode::Ok
         }
     }
 
