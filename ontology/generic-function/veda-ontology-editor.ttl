@@ -1263,6 +1263,7 @@ v-s:MembershipRegistry
   v-fs:searchBlankTemplate v-s:MembershipRegistryTemplate ;
   v-fs:searchResultTemplate v-s:MembershipRegistryResultTemplate ;
   v-fs:searchOnLoad true;
+  v-fs:queryLanguage "sql"^^xsd:string;
 .
 v-s:MembershipRegistryBlank
   rdf:type v-fc:Blank ;
@@ -1291,6 +1292,7 @@ v-s:PermissionStatementRegistry
   v-fs:searchBlankTemplate v-s:PermissionStatementRegistryTemplate ;
   v-fs:searchResultTemplate v-s:PermissionStatementRegistryResultTemplate ;
   v-fs:searchOnLoad true;
+  v-fs:queryLanguage "sql"^^xsd:string;
 .
 v-s:PermissionStatementRegistryBlank
   rdf:type v-fc:Blank ;
