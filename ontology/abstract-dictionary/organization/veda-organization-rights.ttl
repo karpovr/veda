@@ -71,25 +71,9 @@ v-s:OrganizationsWithLimitedClassTypes
 .
 v-s:OrganizationsWithoutLimitedClassTypes
   rdf:type v-s:Group ;
-  rdfs:label "Компании с потенциальным доступом к просмотру документов" ;
 .
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ------------------------------------------------------------ ВКЛЮЧЕНИЯ В ГРУППЫ --
+# ------------------------------------------------------------ СТАРЫЕ ПРАВА --
 
 v-s:Organization_Environment_membership
   rdf:type v-s:Membership ;

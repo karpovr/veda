@@ -17,77 +17,95 @@
 # ------------------------------------------------------------ ОКРУЖЕНИЯ --
 v-s:Contractor_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение Contractor - схема и индивиды" ;
+  rdfs:label "Окружение Contractor - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorProfile - схема и индивиды" ;
+  rdfs:label "Окружение ContractorProfile - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryRequest_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorCategoryRequest - схема и индивиды" ;
+  rdfs:label "Окружение ContractorCategoryRequest - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionSecurity_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorCategoryDecisionSecurity - схема и индивиды" ;
+  rdfs:label "Окружение ContractorCategoryDecisionSecurity - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionLegal_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorCategoryDecisionLegal - схема и индивиды" ;
+  rdfs:label "Окружение ContractorCategoryDecisionLegal - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionFinancial_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorCategoryDecisionFinancial - схема и индивиды" ;
+  rdfs:label "Окружение ContractorCategoryDecisionFinancial - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecision_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorCategoryDecision - схема и индивиды" ;
+  rdfs:label "Окружение ContractorCategoryDecision - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_EnvironmentDict
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorProfile справочники - схема и индивиды" ;
+  rdfs:label "Окружение ContractorProfile справочники - схема и индивид " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_EnvironmentDictVedaIndividual
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorProfile справочники Veda - индивиды" ;
+  rdfs:label "Окружение ContractorProfile справочники Veda - индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorLock_Environment
   rdf:type v-s:Group ;
-  rdfs:label "Окружение ContractorLock - схема и индивиды" ;
+  rdfs:label "Окружение ContractorLock - схема и индивиды " ;
+  v-s:deleted true;
 .
 
 # ------------------------------------------------------------ ГРУППЫ --
 v-s:Contractor_BaseUser
   rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи Contractor" ;
+  rdfs:label "Основные пользователи Contractor " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_BaseUser
   rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи ContractorProfile. Создание. Редактирование." ;
+  rdfs:label "Основные пользователи ContractorProfile. Создание. Редактирование. " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfileAll_ReadUser
   rdf:type v-s:Group ;
-  rdfs:label "Пользователи с правами просмотра всех ContractorProfile." ;
+  rdfs:label "Пользователи с правами просмотра всех ContractorProfile. " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionSecurity_BaseUser
   rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи ContractorCategoryDecisionSecurity. Создание. Редактирование. Просмотр" ;
+  rdfs:label "Основные пользователи ContractorCategoryDecisionSecurity. Создание. Редактирование. Просмотр " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionLegal_BaseUser
   rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи ContractorCategoryDecision. Создание. Редактирование. Просмотр" ;
+  rdfs:label "Основные пользователи ContractorCategoryDecision. Создание. Редактирование. Просмотр " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionFinancial_BaseUser
   rdf:type v-s:Group ;
-  rdfs:label "Основные пользователи ContractorCategoryDecisionFinancial. Создание. Редактирование. Просмотр" ;
+  rdfs:label "Основные пользователи ContractorCategoryDecisionFinancial. Создание. Редактирование. Просмотр " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionFullAll_ReadUser
   rdf:type v-s:Group ;
-  rdfs:label "Пользователи с правами просмотра всех, всех видов ContractorCategoryDecision. Просмотр" ;
+  rdfs:label "Пользователи с правами просмотра всех, всех видов ContractorCategoryDecision. Просмотр " ;
+  v-s:deleted true;
 .
 v-s:ContractorLock_Admin
   rdf:type v-s:Group ;
-  rdfs:label "Администраторы v-s:ContractorLock" ;
+  rdfs:label "Администраторы v-s:ContractorLock " ;
+  v-s:deleted true;
 .
 
 # ------------------------------------------------------------ ПРАВА --
@@ -103,7 +121,8 @@ v-s:Organization_permission0
   v-s:permissionSubject v-s:ContractorCategoryRequestAll_ReadUser ;
    v-s:permissionSubject v-s:ContractorCategoryDecisionAll_ReadUser ;
   v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "R. Все пользователи Organization. Окружение Organization справочники, справочники Veda" ;
+  rdfs:label "R. Все пользователи Organization. Окружение Organization справочники, справочники Veda " ;
+  v-s:deleted true
 .
 
 v-s:Organization_permission1
@@ -122,7 +141,8 @@ v-s:Organization_permission1
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
   v-s:canDelete "true"^^xsd:boolean ;
-  rdfs:label "CRUD. Администраторы Organization. Окружение Organization" ;
+  rdfs:label "CRUD. Администраторы Organization. Окружение Organization " ;
+  v-s:deleted true;
 .
 v-s:Organization_permission2
   rdf:type v-s:PermissionStatement ;
@@ -132,7 +152,8 @@ v-s:Organization_permission2
   v-s:permissionSubject v-s:Organization_BaseUser ;
   v-s:permissionSubject v-s:ContractorProfile_BaseUser ;
   v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "R. Пользователи с правами просмотра всех Organization. Все окружение Organization" ;
+  rdfs:label "R. Пользователи с правами просмотра всех Organization. Все окружение Organization " ;
+  v-s:deleted true;
 .
 
 v-s:Contractor_permission1
@@ -141,7 +162,8 @@ v-s:Contractor_permission1
   v-s:permissionSubject v-s:Contractor_BaseUser ;
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
-  rdfs:label "RU. Основные пользователи Contractor. Окружение Contractor" ;
+  rdfs:label "RU. Основные пользователи Contractor. Окружение Contractor " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_permission3
   rdf:type v-s:PermissionStatement ;
@@ -152,7 +174,8 @@ v-s:ContractorProfile_permission3
   v-s:canCreate "true"^^xsd:boolean ;
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
-  rdfs:label "CRU. Основные пользователи ContractorProfile. Окружение ContractorProfile." ;
+  rdfs:label "CRU. Основные пользователи ContractorProfile. Окружение ContractorProfile. " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_permission4
   rdf:type v-s:PermissionStatement ;
@@ -163,7 +186,8 @@ v-s:ContractorProfile_permission4
   v-s:permissionSubject v-s:ContractorProfileAll_ReadUser ;
   v-s:permissionSubject v-s:ContractorProfile_BaseUser ;
   v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "R. Пользователи с правами просмотра всех ContractorProfile. Окружение ContractorProfile" ;
+  rdfs:label "R. Пользователи с правами просмотра всех ContractorProfile. Окружение ContractorProfile " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionSecurity_permission62
   rdf:type v-s:PermissionStatement ;
@@ -173,7 +197,8 @@ v-s:ContractorCategoryDecisionSecurity_permission62
   v-s:canCreate "true"^^xsd:boolean ;
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
-  rdfs:label "CRU. Основные пользователи ContractorCategoryDecisionSecurity. Окружение ContractorCategoryDecision" ;
+  rdfs:label "CRU. Основные пользователи ContractorCategoryDecisionSecurity. Окружение ContractorCategoryDecision " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionLegal_permission63
   rdf:type v-s:PermissionStatement ;
@@ -183,7 +208,8 @@ v-s:ContractorCategoryDecisionLegal_permission63
   v-s:canCreate "true"^^xsd:boolean ;
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
-  rdfs:label "CRU. Основные пользователи ContractorCategoryDecisionLegal. Окружение ContractorCategoryDecision" ;
+  rdfs:label "CRU. Основные пользователи ContractorCategoryDecisionLegal. Окружение ContractorCategoryDecision " ;
+  v-s:deleted true;
 .
 
 v-s:ContractorCategoryDecisionFinancial_permission65
@@ -194,7 +220,8 @@ v-s:ContractorCategoryDecisionFinancial_permission65
   v-s:canCreate "true"^^xsd:boolean ;
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
-  rdfs:label "CRU. Основные пользователи ContractorCategoryDecisionFinancial. Окружение ContractorCategoryDecisionFinancial" ;
+  rdfs:label "CRU. Основные пользователи ContractorCategoryDecisionFinancial. Окружение ContractorCategoryDecisionFinancial " ;
+  v-s:deleted true;
 .
 
 v-s:ContractorCategoryDecision_permission8
@@ -214,7 +241,8 @@ v-s:ContractorCategoryDecision_permission8
   v-s:permissionSubject v-s:ContractorCategoryDecisionFinancial_BaseUser ;
   v-s:permissionSubject v-s:ContractorCategoryDecisionFullAll_ReadUser ;
   v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "R. Пользователи с правами просмотра Решения по согласованию контрагента ContractorCategoryDecisionFull. Окружение ContractorCategoryDecisionFull" ;
+  rdfs:label "R. Пользователи с правами просмотра Решения по согласованию контрагента ContractorCategoryDecisionFull. Окружение ContractorCategoryDecisionFull " ;
+  v-s:deleted true;
 .
 
 v-s:ContractorLock_permission1
@@ -225,7 +253,8 @@ v-s:ContractorLock_permission1
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
   v-s:canDelete "true"^^xsd:boolean ;
-  rdfs:label "CRUD. Администраторы ContractorLock. Окружение ContractorLock" ;
+  rdfs:label "CRUD. Администраторы ContractorLock. Окружение ContractorLock " ;
+  v-s:deleted true;
 .
 
 # ------------------------------------------------------------ ВКЛЮЧЕНИЯ В ГРУППЫ --
@@ -235,7 +264,8 @@ v-s:Contractor_Environment_membership
   v-s:memberOf v-s:Contractor_Environment ;
   v-s:resource v-s:Contractor ;
   v-s:resource v-s:Contractor_group ;
-  rdfs:label "Члены группы Окружение Contractor - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение Contractor - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_Environment_membership
   rdf:type v-s:Membership ;
@@ -244,7 +274,8 @@ v-s:ContractorProfile_Environment_membership
   v-s:resource v-s:ContractorProfile_group ;
   v-s:resource v-s:ContractorProfileFile ;
   v-s:resource v-s:ContractorProfileFile_group ;
-  rdfs:label "Члены группы Окружение ContractorProfile - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorProfile - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryRequest_Environment_membership
   rdf:type v-s:Membership ;
@@ -252,35 +283,40 @@ v-s:ContractorCategoryRequest_Environment_membership
   v-s:resource v-s:ContractorCategoryRequest ;
   v-s:resource v-s:ContractorCategoryRequest_group ;
   v-s:resource v-s:Price ;
-  rdfs:label "Члены группы Окружение ContractorCategoryRequest - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorCategoryRequest - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecision_Environment_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:ContractorCategoryDecision_Environment ;
   v-s:resource v-s:ContractorCategoryDecision ;
   v-s:resource v-s:ContractorCategoryDecision_group ;
-  rdfs:label "Члены группы Окружение ContractorCategoryDecision - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorCategoryDecision - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionSecurity_Environment_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:ContractorCategoryDecisionSecurity_Environment ;
   v-s:resource v-s:ContractorCategoryDecisionSecurity ;
   v-s:resource v-s:ContractorCategoryDecisionSecurity_group ;
-  rdfs:label "Члены группы Окружение ContractorCategoryDecisionSecurity - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorCategoryDecisionSecurity - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionLegal_Environment_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:ContractorCategoryDecisionLegal_Environment ;
   v-s:resource v-s:ContractorCategoryDecisionLegal ;
   v-s:resource v-s:ContractorCategoryDecisionLegal_group ;
-  rdfs:label "Члены группы Окружение ContractorCategoryDecisionLegal - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorCategoryDecisionLegal - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorCategoryDecisionFinancial_Environment_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:ContractorCategoryDecisionFinancial_Environment ;
   v-s:resource v-s:ContractorCategoryDecisionFinancial ;
   v-s:resource v-s:ContractorCategoryDecisionFinancial_group ;
-  rdfs:label "Члены группы Окружение ContractorCategoryDecisionFinancial - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorCategoryDecisionFinancial - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_EnvironmentDict_membership
   rdf:type v-s:Membership ;
@@ -288,7 +324,8 @@ v-s:ContractorProfile_EnvironmentDict_membership
   v-s:resource v-s:ContractorCategory_group ;
   v-s:resource v-s:ContractorInteractionCategory_group ;
   v-s:resource v-s:ContractActivityKind_group ;
-  rdfs:label "Члены группы Окружение ContractorProfile - справочники - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorProfile - справочники - схема и индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorProfile_EnvironmentDictVedaIndividual_membership
   rdf:type v-s:Membership ;
@@ -298,14 +335,16 @@ v-s:ContractorProfile_EnvironmentDictVedaIndividual_membership
   v-s:resource v-s:Currency_group ;
   v-s:resource v-s:PaymentConditions_group ;
   v-s:resource v-s:DeliveryConditions_group ;
-  rdfs:label "Члены группы Окружение ContractorProfile - справочники Veda - индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorProfile - справочники Veda - индивиды " ;
+  v-s:deleted true;
 .
 v-s:ContractorLock_Environment_membership
   rdf:type v-s:Membership ;
   v-s:memberOf v-s:ContractorLock_Environment ;
   v-s:resource v-s:ContractorLock ;
   v-s:resource v-s:ContractorLock_group ;
-  rdfs:label "Члены группы Окружение ContractorLock - схема и индивиды" ;
+  rdfs:label "Члены группы Окружение ContractorLock - схема и индивиды " ;
+  v-s:deleted true;
 .
 #----пока здесь. нужно переписать права на точечные permission
 v-s:Organization_BaseUser_permission
@@ -316,13 +355,15 @@ v-s:Organization_BaseUser_permission
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
   rdfs:label "CRU. Основные пользователи Organization. Окружение Organization справочники, справочники Veda " ;
+  v-s:deleted true;
 .
 v-s:Organization_ReadUser_permission
   rdf:type v-s:PermissionStatement ;
   v-s:permissionObject v-s:Organization_Environment ;
   v-s:permissionSubject v-s:Organization_ReadUser ;
   v-s:canRead "true"^^xsd:boolean ;
-  rdfs:label "R. Все пользователи Organization. Окружение Organization" ;
+  rdfs:label "R. Все пользователи Organization. Окружение Organization " ;
+  v-s:deleted true;
 .
 v-s:Organization_Admin_permission
   rdf:type v-s:PermissionStatement ;
@@ -332,32 +373,38 @@ v-s:Organization_Admin_permission
   v-s:canRead "true"^^xsd:boolean ;
   v-s:canUpdate "true"^^xsd:boolean ;
   v-s:canDelete "true"^^xsd:boolean ;
-  rdfs:label "CRUD. Администраторы Organization. Окружение Organization" ;
+  rdfs:label "CRUD. Администраторы Organization. Окружение Organization " ;
+  v-s:deleted true;
 .
 v-s:Organization_Admin
   rdf:type v-s:Group ;
   rdfs:label "Администраторы v-s:Organization " ;
+  v-s:deleted true;
 .
 v-s:Organization_BaseUser
   rdf:type v-s:Group ;
   rdfs:label "Основные пользователи Organization " ;
+  v-s:deleted true;
 .
 v-s:Organization_ReadUser
   rdf:type v-s:Group ; 
   rdfs:label "Пользователи с правами просмотра всех Organization " ;
+  v-s:deleted true;
 .
 v-s:Organization_Environment
   rdf:type v-s:Group ;
   rdfs:label "Окружение Organization - схема и индивиды " ;
- .
-v-s:OrganizationStructure_Environment
-  rdf:type v-s:Group ;
-  rdfs:label "Окружение OrganizationStructure - схема и индивиды " ;
+  v-s:deleted true;
 .
-
 v-s:OrganizationStructure_BaseUser
   rdf:type v-s:Group ;
   rdfs:label "Основные пользователи OrganizationStructure " ;
+  v-s:deleted true;
+.
+v-s:OrganizationStructure_Environment
+  rdf:type v-s:Group ;
+  rdfs:label "Окружение OrganizationStructure - схема и индивиды " ;
+  v-s:deleted true;
 .
 
 v-s:OrganizationStructure_BaseUser_permission
@@ -367,4 +414,7 @@ v-s:OrganizationStructure_BaseUser_permission
   v-s:canCreate "true"^^xsd:boolean ;
   #v-s:canRead "true"^^xsd:boolean ;
   rdfs:label "CR. Основные пользователи OrganizationStructure. Окружение OrganizationStructure " ;
+  v-s:deleted true;
 .
+
+
