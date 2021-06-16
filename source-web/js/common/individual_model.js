@@ -512,40 +512,29 @@ proto.reset = function (original) {
    * @param {Object} original
    * @return {void}
    */
-  const processOriginal = (original) => {
+  const mergeOriginal = (original) => {
     this.original = JSON.stringify(original);
-    const this_property_uris = Object.keys(this.properties);
     const original_property_uris = Object.keys(original);
-    const union = Util.unique( this_property_uris.concat(original_property_uris) );
-    union.forEach((property_uri) => {
-      let modified = false;
-      if (property_uri === '@') {
-        return;
-      }
-      if (!this.properties[property_uri]) {
-        this.properties[property_uri] = original[property_uri];
-        modified = true;
-      } else if (!original[property_uri]) {
-        delete this.properties[property_uri];
-        modified = true;
-      } else {
-        const currentSum = JSON.stringify(this.properties[property_uri]).split('').reduce(function (acc, char) {
-          return acc += char.charCodeAt(0);
-        }, 0);
-        const originalSum = JSON.stringify(original[property_uri]).split('').reduce(function (acc, char) {
-          return acc += char.charCodeAt(0);
-        }, 0);
-        if (currentSum !== originalSum) {
-          this.properties[property_uri] = original[property_uri];
-          modified = true;
-        }
-      }
-      if (modified) {
+    if (this.isSync() || !this.isLoaded()) {
+      this.properties = original;
+      original_property_uris.forEach((property_uri) => {
+        if (property_uri === '@') return;
         const values = this.get(property_uri);
         this.trigger('propertyModified', property_uri, values);
         this.trigger(property_uri, values);
+      });
+    } else {
+      const delta = Util.diff(this.properties, original);
+      // Add missing properties
+      for (const property_uri of Object.keys(delta.missing)) {
+        this[property_uri] = original[property_uri].map(parser);
       }
-    });
+      // Add missing object values
+      for (const property_uri of Object.keys(delta.differ)) {
+        const missing_object_values = original[property_uri].map(parser).filter((value) => !this.hasValue(property_uri, value) && value instanceof IndividualModel);
+        this.addValue(property_uri, missing_object_values);
+      }
+    }
   };
 
   if ( this.isResetting() && typeof window !== 'undefined' ) {
@@ -556,7 +545,7 @@ proto.reset = function (original) {
       return this.trigger('afterReset');
     }
     const promise = (original ? Promise.resove(original) : Backend.reset_individual(veda.ticket, this.id))
-      .then(processOriginal)
+      .then(mergeOriginal)
       .then(() => {
         this.isResetting(false);
         this.isNew(false);
