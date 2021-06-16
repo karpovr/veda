@@ -523,6 +523,8 @@ proto.reset = function (original) {
         this.trigger('propertyModified', property_uri, values);
         this.trigger(property_uri, values);
       });
+      this.isSync(true);
+      this.isLoaded(true);
     } else {
       const delta = Util.diff(this.properties, original);
       // Add missing properties
@@ -548,9 +550,6 @@ proto.reset = function (original) {
       .then(mergeOriginal)
       .then(() => {
         this.isResetting(false);
-        this.isNew(false);
-        this.isSync(true);
-        this.isLoaded(true);
         return this.trigger('afterReset');
       })
       .catch((error) => {
