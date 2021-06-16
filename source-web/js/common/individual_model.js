@@ -506,7 +506,7 @@ proto.save = function (isAtomic) {
  * @param {Object} original
  * @return {Promise<IndividualModel>}
  */
-proto.reset = function (original) {
+proto.reset = function (forced) {
   /**
    * Merge original from DB with local changes
    * @param {Object} original
@@ -514,10 +514,12 @@ proto.reset = function (original) {
    */
   const mergeOriginal = (original) => {
     this.original = JSON.stringify(original);
-    const original_property_uris = Object.keys(original);
-    if (this.isSync() || !this.isLoaded()) {
+    if (forced || this.isSync() || !this.isLoaded()) {
+      const property_uris = Object.keys(this.properties);
+      const original_property_uris = Object.keys(original);
+      const combined_property_uris = Util.unique(property_uris.concat(original_property_uris));
       this.properties = original;
-      original_property_uris.forEach((property_uri) => {
+      combined_property_uris.forEach((property_uri) => {
         if (property_uri === '@') return;
         const values = this.get(property_uri);
         this.trigger('propertyModified', property_uri, values);
@@ -546,7 +548,7 @@ proto.reset = function (original) {
     if (this.isNew()) {
       return this.trigger('afterReset');
     }
-    const promise = (original ? Promise.resove(original) : Backend.reset_individual(veda.ticket, this.id))
+    const promise = Backend.reset_individual(veda.ticket, this.id)
       .then(mergeOriginal)
       .then(() => {
         this.isResetting(false);

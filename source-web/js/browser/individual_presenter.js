@@ -284,7 +284,7 @@ function processTemplate (individual, container, template, mode) {
       return acc;
     }
     const uris = Util.unique(acc);
-    return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset()), Promise.resolve())
+    return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset(true)), Promise.resolve())
       .then(() => template.trigger('view'))
       .catch(errorHandler);
   }
