@@ -109,13 +109,12 @@ v-s:CommentsTemplate
     var commentTemplate = $(this).closest("[resource]"),
         targetComment = new veda.IndividualModel( commentTemplate.attr("resource") ),
         cntr = $("#new-reply", commentTemplate).first().empty(),
-        _class = new veda.IndividualModel("v-s:Comment"),
-        tmpl = new veda.IndividualModel("v-s:SingleCommentTemplate"),
+        tmpl = "v-s:SingleCommentTemplate",
         reply = new veda.IndividualModel();
-    reply["rdf:type"] = [_class];
-    reply["v-s:backwardTarget"] = [targetComment];
-    reply["v-s:backwardProperty"] = [new veda.IndividualModel("v-s:hasComment")];
-    reply["v-s:canRead"] = [ true ];
+    reply["rdf:type"] = "v-s:Comment";
+    reply["v-s:backwardTarget"] = targetComment;
+    reply["v-s:backwardProperty"] = "v-s:hasComment";
+    reply["v-s:canRead"] = true;
     reply.present(cntr, tmpl, "edit");
     reply.one("afterSave beforeReset", function () {
       cntr.empty();
@@ -124,7 +123,7 @@ v-s:CommentsTemplate
 
   template.on("click", "#edit-comment.action", function (e) {
     e.preventDefault();
-    var tmpl = new veda.IndividualModel("v-s:SingleCommentTemplate"),
+    var tmpl = "v-s:SingleCommentTemplate",
         commentTemplate = $(this).closest("[resource]"),
         comment = new veda.IndividualModel( commentTemplate.attr("resource") ),
         cntr = $("#new-reply", commentTemplate).first().empty(),

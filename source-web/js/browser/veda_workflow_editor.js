@@ -1099,6 +1099,7 @@ jsWorkflow.ready(function () {
 
       return instance;
     });
+    return instance;
   };
 });
 
