@@ -122,11 +122,11 @@ proto.set = function (property_uri, values, silently) {
     }
     if ( !silently ) {
       values = this.get(property_uri);
-      this.trigger('propertyModified', property_uri, values);
-      this.trigger(property_uri, values);
+      return this.trigger('propertyModified', property_uri, values)
+        .then(() => this.trigger(property_uri, values));
     }
   }
-  return this;
+  return Promise.resolve(this);
 };
 
 /**
@@ -503,7 +503,7 @@ proto.save = function (isAtomic) {
 
 /**
  * Reset current individual to database
- * @param {Object} original
+ * @param {Boolean} forced
  * @return {Promise<IndividualModel>}
  */
 proto.reset = function (forced) {
@@ -512,32 +512,29 @@ proto.reset = function (forced) {
    * @param {Object} original
    * @return {void}
    */
-  const mergeOriginal = (original) => {
-    this.original = JSON.stringify(original);
+  const mergeServerState = (server_state) => {
+    this.original = JSON.stringify(server_state);
+    const delta = Util.diff(this.properties, server_state);
     if (forced || this.isSync() || !this.isLoaded()) {
-      const property_uris = Object.keys(this.properties);
-      const original_property_uris = Object.keys(original);
-      const combined_property_uris = Util.unique(property_uris.concat(original_property_uris));
-      this.properties = original;
-      combined_property_uris.forEach((property_uri) => {
-        if (property_uri === '@') return;
-        const values = this.get(property_uri);
-        this.trigger('propertyModified', property_uri, values);
-        this.trigger(property_uri, values);
-      });
+      this.properties = server_state;
+      this.isNew(false);
       this.isSync(true);
       this.isLoaded(true);
+      return Promise.all(Object.keys(delta.added).concat(Object.keys(delta.differ), Object.keys(delta.missing)).map((property_uri) => {
+        const values = this.get(property_uri);
+        return this.trigger('propertyModified', property_uri, values).then(() => this.trigger(property_uri, values));
+      }));
     } else {
-      const delta = Util.diff(this.properties, original);
       // Add missing properties
-      for (const property_uri of Object.keys(delta.missing)) {
-        this[property_uri] = original[property_uri].map(parser);
-      }
-      // Add missing object values
-      for (const property_uri of Object.keys(delta.differ)) {
-        const missing_object_values = original[property_uri].map(parser).filter((value) => !this.hasValue(property_uri, value) && value instanceof IndividualModel);
-        this.addValue(property_uri, missing_object_values);
-      }
+      return Promise.all(Object.keys(delta.missing).map((property_uri) => {
+        return this.set(property_uri, server_state[property_uri].map(parser));
+      })).then(() => {
+        // Add missing object values
+        return Promise.all(Object.keys(delta.differ).map((property_uri) => {
+          const missing_object_values = server_state[property_uri].map(parser).filter((value) => !this.hasValue(property_uri, value) && value instanceof IndividualModel);
+          return this.addValue(property_uri, missing_object_values);
+        }));
+      });
     }
   };
 
@@ -549,14 +546,14 @@ proto.reset = function (forced) {
       return this.trigger('afterReset');
     }
     const promise = Backend.reset_individual(veda.ticket, this.id)
-      .then(mergeOriginal)
+      .then(mergeServerState)
       .then(() => {
         this.isResetting(false);
         return this.trigger('afterReset');
       })
       .catch((error) => {
         this.isResetting(false);
-        console.log('reset individual error', this.id, error);
+        console.log('reset individual error', this.id, error.stack);
         throw error;
       });
     return this.isResetting(promise);
@@ -570,7 +567,7 @@ proto.reset = function (forced) {
 proto.delete = function () {
   return this.trigger('beforeDelete').then(() => {
     if ( this.isNew() ) {
-      return this.trigger('afterDelete');
+      return;
     }
     this['v-s:deleted'] = [true];
     this['rdf:type'] = this['rdf:type'].concat(new veda.IndividualModel('v-s:Deletable'));
@@ -588,7 +585,7 @@ proto.remove = function () {
       veda.cache.remove(this.id);
     }
     if ( this.isNew() ) {
-      return this.trigger('afterRemove');
+      return;
     }
     return Backend.remove_individual(veda.ticket, this.id);
   }).then(() => this.trigger('afterRemove'));
@@ -641,7 +638,7 @@ proto.hasValue = function (property_uri, value) {
  */
 proto.addValue = function (property_uri, values, silently) {
   if (typeof values === 'undefined' || values === null) {
-    return this;
+    return Promise.resolve(this);
   }
   this.properties[property_uri] = this.properties[property_uri] || [];
   if ( Array.isArray(values) ) {
@@ -652,10 +649,10 @@ proto.addValue = function (property_uri, values, silently) {
   this.isSync(false);
   if ( !silently ) {
     values = this.get(property_uri);
-    this.trigger('propertyModified', property_uri, values);
-    this.trigger(property_uri, values);
+    return this.trigger('propertyModified', property_uri, values)
+      .then(() => this.trigger(property_uri, values));
   }
-  return this;
+  return Promise.resolve(this);
 };
 
 /**
@@ -681,7 +678,7 @@ function addSingleValue (property_uri, value) {
  */
 proto.removeValue = function (property_uri, values, silently) {
   if (!this.properties[property_uri] || !this.properties[property_uri].length || typeof values === 'undefined' || values === null) {
-    return this;
+    return Promise.resolve(this);
   }
   if ( Array.isArray(values) ) {
     values.forEach((value) => removeSingleValue.call(this, property_uri, value));
@@ -691,10 +688,10 @@ proto.removeValue = function (property_uri, values, silently) {
   this.isSync(false);
   if ( !silently ) {
     values = this.get(property_uri);
-    this.trigger('propertyModified', property_uri, values);
-    this.trigger(property_uri, values);
+    return this.trigger('propertyModified', property_uri, values)
+      .then(() => this.trigger(property_uri, values));
   }
-  return this;
+  return Promise.resolve(this);
 };
 
 /**
@@ -722,7 +719,7 @@ function removeSingleValue (property_uri, value) {
  */
 proto.toggleValue = function (property_uri, values, silently) {
   if (typeof values === 'undefined' || values === null) {
-    return this;
+    return Promise.resolve(this);
   }
   this.properties[property_uri] = this.properties[property_uri] || [];
   if ( Array.isArray(values) ) {
@@ -733,10 +730,10 @@ proto.toggleValue = function (property_uri, values, silently) {
   this.isSync(false);
   if ( !silently ) {
     values = this.get(property_uri);
-    this.trigger('propertyModified', property_uri, values);
-    this.trigger(property_uri, values);
+    return this.trigger('propertyModified', property_uri, values)
+      .then(() => this.trigger(property_uri, values));
   }
-  return this;
+  return Promise.resolve(this);
 };
 
 /**
@@ -763,17 +760,17 @@ function toggleSingleValue (property_uri, value) {
  */
 proto.clearValue = function (property_uri, silently) {
   if (!this.properties[property_uri] || !this.properties[property_uri].length) {
-    return this;
+    return Promise.resolve(this);
   } else {
     delete this.properties[property_uri];
     this.isSync(false);
     if ( !silently ) {
       const empty = [];
-      this.trigger('propertyModified', property_uri, empty);
-      this.trigger(property_uri, empty);
+      return this.trigger('propertyModified', property_uri, empty)
+        .then(() => this.trigger(property_uri, empty));
     }
   }
-  return this;
+  return Promise.resolve(this);
 };
 
 /**

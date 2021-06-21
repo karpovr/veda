@@ -317,6 +317,7 @@ function processTemplate (individual, container, template, mode) {
           const individual = new veda.IndividualModel(props['@']);
           individual.isNew(false);
           individual.isSync(true);
+          individual.isLoaded(true);
         });
       })
       .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
