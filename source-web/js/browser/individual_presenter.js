@@ -298,7 +298,9 @@ function processTemplate (individual, container, template, mode) {
   function saveHandler (parent, acc) {
     acc = acc || [];
     acc = embedded.reduce((acc, item) => item.data('save')(individual.id, acc), acc);
-    acc.push(individual.id);
+    if (parent !== individual.id) {
+      acc.push(individual.id);
+    }
     if (parent) {
       return acc;
     }
@@ -663,18 +665,23 @@ function processTemplate (individual, container, template, mode) {
       const propertyModifiedHandler = function (values, limit_param) {
         limit = limit_param || limit;
         relContainer.empty();
-        const templatesPromises = [];
-        let i = 0; let value;
-        while ( i < limit && (value = values[i]) ) {
-          templatesPromises.push( renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false) );
-          i++;
-        }
-        return Promise.all(templatesPromises).then(function (renderedTemplates) {
-          relContainer.append(renderedTemplates);
-          if (limit < values.length && more) {
-            relContainer.append( '<a class=\'more badge\'>&darr; ' + (values.length - limit) + '</a>' );
-          }
-        });
+
+        return values.reduce((p, value, i) => {
+          return p.then((templates) => {
+            if (i < limit) {
+              return renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false)
+                .then((template) => templates.concat(template));
+            } else {
+              return templates;
+            }
+          });
+        }, Promise.resolve([]))
+          .then((templates) => {
+            relContainer.append(templates);
+            if (limit < values.length && more) {
+              relContainer.append( '<a class=\'more badge\'>&darr; ' + (values.length - limit) + '</a>' );
+            }
+          });
       };
 
       const embeddedHandler = function (values) {
@@ -686,11 +693,11 @@ function processTemplate (individual, container, template, mode) {
               !value.hasValue('v-s:parent') // do not change parent
             ) {
               value['v-s:parent'] = [about];
-              value["v-s:backwardTarget"] = [about];
-              value["v-s:backwardProperty"] = [rel_uri];
-              value["v-s:canRead"] = [true];
-              value["v-s:canUpdate"] = [true];
-              value["v-s:canDelete"] = [true];
+              value['v-s:backwardTarget'] = [about];
+              value['v-s:backwardProperty'] = [rel_uri];
+              value['v-s:canRead'] = [true];
+              value['v-s:canUpdate'] = [true];
+              value['v-s:canDelete'] = [true];
             }
           });
         }
