@@ -51,8 +51,6 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
 
   return this.load()
     .then(function (individual) {
-      const offlineTemplate = '<h5 class=\'container sheet text-center text-muted\'>Нет связи с сервером. Этот объект сейчас недоступен / Server disconnected. This object is not available now</h5>';
-
       if (template) {
         if (template instanceof IndividualModel) {
         // if template is uri
@@ -68,7 +66,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
           return renderTemplate(individual, container, templateString, mode, extra, toAppend);
         }
         return template.load().then(function (template) {
-          const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+          const templateString = template['v-ui:template'][0];
           if (reg_file.test(templateString)) {
             return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
               return renderTemplate(individual, container, templateString, mode, extra, toAppend);
@@ -86,7 +84,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
             if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
               throw new Error('Template type violation!');
             }
-            const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+            const templateString = template['v-ui:template'][0].toString();
             if (reg_file.test(templateString)) {
               return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
                 return renderTemplate(individual, container, templateString, mode, extra, toAppend);
@@ -113,7 +111,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
             return Promise.all(templatesPromises);
           }).then(function (templates) {
             const renderedTemplatesPromises = templates.map( function (template) {
-              const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+              const templateString = template['v-ui:template'][0];
               if (reg_file.test(templateString)) {
                 return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
                   return renderTemplate(individual, container, templateString, mode, extra, toAppend);
@@ -132,9 +130,45 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         return templatePromise;
       }
     })
-    .catch(function (error) {
-      console.log('Presenter error', error);
+    .catch(errorHandler)
+    .catch(() => {
+      const presenterError = new veda.IndividualModel('v-s:PresenterError');
+      presenterError.load().then((presenterError) => {
+        container.append(`<p class="container bg-danger"><strong>${presenterError.toString()}</strong>${this.id}</p>`);
+      });
     });
+}
+
+/**
+ * Show success message
+ * @param {Promise} result
+ * @return {void}
+ */
+function successHandler (result) {
+  const successMsg = new IndividualModel('v-s:SuccessBundle').load();
+  successMsg.then((successMsg) => {
+    const notify = new Notify();
+    notify('success', {name: successMsg.toString()});
+  }).catch(console.log);
+  return result;
+}
+
+/**
+ * Show error message
+ * @param {Error} error to handle
+ * @throw {Error}
+ */
+function errorHandler (error) {
+  const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
+  errorMsg.then((errorMsg) => {
+    const notify = new Notify();
+    if (error.code + error.name + error.message) {
+      notify('danger', error);
+    } else {
+      notify('danger', {name: errorMsg.toString()});
+    }
+  }).catch(console.log);
+  throw error;
 }
 
 /**
@@ -324,7 +358,7 @@ function processTemplate (individual, container, template, mode) {
       })
       .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
       .then(() => template.trigger('view'))
-      .then(() => successHandler())
+      .then(successHandler)
       .catch(errorHandler);
   }
 
@@ -335,10 +369,8 @@ function processTemplate (individual, container, template, mode) {
    */
   function deleteHandler () {
     return individual.delete()
-      .then(() => {
-        template.trigger('view');
-        successHandler();
-      })
+      .then(() => template.trigger('view'))
+      .then(successHandler)
       .catch(errorHandler);
   }
 
@@ -349,10 +381,8 @@ function processTemplate (individual, container, template, mode) {
    */
   function recoverHandler () {
     return individual.recover()
-      .then(() => {
-        template.trigger('view');
-        successHandler();
-      })
+      .then(() => template.trigger('view'))
+      .then(successHandler)
       .catch(errorHandler);
   }
 
@@ -371,40 +401,14 @@ function processTemplate (individual, container, template, mode) {
     }
     const uris = Util.unique(acc);
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).remove()), Promise.resolve())
-      .then(successHandler)
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
           template.empty().append(`<p class="bg-danger"><strong>${removedAlert.toString()}</strong></p>`);
-        });
+        }).catch(console.log);
       })
+      .then(successHandler)
       .catch(errorHandler);
-  }
-
-  /**
-   * Show success message
-   * @return {void}
-   */
-  function successHandler () {
-    const successMsg = new IndividualModel('v-s:SuccessBundle').load();
-    successMsg.then((successMsg) => {
-      const notify = Notify ? new Notify() : function () {};
-      notify('success', {name: successMsg.toString()});
-    }).catch(console.log);
-  }
-
-  /**
-   * Show error message
-   * @param {Error} error to handle
-   * @throw {Error}
-   */
-  function errorHandler (error) {
-    const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
-    errorMsg.then((errorMsg) => {
-      const notify = Notify ? new Notify() : function () {};
-      notify('danger', {name: errorMsg.toString()});
-    }).catch(console.log);
-    throw error;
   }
 
   /**

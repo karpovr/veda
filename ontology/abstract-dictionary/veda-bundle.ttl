@@ -178,6 +178,11 @@ v-s:RemovedAlert
   rdfs:label "Объект уничтожен"@ru ;
   rdfs:label "Object is removed"@en ;
 .
+v-s:PresenterError
+  rdf:type v-s:Bundle ;
+  rdfs:label "Ошибка отображения объекта"@ru ;
+  rdfs:label "Object presentation error"@en ;
+.
 v-s:InvalidAlert
   rdf:type v-s:Bundle ;
   rdfs:label "Документ не актуален"@ru ;

@@ -33,6 +33,7 @@ function IndividualModel (uri, cache, init) {
     isNew: typeof uri === 'undefined',
     isSync: typeof uri === 'object',
     isLoaded: typeof uri === 'object',
+    isInited: false,
     pending: {},
     uri: uri,
   };
@@ -350,108 +351,47 @@ proto.load = function () {
   if ( this.isLoading() && typeof window !== 'undefined' ) {
     return this.isLoading();
   }
-  return this.trigger('beforeLoad').then(() => {
-    if ( this.isLoaded() && ( Backend.status === 'online' || Backend.status === 'offline' ) ) {
-      return this.trigger('afterLoad');
-    } else if ( this.isLoaded() && Backend.status === 'limited' ) {
-      if (typeof window !== 'undefined') {
-        return this.is('v-s:UserThing').then((isUserThing) => {
-          if (isUserThing) {
-            return this.reset();
-          } else {
-            return this;
-          }
-        }).then(() => {
-          return this.trigger('afterLoad');
-        });
-      } else {
-        return this.reset()
-          .then(() => {
-            return this.trigger('afterLoad');
-          });
-      }
-    }
-    const uri = this._.uri;
-    if (typeof uri === 'string') {
-      const loadingPromise = Backend.get_individual(veda.ticket, uri).then((individualJson) => {
-        this.isLoading(false);
-        this.isNew(false);
-        this.isSync(true);
-        this.isLoaded(true);
-        this.properties = individualJson;
-        this.original = JSON.stringify(individualJson);
-        return (this._.init ? this.init() : Promise.resolve(this))
-          .then(() => this.trigger('afterLoad'));
-      }).catch((error) => {
-        this.isLoading(false);
-        console.log('load individual error', this.id, error.stack);
-        if (error.code === 422 || error.code === 404) {
-          this.isNew(true);
-          this.isSync(false);
-          this.isLoaded(false);
-          this.properties = {
-            '@': uri,
-            'rdf:type': [{type: 'Uri', data: 'rdfs:Resource'}],
-            'rdfs:label': [
-              {type: 'String', data: 'Объект не существует [' + uri + ']', lang: 'RU'},
-              {type: 'String', data: 'Object does not exist [' + uri + ']', lang: 'EN'},
-            ],
-          };
-        } else if (error.code === 472) {
-          this.isNew(false);
-          this.isSync(false);
-          this.isLoaded(false);
-          this.properties = {
-            '@': uri,
-            'rdf:type': [{type: 'Uri', data: 'rdfs:Resource'}],
-            'rdfs:label': [
-              {type: 'String', data: 'Нет прав на объект', lang: 'RU'},
-              {type: 'String', data: 'Insufficient rights', lang: 'EN'},
-            ],
-          };
-        } else if (error.code === 470 || error.code === 471) {
-          this.isNew(false);
-          this.isSync(false);
-          this.isLoaded(false);
-        } else if (error.code === 0 || error.code === 4000 || error.code === 503) {
-          this.isNew(false);
-          this.isSync(false);
-          this.isLoaded(false);
-          this.properties = {
-            '@': uri,
-            'rdf:type': [{type: 'Uri', data: 'rdfs:Resource'}],
-            'rdfs:label': [
-              {type: 'String', data: 'Нет связи с сервером. Этот объект сейчас недоступен.', lang: 'RU'},
-              {type: 'String', data: 'Server disconnected. This object is not available now.', lang: 'EN'},
-            ],
-          };
-          veda.one('online', () => this.reset());
+  return this.isLoading(
+    this.trigger('beforeLoad')
+      .then(() => {
+        if (this.isLoaded() && (Backend.status === 'online' || Backend.status === 'offline')) {
+          return this;
+        } else if (this.isLoaded() && Backend.status === 'limited') {
+          return this.reset();
         } else {
-          this.isNew(false);
-          this.isSync(false);
-          this.isLoaded(false);
-          this.properties = {
-            '@': uri,
-            'rdf:type': [{type: 'Uri', data: 'rdfs:Resource'}],
-            'rdfs:label': [{type: 'String', data: uri, lang: 'NONE'}],
-          };
+          const uri = this._.uri;
+          if (typeof uri === 'string') {
+            return Backend.get_individual(veda.ticket, uri).then((individualJson) => {
+              this.isNew(false);
+              this.isSync(true);
+              this.isLoaded(true);
+              this.properties = individualJson;
+              this.original = JSON.stringify(individualJson);
+            });
+          } else if (typeof uri === 'object') {
+            this.isNew(false);
+            this.isSync(true);
+            this.isLoaded(true);
+            this.properties = uri;
+          } else if (typeof uri === 'undefined') {
+            this.isNew(true);
+            this.isSync(false);
+            this.isLoaded(false);
+          }
         }
-        return this.trigger('afterLoad');
-      });
-      return this.isLoading(loadingPromise);
-    } else if (typeof uri === 'object') {
-      this.isNew(false);
-      this.isSync(true);
-      this.isLoaded(true);
-      this.properties = uri;
-    } else if (typeof uri === 'undefined') {
-      this.isNew(true);
-      this.isSync(false);
-      this.isLoaded(false);
-    }
-    return (this._.init ? this.init() : Promise.resolve(this))
-      .then(() => this.trigger('afterLoad'));
-  });
+      })
+      .then(() => this.init())
+      .then(() => this.trigger('afterLoad'))
+      .then(() => {
+        this.isLoading(false);
+        return this;
+      })
+      .catch((error) => {
+        console.log('load individual error', this.id, error.stack);
+        this.isLoading(false);
+        throw error;
+      }),
+  );
 };
 
 /**
@@ -460,6 +400,7 @@ proto.load = function () {
  * @return {Promise<IndividualModel>}
  */
 proto.save = function (isAtomic) {
+  if (isAtomic == undefined) isAtomic = true;
   // Do not save individual to server if nothing changed
   if (this.isSync()) {
     return Promise.resolve(this);
@@ -467,38 +408,44 @@ proto.save = function (isAtomic) {
   if ( this.isSaving() && this.isSync() && typeof window !== 'undefined' ) {
     return this.isSaving();
   }
-  if (isAtomic == undefined) isAtomic = true;
-  return this.trigger('beforeSave').then(() => {
-    Object.keys(this.properties).reduce((acc, property_uri) => {
-      if (property_uri === '@') return acc;
-      if (!acc[property_uri].length) delete acc[property_uri];
-      return acc;
-    }, this.properties);
+  return this.isSaving(
+    this.trigger('beforeSave')
+      .then(() => {
+        Object.keys(this.properties).reduce((acc, property_uri) => {
+          if (property_uri === '@') return acc;
+          if (!acc[property_uri].length) delete acc[property_uri];
+          return acc;
+        }, this.properties);
 
-    const original = this.original ? JSON.parse(this.original) : {'@': this.id};
-    const delta = Util.diff(this.properties, original);
+        const original = this.original ? JSON.parse(this.original) : {'@': this.id};
+        const delta = Util.diff(this.properties, original);
 
-    const promise = (this.isNew() || isAtomic ?
-      Backend.put_individual(veda.ticket, this.properties) :
-      Promise.all([
-        delta.added && Object.keys(delta.added).length ? (delta.added['@'] = this.id, Backend.add_to_individual(veda.ticket, delta.added)) : undefined,
-        delta.differ && Object.keys(delta.differ).length ? (delta.differ['@'] = this.id, Backend.set_in_individual(veda.ticket, delta.differ)) : undefined,
-        delta.missing && Object.keys(delta.missing).length? (delta.missing['@'] = this.id, Backend.remove_from_individual(veda.ticket, delta.missing)) : undefined,
-      ])
-    ).then(() => {
-      this.original = JSON.stringify(this.properties);
-      this.isSaving(false);
-      this.isNew(false);
-      this.isSync(true);
-      this.isLoaded(true);
-      return this.trigger('afterSave');
-    }).catch((error) => {
-      this.isSaving(false);
-      console.log('save individual error', this.id, error);
-      throw error;
-    });
-    return this.isSaving(promise);
-  });
+        const promise = (this.isNew() || isAtomic ?
+          Backend.put_individual(veda.ticket, this.properties) :
+          Promise.all([
+            delta.added && Object.keys(delta.added).length ? (delta.added['@'] = this.id, Backend.add_to_individual(veda.ticket, delta.added)) : undefined,
+            delta.differ && Object.keys(delta.differ).length ? (delta.differ['@'] = this.id, Backend.set_in_individual(veda.ticket, delta.differ)) : undefined,
+            delta.missing && Object.keys(delta.missing).length? (delta.missing['@'] = this.id, Backend.remove_from_individual(veda.ticket, delta.missing)) : undefined,
+          ])
+        ).then(() => {
+          this.original = JSON.stringify(this.properties);
+          this.isNew(false);
+          this.isSync(true);
+          this.isLoaded(true);
+        });
+        return promise;
+      })
+      .then(() => this.trigger('afterSave'))
+      .then(() => {
+        this.isSaving(false);
+        return this;
+      })
+      .catch((error) => {
+        console.log('save individual error', this.id, error);
+        this.isSaving(false);
+        throw error;
+      }),
+  );
 };
 
 /**
@@ -507,9 +454,13 @@ proto.save = function (isAtomic) {
  * @return {Promise<IndividualModel>}
  */
 proto.reset = function (forced) {
+  if ( this.isResetting() && typeof window !== 'undefined' ) {
+    return this.isResetting();
+  }
+
   /**
    * Merge original from DB with local changes
-   * @param {Object} original
+   * @param {Object} server_state
    * @return {void}
    */
   const mergeServerState = (server_state) => {
@@ -538,26 +489,20 @@ proto.reset = function (forced) {
     }
   };
 
-  if ( this.isResetting() && typeof window !== 'undefined' ) {
-    return this.isResetting();
-  }
-  return this.trigger('beforeReset').then(() => {
-    if (this.isNew()) {
-      return this.trigger('afterReset');
-    }
-    const promise = Backend.reset_individual(veda.ticket, this.id)
-      .then(mergeServerState)
+  return this.isResetting(
+    this.trigger('beforeReset')
+      .then(() => !this.isNew() ? Backend.reset_individual(veda.ticket, this.id).then(mergeServerState) : null)
+      .then(() => this.trigger('afterReset'))
       .then(() => {
         this.isResetting(false);
-        return this.trigger('afterReset');
+        return this;
       })
       .catch((error) => {
-        this.isResetting(false);
         console.log('reset individual error', this.id, error.stack);
+        this.isResetting(false);
         throw error;
-      });
-    return this.isResetting(promise);
-  });
+      }),
+  );
 };
 
 /**
@@ -565,14 +510,20 @@ proto.reset = function (forced) {
  * @return {Promise<IndividualModel>}
  */
 proto.delete = function () {
-  return this.trigger('beforeDelete').then(() => {
-    if ( this.isNew() ) {
-      return;
-    }
-    this['v-s:deleted'] = [true];
-    this['rdf:type'] = this['rdf:type'].concat(new veda.IndividualModel('v-s:Deletable'));
-    return this.save();
-  }).then(() => this.trigger('afterDelete'));
+  return this.trigger('beforeDelete')
+    .then(() => {
+      if (this.isNew()) {
+        return;
+      }
+      this['v-s:deleted'] = [true];
+      this.addValue('rdf:type', 'v-s:Deletable');
+      return this.save();
+    })
+    .then(() => this.trigger('afterDelete'))
+    .catch((error) => {
+      console.log('delete individual error', this.id, error);
+      throw error;
+    });
 };
 
 /**
@@ -580,15 +531,21 @@ proto.delete = function () {
  * @return {Promise<IndividualModel>}
  */
 proto.remove = function () {
-  return this.trigger('beforeRemove').then(() => {
-    if ( this._.cache && veda.cache && veda.cache.get(this.id) ) {
-      veda.cache.remove(this.id);
-    }
-    if ( this.isNew() ) {
-      return;
-    }
-    return Backend.remove_individual(veda.ticket, this.id);
-  }).then(() => this.trigger('afterRemove'));
+  return this.trigger('beforeRemove')
+    .then(() => {
+      if (this._.cache && veda.cache && veda.cache.get(this.id)) {
+        veda.cache.remove(this.id);
+      }
+      if (this.isNew()) {
+        return;
+      }
+      return Backend.remove_individual(veda.ticket, this.id);
+    })
+    .then(() => this.trigger('afterRemove'))
+    .catch((error) => {
+      console.log('remove individual error', this.id, error);
+      throw error;
+    });
 };
 
 /**
@@ -596,10 +553,16 @@ proto.remove = function () {
  * @return {Promise<IndividualModel>}
  */
 proto.recover = function () {
-  return this.trigger('beforeRecover').then(() => {
-    this['v-s:deleted'] = [false];
-    return this.save();
-  }).then(() => this.trigger('afterRecover'));
+  return this.trigger('beforeRecover')
+    .then(() => {
+      this['v-s:deleted'] = [false];
+      return this.save();
+    })
+    .then(() => this.trigger('afterRecover'))
+    .catch((error) => {
+      console.log('recover individual error', this.id, error);
+      throw error;
+    });
 };
 
 /**
@@ -814,6 +777,9 @@ proto.is = function (_class) {
  * @return {Promise<IndividualModel>}
  */
 proto.init = function () {
+  if (this.isInited() || !this._.init) {
+    return Promise.resolve(this);
+  }
   const isClass = this.hasValue('rdf:type', 'owl:Class') || this.hasValue('rdf:type', 'rdfs:Class');
   if ( this.hasValue('v-ui:hasModel') && !isClass ) {
     return this.get('v-ui:hasModel')[0].load()
@@ -822,6 +788,7 @@ proto.init = function () {
           model.modelFn = new Function('veda', model['v-s:script'][0]);
         }
         model.modelFn.call(this, veda);
+        this.isInited(true);
         return this;
       });
   } else {
@@ -845,6 +812,7 @@ proto.init = function () {
           }
           model.modelFn.call(this, veda);
         });
+        this.isInited(true);
         return this;
       });
   }
@@ -862,6 +830,15 @@ proto.clone = function () {
   clone.isSync(false);
   clone.clearValue('v-s:updateCounter');
   return clone.init();
+};
+
+/**
+ * Set/get flag whether individual is initialized
+ * @param {boolean} value
+ * @return {boolean}
+ */
+proto.isInited = function (value) {
+  return ( typeof value !== 'undefined' ? this._.isInited = value : this._.isInited );
 };
 
 /**
