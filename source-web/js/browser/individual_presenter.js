@@ -131,11 +131,8 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
       }
     })
     .catch(errorHandler)
-    .catch(() => {
-      const presenterError = new veda.IndividualModel('v-s:PresenterError');
-      presenterError.load().then((presenterError) => {
-        container.append(`<p class="container bg-danger"><strong>${presenterError.toString()}</strong>${this.id}</p>`);
-      });
+    .catch((error) => {
+      container.append(`<code>${error.name} ${error.message} ${this.id}</code>`);
     });
 }
 
@@ -162,7 +159,7 @@ function errorHandler (error) {
   const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
   errorMsg.then((errorMsg) => {
     const notify = new Notify();
-    if (error.code + error.name + error.message) {
+    if (error.name + error.message) {
       notify('danger', error);
     } else {
       notify('danger', {name: errorMsg.toString()});
@@ -404,7 +401,7 @@ function processTemplate (individual, container, template, mode) {
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
-          template.empty().append(`<p class="bg-danger"><strong>${removedAlert.toString()}</strong></p>`);
+          template.empty().append(`<code>${removedAlert.toString()}</code>`);
         }).catch(console.log);
       })
       .then(successHandler)
