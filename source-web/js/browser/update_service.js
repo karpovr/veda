@@ -199,17 +199,21 @@ proto.subscribe = function (uri, action) {
     ++this.list[uri].subscribeCounter;
   } else {
     const individual = new IndividualModel(uri);
-    individual.load().then(function (individual) {
-      const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
-      self.list[uri] = {
-        subscribeCounter: 1,
-        updateCounter: updateCounter,
-      };
-      if (action) {
-        self.list[uri].action = action;
-      }
-      self.socket.sendMessage('+' + uri + '=' + updateCounter);
-    });
+    individual.load()
+      .catch(function (error) {
+        console.log('subscribed individual load error', error);
+      })
+      .then(function () {
+        const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
+        self.list[uri] = {
+          subscribeCounter: 1,
+          updateCounter: updateCounter,
+        };
+        if (action) {
+          self.list[uri].action = action;
+        }
+        self.socket.sendMessage('+' + uri + '=' + updateCounter);
+      })
   }
 };
 

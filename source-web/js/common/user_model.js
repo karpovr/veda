@@ -42,28 +42,27 @@ proto._init = function () {
 };
 
 proto.initAspect = function () {
-  if ( this.hasValue('v-s:hasAspect') ) {
-    this.aspect = this['v-s:hasAspect'][0];
-    return this.aspect.load();
-  } else {
-    const aspect_id = this.id + '_aspect';
-    return new IndividualModel(aspect_id).load().then((loadedAspect) => {
-      if (loadedAspect.hasValue('rdf:type', 'rdfs:Resource')) {
-        this.aspect = new IndividualModel(aspect_id);
-        this.aspect['rdf:type'] = [new IndividualModel('v-s:PersonalAspect')];
-        this.aspect['v-s:owner'] = [this];
-        this.aspect['rdfs:label'] = ['PersonalAspect_' + this.id];
-        this['v-s:hasAspect'] = [this.aspect];
-        if ( this.id !== 'cfg:Guest' ) {
-          return this.aspect.save();
-        }
-      } else {
-        this.aspect = loadedAspect;
-        this['v-s:hasAspect'] = [this.aspect];
-        return this.aspect;
+  const aspect_id = this.id + '_aspect';
+  const aspect = this.hasValue('v-s:hasAspect') ? this['v-s:hasAspect'][0] : new veda.IndividualModel(aspect_id);
+  return aspect.load()
+    .catch((error) => {
+      console.log('personal aspect load error', error);
+      const aspect = new IndividualModel(aspect_id);
+      aspect['rdf:type'] = 'v-s:PersonalAspect';
+      aspect['v-s:owner'] = this;
+      aspect['rdfs:label'] = 'PersonalAspect_' + this.id;
+      return this.id !== 'cfg:Guest' ? aspect.save() : aspect;
+    })
+    .catch((error) => {
+      console.log('personal aspect save error', error);
+      throw error;
+    })
+    .then((aspect) => {
+      if (!this.hasValue('v-s:hasAspect')) {
+        this['v-s:hasAspect'] = aspect;
       }
+      this.aspect = aspect;
     });
-  }
 };
 
 proto.initAppointment = function () {
@@ -89,18 +88,29 @@ proto.initAppointment = function () {
 };
 
 proto.initPreferences = function () {
-  if ( this.hasValue('v-ui:hasPreferences') ) {
-    this.preferences = this['v-ui:hasPreferences'][0];
-    return this.preferences.load();
-  } else {
-    const preferences_id = this.id + '_pref';
-    this.preferences = new IndividualModel(preferences_id);
-    this.preferences['v-s:owner'] = [this];
-    this.preferences['rdf:type'] = [new IndividualModel('v-ui:Preferences')];
-    this.preferences['rdfs:label'] = ['Preferences_' + this.id];
-    this['v-ui:hasPreferences'] = [this.preferences];
-    return this.preferences;
-  }
+  const preferences_id = this.id + '_pref';
+  const preferences = this.hasValue('v-ui:hasPrefences') ? this['v-ui:hasPrefences'][0] : new veda.IndividualModel(preferences_id);
+  return preferences.load()
+    .catch((error) => {
+      console.log('personal preferences load error', error);
+      const preferences = new IndividualModel(preferences_id);
+      preferences['v-s:owner'] = this;
+      preferences['rdf:type'] = 'v-ui:Preferences';
+      preferences['rdfs:label'] = 'Preferences_' + this.id;
+      this['v-ui:hasPreferences'] = preferences;
+      return this.id !== 'cfg:Guest' ? preferences.save() : preferences;
+    })
+    .catch((error) => {
+      console.log('personal preferences save error', error);
+      throw error;
+    })
+    .then((preferences) => {
+      if (!this.hasValue('v-ui:hasPreferences')) {
+        this['v-ui:hasPreferences'] = preferences;
+      }
+      this.preferences = preferences;
+      return preferences;
+    });
 };
 
 proto.initLanguage = function (preferences) {
@@ -119,7 +129,7 @@ proto.initLanguage = function (preferences) {
       return preferences.save();
     }
   };
-  if ( !preferences.hasValue('v-ui:preferredLanguage') || !preferences.hasValue('v-ui:displayedElements')) {
+  if (!preferences.hasValue('v-ui:preferredLanguage') || !preferences.hasValue('v-ui:displayedElements')) {
     const defaultDisplayedElements = 10;
     const defaultLanguage = new IndividualModel('v-ui:RU');
     preferences['v-ui:preferredLanguage'] = [defaultLanguage];
