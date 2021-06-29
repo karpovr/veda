@@ -369,10 +369,8 @@ v-fc:BlankTemplate
       window.history.back();
     }
     function saveHandler () {
-      setTimeout(function () {
-        delete self.object;
-        riot.route("#/" + object.id);
-      }, 1000);
+      delete self.object;
+      riot.route("#/" + object.id);
     }
   });
 

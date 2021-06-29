@@ -51,8 +51,6 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
 
   return this.load()
     .then(function (individual) {
-      const offlineTemplate = '<h5 class=\'container sheet text-center text-muted\'>Нет связи с сервером. Этот объект сейчас недоступен / Server disconnected. This object is not available now</h5>';
-
       if (template) {
         if (template instanceof IndividualModel) {
         // if template is uri
@@ -68,7 +66,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
           return renderTemplate(individual, container, templateString, mode, extra, toAppend);
         }
         return template.load().then(function (template) {
-          const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+          const templateString = template['v-ui:template'][0];
           if (reg_file.test(templateString)) {
             return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
               return renderTemplate(individual, container, templateString, mode, extra, toAppend);
@@ -86,7 +84,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
             if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
               throw new Error('Template type violation!');
             }
-            const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+            const templateString = template['v-ui:template'][0].toString();
             if (reg_file.test(templateString)) {
               return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
                 return renderTemplate(individual, container, templateString, mode, extra, toAppend);
@@ -113,7 +111,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
             return Promise.all(templatesPromises);
           }).then(function (templates) {
             const renderedTemplatesPromises = templates.map( function (template) {
-              const templateString = template.hasValue('v-ui:template') ? template['v-ui:template'][0].toString() : offlineTemplate;
+              const templateString = template['v-ui:template'][0];
               if (reg_file.test(templateString)) {
                 return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
                   return renderTemplate(individual, container, templateString, mode, extra, toAppend);
@@ -132,9 +130,44 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         return templatePromise;
       }
     })
-    .catch(function (error) {
-      console.log('Presenter error', error);
+    .catch(errorHandler)
+    .catch((error) => {
+      const msg = $(`<div><code>${error.name} ${error.message} ${this.id}</code></div>`);
+      container.append(msg);
+      return msg;
     });
+}
+
+/**
+ * Show success message
+ * @param {Promise} result
+ * @return {void}
+ */
+function successHandler (result) {
+  const successMsg = new IndividualModel('v-s:SuccessBundle').load();
+  successMsg.then((successMsg) => {
+    const notify = new Notify();
+    notify('success', {name: successMsg.toString()});
+  }).catch(console.log);
+  return result;
+}
+
+/**
+ * Show error message
+ * @param {Error} error to handle
+ * @throw {Error}
+ */
+function errorHandler (error) {
+  const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
+  errorMsg.then((errorMsg) => {
+    const notify = new Notify();
+    if (error.name + error.message) {
+      notify('danger', error);
+    } else {
+      notify('danger', {name: errorMsg.toString()});
+    }
+  }).catch(console.log);
+  throw error;
 }
 
 /**
@@ -163,7 +196,7 @@ function renderTemplate (individual, container, template, mode, extra, toAppend)
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(function () {
     return processTemplate(individual, container, template, mode).then(function (processedTemplate) {
-      processedTemplate.trigger(mode);
+      processedTemplate.triggerHandler(mode);
 
       if (toAppend) {
         container.append(processedTemplate);
@@ -237,7 +270,7 @@ function processTemplate (individual, container, template, mode) {
    */
   const syncEmbedded = function (event) {
     embedded.map(function (item) {
-      item.trigger(event.type, individual.id);
+      item.triggerHandler(event.type, individual.id);
     });
     event.stopPropagation();
   };
@@ -278,14 +311,14 @@ function processTemplate (individual, container, template, mode) {
    */
   function resetHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('reset')(individual.id, acc), acc);
+    acc = embedded.reduce((acc, item) => typeof item.data('reset') === 'function' ? item.data('reset')(individual.id, acc) : acc, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
     }
     const uris = Util.unique(acc);
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset(true)), Promise.resolve())
-      .then(() => template.trigger('view'))
+      .then(() => template.triggerHandler('view'))
       .catch(errorHandler);
   }
 
@@ -297,7 +330,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function saveHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('save')(individual.id, acc), acc);
+    acc = embedded.reduce((acc, item) => typeof item.data('save') === 'function' ? item.data('save')(individual.id, acc) : acc, acc);
     if (parent !== individual.id) {
       acc.push(individual.id);
     }
@@ -323,8 +356,8 @@ function processTemplate (individual, container, template, mode) {
         });
       })
       .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
-      .then(() => template.trigger('view'))
-      .then(() => successHandler())
+      .then(() => template.triggerHandler('view'))
+      .then(successHandler)
       .catch(errorHandler);
   }
 
@@ -335,10 +368,8 @@ function processTemplate (individual, container, template, mode) {
    */
   function deleteHandler () {
     return individual.delete()
-      .then(() => {
-        template.trigger('view');
-        successHandler();
-      })
+      .then(() => template.triggerHandler('view'))
+      .then(successHandler)
       .catch(errorHandler);
   }
 
@@ -349,10 +380,8 @@ function processTemplate (individual, container, template, mode) {
    */
   function recoverHandler () {
     return individual.recover()
-      .then(() => {
-        template.trigger('view');
-        successHandler();
-      })
+      .then(() => template.triggerHandler('view'))
+      .then(successHandler)
       .catch(errorHandler);
   }
 
@@ -364,47 +393,21 @@ function processTemplate (individual, container, template, mode) {
    */
   function removeHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('remove')(individual.id, acc), acc);
+    acc = embedded.reduce((acc, item) => typeof item.data('remove') === 'function' ? item.data('remove')(individual.id, acc) : acc, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
     }
     const uris = Util.unique(acc);
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).remove()), Promise.resolve())
-      .then(successHandler)
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(function (removedAlert) {
-          template.empty().append(`<p class="bg-danger"><strong>${removedAlert.toString()}</strong></p>`);
-        });
+          template.empty().append(`<code>${removedAlert.toString()}</code>`);
+        }).catch(console.log);
       })
+      .then(successHandler)
       .catch(errorHandler);
-  }
-
-  /**
-   * Show success message
-   * @return {void}
-   */
-  function successHandler () {
-    const successMsg = new IndividualModel('v-s:SuccessBundle').load();
-    successMsg.then((successMsg) => {
-      const notify = Notify ? new Notify() : function () {};
-      notify('success', {name: successMsg.toString()});
-    }).catch(console.log);
-  }
-
-  /**
-   * Show error message
-   * @param {Error} error to handle
-   * @throw {Error}
-   */
-  function errorHandler (error) {
-    const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
-    errorMsg.then((errorMsg) => {
-      const notify = Notify ? new Notify() : function () {};
-      notify('danger', {name: errorMsg.toString()});
-    }).catch(console.log);
-    throw error;
   }
 
   /**
@@ -432,7 +435,7 @@ function processTemplate (individual, container, template, mode) {
             </div>`,
           );
           $('.recover', deletedAlert).click(function () {
-            template.trigger('recover');
+            template.triggerHandler('recover');
           });
           template.prepend(deletedAlert);
         });
@@ -577,7 +580,7 @@ function processTemplate (individual, container, template, mode) {
     const countDisplayed = relContainer.children().length - 1;// last children is .more button
     const rel_uri = relContainer.attr('rel');
 
-    resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 10);
+    resource.triggerHandler(rel_uri, resource.get(rel_uri), countDisplayed + 10);
     $this.remove();
   });
 
@@ -887,7 +890,7 @@ function processTemplate (individual, container, template, mode) {
 
     template.on('view edit search', function (e) {
       e.stopPropagation();
-      control.trigger(e.type);
+      control.triggerHandler(e.type);
     });
 
     const assignDefaultValue = function (e) {

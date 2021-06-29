@@ -808,20 +808,6 @@ v-ui:StandardButtonsTemplate
     veda.off("status", statusHandler);
   });
 
-  // var allButtons = "send edit save cancel delete destroy journal task rights";
-  var defaultButtons = "send edit save cancel delete journal task";
-  individual.rights.then(function (rights) {
-    var canUpdate = rights.hasValue("v-s:canUpdate", true);
-    var canDelete = rights.hasValue("v-s:canDelete", true);
-    var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
-    enabledButtons.forEach(function (id) {
-      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
-      if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
-      $("#" + id, template).removeClass("rm hidden");
-    });
-    $(".rm", template).remove();
-  });
-
   template.on("click", "#edit, #save, #cancel, #delete, #destroy", function (e) {
     e.preventDefault();
     var action = this.id;
@@ -890,6 +876,20 @@ v-ui:StandardButtonsTemplate
     veda.Util.send(individual, template, startFormTransform, true);
   });
 
+  // var allButtons = "send edit save cancel delete destroy journal task rights";
+  var defaultButtons = "send edit save cancel delete journal task";
+  return individual.rights.then(function (rights) {
+    var canUpdate = rights.hasValue("v-s:canUpdate", true);
+    var canDelete = rights.hasValue("v-s:canDelete", true);
+    var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
+    enabledButtons.forEach(function (id) {
+      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
+      if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
+      $("#" + id, template).removeClass("rm hidden");
+    });
+    $(".rm", template).remove();
+  });
+
   //# sourceURL=v-ui:StandardButtonsTemplate_pre
 </script>
 <span>
@@ -934,10 +934,6 @@ v-ui:StandardButtonsTemplate
   template.one("remove", function () {
     individual.off("v-s:deleted", hiddenButtonsForDeleted);
   });
-
-
-
-
 
   $(".toggle-actions", template).click(function () {
     template.closest(".actions").children(":not(.toggle-actions)").toggleClass("hidden");
@@ -2451,7 +2447,7 @@ v-ui:SimplifiedJournalTemplate
                 $(".docflow-buttons", template).remove();
               }
             });
-            
+
           }
 
           function takeDecision(takenDecision, label) {
