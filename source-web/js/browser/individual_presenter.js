@@ -132,7 +132,9 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     })
     .catch(errorHandler)
     .catch((error) => {
-      container.append(`<code>${error.name} ${error.message} ${this.id}</code>`);
+      const msg = $(`<div><code>${error.name} ${error.message} ${this.id}</code></div>`);
+      container.append(msg);
+      return msg;
     });
 }
 
@@ -194,7 +196,7 @@ function renderTemplate (individual, container, template, mode, extra, toAppend)
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(function () {
     return processTemplate(individual, container, template, mode).then(function (processedTemplate) {
-      processedTemplate.trigger(mode);
+      processedTemplate.triggerHandler(mode);
 
       if (toAppend) {
         container.append(processedTemplate);
@@ -268,7 +270,7 @@ function processTemplate (individual, container, template, mode) {
    */
   const syncEmbedded = function (event) {
     embedded.map(function (item) {
-      item.trigger(event.type, individual.id);
+      item.triggerHandler(event.type, individual.id);
     });
     event.stopPropagation();
   };
@@ -309,14 +311,14 @@ function processTemplate (individual, container, template, mode) {
    */
   function resetHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('reset')(individual.id, acc), acc);
+    acc = embedded.reduce((acc, item) => typeof item.data('reset') === 'function' ? item.data('reset')(individual.id, acc) : acc, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
     }
     const uris = Util.unique(acc);
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset(true)), Promise.resolve())
-      .then(() => template.trigger('view'))
+      .then(() => template.triggerHandler('view'))
       .catch(errorHandler);
   }
 
@@ -328,7 +330,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function saveHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('save')(individual.id, acc), acc);
+    acc = embedded.reduce((acc, item) => typeof item.data('save') === 'function' ? item.data('save')(individual.id, acc) : acc, acc);
     if (parent !== individual.id) {
       acc.push(individual.id);
     }
@@ -354,7 +356,7 @@ function processTemplate (individual, container, template, mode) {
         });
       })
       .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
-      .then(() => template.trigger('view'))
+      .then(() => template.triggerHandler('view'))
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -366,7 +368,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function deleteHandler () {
     return individual.delete()
-      .then(() => template.trigger('view'))
+      .then(() => template.triggerHandler('view'))
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -378,7 +380,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function recoverHandler () {
     return individual.recover()
-      .then(() => template.trigger('view'))
+      .then(() => template.triggerHandler('view'))
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -391,7 +393,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function removeHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => item.data('remove')(individual.id, acc), acc);
+    acc = embedded.reduce((acc, item) => typeof item.data('remove') === 'function' ? item.data('remove')(individual.id, acc) : acc, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
@@ -433,7 +435,7 @@ function processTemplate (individual, container, template, mode) {
             </div>`,
           );
           $('.recover', deletedAlert).click(function () {
-            template.trigger('recover');
+            template.triggerHandler('recover');
           });
           template.prepend(deletedAlert);
         });
@@ -578,7 +580,7 @@ function processTemplate (individual, container, template, mode) {
     const countDisplayed = relContainer.children().length - 1;// last children is .more button
     const rel_uri = relContainer.attr('rel');
 
-    resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 10);
+    resource.triggerHandler(rel_uri, resource.get(rel_uri), countDisplayed + 10);
     $this.remove();
   });
 
@@ -888,7 +890,7 @@ function processTemplate (individual, container, template, mode) {
 
     template.on('view edit search', function (e) {
       e.stopPropagation();
-      control.trigger(e.type);
+      control.triggerHandler(e.type);
     });
 
     const assignDefaultValue = function (e) {
