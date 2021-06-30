@@ -42,7 +42,7 @@ function UpdateService () {
    * @return {Promise} instance promise
    */
   function initSocket () {
-    return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort').then(function (ccusPortCfg) {
+    return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort').then((ccusPortCfg) => {
       const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
       const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
       const port = ccusPort || window.location.port;
@@ -77,7 +77,7 @@ function UpdateService () {
     }
     buffer.push(msg);
     if ( !socketTimeout ) {
-      socketTimeout = setTimeout(function () {
+      socketTimeout = setTimeout(() => {
         const message = buffer.join(',');
         if (socket.readyState === 1) {
           socket.send(message);
@@ -200,10 +200,10 @@ proto.subscribe = function (uri, action) {
   } else {
     const individual = new IndividualModel(uri);
     individual.load()
-      .catch(function (error) {
+      .catch((error) => {
         console.log('subscribed individual load error', error);
       })
-      .then(function () {
+      .then(() => {
         const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
         self.list[uri] = {
           subscribeCounter: 1,
@@ -213,7 +213,7 @@ proto.subscribe = function (uri, action) {
           self.list[uri].action = action;
         }
         self.socket.sendMessage('+' + uri + '=' + updateCounter);
-      })
+      });
   }
 };
 

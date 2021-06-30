@@ -115,7 +115,7 @@ proto.initPreferences = function () {
 
 proto.initLanguage = function (preferences) {
   const setLanguage = () => {
-    preferences.language = preferences['v-ui:preferredLanguage'].reduce( function (acc, lang) {
+    preferences.language = preferences['v-ui:preferredLanguage'].reduce((acc, lang) => {
       acc[lang.id.substr(lang.id.indexOf(':') + 1)] = lang;
       return acc;
     }, {});

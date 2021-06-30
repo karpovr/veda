@@ -20,7 +20,7 @@ export default jsWorkflow;
 jsWorkflow.ready = jsPlumb.ready;
 
 // No API call should be made until the DOM has been initialized.
-jsWorkflow.ready(function () {
+jsWorkflow.ready(() => {
   /**
    * Create a workflow instance.
    * @constructor Instance
@@ -37,6 +37,7 @@ jsWorkflow.ready(function () {
    * @param {IndividualModel} net individual of rdfs:type "v-wf:Net"
    * @param {Element} template
    * @param {Element} container
+   * @return {Object} instance
    */
   jsWorkflow.Instance.prototype.init = function (workflowData, veda, net, template, container) {
     let workflow;
@@ -120,7 +121,7 @@ jsWorkflow.ready(function () {
         const y2 = Math.max(as_start[1], end[1]) - canvasSizePx/2;
         $('#select_canvas', template).hide();
 
-        net['v-wf:consistsOf'].forEach(function (state) {
+        net['v-wf:consistsOf'].forEach((state) => {
           if (state.hasValue('v-wf:locationX') && state.hasValue('v-wf:locationY')) {
             if (
               x1 <= state['v-wf:locationX'][0] && state['v-wf:locationX'][0] <= x2 &&
@@ -256,7 +257,7 @@ jsWorkflow.ready(function () {
 
     instance.bind('connectionMoved', function (info, originalEvent) {
       if (info.originalSourceId !== info.newSourceId) {
-        net['v-wf:consistsOf'].forEach(function (state) {
+        net['v-wf:consistsOf'].forEach((state) => {
           if (state.id === info.originalSourceId) {
             state['v-wf:hasFlow'] = veda.Util.removeSubIndividual(state, 'v-wf:hasFlow', info.connection.id);
           }
@@ -270,7 +271,7 @@ jsWorkflow.ready(function () {
     // Handle creating new flow event
     instance.bind('connection', function (info) {
       const source = new veda.IndividualModel(info.sourceId);
-      const flowExists = source.get('v-wf:hasFlow').filter(function (flow) {
+      const flowExists = source.get('v-wf:hasFlow').filter((flow) => {
         return flow.hasValue('v-wf:flowsInto', info.targetId);
       }).length;
       if (flowExists) {
@@ -290,7 +291,7 @@ jsWorkflow.ready(function () {
         return;
       }
       $('<span/>', {
-        'click': (function (instance) {
+        'click': ((instance) => {
           riot.route('#/'+state['v-wf:subNet'][0].id+'///edit');
         }),
         'class': 'glyphicon glyphicon-search subnet-link',
@@ -301,7 +302,7 @@ jsWorkflow.ready(function () {
       if (!state.hasValue('v-wf:executor')) {
         return;
       }
-      state['v-wf:executor'][0].load().then(function (executor) {
+      state['v-wf:executor'][0].load().then((executor) => {
         if (executor['rdf:type'][0].id == 'v-s:Appointment') {
           $('<span/>', {
             'class': 'glyphicon glyphicon-user',
@@ -340,10 +341,10 @@ jsWorkflow.ready(function () {
 
     instance.showProcessRunPath = function (workItem, depth) {
       if (workItem.hasValue('v-wf:previousWorkItem')) {
-        workItem['v-wf:previousWorkItem'].forEach(function (previousWorkItem) {
+        workItem['v-wf:previousWorkItem'].forEach((previousWorkItem) => {
           if (workItem.hasValue('v-wf:forNetElement') && previousWorkItem.hasValue('v-wf:forNetElement')) {
             instance.showProcessRunPath(previousWorkItem, depth+1);
-            instance.select({target: workItem['v-wf:forNetElement'][0].id, source: previousWorkItem['v-wf:forNetElement'][0].id}).each(function (e) {
+            instance.select({target: workItem['v-wf:forNetElement'][0].id, source: previousWorkItem['v-wf:forNetElement'][0].id}).each((e) => {
               e.addClass('process-path-highlight');
               const pathCounterLabel = (e.getOverlay('pathCounter')!=undefined)?e.getOverlay('pathCounter').getLabel():'';
               e.removeOverlay('pathCounter');
@@ -493,13 +494,13 @@ jsWorkflow.ready(function () {
             const menu = $('#workflow-context-menu ul', template);
             menu.html('');
 
-            $('[type=\'work-item\']', _this).each(function (i, el) {
+            $('[type=\'work-item\']', _this).each((i, el) => {
               const wi = new veda.IndividualModel($(el).attr('work-item-id'));
               const $item = $('<li/>').appendTo(menu);
               $('<a/>', {
                 'text': (wi.hasValue('rdfs:label')?wi['rdfs:label'][0]:wi.id),
                 'href': '#',
-                'click': (function (wi) {
+                'click': ((wi) => {
                   return function (event) {
                     event.preventDefault();
                     props.empty();
@@ -526,7 +527,7 @@ jsWorkflow.ready(function () {
             if (alreadySelected) {
               return; // do nothing when click on already selected element
             }
-            $('[type=\'work-item\']', _this).each(function (i, el) {
+            $('[type=\'work-item\']', _this).each((i, el) => {
               const wi = new veda.IndividualModel($(el).attr('work-item-id'));
               $.each(instance.getAllConnections(), function (idx, connection) {
                 const o = connection.getOverlay('flowLabel');
@@ -739,9 +740,9 @@ jsWorkflow.ready(function () {
       instance.detachAllConnections(element);
       instance.remove(element);
       net['v-wf:consistsOf'] = veda.Util.removeSubIndividual(net, 'v-wf:consistsOf', element.id);
-      net['v-wf:consistsOf'].forEach(function (state) {
+      net['v-wf:consistsOf'].forEach((state) => {
         if (state.hasValue('v-wf:hasFlow')) {
-          state['v-wf:hasFlow'].forEach(function (flow) {
+          state['v-wf:hasFlow'].forEach((flow) => {
             if (flow.hasValue('v-wf:flowsInto') && flow['v-wf:flowsInto'][0].id == element.id) {
               instance.deleteFlow(flow, state);
             }
@@ -800,14 +801,14 @@ jsWorkflow.ready(function () {
      * @return {IndividualModel} net
      */
     instance.createNetView = function (net) {
-      return net.prefetch(Infinity, 'v-wf:consistsOf', 'v-wf:hasFlow', 'v-wf:executor').then(function (prefetched) {
+      return net.prefetch(Infinity, 'v-wf:consistsOf', 'v-wf:hasFlow', 'v-wf:executor').then((prefetched) => {
         net = prefetched[0];
         $('#workflow-net-name', template).text(net['rdfs:label'][0]);
         const netElements = prefetched.slice(1);
         // Create states
         let hasInput = false;
         let hasOutput = false;
-        netElements.forEach(function (element) {
+        netElements.forEach((element) => {
           if ( element.hasValue('rdf:type', 'v-wf:Task') || element.hasValue('rdf:type', 'v-wf:Condition') || element.hasValue('rdf:type', 'v-wf:InputCondition') || element.hasValue('rdf:type', 'v-wf:OutputCondition') ) {
             instance.createState(element);
           }
@@ -821,9 +822,9 @@ jsWorkflow.ready(function () {
         if (!hasOutput) {
           instance.createEmptyNetElement('output');
         }
-        netElements.forEach(function (element) {
+        netElements.forEach((element) => {
           if ( element.hasValue('v-wf:hasFlow') ) {
-            element['v-wf:hasFlow'].forEach(function (flow) {
+            element['v-wf:hasFlow'].forEach((flow) => {
               instance.createFlow(element, flow);
             });
           }
@@ -841,7 +842,7 @@ jsWorkflow.ready(function () {
       let minx; let maxx; let miny; let maxy; let scale;
       let offsetX = 0; let offsetY = 0;
       // read ranges
-      net['v-wf:consistsOf'].forEach(function (state) {
+      net['v-wf:consistsOf'].forEach((state) => {
         if (state.hasValue('v-wf:locationX')) {
           if (maxx === undefined || state['v-wf:locationX'][0]>maxx) maxx = state['v-wf:locationX'][0];
           if (minx === undefined || state['v-wf:locationX'][0]<minx) minx = state['v-wf:locationX'][0];
@@ -860,7 +861,7 @@ jsWorkflow.ready(function () {
 
 
       // read viewport div
-      $('.workflow-canvas-wrapper', template).each(function (i, el) {
+      $('.workflow-canvas-wrapper', template).each((i, el) => {
         const scaleX = el.clientWidth/(maxx-minx);
         const scaleY = el.clientHeight/(maxy-miny);
         scale = Math.min(scaleX, scaleY);
@@ -887,7 +888,7 @@ jsWorkflow.ready(function () {
       });
       $('#'+veda.Util.escape4$(selectedElementId), template).removeClass('w_active');
       if (selectedElementSourceId!=null) {
-        instance.select({source: selectedElementSourceId}).each(function (e) {
+        instance.select({source: selectedElementSourceId}).each((e) => {
           e.setPaintStyle({strokeStyle: '#666666'});
           e.removeOverlay('connLabel');
         });
@@ -903,14 +904,14 @@ jsWorkflow.ready(function () {
 
     instance.createProcessView = function (process) {
       // Apply WorkItems to Net
-      instance.loadProcessWorkItems(process).then(function (wis) {
+      instance.loadProcessWorkItems(process).then((wis) => {
         wis = wis.slice(1);
-        $('.w', template).each(function (index, el) {
+        $('.w', template).each((index, el) => {
           $('span', el).text('');
           $( el ).css('background-color', 'white').attr('work-items-count', 0).attr('colored-to', '');
         });
 
-        wis.forEach(function (wi) {
+        wis.forEach((wi) => {
           if (wi.hasValue('v-wf:forNetElement')) {
             const state = $('#'+veda.Util.escape4$(wi['v-wf:forNetElement'][0].id), template);
             if ($(state).find('[work-item-id="'+veda.Util.escape4$(wi.id)+'"]').length == 0) {
@@ -946,7 +947,7 @@ jsWorkflow.ready(function () {
       });
     };
     let $contextMenu;
-    instance.createNetView(net).then(function (net) {
+    instance.createNetView(net).then((net) => {
       if (net['currentScale']==1.0) {
         instance.optimizeView();
       } else {
@@ -967,12 +968,12 @@ jsWorkflow.ready(function () {
       $('#workflow-save-button', template).on('click', function () {
         // TODO REFACTOR - recursive save (based on type checking)
         if (net.hasValue('v-wf:consistsOf')) {
-          net['v-wf:consistsOf'].forEach(function (el) {
+          net['v-wf:consistsOf'].forEach((el) => {
             const saveMapping = function (mapping, el) {
               if (el.hasValue(mapping)) {
-                el[mapping].forEach(function (m) {
+                el[mapping].forEach((m) => {
                   if (m.hasValue('v-wf:mapToVariable')) {
-                    m['v-wf:mapToVariable'].forEach(function (v) {
+                    m['v-wf:mapToVariable'].forEach((v) => {
                       v.save();
                     });
                   }
@@ -987,7 +988,7 @@ jsWorkflow.ready(function () {
             saveMapping('v-wf:startingJournalMap', el);
             saveMapping('v-wf:completedJournalMap', el);
             if (el.hasValue('v-wf:executor')) {
-              el['v-wf:executor'].forEach(function (e) {
+              el['v-wf:executor'].forEach((e) => {
                 e.save();
               });
             }
@@ -1013,7 +1014,7 @@ jsWorkflow.ready(function () {
 
       $('.delete-state', template).on('click', function () {
         if (dragList.length > 0) {
-          dragList.forEach(function (item) {
+          dragList.forEach((item) => {
             instance.deleteState(instance.getSelector('#'+veda.Util.escape4$(item.attr('id')))[0]);
           });
         } else if (selectedElementType == 'state') {
@@ -1024,7 +1025,7 @@ jsWorkflow.ready(function () {
           if (confirm('Delete flow ' + selectedElementId + ' ?')) {
             instance.getConnections({
               source: selectedElementSourceId,
-            }).forEach(function (connection) {
+            }).forEach((connection) => {
               if (connection.id == selectedElementId) {
                 instance.deleteFlow(connection, new veda.IndividualModel(selectedElementSourceId));
               }
@@ -1046,7 +1047,7 @@ jsWorkflow.ready(function () {
           const individual = new veda.IndividualModel(selectedElementId);
           if (individual.hasValue('rdf:type')) {
             if (individual['rdf:type'][0].id === 'v-wf:Task' || individual['rdf:type'][0].id === 'v-wf:Condition') {
-              individual.clone().then(function (clone) {
+              individual.clone().then((clone) => {
                 clone['v-wf:locationX'] = [individual['v-wf:locationX'][0] + 50];
                 clone['v-wf:locationY'] = [individual['v-wf:locationY'][0] + 50];
                 clone['v-wf:hasFlow'] = [];
@@ -1113,9 +1114,9 @@ function collectEntities (element, list) {
   for (let key = 0; key < props.length; key++) {
     const prop = props[key];
     if (element[prop] && Array.isArray(element[prop])) {
-      element[prop].forEach(function (subelement) {
+      element[prop].forEach((subelement) => {
         if (typeof subelement.hasValue === 'function' && subelement.hasValue('rdf:type')) {
-          subelement['rdf:type'].forEach(function (subRdfType) {
+          subelement['rdf:type'].forEach((subRdfType) => {
             if (subRdfType.id == 'v-wf:VarDefine' || subRdfType.id == 'v-wf:Transform' || subRdfType.id == 'v-wf:Mapping') {
               list.add(subelement);
             }

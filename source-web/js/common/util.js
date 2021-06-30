@@ -104,7 +104,7 @@ Util.decimalDatetimeReviver = function (key, value) {
 Util.hasValue = function (individual, property, value) {
   const any = !!(individual && individual[property] && individual[property].length);
   if (!value) return any;
-  return !!(any && individual[property].filter( function (i) {
+  return !!(any && individual[property].filter((i) => {
     return (i.type === value.type && i.data.valueOf() === value.data.valueOf());
   }).length);
 };
@@ -137,7 +137,7 @@ Util.processQuery = function (vql, sql, sort, limit, queryDelta, processDelta, p
       from: from,
       top: queryDelta,
       limit: limit,
-    }).then(function (query_result) {
+    }).then((query_result) => {
       const cursor = query_result.cursor;
       const estimated = query_result.estimated;
       if ( limit > estimated ) {
@@ -179,14 +179,14 @@ Util.processQuery = function (vql, sql, sort, limit, queryDelta, processDelta, p
 Util.processResult = function (result, delta, pause, fn) {
   const processPortion = function () {
     const portion = result.splice(0, delta);
-    portion.reduce(function (prom, item) {
-      return prom.then(function () {
+    portion.reduce((prom, item) => {
+      return prom.then(() => {
         return fn(item);
-      }).catch(function (error) {
+      }).catch((error) => {
         console.log('Error processing item:', item);
         console.log(error, error.stack);
       });
-    }, Promise.resolve()).then(function () {
+    }, Promise.resolve()).then(() => {
       if ( (total - result.length) / total - processingProgress >= 0.05 ) {
         processingProgress = (total - result.length) / total;
         console.log('Processing progress:', Math.floor(processingProgress * 100) + '%', '(' + (total - result.length), 'of', total + ')');
@@ -301,7 +301,7 @@ Util.forSubIndividual = function (net, property, id, func) {
   if (net[property] === undefined) {
     return;
   }
-  net[property].forEach(function (el) {
+  net[property].forEach((el) => {
     if (el.id == id) {
       func(el);
     }
@@ -312,9 +312,7 @@ Util.removeSubIndividual = function (net, property, id) {
   if (net[property] === undefined) {
     return;
   }
-  return net[property].filter( function (item) {
-    return item.id !== id;
-  });
+  return net[property].filter((item) => item.id !== id);
 };
 
 /*
@@ -407,7 +405,7 @@ Util.queryFromIndividualPT = function (individual, sort) {
     const tables = [];
     let i = -1;
     const where = Object.keys(individual.properties)
-      .map(function (property_uri) {
+      .map((property_uri) => {
         if (property_uri.indexOf('.') >= 0 || property_uri.indexOf('*') >= 0) {
           throw new Error('VQL style property nesting: ' + property_uri);
         }
@@ -417,9 +415,7 @@ Util.queryFromIndividualPT = function (individual, sort) {
         i++;
         const table = 'veda_pt.`' + property_uri + '` as p' + i;
         tables[i] = table;
-        const values = individual.get(property_uri).sort(function (a, b) {
-          return a < b ? - 1 : a === b ? 0 : 1;
-        });
+        const values = individual.get(property_uri).sort((a, b) => a < b ? - 1 : a === b ? 0 : 1);
         let oneProp;
         switch (true) {
         case Number.isInteger(values[0]):
@@ -439,17 +435,17 @@ Util.queryFromIndividualPT = function (individual, sort) {
           break;
         case typeof values[0] === 'boolean':
           oneProp = values
-            .map(function (value) {
+            .map((value) => {
               return 'p' + i + '.int[1] = ' + (value ? 1 : 0);
             }).join(' OR ');
           break;
         case values[0] instanceof String:
           oneProp = values
             .filter(Boolean)
-            .map( function (value) {
+            .map((value) => {
               const q = value;
               const lines = q.trim().split('\n');
-              const lineQueries = lines.map(function (line) {
+              const lineQueries = lines.map((line) => {
                 const words = line
                   .trim()
                   .replace(/[-*\s]+/g, ' ')
@@ -464,7 +460,7 @@ Util.queryFromIndividualPT = function (individual, sort) {
         case values[0] instanceof IndividualModel:
           oneProp = values
             .filter(Boolean)
-            .map( function (value) {
+            .map((value) => {
               if ( value.isNew() ) {
                 return;
               } else {
@@ -483,7 +479,7 @@ Util.queryFromIndividualPT = function (individual, sort) {
       .filter(Boolean)
       .join(' AND ');
 
-    const from = tables.reduce(function (acc, table, i) {
+    const from = tables.reduce((acc, table, i) => {
       return acc ? acc + ' JOIN ' + table + ' ON p' + (i - 1) + '.id = p' + i + '.id' : table;
     }, '');
 
@@ -565,14 +561,14 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
       visited[individual.id] = true;
     }
     let where = Object.keys(individual.properties)
-      .map(function (property_uri, i) {
+      .map((property_uri, i) => {
         if (property_uri.indexOf('.') >= 0 || property_uri.indexOf('*') >= 0) {
           throw new Error('VQL style property nesting: ' + property_uri);
         }
         if (property_uri === '@' || property_uri === 'rdf:type') {
           return;
         }
-        const values = individual.get(property_uri).sort(function (a, b) {
+        const values = individual.get(property_uri).sort((a, b) => {
           return a < b ? - 1 : a === b ? 0 : 1;
         });
         const prop = property_uri.replace(re, '_');
@@ -596,17 +592,17 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
           break;
         case typeof values[0] === 'boolean':
           oneProp = values
-            .map(function (value) {
+            .map((value) => {
               return prop + '_int[1] = ' + (value ? 1 : 0);
             }).join(' OR ');
           break;
         case values[0] instanceof String:
           oneProp = values
             .filter(Boolean)
-            .map( function (value) {
+            .map((value) => {
               const q = value;
               const lines = q.trim().split('\n');
-              const lineQueries = lines.map(function (line) {
+              const lineQueries = lines.map((line) => {
                 const words = line
                   .trim()
                   .replace(/[-*\s]+/g, ' ')
@@ -629,7 +625,7 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
         case values[0] instanceof IndividualModel:
           oneProp = values
             .filter(Boolean)
-            .map( function (value) {
+            .map((value) => {
               if ( value.isNew() ) {
                 const sub = buildQuery(value);
                 return sub ? prop + '_str IN ( ' + sub + ' )' : undefined;
@@ -659,7 +655,7 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
     }
 
     return individual.get('rdf:type')
-      .map(function (type) {
+      .map((type) => {
         const from = 'veda_tt.`' + type.id + '`';
         const query = 'SELECT id FROM ' + from + (where ? ' WHERE ' + where : '');
         return query;
@@ -685,7 +681,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
   let table_counter = 0;
   const re = /[^a-zA-Z0-9]/g;
   try {
-    return individual['rdf:type'].map(function (_type, type_index) {
+    return individual['rdf:type'].map((_type, type_index) => {
       let from = '';
       let where = '';
       const visited = visited || {};
@@ -793,14 +789,14 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
         }
 
         const where_aliased = Object.keys(individual.properties)
-          .map(function (property_uri, i) {
+          .map((property_uri, i) => {
             if (property_uri.indexOf('.') >= 0 || property_uri.indexOf('*') >= 0) {
               throw new Error('VQL style property nesting: ' + property_uri);
             }
             if (property_uri === '@' || property_uri === 'rdf:type') {
               return;
             }
-            const values = individual.get(property_uri).sort(function (a, b) {
+            const values = individual.get(property_uri).sort((a, b) => {
               return a < b ? - 1 : a === b ? 0 : 1;
             });
             const prop = alias + '.' + property_uri.replace(re, '_');
@@ -823,17 +819,17 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
               break;
             case typeof values[0] === 'boolean':
               oneProp = values
-                .map(function (value) {
+                .map((value) => {
                   return prop + '_int[1] = ' + (value ? 1 : 0);
                 }).join(' OR ');
               break;
             case values[0] instanceof String:
               oneProp = values
                 .filter(Boolean)
-                .map( function (value) {
+                .map((value) => {
                   const q = value;
                   const lines = q.trim().split('\n');
-                  const lineQueries = lines.map(function (line) {
+                  const lineQueries = lines.map((line) => {
                     const words = line
                       .trim()
                       .replace(/[-*\s]+/g, ' ')
@@ -856,7 +852,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
             case values[0] instanceof IndividualModel:
               oneProp = values
                 .filter(Boolean)
-                .map( function (value) {
+                .map((value) => {
                   if ( value.isNew() && !(value.id in visited)) {
                     return buildQuery(value, prop + '_str');
                   } else if ( value.isNew() && value.id in visited ) {
@@ -899,11 +895,11 @@ Util.queryFromIndividual = function (individual) {
     return individual.get('*')[0];
   }
   const allProps = Object.getOwnPropertyNames(flat)
-    .map(function (property_uri) {
+    .map((property_uri) => {
       if (property_uri === '@' || property_uri === 'v-s:isDraft') {
         return;
       }
-      const values = flat[property_uri].sort(function (a, b) {
+      const values = flat[property_uri].sort((a, b) => {
         return a.data < b.data ? - 1 : a.data === b.data ? 0 : 1;
       });
       let oneProp;
@@ -922,26 +918,24 @@ Util.queryFromIndividual = function (individual) {
         break;
       case 'Boolean':
         oneProp = values
-          .map( function (value) {
+          .map((value) => {
             return '\'' + property_uri + '\'==\'' + value.data + '\'';
           })
           .join(' || ');
         break;
       case 'String':
         oneProp = values
-          .filter(function (item) {
-            return !!item && !!item.valueOf();
-          })
-          .map( function (value) {
+          .filter((item) => !!item && !!item.valueOf())
+          .map((value) => {
             const q = value.data;
             if ( !q.match(/[\+\-\*]/) ) {
               const lines = q.trim().split('\n');
-              const lineQueries = lines.map(function (line) {
+              const lineQueries = lines.map((line) => {
                 const words = line
                   .trim()
                   .replace(/[-*\s]+/g, ' ')
                   .split(' ');
-                line = words.map(function (word) {
+                line = words.map((word) => {
                   return '+' + word + '*';
                 }).join(' ');
                 return '\'' + property_uri + '\'==\'' + line + '\'';
@@ -955,10 +949,8 @@ Util.queryFromIndividual = function (individual) {
         break;
       case 'Uri':
         oneProp = values
-          .filter(function (item) {
-            return !!item && !!item.valueOf();
-          })
-          .map( function (value) {
+          .filter((item) => !!item && !!item.valueOf())
+          .map((value) => {
             if (property_uri === 'rdf:type') {
               return '\'' + property_uri + '\'==\'' + value.data + '\'';
             } else {
@@ -970,9 +962,7 @@ Util.queryFromIndividual = function (individual) {
       }
       return oneProp ? '( ' + oneProp + ' )' : undefined;
     })
-    .filter(function (item) {
-      return typeof item !== undefined;
-    })
+    .filter((item) => typeof item !== 'undefined')
     .join(' && ');
   const query = allProps ? '( ' + allProps + ' )' : undefined;
   return query;
@@ -1046,9 +1036,9 @@ Util.complexLabel = function (individual) {
       const length = properties.length;
       if (i === length - 1) {
         const parts = [];
-        intermediates.forEach(function (item) {
+        intermediates.forEach((item) => {
           if (item[property]) {
-            const part = item[property].reduce(function (acc, value) {
+            const part = item[property].reduce((acc, value) => {
               if ( !value.lang || value.lang === 'NONE' || value.lang.toLowerCase() === language.toLowerCase() ) {
                 let data = value.data;
                 if ( data instanceof Date || re_date.test(data) ) {
@@ -1066,9 +1056,9 @@ Util.complexLabel = function (individual) {
         return parts.join(', ');
       }
       const temp = [];
-      intermediates.forEach(function (item) {
+      intermediates.forEach((item) => {
         if (Util.hasValue(item, property)) {
-          item[property].forEach(function (propertyItem) {
+          item[property].forEach((propertyItem) => {
             temp.push(get_cached(propertyItem.data));
           });
         }
@@ -1084,19 +1074,19 @@ Util.complexLabel = function (individual) {
 
   try {
     const availableLanguages = get_cached('v-ui:AvailableLanguage');
-    const languages = availableLanguages['rdf:value'].map(function (languageValue) {
+    const languages = availableLanguages['rdf:value'].map((languageValue) => {
       const languageUri = languageValue.data;
       const language = get_cached(languageUri);
       return language['rdf:value'][0].data;
     });
-    return individual['rdf:type'].reduce(function (acc, typeValue) {
+    return individual['rdf:type'].reduce((acc, typeValue) => {
       const typeUri = typeValue.data;
       const type = get_cached(typeUri);
       if ( !type || !Util.hasValue(type, 'v-s:labelPattern') ) {
         return acc;
       }
       const pattern = type['v-s:labelPattern'][0].data;
-      languages.forEach(function (language) {
+      languages.forEach((language) => {
         const replaced = pattern.replace(/{(\s*([^{}]+)\s*)}/g, function (match, group) {
           let indexes = null;
           if (group.indexOf(' ') != -1) {

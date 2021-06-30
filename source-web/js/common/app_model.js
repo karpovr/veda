@@ -59,7 +59,7 @@ export default function AppModel (manifest) {
       this.count++;
       if (typeof window !== 'undefined' && expire_key !== 1) {
         const updateService = new UpdateService();
-        updateService.then(function (updateService) {
+        updateService.then((updateService) => {
           updateService.subscribe(obj.id);
         });
       }
@@ -67,16 +67,14 @@ export default function AppModel (manifest) {
     remove: function (key) {
       const obj = this.storage[key];
       const expires = obj.expires;
-      this.expire[expires] = this.expire[expires].filter(function (item) {
-        return item.id !== key;
-      });
+      this.expire[expires] = this.expire[expires].filter((item) => item.id !== key);
       if (this.expire[expires].length === 0) {
         delete this.expire[expires];
       }
       this.count--;
       if (typeof window !== 'undefined') {
         const updateService = new UpdateService();
-        updateService.then(function (updateService) {
+        updateService.then((updateService) => {
           updateService.unsubscribe(key);
         });
       }
@@ -88,7 +86,7 @@ export default function AppModel (manifest) {
       this.expire = {};
       if (typeof window !== 'undefined') {
         const updateService = new UpdateService();
-        updateService.then(function (updateService) {
+        updateService.then((updateService) => {
           updateService.unsubscribe();
         });
       }

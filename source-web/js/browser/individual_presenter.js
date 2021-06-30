@@ -50,7 +50,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
   const reg_file = /\.html$/;
 
   return this.load()
-    .then(function (individual) {
+    .then((individual) => {
       if (template) {
         if (template instanceof IndividualModel) {
         // if template is uri
@@ -65,10 +65,10 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
           }
           return renderTemplate(individual, container, templateString, mode, extra, toAppend);
         }
-        return template.load().then(function (template) {
+        return template.load().then((template) => {
           const templateString = template['v-ui:template'][0];
           if (reg_file.test(templateString)) {
-            return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
+            return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
               return renderTemplate(individual, container, templateString, mode, extra, toAppend);
             });
           } else {
@@ -80,13 +80,13 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         let templatePromise;
         if ( individual.hasValue('v-ui:hasTemplate') && !isClass ) {
           template = individual['v-ui:hasTemplate'][0];
-          templatePromise = template.load().then(function (template) {
+          templatePromise = template.load().then((template) => {
             if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
               throw new Error('Template type violation!');
             }
             const templateString = template['v-ui:template'][0].toString();
             if (reg_file.test(templateString)) {
-              return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
+              return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
                 return renderTemplate(individual, container, templateString, mode, extra, toAppend);
               });
             } else {
@@ -96,11 +96,11 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         } else {
           const ontology = veda.ontology;
 
-          const typePromises = individual['rdf:type'].map(function (type) {
+          const typePromises = individual['rdf:type'].map((type) => {
             return type.load();
           });
-          templatePromise = Promise.all(typePromises).then(function (types) {
-            const templatesPromises = types.map( function (type) {
+          templatePromise = Promise.all(typePromises).then((types) => {
+            const templatesPromises = types.map((type) => {
               const defaultTemplateUri = ontology.getClassTemplate(type.id);
               if (defaultTemplateUri) {
                 return new IndividualModel(defaultTemplateUri).load();
@@ -109,11 +109,11 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
               }
             });
             return Promise.all(templatesPromises);
-          }).then(function (templates) {
-            const renderedTemplatesPromises = templates.map( function (template) {
+          }).then((templates) => {
+            const renderedTemplatesPromises = templates.map((template) => {
               const templateString = template['v-ui:template'][0];
               if (reg_file.test(templateString)) {
-                return veda.Backend.loadFile('/templates/' + templateString).then(function (templateString) {
+                return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
                   return renderTemplate(individual, container, templateString, mode, extra, toAppend);
                 });
               } else {
@@ -121,8 +121,8 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
               }
             });
             return Promise.all(renderedTemplatesPromises);
-          }).then(function (renderedTemplates) {
-            return renderedTemplates.reduce(function (acc, renderedTemplate) {
+          }).then((renderedTemplates) => {
+            return renderedTemplates.reduce((acc, renderedTemplate) => {
               return acc.add(renderedTemplate);
             }, $());
           });
@@ -195,8 +195,8 @@ function renderTemplate (individual, container, template, mode, extra, toAppend)
     pre_result = eval('(function (){ \'use strict\'; ' + pre_render_src + '}).call(individual);');
   }
 
-  return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(function () {
-    return processTemplate(individual, container, template, mode).then(function (processedTemplate) {
+  return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
+    return processTemplate(individual, container, template, mode).then((processedTemplate) => {
       processedTemplate.triggerHandler(mode);
 
       if (toAppend) {
@@ -227,14 +227,14 @@ function processTemplate (individual, container, template, mode) {
   const ontology = veda.ontology;
   const specs = $.extend.apply(
     {}, [{}].concat(
-      individual['rdf:type'].map( function (_class) {
+      individual['rdf:type'].map((_class) => {
         return ontology.getClassSpecifications(_class.id);
       }),
     ),
   );
   template.attr({
     'resource': individual.id,
-    'typeof': individual['rdf:type'].map(function (item) {
+    'typeof': individual['rdf:type'].map((item) => {
       return item.id;
     }).join(' '),
   });
@@ -272,7 +272,7 @@ function processTemplate (individual, container, template, mode) {
    * @return {void}
    */
   const syncEmbedded = function (event) {
-    embedded.map(function (item) {
+    embedded.map((item) => {
       item.triggerHandler(event.type, individual.id);
     });
     event.stopPropagation();
@@ -405,7 +405,7 @@ function processTemplate (individual, container, template, mode) {
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).remove()), Promise.resolve())
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
-        removedAlert.load().then(function (removedAlert) {
+        removedAlert.load().then((removedAlert) => {
           template.empty().append(`<code>${removedAlert.toString()}</code>`);
         }).catch(console.log);
       })
@@ -423,7 +423,7 @@ function processTemplate (individual, container, template, mode) {
       if ( container && typeof container.prop === 'function' && container.prop('id') === 'main' && !template.hasClass('deleted') ) {
         const alertModel = new IndividualModel('v-s:DeletedAlert');
         const recoverModel = new IndividualModel('v-s:Recover');
-        Promise.all([alertModel.load(), recoverModel.load(), this.canUpdate()]).then(function (arr) {
+        Promise.all([alertModel.load(), recoverModel.load(), this.canUpdate()]).then((arr) => {
           let alert = arr[0]['rdfs:label'].map(Util.formatValue).join(' ');
           const recover = arr[1]['rdfs:label'].map(Util.formatValue).join(' ');
           const canUpdate = arr[2];
@@ -437,7 +437,7 @@ function processTemplate (individual, container, template, mode) {
               </div>
             </div>`,
           );
-          $('.recover', deletedAlert).click(function () {
+          $('.recover', deletedAlert).click(() => {
             template.triggerHandler('recover');
           });
           template.prepend(deletedAlert);
@@ -467,7 +467,7 @@ function processTemplate (individual, container, template, mode) {
   const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) && mode === 'view' ) {
       if ( (container.prop('id') === 'main' || container.hasClass('modal-body') ) && !template.hasClass('invalid') ) {
-        new IndividualModel('v-s:InvalidAlert').load().then(function (loaded) {
+        new IndividualModel('v-s:InvalidAlert').load().then((loaded) => {
           const alert = loaded['rdfs:label'].map(Util.formatValue).join(' ');
           const invalidAlert = $(
             `<div id="invalid-alert" class="container sheet margin-lg">
@@ -498,37 +498,37 @@ function processTemplate (individual, container, template, mode) {
   // Process RDFa compliant template
 
   // Special (not RDFa)
-  template.find('[href*=\'@\']:not([rel] *):not([about] *)').addBack('[href*=\'@\']:not([rel] *):not([about] *)').map( function (i, el) {
+  template.find('[href*=\'@\']:not([rel] *):not([about] *)').addBack('[href*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
     const self = $(el);
     const str = self.attr('href');
     self.attr('href', str.replace('@', individual.id));
   });
 
-  template.find('[src*=\'@\']:not([rel] *):not([about] *)').addBack('[src*=\'@\']:not([rel] *):not([about] *)').map( function (i, el) {
+  template.find('[src*=\'@\']:not([rel] *):not([about] *)').addBack('[src*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
     const self = $(el);
     const str = self.attr('src');
     self.attr('src', str.replace('@', individual.id));
   });
 
-  template.find('[style*=\'@\']:not([rel] *):not([about] *)').addBack('[style*=\'@\']:not([rel] *):not([about] *)').map( function (i, el) {
+  template.find('[style*=\'@\']:not([rel] *):not([about] *)').addBack('[style*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
     const self = $(el);
     const style = self.attr('style');
     self.attr('style', style.replace('@', individual.id));
   });
 
-  template.find('[title]:not([rel] *):not([about] *)').addBack('[style*=\'@\']:not([rel] *):not([about] *)').map( function (i, el) {
+  template.find('[title]:not([rel] *):not([about] *)').addBack('[style*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
     const self = $(el);
     const title = self.attr('title');
     if ( (/^(\w|-)+:.*?$/).test(title) ) {
       const titleIndividual = new IndividualModel(title);
-      titleIndividual.load().then(function (titleIndividual) {
+      titleIndividual.load().then((titleIndividual) => {
         self.attr('title', titleIndividual);
       });
     }
   });
 
   // Property values
-  const props = template.find('[property]:not(veda-control):not([rel] *):not([about] *)').addBack('[property]:not(veda-control):not([rel] *):not([about] *)').map( function (i, el) {
+  const props = template.find('[property]:not(veda-control):not([rel] *):not([about] *)').addBack('[property]:not(veda-control):not([rel] *):not([about] *)').map((i, el) => {
     const propertyContainer = $(el);
     const property_uri = propertyContainer.attr('property');
     const about_uri = propertyContainer.attr('about');
@@ -547,7 +547,7 @@ function processTemplate (individual, container, template, mode) {
       isAbout = true;
     }
 
-    return about.load().then(function (about) {
+    return about.load().then((about) => {
       const idModifiedHandler = function () {
         propertyContainer.text(about.id);
       };
@@ -588,7 +588,7 @@ function processTemplate (individual, container, template, mode) {
   });
 
   // Related resources & about resources
-  const rels = template.find('[rel]:not(veda-control):not([rel] *):not([about] *)').addBack('[rel]:not(veda-control):not([rel] *):not([about] *)').map( function (i, el) {
+  const rels = template.find('[rel]:not(veda-control):not([rel] *):not([about] *)').addBack('[rel]:not(veda-control):not([rel] *):not([about] *)').map((i, el) => {
     const relContainer = $(el);
     let about = relContainer.attr('about');
     const rel_uri = relContainer.attr('rel');
@@ -611,7 +611,7 @@ function processTemplate (individual, container, template, mode) {
         const uris = $(this).sortable('toArray', {attribute: 'resource'});
         individual.set(
           rel_uri,
-          uris.map(function (uri) {
+          uris.map((uri) => {
             return new IndividualModel(uri);
           }),
         );
@@ -665,7 +665,7 @@ function processTemplate (individual, container, template, mode) {
       e.stopPropagation();
     });
 
-    return about.load().then(function (about) {
+    return about.load().then((about) => {
       const values = about.get(rel_uri);
 
       const propertyModifiedHandler = function (values, limit_param) {
@@ -692,7 +692,7 @@ function processTemplate (individual, container, template, mode) {
 
       const embeddedHandler = function (values) {
         if (mode === 'edit') {
-          values.map(function (value) {
+          values.map((value) => {
             if (
               value.id !== about.id && // prevent self parent
               rel_uri !== 'v-s:parent' && // prevent circular parent
@@ -727,7 +727,7 @@ function processTemplate (individual, container, template, mode) {
   }).get();
 
   // About resource
-  const abouts = template.find('[about]:not([rel] *):not([about] *):not([rel]):not([property])').addBack('[about]:not([rel] *):not([about] *):not([rel]):not([property])').map( function (i, el) {
+  const abouts = template.find('[about]:not([rel] *):not([about] *):not([rel]):not([property])').addBack('[about]:not([rel] *):not([about] *):not([rel]):not([property])').map((i, el) => {
     const aboutContainer = $(el);
     const about_template_uri = aboutContainer.attr('data-template');
     const about_inline_template = aboutContainer.html().trim();
@@ -745,7 +745,7 @@ function processTemplate (individual, container, template, mode) {
     } else {
       about = new IndividualModel(aboutContainer.attr('about'));
     }
-    return about.present(aboutContainer, aboutTemplate, isEmbedded ? mode : undefined).then(function (aboutTemplate) {
+    return about.present(aboutContainer, aboutTemplate, isEmbedded ? mode : undefined).then((aboutTemplate) => {
       if (isEmbedded) {
         aboutTemplate.data('isEmbedded', true);
         embedded.push(aboutTemplate);
@@ -770,7 +770,7 @@ function processTemplate (individual, container, template, mode) {
   const validateTemplate = function (event) {
     event.stopPropagation();
     if (mode === 'edit') {
-      Object.keys(validation).map( function (property_uri) {
+      Object.keys(validation).map((property_uri) => {
         if (property_uri === 'state') {
           return;
         }
@@ -778,13 +778,13 @@ function processTemplate (individual, container, template, mode) {
         validation[property_uri] = validate(individual, property_uri, spec);
       });
       template.trigger('validate');
-      validation.state = Object.keys(validation).reduce( function (acc, property_uri) {
+      validation.state = Object.keys(validation).reduce((acc, property_uri) => {
         if (property_uri === 'state') {
           return acc;
         }
         return acc && validation[property_uri].state;
       }, true);
-      validation.state = validation.state && embedded.reduce(function (acc, embeddedTemplate) {
+      validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
         const embeddedValidation = embeddedTemplate.data('validation');
         return embeddedValidation ? acc && embeddedValidation.state : acc;
       }, true);
@@ -822,13 +822,13 @@ function processTemplate (individual, container, template, mode) {
   const mergeValidationResult = function (event, validationResult) {
     event.stopPropagation();
     if (mode === 'edit') {
-      Object.keys(validationResult).map(function (property_uri) {
+      Object.keys(validationResult).map((property_uri) => {
         if (property_uri === 'state') {
           return;
         }
         validation[property_uri] = validationResult[property_uri];
       });
-      validation.state = Object.keys(validation).reduce( function (acc, property_uri) {
+      validation.state = Object.keys(validation).reduce((acc, property_uri) => {
         if (property_uri === 'state') {
           return acc;
         }
@@ -843,7 +843,7 @@ function processTemplate (individual, container, template, mode) {
   template.on('validated', mergeValidationResult);
 
   // Controls
-  template.find('veda-control[property], veda-control[rel]').not('[rel] *').not('[about] *').map( function (i, el) {
+  template.find('veda-control[property], veda-control[rel]').not('[rel] *').not('[about] *').map((i, el) => {
     const control = $(el);
     const property_uri = control.attr('property') || control.attr('rel');
     const type = control.attr('data-type') || 'generic';
@@ -865,11 +865,11 @@ function processTemplate (individual, container, template, mode) {
         if (validation[property_uri].message) {
           explanation = validation[property_uri].message;
         } else {
-          const causesPromises = validation[property_uri].cause.map(function (cause_uri) {
+          const causesPromises = validation[property_uri].cause.map((cause_uri) => {
             return new IndividualModel(cause_uri).load();
           });
-          Promise.all(causesPromises).then(function (causes) {
-            explanation = causes.map(function (cause) {
+          Promise.all(causesPromises).then((causes) => {
+            explanation = causes.map((cause) => {
               return cause['rdfs:comment'].map(Util.formatValue).filter(Boolean).join(', ');
             }).join('\n');
           });
@@ -915,7 +915,7 @@ function processTemplate (individual, container, template, mode) {
   });
 
   const promises = rels.concat(abouts, props);
-  return Promise.all(promises).then(function () {
+  return Promise.all(promises).then(() => {
     return template;
   });
 }
@@ -932,7 +932,7 @@ function processTemplate (individual, container, template, mode) {
  */
 function renderPropertyValues (about, isAbout, property_uri, propertyContainer, template, mode) {
   propertyContainer.empty();
-  about.get(property_uri).map( function (value) {
+  about.get(property_uri).map((value) => {
     const formattedValue = Util.formatValue(value);
     if (isAbout) {
       const prevValue = propertyContainer.text();
@@ -953,11 +953,11 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
         btnGroup.hide();
       }
 
-      btnRemove.click(function () {
+      btnRemove.click(() => {
         about.removeValue( property_uri, value );
-      }).mouseenter(function () {
+      }).mouseenter(() => {
         valueHolder.addClass('red-outline');
-      }).mouseleave(function () {
+      }).mouseleave(() => {
         valueHolder.removeClass('red-outline');
       });
       valueHolder.append( btnGroup );
@@ -981,7 +981,7 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
  * @return {void}
  */
 function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend) {
-  return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then(function (valTemplate) {
+  return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then((valTemplate) => {
     if (isEmbedded) {
       valTemplate.data('isEmbedded', true);
       embedded.push(valTemplate);
@@ -1009,7 +1009,7 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
         btnGroup.hide();
       }
 
-      btnRemove.click(function (e) {
+      btnRemove.click((e) => {
         e.preventDefault();
         e.stopPropagation();
         valTemplate.remove();
@@ -1017,20 +1017,20 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
         if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) ) {
           value.delete();
         }
-      }).mouseenter(function () {
+      }).mouseenter(() => {
         valTemplate.addClass('red-outline');
-      }).mouseleave(function () {
+      }).mouseleave(() => {
         valTemplate.removeClass('red-outline');
       });
 
       // Sortable scroll bugfix
-      btnDrag.mouseenter(function () {
+      btnDrag.mouseenter(() => {
         valTemplate.addClass('gray-outline');
-      }).mouseleave(function () {
+      }).mouseleave(() => {
         valTemplate.removeClass('gray-outline');
-      }).mousedown(function () {
+      }).mousedown(() => {
         relContainer.addClass('sortable-overflow');
-      }).mouseup(function () {
+      }).mouseup(() => {
         relContainer.removeClass('sortable-overflow');
       });
 
@@ -1069,7 +1069,7 @@ function validate (individual, property_uri, spec) {
   if (spec.hasValue('v-ui:minCardinality')) {
     const minCardinalityState = (values.length >= spec['v-ui:minCardinality'][0] &&
     // filter empty values
-    values.length === values.filter(function (item) {
+    values.length === values.filter((item) => {
       return (
         typeof item === 'boolean' ? true :
           typeof item === 'number' ? true : !!item
@@ -1084,7 +1084,7 @@ function validate (individual, property_uri, spec) {
     const maxCardinalityState = (
       values.length <= spec['v-ui:maxCardinality'][0] &&
       // filter empty values
-      values.length === values.filter(function (item) {
+      values.length === values.filter((item) => {
         return (
           typeof item === 'boolean' ? true :
             typeof item === 'number' ? true : !!item
@@ -1097,7 +1097,7 @@ function validate (individual, property_uri, spec) {
     }
   }
   // check each value
-  result = result && values.reduce(function (result, value) {
+  result = result && values.reduce((result, value) => {
     // regexp check
     if (spec.hasValue('v-ui:regexp')) {
       const regexp = new RegExp(spec['v-ui:regexp'][0]);

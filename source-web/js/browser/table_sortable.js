@@ -2,11 +2,11 @@
 
 import $ from 'jquery';
 
-System.import('moment').then(function (module) {
+System.import('moment').then((module) => {
   const moment = module.default;
 
   $.fn.tableSortable = function (clicked) {
-    return this.each(function (i, el) {
+    return this.each((i, el) => {
       const table = $(el);
       if ( table.hasClass('table-sortable-done') ) {
         return;
@@ -16,11 +16,11 @@ System.import('moment').then(function (module) {
       const ths = thead.find('tr:last-child > th');
       table.addClass('table-sortable-done');
 
-      ths.each( function (i, el) {
+      ths.each((i, el) => {
         const th = $(el);
         const index = th.index();
 
-        th.click(function (e) {
+        th.click((e) => {
           const rows = tbody.children();
           e.preventDefault();
           e.stopPropagation();

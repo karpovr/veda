@@ -81,7 +81,7 @@ function notify (type = 'info', {name = '', message = ''}) {
   note.innerHTML = HTML.trim();
   container.insertBefore(fragment, container.firstChild);
 
-  setTimeout(function () {
+  setTimeout(() => {
     container.removeChild(note);
   }, 5000);
 }

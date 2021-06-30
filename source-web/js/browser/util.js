@@ -53,7 +53,7 @@ Util.toTTL = function (individualList, callback) {
     }
   };
 
-  let ttl = individualList.map(function (individual) {
+  let ttl = individualList.map((individual) => {
     let individual_ttl = '';
     for ( const property in individual.properties ) {
       if (Object.hasOwnProperty.call(individual.properties, property)) {
@@ -62,7 +62,7 @@ Util.toTTL = function (individualList, callback) {
           individual_ttl = resources + '\n' + individual_ttl;
           prefixer(resources, prefixes);
         } else {
-          const values = resources.reduce(function (acc, resource) {
+          const values = resources.reduce((acc, resource) => {
             let value;
             switch (resource.type) {
             case 'Boolean':
@@ -114,7 +114,7 @@ Util.toTTL = function (individualList, callback) {
 };
 
 Util.exportTTL = function (individualList) {
-  System.import('filesaver').then(function (module) {
+  System.import('filesaver').then((module) => {
     const saveAs = module.default;
     Util.toTTL(individualList, function (error, result) {
       const blob = new Blob([result], {type: 'text/plain;charset=utf-8'});
@@ -133,7 +133,7 @@ Util.createReport = function (report, params) {
     report = new IndividualModel(report);
   }
   const jasperServerCfg = new IndividualModel('cfg:jasperServerAddress');
-  Promise.all([report.load(), jasperServerCfg.load()]).then(function (loaded) {
+  Promise.all([report.load(), jasperServerCfg.load()]).then((loaded) => {
     const report = loaded[0];
     const jasperServerCfg = loaded[1];
     const jasperServerAddress = jasperServerCfg['rdf:value'][0];
@@ -143,12 +143,12 @@ Util.createReport = function (report, params) {
     form.setAttribute('action', jasperServerAddress + 'flow.html?_flowId=viewReportFlow&reportUnit=' + encodeURIComponent(report['v-s:reportPath'][0]) + '&output=' + encodeURIComponent(report['v-s:reportFormat'][0]) + '&documentId=' + encodeURIComponent(params.id) + '&ticket=' + veda.ticket);
     form.setAttribute('target', 'Report');
 
-    Object.getOwnPropertyNames(params.properties).forEach(function (key) {
+    Object.getOwnPropertyNames(params.properties).forEach((key) => {
       if ( key !== '@' && params.hasValue(key) ) {
         const hiddenField = document.createElement('input');
         hiddenField.setAttribute('type', 'hidden');
         hiddenField.setAttribute('name', key.replace(':', '_'));
-        const value = params.get(key).map(function (item) {
+        const value = params.get(key).map((item) => {
           return item instanceof IndividualModel ? item.id :
             item instanceof Date ? item.toISOString() :
               item;
@@ -198,14 +198,14 @@ Util.showModal = function (individual, template, mode) {
     individual = new IndividualModel(individual);
   }
   individual.present(container, template, mode);
-  modal.find('#follow').click( function () {
+  modal.find('#follow').click(() => {
     const resourceTemplate = modal.find('[resource]').first();
     const uri = resourceTemplate.attr('resource');
     const mode = resourceTemplate.data('mode');
     modal.modal('hide');
     riot.route( ['#', uri, '#main', undefined, mode].join('/') );
   });
-  $('.action#cancel', modal).click(function () {
+  $('.action#cancel', modal).click(() => {
     modal.modal('hide');
   });
   modal.on('hidden.bs.modal', function () {
@@ -220,7 +220,7 @@ Util.showSmallModal = function (individual, template, mode) {
   $('body').append(modal);
   const container = $('.modal-body', modal);
   individual.present(container, template, mode);
-  $('.action#cancel', modal).click(function () {
+  $('.action#cancel', modal).click(() => {
     modal.modal('hide');
   });
   modal.on('hidden.bs.modal', function () {
@@ -237,12 +237,12 @@ Util.confirm = function (individual, template, mode) {
   });
   $('body').append(modal);
   const container = $('.modal-body', modal);
-  return individual.present(container, template, mode).then(function () {
-    return new Promise(function (resolve, reject) {
-      $('.modal-footer > .ok', modal).click(function () {
+  return individual.present(container, template, mode).then(() => {
+    return new Promise((resolve, reject) => {
+      $('.modal-footer > .ok', modal).click(() => {
         resolve(true);
       });
-      $('.modal-footer > .cancel', modal).click(function () {
+      $('.modal-footer > .cancel', modal).click(() => {
         resolve(false);
       });
     });
@@ -262,18 +262,18 @@ Util.confirm = function (individual, template, mode) {
 Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
     (template.data('mode') === 'edit' ? individual.isSync(false) || template.data('save')() : Promise.resolve())
-      .then(function () {
+      .then(() => {
         const transform = new IndividualModel(transformId);
-        return transform.load().then(function (transform) {
-          return Util.buildStartFormByTransformation(individual, transform).then(function (startForm) {
+        return transform.load().then((transform) => {
+          return Util.buildStartFormByTransformation(individual, transform).then((startForm) => {
             return Util.showModal(startForm, startFormTemplate, 'edit');
           });
         });
       })
-      .catch(function (error) {
+      .catch((error) => {
         const notify = new Notify();
         const sendError = new IndividualModel('v-s:SendError');
-        sendError.load().then(function (sendError) {
+        sendError.load().then((sendError) => {
           notify('danger', {name: sendError});
         });
         console.log('Save before send error:', error.stack);
@@ -282,18 +282,18 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
   } else {
     individual['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
     template.data('save')()
-      .then(function () {
+      .then(() => {
         template.closest('.modal').modal('hide').remove();
         const notify = new Notify();
         const sendSuccess = new IndividualModel('v-s:SendSuccess');
-        sendSuccess.load().then(function (sendSuccess) {
+        sendSuccess.load().then((sendSuccess) => {
           notify('success', {name: sendSuccess});
         });
       })
-      .catch(function (error) {
+      .catch((error) => {
         const notify = new Notify();
         const sendError = new IndividualModel('v-s:SendError');
-        sendError.load().then(function (sendError) {
+        sendError.load().then((sendError) => {
           notify('danger', {name: sendError});
         });
         console.log('Send error:', error.stack);
@@ -310,9 +310,9 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
  */
 Util.buildStartFormByTransformation = function (individual, transformation) {
   const promises = [individual.load(), transformation.load()];
-  return Promise.all(promises).then(function (loadedItems) {
+  return Promise.all(promises).then((loadedItems) => {
     return Util.transformation(loadedItems[0].properties, loadedItems[1].properties);
-  }).then(function (transformResult) {
+  }).then((transformResult) => {
     const startForm = new IndividualModel(transformResult[0]);
     startForm.isNew(true);
     startForm.isSync(false);
@@ -354,14 +354,14 @@ Util.transformation = function (individuals, transform) {
     return Promise.resolve();
   }
 
-  return Backend.get_individuals(veda.ticket, rules).then(function (rules) {
+  return Backend.get_individuals(veda.ticket, rules).then((rules) => {
     const out_data0 = {};
 
     let out_data0_el = {};
 
     /* PUT functions [BEGIN] */
 
-    const putFieldOfObject = (function () {
+    const putFieldOfObject = (() => {
       return function (name, field) {
         let out_data0_el_arr;
 
@@ -377,7 +377,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const putUri = (function () {
+    const putUri = (() => {
       return function (name, value) {
         let out_data0_el_arr;
 
@@ -405,7 +405,7 @@ Util.transformation = function (individuals, transform) {
         }];
     };
 
-    const putString = (function () {
+    const putString = (() => {
       return function (name, value) {
         let out_data0_el_arr;
 
@@ -425,7 +425,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setString = (function () {
+    const setString = (() => {
       return function (name, value) {
         const out_data0_el_arr = [];
 
@@ -439,7 +439,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setDatetime = (function () {
+    const setDatetime = (() => {
       return function (name, value) {
         const out_data0_el_arr = [];
 
@@ -453,7 +453,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const putDatetime = (function () {
+    const putDatetime = (() => {
       return function (name, value) {
         let out_data0_el_arr;
 
@@ -473,7 +473,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const putBoolean = (function () {
+    const putBoolean = (() => {
       return function (name, value) {
         let out_data0_el_arr;
 
@@ -493,7 +493,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setBoolean = (function () {
+    const setBoolean = (() => {
       return function (name, value) {
         const out_data0_el_arr = [];
 
@@ -508,7 +508,7 @@ Util.transformation = function (individuals, transform) {
     })();
 
 
-    const putInteger = (function () {
+    const putInteger = (() => {
       return function (name, value) {
         let out_data0_el_arr = out_data0_el[name];
 
@@ -526,7 +526,7 @@ Util.transformation = function (individuals, transform) {
       };
     })();
 
-    const setInteger = (function () {
+    const setInteger = (() => {
       return function (name, value) {
         const out_data0_el_arr = [];
 
@@ -548,7 +548,7 @@ Util.transformation = function (individuals, transform) {
         const individual = individuals[key];
 
         // print("#1.1 key=", key);
-        const objectContentStrValue = (function () {
+        const objectContentStrValue = (() => {
           return function (name, value) {
             if (individual[name]) {
               let result = false;
@@ -567,7 +567,7 @@ Util.transformation = function (individuals, transform) {
         for (let key2 = 0; key2 < iteratedObject.length; key2++) {
           const element = individual[iteratedObject[key2]];
 
-          const putValue = (function () {
+          const putValue = (() => {
             return function (name) {
               let out_data0_el_arr = out_data0_el[name];
 
@@ -597,7 +597,7 @@ Util.transformation = function (individuals, transform) {
             };
           })();
 
-          const putValueFrom = (function () {
+          const putValueFrom = (() => {
             return function (name, path, transform) {
               let out_data0_el_arr = out_data0_el[name];
               if (!out_data0_el_arr) {
@@ -629,7 +629,7 @@ Util.transformation = function (individuals, transform) {
             };
           })();
 
-          const putFrontValue = (function () {
+          const putFrontValue = (() => {
             return function (name) {
               let out_data0_el_arr = out_data0_el[name];
 
@@ -658,7 +658,7 @@ Util.transformation = function (individuals, transform) {
             };
           })();
 
-          const putElement = (function () {
+          const putElement = (() => {
             return function () {
               const name = iteratedObject[key2];
               if (name == '@') {
@@ -687,13 +687,13 @@ Util.transformation = function (individuals, transform) {
           })();
 
           /* Segregate functions [BEGIN] */
-          const contentName = (function () {
+          const contentName = (() => {
             return function (name) {
               return iteratedObject[key2] == name;
             };
           })();
 
-          const elementContentStrValue = (function () {
+          const elementContentStrValue = (() => {
             return function (name, value) {
               if (iteratedObject[key2] !== name) {
                 return false;
@@ -708,7 +708,7 @@ Util.transformation = function (individuals, transform) {
           })();
           /* Segregate functions [END] */
 
-          const getElement = (function () {
+          const getElement = (() => {
             return function () {
               return element;
             };
@@ -795,7 +795,7 @@ Util.transformation = function (individuals, transform) {
     }
 
     return out_data;
-  }).catch(function (error) {
+  }).catch((error) => {
     console.log(error);
   });
 };

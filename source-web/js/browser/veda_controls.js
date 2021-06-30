@@ -10,6 +10,8 @@ import autosize from 'autosize';
 
 import Util from '../common/util.js';
 
+import 'adoptedStyleSheets';
+
 // INPUT CONTROLS
 
 // Generic literal input behaviour
@@ -37,7 +39,7 @@ function veda_literal_input (options) {
       'name': (individual.hasValue('rdf:type') ? individual['rdf:type'].pop().id + '_' + property_uri : property_uri).toLowerCase().replace(/[-:]/g, '_'),
     })
     .on('change focusout', changeHandler)
-    .keyup( function (e) {
+    .keyup((e) => {
       if (!input.isSingle) {
         return;
       }
@@ -385,10 +387,10 @@ $.fn.veda_decimal.defaults = {
   },
 };
 
-System.import('moment').then(function (module) {
+System.import('moment').then((module) => {
   const moment = module.default;
-  System.import('datetimepicker/js/bootstrap-datetimepicker.min.js').then(function () {
-    System.import('datetimepicker/css/bootstrap-datetimepicker.min.css').then(function (module) {
+  System.import('datetimepicker/js/bootstrap-datetimepicker.min.js').then(() => {
+    System.import('datetimepicker/css/bootstrap-datetimepicker.min.css').then((module) => {
       const styleSheet = module.default;
       document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
     });
@@ -627,7 +629,7 @@ function veda_multilingual (options) {
     this.find('input').attr('tabindex', tabindex);
   }
 
-  Object.keys(veda.user.preferences.language).map(function (language_name) {
+  Object.keys(veda.user.preferences.language).map((language_name) => {
     const localedInput = $(opts.template);
 
     localedInput.find('.language-tag').text(language_name);
@@ -640,12 +642,12 @@ function veda_multilingual (options) {
         'name': (individual.hasValue('rdf:type') ? individual['rdf:type'].pop().id + '_' + property_uri : property_uri).toLowerCase().replace(/[-:]/g, '_'),
       })
       .on('change focusout', function () {
-        const values = self.find('.form-control').map(function (i, el) {
+        const values = self.find('.form-control').map((i, el) => {
           return opts.parser( el.value, el );
         }).get();
         individual.set(property_uri, values);
       })
-      .keyup( function (e) {
+      .keyup((e) => {
         if (e.which === 13) {
           formControl.change();
         }
@@ -655,7 +657,7 @@ function veda_multilingual (options) {
         timeout = setTimeout(keyupHandler, 50, e);
       });
 
-    individual.get(property_uri).forEach(function (value) {
+    individual.get(property_uri).forEach((value) => {
       if ( value.language === language_name || !value.language ) {
         formControl.val(value);
       }
@@ -698,10 +700,10 @@ function veda_multilingual (options) {
    * @return {void}
    */
   function handler (values) {
-    input.each(function (i, el) {
+    input.each((i, el) => {
       const self = el;
       const lang = el.lang;
-      individual.get(property_uri).forEach(function (value) {
+      individual.get(property_uri).forEach((value) => {
         if ( value.language === lang || !value.language && self.value != value) {
           try {
             if (self === document.activeElement) {
@@ -730,7 +732,7 @@ function veda_multilingual (options) {
     if (!value) {
       return parser( input.val() );
     }
-    input.each(function (i, el) {
+    input.each((i, el) => {
       if (value.language === el.lang || !value.language) {
         el.value = value.toString();
       }
@@ -849,7 +851,7 @@ $.fn.veda_boolean = function ( options ) {
     individual.off(property_uri, handler);
   });
 
-  control.click( function () {
+  control.click(() => {
     if ( control.prop('readonly') ) {
       individual.set(property_uri, [false]);
     } else if ( !control.prop('checked') ) {
@@ -921,17 +923,17 @@ $.fn.veda_actor = function ( options ) {
   const fulltextMenu = $('.fulltext-menu', control);
 
   // Disable closing actor type dropdown on click
-  $('.dropdown-menu', control).click(function (e) {
+  $('.dropdown-menu', control).click((e) => {
     e.stopPropagation();
   });
 
   // Close actor type dropdown on input click
-  fulltext.click(function () {
+  fulltext.click(() => {
     $('.dropdown-toggle', control).attr('aria-expanded', false).parent().removeClass('open');
   });
 
   // Filter allowed actor types, set label & handler
-  $('[name=\'actor-type\']', control).filter(function (i, el) {
+  $('[name=\'actor-type\']', control).filter((i, el) => {
     if (actorType.indexOf(el.value) < 0) {
       $(el).closest('.radio').remove();
       return false;
@@ -939,7 +941,7 @@ $.fn.veda_actor = function ( options ) {
       $(el).parent().append( new veda.IndividualModel(el.value).toString() );
       return true;
     }
-  }).change(function (e) {
+  }).change((e) => {
     $('.tree', control).hide();
     if ( $(e.target).is(':checked') ) {
       chosenActorType = e.target.value;
@@ -960,13 +962,13 @@ $.fn.veda_actor = function ( options ) {
   }).first().prop('checked', 'checked').change();
 
   // Full name check label & handler
-  $('[name=\'full-name\']', control).each(function (i, el) {
+  $('[name=\'full-name\']', control).each((i, el) => {
     const label = new veda.IndividualModel(el.value);
     const self = el;
-    label.load().then(function (label) {
+    label.load().then((label) => {
       $(self).parent().append( new veda.IndividualModel(self.value).toString() );
     });
-  }).change(function () {
+  }).change(() => {
     fullName = $(el).is(':checked') ? true : false;
     const ftValue = $('.fulltext', control).val();
     if (ftValue) {
@@ -974,13 +976,13 @@ $.fn.veda_actor = function ( options ) {
     }
   });
 
-  $('[name=\'only-deleted\']', control).each(function (i, el) {
+  $('[name=\'only-deleted\']', control).each((i, el) => {
     const label = new veda.IndividualModel(el.value);
     const self = el;
-    label.load().then(function (label) {
+    label.load().then((label) => {
       $(self).parent().append( new veda.IndividualModel(self.value).toString() );
     });
-  }).change(function () {
+  }).change(() => {
     onlyDeleted = $(el).is(':checked') ? true : false;
     const ftValue = $('.fulltext', control).val();
     if (ftValue) {
@@ -1035,7 +1037,7 @@ $.fn.veda_actor = function ( options ) {
   });
 
   if (placeholder instanceof veda.IndividualModel) {
-    placeholder.load().then(function (placeholder) {
+    placeholder.load().then((placeholder) => {
       fulltext.attr({
         'placeholder': placeholder.toString(),
         'name': (individual.hasValue('rdf:type') ? individual['rdf:type'][0].id + '_' + rel_uri : rel_uri).toLowerCase().replace(/[-:]/g, '_'),
@@ -1064,24 +1066,24 @@ $.fn.veda_actor = function ( options ) {
     new veda.IndividualModel('v-s:SelectAll').load(),
     new veda.IndividualModel('v-s:CancelSelection').load(),
     new veda.IndividualModel('v-s:InvertSelection').load(),
-  ]).then(function (actions) {
+  ]).then((actions) => {
     header.find('.select-all')
-      .click(function () {
+      .click(() => {
         suggestions.children(':not(.selected)').click();
       })
       .text( actions[0].toString() );
     header.find('.cancel-selection')
-      .click(function () {
+      .click(() => {
         suggestions.children('.selected').click();
       })
       .text( actions[1].toString() );
     header.find('.invert-selection')
-      .click(function () {
+      .click(() => {
         suggestions.children().click();
       })
       .text( actions[2].toString() );
     header.find('.close-menu')
-      .click(function () {
+      .click(() => {
         setValue(selected);
         fulltextMenu.hide();
         $(document).off('click', clickOutsideMenuHandler);
@@ -1105,7 +1107,7 @@ $.fn.veda_actor = function ( options ) {
     }
   });
 
-  const inputHandler = (function () {
+  const inputHandler = (() => {
     let timeout;
     const minLength = 3;
     const nav_keys = [37, 38, 39, 40, 9, 16]; // Arrows, shift, tab
@@ -1116,7 +1118,7 @@ $.fn.veda_actor = function ( options ) {
       if (nav_keys.indexOf(e.which) >= 0) {
         return;
       }
-      timeout = setTimeout(function () {
+      timeout = setTimeout(() => {
         const value = e.target.value;
         if (value.length >= minLength) {
           performSearch(value);
@@ -1131,7 +1133,7 @@ $.fn.veda_actor = function ( options ) {
         }
       }, 750);
     };
-  }());
+  })();
   fulltext.on('keydown', inputHandler);
 
   /**
@@ -1142,10 +1144,10 @@ $.fn.veda_actor = function ( options ) {
   function performSearch (value) {
     if ( chosenActorType === 'v-s:Appointment' || chosenActorType === 'v-s:Person' || chosenActorType === 'v-s:Position' ) {
       if ( fullName ) {
-        value = value.trim().split('\n').map(function (line) {
+        value = value.trim().split('\n').map((line) => {
           const fullNameProps = ['v-s:employee.v-s:lastName', 'v-s:employee.v-s:firstName', 'v-s:employee.v-s:middleName'];
           const fullNameInput = line.trim().replace(/\s+/g, ' ').split(' ');
-          const fullNameQuery = fullNameInput.map(function (token, i) {
+          const fullNameQuery = fullNameInput.map((token, i) => {
             if (i < 3 && token) {
               return '\'' + fullNameProps[i] + '\'==\'' + token + '*\'';
             }
@@ -1155,7 +1157,7 @@ $.fn.veda_actor = function ( options ) {
       }
     }
 
-    const ftQueryPromise = interpolate(queryPrefix, individual).then(function (queryPrefix) {
+    const ftQueryPromise = interpolate(queryPrefix, individual).then((queryPrefix) => {
       if (onlyDeleted) {
         return ftQuery(queryPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
       } else {
@@ -1165,7 +1167,7 @@ $.fn.veda_actor = function ( options ) {
 
     ftQueryPromise
       .then(renderResults)
-      .catch(function (error) {
+      .catch((error) => {
         console.log('Fulltext query error', error);
       });
   }
@@ -1180,7 +1182,7 @@ $.fn.veda_actor = function ( options ) {
   function renderResults (results) {
     selected = individual.get(rel_uri).concat(individual.get(rel_uri + '.v-s:employee'), individual.get(rel_uri + '.v-s:occupation'), individual.get(rel_uri + '.v-s:parentUnit'));
     if (results.length) {
-      const renderedPromises = results.map(function (result) {
+      const renderedPromises = results.map((result) => {
         const cont = $('<a href=\'#\' class=\'suggestion\'></a>').attr('resource', result.id);
         if (individual.hasValue(rel_uri, result) || individual.hasValue(rel_uri + '.v-s:employee', result) || individual.hasValue(rel_uri + '.v-s:occupation', result) || individual.hasValue(rel_uri + '.v-s:parentUnit', result)) {
           cont.addClass('selected');
@@ -1192,14 +1194,14 @@ $.fn.veda_actor = function ( options ) {
           tmpl = '<span about=\'@\' property=\'rdfs:label\'></span>';
         }
         return result.present(cont, tmpl)
-          .then(function () {
+          .then(() => {
             return cont;
           });
       });
-      Promise.all(renderedPromises).then(function (rendered) {
-        rendered = rendered.sort(function (a, b) {
+      Promise.all(renderedPromises).then((rendered) => {
+        rendered = rendered.sort((a, b) => {
           return a.text() < b.text() ? -1 : 1;
-        }).reduce(function (acc, curr) {
+        }).reduce((acc, curr) => {
           if ( !acc.length || acc[acc.length - 1].text() !== curr.text() ) {
             acc.push(curr);
           }
@@ -1271,7 +1273,7 @@ $.fn.veda_actor = function ( options ) {
         $(document).off('click', clickOutsideMenuHandler);
         $(document).off('keydown', arrowHandler);
       } else {
-        selected = selected.filter(function (value) {
+        selected = selected.filter((value) => {
           return value !== suggestion;
         });
       }
@@ -1286,7 +1288,7 @@ $.fn.veda_actor = function ( options ) {
         selected.push(suggestion);
       }
     }
-    dblTimeout = setTimeout(function () {
+    dblTimeout = setTimeout(() => {
       dblTimeout = undefined;
     }, 300);
     fulltext.focus();
@@ -1373,33 +1375,33 @@ $.fn.veda_actor = function ( options ) {
       if (chosenActorType === 'v-s:Appointment') {
         individual.set(rel_uri, values);
       } else if (chosenActorType === 'v-s:Person') {
-        Promise.all(values.map(function (value) {
+        Promise.all(values.map((value) => {
           if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
             return value['v-s:employee'][0].load();
           } else if ( value.hasValue('rdf:type', 'v-s:Person') ) {
             return value;
           }
-        })).then(function (persons) {
+        })).then((persons) => {
           individual.set(rel_uri + '.v-s:employee', persons);
         });
       } else if (chosenActorType === 'v-s:Position') {
-        Promise.all(values.map(function (value) {
+        Promise.all(values.map((value) => {
           if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
             return value['v-s:occupation'][0].load();
           } else if ( value.hasValue('rdf:type', 'v-s:Position') ) {
             return value;
           }
-        })).then(function (positions) {
+        })).then((positions) => {
           individual.set(rel_uri + '.v-s:occupation', positions);
         });
       } else if (chosenActorType === 'v-s:Department') {
-        Promise.all(values.map(function (value) {
+        Promise.all(values.map((value) => {
           if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
             return value['v-s:parentUnit'][0].load();
           } else if ( value.hasValue('rdf:type', 'v-s:Department') ) {
             return value;
           }
-        })).then(function (departments) {
+        })).then((departments) => {
           individual.set(rel_uri + '.v-s:parentUnit', departments);
         });
       }
@@ -1408,33 +1410,33 @@ $.fn.veda_actor = function ( options ) {
       if (chosenActorType === 'v-s:Appointment') {
         individual.set(rel_uri, values);
       } else if (chosenActorType === 'v-s:Person') {
-        Promise.all(values.map(function (value) {
+        Promise.all(values.map((value) => {
           if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
             return value['v-s:employee'][0].load();
           } else if ( value.hasValue('rdf:type', 'v-s:Person') ) {
             return value;
           }
-        })).then(function (persons) {
+        })).then((persons) => {
           individual.set(rel_uri, persons);
         });
       } else if (chosenActorType === 'v-s:Position') {
-        Promise.all(values.map(function (value) {
+        Promise.all(values.map((value) => {
           if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
             return value['v-s:occupation'][0].load();
           } else if ( value.hasValue('rdf:type', 'v-s:Position') ) {
             return value;
           }
-        })).then(function (positions) {
+        })).then((positions) => {
           individual.set(rel_uri, positions);
         });
       } else if (chosenActorType === 'v-s:Department') {
-        Promise.all(values.map(function (value) {
+        Promise.all(values.map((value) => {
           if ( value.hasValue('rdf:type', 'v-s:Appointment') ) {
             return value['v-s:parentUnit'][0].load();
           } else if ( value.hasValue('rdf:type', 'v-s:Department') ) {
             return value;
           }
-        })).then(function (departments) {
+        })).then((departments) => {
           individual.set(rel_uri, departments);
         });
       }
@@ -1449,7 +1451,7 @@ $.fn.veda_actor = function ( options ) {
   function propertyModifiedHandler (values) {
     if ( isSingle && (individual.hasValue(rel_uri) || individual.hasValue(rel_uri + '.v-s:employee') || individual.hasValue(rel_uri + '.v-s:occupation') || individual.hasValue(rel_uri + '.v-s:parentUnit')) ) {
       const value = individual.get(rel_uri).concat(individual.get(rel_uri + '.v-s:employee'), individual.get(rel_uri + '.v-s:occupation'), individual.get(rel_uri + '.v-s:parentUnit')).filter(Boolean)[0];
-      value.load().then(function (value) {
+      value.load().then((value) => {
         const newValueStr = value.toString();
         const oldValueStr = fulltext.val();
         if (newValueStr != oldValueStr) {
@@ -1487,7 +1489,7 @@ $.fn.veda_select = function (params) {
   const first_opt = $('option', control);
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : (new veda.IndividualModel(property_uri))['rdfs:range'];
-  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map(function (item) {
+  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
@@ -1499,7 +1501,7 @@ $.fn.veda_select = function (params) {
   let withDeleted = false || this.attr('data-deleted');
 
   if (placeholder instanceof veda.IndividualModel) {
-    placeholder.load().then(function (placeholderLoaded) {
+    placeholder.load().then((placeholderLoaded) => {
       placeholder = placeholderLoaded.toString();
       populate();
     });
@@ -1517,7 +1519,7 @@ $.fn.veda_select = function (params) {
     populate();
   });
 
-  control.change(function (e) {
+  control.change((e) => {
     const value = $('option:selected', control).data('value');
     if (isSingle) {
       individual.set(property_uri, [value]);
@@ -1549,16 +1551,16 @@ $.fn.veda_select = function (params) {
     } else if (source) {
       return Promise.resolve(eval(source))
         .then(renderOptions)
-        .catch(function (error) {
+        .catch((error) => {
           console.log('Source error', source);
         });
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
-        .then(function (queryPrefix) {
+        .then((queryPrefix) => {
           return ftQuery(queryPrefix, undefined, sort, withDeleted);
         })
         .then(renderOptions)
-        .catch(function (error) {
+        .catch((error) => {
           console.log('Query prefix error', queryPrefix);
         });
     }
@@ -1572,7 +1574,7 @@ $.fn.veda_select = function (params) {
   function renderOptions (options) {
     control.empty();
     first_opt.text(placeholder).data('value', null).appendTo(control);
-    const optionsPromises = options.map(function (value, index) {
+    const optionsPromises = options.map((value, index) => {
       if (index >= 100) {
         return;
       }
@@ -1597,8 +1599,8 @@ $.fn.veda_select = function (params) {
    */
   function handler () {
     if (isSingle) {
-      populate().then(function () {
-        $('option', control).each(function (i, el) {
+      populate().then(() => {
+        $('option', control).each((i, el) => {
           const value = $(el).data('value');
           const hasValue = !!value && individual.hasValue(property_uri, value);
           $(el).prop('selected', hasValue);
@@ -1648,7 +1650,7 @@ $.fn.veda_checkbox = function (params) {
   const spec = opts.spec;
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : (new veda.IndividualModel(property_uri))['rdfs:range'];
-  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map(function (item) {
+  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
@@ -1679,16 +1681,16 @@ $.fn.veda_checkbox = function (params) {
     } else if (source) {
       return Promise.resolve(eval(source))
         .then(renderOptions)
-        .catch(function (error) {
+        .catch((error) => {
           console.log('Source error', source);
         });
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
-        .then(function (queryPrefix) {
+        .then((queryPrefix) => {
           return ftQuery(queryPrefix, undefined, sort, withDeleted);
         })
         .then(renderOptions)
-        .catch(function (error) {
+        .catch((error) => {
           console.log('Query prefix error', queryPrefix);
         });
     }
@@ -1701,7 +1703,7 @@ $.fn.veda_checkbox = function (params) {
    */
   function renderOptions (options) {
     self.empty();
-    const optionsPromises = options.map(function (value, index) {
+    const optionsPromises = options.map((value, index) => {
       if (index >= 100) {
         return;
       }
@@ -1714,7 +1716,7 @@ $.fn.veda_checkbox = function (params) {
         }
         const hasValue = individual.hasValue(property_uri, value);
         chk.prop('checked', hasValue);
-        chk.change(function () {
+        chk.change(() => {
           if ( chk.is(':checked') ) {
             individual.addValue(property_uri, value);
           } else {
@@ -1735,7 +1737,7 @@ $.fn.veda_checkbox = function (params) {
    * @return {void}
    */
   function handler () {
-    $('input', self).each(function (i, el) {
+    $('input', self).each((i, el) => {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
       $(el).prop('checked', hasValue);
@@ -1789,7 +1791,7 @@ $.fn.veda_radio = function (params) {
   const spec = opts.spec;
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : (new veda.IndividualModel(property_uri))['rdfs:range'];
-  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map(function (item) {
+  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
@@ -1820,16 +1822,16 @@ $.fn.veda_radio = function (params) {
     } else if (source) {
       return Promise.resolve(eval(source))
         .then(renderOptions)
-        .catch(function (error) {
+        .catch((error) => {
           console.log('Source error', source);
         });
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
-        .then(function (queryPrefix) {
+        .then((queryPrefix) => {
           return ftQuery(queryPrefix, undefined, sort, withDeleted);
         })
         .then(renderOptions)
-        .catch(function (error) {
+        .catch((error) => {
           console.log('Query prefix error', queryPrefix);
         });
     }
@@ -1842,7 +1844,7 @@ $.fn.veda_radio = function (params) {
    */
   function renderOptions (options) {
     self.empty();
-    options.forEach(function (value, index) {
+    options.forEach((value, index) => {
       if (index >= 100) {
         return;
       }
@@ -1855,7 +1857,7 @@ $.fn.veda_radio = function (params) {
         }
         const hasValue = individual.hasValue(property_uri, value);
         rad.prop('checked', hasValue);
-        rad.change(function () {
+        rad.change(() => {
           if ( rad.is(':checked') ) {
             individual.set(property_uri, [value]);
           } else {
@@ -1875,7 +1877,7 @@ $.fn.veda_radio = function (params) {
    * @return {void}
    */
   function handler () {
-    $('input', self).each(function (i, el) {
+    $('input', self).each((i, el) => {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
       $(el).prop('checked', hasValue);
@@ -1930,7 +1932,7 @@ $.fn.veda_booleanRadio = function (params) {
   const trueOption = {
     label: spec && spec.hasValue('v-ui:trueLabel') ?
       Promise.resolve(spec.get('v-ui:trueLabel').map(Util.formatValue).join(' ')) :
-      (new veda.IndividualModel('v-s:YesBundle')).load().then(function (loaded) {
+      (new veda.IndividualModel('v-s:YesBundle')).load().then((loaded) => {
         return loaded.get('rdfs:label').map(Util.formatValue).join(' ');
       }),
     value: true,
@@ -1938,7 +1940,7 @@ $.fn.veda_booleanRadio = function (params) {
   const falseOption = {
     label: spec && spec.hasValue('v-ui:falseLabel') ?
       Promise.resolve(spec.get('v-ui:falseLabel').map(Util.formatValue).join(' ')) :
-      (new veda.IndividualModel('v-s:NoBundle')).load().then(function (loaded) {
+      (new veda.IndividualModel('v-s:NoBundle')).load().then((loaded) => {
         return loaded.get('rdfs:label').map(Util.formatValue).join(' ');
       }),
     value: false,
@@ -1959,18 +1961,18 @@ $.fn.veda_booleanRadio = function (params) {
    */
   function renderOptions () {
     self.empty();
-    options.map(function (option) {
+    options.map((option) => {
       const hld = $(opts.template).appendTo(self);
-      option.label.then(function (label) {
+      option.label.then((label) => {
         const lbl = $('label', hld).append( label );
         const rad = $('input', lbl).data('value', option.value);
         const hasValue = individual.hasValue(property_uri, option.value);
         rad.prop('checked', hasValue);
-        rad.change(function () {
+        rad.change(() => {
           if ( rad.is(':checked') ) {
             individual.set(property_uri, [rad.data('value')]);
           } else {
-            individual.set(property_uri, individual.get(property_uri).filter( function (i) {
+            individual.set(property_uri, individual.get(property_uri).filter((i) => {
               return i.valueOf() !== rad.data('value').valueOf();
             }));
           }
@@ -1984,7 +1986,7 @@ $.fn.veda_booleanRadio = function (params) {
    * @return {void}
    */
   function handler () {
-    $('input', self).each(function (i, el) {
+    $('input', self).each((i, el) => {
       const value = $(el).data('value');
       const hasValue = individual.hasValue(property_uri, value);
       $(el).prop('checked', hasValue);
@@ -2118,7 +2120,7 @@ $.fn.veda_source.defaults = {
  * @return {Promise}
  */
 function loadImage (imageFile) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = function (e) {
       const image = new Image();
@@ -2144,14 +2146,14 @@ function loadImage (imageFile) {
  * @return {Promise}
  */
 function resizeImage (image, maxWidth) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     if (image.width <= maxWidth) {
       resolve(image);
     } else {
       const temp = $('<div></div>').append(image);
-      System.import('cropper/cropper.min.js').then(function (module) {
+      System.import('cropper/cropper.min.js').then((module) => {
         const Cropper = module.default;
-        System.import('cropper/cropper.min.css').then(function (module) {
+        System.import('cropper/cropper.min.css').then((module) => {
           const styleSheet = module.default;
           document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
 
@@ -2191,10 +2193,10 @@ function cropImage (imageForCrop, ratio, maxWidth) {
   const temp = $('<div></div>').append(imageForCrop);
   container.append(temp);
 
-  return new Promise(function (resolve, reject) {
-    System.import('cropper/cropper.min.js').then(function (module) {
+  return new Promise((resolve, reject) => {
+    System.import('cropper/cropper.min.js').then((module) => {
       const Cropper = module.default;
-      System.import('cropper/cropper.min.css').then(function (module) {
+      System.import('cropper/cropper.min.css').then((module) => {
         const styleSheet = module.default;
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
 
@@ -2209,7 +2211,7 @@ function cropImage (imageForCrop, ratio, maxWidth) {
           },
         });
 
-        $('.modal-footer > .ok', modal).click(function () {
+        $('.modal-footer > .ok', modal).click(() => {
           const img = new Image();
           img.src = cropper.getCroppedCanvas({
             maxWidth: maxWidth,
@@ -2218,7 +2220,7 @@ function cropImage (imageForCrop, ratio, maxWidth) {
           resolve(img);
           cropper.destroy();
         });
-        $('.modal-footer > .cancel', modal).click(function () {
+        $('.modal-footer > .cancel', modal).click(() => {
           resolve(false);
         });
         modal.on('hidden.bs.modal', function () {
@@ -2279,11 +2281,11 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:fileUri'] = [uri];
     fileIndividual['v-s:filePath'] = [path];
     fileIndividual['v-s:parent'] = [parent];
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       // If file is image && !thumbnail
       if ( file.name && (/^(?!thumbnail-).+\.(jpg|jpeg|gif|png|bmp|svg)$/i).test(file.name) ) {
         loadImage(file)
-          .then(function (image) {
+          .then((image) => {
             if (targetRatio) {
               const curRatio = image.height / image.width;
               console.log('curRatio: ', curRatio);
@@ -2292,14 +2294,14 @@ $.fn.veda_file = function ( options ) {
               };
             };
             return image;
-          }).then(function (image) {
+          }).then((image) => {
             if (image === false) {
               reject(Error('Cropper canceled'));
             } else {
               file = image;
-              return resizeImage(image, 256).then(function (thumbnail) {
+              return resizeImage(image, 256).then((thumbnail) => {
                 createFileIndividual(thumbnail, 'thumbnail-' + fileName, fileIndividual)
-                  .then(function (thumbnailIndividual) {
+                  .then((thumbnailIndividual) => {
                     fileIndividual['v-s:thumbnail'] = [thumbnailIndividual];
                     resolve(fileIndividual);
                   });
@@ -2309,21 +2311,21 @@ $.fn.veda_file = function ( options ) {
       } else {
         resolve(fileIndividual);
       }
-    }).then(function () {
+    }).then(() => {
       return veda.Backend.uploadFile({
         file: file,
         path: path,
         uri: uri,
         progress: progress,
       });
-    }).then(function () {
+    }).then(() => {
       return fileIndividual.save();
-    }).catch(function (error) {
+    }).catch((error) => {
       console.log(error);
     });
   };
 
-  fileInput.change(function (e) {
+  fileInput.change((e) => {
     const self = e.delegateTarget;
     const fileIndividualPromises = [];
     for (let i = 0, file; (file = self.files && self.files[i]); i++) {
@@ -2336,7 +2338,7 @@ $.fn.veda_file = function ( options ) {
     control.addClass('disabled');
     fileInput.attr('disabled', 'disabled');
     Promise.all(fileIndividualPromises)
-      .then(function (fileIndividuals) {
+      .then((fileIndividuals) => {
         control.removeClass('disabled');
         fileInput.removeAttr('disabled');
         self.value = '';
@@ -2348,10 +2350,10 @@ $.fn.veda_file = function ( options ) {
           individual.addValue(rel_uri, fileIndividuals);
         }
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error);
       })
-      .then(function () {
+      .then(() => {
         control.removeClass('disabled');
         fileInput.removeAttr('disabled');
       });
@@ -2379,7 +2381,7 @@ $.fn.veda_link = function ( options ) {
   const rel_uri = opts.property_uri;
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : new veda.IndividualModel(rel_uri)['rdfs:range'];
-  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : range.map(function (item) {
+  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
   const source = this.attr('data-source') || undefined;
@@ -2403,7 +2405,7 @@ $.fn.veda_link = function ( options ) {
     if (isSingle) {
       individual.set(rel_uri, [selected[0]]);
     } else {
-      const filtered = selected.filter( function (i) {
+      const filtered = selected.filter((i) => {
         return individual.get(rel_uri).indexOf(i) < 0;
       });
       individual.set(rel_uri, individual.get(rel_uri).concat(filtered));
@@ -2421,7 +2423,7 @@ $.fn.veda_link = function ( options ) {
   if ( this.hasClass('create') || this.hasClass('full') ) {
     const inModal = this.hasClass('create-modal');
     const rel_range = rangeRestriction ? rangeRestriction : (new veda.IndividualModel(rel_uri))['rdfs:range'][0];
-    rel_range.rights.then(function (rights) {
+    rel_range.rights.then((rights) => {
       if ( !rights.hasValue('v-s:canCreate', true) && opts.mode !== 'search' ) {
         create.addClass('disabled');
         create.off('click keyup');
@@ -2442,11 +2444,11 @@ $.fn.veda_link = function ( options ) {
               modal.modal('hide').remove();
               $(document).off('keyup', escHandler);
             });
-            const ok = $('#ok', modal).click(function (e) {
+            const ok = $('#ok', modal).click((e) => {
               select(newVal);
               $(document).off('keyup', escHandler);
             });
-            const close = $('.close', modal).click(function (e) {
+            const close = $('.close', modal).click((e) => {
               newVal.delete();
               $(document).off('keyup', escHandler);
             });
@@ -2464,7 +2466,7 @@ $.fn.veda_link = function ( options ) {
               select(newVal);
               modal.modal('hide').remove();
             });
-            newVal.present(cntr, undefined, 'edit').then(function (tmpl) {
+            newVal.present(cntr, undefined, 'edit').then((tmpl) => {
               $('.action', tmpl).remove();
               const validation = tmpl.data('validation');
               if ( validation && validation.state ) {
@@ -2545,7 +2547,7 @@ $.fn.veda_link = function ( options ) {
   const fulltextMenu = $('.fulltext-menu', control);
   if ( this.hasClass('fulltext') || this.hasClass('full') ) {
     if (placeholder instanceof veda.IndividualModel) {
-      placeholder.load().then(function (placeholder) {
+      placeholder.load().then((placeholder) => {
         fulltext.attr({
           'placeholder': placeholder.toString(),
           'name': (individual.hasValue('rdf:type') ? individual['rdf:type'][0].id + '_' + rel_uri : rel_uri).toLowerCase().replace(/[-:]/g, '_'),
@@ -2574,24 +2576,24 @@ $.fn.veda_link = function ( options ) {
       new veda.IndividualModel('v-s:SelectAll').load(),
       new veda.IndividualModel('v-s:CancelSelection').load(),
       new veda.IndividualModel('v-s:InvertSelection').load(),
-    ]).then(function (actions) {
+    ]).then((actions) => {
       header.find('.select-all')
-        .click(function () {
+        .click(() => {
           suggestions.children(':not(.selected)').click();
         })
         .text( actions[0].toString() );
       header.find('.cancel-selection')
-        .click(function () {
+        .click(() => {
           suggestions.children('.selected').click();
         })
         .text( actions[1].toString() );
       header.find('.invert-selection')
-        .click(function () {
+        .click(() => {
           suggestions.children().click();
         })
         .text( actions[2].toString() );
       header.find('.close-menu')
-        .click(function () {
+        .click(() => {
           individual.set(rel_uri, selected);
           fulltextMenu.hide();
           $(document).off('click', clickOutsideMenuHandler);
@@ -2619,21 +2621,21 @@ $.fn.veda_link = function ( options ) {
       if (source) {
         return Promise.resolve(eval(source))
           .then(renderResults)
-          .catch(function (error) {
+          .catch((error) => {
             console.log('Source error', source);
           });
       } else {
-        interpolate(queryPrefix, individual).then(function (queryPrefix) {
+        interpolate(queryPrefix, individual).then((queryPrefix) => {
           ftQuery(queryPrefix, value, sort, withDeleted)
             .then(renderResults)
-            .catch(function (error) {
+            .catch((error) => {
               console.log('Fulltext query error', error);
             });
         });
       }
     };
 
-    const inputHandler = (function () {
+    const inputHandler = (() => {
       let timeout;
       const minLength = 3;
       const nav_keys = [37, 38, 39, 40, 9, 16]; // Arrows, shift, tab
@@ -2644,7 +2646,7 @@ $.fn.veda_link = function ( options ) {
         if (nav_keys.indexOf(e.which) >= 0) {
           return;
         }
-        timeout = setTimeout(function () {
+        timeout = setTimeout(() => {
           const value = e.target.value;
           if (value.length >= minLength) {
             performSearch(value);
@@ -2659,7 +2661,7 @@ $.fn.veda_link = function ( options ) {
           }
         }, 750);
       };
-    }());
+    })();
     fulltext.on('keydown', inputHandler);
 
     const renderResults = function (results) {
@@ -2743,7 +2745,7 @@ $.fn.veda_link = function ( options ) {
           $(document).off('click', clickOutsideMenuHandler);
           $(document).off('keydown', arrowHandler);
         } else {
-          selected = selected.filter(function (value) {
+          selected = selected.filter((value) => {
             return value !== suggestion;
           });
         }
@@ -2758,7 +2760,7 @@ $.fn.veda_link = function ( options ) {
           selected.push(suggestion);
         }
       }
-      dblTimeout = setTimeout(function () {
+      dblTimeout = setTimeout(() => {
         dblTimeout = undefined;
       }, 300);
       fulltext.focus();
@@ -2955,13 +2957,13 @@ function ftQuery (prefix, input, sort, withDeleted) {
   let queryString = '';
   if ( input ) {
     const lines = input.split('\n').filter(Boolean);
-    const lineQueries = lines.map(function (line) {
+    const lineQueries = lines.map((line) => {
       const special = line && line.indexOf('==') > 0 ? line : false;
       if (special) {
         return special;
       }
       const words = line.trim().replace(/[-*\s]+/g, ' ').split(' ');
-      return words.filter(Boolean).map(function (word) {
+      return words.filter(Boolean).map((word) => {
         return '\'*\' == \'' + word + '*\'';
       }).join(' && ');
     });
@@ -2974,7 +2976,7 @@ function ftQuery (prefix, input, sort, withDeleted) {
   const result = [];
 
   return incrementalSearch(0, 100, [])
-    .then(function (results) {
+    .then((results) => {
       if (withDeleted) {
         queryString = queryString + ' && (\'v-s:deleted\' == true )';
         return incrementalSearch(0, 100, results);
@@ -2982,9 +2984,9 @@ function ftQuery (prefix, input, sort, withDeleted) {
         return results;
       }
     })
-    .then(function (results) {
+    .then((results) => {
       results = veda.Util.unique( results );
-      const getList = results.filter( function (uri, i) {
+      const getList = results.filter((uri, i) => {
         const cached = veda.cache.get(uri);
         if ( cached ) {
           result[i] = cached.load();
@@ -3002,13 +3004,13 @@ function ftQuery (prefix, input, sort, withDeleted) {
         return [];
       }
     })
-    .then(function (individuals) {
+    .then((individuals) => {
       for (let i = 0, j = 0, length = individuals.length; i < length; i++) {
         while (result[j++]); // Fast forward to empty element
         result[j-1] = new veda.IndividualModel(individuals[i]).init();
       }
       return Promise.all(result);
-    }).then(function (fulfilled) {
+    }).then((fulfilled) => {
       return fulfilled.filter(Boolean);
     });
 
@@ -3027,7 +3029,7 @@ function ftQuery (prefix, input, sort, withDeleted) {
       from: cursor,
       top: 10,
       limit: 1000,
-    }).then(function (queryResult) {
+    }).then((queryResult) => {
       results = results.concat(queryResult.result);
       const cursor = queryResult.cursor;
       const estimated = queryResult.estimated;
@@ -3048,7 +3050,7 @@ function ftQuery (prefix, input, sort, withDeleted) {
  */
 function renderValue (value, template) {
   if (value instanceof veda.IndividualModel) {
-    return value.load().then(function (value) {
+    return value.load().then((value) => {
       if (template) {
         return interpolate(template, value);
       } else {

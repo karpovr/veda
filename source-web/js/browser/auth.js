@@ -52,10 +52,10 @@ export default function Auth () {
 
     const ntlmProvider = new IndividualModel('cfg:NTLMAuthProvider', true, false);
     return ntlmProvider.load()
-      .then(function (ntlmProvider) {
+      .then((ntlmProvider) => {
         const ntlm = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
         if (ntlm) {
-          return new Promise(function (resolve, reject) {
+          return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/ad', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -75,7 +75,7 @@ export default function Auth () {
           return Promise.reject(Error('AD provider is not defined'));
         }
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log(error);
         return Backend.authenticate(login, hash);
       })
@@ -138,7 +138,7 @@ export default function Auth () {
     Backend.authenticate(login, hash, secret)
       .then(handleLoginSuccess)
       .catch(handleLoginError)
-      .then(function () {
+      .then(() => {
         loginForm.querySelector('#new-password').value = '';
         loginForm.querySelector('#confirm-new-password').value = '';
       });
@@ -169,7 +169,7 @@ export default function Auth () {
   function reCAPTCHA (onSuccess, onExpired, onError) {
     if (!captchaRendered) {
       const reCAPTCHA_key = new IndividualModel('cfg:reCAPTCHA_client_key');
-      reCAPTCHA_key.load().then(function (reCAPTCHA_key) {
+      reCAPTCHA_key.load().then((reCAPTCHA_key) => {
         window.captchaCallback = function () {
           grecaptcha.render('recaptcha', {
             'sitekey': reCAPTCHA_key.get('rdf:value')[0].toString(),
@@ -418,7 +418,7 @@ export default function Auth () {
 
     // NTLM auth using iframe
     const ntlmProvider = new IndividualModel('cfg:NTLMAuthProvider', true, false);
-    ntlmProvider.load().then(function (ntlmProvider) {
+    ntlmProvider.load().then((ntlmProvider) => {
       const ntlm = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
       if (ntlm) {
         const iframe = document.createElement('iframe');
@@ -467,14 +467,14 @@ export default function Auth () {
       const ticketDelayHours = Math.floor(ticketDelay / 1000 / 60 / 60);
       const ticketDelayMinutes = Math.floor(ticketDelay / 1000 / 60 - ticketDelayHours * 60);
       console.log('Ticket will expire in %d hrs. %d mins.', ticketDelayHours, ticketDelayMinutes);
-      setTimeout(function () {
+      setTimeout(() => {
         console.log('Ticket expired, re-login.');
         veda.trigger('login:failed');
       }, ticketDelay);
     }
 
     document.getElementById('load-indicator').style.display = 'block';
-    veda.init(veda.user_uri).then(function () {
+    veda.init(veda.user_uri).then(() => {
       document.getElementById('load-indicator').style.display = 'none';
       veda.trigger('started');
     });
@@ -493,7 +493,7 @@ export default function Auth () {
   // Init application
   document.getElementById('load-indicator').style.display = 'block';
   veda.init('cfg:Guest')
-    .then(function () {
+    .then(() => {
       // Check if ticket is valid
       const ticket = storage.ticket;
       const user_uri = storage.user_uri;
@@ -504,7 +504,7 @@ export default function Auth () {
         return false;
       }
     })
-    .then(function (valid) {
+    .then((valid) => {
       if (valid) {
         veda.trigger('login:success', {
           ticket: storage.ticket,
@@ -513,7 +513,7 @@ export default function Auth () {
         });
       } else {
         const authRequired = new IndividualModel('cfg:AuthRequired');
-        authRequired.load().then(function (authRequiredParam) {
+        authRequired.load().then((authRequiredParam) => {
           if ( authRequiredParam && authRequiredParam.hasValue('rdf:value', false) ) {
             veda.trigger('login:success', {
               ticket: '',
@@ -526,7 +526,7 @@ export default function Auth () {
         });
       }
     })
-    .then(function () {
+    .then(() => {
       document.getElementById('load-indicator').style.display = 'none';
     });
 }

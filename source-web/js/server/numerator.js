@@ -38,7 +38,7 @@ Numerator.numerate = function (ticket, individual, super_classes, prev_state, _e
     const deleted = Util.hasValue( individual, 'v-s:deleted', {data: true, type: 'Boolean'} );
     const prevDeleted = prev_state && Util.hasValue( prev_state, 'v-s:deleted', {data: true, type: 'Boolean'} );
 
-    individual['rdf:type'] && individual['rdf:type'].length && individual['rdf:type'].forEach(function (typeValue) {
+    individual['rdf:type'] && individual['rdf:type'].length && individual['rdf:type'].forEach((typeValue) => {
       const type = get_individual(ticket, typeValue.data);
       if (!type || !type['v-s:hasNumeration']) {
         return;
@@ -384,7 +384,7 @@ Numerator.getNextValueSimple = function (ticket, scope, FIRST_VALUE) {
     return ''+FIRST_VALUE;
   }
   let max = 0;
-  scope['v-s:numerationCommitedInterval'].forEach(function (interval) {
+  scope['v-s:numerationCommitedInterval'].forEach((interval) => {
     const intervalUri = interval.data;
     try {
       interval = get_individual(ticket, intervalUri);

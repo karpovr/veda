@@ -585,7 +585,7 @@ proto.hasValue = function (property_uri, value) {
   let result = !!(this.properties[property_uri] && this.properties[property_uri].length);
   if (typeof value !== 'undefined' && value !== null) {
     const serialized = serializer(value);
-    result = result && !!this.properties[property_uri].filter( function (item) {
+    result = result && !!this.properties[property_uri].filter((item) => {
       return ( item.type === serialized.type && item.data === serialized.data && (item.lang && serialized.lang ? item.lang === serialized.lang : true) );
     }).length;
   }
@@ -667,7 +667,7 @@ proto.removeValue = function (property_uri, values, silently) {
 function removeSingleValue (property_uri, value) {
   if (value != undefined) {
     const serialized = serializer(value);
-    this.properties[property_uri] = (this.properties[property_uri] || []).filter(function (item) {
+    this.properties[property_uri] = (this.properties[property_uri] || []).filter((item) => {
       return !( item.data == serialized.data && (item.lang && serialized.lang ? item.lang === serialized.lang : true) );
     });
   }
@@ -752,9 +752,7 @@ proto.is = function (_class) {
       return (is = is || true);
     } else {
       const types = type.get('rdfs:subClassOf');
-      return Promise.all(types.map(isSub)).then(function (results) {
-        return results.reduce((state, isSub) => state || isSub, false);
-      });
+      return Promise.all(types.map(isSub)).then((results) => results.reduce((state, isSub) => state || isSub, false));
     }
   };
 
@@ -936,19 +934,15 @@ proto.getChainValue = function (...properties) {
     individuals = [individuals];
   }
   const property_uri = properties.shift();
-  const promises = individuals.map(function (individual) {
-    return individual.load();
-  });
-  return Promise.all(promises).then(function (individuals) {
-    const children = individuals.reduce(function (acc, individual) {
-      return acc.concat(individual[property_uri]);
-    }, []);
+  const promises = individuals.map((individual) => individual.load());
+  return Promise.all(promises).then((individuals) => {
+    const children = individuals.reduce((acc, individual) => acc.concat(individual[property_uri]), []);
     if ( !properties.length ) {
       return children;
     } else {
       return proto.getChainValue.apply(children, properties);
     }
-  }).catch(function (error) {
+  }).catch((error) => {
     console.log(error);
     return [];
   });
@@ -961,11 +955,12 @@ proto.getChainValue = function (...properties) {
  * @return {Promise<Boolean>}
  */
 proto.hasChainValue = function (sought_value, ...args) {
-  return this.getChainValue(...args).then(function (values) {
-    return values.reduce(function (state, value) {
-      return state || sought_value.valueOf() == value.valueOf();
-    }, false);
-  });
+  return this.getChainValue(...args)
+    .then((values) =>
+      values.reduce((state, value) =>
+        state || sought_value.valueOf() == value.valueOf(),
+      false),
+    );
 };
 
 /**
@@ -1013,11 +1008,11 @@ function prefetch (result, depth, uris, ...allowed_props) {
     uris.forEach((uri) => {
       const individual = new IndividualModel(uri);
       const data = individual.properties;
-      Object.keys(data).forEach( function (key) {
+      Object.keys(data).forEach((key) => {
         if ( key === '@' || (allowed_props.length && allowed_props.indexOf(key) < 0) ) {
           return;
         }
-        data[key].map(function (value) {
+        data[key].forEach((value) => {
           if (value.type === 'Uri') {
             nextUris.push(value.data);
           }

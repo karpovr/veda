@@ -145,7 +145,7 @@ const query_timeout = default_timeout * 10;
 
 // Check server health
 browserBackend.ping = function () {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onload = function () {
       if (this.status == 200) {
@@ -188,10 +188,10 @@ veda.on('online offline ccus-online ccus-offline', setStatus);
 let interval;
 const duration = default_timeout;
 const check = function () {
-  browserBackend.ping().then(function () {
+  browserBackend.ping().then(() => {
     interval = clearInterval(interval);
     veda.trigger('online');
-  }).catch(function () {
+  }).catch(() => {
     veda.trigger('offline');
   });
 };
@@ -283,7 +283,7 @@ function call_server (params) {
   const timeout = params.timeout || default_timeout;
   let queryParams = [];
   let payload = null;
-  return new Promise( function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onload = function () {
       if (this.status == 200) {
@@ -332,7 +332,7 @@ browserBackend.get_rights = function (ticket, uri) {
       'uri': isObj ? arg.uri : uri,
     },
   };
-  return call_server(params).catch(function (BackendError) {
+  return call_server(params).catch((BackendError) => {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       return {
         '@': '_',
@@ -360,7 +360,7 @@ browserBackend.get_rights_origin = function (ticket, uri) {
       'uri': isObj ? arg.uri : uri,
     },
   };
-  return call_server(params).catch(function (BackendError) {
+  return call_server(params).catch((BackendError) => {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       return [];
     } else {
@@ -381,7 +381,7 @@ browserBackend.get_membership = function (ticket, uri) {
       'uri': isObj ? arg.uri : uri,
     },
   };
-  return call_server(params).catch(function (BackendError) {
+  return call_server(params).catch((BackendError) => {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       return {
         '@': '_',
@@ -413,7 +413,7 @@ browserBackend.authenticate = function (login, password, secret) {
     },
   };
   return call_server(params)
-    .then(function (result) {
+    .then((result) => {
       return {
         ticket: result.id,
         user_uri: result.user_uri,
@@ -447,7 +447,7 @@ browserBackend.is_ticket_valid = function (ticket) {
     timeout: default_timeout,
     data: {},
   };
-  return call_server(params).catch(function (BackendError) {
+  return call_server(params).catch((BackendError) => {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       return true;
     } else {
@@ -504,25 +504,21 @@ browserBackend.query = function (ticket, queryStr, sort, databases, reopen, top,
       'sql': isObj ? arg.sql : sql,
     },
   };
-  return call_server(params).catch(function (BackendError) {
+  return call_server(params).catch((BackendError) => {
     if (BackendError.code === 999) {
       return browserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
     } else if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       params.ticket = undefined;
       const localDB = new LocalDB();
-      return localDB.then(function (db) {
-        return db.get(JSON.stringify(params));
-      });
+      return localDB.then((db) => db.get(JSON.stringify(params)));
     } else {
       throw BackendError;
     }
-  }).then(function (result) {
+  }).then((result) => {
     if (result) {
       params.ticket = undefined;
       const localDB = new LocalDB();
-      localDB.then(function (db) {
-        db.put(JSON.stringify(params), result);
-      });
+      localDB.then((db) => db.put(JSON.stringify(params), result));
     } else {
       result = {
         'result': [],
@@ -553,18 +549,16 @@ browserBackend.get_individual = function (ticket, uri, reopen) {
   if (browserBackend.status === 'online' || browserBackend.status === 'offline') {
     // Cache first
     const localDB = new LocalDB();
-    return localDB.then(function (db) {
-      return db.get(params.data.uri);
-    }).then(function (result) {
-      return result || call_server(params)
-        .then(function (individual) {
-          const localDB = new LocalDB();
-          localDB.then(function (db) {
-            db.put(individual['@'], individual);
-          }).catch(console.log);
-          return individual;
-        });
-    });
+    return localDB
+      .then((db) => db.get(params.data.uri))
+      .then((result) => {
+        return result || call_server(params)
+          .then((individual) => {
+            const localDB = new LocalDB();
+            localDB.then((db) => db.put(individual['@'], individual)).catch(console.log);
+            return individual;
+          });
+      });
   } else {
     // Fetch second
     return browserBackend.reset_individual(ticket, uri, reopen);
@@ -585,25 +579,23 @@ browserBackend.reset_individual = function (ticket, uri, reopen) {
     },
   };
   // Fetch first
-  return call_server(params).then(function (individual) {
+  return call_server(params).then((individual) => {
     const localDB = new LocalDB();
-    localDB.then(function (db) {
-      db.put(individual['@'], individual);
-    });
+    localDB.then((db) => db.put(individual['@'], individual));
     return individual;
-  }).catch(function (BackendError) {
+  }).catch((BackendError) => {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
       // Cache second
       const localDB = new LocalDB();
-      return localDB.then(function (db) {
-        return db.get(params.data.uri);
-      }).then(function (result) {
-        if (result) {
-          return result;
-        } else {
-          throw BackendError;
-        }
-      });
+      return localDB
+        .then((db) => db.get(params.data.uri))
+        .then((result) => {
+          if (result) {
+            return result;
+          } else {
+            throw BackendError;
+          }
+        });
     } else {
       throw BackendError;
     }
@@ -625,25 +617,25 @@ browserBackend.get_individuals = function (ticket, uris) {
   if (browserBackend.status === 'online' || browserBackend.status === 'offline') {
     // Cache first
     const localDB = new LocalDB();
-    return localDB.then(function (db) {
+    return localDB.then((db) => {
       const results = [];
       const get_from_server = [];
-      return params.data.uris.reduce(function (p, uri, i) {
-        return p.then(function () {
-          return db.get(uri).then(function (result) {
+      return params.data.uris.reduce((p, uri, i) => {
+        return p.then(() => {
+          return db.get(uri).then((result) => {
             if (typeof result !== 'undefined') {
               results[i] = result;
             } else {
               get_from_server.push(uri);
             }
             return results;
-          }).catch(function () {
+          }).catch(() => {
             get_from_server.push(uri);
             return results;
           });
         });
       }, Promise.resolve(results))
-        .then(function (results) {
+        .then((results) => {
           if (get_from_server.length) {
             params.data.uris = get_from_server;
             return call_server(params);
@@ -651,7 +643,7 @@ browserBackend.get_individuals = function (ticket, uris) {
             return [];
           }
         })
-        .then(function (results_from_server) {
+        .then((results_from_server) => {
           for (let i = 0, j = 0, length = results_from_server.length; i < length; i++) {
             while (results[j++]); // Fast forward to empty element
             results[j-1] = results_from_server[i];
@@ -663,27 +655,23 @@ browserBackend.get_individuals = function (ticket, uris) {
     });
   } else {
     // Fetch second
-    return call_server(params).then(function (results) {
+    return call_server(params).then((results) => {
       const localDB = new LocalDB();
-      localDB.then(function (db) {
-        results.reduce(function (p, result) {
-          p.then(function () {
+      localDB.then((db) => {
+        results.reduce((p, result) => {
+          p.then(() => {
             return db.put(result['@'], result);
           });
         }, Promise.resolve());
       });
       return results;
-    }).catch(function (BackendError) {
+    }).catch((BackendError) => {
       if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
         // Cache fallback
         const localDB = new LocalDB();
-        return localDB.then(function (db) {
-          const promises = params.data.uris.map(function (uri) {
-            return db.get(uri);
-          });
-          return Promise.all(promises).then(function (fulfilled) {
-            return fulfilled.filter(Boolean);
-          });
+        return localDB.then((db) => {
+          const promises = params.data.uris.map((uri) => db.get(uri));
+          return Promise.all(promises).then((fulfilled) => fulfilled.filter(Boolean));
         });
       } else {
         throw BackendError;
@@ -698,9 +686,9 @@ browserBackend.get_individuals = function (ticket, uris) {
  * @return {Promise<Object>}
  */
 function call_server_put (params) {
-  return call_server(params).catch(function (BackendError) {
+  return call_server(params).catch((BackendError) => {
     if (BackendError.code === 0 || BackendError.code === 503 || BackendError.code === 4000 ) {
-      return enqueueCall(params).then(function (queue) {
+      return enqueueCall(params).then((queue) => {
         console.log('Offline operation added to queue, queue length = ', queue.length);
         return {
           'op_id': 0,
@@ -730,11 +718,9 @@ browserBackend.remove_individual = function (ticket, uri, assigned_subsystems, e
     },
   };
   return call_server_put(params)
-    .then(function () {
+    .then(() => {
       const localDB = new LocalDB();
-      return localDB.then(function (db) {
-        return db.remove(params.data.uri);
-      });
+      return localDB.then((db) => db.remove(params.data.uri));
     });
 };
 
@@ -755,9 +741,9 @@ browserBackend.put_individual = function (ticket, individual, assigned_subsystem
     },
   };
   return call_server_put(params)
-    .then(function () {
+    .then(() => {
       const localDB = new LocalDB();
-      localDB.then(function (db) {
+      localDB.then((db) => {
         db.put(params.data.individual['@'], params.data.individual);
       }).catch(console.log);
     });
@@ -837,10 +823,10 @@ browserBackend.put_individuals = function (ticket, individuals, assigned_subsyst
     },
   };
   return call_server_put(params)
-    .then(function () {
+    .then(() => {
       const localDB = new LocalDB();
-      localDB.then(function (db) {
-        params.data.individuals.forEach(function (individual) {
+      localDB.then((db) => {
+        params.data.individuals.forEach((individual) => {
           db.put(individual['@'], individual);
         });
       }).catch(console.log);
@@ -849,7 +835,7 @@ browserBackend.put_individuals = function (ticket, individuals, assigned_subsyst
 
 browserBackend.uploadFile = function (params, tries) {
   tries = typeof tries === 'number' ? tries : 5;
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     const done = () => {
       if (xhr.status === 200) {
         resolve(params);
@@ -882,7 +868,7 @@ browserBackend.uploadFile = function (params, tries) {
       fd.append('content', file.src);
     }
     xhr.send(fd);
-  }).catch(function (error) {
+  }).catch((error) => {
     if (tries > 0) {
       return browserBackend.uploadFile(params, --tries);
     }
@@ -904,8 +890,8 @@ const memoize = (fn) => {
   };
 };
 
-browserBackend.loadFile = memoize(function (url) {
-  return new Promise(function (resolve, reject) {
+browserBackend.loadFile = memoize((url) => {
+  return new Promise((resolve, reject) => {
     const done = () => {
       if (xhr.status === 200) {
         resolve(xhr.response);
@@ -939,8 +925,8 @@ function enqueueCall (params) {
     params.ticket = undefined;
   }
   const localDB = new LocalDB();
-  return localDB.then(function (db) {
-    return db.get('offline-queue').then(function (queue) {
+  return localDB.then((db) => {
+    return db.get('offline-queue').then((queue) => {
       queue = queue || [];
       queue.push( JSON.stringify(params) );
       return db.put('offline-queue', queue);
@@ -954,21 +940,21 @@ function enqueueCall (params) {
  */
 function flushQueue () {
   const localDB = new LocalDB();
-  return localDB.then(function (db) {
-    return db.get('offline-queue').then(function (queue) {
+  return localDB.then((db) => {
+    return db.get('offline-queue').then((queue) => {
       if (queue && queue.length) {
         if (veda.ticket) {
-          return browserBackend.is_ticket_valid(veda.ticket).then(function (isValid) {
+          return browserBackend.is_ticket_valid(veda.ticket).then((isValid) => {
             if (isValid) {
-              return queue.reduce(function (prom, params) {
-                return prom.then(function () {
+              return queue.reduce((prom, params) => {
+                return prom.then(() => {
                   params = JSON.parse(params);
                   params.ticket = veda.ticket;
                   return call_server(params);
-                }).catch(function (error) {
+                }).catch((error) => {
                   console.log('Offline queue operation failed:', params, error);
                 });
-              }, Promise.resolve()).then(function () {
+              }, Promise.resolve()).then(() => {
                 db.remove('offline-queue');
                 return queue.length;
               });
@@ -985,10 +971,10 @@ function flushQueue () {
     });
   });
 }
-veda.on('online started', function () {
+veda.on('online started', () => {
   if (browserBackend.status === 'online') {
     console.log('Veda \'online\', flushing queue');
-    flushQueue().then(function (queue_length) {
+    flushQueue().then((queue_length) => {
       console.log('Done, queue flushed', queue_length);
     }).catch(console.log);
   }
