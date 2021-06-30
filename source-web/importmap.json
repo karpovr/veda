@@ -1,5 +1,6 @@
 {
   "imports": {
+    "adoptedStyleSheets":"/node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js",
     "regenerator-runtime/runtime":"/node_modules/regenerator-runtime/runtime.js",
     "jquery":"/node_modules/jquery/dist/jquery.min.js",
     "jquery-ui":"/node_modules/jquery-ui-dist/jquery-ui.min.js",
