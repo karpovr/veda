@@ -4,7 +4,7 @@ import { Selector, t } from 'testcafe';
   fixture `test Person`
     .page `${config.baseUrl}`;
   const basic = new Basic();
-  const pageForNavigateFromConfig = `${config.baseUrl}`+'#/v-ui:TestUIRegistry';
+  const pageForNavigateFromConfig = `${config.baseUrl}#/v-ui:TestUIRegistry`;
   test('testPerson', async t => {
     basic.login('karpovrt', '123');
     const timeStamp = Math.round(Date.now() / 1000).toString();

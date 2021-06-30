@@ -2005,7 +2005,7 @@ v-ui:TestUIResultTemplate
 <table class="table table-bordered">
   <thead class="result-header">
     <tr>
-      <th colspan="15" about="v-ui:TestUI" property="rdfs:label"></th>
+      <th colspan="15" about="v-ui:TestUIClass" property="rdfs:label"></th>
     </tr>
     <tr class="active">
       <th width="1%">#</th>
