@@ -132,6 +132,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     })
     .catch(errorHandler)
     .catch((error) => {
+      console.error(`presenter error: ${this.id}`, error, error.stack);
       const msg = $(`<div><code>${error.name} ${error.message} ${this.id}</code></div>`);
       container.append(msg);
       return msg;
@@ -202,10 +203,12 @@ function renderTemplate (individual, container, template, mode, extra, toAppend)
         container.append(processedTemplate);
       }
 
+      let post_result;
       if (post_render_src) {
-        eval('(function (){ \'use strict\'; ' + post_render_src + '}).call(individual);');
+        post_result = eval('(function (){ \'use strict\'; ' + post_render_src + '}).call(individual);');
       }
-      return processedTemplate;
+      return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
+        .then(() => processedTemplate);
     });
   });
 }

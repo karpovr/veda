@@ -944,13 +944,14 @@ v-ui:StandardButtonsTemplate
   });
 
   // Make position fixed for buttons bar that doesn't fit the window
-  function checkOffset(main, actions, actionsStaticHeight, placeholder) {
+  function checkOffset(main, actions, placeholder) {
     var mainTop = main.offset().top;
     var mainHeight = main.height();
     var windowHeight = window.innerHeight;
     var windowTop = window.scrollY || window.pageYOffset;
     var actionsStaticTop = placeholder.offset().top;
-    var actions_inside_viewport = windowTop <= actionsStaticTop && actionsStaticTop < (windowTop + windowHeight);
+    var actionsStaticHeight = actions.height();
+    var actions_inside_viewport = windowTop <= actionsStaticTop && actionsStaticTop + actions.height() < (windowTop + windowHeight);
     var main_inside_viewport = windowTop <= (mainTop + mainHeight - actionsStaticHeight) && (mainTop + actionsStaticHeight) < (windowTop + windowHeight);
     if ( !actions_inside_viewport && main_inside_viewport ) {
       if ( !actions.hasClass("actions-fixed") ) {
@@ -964,23 +965,19 @@ v-ui:StandardButtonsTemplate
       }
     }
   }
-  setTimeout(function () {
-    var main = template.parent().closest("[resource]");
-    if (!main.length) { return; }
-    var actions = template.closest(".actions");
-    if (!actions.length) { return; }
-    var actionsStaticHeight = actions.height();
-    var placeholder = $("<div></div>").insertBefore(actions);
-    checkOffset(main, actions, actionsStaticHeight, placeholder);
-    $(window).on("scroll", scrollHandler);
-    template.one("remove", function () {
-      $(window).off("scroll", scrollHandler);
-    });
-    $(".toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
-    function scrollHandler () {
-      checkOffset(main, actions, actionsStaticHeight, placeholder);
-    }
-  }, 500);
+
+  var main = template.parent().closest("[resource]");
+  var actions = template.closest(".actions");
+  var placeholder = $("<div></div>").insertBefore(actions);
+  checkOffset(main, actions, placeholder);
+  $(window).on("scroll", scrollHandler);
+  template.one("remove", function () {
+    $(window).off("scroll", scrollHandler);
+  });
+  $(".toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
+  function scrollHandler () {
+    checkOffset(main, actions, placeholder);
+  }
 
   // Respect validation state of parent template
   var closest = template.parent().closest("[resource]");
