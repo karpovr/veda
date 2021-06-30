@@ -510,20 +510,30 @@ proto.reset = function (forced) {
  * @return {Promise<IndividualModel>}
  */
 proto.delete = function () {
-  return this.trigger('beforeDelete')
-    .then(() => {
-      if (this.isNew()) {
-        return;
-      }
-      this['v-s:deleted'] = [true];
-      this.addValue('rdf:type', 'v-s:Deletable');
-      return this.save();
-    })
-    .then(() => this.trigger('afterDelete'))
-    .catch((error) => {
-      console.log('delete individual error', this.id, error);
-      throw error;
-    });
+  if ( this.isDeleting() && typeof window !== 'undefined' ) {
+    return this.isDeleting();
+  }
+  return this.isDeleting(
+    this.trigger('beforeDelete')
+      .then(() => {
+        if (this.isNew()) {
+          return;
+        }
+        this['v-s:deleted'] = [true];
+        this.addValue('rdf:type', 'v-s:Deletable');
+        return this.save();
+      })
+      .then(() => this.trigger('afterDelete'))
+      .then(() => {
+        this.isDeleting(false);
+        return this;
+      })
+      .catch((error) => {
+        console.log('delete individual error', this.id, error);
+        this.isDeleting(false);
+        throw error;
+      }),
+  );
 };
 
 /**
@@ -531,21 +541,31 @@ proto.delete = function () {
  * @return {Promise<IndividualModel>}
  */
 proto.remove = function () {
-  return this.trigger('beforeRemove')
-    .then(() => {
-      if (this._.cache && veda.cache && veda.cache.get(this.id)) {
-        veda.cache.remove(this.id);
-      }
-      if (this.isNew()) {
-        return;
-      }
-      return Backend.remove_individual(veda.ticket, this.id);
-    })
-    .then(() => this.trigger('afterRemove'))
-    .catch((error) => {
-      console.log('remove individual error', this.id, error);
-      throw error;
-    });
+  if ( this.isRemoving() && typeof window !== 'undefined' ) {
+    return this.isRemoving();
+  }
+  return this.isRemoving(
+    this.trigger('beforeRemove')
+      .then(() => {
+        if (this._.cache && veda.cache && veda.cache.get(this.id)) {
+          veda.cache.remove(this.id);
+        }
+        if (this.isNew()) {
+          return;
+        }
+        return Backend.remove_individual(veda.ticket, this.id);
+      })
+      .then(() => this.trigger('afterRemove'))
+      .then(() => {
+        this.isRemoving(false);
+        return this;
+      })
+      .catch((error) => {
+        console.log('remove individual error', this.id, error);
+        this.isRemoving(false);
+        throw error;
+      }),
+  );
 };
 
 /**
@@ -553,16 +573,26 @@ proto.remove = function () {
  * @return {Promise<IndividualModel>}
  */
 proto.recover = function () {
-  return this.trigger('beforeRecover')
-    .then(() => {
-      this['v-s:deleted'] = [false];
-      return this.save();
-    })
-    .then(() => this.trigger('afterRecover'))
-    .catch((error) => {
-      console.log('recover individual error', this.id, error);
-      throw error;
-    });
+  if ( this.isRecovering() && typeof window !== 'undefined' ) {
+    return this.isRecovering();
+  }
+  return this.isRecovering(
+    this.trigger('beforeRecover')
+      .then(() => {
+        this['v-s:deleted'] = [false];
+        return this.save();
+      })
+      .then(() => this.trigger('afterRecover'))
+      .then(() => {
+        this.isRecovering(false);
+        return this;
+      })
+      .catch((error) => {
+        console.log('recover individual error', this.id, error);
+        this.isRecovering(false);
+        throw error;
+      }),
+  );
 };
 
 /**
@@ -869,7 +899,6 @@ proto.isLoaded = function (value) {
 proto.isPending = function (operation, value) {
   return ( typeof value !== 'undefined' ? this._.pending[operation] = value : this._.pending[operation] );
 };
-
 proto.isLoading = function (value) {
   return this.isPending('load', value);
 };
@@ -878,6 +907,15 @@ proto.isSaving = function (value) {
 };
 proto.isResetting = function (value) {
   return this.isPending('reset', value);
+};
+proto.isDeleting = function (value) {
+  return this.isPending('delete', value);
+};
+proto.isRemoving = function (value) {
+  return this.isPending('remove', value);
+};
+proto.isRecovering = function (value) {
+  return this.isPending('recover', value);
 };
 
 /**
