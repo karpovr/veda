@@ -9,24 +9,24 @@ jobs:
       - checkout
       - run:
           name: "pre-install"
-          command: | 
+          command: |
            sudo apt-get clean
            sudo apt-get update
            sudo apt-get install dpkg
       - run:
           name: "Install Test Env"
-          command: | 
+          command: |
            sudo apt-get install nodejs
            sudo apt install npm
            npm install -g testcafe@1.9.4
-           testcafe --version    
+           testcafe --version
            npm install grunt
            npm install grunt-contrib-qunit
            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
            sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
       - run:
           name: "Install"
-          command: | 
+          command: |
            ./tools/install-tarantool.sh
            ./control-install.sh
            source $HOME/.cargo/env
@@ -34,12 +34,12 @@ jobs:
            rustc -V
       - run:
           name: "Build"
-          command: | 
+          command: |
            source $HOME/.cargo/env
-           ./build.sh 
+           ./build.sh
       - run:
           name: "test"
-          command: | 
+          command: |
             ./control-start.sh
             sleep 120
             grunt test --stack --verbose
@@ -77,6 +77,8 @@ jobs:
             testcafe chrome:headless qa/testcafe/testDropDown.js --screenshots screens --screenshots-on-fails screens --speed 1
             sleep 1
             testcafe chrome:headless qa/testcafe/testAttributiveSearch.js --screenshots screens --screenshots-on-fails screens --speed 1
+      - store_artifacts:
+          path: /home/circleci/project/screens
 
 # Orchestrate our job run sequence
 workflows:
