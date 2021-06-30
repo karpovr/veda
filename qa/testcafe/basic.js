@@ -64,7 +64,9 @@ export default class basic {
       .wait(1000)
       .click('veda-control[data-type="select"][property="v-ui:testInteger"]')
       .click(number)
+      .wait(1000)
       .click(checkbox)
+      .wait(1000)
       .click('button#save')
       .wait(1000)
   }
