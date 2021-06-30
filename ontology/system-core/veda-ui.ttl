@@ -966,17 +966,19 @@ v-ui:StandardButtonsTemplate
     }
   }
 
-  var main = template.parent().closest("[resource]");
-  var actions = template.closest(".actions");
-  var placeholder = $("<div></div>").insertBefore(actions);
-  checkOffset(main, actions, placeholder);
-  $(window).on("scroll", scrollHandler);
-  template.one("remove", function () {
-    $(window).off("scroll", scrollHandler);
-  });
-  $(".toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
   function scrollHandler () {
     checkOffset(main, actions, placeholder);
+  }
+  var main = template.parent().closest("[resource]");
+  var actions = template.closest(".actions");
+  if (actions.length) {
+    var placeholder = $("<div></div>").insertBefore(actions);
+    $(window).on("scroll", scrollHandler);
+    template.one("remove", function () {
+      $(window).off("scroll", scrollHandler);
+    });
+    $(".toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
+    setTimeout(() => checkOffset(main, actions, placeholder), 0);
   }
 
   // Respect validation state of parent template

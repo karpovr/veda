@@ -12,7 +12,6 @@ import { Selector, t } from 'testcafe';
       .click('veda-control.fulltext.dropdown')
       .typeText('veda-control.fulltext.dropdown', 'Класс для тестирования интерфейса')
       .click('.suggestion[resource="v-ui:TestUIClass"]')
-      .click('div.actions.actions-fixed button[type="button"] span.glyphicon.glyphicon-chevron-left')
       .click('veda-control[rel="v-s:hasTransportKind"] .dropdown')
       .click('veda-control[rel="v-s:hasTransportKind"] .fulltext-menu .select-all')
       .expect(Selector('veda-control[rel="v-s:hasTransportKind"] .suggestions .suggestion.selected').count).eql(3)
