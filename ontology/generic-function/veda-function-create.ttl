@@ -178,6 +178,8 @@ var updateStopList = [
   "v-s:actualVersion",
   "v-s:previousVersion",
   "v-s:nextVersion",
+  "v-s:parent",
+  "v-s:backwardTarget",
 ];
 
 this.initBlank = function (blankObject) {
@@ -209,14 +211,23 @@ this.initBlank = function (blankObject) {
     return Promise.all(values_promises).then(function (values) {
       var result_values_promises = values.map(function (value) {
         if (value.hasValue("rdf:type", "v-fc:Blank")) {
-          return value.initBlank().then(function (blankObject) {
-            blankObject.is("v-s:Embedded").then(function (isEmbedded) {
-              if ( isEmbedded && property_uri !== "v-s:parent" ) {
-                blankObject["v-s:parent"] = [ blank.object ];
-              }
+          return value.initBlank()
+            .then(function (childBlankObject) {
+              return childBlankObject.is("v-s:Embedded").then(function (isEmbedded) {
+                if (isEmbedded) {
+                  childBlankObject["v-s:parent"] = [ blank.object ];
+                }
+                return childBlankObject;
+              });
+            })
+            .then(function (childBlankObject) {
+              return childBlankObject.is("v-s:BackwardLink").then(function (isBackward) {
+                if (isBackward) {
+                  childBlankObject["v-s:backwardTarget"] = [ blank.object ];
+                }
+                return childBlankObject;
+              });
             });
-            return blankObject;
-          });
         } else {
           return value;
         }
@@ -231,7 +242,7 @@ this.initBlank = function (blankObject) {
   });
 };
 
-this.resetBlank = function (blankObject) {
+this.resetBlank = function () {
   var blank = this;
   blank.object = new veda.IndividualModel();
   blank.object["rdf:type"] = blank["v-fc:targetType"].slice(0);
@@ -254,14 +265,23 @@ this.resetBlank = function (blankObject) {
     return Promise.all(values_promises).then(function (values) {
       var result_values_promises = values.map(function (value) {
         if (value.hasValue("rdf:type", "v-fc:Blank")) {
-          return value.resetBlank().then(function (blankObject) {
-            blankObject.is("v-s:Embedded").then(function (isEmbedded) {
-              if ( isEmbedded && property_uri !== "v-s:parent" ) {
-                blankObject["v-s:parent"] = [ blank.object ];
-              }
+          return value.resetBlank()
+            .then(function (childBlankObject) {
+              return childBlankObject.is("v-s:Embedded").then(function (isEmbedded) {
+                if (isEmbedded) {
+                  childBlankObject["v-s:parent"] = [ blank.object ];
+                }
+                return childBlankObject;
+              });
+            })
+            .then(function (childBlankObject) {
+              return childBlankObject.is("v-s:BackwardLink").then(function (isBackward) {
+                if (isBackward) {
+                  childBlankObject["v-s:backwardTarget"] = [ blank.object ];
+                }
+                return childBlankObject;
+              });
             });
-            return blankObject;
-          });
         } else {
           return value;
         }
@@ -285,17 +305,24 @@ this.updateBlank = function () {
       return true;
     } else {
       blank.set(property_uri, blank.object.get(property_uri).slice(0));
+      return false;
     }
   });
   var relations_done_promises = relations.map(function (property_uri) {
     return blank.object.get(property_uri).map(function (value) {
-      return value.is("v-s:Embedded").then(function (isEmbedded) {
-        if ( isEmbedded && value.hasValue("v-s:parent", blank.object) ) {
+      return Promise.resolve().then(function () {
+        if (value.hasValue("v-s:parent", blank.object) || value.hasValue("v-s:backwardTarget", blank.object)) {
           return value.clone().then(function (embeddedBlank) {
             var types = embeddedBlank["rdf:type"];
             embeddedBlank["v-fc:targetType"] = types;
             embeddedBlank["rdf:type"] = [ new veda.IndividualModel("v-fc:Blank") ];
             blank.addValue(property_uri, embeddedBlank);
+            if (embeddedBlank.hasValue('v-s:parent', blank.object)) {
+              embeddedBlank['v-s:parent'] = [ blank ];
+            }
+            if (embeddedBlank.hasValue('v-s:backwardTarget', blank.object)) {
+              embeddedBlank['v-s:backwardTarget'] = [ blank ];
+            }
             return embeddedBlank.init().then(function (embeddedBlank) {
               return embeddedBlank.initBlank(value);
             }).then(function () {
