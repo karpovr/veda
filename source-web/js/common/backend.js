@@ -1,8 +1,10 @@
-'use strict';
+// Backend
 
 import veda from '../common/veda.js';
 
 import LocalDB from '../browser/local_db.js';
+
+import BackendError from '../common/backend_error.js';
 
 const serverBackend = {};
 
@@ -212,64 +214,6 @@ if (typeof window !== 'undefined') {
   veda.on('ccus-offline', browserBackend.check);
 }
 
-// Server errors
-
-/**
- * Server errors constructor
- * @param {Error} result
- */
-function BackendError (result) {
-  const errorCodes = {
-    0: 'Server unavailable',
-    200: 'Ok',
-    201: 'Created',
-    204: 'No content',
-    400: 'Bad request',
-    403: 'Forbidden',
-    404: 'Not found',
-    422: 'Unprocessable entity',
-    423: 'Locked',
-    429: 'Too many requests',
-    430: 'Too many password change fails',
-    463: 'Password change is not allowed',
-    464: 'Secret expired',
-    465: 'Empty password',
-    466: 'New password is equal to old',
-    467: 'Invalid password',
-    468: 'Invalid secret',
-    469: 'Password expired',
-    470: 'Ticket not found',
-    471: 'Ticket expired',
-    472: 'Not authorized',
-    473: 'Authentication failed',
-    474: 'Not ready',
-    475: 'Fail open transaction',
-    476: 'Fail commit',
-    477: 'Fail store',
-    500: 'Internal server error',
-    501: 'Not implemented',
-    503: 'Service unavailable',
-    904: 'Invalid identifier',
-    999: 'Database modified error',
-    1021: 'Disk full',
-    1022: 'Duplicate key',
-    1118: 'Size too large',
-    4000: 'Connect error',
-  };
-  this.code = result.status;
-  this.message = typeof code !== 'undefined' ? `${code}: ${errorCodes[code]}` : undefined;
-  this.stack = (new Error()).stack;
-  if (this.code === 0 || this.code === 503 || this.code === 4000) {
-    veda.trigger('offline');
-    browserBackend.check();
-  }
-  if (this.code === 470 || this.code === 471) {
-    veda.trigger('login:failed');
-  }
-}
-BackendError.prototype = Object.create(Error.prototype);
-BackendError.prototype.constructor = BackendError;
-
 /**
  * Common server call function
  * @param {Object} params
@@ -317,6 +261,15 @@ function call_server (params) {
       payload = JSON.stringify(data);
     }
     xhr.send(payload);
+  }).catch((error) => {
+    if (error.code === 0 || error.code === 503 || error.code === 4000) {
+      veda.trigger('offline');
+      browserBackend.check();
+    }
+    if (error.code === 470 || error.code === 471) {
+      veda.trigger('login:failed');
+    }
+    throw error;
   });
 }
 
