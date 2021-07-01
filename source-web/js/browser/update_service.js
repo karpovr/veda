@@ -26,7 +26,7 @@ function UpdateService () {
   const reconnectDelayInitial = 2500 + Math.round(Math.random() * 2500); // 2.5 - 5 sec
   const reconnectDelayFactor = 1.1;
   const reconnectDelayLimit = 5 * 60 * 1000; // 5 min
-  const pingTimeout = 5000;
+  const pingTimeout = 10000;
 
   let buffer = [];
   const socketDelay = 1000;
@@ -42,22 +42,28 @@ function UpdateService () {
    * @return {Promise} instance promise
    */
   function initSocket () {
-    return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort').then((ccusPortCfg) => {
-      const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
-      const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
-      const port = ccusPort || window.location.port;
-      const address = protocol + '//' + window.location.hostname + (port ? ':' + port : '') + '/ccus';
-      const socket = new WebSocket(address);
+    return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort')
+      .then((ccusPortCfg) => {
+        const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
+        const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
+        const port = ccusPort || window.location.port;
+        const address = protocol + '//' + window.location.hostname + (port ? ':' + port : '') + '/ccus';
+        const socket = new WebSocket(address);
 
-      socket.onopen = openedHandler;
-      socket.onclose = closedHandler;
-      socket.onerror = errorHandler;
-      socket.onmessage = messageHandler;
-      socket.receiveMessage = receiveMessage;
-      socket.sendMessage = sendMessage;
-      self.socket = socket;
-      return self;
-    });
+        socket.onopen = openedHandler;
+        socket.onclose = closedHandler;
+        socket.onerror = errorHandler;
+        socket.onmessage = messageHandler;
+        socket.receiveMessage = receiveMessage;
+        socket.sendMessage = sendMessage;
+        self.socket = socket;
+        return self;
+      })
+      .catch((error) => {
+        reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
+        console.log('init socket error, retry in', reconnectDelay / 1000, 'sec');
+        setTimeout(initSocket, reconnectDelay);
+      });
   }
 
   /**
