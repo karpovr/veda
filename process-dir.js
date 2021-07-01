@@ -11,6 +11,7 @@
  * node process-dir.js ontology templateRemover
  * node process-dir.js ontology uriToFile
  * node process-dir.js ontology fixSourceURL
+ * node process-dir.js ontology removeSourceURL
  *
  */
 
@@ -219,4 +220,29 @@ async function fixSourceURL(dir, file) {
       console.log(`Error reading/writing file ${filePath}`, err);
     }
   }
+}
+
+/**
+ * Remove`//# sourceURL=...` directives
+ */
+async function removeSourceURL(dir, file) {
+  const filePath = [dir, file].join('/');
+  const filterTTL = /\.ttl$/i;
+  const isTTL = filterTTL.test(filePath);
+  const templateRE = /\/\/# sourceURL=[a-z][a-z0-9\-]*:[a-zA-Z0-9\-\_]*/g;
+  let counter = 0;
+  if ( isTTL ) {
+    console.log('Replacing templates URIs to filenames in sourceURL:', filePath);
+    try {
+      let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
+      content = content.replace(templateRE, function (match) {
+        counter++;
+        return '';
+      });
+      await fsAsync.writeFile(filePath, content, 'utf-8');
+    } catch (err) {
+      console.log(`Error reading/writing file ${filePath}`, err);
+    }
+  }
+  console.log(`Replaced ${counter} URIs`);
 }

@@ -195,7 +195,7 @@ function renderTemplate (individual, container, templateString, templateName, mo
 
   let pre_result;
   if (pre_render_src) {
-    pre_result = eval(`(function () { 'use strict';\n${pre_render_src}\n}).call(individual); //# sourceURL=${templateName || templateString.length}_pre`);
+    pre_result = eval(`(function () { 'use strict';\n${pre_render_src}\n}).call(individual);\n//# sourceURL=${templateName || templateString.length}_pre`);
   }
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
@@ -208,7 +208,7 @@ function renderTemplate (individual, container, templateString, templateName, mo
 
       let post_result;
       if (post_render_src) {
-        post_result = eval(`(function () { 'use strict';\n${post_render_src}\n}).call(individual); //# sourceURL=${templateName || templateString.length}_post`);
+        post_result = eval(`(function () { 'use strict';\n${post_render_src}\n}).call(individual);\n//# sourceURL=${templateName || templateString.length}_post`);
       }
       return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
         .then(() => processedTemplate);
