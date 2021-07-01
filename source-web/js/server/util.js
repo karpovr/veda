@@ -1,6 +1,4 @@
-// Veda server utility functions
-
-'use strict';
+// Utilities
 
 import veda from '../common/veda.js';
 

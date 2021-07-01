@@ -1,7 +1,5 @@
 // Workflow engine
 
-'use strict';
-
 import veda from '../common/veda.js';
 
 const Workflow = veda.Workflow || {};

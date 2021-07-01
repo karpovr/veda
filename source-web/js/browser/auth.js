@@ -1,6 +1,4 @@
-// Veda application authentication
-
-'use strict';
+// Authentication
 
 import veda from '../common/veda.js';
 

@@ -1,7 +1,4 @@
-/**
- * BPMN utils
- *
- */
+// BPMN utils
 
 import veda from '../common/veda.js';
 

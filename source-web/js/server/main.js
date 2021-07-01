@@ -1,3 +1,5 @@
+// Application bootstrap
+
 import veda from '../common/veda.js';
 
 import AppModel from '../common/app_model.js';

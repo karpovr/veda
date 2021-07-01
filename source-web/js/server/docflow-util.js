@@ -1,7 +1,5 @@
 // Workflow engine utilities
 
-'use strict';
-
 import veda from '../common/veda.js';
 
 import mustache from 'mustache';

@@ -1,7 +1,5 @@
 // Local client database module
 
-'use strict';
-
 import veda from '../common/veda.js';
 
 const fallback = {

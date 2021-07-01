@@ -1,7 +1,5 @@
 // Update service for individuals that were changed on server
 
-'use strict';
-
 import veda from '../common/veda.js';
 
 import IndividualModel from '../common/individual_model.js';

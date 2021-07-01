@@ -1,4 +1,4 @@
-// Main
+// Application bootstrap
 
 import veda from '../common/veda.js';
 

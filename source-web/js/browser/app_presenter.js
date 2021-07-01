@@ -1,4 +1,4 @@
-// Veda application presenter
+// Application presenter
 
 import './check_browser.js';
 

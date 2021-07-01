@@ -1,4 +1,4 @@
-// User Model
+// User model
 
 import veda from '../common/veda.js';
 

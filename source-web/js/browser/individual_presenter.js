@@ -1,6 +1,4 @@
-// Individual Presenter
-
-'use strict';
+// Individual presenter
 
 import veda from '../common/veda.js';
 

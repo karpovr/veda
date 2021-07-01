@@ -1,4 +1,4 @@
-// Ontology Model
+// Ontology model
 
 import veda from '../common/veda.js';
 

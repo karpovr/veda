@@ -1,6 +1,4 @@
-// Class to manipulate individuals.
-
-'use strict';
+// Individual model
 
 import veda from '../common/veda.js';
 

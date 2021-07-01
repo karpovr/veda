@@ -1,6 +1,4 @@
-// Notify module
-
-'use strict';
+// User notifications
 
 import veda from '../common/veda.js';
 

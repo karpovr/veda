@@ -1,4 +1,4 @@
-// Veda common utility functions
+// Utilities
 
 import veda from '../common/veda.js';
 

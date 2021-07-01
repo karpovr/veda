@@ -1,6 +1,4 @@
-// Veda controls implemented as JQuery plugins
-
-'use strict';
+// Controls implemented as JQuery plugins
 
 import veda from '../common/veda.js';
 

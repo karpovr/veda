@@ -1,4 +1,4 @@
-// Veda application Model
+// Application model
 
 import riot from '../common/lib/riot.js';
 
