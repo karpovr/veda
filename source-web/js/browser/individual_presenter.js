@@ -63,16 +63,17 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
           } else if (template instanceof HTMLElement) {
             templateString = template.outerHTML;
           }
-          return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+          return renderTemplate(individual, container, templateString, undefined, mode, extra, toAppend);
         }
         return template.load().then((template) => {
+          const templateName = template.id;
           const templateString = template['v-ui:template'][0];
           if (reg_file.test(templateString)) {
             return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
-              return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+              return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
             });
           } else {
-            return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+            return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
           }
         });
       } else {
@@ -84,13 +85,14 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
             if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
               throw new Error('Template type violation!');
             }
+            const templateName = template.id;
             const templateString = template['v-ui:template'][0].toString();
             if (reg_file.test(templateString)) {
               return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
-                return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+                return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
               });
             } else {
-              return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+              return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
             }
           });
         } else {
@@ -111,13 +113,14 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
             return Promise.all(templatesPromises);
           }).then((templates) => {
             const renderedTemplatesPromises = templates.map((template) => {
+              const templateName = template.id;
               const templateString = template['v-ui:template'][0];
               if (reg_file.test(templateString)) {
                 return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
-                  return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+                  return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
                 });
               } else {
-                return renderTemplate(individual, container, templateString, mode, extra, toAppend);
+                return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
               }
             });
             return Promise.all(renderedTemplatesPromises);
@@ -181,8 +184,8 @@ function errorHandler (error) {
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function renderTemplate (individual, container, template, mode, extra, toAppend) {
-  template = template.trim();
+function renderTemplate (individual, container, templateString, templateName, mode, extra, toAppend) {
+  let template = templateString.trim();
 
   // Extract pre script, template and post script
   const match = template.match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
@@ -192,7 +195,7 @@ function renderTemplate (individual, container, template, mode, extra, toAppend)
 
   let pre_result;
   if (pre_render_src) {
-    pre_result = eval('(function (){ \'use strict\'; ' + pre_render_src + '}).call(individual);');
+    pre_result = eval(`(function () { 'use strict';\n${pre_render_src}\n}).call(individual); //# sourceURL=${templateName || templateString.length}_pre`);
   }
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
@@ -205,7 +208,7 @@ function renderTemplate (individual, container, template, mode, extra, toAppend)
 
       let post_result;
       if (post_render_src) {
-        post_result = eval('(function (){ \'use strict\'; ' + post_render_src + '}).call(individual);');
+        post_result = eval(`(function () { 'use strict';\n${post_render_src}\n}).call(individual); //# sourceURL=${templateName || templateString.length}_post`);
       }
       return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
         .then(() => processedTemplate);
