@@ -178,7 +178,8 @@ function errorHandler (error) {
  * Render template
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
- * @param {IndividualModel|string} template - template to render individual with
+ * @param {IndividualModel|string} templateString - template string to render individual with
+ * @param {string} templateName - template name for sourceURL
  * @param {string} mode - view | edit | search
  * @param {Object} extra - extra parameters to pass ro template
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
@@ -249,6 +250,9 @@ function processTemplate (individual, container, template, mode) {
   const _edit = template.find('.-edit').addBack('.-edit');
   const _search = template.find('.-search').addBack('.-search');
 
+  // Embedded templates list
+  const embedded = [];
+
   /**
    * Template mode handler. Applies mode to template to show/hide elements in different modes
    * @param {Event} event
@@ -263,27 +267,14 @@ function processTemplate (individual, container, template, mode) {
     case 'edit': edit.show(); _edit.hide(); break;
     case 'search': search.show(); _search.hide(); break;
     }
-  };
-  template.on('view edit search', modeHandler);
-
-  // Embedded templates list
-  const embedded = [];
-
-  /**
-   * Template mode handler. Triggers same events for embedded templates
-   * @param {Event} event
-   * @return {void}
-   */
-  const syncEmbedded = function (event) {
+    // sync mode for embedded templates
     embedded.map((item) => {
       item.triggerHandler(event.type, individual.id);
     });
-    event.stopPropagation();
   };
-  template.on('view edit search', syncEmbedded);
+  template.on('view edit search', modeHandler);
 
   // Define handlers
-
   template.data({
     'reset': resetHandler,
     'save': saveHandler,
@@ -574,12 +565,12 @@ function processTemplate (individual, container, template, mode) {
 
       renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
     })
-    .catch((error) => {
-      console.log(`presenter error: ${about.id}`, error, error.stack);
-      const msg = $(`<div><code>${error.name} ${error.message} ${about.id}</code></div>`);
-      propertyContainer.append(msg);
-      return msg;
-    });
+      .catch((error) => {
+        console.log(`presenter error: ${about.id}`, error, error.stack);
+        const msg = $(`<div><code>${error.name} ${error.message} ${about.id}</code></div>`);
+        propertyContainer.append(msg);
+        return msg;
+      });
   }).get();
 
   // Max displayed values
