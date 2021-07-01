@@ -256,14 +256,14 @@ function BackendError (result) {
     1118: 'Size too large',
     4000: 'Connect error',
   };
-  const code = result.status;
+  this.code = result.status;
   this.message = typeof code !== 'undefined' ? `${code}: ${errorCodes[code]}` : undefined;
   this.stack = (new Error()).stack;
-  if (code === 0 || code === 503 || code === 4000) {
+  if (this.code === 0 || this.code === 503 || this.code === 4000) {
     veda.trigger('offline');
     browserBackend.check();
   }
-  if (code === 470 || code === 471) {
+  if (this.code === 470 || this.code === 471) {
     veda.trigger('login:failed');
   }
 }
