@@ -804,8 +804,8 @@ proto.is = function (_class) {
  * Initialize individual with class specific domain properties and methods
  * @return {Promise<IndividualModel>}
  */
-proto.init = function () {
-  if (this.isInited() || !this._.init) {
+proto.init = function (forced) {
+  if (!forced && (this.isInited() || !this._.init)) {
     return Promise.resolve(this);
   }
   const isClass = this.hasValue('rdf:type', 'owl:Class') || this.hasValue('rdf:type', 'rdfs:Class');

@@ -323,7 +323,7 @@ this.updateBlank = function () {
             if (embeddedBlank.hasValue('v-s:backwardTarget', blank.object)) {
               embeddedBlank['v-s:backwardTarget'] = [ blank ];
             }
-            return embeddedBlank.init().then(function (embeddedBlank) {
+            return embeddedBlank.init(true).then(function (embeddedBlank) {
               return embeddedBlank.initBlank(value);
             }).then(function () {
               return embeddedBlank.updateBlank();
