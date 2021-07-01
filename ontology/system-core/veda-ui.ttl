@@ -403,61 +403,6 @@ v-ui:rejectMessageType
   rdfs:range v-s:MessageType ;
 .
 
-#----------------for dropdown----------------------------------
-d:2078749d2bcf42e0ae80c5d8287d19d1
-  rdf:type v-s:TransportKind ;
-  rdfs:label "Авиатранспорт"@ru;
-  rdfs:label "Air transport"@en;
-  v-s:updateCounter "1"^^xsd:integer.
-
-d:177b4624ed3f4ce6a1c89d7a3bd4f1c1
-  rdf:type v-s:TransportKind ;
-  rdfs:label "Железнодорожный транспорт"@ru;
-  rdfs:label "Railway transport"@en;
-  v-s:updateCounter "1"^^xsd:integer.
-
-d:62fbbbc27f8e407c8f51de71e10d0501
-  rdf:type v-s:TransportKind ;
-  rdfs:label "Автобус"@ru;
-  rdfs:label "Bus"@en;
-  v-s:updateCounter "1"^^xsd:integer.
-
-v-s:hasTransportKind
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Вид транспорта"@ru ;
-  rdfs:label "Transport kind"@en ;
-  rdfs:range v-s:TransportKind ;
-.
-v-s:hasTransportKindSingle
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Вид транспорта единичный"@ru ;
-  rdfs:label "Transport kind single"@en ;
-  rdfs:range v-s:TransportKind ;
-.
-v-s:PS_hasTransportKind_TestUi
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-s:hasTransportKind ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-  rdfs:label "Спецификация свойства v-s:hasTransportKind для класса v-ui:TestUIClass"@ru ;
-  rdfs:label "v-s:hasTransportKind property specification for v-ui:TestUIClass"@en ;
-.
-v-s:PS_hasTransportKindSingle_TestUi
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-s:hasTransportKindSingle ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация свойства v-s:hasTransportKind для класса v-ui:TestUIClass"@ru ;
-  rdfs:label "v-s:hasTransportKind property specification for v-ui:TestUIClass"@en ;
-.
-v-s:TransportKind
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:UserThing ;
-  rdfs:label "Вид транспорта"@ru ;
-  rdfs:label "Transport kind"@en ;
-.
 # --------------- System properties template ------------------
 
 v-ui:ExitButtonTemplate
@@ -615,16 +560,6 @@ v-ui:FullWidthSwitchTemplate
 </button>
   """
 .
-
-# v-ui:SpecCreator
-#   rdf:type v-ui:DatatypePropertySpecification ;
-#   rdfs:label "Спецификация свойства v-s:creator для класса v-s:Thing"@ru ;
-#   rdfs:label "v-s:creator property specification for v-s:Thing class"@en ;
-#   v-ui:forClass v-s:Thing ;
-#   v-ui:forProperty v-s:creator ;
-#   v-ui:minCardinality 1 ;
-#   v-ui:maxCardinality 1 ;
-# .
 
 v-ui:SystemPropertiesTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -1005,20 +940,6 @@ v-ui:IconButtonsTemplate
   rdfs:label "Template with standard buttons"@en ;
   v-ui:template """
 <script>
-  // var allButtons = "edit save cancel delete";
-  var defaultButtons = "edit save cancel delete";
-  individual.rights.then(function (rights) {
-    var canUpdate = rights.hasValue("v-s:canUpdate", true);
-    var canDelete = rights.hasValue("v-s:canDelete", true);
-    var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
-    enabledButtons.forEach(function (id) {
-      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
-      if ( !canDelete && (id === "delete") ) { return; }
-      $("#" + id, template).removeClass("rm");
-    });
-    $(".rm", template).remove();
-  });
-
   template.on("click", "#edit, #save, #cancel, #delete", function (e) {
     e.preventDefault();
     var action = this.id;
@@ -1032,6 +953,20 @@ v-ui:IconButtonsTemplate
     } else {
       template.parent().closest("[resource]").trigger(action);
     }
+  });
+
+  // var allButtons = "edit save cancel delete";
+  var defaultButtons = "edit save cancel delete";
+  return individual.rights.then(function (rights) {
+    var canUpdate = rights.hasValue("v-s:canUpdate", true);
+    var canDelete = rights.hasValue("v-s:canDelete", true);
+    var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
+    enabledButtons.forEach(function (id) {
+      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
+      if ( !canDelete && (id === "delete") ) { return; }
+      $("#" + id, template).removeClass("rm");
+    });
+    $(".rm", template).remove();
   });
 
   //# sourceURL=v-ui:IconButtonsTemplate_pre
@@ -1634,10 +1569,6 @@ v-ui:IconModalTemplate
         $(".actions", tmpl).remove();
       }
     });
-    // 21.10.2019 пока временно, если долго не раскоменчено то удалить
-    // individual.one("beforeReset", function () {
-    //   modal.modal("hide").remove();
-    // });
     individual.one("afterSave", function () {
       modal.modal("hide").remove();
     });
@@ -1836,314 +1767,6 @@ v-ui:SectionHeaderTemplate
 """
 .
 
-####### TEST UI #######
-
-v-ui:TestUIClass
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:Document ;
-  rdfs:subClassOf v-s:Journaling ;
-  rdfs:label "Класс для тестирования интерфейса"@ru ;
-  rdfs:label "Test UI class"@en ;
-.
-
-v-ui:testBoolean
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Тестовое булево свойство"@ru ;
-  rdfs:label "Test boolean property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range xsd:boolean ;
-.
-v-ui:testInteger
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Тестовое целочисленное свойство"@ru ;
-  rdfs:label "Test integer property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range xsd:integer ;
-.
-v-ui:testDecimal
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Тестовое десятичное свойство"@ru ;
-  rdfs:label "Test decimal property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range xsd:decimal ;
-.
-v-ui:testString
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Тестовое текстовое свойство"@ru ;
-  rdfs:label "Test string property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range xsd:string ;
-.
-v-ui:testDatetime
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Тестовое календарное свойство"@ru ;
-  rdfs:label "Test datetime property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range xsd:dateTime ;
-.
-v-ui:testLink
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Тестовое объектное свойство"@ru ;
-  rdfs:label "Test object property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range rdfs:Resource ;
-.
-v-ui:testFile
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Тестовое файловое свойство"@ru ;
-  rdfs:label "Test file property"@en ;
-  rdfs:domain v-ui:TestUIClass ;
-  rdfs:range v-s:File ;
-.
-v-ui:SpecTestBoolean
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация тестового булева свойства"@ru ;
-  rdfs:label "Specification for test boolean property"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-ui:testBoolean ;
-.
-v-ui:SpecTestInteger
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация тестового целочисленного свойства"@ru ;
-  rdfs:label "Specification for test integer property"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-ui:testInteger ;
-  v-ui:optionValue "1"^^xsd:integer ;
-  v-ui:optionValue "2"^^xsd:integer ;
-  v-ui:optionValue "3"^^xsd:integer ;
-  v-ui:minCardinality "1"^^xsd:integer ;
-  v-ui:maxCardinality "1"^^xsd:integer ;
-.
-v-ui:SpecTestDecimal
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация тестового десятичного свойства"@ru ;
-  rdfs:label "Specification for test decimal property"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-ui:testDecimal ;
-  v-ui:optionValue "1.1"^^xsd:string ;
-  v-ui:optionValue "2.2"^^xsd:string ;
-  v-ui:optionValue "3.3"^^xsd:string ;
-.
-v-ui:SpecTestString
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация тестового текстового свойства"@ru ;
-  rdfs:label "Specification for test string property"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-ui:testString ;
-  v-ui:optionValue "Предопределенное значение 1"^^xsd:string ;
-  v-ui:optionValue "Предопределенное значение 2"^^xsd:string ;
-  v-ui:optionValue "Предопределенное значение 3"^^xsd:string ;
-  v-ui:minCardinality "1"^^xsd:integer ;
-  v-ui:maxCardinality "1"^^xsd:integer ;
-.
-v-ui:SpecTestDatetime
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация тестового календарного свойства"@ru ;
-  rdfs:label "Specification for test datetime property"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-ui:testDatetime ;
-  v-ui:optionValue "2011-01-02"^^xsd:dateTime ;
-  v-ui:optionValue "2012-03-04"^^xsd:dateTime ;
-  v-ui:optionValue "2013-05-06"^^xsd:dateTime ;
-  v-ui:defaultValue "2013-05-06"^^xsd:dateTime ;
-.
-v-ui:SpecTestLink
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация тестового объектного свойства"@ru ;
-  rdfs:label "Specification for test link property"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:forProperty v-ui:testLink ;
-  v-ui:minCardinality "1"^^xsd:integer ;
-  v-ui:maxCardinality "1"^^xsd:integer ;
-  v-ui:optionValue v-ui:SpecTestLink ;
-  v-ui:optionValue v-ui:SpecTestDatetime ;
-  v-ui:optionValue v-ui:SpecTestString ;
-.
-
-v-ui:TestUI
-  rdf:type v-ui:TestUIClass ;
-  rdfs:label "Индивид для тестирования интерфейса"@ru ;
-  rdfs:label "Test UI individual"@en ;
-  v-ui:testBoolean  "true"^^xsd:boolean ;
-  v-ui:testString   "Тестовое значение строкового свойства"@ru ;
-  v-ui:testString   "Test string property value"@en ;
-  v-ui:testInteger  "999"^^xsd:integer ;
-  v-s:creator td:RomanKarpov-Analyst1 ;
-#  v-ui:testDatetime "1945-05-09T21:00:00"^^xsd:dateTime ;
-#  v-ui:testLink     v-ui:TestUIClass ;
-  v-ui:testDecimal  "3.1415926"^^xsd:decimal ;
-.
-
-v-ui:TestUIClass_permission
-  rdf:type v-s:PermissionStatement ;
-  v-s:permissionObject v-ui:TestUIClass ;
-  v-s:permissionSubject td:AndreyBychin ;
-  v-s:canCreate "true"^^xsd:boolean ;
-  rdfs:label "Права на создание тестового шаблона" ;
-.
-
-# for search #
-v-ui:TestUIRegistry
-  a v-fs:AttributiveSearch;
-  rdfs:label "Тестовый шаблон"@ru ;
-  rdfs:label "Test UI template"@en ;
-  v-fs:searchBlank v-ui:TestUIRegistryBlank ;
-  v-fs:searchBlankTemplate v-ui:TestUITemplate ;
-  v-fs:searchResultTemplate v-ui:TestUIResultTemplate ;
-.
-v-ui:TestUIRegistryBlank
-  rdf:type v-fc:Blank ;
-  rdfs:label "Тестовый шаблон"@ru ;
-  rdfs:label "Test UI template"@en ;
-  v-fc:targetType v-ui:TestUIClass ;
-.
-v-ui:TestUIResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон результатов реестра годовые TestUI"@ru ;
-  rdfs:label "TestUI result template"@en ;
-  v-ui:template """
-<table class="table table-bordered">
-  <thead class="result-header">
-    <tr>
-      <th colspan="15" about="v-ui:TestUIClass" property="rdfs:label"></th>
-    </tr>
-    <tr class="active">
-      <th width="1%">#</th>
-      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
-      <th class="orderby" data-orderby="v-s:creator"><span about="v-s:creator" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="rdfs:label"><span about="rdfs:label" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="rdfs:comment"><span about="rdfs:comment" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testBoolean"><span about="v-ui:testBoolean" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testString"><span about="v-ui:testString" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testInteger"><span about="v-ui:testInteger" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testDecimal"><span about="v-ui:testDecimal" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testDatetime"><span about="v-ui:testDatetime" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testLink"><span about="v-ui:testLink" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:template"><span about="v-ui:template" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-s:script"><span about="v-s:script" property="rdfs:label"></span></th>
-      <th class="orderby" data-orderby="v-ui:testFile"><span about="v-ui:testFile" property="rdfs:label"></span></th>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td class="serial-number"></td>
-      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-      <td rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
-      <td property="v-s:created"></td>
-      <td property="rdfs:label"></td>
-      <td property="rdfs:comment"></td>
-      <td property="v-ui:testBoolean"></td>
-      <td property="v-ui:testString"></td>
-      <td property="v-ui:testInteger"></td>
-      <td property="v-ui:testDecimal"></td>
-      <td property="v-ui:testDatetime"></td>
-      <td property="v-ui:testLink"></td>
-      <td property="v-ui:template"></td>
-      <td property="v-s:script"></td>
-      <td property="v-ui:testFile"></td>
-    </tr>
-  </tbody>
-</table>
-  """ ;
-.
-##############
-v-s:TS_TestUIClass
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-ui:TestUITemplate;
-  v-ui:forClass v-ui:TestUIClass
-.
-
-v-ui:TestUITemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Тестовый шаблон"@ru ;
-  rdfs:label "Test UI template"@en ;
-  v-ui:forClass v-ui:TestUIClass ;
-  v-ui:template """
-<div class="container sheet">
-  <div class="clearfix">
-    <h2 class="pull-left" about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></h2>
-    <a class="pull-right" href="#/@"><small property="@"></small></a>
-  </div>
-  <em about="rdfs:label" property="rdfs:label" class="-view edit search"></em>
-  <h3 property="rdfs:label"></h3>
-  <veda-control property="rdfs:label" data-type="string" class="-view edit search" id="label"></veda-control>
-  <br class="-view edit search">
-  <em about="rdfs:comment" property="rdfs:label" class="-view edit search"></em>
-  <div><em property="rdfs:comment"></em></div>
-  <veda-control property="rdfs:comment" data-type="string" class="-view edit search" id="comment"></veda-control>
-  <br class="-view edit search">
-  <div class="checkbox">
-    <label>
-      <veda-control property="v-ui:testBoolean" data-type="boolean"></veda-control>
-      <em about="v-ui:testBoolean" property="rdfs:label"></em>
-    </label>
-  </div>
-  <hr>
-  <em about="v-s:hasTransportKind" property="rdfs:label"></em>
-  <div rel="v-s:hasTransportKind" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-  <veda-control data-type="link" rel="v-s:hasTransportKind" class="-view edit search fulltext dropdown"></veda-control>
-  <em about="v-s:hasTransportKindSingle" property="rdfs:label"></em>
-  <div rel="v-s:hasTransportKindSingle" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-  <veda-control data-type="link" rel="v-s:hasTransportKindSingle" class="-view edit search fulltext dropdown"></veda-control>
-  <hr>
-  <em about="v-ui:testString" property="rdfs:label"></em>
-  <div property="v-ui:testString"></div>
-  <veda-control property="v-ui:testString" data-type="string" class="-view edit search" id="testString"></veda-control>
-  <veda-control property="v-ui:testString" data-type="multilingualString" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testString" data-type="text" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testString" data-type="multilingualText" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testString" data-type="select" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testString" data-type="checkbox" class="view edit search"></veda-control>
-  <veda-control property="v-ui:testString" data-type="radio" class="view edit search"></veda-control>
-  <hr>
-  <em about="v-ui:testInteger" property="rdfs:label"></em>
-  <div property="v-ui:testInteger"></div>
-  <veda-control property="v-ui:testInteger" data-type="integer" class="-view edit search"></veda-control>
-  <br>
-  <br>
-  <veda-control property="v-ui:testInteger" data-type="select" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testInteger" data-type="checkbox"></veda-control>
-  <veda-control property="v-ui:testInteger" data-type="radio"></veda-control>
-  <hr>
-  <em about="v-ui:testDecimal" property="rdfs:label"></em>
-  <div property="v-ui:testDecimal"></div>
-  <veda-control property="v-ui:testDecimal" data-type="decimal" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testDecimal" data-type="select" class="-view edit search"></veda-control>
-  <hr>
-  <em about="v-ui:testDatetime" property="rdfs:label"></em>
-  <div property="v-ui:testDatetime" class="view edit -search"></div>
-  <veda-control property="v-ui:testDatetime" data-type="date" class="-view edit search" id="date"></veda-control>
-  <veda-control property="v-ui:testDatetime" data-type="dateTime" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testDatetime" data-type="select" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testDatetime" data-type="checkbox" class="-view edit search"></veda-control>
-  <veda-control property="v-ui:testDatetime" data-type="radio" class="-view edit search"></veda-control>
-  <hr>
-  <em about="v-ui:testLink" property="rdfs:label"></em>
-  <div rel="v-ui:testLink" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-  <veda-control rel="v-ui:testLink" data-type="link" class="-view edit search full"></veda-control>
-  <veda-control rel="v-ui:testLink" data-type="checkbox"></veda-control>
-  <veda-control rel="v-ui:testLink" data-type="radio"></veda-control>
-  <veda-control rel="v-ui:testLink" data-type="select" class="-view edit search"></veda-control>
-  <!--hr>
-  <em about="v-ui:template" property="rdfs:label"></em>
-  <veda-control property="v-ui:template" data-type="source"></veda-control>
-  <hr>
-  <em about="v-s:script" property="rdfs:label"></em>
-  <veda-control property="v-s:script" data-type="source"></veda-control-->
-  <hr>
-  <em about="v-ui:testFile" property="rdfs:label"></em>
-  <div rel="v-ui:testFile" data-template="v-ui:FileTemplate" class="view edit -search"></div>
-  <br>
-  <veda-control rel="v-ui:testFile" data-type="file" class="-view edit -search"></veda-control>
-  <br>
-  <div class="actions">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="send edit save cancel delete journal task"></span>
-  </div>
-  <div about="@" class="container sheet view -edit -search" data-template="v-s:CommentsTemplate"></div>
-</div>
-  """ ;
-.
 v-ui:PsCommentFile
   rdf:type v-ui:DatatypePropertySpecification ;
   v-ui:forClass v-s:File ;
