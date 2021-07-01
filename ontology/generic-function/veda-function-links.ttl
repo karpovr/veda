@@ -175,7 +175,7 @@ v-s:LinksTemplate
   $("#links-tabs a[href='" + individual.activeTab + "']", template).parent().addClass("active");
   $("#links-tabs-content " + individual.activeTab, template).addClass("active");
 
-//# sourceURL=v-s:LinksTemplate_pre
+
 </script>
 <div>
   <br>
@@ -272,7 +272,7 @@ v-s:LinksListTemplate
     }
   }
 
-//# sourceURL=v-s:LinksListTemplate_pre
+
 </script>
 <div>
   <table class="hidden links-table table table-condensed table-striped table-sortable">
@@ -537,7 +537,7 @@ v-s:LinksTreeRecursiveTemplate
     });
   }
 
-//# sourceURL=v-s:LinksTreeRecursiveTemplate_pre
+
 </script>
 <ul class="link-node">
   <li>
@@ -572,7 +572,7 @@ v-s:TrimmedLinkTemplate
     label = label.substring(0, 70) + "...";
     template.text(label);
   }
-  //# sourceURL=v-s:TrimmedLinkTemplate_post
+  
 </script>
   """ ;
 .

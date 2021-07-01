@@ -43,7 +43,7 @@ v-s:IncomingLetter_ComplexRouteStartForm_Template
     individual[complex+'review'][0][simple+'participant'] = correspondentPerson;
   });
 
-//# sourceURL=v-s:IncomingLetter_ComplexRouteStartForm_Template_pre
+
 </script>
 <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div>
 """ ;
@@ -78,7 +78,7 @@ v-s:OutgoingLetter_ComplexRouteStartForm_Template
     individual[complex+'sign'][0][simple+'participant'] = correspondentPerson;
   });
 
-//# sourceURL=v-s:OutgoingLetter_ComplexRouteStartForm_Template_pre
+
 </script>
 <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div>
 """ ;

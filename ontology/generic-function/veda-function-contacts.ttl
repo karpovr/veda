@@ -121,7 +121,7 @@ v-s:ContactsTemplate
   }
   $("#box-tabs li[data-type='"+individual["activeTab"]+"']", template).click();
 
-  //# sourceURL=v-s:MultiFunctionalSearchTemplate_pre
+  
 </script>
 <div class="container-fluid sheet">
   <br>
@@ -183,7 +183,7 @@ v-ui:CompactCommunicationMeanTemplate
   } else {
     $("a.email-link", template).remove();
   }
-  //# sourceURL=v-ui:CompactCommunicationMeanTemplate_post
+  
 </script>
 """
 .
@@ -216,7 +216,7 @@ v-s:ContactCardTemplate
     $("div.unit-image", template).remove();
     $("#appLabel", template).remove();
   };
-  //# sourceURL=v-s:ContactCardTemplate_pre
+  
 </script>
 <tr>
   <td>
@@ -303,7 +303,7 @@ v-s:ContactCardTemplate
       faviconIcon.toggleClass("fa-star-o fa-star");
     });
   };
-  //# sourceURL=v-s:ContactCardTemplate_post
+  
 </script>
 """
 .
@@ -320,7 +320,7 @@ v-s:ContactsStructureTemplate
   } else {
     $("#selfOrg", template).remove();
   }
-//# sourceURL=v-s:ContactsStructureTemplate_pre
+
 </script>
 <div>
   <style>
@@ -1281,7 +1281,7 @@ v-s:ContactsStructureTemplate
     });
   }
 
-  //# sourceURL=v-s:ContactsStructureTemplate_post
+  
 </script>
 """
 .
@@ -1377,7 +1377,7 @@ v-s:OrganizationUnitContentTemplate
       }
     });
   });
-//# sourceURL=v-s:OrganizationUnitContentTemplate_pre
+
 </script>
 <div>
   <h4><span about="@" property="rdfs:label"></span></h4>
@@ -1423,7 +1423,7 @@ v-s:ContactsInUnitSearchResultTemplate
       } else if ( individual.hasValue("rdf:type", "v-s:Organization") ) {
         template.children().not(".org").remove();
       }
-    //# sourceURL=v-s:ContactsInUnitSearchResultTemplate
+    
     </script>
     <div>
       <hr class="app dep org margin-md">

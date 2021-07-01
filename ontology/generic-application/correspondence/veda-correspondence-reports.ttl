@@ -166,7 +166,7 @@ v-s:CountOfUsersTasks_Report_ParametersTemplate
   $('#createReport', template).on('click', function () {
     veda.Util.createReport('v-s:CountOfUsersTasks_Report', individual);
   });
-  //# sourceURL=v-s:CountOfUsersTasks_Report_ParametersTemplate
+  
 </script>
 """ ;
 .
@@ -208,7 +208,7 @@ v-s:CompletedTasksCount_Report_ParametersTemplate
   $('#createReport', template).on('click', function () {
     veda.Util.createReport('v-s:CompletedTasksCount_Report', individual);
   });
-  //# sourceURL=v-s:CompletedTasksCount_Report_ParametersTemplate
+  
 </script>
 """ ;
 .

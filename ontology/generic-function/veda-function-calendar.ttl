@@ -107,7 +107,7 @@ function format(str) {
   });
 }
 
-//# sourceURL=v-cal:FunctionCalendarModel
+
   """
 .
 v-cal:TasksCalendar
@@ -211,7 +211,7 @@ v-cal:FunctionCalendarTemplate
     });
   });
 
-  //# sourceURL=v-cal:FunctionCalendarTemplate_post
+  
 </script>
   """ ;
 .
@@ -230,7 +230,7 @@ v-cal:FunctionCalendarIndicatorTemplate
     trigger: "hover",
     title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
   });
-  //# sourceURL=v-cal:FunctionCalendarIndicatorTemplate_pre
+  
 </script>
 <a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-calendar fa-lg"></span>

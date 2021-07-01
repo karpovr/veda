@@ -286,7 +286,7 @@ v-s:ScheduledActionTemplate
     });
   });
 
-  //# sourceURL=v-s:ScheduledActionTemplate
+  
 </script>
     """;
 .
@@ -472,7 +472,7 @@ v-s:RecursiveScheduledActionTemplate
     }
   });
 
-  //# sourceURL=v-s:RecursiveScheduledActionTemplate
+  
 </script>
 <div class="media" style="overflow:initial;">
   <div class="media-body" style="overflow:initial;">

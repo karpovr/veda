@@ -111,7 +111,7 @@ v-s:EmailTemplate
     });
   })
 
-//# sourceURL=v-s:EmailTemplate_pre
+
 </script>
 <div class="container sheet">
   <h2>

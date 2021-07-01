@@ -139,7 +139,7 @@ v-fc:CreateByTypeTemplate
   if (self.hasValue("v-fc:targetType")) {
     typeHandler(self["v-fc:targetType"]);
   }
-  //# sourceURL=v-fc:CreateByTypeTemplate_post
+  
 </script>
   """
 .
@@ -340,7 +340,7 @@ this.updateBlank = function () {
     return blank.save();
   });
 };
-//# sourceURL=v-fc:BlankModel
+
   """
 .
 
@@ -359,7 +359,7 @@ v-fc:BlankTemplate
 <script>
   return individual.initBlank();
 
-  //# sourceURL=v-fc:BlankTemplate_pre
+  
 </script>
 <div>
   <div id="object-container"></div>
@@ -401,7 +401,7 @@ v-fc:BlankTemplate
     }
   });
 
-  //# sourceURL=v-fc:BlankTemplate_post
+  
 </script>
   """
 .
@@ -552,7 +552,7 @@ v-fc:CreateManagementTemplate
       $(".action.delete-create", template).remove();
     }
   });
-//# sourceURL=v-fc:CreateManagementTemplate_pre
+
 </script>
 <div>
   <div class="container sheet">

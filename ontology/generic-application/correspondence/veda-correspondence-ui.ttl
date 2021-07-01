@@ -159,7 +159,7 @@ v-s:LetterTemplate
       regRecord["rdf:type"] = [ new veda.IndividualModel("v-s:LetterRegistrationRecord" + keyWord), isOwn ? enumerated : null ];
     });
   }
-  //# sourceURL=v-s:LetterTemplate_pre
+  
 </script>
 <div>
   <div class="container sheet">
@@ -384,7 +384,7 @@ v-s:LetterTemplate
   } else if( individual.hasValue("rdf:type", "v-s:OutgoingLetter") ) {
     $("#add-OutgoingLetter", template).remove();
   }
-  //# sourceURL=v-s:LetterTemplate_post
+  
 </script>
   """ ;
 .
@@ -498,7 +498,7 @@ v-s:CorrespondentTemplate
       individual["v-s:correspondentOrganization"] = [ Organization ];
     });
   });
-  //# sourceURL=v-s:CorrespondentTemplate_post
+  
 </script>
   """ ;
 .
@@ -648,7 +648,7 @@ v-s:LetterRegistrationRecordTemplate
     template.children(":first").addClass("bg-success");
   }
 
-  //# sourceURL=v-s:LetterRegistrationRecordTemplate_post
+  
 </script>
   """ ;
 .

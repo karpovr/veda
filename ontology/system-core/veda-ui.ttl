@@ -420,7 +420,7 @@ v-ui:ExitButtonTemplate
   template.click(function(e) {
     e.preventDefault();
   });
-  //# sourceURL=v-ui:ExitButtonTemplate_pre
+  
 </script>
 <a id="logout" class="logout" href="#" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="glyphicon glyphicon-log-out"></span> <span class="label label-default"></span>
@@ -446,7 +446,7 @@ v-ui:AdministrationIconTemplate
       });
     }
   });
-  //# sourceURL=v-ui:AdministrationIconTemplate_pre
+  
 </script>
 <a href="#/v-s:AdministrationAspect" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-cog fa-lg"></span> <span class="label label-default"></span>
@@ -503,7 +503,7 @@ v-ui:LanguageSwitchTemplate
       return;
     }
   };
-  //# sourceURL=v-ui:LanguageSwitchTemplate
+  
 </script>
 
   """
@@ -546,7 +546,7 @@ v-ui:FullWidthSwitchTemplate
       title: changeSizeBundle["rdfs:label"].map(veda.Util.formatValue).join(" ")
     });
   })
-  //# sourceURL=v-ui:FullWidthSwitchTemplate
+  
 </script>
 <button class="btn btn-xs btn-default navbar-btn">
   <span class="glyphicon glyphicon-fullscreen"></span>
@@ -576,7 +576,7 @@ v-ui:SystemPropertiesTemplate
   function archivedHandler() {
     this['v-s:deleted'] = this['v-s:archived'];
   }
-  //# sourceURL=v-ui:SystemPropertiesTemplate
+  
 </script>
 <div>
   <h3 about="v-ui:SystemPropertiesTemplate" property="rdfs:comment"></h3>
@@ -646,7 +646,7 @@ v-ui:SystemPropertiesNewTemplate
   function archivedHandler() {
     this['v-s:deleted'] = this['v-s:archived'];
   }
-  //# sourceURL=v-ui:SystemPropertiesNewTemplate
+  
 </script>
 <div>
   <section id="SystemProperties">
@@ -825,7 +825,7 @@ v-ui:StandardButtonsTemplate
     $(".rm", template).remove();
   });
 
-  //# sourceURL=v-ui:StandardButtonsTemplate_pre
+  
 </script>
 <span>
   <button type="refresh" class="btn btn-success view -edit -search hidden" id="refresh"><span class="glyphicon glyphicon-refresh"></span></button>
@@ -930,7 +930,7 @@ v-ui:StandardButtonsTemplate
     }
     e.stopPropagation();
   });
-  //# sourceURL=v-ui:StandardButtonsTemplate_post
+  
 </script>
 """ ;
 .
@@ -969,7 +969,7 @@ v-ui:IconButtonsTemplate
     $(".rm", template).remove();
   });
 
-  //# sourceURL=v-ui:IconButtonsTemplate_pre
+  
 </script>
 <span>
   <button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>
@@ -988,7 +988,7 @@ v-ui:IconButtonsTemplate
     }
     e.stopPropagation();
   });
-  //# sourceURL=v-ui:IconButtonsTemplate_post
+  
 </script>
 """ ;
 .
@@ -1048,7 +1048,7 @@ v-ui:VersionTemplate
       }
     });
   }, 300);
-  //# sourceURL=v-ui:VersionTemplate_post
+  
 </script>
 """ ;
 .
@@ -1124,7 +1124,7 @@ v-ui:VersionedTemplate
       });
     });
   }
-  //# sourceURL=v-ui:VersionedTemplate
+  
 </script>
 """ ;
 .
@@ -1193,7 +1193,7 @@ v-ui:AppointmentPopoverTemplate
       return true;
     })
   };
-  //# sourceURL=v-ui:AppointmentPopoverTemplate_pre
+  
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1255,7 +1255,7 @@ v-ui:PersonPopoverTemplate
   if (!individual.hasValue("v-s:dateAbsenceTo")) {
     $(".absence-block", template).remove();
   };
-  //# sourceURL=v-ui:PersonPopoverTemplate_pre
+  
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1327,7 +1327,7 @@ v-ui:PositionPopoverTemplate
       return true;
     });0
   })
-  //# sourceURL=v-ui:PositionPopoverTemplate_pre
+  
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1381,7 +1381,7 @@ v-ui:ResourceTemplate
     })
   });
   return Promise.all(promises);
-  //# sourceURL=v-ui:ResourceTemplate_pre
+  
 </script>
 <div class="container sheet">
   <div class="clearfix">
@@ -1472,7 +1472,7 @@ v-ui:LabelTemplate
         });
       });
     }
-    //# sourceURL=v-ui:LabelTemplate
+    
   </script>
   """ ;
 .
@@ -1488,7 +1488,7 @@ v-ui:LabelTemplateWithEditLink
     if (!individual.hasValue("rdfs:label")) {
       $("#label", template).text(individual.id);
     }
-    //# sourceURL=v-ui:LabelTemplateWithEditLink
+    
   </script>
   """ ;
 .
@@ -1502,7 +1502,7 @@ v-ui:LabelLinkTemplate
     if (!individual.hasValue("rdfs:label")) {
       template.children().first().text(individual.id);
     }
-    //# sourceURL=v-ui:LabelLinkTemplate
+    
   </script>
   """ ;
 .
@@ -1573,7 +1573,7 @@ v-ui:IconModalTemplate
       modal.modal("hide").remove();
     });
   });
-  //# sourceURL=v-ui:IconModalTemplate
+  
 </script>
   """ ;
 .
@@ -1593,7 +1593,7 @@ v-ui:GenericModalTemplate
   template.click(function () {
     veda.Util.showModal(individual, modalTemplate);
   });
-  //# sourceURL=v-ui:GenericModalTemplate_pre
+  
 </script>
 <button class="btn btn-link btn-sm">
   <span class="glyphicon glyphicon-zoom-in"></span>
@@ -1612,7 +1612,7 @@ v-ui:LabelEmptyLinkTemplate
   if (!individual.hasValue("rdfs:label")) {
     template.text(individual.id);
   }
-  //# sourceURL=v-ui:LabelEmptyLinkTemplate
+  
 </script>
   """ ;
 .
@@ -1626,7 +1626,7 @@ v-ui:LabelBlockLinkTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  //# sourceURL=v-ui:LabelBlockLinkTemplate
+  
 </script>
   """ ;
 .
@@ -1647,7 +1647,7 @@ v-ui:ClassNameLabelLinkTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  //# sourceURL=v-ui:ClassNameLabelLinkTemplate
+  
 </script>
   """ ;
 .
@@ -1661,7 +1661,7 @@ v-ui:ClassNameLabelLinkEditTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  //# sourceURL=v-ui:ClassNameLabelLinkTemplate
+  
 </script>
   """ ;
 .
@@ -1724,7 +1724,7 @@ v-ui:RabbitHole
     }
     return {title: title, label: label};
   }
-  //# sourceURL=v-ui:RabbitHole_post
+  
 </script>
 <div>
   <h5><small></small></h5>
@@ -1742,7 +1742,7 @@ v-ui:ClassNameLabelTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  //# sourceURL=v-ui:ClassNameLabelTemplate
+  
 </script>
   """ ;
 .
@@ -1762,7 +1762,7 @@ v-ui:SectionHeaderTemplate
     var parentHeader = self.closest(".section-header");
     parentHeader.siblings(".section-content").toggle();
   });
-  //# sourceURL=v-ui:SectionHeaderTemplate_post
+  
 </script>
 """
 .
@@ -1806,7 +1806,7 @@ v-ui:FileTemplate
     idx = fn.lastIndexOf("."),
     ext = fn.substr(idx + 1);
   $("span#icon", template).text(ext);
-  //# sourceURL=v-ui:FileTemplate
+  
 </script>
   """ ;
 .
@@ -1847,7 +1847,7 @@ v-ui:FileTemplateWithComment
       $(".thumbnail", template).remove();
     }
   }
-  //# sourceURL=v-ui:FileTemplateWithComment
+  
 </script>
 <div class="horizontal-card">
   <div class="thumbnail" about="@" data-template="v-ui:ModalImageTemplate"></div>
@@ -1912,7 +1912,7 @@ v-ui:FileTemplateWithComment2
         ext = fn.substr(idx + 1);
     $("span#icon", template).text(ext);
   }
-  //# sourceURL=v-ui:FileTemplateWithComment
+  
 </script>
   """ ;
 .
@@ -1927,7 +1927,7 @@ v-ui:ImageTemplate
   } else {
     template.children().attr("src", "/files/" + individual.id);
   }
-//# sourceURL=v-ui:ImageTemplate
+
 </script>
 <div><img width="100%"></div>
   """ ;
@@ -1951,7 +1951,7 @@ v-ui:ModalImageTemplate
       modal.modal("hide").remove();
     });
   });
-  //# sourceURL=v-ui:ModalImageTemplate
+  
 </script>
 <a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a>
   """ ;
@@ -2015,7 +2015,7 @@ v-ui:SimplifiedJournalTemplate
   $('.createReport0', template).on('click', function () {
     veda.Util.createReport('v-s:Journal_printBlank', doc);
   });
-  //# sourceURL=v-ui:SimplifiedJournalTemplate_pre
+  
 </script>
 <div class="container sheet">
   <br>
@@ -2090,7 +2090,7 @@ v-ui:SimplifiedJournalTemplate
               $(".docflow-buttons", template).hide();
             });
           }
-          //# sourceURL=v-ui:SimplifiedJournalTemplate_inTbody_pre
+          
         </script>
         <tr>
           <td class="sequence-number"></td>
@@ -2156,7 +2156,7 @@ v-ui:JournalTemplate
   $('.createReport0', template).on('click', function () {
     veda.Util.createReport('v-s:Journal_printBlank', doc);
   });
-  //# sourceURL=v-ui:JournalTemplate_pre
+  
 </script>
 <div class="container journal sheet">
   <style>
@@ -2254,7 +2254,7 @@ v-ui:DocumentEventTemplate
     $("div[rel='v-s:processJournal']", template).toggle();
     $(this).children(":first").toggleClass("glyphicon-chevron-down glyphicon-chevron-right");
   });
-  //# sourceURL=v-ui:DocumentEventTemplate_pre
+  
 </script>
 <div class="journal-record">
   <hr class="margin-sm">
@@ -2291,7 +2291,7 @@ v-ui:DocumentEventTemplate
               $("[about='start-form']", template).remove();
             }
           }
-          //# sourceURL=v-ui:DocumentEventTemplate_inline
+          
         </script>
         <div>
           <a about="@" class="process-id" href="#/@" rel="v-wf:instanceOf" data-template="v-ui:LabelTemplate"></a>
@@ -2358,7 +2358,7 @@ v-ui:DocumentEventTemplate
       }
     });
   }
-  //# sourceURL=v-ui:DocumentEventTemplate_post
+  
 </script>
   """ ;
 .
@@ -2393,7 +2393,7 @@ v-ui:PermissionsTemplate
       }
     });
   });
-//# sourceURL=v-ui:PermissionsTemplate_pre
+
 </script>
 <div class="container">
   <h3 about="@" data-template="v-ui:ClassNameLabelTemplate"></h3>
@@ -2840,7 +2840,7 @@ v-ui:TreeTemplate
   if (!this.hasValue("rdf:type", "v-ui:Tree")) {
     $(".heading", template).remove();
   }
-  //# sourceURL=v-ui:TreeTemplate
+  
 </script>
 <div class="container sheet table-responsive">
   <style scoped>
@@ -2907,7 +2907,7 @@ v-ui:ttl
     return string.replace(reg, function (match) { return map[match]; });
   }
 
-  //# sourceURL=v-ui:ttl
+  
 </script>
   """ ;
 .
@@ -3012,7 +3012,7 @@ v-ui:json
     return anchorized;
   };
 
-  //# sourceURL=v-ui:json
+  
 </script>
   """ ;
 .
@@ -3120,7 +3120,7 @@ v-ui:generic
       return result;
     })
   );
-  //# sourceURL=v-ui:generic
+  
 </script>
 <div>
   <div class="container sheet">
@@ -3639,7 +3639,7 @@ v-ui:Graph
     });
   });
 
-  //# sourceURL=v-ui:Graph
+  
 </script>
   """ ;
 .
@@ -3706,7 +3706,7 @@ v-ui:AppointmentSwitchTemplate
       container.remove();
     }
   });
-  //# sourceURL=v-ui:AppointmentSwitchTemplate_pre
+  
 </script>
   """ ;
 .
@@ -3749,7 +3749,7 @@ v-ui:AppointmentSwitchMenuTemplate
       container.remove();
     }
   });
-  //# sourceURL=v-ui:AppointmentSwitchMenuTemplate_pre
+  
 </script>
   """ ;
 .

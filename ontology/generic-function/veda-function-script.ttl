@@ -300,7 +300,7 @@ v-s:UserScriptTemplate
     individual["v-s:output"] = [];
   });
 
-  //# sourceURL=v-s:UserScriptTemplate_post
+  
 </script>
   """
 .
@@ -594,7 +594,7 @@ v-s:OperationFooterTemplate
         break;
     }
   }
-//# sourceURL=v-s:OperationFooterTemplate_pre
+
 </script>
 <div class="actions view edit -search clearfix">
   <div class="pull-left">
@@ -671,7 +671,7 @@ v-s:OperationStatusTemplate
     veda.Util.showSmallModal(individual);
   })
 
-//# sourceURL=v-s:OperationStatusTemplate_pre
+
 </script>
 <div class="pull-left">
   <h5 class="pull-left margin-sm">
@@ -721,7 +721,7 @@ v-s:OperationProgressTemplate
         break;
     }
   }
-//# sourceURL=v-s:OperationProgressTemplate_pre
+
 </script>
 <div class="pull-left">
   <div class="progress pull-left" style="display: inline-block; height: 22px; width:100px; margin:0 5px;">

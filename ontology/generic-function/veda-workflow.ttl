@@ -520,7 +520,7 @@ v-wf:SimpleNetTemplate
   $('#taskTemplateProperties [rel="v-wf:inputVariable"] [typeof="v-wf:VarDefine"]').draggable({
     revert:true
   });
-  //# sourceURL=v-wf:SimpleNetTemplate
+  
 </script>
   """ ;
 .
@@ -640,7 +640,7 @@ v-wf:NetTemplate
     });
   });
 
-  //# sourceURL=v-wf:NetTemplate
+  
 </script>
   """ ;
 .
@@ -743,7 +743,7 @@ v-wf:ProcessTemplate
     });
   });
 
-  //# sourceURL=v-wf:ProcessTemplate
+  
 </script>
   """ ;
 .
@@ -1269,7 +1269,7 @@ v-wf:TaskTemplateAsProperties
       $(this).parent().parent().appendTo($('#taskTemplateProperties'));
     }
   });
-  //# sourceURL=v-wf:TaskTemplateAsProperties
+  
 </script>
   """ ;
   .
@@ -1351,7 +1351,7 @@ v-wf:ConditionTemplateAsProperties
   template.one("remove", function () {
     individual.off("rdfs:label");
   });
-  //# sourceURL=v-wf:ConditionTemplateAsProperties
+  
 </script>
   """ ;
   .
@@ -1425,7 +1425,7 @@ v-wf:FlowTemplateAsProperties
   template.one("remove", function () {
     individual.off("rdfs:label", handler);
   });
-  //# sourceURL=v-wf:FlowTemplateAsProperties
+  
 </script>
   """ ;
 .
@@ -1499,7 +1499,7 @@ v-wf:ProcessPropsTemplate
       }
     });
   }
-  //# sourceURL=v-wf:ProcessPropsTemplate
+  
 </script>
   """
 .
@@ -1568,7 +1568,7 @@ v-wf:WorkItemTemplate
       }
     });
   }
-  //# sourceURL=v-wf:WorkItemTemplate
+  
 </script>
 """ ;
   .
@@ -1611,7 +1611,7 @@ v-wf:VariableTemplate
     e.preventDefault();
     riot.route( ["#", individual.id, "/v-ui:ttl"].join("/") );
   })
-  //# sourceURL=v-wf:VariableTemplate
+  
 </script>
   """ ;
   .
@@ -1678,7 +1678,7 @@ v-wf:WorkOrderTemplate
   if (!individual.hasValue("v-wf:outVars")) $("#outVars", template).remove();
   if (!individual.hasValue("v-wf:isProcess")) $("#isProcess", template).remove();
   if (!individual.hasValue("v-wf:traceJournal")) $("#traceJournal", template).remove();
-  //# sourceURL=v-wf:WorkOrderTemplate
+  
 </script>
   """ ;
 .
@@ -1713,7 +1713,7 @@ v-wf:DecisionFormTemplate
       });
     }
   });
-  //# sourceURL=v-wf:DecisionFormTemplate
+  
 </script>
   """ ;
 .
@@ -2762,7 +2762,7 @@ v-wf:ProcessEventTemplate
   v-ui:template """
 <script>
   if (!individual.hasValue("v-wf:initiator")) { $("#initiator", template).remove(); }
-  //# sourceURL=v-ui:ProcessEventTemplate
+  
 </script>
 <div class="journal-record">
   <hr class="margin-sm">
@@ -2818,7 +2818,7 @@ v-wf:WorkItemStartedEventTemplate
     $("div[rel='v-s:subJournal']", template).toggle();
     $(this).children(":first").toggleClass("glyphicon-chevron-down glyphicon-chevron-right");
   });
-  //# sourceURL=v-ui:WorkItemStartedEventTemplate
+  
 </script>
 <div class="journal-record">
   <hr class="margin-sm">
@@ -2872,7 +2872,7 @@ v-wf:DecisionFormStartedEventTemplate
     $("div[rel='v-s:subJournal']", template).toggle();
     $(this).children(":first").toggleClass("glyphicon-chevron-down glyphicon-chevron-right");
   });
-  //# sourceURL=v-ui:DecisionFormStartedEventTemplate
+  
 </script>
 <div class="journal-record">
   <hr class="margin-sm">
@@ -2931,7 +2931,7 @@ v-wf:TraceRecordTemplate
       re = new RegExp('"([\\w-]+:[\\w-]+)"','g'),
       txt2 = txt.replace(re, "<a href='#/$1'>'$1'</a>");
   pre.html(txt2);
-  //# sourceURL=v-ui:TraceEventTemplate
+  
 </script>
   """ ;
 .
@@ -3549,7 +3549,7 @@ v-wf:FlowTemplateAsModal
   template.one("remove", function () {
     individual.off("rdfs:label");
   });
-  //# sourceURL=v-wf:FlowTemplateAsProperties
+  
 </script>
   """ ;
 .

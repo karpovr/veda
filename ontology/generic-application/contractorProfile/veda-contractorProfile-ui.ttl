@@ -412,7 +412,7 @@ v-s:PriceTemplate
       });
     }
   }
-  //# sourceURL=v-s:PriceTemplate_post
+  
 </script>
   """ ;
 .

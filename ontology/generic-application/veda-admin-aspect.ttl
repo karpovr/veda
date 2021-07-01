@@ -610,7 +610,7 @@ v-ui:AdminBlankTemplate
       container.siblings(".search-button").click();
     }
   });
-  //# sourceURL=v-ui:AdminBlankTemplate_post
+  
 </script>
   """ ;
 .
@@ -723,7 +723,7 @@ v-ui:TrustedTicketTemplate
       location.assign(location.origin);
     });
   }
-  //# sourceURL=v-ui:TrustedTicketTemplate_post
+  
 </script>
 """ ;
   .
@@ -1070,7 +1070,7 @@ v-ui:AdministrationAspectTemplate
       $("#admin-tabs a:first", template).tab("show");
     }
   }, 0);
-  //# sourceURL=v-ui:AdministrationAspectTemplate_post
+  
 </script>
   """ ;
 .

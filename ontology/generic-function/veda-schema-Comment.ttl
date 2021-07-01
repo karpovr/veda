@@ -135,7 +135,7 @@ v-s:CommentsTemplate
     });
   });
 
-  //# sourceURL=v-s:CommentsTemplate
+  
 </script>
     """;
 .
@@ -262,7 +262,7 @@ v-s:RecursiveCommentTemplate
   function linkedHandler (values) {
     values.length ? $(".linked-object", template).show() : $(".linked-object", template).hide();
   }
-  //# sourceURL=v-s:RecursiveCommentTemplate
+  
 </script>
 <div class="media" style="overflow:initial;">
   <div class="media-left" rel="v-s:creator">

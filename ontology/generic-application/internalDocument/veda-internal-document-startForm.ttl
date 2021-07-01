@@ -93,7 +93,7 @@ v-s:InternalDocument_ComplexRouteStartForm_Template
     });
   });
 
-//# sourceURL=v-s:InternalDocument_ComplexRouteStartForm_Template_pre
+
 </script>
 <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div>
 """ ;

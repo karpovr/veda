@@ -412,7 +412,7 @@ v-fs:AttributiveSearchModel
     });
   }
 
-//# sourceURL=v-fs:AttributiveSearchModel
+
   """ ;
 .
 
@@ -576,7 +576,7 @@ v-fs:AttributiveSearchManagementTemplate
     }
   });
 
-//# sourceURL=v-fs:AttributiveSearchManagementTemplate_pre
+
 </script>
 <div>
   <div class="container sheet">
@@ -763,7 +763,7 @@ v-fs:AttributiveSearchTemplate
     }
   }
 
-  //# sourceURL=v-fs:AttributiveSearchTemplate_post
+  
 </script>
   """ ;
 .
@@ -855,7 +855,7 @@ v-fs:SelectedResultsActionsTemplate
     });
   }
 
-//# sourceURL=v-fs:SelectedResultsActionsTemplate_pre
+
 </script>
 <div class="hidden" style="margin-top:-3px;">
   <button type="button" class="pull-left btn btn-xs btn-primary single-operation hidden"></button>
@@ -966,7 +966,7 @@ v-fs:AttributiveSearchInlineTemplate
     searchResultContainer.append( searchResultTemplate );
   });
 
-  //# sourceURL=v-fs:AttributiveSearchInlineTemplate_pre
+  
 </script>
 <div>
   <style>
@@ -1511,7 +1511,7 @@ v-fs:AttributiveSearchInlineTemplate
     }
   });
 
-  //# sourceURL=v-fs:AttributiveSearchInlineTemplate_post
+  
 </script>
   """ ;
 .
@@ -1558,7 +1558,7 @@ v-fs:MultiFunctionalSearchTemplate
   }
   $("#box-tabs li[data-search='"+individual["activeTab"]+"']", template).click();
 
-  //# sourceURL=v-s:MultiFunctionalSearchTemplate_pre
+  
 </script>
 <div class="container sheet">
   <br>
@@ -1660,7 +1660,7 @@ v-fs:DocumentsSearchBlankTemplate
     individual.off("v-fs:requiredClass", searchHandler);
     individual.off("v-s:created", searchHandler);
   });
-  //# sourceURL=v-fs:DocumentsSearchBlankTemplate_post
+  
 </script>
   """ ;
 .
@@ -1729,7 +1729,7 @@ v-fs:AdvancedSearchTemplate
     individual.off('rdf:type', typeHandler);
   });
 
-  //# sourceURL=v-fs:AdvancedSearchTemplate_post
+  
 </script>
   """ ;
 .
@@ -1798,7 +1798,7 @@ v-fs:FulltextBlankTemplate
   template.one("remove", function(){
     individual.off("propertyModified", propertyModifiedHandler);
   });
-  //# sourceURL=v-fs:FulltextBlankTemplate_post
+  
 </script>
   """ ;
 .
@@ -1869,7 +1869,7 @@ v-fs:MinimalSearchBlankTemplate
       container.siblings(".search-button").click();
     }
   });
-  //# sourceURL=v-ui:MinimalSearchBlankTemplate_post
+  
 </script>
   """ ;
 .
@@ -1989,7 +1989,7 @@ v-ft:SendToIntroductionOperationTemplate
       });
     })
   });
-  //# sourceURL=v-ft:SendToIntroductionOperationTemplate_post
+  
 </script>
   """ ;
 .

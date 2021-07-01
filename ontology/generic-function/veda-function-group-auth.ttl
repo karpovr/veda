@@ -265,7 +265,7 @@ v-s:GroupGeneratorTemplate
     }
 
   });
-  //# sourceURL=v-s:GroupGeneratorTemplate_post
+  
 </script>
 """ ;
 .
@@ -383,7 +383,7 @@ v-s:PermissionGeneratorTemplate
     }
   });
 
-  //# sourceURL=v-s:PermissionGeneratorTemplate_post
+  
 </script>
 """ ;
 .

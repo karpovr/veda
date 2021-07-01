@@ -44,7 +44,7 @@ v-fe:FunctionExampleModel
     self.press = function () {
       alert("model extention works! self['v-fe:exampleProperty']:" + self["v-fe:exampleProperty"].join(", "));
     }
-  //# sourceURL=v-fe:FunctionExampleModel
+  
   """
 .
 v-s:TS_FunctionExample 
@@ -69,7 +69,7 @@ v-fe:FunctionExampleTemplate
       $("#press-me", template).click(function () {
         individual.press();
       });
-      //# sourceURL=v-fe:FunctionExampleTemplate
+      
     </script>
   """
 .

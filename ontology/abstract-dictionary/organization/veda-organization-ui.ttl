@@ -150,7 +150,7 @@ v-s:OrganizationUnitModel
       }
     });
   };
-  //# sourceURL=v-s:OrganizationUnitModel
+  
   """ ;
 .
 
@@ -470,7 +470,7 @@ v-s:OrganizationTemplate
     template.trigger("validated", result);
   });
 
-  //# sourceURL=v-s:OrganizationTemplate_pre
+  
 </script>
 <div>
   <div class="container sheet">
@@ -636,7 +636,7 @@ v-s:OrganizationTemplate
       modal.modal("hide").remove();
     });
   });
-  //# sourceURL=v-s:OrganizationTemplate_post
+  
 </script>
   """ ;
 .
@@ -659,7 +659,7 @@ v-s:OrganizationForAdminTemplate
 <script>
 
 
-  //# sourceURL=v-s:OrganizationForAdminTemplate_pre
+  
 </script>
 <div>
   <div class="container sheet">
@@ -764,7 +764,7 @@ v-s:OrganizationForAdminTemplate
     loaded.present(membershipContainer, "v-fs:AttributiveSearchInlineTemplate");
   })
 
-  //# sourceURL=v-s:OrganizationTemplate_post
+  
 </script>
   """ ;
 .
@@ -908,7 +908,7 @@ v-s:DepartmentTemplate
     }
     template.trigger("validated", result);
   });
-//# sourceURL=v-s:DepartmentTemplate_pre
+
 </script>
 <div class="container sheet">
   <h2>
@@ -1035,7 +1035,7 @@ v-s:AppointmentTemplate
     },500);
   });
 
-//# sourceURL=v-s:AppointmentTemplate_pre
+
 </script>
 <div class="container sheet">
   <h2>
@@ -1398,7 +1398,7 @@ v-s:AppointmentTemplate
   });
 
 
-  //# sourceURL=v-s:AppointmentTemplate_post
+  
 </script>
   """ ;
 .
@@ -1780,7 +1780,7 @@ v-s:PersonTemplate
   });
 
 
-  //# sourceURL=v-s:PersonTemplate_post
+  
 </script>
   """;
 .
@@ -1945,7 +1945,7 @@ v-s:PersonEmbeddedTemplate
     $('span[property="v-s:birthday"]').text('Не указано');
   }
 
-  //# sourceURL=v-s:PersonEmbeddedTemplate_post
+  
 </script>
   """;
 .
@@ -2090,7 +2090,7 @@ v-s:PositionTemplate
   if(!individual.isNew() && veda.appointment.id != 'cfg:AdministratorAppointment')
     $('.notEditForUsers').addClass('hide');
 
-  //# sourceURL=v-s:PositionTemplate_post
+  
 </script>
   """ ;
 .
@@ -2205,7 +2205,7 @@ v-s:PositionMinimalTemplate
 </div>
 <script>
 
-  //# sourceURL=v-s:PositionMinimalTemplate_post
+  
 </script>
   """ ;
 .
@@ -2299,7 +2299,7 @@ v-s:PositionEmbeddedTemplate
 </div>
 <script>
 
-  //# sourceURL=v-s:PositionEmbeddedTemplate
+  
 </script>
   """ ;
 .
@@ -2458,7 +2458,7 @@ v-s:AccountTemplate
     individual["v-s:authOrigin"]=["veda"];
   }
 
-  //# sourceURL=v-s:AccountTemplate_post
+  
 </script>
   """ ;
 .
@@ -2509,7 +2509,7 @@ v-s:AccountEmbeddedTemplate
     }
     template.trigger("validated", result);
   });
-   //# sourceURL=v-s:AccountEmbeddedTemplate_pre
+   
 </script>
 <div>
   <div class="container sheet">
@@ -2562,7 +2562,7 @@ v-s:AccountEmbeddedTemplate
 
 
 
-  //# sourceURL=v-s:AccountEmbeddedTemplate_post
+  
 </script>
   """ ;
 .

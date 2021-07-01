@@ -104,7 +104,7 @@ v-ui:PropertyClassModel
     });
     this.save();
   };
-  //# sourceURL=v-ui:PropertyClassModel
+  
   """ ;
 .
 
@@ -146,7 +146,7 @@ v-ui:ClassClassModel
       return superClasses.slice(1);
     });
   };
-  //# sourceURL=v-ui:ClassClassModel
+  
   """ ;
 .
 
@@ -227,7 +227,7 @@ v-ui:CommonOntologyTemplate
   } else {
     $("#uri", template).remove();
   }
-  //# sourceURL=v-ui:CommonOntologyTemplate_pre
+  
 </script>
 <div style="position:relative;">
   <a style="position:absolute;top:10px;right:10px;" href="#/@//v-ui:Graph"><span class="glyphicon glyphicon-link"></span></a>
@@ -389,7 +389,7 @@ v-ui:ClassClassTemplate
     riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
   });
 
-  //# sourceURL=v-ui:ClassClassTemplate_post
+  
 </script>
   """ ;
 .
@@ -1383,7 +1383,7 @@ v-ui:template """
       individual["v-s:resource"] = [];
     }
   });
-  //# sourceURL=v-s:MembershipTemplate_post
+  
 </script>
 """ ;
 .
@@ -1462,7 +1462,7 @@ v-s:MembershipRegistryTemplate
       individual["v-s:resource"] = [];
     }
   });
-  //# sourceURL=v-s:MembershipTemplate_post
+  
 </script>
 """ ;
 .
@@ -1583,7 +1583,7 @@ v-ui:template """
     }
   });
 
-  //# sourceURL=v-s:PermissionStatementRegistryTemplate_post
+  
 </script>
 """ ;
 .
@@ -1652,7 +1652,7 @@ v-s:PermissionStatementRegistryTemplate
     }
   });
 
-  //# sourceURL=v-s:PermissionStatementRegistryTemplate_post
+  
 </script>
 """ ;
 .
@@ -1729,7 +1729,7 @@ v-ui:GroupTemplate
   });
 
   return Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
-  //# sourceURL=v-ui:GroupTemplate_pre
+  
 </script>
 <div class="container sheet">
   <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>

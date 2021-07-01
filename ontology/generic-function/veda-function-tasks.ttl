@@ -282,7 +282,7 @@ v-ft:FunctionTasksIndicatorTemplate
       title: taskBundle["rdfs:label"].map(veda.Util.formatValue).join(" ")
     });
   })
-  //# sourceURL=v-ft:FunctionTasksIndicatorTemplate_pre
+  
 </script>
 <a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-envelope-o fa-lg"></span>
@@ -349,7 +349,7 @@ if ( forceUpdate ) {
   this["v-ft:forceUpdate"] = [true];
   this.save();
 }*/
-//# sourceURL=v-ft:TaskCounterModel
+
   """ ;
 .
 
@@ -535,7 +535,7 @@ v-ft:InboxTemplate
     }
     individual.clearValue("v-fs:searchResult");
   });
-//# sourceURL=v-ft:InboxTemplate_pre
+
 </script>
 <div class="container sheet" about="@" data-template="v-fs:AttributiveSearchTemplate"></div>
   """ ;
@@ -560,7 +560,7 @@ v-ft:TaskBlankTemplate
   } else {
     $(".from", template).remove();
   }
-  //# sourceURL=v-ft:TaskBlankTemplate_pre
+  
 </script>
 <div>
   <br>
@@ -609,7 +609,7 @@ v-ft:TaskBlankTemplate
         });
         documentHandler.apply(this);
 
-        //# sourceURL=v-ft:TaskBlankTemplate_inline
+        
       </script>
     </div>
   </div>
@@ -656,7 +656,7 @@ v-ft:TaskBlankTemplate
     }
   });
 
-  //# sourceURL=v-ft:TaskBlankTemplate_post
+  
 </script>
   """ ;
 .
@@ -776,7 +776,7 @@ v-ft:ActorFilterTemplate
     }
   }*/
 
-  //# sourceURL=v-ft:ActorFilterTemplate_pre
+  
 </script>
 <ul class="nav nav-pills" role="tablist">
   <style scoped>
@@ -1247,7 +1247,7 @@ v-ft:TaskRelatedTasksTemplate
     ].join(" && ");
     relatedTasks["v-fs:fulltextQuery"] = [ queryStr ];
   });
-  //# sourceURL=v-ft:TaskRelatedTasksTemplate_pre
+  
 </script>
 <div>
   <div about="v-ft:RelatedTasks" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
@@ -1349,7 +1349,7 @@ v-ft:MakeDecisionOperationTemplate
   common.push( new veda.IndividualModel("v-wf:DecisionRedirect") );
   this["v-ft:groupDecisionClass"] = common;
 
-  //# sourceURL=v-ft:MakeDecisionOperationTemplate_pre
+  
 </script>
 <div class="container sheet">
   <h4 about="v-ft:groupDecisionClass" property="rdfs:label"></h4>
@@ -1411,7 +1411,7 @@ v-ft:MakeDecisionOperationTemplate
   var decision = new veda.IndividualModel();
   $(".possible-decisions input", template).first().prop("checked", "checked").change();
 
-  //# sourceURL=v-ft:MakeDecisionOperationTemplate_post
+  
 </script>
   """ ;
 .

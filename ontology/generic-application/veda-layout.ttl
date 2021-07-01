@@ -102,7 +102,7 @@ v-s:LayoutTemplate
   userInfo.empty();
   veda.user.present(userInfo, userInfoTmpl);
 
-  //# sourceURL=v-s:LayoutTemplate_post
+  
 </script>
   """ ;
 .
@@ -157,7 +157,7 @@ v-s:MenuItemViewTemplate
       template.find("#static").attr("href", individual["v-s:staticLink"][0]);
       break;
   }
-  //# sourceURL=v-s:MenuItemViewTemplate
+  
 </script>
 <li>
   <a id="static">

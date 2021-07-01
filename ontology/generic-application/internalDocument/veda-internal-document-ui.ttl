@@ -104,7 +104,7 @@ v-s:InternalDocumentTemplate
      individual["v-s:initiator"] = [ veda.appointment["v-s:parentUnit"][0] ] ;
     }
   }
-//# sourceURL=v-s:InternalDocumentTemplate_pre
+
 </script>
 <div>
   <div class="container sheet">
@@ -211,7 +211,7 @@ v-s:InternalDocumentTemplate
     individual.off("afterReset", processHandler);
   });
 
-//# sourceURL=v-s:InternalDocumentTemplate
+
 </script>
   """
 .

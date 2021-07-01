@@ -169,7 +169,7 @@ v-s:FavoritesIndicatorTemplate
 
   });
 
-//# sourceURL=v-s:FavoritesIndicatorTemplate_pre
+
 </script>
 <a href="#" class="fa fa-lg" style="display:none;"></a>
   """ ;
