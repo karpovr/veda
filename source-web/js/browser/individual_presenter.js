@@ -132,7 +132,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     })
     .catch(errorHandler)
     .catch((error) => {
-      console.error(`presenter error: ${this.id}`, error, error.stack);
+      console.log(`presenter error: ${this.id}`, error, error.stack);
       const msg = $(`<div><code>${error.name} ${error.message} ${this.id}</code></div>`);
       container.append(msg);
       return msg;
@@ -570,6 +570,12 @@ function processTemplate (individual, container, template, mode) {
       });
 
       renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
+    })
+    .catch((error) => {
+      console.log(`presenter error: ${about.id}`, error, error.stack);
+      const msg = $(`<div><code>${error.name} ${error.message} ${about.id}</code></div>`);
+      propertyContainer.append(msg);
+      return msg;
     });
   }).get();
 

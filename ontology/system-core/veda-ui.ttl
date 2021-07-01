@@ -808,20 +808,6 @@ v-ui:StandardButtonsTemplate
     veda.off("status", statusHandler);
   });
 
-  // var allButtons = "send edit save cancel delete destroy journal task rights";
-  var defaultButtons = "send edit save cancel delete journal task";
-  individual.rights.then(function (rights) {
-    var canUpdate = rights.hasValue("v-s:canUpdate", true);
-    var canDelete = rights.hasValue("v-s:canDelete", true);
-    var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
-    enabledButtons.forEach(function (id) {
-      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
-      if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
-      $("#" + id, template).removeClass("rm hidden");
-    });
-    $(".rm", template).remove();
-  });
-
   template.on("click", "#edit, #save, #cancel, #delete, #destroy", function (e) {
     e.preventDefault();
     var action = this.id;
@@ -888,6 +874,20 @@ v-ui:StandardButtonsTemplate
     e.preventDefault();
     var startFormTransform = $(this).attr("about");
     veda.Util.send(individual, template, startFormTransform, true);
+  });
+
+  // var allButtons = "send edit save cancel delete destroy journal task rights";
+  var defaultButtons = "send edit save cancel delete journal task";
+  return individual.rights.then(function (rights) {
+    var canUpdate = rights.hasValue("v-s:canUpdate", true);
+    var canDelete = rights.hasValue("v-s:canDelete", true);
+    var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
+    enabledButtons.forEach(function (id) {
+      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
+      if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
+      $("#" + id, template).removeClass("rm hidden");
+    });
+    $(".rm", template).remove();
   });
 
   //# sourceURL=v-ui:StandardButtonsTemplate_pre
@@ -978,7 +978,7 @@ v-ui:StandardButtonsTemplate
       $(window).off("scroll", scrollHandler);
     });
     $(".toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
-    setTimeout(() => checkOffset(main, actions, placeholder), 500);
+    setTimeout(checkOffset, 0, main, actions, placeholder);
   }
 
   // Respect validation state of parent template
