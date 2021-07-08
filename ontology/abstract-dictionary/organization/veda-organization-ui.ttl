@@ -1905,7 +1905,7 @@ v-s:PersonEmbeddedTemplate
       </div>
     </div>
     <div class="row row-attribute">
-      <div class="col-sm-3 col-xs-5">
+      <div class="col-sm-3 col-xs-5 view edit -search">
         <label about="v-s:hasCommunicationMean" property="rdfs:label"></label>
       </div>
       <div class="col-sm-9 col-xs-7">
@@ -1926,7 +1926,7 @@ v-s:PersonEmbeddedTemplate
       </div>
     </div>
     <section id="Account">
-      <h4 class="section-header -view edit search">
+      <h4 class="section-header -view edit -search">
         <span about="v-s:Account" property="rdfs:label"></span>
         <div class="btn-group -view edit -search"></div>
         <veda-control data-type="link" rel="v-s:hasAccount" class="-view edit -search create pull-right"></veda-control>
