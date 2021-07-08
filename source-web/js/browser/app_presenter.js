@@ -228,6 +228,10 @@ export default function AppPresenter () {
       layout.present('#app')
         .then(() => new IndividualModel(main_uri).load())
         .then(installRouter)
+        .catch((error) => {
+          const notify = new Notify();
+          notify('danger', error);
+        })
         .then(() => riot.route(window.location.hash || start_url))
         .then(() => starting = false);
     } else {
