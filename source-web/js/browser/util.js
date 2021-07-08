@@ -248,6 +248,33 @@ Util.confirm = function (individual, template, mode) {
 };
 
 /**
+ * Start BPMN process
+ * @param {String} processDefinition
+ * @param {IndividualModel} document
+ * @return {void}
+ */
+Util.startProcess = function (processDefinition, document) {
+  return processDefinition.load()
+    .then((processDefinition) => {
+      const startFormClass = processDefinition['bpmn:hasStartFormClass'][0];
+      if (!startFormClass) throw Error('start form class is not defined');
+      const processDefinitionKey = processDefinition['bpmn:processDefinitionKey'][0];
+      if (!processDefinitionKey) throw Error('processDefinitionKey is not defined');
+      const startForm = new veda.IndividualModel();
+      startForm['rdf:type'] = startFormClass;
+      startForm['bpmn:hasStatus'] = 'bpmn:ToBeStarted';
+      startForm['bpmn:processDefinitionKey'] = processDefinitionKey;
+      if (document) startForm['bpmn:hasDocument'] = document;
+      return Util.showModal(startForm, undefined, 'edit');
+    })
+    .catch((error) => {
+      const notify = new Notify();
+      notify('danger', error);
+      throw error;
+    });
+};
+
+/**
  * Start workflow process
  *   - Apply transformation and redirect to start form.
  * @param {IndividualModel} individual

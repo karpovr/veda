@@ -420,7 +420,7 @@ v-ui:ExitButtonTemplate
   template.click(function(e) {
     e.preventDefault();
   });
-  
+
 </script>
 <a id="logout" class="logout" href="#" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="glyphicon glyphicon-log-out"></span> <span class="label label-default"></span>
@@ -446,7 +446,7 @@ v-ui:AdministrationIconTemplate
       });
     }
   });
-  
+
 </script>
 <a href="#/v-s:AdministrationAspect" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-cog fa-lg"></span> <span class="label label-default"></span>
@@ -503,7 +503,7 @@ v-ui:LanguageSwitchTemplate
       return;
     }
   };
-  
+
 </script>
 
   """
@@ -546,7 +546,7 @@ v-ui:FullWidthSwitchTemplate
       title: changeSizeBundle["rdfs:label"].map(veda.Util.formatValue).join(" ")
     });
   })
-  
+
 </script>
 <button class="btn btn-xs btn-default navbar-btn">
   <span class="glyphicon glyphicon-fullscreen"></span>
@@ -576,7 +576,7 @@ v-ui:SystemPropertiesTemplate
   function archivedHandler() {
     this['v-s:deleted'] = this['v-s:archived'];
   }
-  
+
 </script>
 <div>
   <h3 about="v-ui:SystemPropertiesTemplate" property="rdfs:comment"></h3>
@@ -646,7 +646,7 @@ v-ui:SystemPropertiesNewTemplate
   function archivedHandler() {
     this['v-s:deleted'] = this['v-s:archived'];
   }
-  
+
 </script>
 <div>
   <section id="SystemProperties">
@@ -705,6 +705,12 @@ v-ui:SystemPropertiesNewTemplate
   </section>
 </div>
 """ ;
+.
+
+v-ui:StartProcess
+  rdf:type rdfs:Resource ;
+  rdfs:label "Запустить процесс"@ru ;
+  rdfs:label "Start process"@en ;
 .
 
 v-ui:StandardButtonsTemplate
@@ -804,11 +810,19 @@ v-ui:StandardButtonsTemplate
     veda.Util.showRights(individual);
   });
 
-  // Standard tasks
-  template.on("click", "ul#standard-tasks a", function (e) {
+  // Standard task
+  template.on("click", "ul#standard-task a", function (e) {
     e.preventDefault();
     var startFormTransform = $(this).attr("about");
     veda.Util.send(individual, template, startFormTransform, true);
+  });
+
+  // Standard process
+  template.on("click", "ul#standard-process a", function (e) {
+    e.preventDefault();
+    var processDefinitionId = e.target.getAttribute("about");
+    var processDefinition = new veda.IndividualModel(processDefinitionId);
+    veda.Util.startProcess(processDefinition, individual);
   });
 
   // var allButtons = "send edit save cancel delete destroy journal task rights";
@@ -825,7 +839,7 @@ v-ui:StandardButtonsTemplate
     $(".rm", template).remove();
   });
 
-  
+
 </script>
 <span>
   <button type="refresh" class="btn btn-success view -edit -search hidden" id="refresh"><span class="glyphicon glyphicon-refresh"></span></button>
@@ -842,7 +856,7 @@ v-ui:StandardButtonsTemplate
       <span about="v-s:SendTask" property="rdfs:label"> </span>
       <span class="caret"></span>
     </button>
-    <ul class="dropdown-menu" id="standard-tasks">
+    <ul class="dropdown-menu" id="standard-task">
       <li><a href="#" about="v-wf:questionRouteStartForm" property="rdfs:label"></a></li>
       <li><a href="#" about="v-wf:instructionRouteStartForm" property="rdfs:label"></a></li>
       <li><a href="#" about="v-wf:taskRouteStartForm" property="rdfs:label"></a></li>
@@ -851,6 +865,15 @@ v-ui:StandardButtonsTemplate
       <li><a href="#" about="v-wf:confirmationRouteStartForm" property="rdfs:label"></a></li>
       <li class="divider"></li>
       <li><a href="#" about="v-wf:distributionRouteStartForm" property="rdfs:label"></a></li>
+    </ul>
+  </div>
+  <div class="rm hidden action btn-group dropup allButtons view -edit -search" id="process">
+    <button class="action btn btn-warning btn-block dropdown-toggle" id="process-button" data-toggle="dropdown">
+      <span about="v-ui:StartProcess" property="rdfs:label"></span>
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" id="standard-process">
+      <li><a href="#" about="bpmn:SimpleTaskProcessDefinition" property="rdfs:label"></a></li>
     </ul>
   </div>
   <button type="button" class="btn btn-link view edit -search action toggle-actions hidden">
@@ -930,7 +953,7 @@ v-ui:StandardButtonsTemplate
     }
     e.stopPropagation();
   });
-  
+
 </script>
 """ ;
 .
@@ -969,7 +992,7 @@ v-ui:IconButtonsTemplate
     $(".rm", template).remove();
   });
 
-  
+
 </script>
 <span>
   <button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>
@@ -988,7 +1011,7 @@ v-ui:IconButtonsTemplate
     }
     e.stopPropagation();
   });
-  
+
 </script>
 """ ;
 .
@@ -1048,7 +1071,7 @@ v-ui:VersionTemplate
       }
     });
   }, 300);
-  
+
 </script>
 """ ;
 .
@@ -1124,7 +1147,7 @@ v-ui:VersionedTemplate
       });
     });
   }
-  
+
 </script>
 """ ;
 .
@@ -1193,7 +1216,7 @@ v-ui:AppointmentPopoverTemplate
       return true;
     })
   };
-  
+
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1255,7 +1278,7 @@ v-ui:PersonPopoverTemplate
   if (!individual.hasValue("v-s:dateAbsenceTo")) {
     $(".absence-block", template).remove();
   };
-  
+
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1327,7 +1350,7 @@ v-ui:PositionPopoverTemplate
       return true;
     });0
   })
-  
+
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1381,7 +1404,7 @@ v-ui:ResourceTemplate
     })
   });
   return Promise.all(promises);
-  
+
 </script>
 <div class="container sheet">
   <div class="clearfix">
@@ -1472,7 +1495,7 @@ v-ui:LabelTemplate
         });
       });
     }
-    
+
   </script>
   """ ;
 .
@@ -1488,7 +1511,7 @@ v-ui:LabelTemplateWithEditLink
     if (!individual.hasValue("rdfs:label")) {
       $("#label", template).text(individual.id);
     }
-    
+
   </script>
   """ ;
 .
@@ -1502,7 +1525,7 @@ v-ui:LabelLinkTemplate
     if (!individual.hasValue("rdfs:label")) {
       template.children().first().text(individual.id);
     }
-    
+
   </script>
   """ ;
 .
@@ -1573,7 +1596,7 @@ v-ui:IconModalTemplate
       modal.modal("hide").remove();
     });
   });
-  
+
 </script>
   """ ;
 .
@@ -1593,7 +1616,7 @@ v-ui:GenericModalTemplate
   template.click(function () {
     veda.Util.showModal(individual, modalTemplate);
   });
-  
+
 </script>
 <button class="btn btn-link btn-sm">
   <span class="glyphicon glyphicon-zoom-in"></span>
@@ -1612,7 +1635,7 @@ v-ui:LabelEmptyLinkTemplate
   if (!individual.hasValue("rdfs:label")) {
     template.text(individual.id);
   }
-  
+
 </script>
   """ ;
 .
@@ -1626,7 +1649,7 @@ v-ui:LabelBlockLinkTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  
+
 </script>
   """ ;
 .
@@ -1647,7 +1670,7 @@ v-ui:ClassNameLabelLinkTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  
+
 </script>
   """ ;
 .
@@ -1661,7 +1684,7 @@ v-ui:ClassNameLabelLinkEditTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  
+
 </script>
   """ ;
 .
@@ -1724,7 +1747,7 @@ v-ui:RabbitHole
     }
     return {title: title, label: label};
   }
-  
+
 </script>
 <div>
   <h5><small></small></h5>
@@ -1742,7 +1765,7 @@ v-ui:ClassNameLabelTemplate
   if (!individual.hasValue("rdfs:label")) {
     $("#label", template).text(individual.id);
   }
-  
+
 </script>
   """ ;
 .
@@ -1762,7 +1785,7 @@ v-ui:SectionHeaderTemplate
     var parentHeader = self.closest(".section-header");
     parentHeader.siblings(".section-content").toggle();
   });
-  
+
 </script>
 """
 .
@@ -1806,7 +1829,7 @@ v-ui:FileTemplate
     idx = fn.lastIndexOf("."),
     ext = fn.substr(idx + 1);
   $("span#icon", template).text(ext);
-  
+
 </script>
   """ ;
 .
@@ -1847,7 +1870,7 @@ v-ui:FileTemplateWithComment
       $(".thumbnail", template).remove();
     }
   }
-  
+
 </script>
 <div class="horizontal-card">
   <div class="thumbnail" about="@" data-template="v-ui:ModalImageTemplate"></div>
@@ -1912,7 +1935,7 @@ v-ui:FileTemplateWithComment2
         ext = fn.substr(idx + 1);
     $("span#icon", template).text(ext);
   }
-  
+
 </script>
   """ ;
 .
@@ -1951,7 +1974,7 @@ v-ui:ModalImageTemplate
       modal.modal("hide").remove();
     });
   });
-  
+
 </script>
 <a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a>
   """ ;
@@ -2015,7 +2038,7 @@ v-ui:SimplifiedJournalTemplate
   $('.createReport0', template).on('click', function () {
     veda.Util.createReport('v-s:Journal_printBlank', doc);
   });
-  
+
 </script>
 <div class="container sheet">
   <br>
@@ -2090,7 +2113,7 @@ v-ui:SimplifiedJournalTemplate
               $(".docflow-buttons", template).hide();
             });
           }
-          
+
         </script>
         <tr>
           <td class="sequence-number"></td>
@@ -2156,7 +2179,7 @@ v-ui:JournalTemplate
   $('.createReport0', template).on('click', function () {
     veda.Util.createReport('v-s:Journal_printBlank', doc);
   });
-  
+
 </script>
 <div class="container journal sheet">
   <style>
@@ -2254,7 +2277,7 @@ v-ui:DocumentEventTemplate
     $("div[rel='v-s:processJournal']", template).toggle();
     $(this).children(":first").toggleClass("glyphicon-chevron-down glyphicon-chevron-right");
   });
-  
+
 </script>
 <div class="journal-record">
   <hr class="margin-sm">
@@ -2291,7 +2314,7 @@ v-ui:DocumentEventTemplate
               $("[about='start-form']", template).remove();
             }
           }
-          
+
         </script>
         <div>
           <a about="@" class="process-id" href="#/@" rel="v-wf:instanceOf" data-template="v-ui:LabelTemplate"></a>
@@ -2358,7 +2381,7 @@ v-ui:DocumentEventTemplate
       }
     });
   }
-  
+
 </script>
   """ ;
 .
@@ -2840,7 +2863,7 @@ v-ui:TreeTemplate
   if (!this.hasValue("rdf:type", "v-ui:Tree")) {
     $(".heading", template).remove();
   }
-  
+
 </script>
 <div class="container sheet table-responsive">
   <style scoped>
@@ -2907,7 +2930,7 @@ v-ui:ttl
     return string.replace(reg, function (match) { return map[match]; });
   }
 
-  
+
 </script>
   """ ;
 .
@@ -3012,7 +3035,7 @@ v-ui:json
     return anchorized;
   };
 
-  
+
 </script>
   """ ;
 .
@@ -3120,7 +3143,7 @@ v-ui:generic
       return result;
     })
   );
-  
+
 </script>
 <div>
   <div class="container sheet">
@@ -3639,7 +3662,7 @@ v-ui:Graph
     });
   });
 
-  
+
 </script>
   """ ;
 .
@@ -3706,7 +3729,7 @@ v-ui:AppointmentSwitchTemplate
       container.remove();
     }
   });
-  
+
 </script>
   """ ;
 .
@@ -3749,7 +3772,7 @@ v-ui:AppointmentSwitchMenuTemplate
       container.remove();
     }
   });
-  
+
 </script>
   """ ;
 .
