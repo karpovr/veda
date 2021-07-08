@@ -6,7 +6,7 @@ import Util from '../common/util.js';
 
 import IndividualModel from '../common/individual_model.js';
 
-veda.on('started', () => {
+veda.one('started', () => {
   const serverNotification = new IndividualModel('cfg:ClientNotification');
   serverNotification.reset().then((serverNotification) => {
     serverNotification.on('afterReset', checkNotification);

@@ -208,8 +208,14 @@ export default function AppPresenter () {
     return value || null;
   }
 
+
+  let starting = false;
+
   // Triggered in auth
   veda.on('started', () => {
+    if (starting === true) return;
+    starting = true;
+
     const loadIndicator = document.getElementById('load-indicator');
     loadIndicator.style.display = '';
 
@@ -222,7 +228,8 @@ export default function AppPresenter () {
       layout.present('#app')
         .then(() => new IndividualModel(main_uri).load())
         .then(installRouter)
-        .then(() => riot.route(window.location.hash || start_url));
+        .then(() => riot.route(window.location.hash || start_url))
+        .then(() => starting = false);
     } else {
       console.log('Incomplete layout params in manifest');
       const layout_param_uri = veda.user.hasValue('v-s:origin', 'ExternalUser') ? 'cfg:LayoutExternal' : 'cfg:Layout';
@@ -239,7 +246,8 @@ export default function AppPresenter () {
           const notify = new Notify();
           notify('danger', error);
         })
-        .then(() => riot.route(window.location.hash));
+        .then(() => riot.route(window.location.hash))
+        .then(() => starting = false);
     }
   });
 }
