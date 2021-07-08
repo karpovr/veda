@@ -41,7 +41,7 @@ const errorCodes = {
 
 function BackendError (result) {
   this.code = result.status;
-  this.message = typeof code !== 'undefined' ? `${code}: ${errorCodes[code]}` : undefined;
+  this.message = typeof this.code !== 'undefined' ? `${this.code}: ${errorCodes[this.code]}` : undefined;
   this.stack = (new Error()).stack;
 }
 BackendError.prototype = Object.create(Error.prototype);
