@@ -186,7 +186,7 @@ v-s:PscontrollerForScheduledAction
   v-ui:forProperty v-s:controller ;
   v-ui:minCardinality 0 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' )  && ('v-s:employee.v-s:hasAccount.isExists'=='true') && ('v-s:origin'=='sap hr' || 'v-s:origin'=='Group User') || ('rdf:type'=='v-s:Position') && ( 'v-s:origin'=='Role')"^^xsd:string;
+  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' )  && ('v-s:employee.v-s:hasAccount.isExists'=='true') && ('v-s:origin'=='sap hr' || 'v-s:origin'=='Group') || ('rdf:type'=='v-s:Position') && ( 'v-s:origin'=='Role')"^^xsd:string;
   rdfs:label "Спецификация свойства v-s:controller для класса v-s:ScheduledAction"@ru ;
   rdfs:label "v-s:controller property specification for v-s:ScheduledAction class"@en ;
 .
