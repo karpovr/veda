@@ -763,7 +763,7 @@ v-fs:AttributiveSearchTemplate
     }
   }
 
-  
+
 </script>
   """ ;
 .
@@ -966,10 +966,10 @@ v-fs:AttributiveSearchInlineTemplate
     searchResultContainer.append( searchResultTemplate );
   });
 
-  
+
 </script>
 <div>
-  <style>
+  <style scoped>
     .swipe {
       cursor: move;
     }
@@ -1355,8 +1355,8 @@ v-fs:AttributiveSearchInlineTemplate
     }
 
     return resultDelta.reduce(function(p, result, i) {
-      return p.then(function() {
-        return result.present(resultContainer, individual.resultTemplate).then(function (tmpl) {
+      return p.then(function(templates) {
+        return result.present(resultContainer, individual.resultTemplate, undefined, undefined, false).then(function (tmpl) {
           $(".serial-number", tmpl).text(total - delta + i + 1);
           if (result.id === self.marked) {
             tmpl.addClass("marked");
@@ -1381,10 +1381,13 @@ v-fs:AttributiveSearchInlineTemplate
               });
             }
           });
-          return tmpl;
+          templates.push(tmpl);
+          return templates;
         });
       });
-    }, Promise.resolve()).then(setToggleSelectAll);
+    }, Promise.resolve([]))
+      .then((templates) => resultContainer.append(templates))
+      .then(setToggleSelectAll);
   }
 
   // Spinner
@@ -1511,7 +1514,7 @@ v-fs:AttributiveSearchInlineTemplate
     }
   });
 
-  
+
 </script>
   """ ;
 .
@@ -1558,7 +1561,7 @@ v-fs:MultiFunctionalSearchTemplate
   }
   $("#box-tabs li[data-search='"+individual["activeTab"]+"']", template).click();
 
-  
+
 </script>
 <div class="container sheet">
   <br>
@@ -1660,7 +1663,7 @@ v-fs:DocumentsSearchBlankTemplate
     individual.off("v-fs:requiredClass", searchHandler);
     individual.off("v-s:created", searchHandler);
   });
-  
+
 </script>
   """ ;
 .
@@ -1729,7 +1732,7 @@ v-fs:AdvancedSearchTemplate
     individual.off('rdf:type', typeHandler);
   });
 
-  
+
 </script>
   """ ;
 .
@@ -1798,7 +1801,7 @@ v-fs:FulltextBlankTemplate
   template.one("remove", function(){
     individual.off("propertyModified", propertyModifiedHandler);
   });
-  
+
 </script>
   """ ;
 .
@@ -1869,7 +1872,7 @@ v-fs:MinimalSearchBlankTemplate
       container.siblings(".search-button").click();
     }
   });
-  
+
 </script>
   """ ;
 .
@@ -1989,7 +1992,7 @@ v-ft:SendToIntroductionOperationTemplate
       });
     })
   });
-  
+
 </script>
   """ ;
 .

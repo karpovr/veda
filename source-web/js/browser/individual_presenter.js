@@ -581,7 +581,7 @@ function processTemplate (individual, container, template, mode) {
     const countDisplayed = relContainer.children().length - 1;// last children is .more button
     const rel_uri = relContainer.attr('rel');
 
-    resource.triggerHandler(rel_uri, resource.get(rel_uri), countDisplayed + 10);
+    resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 10);
     $this.remove();
   });
 
@@ -664,28 +664,60 @@ function processTemplate (individual, container, template, mode) {
     });
 
     return about.load().then((about) => {
-      const values = about.get(rel_uri);
+
+      let prev_rendered = {};
+      let curr_rendered = {};
+      let sort_required = false;
 
       const propertyModifiedHandler = function (values, limit_param) {
-        limit = limit_param || limit;
-        relContainer.empty();
+        if (!values.length) {
+          prev_rendered = {};
+          curr_rendered = {};
+          sort_required = false;
+          relContainer.empty();
+          return;
+        }
 
-        return values.reduce((p, value, i) => {
-          return p.then((templates) => {
-            if (i < limit) {
-              return renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false)
-                .then((template) => templates.concat(template));
-            } else {
-              return templates;
+        limit = limit_param || limit;
+
+        return Promise.all(
+          values.map((value, i) => {
+            if (i >= limit) { return; }
+            if (value.id in prev_rendered) {
+              curr_rendered[value.id] = prev_rendered[value.id];
+              if (curr_rendered[value.id] !== i) {
+                curr_rendered[value.id] = i;
+                sort_required = true;
+              }
+              delete prev_rendered[value.id];
+              return;
             }
-          });
-        }, Promise.resolve([]))
-          .then((templates) => {
-            relContainer.append(templates);
-            if (limit < values.length && more) {
-              relContainer.append( '<a class=\'more badge\'>&darr; ' + (values.length - limit) + '</a>' );
-            }
-          });
+            return renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false)
+              .then((template) => {
+                curr_rendered[value.id] = i;
+                return template;
+              });
+          }).filter(Boolean)
+        ).then((templates) => {
+          relContainer.append(templates);
+          const prev_uris = Object.keys(prev_rendered);
+          if (prev_uris.length) {
+            const selector = prev_uris.map((uri) => `[resource="${Util.escape4$(uri)}"]`).join(',');
+            $(selector, relContainer).remove();
+          }
+          if (sort_required) {
+            let list = relContainer.children().detach().toArray();
+            list.sort((a, b) => {
+              return curr_rendered[a.getAttribute('resource')] - curr_rendered[b.getAttribute('resource')];
+            });
+            relContainer.append(list);
+          }
+          if (limit < values.length && more) {
+            relContainer.children('a.more').remove();
+            relContainer.append( '<a class=\'more badge\'>&darr; ' + (values.length - limit) + '</a>' );
+          }
+          prev_rendered = {...curr_rendered};
+        });
       };
 
       const embeddedHandler = function (values) {
@@ -706,6 +738,8 @@ function processTemplate (individual, container, template, mode) {
           });
         }
       };
+
+      const values = about.get(rel_uri);
 
       if (isEmbedded) {
         embeddedHandler(values);
