@@ -2084,13 +2084,17 @@ v-ui:SimplifiedJournalTemplate
               var targetOccupation = individual["v-wf:from"][1]
               var canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
               var isDirectTask = individual.hasValue("v-wf:isDirectTask", true);
-              if (canRevoke || isDirectTask || isMemberSuperUser) {
-                $(".docflow-buttons", template).show();
-                $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
-                $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
+              if (isDirectTask) {
+                if (canRevoke || isMemberSuperUser) {
+                  $(".docflow-buttons", template).show();
+                  $(".redirect", template).click(takeDecision.bind(null, "v-wf:DecisionRedirect", "Перенаправлено"));
+                  $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
+                } else {
+                  $(".docflow-buttons", template).remove();
+                } 
               } else {
-                $(".docflow-buttons", template).remove();
-              }
+                  $(".docflow-buttons", template).remove();
+                }
             });
 
           }
