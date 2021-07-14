@@ -403,7 +403,7 @@ Workflow.prepare_work_order = function (ticket, document) {
     }
 
     let is_goto_to_next_task = false;
-
+    let is_have_enforce_order = false;
     // begin //////////////// скрипт сборки результатов (WorkOrder) ///////////////////////////////////////////
     const work_item_result = [];
 
@@ -421,7 +421,7 @@ Workflow.prepare_work_order = function (ticket, document) {
         } else {
           workOrder = document;
         }
-
+        is_have_enforce_order = is_have_enforce_order || veda.Util.hasValue(workOrder, 'v-wf:enforceProcessing', {data: true, type: "Boolean"});
         // print("[WORKFLOW][WO3.1] workOrder=" + veda.Util.toJson(workOrder) + "");
 
         const outVars = workOrder['v-wf:outVars'];
@@ -478,129 +478,134 @@ Workflow.prepare_work_order = function (ticket, document) {
     const workItemList = [];
 
     if (is_goto_to_next_task) {
-      journal_uri = veda.Util.getJournalUri(_work_order['@']);
+      //правка прекращает дублирование задач при автозакрытии, и оставляет рабочей кнопку #repeat-workOrder
+      if (!is_have_enforce_order && work_item['v-wf:isCompleted'] && work_item['v-wf:isCompleted'][0].data == true) {
+        veda.Util.traceToJournal(ticket, trace_journal_uri, '[WO4] work_item already is completed, stop. ', veda.Util.toJson(work_item));
+      } else {
+        journal_uri = veda.Util.getJournalUri(_work_order['@']);
 
 
-      // переход к новой задаче  prepare[[wo][wo][wo]] ----> new [wi]
+        // переход к новой задаче  prepare[[wo][wo][wo]] ----> new [wi]
 
-      if (work_item_result.length > 0) {
-        if (work_item_result[0]['complete']) {
-          // если было пустое задание, то не журналируем
-        } else {
-          // print("[WORKFLOW][WO4.0.0] completedJournalMap");
-          Workflow.mapToJournal(net_element['v-wf:completedJournalMap'], ticket, _process, work_item, null, net_element['rdfs:label'], journal_uri);
-        }
-      }
-
-      // print("[WORKFLOW][WO4.1] is_goto_to_next_task == true");
-      if (net_element['v-wf:completedMapping']) {
-        // сохраняем результаты в v-wf:outVars в обрабатываемом рабочем задании
-        task_output_vars = Workflow.create_and_mapping_variables(ticket, net_element['v-wf:completedMapping'], _process, work_item, null, work_item_result, true, trace_journal_uri, 'v-wf:completedMapping');
-      }
-
-      //            if (task_output_vars.length > 0)
-      //            {
-      //                document['v-wf:outVars'] = task_output_vars;
-      //                put_individual(ticket, document, _event_id);
-      //            }
-
-      // определим переход на следующие задачи в зависимости от результата
-      // res должен быть использован при eval каждого из предикатов
-      const hasFlows = net_element['v-wf:hasFlow'];
-      if (hasFlows) {
-        // print("[WORKFLOW][WO4.4]");
-        const split = veda.Util.getUri(net_element['v-wf:split']);
-
-        for (let i = 0; i < hasFlows.length; i++) {
-          const flow = get_individual(ticket, hasFlows[i].data);
-          if (!flow) continue;
-
-          // print("[WORKFLOW][WO6]:Flow: " + flow['@']);
-
-          const flowsInto = flow['v-wf:flowsInto'];
-          if (!flowsInto) continue;
-
-          const predicate = flow['v-wf:predicate'];
-          if (predicate) {
-            // print("[WORKFLOW][WO8] predicate=" + veda.Util.toJson(predicate));
-            const expression = veda.Util.getFirstValue(predicate);
-            // print("[WORKFLOW][WO8.1] work_item_result=" + veda.Util.toJson(work_item_result));
-            // print("[WORKFLOW][WO9] expression=" + veda.Util.toJson(expression));
-            if (expression) {
-              try {
-                const task_result = new Workflow.WorkItemResult(work_item_result);
-                const task = new Workflow.Context(work_item, ticket);
-                const process = new Workflow.Context(_process, ticket);
-                const res1 = eval(expression);
-
-                if (trace_journal_uri) {
-                  veda.Util.traceToJournal(ticket, trace_journal_uri, 'in flow expression', veda.Util.toJson(expression) + ', res =' + veda.Util.toJson(res1));
-                }
-
-                if (res1 === true) {
-                  // выполним переход по XOR условию
-                  const nextNetElement = get_individual(ticket, veda.Util.getUri(flowsInto));
-
-                  if (nextNetElement) {
-                    // print("[WORKFLOW][WO10] create next work item for =" + nextNetElement['@']);
-                    const work_item_uri = Workflow.create_work_item(ticket, forProcess_uri, nextNetElement['@'], work_item['@'], _event_id, trace_journal_uri);
-                    workItemList.push(
-                      {
-                        data: work_item_uri,
-                        type: 'Uri',
-                      });
-                  }
-
-                  if (split == 'v-wf:XOR') {
-                    break;
-                  }
-                }
-              } catch (e) {
-                if (trace_journal_uri) {
-                  veda.Util.traceToJournal(ticket, trace_journal_uri, 'in flow expression', veda.Util.toJson(expression) + ', ', veda.Util.toJson(e.stack));
-                }
-
-                print(e.stack);
-              }
-            }
+        if (work_item_result.length > 0) {
+          if (work_item_result[0]['complete']) {
+            // если было пустое задание, то не журналируем
           } else {
-            if (!split || split == 'v-wf:None') {
-              // условия нет, выполним переход
-              const nextNetElement = get_individual(ticket, veda.Util.getUri(flowsInto));
+            // print("[WORKFLOW][WO4.0.0] completedJournalMap");
+            Workflow.mapToJournal(net_element['v-wf:completedJournalMap'], ticket, _process, work_item, null, net_element['rdfs:label'], journal_uri);
+          }
+        }
 
-              if (nextNetElement) {
-                // print("[WORKFLOW][WO11] create next work item for =" + nextNetElement['@']);
-                const work_item_uri = Workflow.create_work_item(ticket, forProcess_uri, nextNetElement['@'], work_item['@'], _event_id, trace_journal_uri);
-                workItemList.push(
-                  {
-                    data: work_item_uri,
-                    type: 'Uri',
-                  });
+        // print("[WORKFLOW][WO4.1] is_goto_to_next_task == true");
+        if (net_element['v-wf:completedMapping']) {
+          // сохраняем результаты в v-wf:outVars в обрабатываемом рабочем задании
+          task_output_vars = Workflow.create_and_mapping_variables(ticket, net_element['v-wf:completedMapping'], _process, work_item, null, work_item_result, true, trace_journal_uri, 'v-wf:completedMapping');
+        }
+
+        //            if (task_output_vars.length > 0)
+        //            {
+        //                document['v-wf:outVars'] = task_output_vars;
+        //                put_individual(ticket, document, _event_id);
+        //            }
+
+        // определим переход на следующие задачи в зависимости от результата
+        // res должен быть использован при eval каждого из предикатов
+        const hasFlows = net_element['v-wf:hasFlow'];
+        if (hasFlows) {
+          // print("[WORKFLOW][WO4.4]");
+          const split = veda.Util.getUri(net_element['v-wf:split']);
+
+          for (let i = 0; i < hasFlows.length; i++) {
+            const flow = get_individual(ticket, hasFlows[i].data);
+            if (!flow) continue;
+
+            // print("[WORKFLOW][WO6]:Flow: " + flow['@']);
+
+            const flowsInto = flow['v-wf:flowsInto'];
+            if (!flowsInto) continue;
+
+            const predicate = flow['v-wf:predicate'];
+            if (predicate) {
+              // print("[WORKFLOW][WO8] predicate=" + veda.Util.toJson(predicate));
+              const expression = veda.Util.getFirstValue(predicate);
+              // print("[WORKFLOW][WO8.1] work_item_result=" + veda.Util.toJson(work_item_result));
+              // print("[WORKFLOW][WO9] expression=" + veda.Util.toJson(expression));
+              if (expression) {
+                try {
+                  const task_result = new Workflow.WorkItemResult(work_item_result);
+                  const task = new Workflow.Context(work_item, ticket);
+                  const process = new Workflow.Context(_process, ticket);
+                  const res1 = eval(expression);
+
+                  if (trace_journal_uri) {
+                    veda.Util.traceToJournal(ticket, trace_journal_uri, 'in flow expression', veda.Util.toJson(expression) + ', res =' + veda.Util.toJson(res1));
+                  }
+
+                  if (res1 === true) {
+                    // выполним переход по XOR условию
+                    const nextNetElement = get_individual(ticket, veda.Util.getUri(flowsInto));
+
+                    if (nextNetElement) {
+                      // print("[WORKFLOW][WO10] create next work item for =" + nextNetElement['@']);
+                      const work_item_uri = Workflow.create_work_item(ticket, forProcess_uri, nextNetElement['@'], work_item['@'], _event_id, trace_journal_uri);
+                      workItemList.push(
+                        {
+                          data: work_item_uri,
+                          type: 'Uri',
+                        });
+                    }
+
+                    if (split == 'v-wf:XOR') {
+                      break;
+                    }
+                  }
+                } catch (e) {
+                  if (trace_journal_uri) {
+                    veda.Util.traceToJournal(ticket, trace_journal_uri, 'in flow expression', veda.Util.toJson(expression) + ', ', veda.Util.toJson(e.stack));
+                  }
+
+                  print(e.stack);
+                }
+              }
+            } else {
+              if (!split || split == 'v-wf:None') {
+                // условия нет, выполним переход
+                const nextNetElement = get_individual(ticket, veda.Util.getUri(flowsInto));
+
+                if (nextNetElement) {
+                  // print("[WORKFLOW][WO11] create next work item for =" + nextNetElement['@']);
+                  const work_item_uri = Workflow.create_work_item(ticket, forProcess_uri, nextNetElement['@'], work_item['@'], _event_id, trace_journal_uri);
+                  workItemList.push(
+                    {
+                      data: work_item_uri,
+                      type: 'Uri',
+                    });
+                }
               }
             }
           }
+          // }
         }
-        // }
+
+        work_item['v-wf:isCompleted'] = [
+          {
+            data: true,
+            type: 'Boolean',
+          }];
+
+        if (workItemList.length > 0) {
+          work_item['v-wf:workItemList'] = workItemList;
+        }
+
+        if (task_output_vars.length > 0) {
+          work_item['v-wf:outVars'] = task_output_vars;
+        }
+
+        put_individual(ticket, work_item, _event_id);
+        // print("[WORKFLOW][WOe] update work_item=", veda.Util.toJson(work_item));
+
+        Workflow.remove_empty_branches_from_journal(journal_uri);
       }
-
-      work_item['v-wf:isCompleted'] = [
-        {
-          data: true,
-          type: 'Boolean',
-        }];
-
-      if (workItemList.length > 0) {
-        work_item['v-wf:workItemList'] = workItemList;
-      }
-
-      if (task_output_vars.length > 0) {
-        work_item['v-wf:outVars'] = task_output_vars;
-      }
-
-      put_individual(ticket, work_item, _event_id);
-      // print("[WORKFLOW][WOe] update work_item=", veda.Util.toJson(work_item));
-
-      Workflow.remove_empty_branches_from_journal(journal_uri);
     }
   } catch (e) {
     print(e.stack);
@@ -617,7 +622,6 @@ Workflow.prepare_work_order = function (ticket, document) {
  */
 Workflow.prepare_work_item = function (ticket, document) {
   const work_item = document;
-
   try {
     const forProcess = veda.Util.getUri(work_item['v-wf:forProcess']);
     const _process = get_individual(ticket, forProcess);
