@@ -134,9 +134,16 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     .catch(errorHandler)
     .catch((error) => {
       console.log(`presenter error: ${this.id}`, error, error.stack);
-      const msg = $(`<div><code>${error.name} ${error.message} ${this.id}</code></div>`);
-      container.append(msg);
-      return msg;
+      const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
+      return errorIndividual.load().then((errorIndividual) => {
+        const msg = $(`<div><a href="#/${this.id}"><code>${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}</code></a></div>`);
+        container.append(msg);
+        return msg;
+      }).catch(() => {
+        const msg = $(`<div><a href="#/${this.id}"><code>${error.name} ${error.message}</code></a></div>`);
+        container.append(msg);
+        return msg;
+      });
     });
 }
 
@@ -664,7 +671,6 @@ function processTemplate (individual, container, template, mode) {
     });
 
     return about.load().then((about) => {
-
       let prev_rendered = {};
       let curr_rendered = {};
       let sort_required = false;
@@ -682,7 +688,9 @@ function processTemplate (individual, container, template, mode) {
 
         return Promise.all(
           values.map((value, i) => {
-            if (i >= limit) { return; }
+            if (i >= limit) {
+              return;
+            }
             if (value.id in prev_rendered) {
               curr_rendered[value.id] = prev_rendered[value.id];
               if (curr_rendered[value.id] !== i) {
@@ -697,7 +705,7 @@ function processTemplate (individual, container, template, mode) {
                 curr_rendered[value.id] = i;
                 return template;
               });
-          }).filter(Boolean)
+          }).filter(Boolean),
         ).then((templates) => {
           relContainer.append(templates);
           const prev_uris = Object.keys(prev_rendered);
@@ -706,7 +714,7 @@ function processTemplate (individual, container, template, mode) {
             $(selector, relContainer).remove();
           }
           if (sort_required) {
-            let list = relContainer.children().detach().toArray();
+            const list = relContainer.children().detach().toArray();
             list.sort((a, b) => {
               return curr_rendered[a.getAttribute('resource')] - curr_rendered[b.getAttribute('resource')];
             });
