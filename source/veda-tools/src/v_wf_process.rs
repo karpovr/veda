@@ -48,149 +48,172 @@ pub fn clean_process(ctx: &mut CleanerContext) {
     let max_load = num_cpus::get() / 2;
 
     if let Some((mut pos, _)) = module_info.read_info() {
+        info!("start pos {}", pos);
+        let mut date_from = NaiveDate::from_ymd(2010, 1, 1).and_hms_milli(0, 0, 0, 0);
+        let mut date_to = Utc::now().naive_utc();
+
+        if let Some(df) = ctx.date_to {
+            date_to = df;
+        }
+
         let output_condition_list = get_list_of_output_condition(ctx);
-        let query = get_query_for_work_item_in_output_condition(ctx, &output_condition_list);
-        let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, pos, OptAuthorize::NO);
 
-        if res.result_code == ResultCode::Ok {
-            let mut sw = Stopwatch::start_new();
-            for id in res.result.iter() {
+        loop {
+            if let Some(df) = ctx.date_from {
+                if let Some(r) = df.checked_add_signed(Duration::days(pos)) {
+                    date_from = r;
+                }
+            }
 
-                pos += 1;
-                if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
-                    let f_for_process = &rindv.get_first_literal("v-wf:forProcess").unwrap_or_default();
-                    if let Some(process) = ctx.backend.get_individual(f_for_process, &mut Individual::default()) {
-                        let mut process_elements = HashMap::new();
+            if date_from >= date_to {
+                break;
+            }
 
-                        if !process.is_exists("v-wf:parentWorkOrder") {
-                            if ctx.report_type == "processes" {
-                                if let Some(report) = &mut ctx.report {
-                                    report.write((process.get_id().to_owned() + "\n").as_bytes()).unwrap_or_default();
-                                }
-                            } else {
-                                collect_process_elements("", process, &mut process_elements, ctx);
-                                //collect_membership(&mut process_elements, ctx);
-                                //collect_permission_statement(&mut process_elements, ctx);
+            info!("current pos {}", date_from);
 
-                                if ctx.report_type == "full" {
+            let query = get_query_for_work_item_in_output_condition(&output_condition_list, Some (date_from), date_from.checked_add_signed(Duration::days(1)));
+            let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, 0, OptAuthorize::NO);
+
+            if res.result_code == ResultCode::Ok {
+                let mut sw = Stopwatch::start_new();
+                for id in res.result.iter() {
+                    if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
+                        let f_for_process = &rindv.get_first_literal("v-wf:forProcess").unwrap_or_default();
+                        if let Some(process) = ctx.backend.get_individual(f_for_process, &mut Individual::default()) {
+                            let mut process_elements = HashMap::new();
+
+                            if !process.is_exists("v-wf:parentWorkOrder") {
+                                if ctx.report_type == "processes" {
                                     if let Some(report) = &mut ctx.report {
-                                        report.write("\n\n".as_bytes()).unwrap_or_default();
-                                        let mut sorted: Vec<_> = process_elements.iter().collect();
-                                        sorted.sort_by_key(|a| &a.1.name);
-                                        for (id, el) in sorted.iter() {
-                                            report.write(format!("{};\t{};\t\t{}\n", id, el.name, el.parent_id).as_bytes()).unwrap_or_default();
+                                        report.write((process.get_id().to_owned() + "\n").as_bytes()).unwrap_or_default();
+                                    }
+                                } else {
+                                    collect_process_elements("", process, &mut process_elements, ctx);
+                                    //collect_membership(&mut process_elements, ctx);
+                                    //collect_permission_statement(&mut process_elements, ctx);
+
+                                    if ctx.report_type == "full" {
+                                        if let Some(report) = &mut ctx.report {
+                                            report.write("\n\n".as_bytes()).unwrap_or_default();
+                                            let mut sorted: Vec<_> = process_elements.iter().collect();
+                                            sorted.sort_by_key(|a| &a.1.name);
+                                            for (id, el) in sorted.iter() {
+                                                report.write(format!("{};\t{};\t\t{}\n", id, el.name, el.parent_id).as_bytes()).unwrap_or_default();
+                                            }
                                         }
                                     }
-                                }
 
-                                let mut indvs = vec![];
-                                let mut indv_ids = vec![];
+                                    let mut indvs = vec![];
+                                    let mut indv_ids = vec![];
 
-                                for (id, el) in process_elements {
-                                    match el.indv {
-                                        Some(mut s) => {
-                                            if ctx.operations.contains("to_ttl") {
-                                                s.parse_all();
-                                            }
-
-                                            indv_ids.push(s.get_id().to_owned());
-                                            indvs.push(s);
-                                        }
-                                        None => {
-                                            if let Some(mut s) = ctx.backend.get_individual_s(&id) {
+                                    for (id, el) in process_elements {
+                                        match el.indv {
+                                            Some(mut s) => {
                                                 if ctx.operations.contains("to_ttl") {
                                                     s.parse_all();
                                                 }
+
                                                 indv_ids.push(s.get_id().to_owned());
                                                 indvs.push(s);
                                             }
-                                        }
-                                    }
-                                }
-                                let indvs_count = indvs.len();
-
-                                if !check_subprocesses(&mut indvs, &output_condition_list) {
-                                    warn!("process {} content not pass subprocesses", process.get_id());
-                                    continue;
-                                }
-
-                                if ctx.report_type == "ids" {
-                                    if let Some(report) = &mut ctx.report {
-                                        for id in indv_ids.iter() {
-                                            report.write((id.to_string() + "\n").as_bytes()).unwrap_or_default();
-                                        }
-                                    }
-                                }
-
-                                if ctx.operations.contains("to_ttl") {
-                                    indvs.push(Individual::new_from_obj(header.get_obj()));
-                                    if let Ok(buf) = to_turtle(&indvs, &mut ctx.onto.prefixes) {
-                                        let mut ze = GzEncoder::new(Vec::new(), Compression::default());
-
-                                        ze.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
-                                        if let Err(e) = ze.write_all(buf.as_slice()) {
-                                            error!("failed compress, err = {:?}", e);
-                                            return;
-                                        } else {
-                                            if let Ok(compressed_bytes) = ze.finish() {
-                                                let file_path = format!("./out/{}.ttl.gz", process.get_id().replace(':', "_"));
-                                                if let Ok(mut file) = File::create(&(file_path)) {
-                                                    if let Err(e) = file.write_all(&compressed_bytes) {
-                                                        error!("failed to write to file {}, {:?}", file_path, e);
-                                                        return;
+                                            None => {
+                                                if let Some(mut s) = ctx.backend.get_individual_s(&id) {
+                                                    if ctx.operations.contains("to_ttl") {
+                                                        s.parse_all();
                                                     }
-                                                    info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
-                                                } else {
-                                                    error!("failed to create file {}", file_path);
-                                                    return;
+                                                    indv_ids.push(s.get_id().to_owned());
+                                                    indvs.push(s);
                                                 }
-                                            } else {
-                                                error!("failed compress");
-                                                return;
                                             }
                                         }
                                     }
-                                }
+                                    let indvs_count = indvs.len();
 
-                                if ctx.operations.contains("remove") {
-                                    for s in indvs.iter_mut() {
-                                        remove(s, ctx);
+                                    if !check_subprocesses(&mut indvs, &output_condition_list) {
+                                        warn!("process {} content not pass subprocesses", process.get_id());
+                                        continue;
+                                    }
+
+                                    if ctx.report_type == "ids" {
+                                        if let Some(report) = &mut ctx.report {
+                                            for id in indv_ids.iter() {
+                                                report.write((id.to_string() + "\n").as_bytes()).unwrap_or_default();
+                                            }
+                                        }
+                                    }
+
+                                    if ctx.operations.contains("to_ttl") {
+                                        indvs.push(Individual::new_from_obj(header.get_obj()));
+                                        if let Ok(buf) = to_turtle(&indvs, &mut ctx.onto.prefixes) {
+                                            let mut ze = GzEncoder::new(Vec::new(), Compression::default());
+
+                                            ze.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
+                                            if let Err(e) = ze.write_all(buf.as_slice()) {
+                                                error!("failed compress, err = {:?}", e);
+                                                return;
+                                            } else {
+                                                if let Ok(compressed_bytes) = ze.finish() {
+                                                    let file_path = format!("./out/{}.ttl.gz", process.get_id().replace(':', "_"));
+                                                    if let Ok(mut file) = File::create(&(file_path)) {
+                                                        if let Err(e) = file.write_all(&compressed_bytes) {
+                                                            error!("failed to write to file {}, {:?}", file_path, e);
+                                                            return;
+                                                        }
+                                                        info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
+                                                    } else {
+                                                        error!("failed to create file {}", file_path);
+                                                        return;
+                                                    }
+                                                } else {
+                                                    error!("failed compress");
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if ctx.operations.contains("remove") {
+                                        for s in indvs.iter_mut() {
+                                            remove(s, ctx);
+                                        }
+                                    }
+
+                                    total_count += indvs.len();
+
+                                    info!("total_count : {}", total_count);
+                                }
+                            }
+                        } else {
+                            error!("not found {}[{}={}]", id, "v-wf:forProcess", f_for_process);
+                        }
+                    }
+                    if sw.elapsed_ms() > 1000 {
+                        loop {
+                            match sys.load_average() {
+                                Ok(loadavg) => {
+                                    if loadavg.one > max_load as f32 {
+                                        info!("Load average one: {} > {}, sleep", loadavg.one, max_load);
+                                        thread::sleep(std_Duration::from_millis(10000));
+                                        sw = Stopwatch::start_new();
+                                    } else {
+                                        break;
                                     }
                                 }
-
-                                total_count += indvs.len();
-
-                                info!("total_count : {}", total_count);
-                            }
-                        }
-                    } else {
-                        error!("not found {}[{}={}]", id, "v-wf:forProcess", f_for_process);
-                    }
-                }
-                if sw.elapsed_ms() > 1000 {
-                    loop {
-                        match sys.load_average() {
-                            Ok(loadavg) => {
-                                if loadavg.one > max_load as f32 {
-                                    info!("Load average one: {} > {}, sleep", loadavg.one, max_load);
-                                    thread::sleep(std_Duration::from_millis(10000));
-                                    sw = Stopwatch::start_new();
-                                } else {
+                                Err(x) => {
+                                    info!("\nLoad average: error: {}", x);
                                     break;
                                 }
                             }
-                            Err(x) => {
-                                info!("\nLoad average: error: {}", x);
-                                break;
-                            },
                         }
                     }
                 }
+                if let Err(e) = module_info.put_info(pos, pos) {
+                    error!("err = {:?}", e);
+                    return;
+                }
             }
-            if let Err(e) = module_info.put_info(pos, pos) {
-                error!("err = {:?}", e);
-                return;
-            }
+
+            pos += 1;
         }
     }
 }
@@ -211,7 +234,7 @@ fn get_list_of_output_condition(ctx: &mut CleanerContext) -> Vec<String> {
     res
 }
 
-fn get_query_for_work_item_in_output_condition(ctx: &mut CleanerContext, output_conditions_list: &[String]) -> String {
+fn get_query_for_work_item_in_output_condition(output_conditions_list: &[String], date_from: Option<NaiveDateTime>, date_to: Option<NaiveDateTime>) -> String {
     let mut q0 = String::default();
     for el in output_conditions_list.iter() {
         if q0.len() > 0 {
@@ -222,13 +245,13 @@ fn get_query_for_work_item_in_output_condition(ctx: &mut CleanerContext, output_
         q0.push_str("'")
     }
 
-    let df = if let Some(d) = &ctx.date_from {
+    let df = if let Some(d) = date_from {
         format!(" AND v_s_created_date[1] >= toDateTime ({}) ", d.timestamp())
     } else {
         "".to_owned()
     };
 
-    let dt = if let Some(d) = &ctx.date_to {
+    let dt = if let Some(d) = date_to {
         format!(" AND v_s_created_date[1] < toDateTime ({}) ", d.timestamp())
     } else {
         "".to_owned()
