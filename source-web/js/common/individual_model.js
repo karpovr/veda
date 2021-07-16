@@ -810,7 +810,10 @@ proto.init = function (forced) {
   if ( this.hasValue('v-ui:hasModel') && !isClass ) {
     return this.get('v-ui:hasModel')[0].load()
       .then((model) => {
-        if ( !model.modelFn ) {
+        if (!model.hasValue('rdf:type', 'v-ui:ClassModel')) {
+          throw Error('Model type violation!');
+        }
+        if (!model.modelFn) {
           model.modelFn = new Function('veda', model['v-s:script'][0]);
         }
         model.modelFn.call(this, veda);
