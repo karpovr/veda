@@ -44,92 +44,36 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     container = $(container);
   }
 
-  const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
-  const reg_file = /\.html$/;
-
   return this.load()
-    .then((individual) => {
+    .then(() => {
       if (template) {
-        if (template instanceof IndividualModel) {
-        // if template is uri
-        } else if (typeof template === 'string' && reg_uri.test(template) ) {
-          template = new IndividualModel(template);
-        } else {
-          let templateString;
-          if (typeof template === 'string') {
-            templateString = template;
-          } else if (template instanceof HTMLElement) {
-            templateString = template.outerHTML;
-          }
-          return renderTemplate(individual, container, templateString, undefined, mode, extra, toAppend);
-        }
-        return template.load().then((template) => {
-          const templateName = template.id;
-          const templateString = template['v-ui:template'][0];
-          if (reg_file.test(templateString)) {
-            return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
-              return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
-            });
-          } else {
-            return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
-          }
-        });
+        return getTemplateString(template);
       } else {
-        const isClass = individual.hasValue('rdf:type', 'owl:Class') || individual.hasValue('rdf:type', 'rdfs:Class');
-        let templatePromise;
-        if ( individual.hasValue('v-ui:hasTemplate') && !isClass ) {
-          template = individual['v-ui:hasTemplate'][0];
-          templatePromise = template.load().then((template) => {
-            if ( !template.hasValue('rdf:type', 'v-ui:ClassTemplate') ) {
-              throw new Error('Template type violation!');
-            }
-            const templateName = template.id;
-            const templateString = template['v-ui:template'][0].toString();
-            if (reg_file.test(templateString)) {
-              return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
-                return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
-              });
-            } else {
-              return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
-            }
-          });
+        const isClass = this.hasValue('rdf:type', 'owl:Class') || this.hasValue('rdf:type', 'rdfs:Class');
+        if (this.hasValue('v-ui:hasTemplate') && !isClass) {
+          const templateIndividual = this['v-ui:hasTemplate'][0];
+          if (!templateIndividual instanceof IndividualModel) {
+            throw Error('Custom template must be an individual!');
+          }
+          return getTemplateString(templateIndividual);
         } else {
           const ontology = veda.ontology;
-
-          const typePromises = individual['rdf:type'].map((type) => {
-            return type.load();
-          });
-          templatePromise = Promise.all(typePromises).then((types) => {
-            const templatesPromises = types.map((type) => {
-              const defaultTemplateUri = ontology.getClassTemplate(type.id);
-              if (defaultTemplateUri) {
-                return new IndividualModel(defaultTemplateUri).load();
-              } else {
-                return type.hasValue('v-ui:hasTemplate') ? type['v-ui:hasTemplate'][0].load() : new IndividualModel('v-ui:generic').load();
-              }
-            });
-            return Promise.all(templatesPromises);
-          }).then((templates) => {
-            const renderedTemplatesPromises = templates.map((template) => {
-              const templateName = template.id;
-              const templateString = template['v-ui:template'][0];
-              if (reg_file.test(templateString)) {
-                return veda.Backend.loadFile('/templates/' + templateString).then((templateString) => {
-                  return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
-                });
-              } else {
-                return renderTemplate(individual, container, templateString, templateName, mode, extra, toAppend);
-              }
-            });
-            return Promise.all(renderedTemplatesPromises);
-          }).then((renderedTemplates) => {
-            return renderedTemplates.reduce((acc, renderedTemplate) => {
-              return acc.add(renderedTemplate);
-            }, $());
-          });
+          const templates = this['rdf:type'].map((type) => ontology.getClassTemplate(type.id)).map(getTemplateString);
+          return Promise.all(templates);
         }
-        return templatePromise;
       }
+    })
+    .then((template) => {
+      if (Array.isArray(template)) {
+        return Promise.all(templates.map(({template, name}) => renderTemplate(this, container, template, name, mode, extra, toAppend)));
+      }
+      return renderTemplate(this, container, template.template, template.name, mode, extra, toAppend);
+    })
+    .then((rendered) => {
+      if (Array.isArray(rendered)) {
+        return rendered.reduce((acc, item) => acc.add(item), $());
+      }
+      return rendered;
     })
     .catch(errorHandler)
     .catch((error) => {
@@ -145,6 +89,50 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         return msg;
       });
     });
+}
+
+/**
+ * Get template string
+ * @param {IndividualModel|string|HTMLElement} template
+ * @return {Promise<{name, template}>}
+ */
+function getTemplateString (template) {
+  const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
+  const reg_file = /\.html$/;
+  if (template instanceof IndividualModel) {
+    return template.load().then((templateIndividual) => {
+      if (!templateIndividual.hasValue('rdf:type', 'v-ui:ClassTemplate')) {
+        throw Error('Template type violation!');
+      }
+      const templateName = template.id;
+      const templateString = template['v-ui:template'][0];
+      if (reg_file.test(templateString)) {
+        return veda.Backend.loadFile('/templates/' + templateString).then((data) => ({
+          name: templateName,
+          template: data.trim(),
+        }));
+      }
+      return {
+        name: templateName,
+        template: templateString.trim(),
+      };
+    });
+  } else if (typeof template === 'string' && reg_uri.test(template)) {
+    const templateIndividual = new IndividualModel(template);
+    return getTemplateString(templateIndividual);
+  } else if (typeof template === 'string') {
+    return {
+      name: String(template.length),
+      template: template.trim(),
+    };
+  } else if (template instanceof HTMLElement) {
+    return {
+      name: String(template.length),
+      template: template.outerHTML.trim(),
+    };
+  }
+  const generic = new IndividualModel('v-ui:generic');
+  return getTemplateString(generic);
 }
 
 /**
@@ -183,16 +171,14 @@ function errorHandler (error) {
  * Render template
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
- * @param {IndividualModel|string} templateString - template string to render individual with
- * @param {string} templateName - template name for sourceURL
+ * @param {IndividualModel|string} template - template string to render individual with
+ * @param {string} name - name of template for sourceURL
  * @param {string} mode - view | edit | search
  * @param {Object} extra - extra parameters to pass ro template
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function renderTemplate (individual, container, templateString, templateName, mode, extra, toAppend) {
-  let template = templateString.trim();
-
+function renderTemplate (individual, container, template, name, mode, extra, toAppend) {
   // Extract pre script, template and post script
   const match = template.match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
   const pre_render_src = match[1];
@@ -201,7 +187,7 @@ function renderTemplate (individual, container, templateString, templateName, mo
 
   let pre_result;
   if (pre_render_src) {
-    pre_result = eval(`(function () { 'use strict';\n${pre_render_src}\n}).call(individual);\n//# sourceURL=${templateName || templateString.length}_pre`);
+    pre_result = eval(`(function () { 'use strict';\n${pre_render_src}\n}).call(individual);\n//# sourceURL=${name}_pre`);
   }
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
@@ -214,7 +200,7 @@ function renderTemplate (individual, container, templateString, templateName, mo
 
       let post_result;
       if (post_render_src) {
-        post_result = eval(`(function () { 'use strict';\n${post_render_src}\n}).call(individual);\n//# sourceURL=${templateName || templateString.length}_post`);
+        post_result = eval(`(function () { 'use strict';\n${post_render_src}\n}).call(individual);\n//# sourceURL=${name}_post`);
       }
       return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
         .then(() => processedTemplate);
@@ -246,7 +232,7 @@ function processTemplate (individual, container, template, mode) {
     'typeof': individual['rdf:type'].map((item) => {
       return item.id;
     }).join(' '),
-  });
+  }).addClass('template');
 
   const view = template.find('.view').addBack('.view');
   const edit = template.find('.edit').addBack('.edit');
