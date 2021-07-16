@@ -65,7 +65,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     })
     .then((template) => {
       if (Array.isArray(template)) {
-        return Promise.all(templates.map(({template, name}) => renderTemplate(this, container, template, name, mode, extra, toAppend)));
+        return Promise.all(template.map(({template, name}) => renderTemplate(this, container, template, name, mode, extra, toAppend)));
       }
       return renderTemplate(this, container, template.template, template.name, mode, extra, toAppend);
     })
