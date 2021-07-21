@@ -18,4 +18,4 @@ serde = "1.0"
 
 v_queue = "0.1.7"
 
-v_module = { package = "v-common-module", version = "=0.1.42" }
+v_module = { package = "v-common-module", version = "=0.1.44" }
