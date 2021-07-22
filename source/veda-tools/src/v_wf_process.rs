@@ -71,7 +71,7 @@ pub fn clean_process(ctx: &mut CleanerContext) {
 
             info!("current pos {}", date_from);
 
-            let query = get_query_for_work_item_in_output_condition(&output_condition_list, Some (date_from), date_from.checked_add_signed(Duration::days(1)));
+            let query = get_query_for_work_item_in_output_condition(&output_condition_list, Some(date_from), date_from.checked_add_signed(Duration::days(1)));
             let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, 0, OptAuthorize::NO);
 
             if res.result_code == ResultCode::Ok {
@@ -153,7 +153,17 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                                 return;
                                             } else {
                                                 if let Ok(compressed_bytes) = ze.finish() {
-                                                    let file_path = format!("./out/{}.ttl.gz", process.get_id().replace(':', "_"));
+                                                    let mut file_path = format!("./out/{}.ttl.gz", process.get_id().replace(':', "_"));
+                                                    let mut fc = 0;
+                                                    loop {
+                                                        if !std::path::Path::new(&file_path).exists() {
+                                                            break;
+                                                        }
+                                                        warn!("file {} already exists", file_path);
+                                                        fc += 1;
+                                                        file_path = format!("./out/{}_{}.ttl.gz", process.get_id().replace(':', "_"), fc);
+                                                    }
+
                                                     if let Ok(mut file) = File::create(&(file_path)) {
                                                         if let Err(e) = file.write_all(&compressed_bytes) {
                                                             error!("failed to write to file {}, {:?}", file_path, e);
