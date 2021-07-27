@@ -316,7 +316,12 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
                 let is_need_store = if let Some(indv_db) = backend.get_individual(indv_file.get_id(), &mut Individual::default()) {
                     indv_db.parse_all();
-                    !indv_db.compare(indv_file, vec!["v-s:updateCounter", "v-s:previousVersion", "v-s:actualVersion", "v-s:fullUrl"])
+                    if indv_db.compare(indv_file, vec!["v-s:updateCounter", "v-s:previousVersion", "v-s:actualVersion", "v-s:fullUrl"]) {
+                        info!("{} in ttl is equal to the object from the db", indv_file.get_id());
+                        false
+                    } else {
+                        true
+                    }
                 } else {
                     true
                 };

@@ -12,4 +12,4 @@ log = "0.4"
 rust-ini = "0.16"
 
 v_queue = "0.1.7"
-v_onto = { package = "v-common-onto", version = "=0.1.11" }
+v_onto = { package = "v-common-onto", version = "=0.1.12" }
