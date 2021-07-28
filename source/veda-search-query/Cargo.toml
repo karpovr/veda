@@ -7,9 +7,9 @@ edition = "2018"
 [dependencies]
 log = "0.4"
 rust-ini = "0.16"
-nng = "0.5.1"
+nng = "1.0.0"
 serde_json = "1.0"
 
 v_authorization = "=0.1.1"
 v_az_lmdb = { package = "v-common-az-lmdb", version = "=0.1.2" }
-v_module = { package = "v-common-module", version = "=0.1.45" }
+v_module = { package = "v-common-module", version = "=0.1.46" }
