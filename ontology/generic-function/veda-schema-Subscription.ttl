@@ -324,7 +324,7 @@ var view = {
   "author": author["rdfs:label"][0].data,
   "actionType": actionType["rdfs:label"][0].data,
   "actionDate": veda.Util.formatValue(action["v-s:created"][0].data),
-  "docUrl": "http://optiflow.mp.local:8080/#/"+doc['@']
+  "docUrl": "http://optiflow.mp.local/#/"+doc['@']
 };
 //print("view=", veda.Util.toJson(view));
 var subject = veda.Util.Mustache.render(subjectTemplate, view).replace (/&#x2F;/g, '/');
