@@ -2560,9 +2560,9 @@ v-ui:TreeTemplate
     var isLiteral = (literals.indexOf(property["rdfs:range"][0].id) >= 0);
     if ( index === 0 ) {
       if (isLiteral) {
-        rowTmpl += "<td><div class='spacer'></div><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' property='" + property.id + "'></span></td>";
+        rowTmpl += "<td><div class='spacer'><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' property='" + property.id + "'></span></div></td>";
       } else {
-        rowTmpl += "<td><div class='spacer'></div><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' rel='" + property.id + "' data-template='v-ui:LabelTemplate'></span></td>";
+        rowTmpl += "<td><div class='spacer'><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' rel='" + property.id + "' data-template='v-ui:LabelTemplate'></span></div></td>";
       }
       return;
     } else {
@@ -2620,7 +2620,7 @@ v-ui:TreeTemplate
     var cont = $("<div>");
     var parentLvl = parentRow ? parseInt( parentRow.attr("data-level") ) : -1,
         tmpl = $("<tr class='value-row'>").attr("data-level", parentLvl + 1).append(rowTmpl);
-    $(".spacer", tmpl).css({"width": 16 * (parentLvl + 1) + "px", "display": "inline-block"});
+    $(".spacer", tmpl).css({"margin-left": 16 * (parentLvl + 1) + "px", "display": "inline-block"});
     return Promise.all(values_uris.map(function (valueUri, index) {
       var value = new veda.IndividualModel(valueUri);
       return value.load().then(function (value) {
