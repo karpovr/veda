@@ -39,7 +39,7 @@ v-s:to
 v-s:mutualMembership
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:Link ;
-  rdfs:label "Обоюдные права"@ru ;
+  rdfs:label "Обоюдные права "@ru ;
   rdfs:label "Mutual rights"@en ;
   rdfs:range xsd:boolean ;
 .
