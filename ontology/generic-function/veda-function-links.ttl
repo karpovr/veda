@@ -43,6 +43,20 @@ v-s:mutualMembership
   rdfs:label "Mutual rights"@en ;
   rdfs:range xsd:boolean ;
 .
+v-s:toMemberOfFrom
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Link ;
+  rdfs:label "Цель включить в источник"@ru ;
+  rdfs:label "To memeber of From"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:fromMemberOfTo
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Link ;
+  rdfs:label "Источник включить в цель"@ru ;
+  rdfs:label "From member of to"@en ;
+  rdfs:range xsd:boolean ;
+.
 
 # ---------------- Class links tree -----------------
 
