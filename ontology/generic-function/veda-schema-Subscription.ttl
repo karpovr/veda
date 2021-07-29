@@ -318,13 +318,21 @@ var actionType = get_individual(ticket, action["rdf:type"][0].data);
 var template = get_individual(ticket, 'v-s:msg-template-subscription-notify');
 var subjectTemplate = String(template['v-s:notificationSubject'][0].data);
 var bodyTemplate = String(template['v-s:notificationBody'][0].data);
+
+var vedaInfo = get_individual(ticket, "v-s:vedaInfo");
+var docUrl = "";
+if (vedaInfo["v-s:appUrl"] == undefined) {
+  print("Warning: v-s:vedaInfo[v-s:appUrl] is undefined");
+} else {
+  docUrl = vedaInfo["v-s:appUrl"][0].data;
+}
 var view = {
   "app_name": veda.Workflow.getAppName,
   "docLabel": doc["rdfs:label"][0].data,
   "author": author["rdfs:label"][0].data,
   "actionType": actionType["rdfs:label"][0].data,
   "actionDate": veda.Util.formatValue(action["v-s:created"][0].data),
-  "docUrl": "http://optiflow.mp.local/#/"+doc['@']
+  "docUrl": docUrl + "/" + doc['@']
 };
 //print("view=", veda.Util.toJson(view));
 var subject = veda.Util.Mustache.render(subjectTemplate, view).replace (/&#x2F;/g, '/');
