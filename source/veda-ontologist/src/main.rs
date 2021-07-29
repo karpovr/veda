@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate log;
-extern crate env_logger;
 
 use std::collections::HashMap;
 use std::fs::File;
