@@ -661,23 +661,37 @@ cfg:Event_15
       membershipToFrom,
       membershipFromTo;
 
-  membershipToFrom = {
-    '@' : membershipToFromUri,
-    'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-    'v-s:memberOf' : veda.Util.newUri(linkFromUri),
-    'v-s:resource' : veda.Util.newUri(linkToUri),
-    'rdfs:comment' : veda.Util.newStr('создано cfg:Event_15'),
-    'v-s:canRead'  : veda.Util.newBool(true)
-  };
 
-  membershipFromTo = {
-    '@' : membershipFromToUri,
-    'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-    'v-s:memberOf' : veda.Util.newUri(linkToUri),
-    'v-s:resource' : veda.Util.newUri(linkFromUri),
-    'rdfs:comment' : veda.Util.newStr('создано cfg:Event_15'),
-    'v-s:canRead'  : veda.Util.newBool(true)
-  };
+  remove_individual(ticket, membershipToFromUri, _event_id);
+  remove_individual(ticket, membershipFromToUri, _event_id);
+
+  if (!linkDeleted) {
+    var isToMemberOfFrom = veda.Util.hasValue( document, "v-s:toMemberOfFrom", {data: true, type: "Boolean"});
+    var isFromMemberOfTo = veda.Util.hasValue( document, "v-s:fromMemberOfTo", {data: true, type: "Boolean"});
+    var isMutual = veda.Util.hasValue( document, "v-s:mutualMembership", {data: true, type: "Boolean"});
+    if (isToMemberOfFrom || isMutual) {
+      membershipToFrom = {
+        '@' : membershipToFromUri,
+        'rdf:type'     : veda.Util.newUri('v-s:Membership'),
+        'v-s:memberOf' : veda.Util.newUri(linkFromUri),
+        'v-s:resource' : veda.Util.newUri(linkToUri),
+        'rdfs:comment' : veda.Util.newStr('создано cfg:Event_15'),
+        'v-s:canRead'  : veda.Util.newBool(true)
+      };
+      put_individual(ticket, membershipToFrom, _event_id);
+    }
+    if (isFromMemberOfTo || isMutual) {
+      membershipFromTo = {
+        '@' : membershipFromToUri,
+        'rdf:type'     : veda.Util.newUri('v-s:Membership'),
+        'v-s:memberOf' : veda.Util.newUri(linkToUri),
+        'v-s:resource' : veda.Util.newUri(linkFromUri),
+        'rdfs:comment' : veda.Util.newStr('создано cfg:Event_15'),
+        'v-s:canRead'  : veda.Util.newBool(true)
+      };
+      put_individual(ticket, membershipFromTo, _event_id);
+    }
+  }
 
   if (linkTo) {
     containsThisLink = veda.Util.hasValue(linkTo, "v-s:hasLink", { data: linkUri, type: "Uri" });
@@ -701,22 +715,6 @@ cfg:Event_15
         return link.data !== linkUri;
       });
       put_individual(ticket, linkFrom, _event_id);
-    }
-  }
-  if (linkDeleted) {
-    remove_individual(ticket, membershipToFromUri, _event_id);
-    print( "membershipToFrom removed", membershipToFrom["@"] );
-  } else {
-    put_individual(ticket, membershipToFrom, _event_id);
-    print( "membershipToFrom added", JSON.stringify(membershipToFrom) );
-  }
-  if (mutualMembership) {
-    if (linkDeleted) {
-      remove_individual(ticket, membershipFromToUri, _event_id);
-      print( "membershipFromTo removed", membershipFromTo["@"] );
-    } else {
-      put_individual(ticket, membershipFromTo, _event_id);
-      print( "membershipFromTo added", JSON.stringify(membershipFromTo) );
     }
   }
   """ ;
@@ -841,7 +839,6 @@ cfg:Event_16
     var backwardTargetUri = backwardTargetUris[i],
         backwardTarget = get_individual(ticket, backwardTargetUri),
         backwardTarget_original = JSON.stringify(backwardTarget);
-    if (!backwardTarget) { continue; }
 
     if (canRead || canUpdate || canDelete) {
       var membershipUri = "d:backward_membership_" + backwardLinkUri.split(":").join('_') + '_' + backwardTargetUri.split(':').join('_');
@@ -889,6 +886,7 @@ cfg:Event_16
       };
     };
     
+    if (!backwardTarget) { continue; }
     if (isDeleted) {
       if (backwardPropertyUri && veda.Util.hasValue(backwardTarget, backwardPropertyUri, { data: backwardLinkUri, type: "Uri" })) {
         // backwardTarget[backwardPropertyUri] = backwardTarget[backwardPropertyUri].filter(function (value) {
