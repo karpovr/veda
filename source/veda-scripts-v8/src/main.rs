@@ -2,6 +2,8 @@
 extern crate lazy_static;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate scan_fmt;
 
 use std::sync::Mutex;
 use std::{env, thread, time};
@@ -102,7 +104,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
     let mut vm_id = "main";
     let args: Vec<String> = env::args().collect();
     for el in args.iter() {
-        if el == "main" || el == "lp" || el == "lp1" {
+        if el == "main" || el.starts_with("lp") {
             vm_id = el;
             break;
         }
@@ -132,15 +134,17 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
             module_info: module_info.unwrap(),
         };
 
-        info!("use VM id = {}", process_name);
-
-        if vm_id == "lp" {
-            ctx.vm_id = "V8.LowPriority".to_owned();
-        } else if vm_id == "lp1" {
-            ctx.vm_id = "V8.LowPriority1".to_owned();
+        if vm_id.starts_with("lp") {
+            if let Ok(lp_id) = scan_fmt!(vm_id, "lp{}", i32) {
+                ctx.vm_id = format!("V8.LowPriority{}", lp_id);
+            } else {
+                ctx.vm_id = "V8.LowPriority".to_owned();
+            }
         } else {
             ctx.vm_id = "main".to_owned();
         }
+
+        info!("use VM id = {} -> {}", process_name, ctx.vm_id);
 
         ctx.workplace.load_ext_scripts(&ctx.sys_ticket);
         load_event_scripts(&mut ctx.workplace, &mut ctx.xr);
@@ -149,7 +153,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
 
         let mut queue_consumer = Consumer::new("./data/queue", consumer_name, main_queue_name).expect("!!!!!!!!! FAIL OPEN RW CONSUMER");
 
-        if vm_id == "lp" || vm_id == "lp1" {
+        if vm_id.starts_with("lp") {
             loop {
                 if let Ok(cs) = Consumer::new_with_mode("./data/queue", MAIN_QUEUE_CS, main_queue_name, Mode::Read) {
                     ctx.main_queue_cs = Some(cs);
@@ -307,12 +311,8 @@ fn prepare_for_js(ctx: &mut MyContext, queue_element: &mut Individual) -> Result
         let run_script_id = doc_id.to_owned() + "+" + script_id;
         if let Some(script) = ctx.workplace.scripts.get(script_id) {
             if let Some(compiled_script) = script.compiled_script {
-                if src == "?" {
-                    if !run_at.is_empty() && run_at != ctx.vm_id {
-                        continue;
-                    } else if run_at.is_empty() && script.context.run_at != ctx.vm_id {
-                        continue;
-                    }
+                if src == "?" && ((!run_at.is_empty() && run_at != ctx.vm_id) || (run_at.is_empty() && script.context.run_at != ctx.vm_id)) {
+                    continue;
                 }
 
                 if event_id == "exim" && script.context.execute_if != event_id {
