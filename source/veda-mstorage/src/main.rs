@@ -387,11 +387,9 @@ fn operation_prepare(
 fn add_to_transaction(cmd: IndvOp, original_cmd: &IndvOp, new_indv: &mut Individual, prev_state: Vec<u8>, update_counter: i64, transaction: &mut Transaction) -> bool {
     let mut new_state: Vec<u8> = Vec::new();
     if cmd == IndvOp::Remove {
-    } else {
-        if to_msgpack(&new_indv, &mut new_state).is_err() {
-            error!("failed to update individual, id = {}", new_indv.get_id());
-            return false;
-        }
+    } else if to_msgpack(new_indv, &mut new_state).is_err() {
+        error!("failed to update individual, id = {}", new_indv.get_id());
+        return false;
     }
     let ti = TransactionItem {
         indv_id: new_indv.get_id().to_owned(),

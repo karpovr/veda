@@ -47,21 +47,19 @@ impl<'a> Transaction<'a> {
                     error!("failed to remove individual, id = {}", el.indv_id);
                     return Err(ResultCode::InternalServerError);
                 }
+            } else if storage.put_kv_raw(StorageId::Individuals, &el.indv_id, el.new_state.clone()) {
+                info!(
+                    "{}, {} id={}, ticket={}, event_id={}, src={}",
+                    op_id,
+                    el.original_cmd.as_string(),
+                    el.indv_id,
+                    self.ticket.id,
+                    self.event_id.unwrap_or_default(),
+                    self.src.unwrap_or_default()
+                );
             } else {
-                if storage.put_kv_raw(StorageId::Individuals, &el.indv_id, el.new_state.clone()) {
-                    info!(
-                        "{}, {} id={}, ticket={}, event_id={}, src={}",
-                        op_id,
-                        el.original_cmd.as_string(),
-                        el.indv_id,
-                        self.ticket.id,
-                        self.event_id.unwrap_or_default(),
-                        self.src.unwrap_or_default()
-                    );
-                } else {
-                    error!("failed to update individual, id = {}", el.indv_id);
-                    return Err(ResultCode::InternalServerError);
-                }
+                error!("failed to update individual, id = {}", el.indv_id);
+                return Err(ResultCode::InternalServerError);
             }
 
             // add to queue
