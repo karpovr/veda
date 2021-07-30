@@ -365,7 +365,7 @@ impl Indexer {
                                             if let Some(links) = inner_indv.get_obj().get_resources().get(for_property) {
                                                 debug!("forProperty = [{}], links = [{:?}]", for_property, links);
                                                 for link in links {
-                                                    self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + &for_property), level + 1, prep)?;
+                                                    self.prepare_index(module, iwp, value, &predicate, link, &(ln.to_owned() + "." + for_property), level + 1, prep)?;
                                                 }
                                             }
                                         }

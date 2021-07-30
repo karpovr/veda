@@ -106,7 +106,7 @@ impl IndexDocWorkplace {
         indexer.tg.index_text_with_prefix(data, &prefix)?;
         self.doc.add_string(slot_l1, data)?;
 
-        self.all_text.push_str(&data);
+        self.all_text.push_str(data);
         self.all_text.push('|');
 
         Ok(())
@@ -134,7 +134,7 @@ impl IndexDocWorkplace {
             let substr = &data[..end_pos];
             self.doc.add_string(l_slot, substr)?;
         } else {
-            self.doc.add_string(l_slot, &data)?;
+            self.doc.add_string(l_slot, data)?;
         }
         Ok(())
     }
