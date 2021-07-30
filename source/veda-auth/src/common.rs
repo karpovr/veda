@@ -69,7 +69,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
         return Ticket::default();
     }
 
-    let mut tr_ticket = module.get_ticket_from_db(&tr_ticket_id);
+    let mut tr_ticket = module.get_ticket_from_db(tr_ticket_id);
 
     if tr_ticket.result == ResultCode::Ok {
         let mut is_allow_trusted = false;
@@ -100,7 +100,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
             let candidate_account_ids = get_candidate_users_of_login(login, module, xr);
             if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
                 for account_id in &candidate_account_ids.result {
-                    if let Some(account) = module.get_individual(&account_id, &mut Individual::default()) {
+                    if let Some(account) = module.get_individual(account_id, &mut Individual::default()) {
                         let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
                         if user_id.is_empty() {
                             error!("user id is null, user_indv = {}", account);
@@ -160,7 +160,7 @@ pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, crede
     credential.set_uri("rdf:type", "v-s:Credential");
     set_password(credential, &password);
 
-    let res = module.api.update(systicket, IndvOp::Put, &credential);
+    let res = module.api.update(systicket, IndvOp::Put, credential);
     if res.result != ResultCode::Ok {
         error!("failed to update, uri = {}, result_code = {:?}", credential.get_id(), res.result);
         return false;
@@ -170,7 +170,7 @@ pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, crede
         account.remove("v-s:password");
         account.set_uri("v-s:usesCredential", credential.get_id());
 
-        let res = module.api.update(&systicket, IndvOp::Put, account);
+        let res = module.api.update(systicket, IndvOp::Put, account);
         if res.result != ResultCode::Ok {
             error!("failed to update, uri = {}, res = {:?}", account.get_id(), res);
             return false;
@@ -195,7 +195,7 @@ pub(crate) fn set_password(credential: &mut Individual, password: &str) {
         credential.set_string("v-s:salt", &HEXLOWER.encode(&salt), Lang::NONE);
         credential.set_string("v-s:password", &HEXLOWER.encode(&pbkdf2_hash), Lang::NONE);
     } else {
-        credential.set_string("v-s:password", &password, Lang::NONE);
+        credential.set_string("v-s:password", password, Lang::NONE);
     }
 }
 

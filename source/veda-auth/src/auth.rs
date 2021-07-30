@@ -86,7 +86,7 @@ impl<'a> AuthWorkPlace<'a> {
     }
 
     fn prepare_candidate_account(&mut self, account_id: &str, ticket: &mut Ticket) -> (bool, ResultCode) {
-        if let Some(mut account) = self.backend.get_individual_s(&account_id) {
+        if let Some(mut account) = self.backend.get_individual_s(account_id) {
             account.parse_all();
 
             let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
@@ -115,7 +115,7 @@ impl<'a> AuthWorkPlace<'a> {
                         (false, res)
                     } else {
                         (true, ResultCode::Ok)
-                    }
+                    };
                 } else {
                     let now = Utc::now().naive_utc().timestamp();
 
@@ -158,7 +158,7 @@ impl<'a> AuthWorkPlace<'a> {
         } else {
             error!("failed to read, uri = {}", &account_id);
         }
-        return (false, ResultCode::Ok);
+        (false, ResultCode::Ok)
     }
 
     fn prepare_secret_code(&mut self, ticket: &mut Ticket, person: &Individual) -> ResultCode {
@@ -201,18 +201,18 @@ impl<'a> AuthWorkPlace<'a> {
         }
 
         // update password
-        set_password(self.credential, &self.password);
+        set_password(self.credential, self.password);
 
         self.credential.set_datetime("v-s:dateFrom", now);
         self.credential.remove("v-s:secret");
         self.credential.remove("v-s:SecretDateFrom");
 
-        let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
+        let res = self.backend.api.update(self.sys_ticket, IndvOp::Put, self.credential);
         if res.result != ResultCode::Ok {
             error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::AuthenticationFailed
         } else {
-            create_new_ticket(self.login, &person.get_id(), self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
+            create_new_ticket(self.login, person.get_id(), self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
             self.user_stat.attempt_change_pass = 0;
             info!("updated password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::Ok
@@ -307,7 +307,7 @@ impl<'a> AuthWorkPlace<'a> {
         self.credential.set_string("v-s:secret", &n_secret, Lang::NONE);
         self.credential.set_datetime("v-s:SecretDateFrom", now);
 
-        let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &self.credential);
+        let res = self.backend.api.update(self.sys_ticket, IndvOp::Put, self.credential);
         if res.result != ResultCode::Ok {
             error!("failed to store new secret, user = {}, result = {:?}", user.get_id(), res);
             return ResultCode::InternalServerError;
@@ -355,7 +355,7 @@ impl<'a> AuthWorkPlace<'a> {
                 mail_with_secret.add_string("v-s:subject", from_utf8(subject.as_slice()).unwrap_or_default(), Lang::NONE);
                 mail_with_secret.add_string("v-s:messageBody", from_utf8(body.as_slice()).unwrap_or_default(), Lang::NONE);
 
-                let res = self.backend.api.update(&self.sys_ticket, IndvOp::Put, &mail_with_secret);
+                let res = self.backend.api.update(self.sys_ticket, IndvOp::Put, &mail_with_secret);
                 if res.result != ResultCode::Ok {
                     error!("failed to store email with new secret, user = {}", account.get_id());
                     return ResultCode::AuthenticationFailed;

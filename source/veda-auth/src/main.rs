@@ -27,7 +27,7 @@ fn main() -> std::io::Result<()> {
     let auth_url = section.get("auth_url").expect("param [auth_url] not found in veda.properties");
 
     let server = Socket::new(Protocol::Rep0)?;
-    if let Err(e) = server.listen(&auth_url) {
+    if let Err(e) = server.listen(auth_url) {
         error!("failed to listen, err = {:?}", e);
         return Ok(());
     }
