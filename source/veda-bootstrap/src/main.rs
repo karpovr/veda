@@ -56,7 +56,7 @@ impl App {
         for name in self.modules_start_order.iter() {
             //info!("start {:?}", module);
             let module = self.modules_info.get(name).unwrap();
-            match start_module(&module) {
+            match start_module(module) {
                 Ok(child) => {
                     info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                     self.started_modules.push((module.name.to_owned(), child));
@@ -195,7 +195,7 @@ impl App {
 
             for name in new_config_modules {
                 if let Some(module) = self.modules_info.get(&name) {
-                    match start_module(&module) {
+                    match start_module(module) {
                         Ok(child) => {
                             info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                             self.started_modules.push((module.name.to_owned(), child));
@@ -267,8 +267,8 @@ impl App {
                         if p.starts_with('\t') || p.starts_with(' ') {
                             info!("param = {}", p);
                             if let Some(eq_pos) = p.find('=') {
-                                let nm: &str = &p[0..eq_pos].trim();
-                                let vl: &str = &p[eq_pos + 1..].trim();
+                                let nm: &str = p[0..eq_pos].trim();
+                                let vl: &str = p[eq_pos + 1..].trim();
 
                                 params.insert(nm.to_string(), vl.to_string());
                             }
