@@ -133,21 +133,21 @@ fn add_or_del_right_sets(
     cache: &mut HashMap<String, String>,
     mode: &Cache,
 ) {
-    let removed_resource = get_disappeared(&prev_resource, &resource);
-    let removed_in_set = get_disappeared(&prev_in_set, &in_set);
+    let removed_resource = get_disappeared(prev_resource, resource);
+    let removed_in_set = get_disappeared(prev_in_set, in_set);
 
     if is_deleted && resource.is_empty() && in_set.is_empty() {
-        update_right_set(id, &prev_resource, &prev_in_set, marker, is_deleted, &use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, prev_resource, prev_in_set, marker, is_deleted, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     } else {
-        update_right_set(id, &resource, &in_set, marker, is_deleted, &use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, resource, in_set, marker, is_deleted, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     }
 
     if !removed_resource.is_empty() {
-        update_right_set(id, &removed_resource, &in_set, marker, true, &use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, &removed_resource, in_set, marker, true, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     }
 
     if !removed_in_set.is_empty() {
-        update_right_set(id, &resource, &removed_in_set, marker, true, &use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, resource, &removed_in_set, marker, true, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     }
 }
 
@@ -177,7 +177,7 @@ fn update_right_set(
 
         if let Some(prev_data_str) = cache.get(&key) {
             debug!("PRE(MEM): {} {} {:?}", source_id, rs, prev_data_str);
-            decode_rec_to_rightset(&prev_data_str, &mut new_right_set);
+            decode_rec_to_rightset(prev_data_str, &mut new_right_set);
         } else if let Some(prev_data_str) = ctx.storage.get_value(StorageId::Az, &key) {
             debug!("PRE(STORAGE): {} {} {:?}", source_id, rs, prev_data_str);
             decode_rec_to_rightset(&prev_data_str, &mut new_right_set);
