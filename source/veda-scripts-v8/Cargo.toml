@@ -12,8 +12,8 @@ rust_decimal = "1.7.0"
 align-data = "0.1.0"
 scan_fmt = "0.2.6"
 
-v_queue = "0.1.7"
+v_queue = "0.1.8"
 
-v_module = { package = "v-common-module", version = "=0.1.47" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.49" }
-v_v8 = { package = "v-common-v8", version = "=0.1.64" }
+v_module = { package = "v-common-module", version = "=0.1.50" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.51" }
+v_v8 = { package = "v-common-v8", version = "=0.1.66" }

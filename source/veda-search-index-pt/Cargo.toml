@@ -16,4 +16,4 @@ bincode = "1.2.1"
 
 v_queue = "0.1.7"
 
-v_module = { package = "v-common-module", version = "=0.1.47" }
+v_module = { package = "v-common-module", version = "=0.1.50" }

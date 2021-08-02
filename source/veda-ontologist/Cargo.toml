@@ -11,7 +11,7 @@ path = "src/main.rs"
 [dependencies]
 log = "0.4"
 
-v_queue = "0.1.7"
+v_queue = "0.1.9"
 
-v_module = { package = "v-common-module", version = "=0.1.47" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.49" }
+v_module = { package = "v-common-module", version = "=0.1.50" }
+v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.51" }
