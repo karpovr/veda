@@ -9,7 +9,6 @@ log = "0.4"
 lettre = "0.9"
 lettre_email = "0.9"
 
-v_queue = { package = "v_queue", path = "../../../v-queue" }
+v_queue = "0.1.9"
 
-v_module = { package = "v-common-module", path = "../../../v-common-module" }
-
+v_module = { package = "v-common-module", version = "=0.1.50" }
