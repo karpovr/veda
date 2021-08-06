@@ -11,8 +11,8 @@ path = "src/lib.rs"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-v_az_lmdb = { package = "v-common-az-lmdb", version = "0.1.2" }
 v_authorization = "0.1.1"
+v_common = { package = "v-common",  version = "0.1.51" }
 
 #[build-dependencies]
 #cbindgen = "0.1"

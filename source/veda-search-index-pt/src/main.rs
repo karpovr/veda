@@ -16,17 +16,16 @@ use futures::executor::block_on;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use v_module::common::load_onto;
-use v_module::info::ModuleInfo;
-use v_module::module::*;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::datatype::DataType;
-use v_module::v_onto::datatype::Lang;
-use v_module::v_onto::individual::*;
-use v_module::v_onto::onto::Onto;
-use v_module::v_onto::resource::Value;
-use v_module::veda_backend::*;
-use v_module::veda_module::*;
+use v_common::module::common::load_onto;
+use v_common::module::info::ModuleInfo;
+use v_common::module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, wait_load_ontology, wait_module, Module, PrepareError};
+use v_common::module::veda_backend::Backend;
+use v_common::module::veda_module::VedaQueueModule;
+use v_common::onto::datatype::{DataType, Lang};
+use v_common::onto::individual::Individual;
+use v_common::onto::onto::Onto;
+use v_common::onto::resource::Value;
+use v_common::v_api::api_client::IndvOp;
 
 type TypedBatch = HashMap<String, Batch>;
 type Batch = Vec<BatchElement>;

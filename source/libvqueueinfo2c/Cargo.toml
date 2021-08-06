@@ -11,7 +11,7 @@ path = "src/lib.rs"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-v_queue = { package = "v_queue", version = "0.1.7" }
+v_queue = { package = "v_queue", version = "0.1.9" }
 ffi-convert = "0.5.0"
 libc = "0.2.66"
 

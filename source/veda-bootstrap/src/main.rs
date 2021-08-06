@@ -17,10 +17,10 @@ use std::process::{Child, Command};
 use std::time::SystemTime;
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::*;
-use v_module::v_onto::individual::*;
-use v_module::veda_backend::*;
+use v_common::module::veda_backend::Backend;
+use v_common::onto::individual::Individual;
+use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::*;
 
 pub const MSTORAGE_ID: i64 = 1;
 

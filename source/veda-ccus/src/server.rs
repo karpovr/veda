@@ -2,15 +2,14 @@ use actix::prelude::*;
 use rand::{self, rngs::ThreadRng, Rng};
 use std::collections::{HashMap, HashSet};
 use std::str;
-use std::time::Duration;
-use v_module::v_onto::individual::*;
-use v_module::v_onto::parser::*;
-use v_queue::consumer::*;
-use v_queue::record::*;
-
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
-use v_module::module::wait_load_ontology;
+use std::time::Duration;
+use v_common::module::module::wait_load_ontology;
+use v_common::onto::individual::{Individual, RawObj};
+use v_common::onto::parser::parse_raw;
+use v_queue::consumer::*;
+use v_queue::record::*;
 
 const QUEUE_CHECK_INTERVAL: Duration = Duration::from_millis(300);
 const STAT_INTERVAL: Duration = Duration::from_millis(10000);

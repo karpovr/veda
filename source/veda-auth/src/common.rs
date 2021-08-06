@@ -5,16 +5,16 @@ use ring::rand::SecureRandom;
 use ring::{digest, pbkdf2, rand};
 use std::num::NonZeroU32;
 use v_authorization::common::Trace;
-use v_az_lmdb::_authorize;
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::create_new_ticket;
-use v_module::ticket::Ticket;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::datatype::Lang;
-use v_module::v_onto::individual::Individual;
-use v_module::v_search::common::{FTQuery, QueryResult};
-use v_module::veda_backend::*;
+use v_common::az_lmdb::az_lmdb::f_authorize;
+use v_common::ft_xapian::xapian_reader::XapianReader;
+use v_common::module::module::create_new_ticket;
+use v_common::module::ticket::Ticket;
+use v_common::module::veda_backend::Backend;
+use v_common::onto::datatype::Lang;
+use v_common::onto::individual::Individual;
+use v_common::search::common::{FTQuery, QueryResult};
+use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::ResultCode;
 
 pub const EMPTY_SHA256_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 pub const ALLOW_TRUSTED_GROUP: &str = "cfg:TrustedAuthenticationUserGroup";
@@ -84,7 +84,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
             str_num: 0,
         };
 
-        match _authorize(&tr_ticket.user_uri, &tr_ticket.user_uri, 15, true, Some(&mut trace)) {
+        match f_authorize(&tr_ticket.user_uri, &tr_ticket.user_uri, 15, true, Some(&mut trace)) {
             Ok(_res) => {
                 for gr in trace.group.split('\n') {
                     if gr == ALLOW_TRUSTED_GROUP {

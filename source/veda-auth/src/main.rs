@@ -13,10 +13,10 @@ use nng::{Message, Protocol, Socket};
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::{create_sys_ticket, init_log};
-use v_module::v_storage::storage::StorageMode;
-use v_module::veda_backend::*;
+use v_common::ft_xapian::xapian_reader::XapianReader;
+use v_common::module::module::{create_sys_ticket, init_log};
+use v_common::module::veda_backend::Backend;
+use v_common::storage::storage::StorageMode;
 
 fn main() -> std::io::Result<()> {
     init_log("AUTH");

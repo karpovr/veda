@@ -3,7 +3,8 @@ use futures::future;
 use futures::future::Future;
 use rusty_tarantool::tarantool::Client;
 use serde_json::value::Value as JSONValue;
-use v_onto::{individual::*, parser::*};
+use v_common::onto::individual::{Individual, RawObj};
+use v_common::onto::parser::parse_raw;
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 struct GetIndividualResponse(Vec<u8>);

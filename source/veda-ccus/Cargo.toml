@@ -19,6 +19,6 @@ log = "0.4"
 rust-ini = "0.13"
 rand = "0.7"
 
-v_queue = "0.1.7"
+v_queue = "0.1.9"
 
-v_module = { package = "v-common-module", version = "=0.1.50" }
+v_common = { package = "v-common", version = "0.1.51" }

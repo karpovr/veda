@@ -7,14 +7,14 @@ use ring::pbkdf2;
 use std::num::NonZeroU32;
 use std::str::from_utf8;
 use uuid::Uuid;
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::module::create_new_ticket;
-use v_module::ticket::Ticket;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::datatype::Lang;
-use v_module::v_onto::individual::Individual;
-use v_module::veda_backend::*;
+use v_common::ft_xapian::xapian_reader::XapianReader;
+use v_common::module::module::create_new_ticket;
+use v_common::module::ticket::Ticket;
+use v_common::module::veda_backend::Backend;
+use v_common::onto::datatype::Lang;
+use v_common::onto::individual::Individual;
+use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::ResultCode;
 
 pub(crate) struct AuthWorkPlace<'a> {
     pub conf: &'a AuthConf,

@@ -9,7 +9,7 @@ chrono = "0.4"
 time = "0.1"
 log = "0.4.13"
 rust-ini = "0.16.0"
-nng = "1.0.0"
+nng = "0.5.1"
 serde_json = "1.0.61"
 serde = "1.0.119"
 url = "2.2.0"
@@ -25,5 +25,4 @@ diligent-date-parser = "0.1.2"
 v_authorization = "=0.1.1"
 v_queue = "=0.1.9"
 
-v_module = { package = "v-common-module", version = "=0.1.50" }
-v_ft_xapian = { package = "v-common-ft-xapian", version = "=0.1.51" }
+v_common = { package = "v-common", version = "0.1.51"}

@@ -11,8 +11,8 @@ use redis::geo::Coord;
 use redis::{Commands, Connection};
 use std::io::Write;
 use std::{thread, time};
-use v_onto::individual::*;
-use v_onto::parser::*;
+use v_common::onto::individual::{Individual, RawObj};
+use v_common::onto::parser::parse_raw;
 use v_queue::consumer::*;
 use v_queue::record::*;
 

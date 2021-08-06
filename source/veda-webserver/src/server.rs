@@ -1,12 +1,12 @@
-use std::io::Write;
+use crate::geo::*;
+use crate::individuals::*;
 use actix_web::{middleware, web, App, HttpServer};
 use chrono::Local;
 use env_logger::Builder;
 use ini::Ini;
 use log::LevelFilter;
 use rusty_tarantool::tarantool;
-use crate::geo::*;
-use crate::individuals::*;
+use std::io::Write;
 
 pub fn start_server() -> std::io::Result<()> {
     let env_var = "RUST_LOG";

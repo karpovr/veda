@@ -14,6 +14,6 @@ url = "2.1.1"
 serde = "1.0"
 bincode = "1.2.1"
 
-v_queue = "0.1.7"
+v_queue = "0.1.9"
 
-v_module = { package = "v-common-module", version = "=0.1.50" }
+v_common = { package = "v-common",  version = "0.1.51" }

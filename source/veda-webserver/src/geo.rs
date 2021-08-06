@@ -6,7 +6,8 @@ use redis::geo::{RadiusOptions, RadiusOrder, RadiusSearchResult, Unit};
 use redis::{Commands, Connection, RedisError};
 use redis_async::resp::RespValue;
 use std::collections::HashSet;
-use v_search::*;
+use v_common::search::common::FTQuery;
+use v_common::search::ft_client::FTClient;
 
 #[derive(Deserialize)]
 pub struct GeoRadius {

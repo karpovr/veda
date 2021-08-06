@@ -11,4 +11,4 @@ lettre_email = "0.9"
 
 v_queue = "0.1.9"
 
-v_module = { package = "v-common-module", version = "=0.1.50" }
+v_common = { package = "v-common", version = "0.1.51" }

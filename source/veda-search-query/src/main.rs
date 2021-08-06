@@ -6,10 +6,11 @@ use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::*;
 use std::{str, thread};
-use v_module::module::init_log;
-use v_module::v_api::app::{OptAuthorize, ResultCode};
-use v_module::v_search::clickhouse_client::*;
-use v_module::veda_backend::*;
+use v_common::module::module::init_log;
+use v_common::module::veda_backend::Backend;
+use v_common::search::clickhouse_client::CHClient;
+use v_common::v_api::obj::OptAuthorize;
+use v_common::v_api::obj::*;
 
 fn main() {
     init_log("SEARCH_QUERY");

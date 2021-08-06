@@ -6,18 +6,19 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
-use v_ft_xapian::xapian_reader::XapianReader;
-use v_module::info::ModuleInfo;
-use v_module::module::*;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::individual2turtle::to_turtle;
-use v_module::v_onto::onto_index::OntoIndex;
-use v_module::v_onto::{individual::*, parser::*};
-use v_module::v_search::common::FTQuery;
-use v_module::v_storage::storage::*;
-use v_module::veda_backend::Backend;
-use v_module::veda_module::*;
+use v_common::ft_xapian::xapian_reader::XapianReader;
+use v_common::module::info::ModuleInfo;
+use v_common::module::module::{get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
+use v_common::module::veda_backend::Backend;
+use v_common::module::veda_module::VedaQueueModule;
+use v_common::onto::individual::Individual;
+use v_common::onto::individual2turtle::to_turtle;
+use v_common::onto::onto_index::OntoIndex;
+use v_common::onto::parser::parse_raw;
+use v_common::search::common::FTQuery;
+use v_common::storage::storage::StorageMode;
+use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::ResultCode;
 
 struct OntologistModule {
     last_found_changes: Instant,
@@ -201,6 +202,7 @@ impl OntologistModule {
 }
 
 fn main() -> std::io::Result<()> {
+    init_log("ONTOLOGIST");
     let mut module = Module::new_with_name("ontologist");
 
     let onto_types = vec![

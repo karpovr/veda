@@ -1,22 +1,18 @@
-use crate::common::remove;
-
 use crate::cleaner::CleanerContext;
+use crate::common::{remove, store_to_ttl};
 use chrono::prelude::*;
 use chrono::Duration;
-use flate2::write::GzEncoder;
-use flate2::Compression;
 use std::collections::HashMap;
-use std::fs::File;
 use std::io::Write;
 use std::ops::Sub;
 use std::thread;
 use std::time::Duration as std_Duration;
 use stopwatch::Stopwatch;
 use systemstat::{Platform, System};
-use v_module::info::ModuleInfo;
-use v_module::v_api::app::{OptAuthorize, ResultCode};
-use v_module::v_onto::individual::Individual;
-use v_module::v_onto::individual2turtle::to_turtle;
+use v_common::module::info::ModuleInfo;
+use v_common::onto::individual::Individual;
+use v_common::v_api::obj::OptAuthorize;
+use v_common::v_api::obj::ResultCode;
 
 const MAX_SIZE_BATCH: i64 = 100000;
 
@@ -80,7 +76,7 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                     if let Some(rindv) = ctx.backend.get_individual(id, &mut Individual::default()) {
                         let f_for_process = &rindv.get_first_literal("v-wf:forProcess").unwrap_or_default();
                         if let Some(process) = ctx.backend.get_individual(f_for_process, &mut Individual::default()) {
-                            let mut process_elements = HashMap::new();
+                            let mut collect_elements = HashMap::new();
 
                             if !process.is_exists("v-wf:parentWorkOrder") {
                                 if ctx.report_type == "processes" {
@@ -88,14 +84,14 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                         report.write((process.get_id().to_owned() + "\n").as_bytes()).unwrap_or_default();
                                     }
                                 } else {
-                                    collect_process_elements("", process, &mut process_elements, ctx);
+                                    collect_process_elements("", process, &mut collect_elements, ctx);
                                     //collect_membership(&mut process_elements, ctx);
                                     //collect_permission_statement(&mut process_elements, ctx);
 
                                     if ctx.report_type == "full" {
                                         if let Some(report) = &mut ctx.report {
                                             report.write("\n\n".as_bytes()).unwrap_or_default();
-                                            let mut sorted: Vec<_> = process_elements.iter().collect();
+                                            let mut sorted: Vec<_> = collect_elements.iter().collect();
                                             sorted.sort_by_key(|a| &a.1.name);
                                             for (id, el) in sorted.iter() {
                                                 report.write(format!("{};\t{};\t\t{}\n", id, el.name, el.parent_id).as_bytes()).unwrap_or_default();
@@ -103,92 +99,56 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                         }
                                     }
 
-                                    let mut indvs = vec![];
-                                    let mut indv_ids = vec![];
+                                    let mut collected = vec![];
+                                    let mut collected_ids = vec![];
 
-                                    for (id, el) in process_elements {
+                                    for (id, el) in collect_elements {
                                         match el.indv {
                                             Some(mut s) => {
                                                 if ctx.operations.contains("to_ttl") {
                                                     s.parse_all();
                                                 }
 
-                                                indv_ids.push(s.get_id().to_owned());
-                                                indvs.push(s);
+                                                collected_ids.push(s.get_id().to_owned());
+                                                collected.push(s);
                                             }
                                             None => {
                                                 if let Some(mut s) = ctx.backend.get_individual_s(&id) {
                                                     if ctx.operations.contains("to_ttl") {
                                                         s.parse_all();
                                                     }
-                                                    indv_ids.push(s.get_id().to_owned());
-                                                    indvs.push(s);
+                                                    collected_ids.push(s.get_id().to_owned());
+                                                    collected.push(s);
                                                 }
                                             }
                                         }
                                     }
-                                    let indvs_count = indvs.len();
 
-                                    if !check_subprocesses(&mut indvs, &output_condition_list) {
+                                    if !check_subprocesses(&mut collected, &output_condition_list) {
                                         warn!("process {} content not pass subprocesses", process.get_id());
                                         continue;
                                     }
 
                                     if ctx.report_type == "ids" {
                                         if let Some(report) = &mut ctx.report {
-                                            for id in indv_ids.iter() {
+                                            for id in collected_ids.iter() {
                                                 report.write((id.to_string() + "\n").as_bytes()).unwrap_or_default();
                                             }
                                         }
                                     }
 
                                     if ctx.operations.contains("to_ttl") {
-                                        indvs.push(Individual::new_from_obj(header.get_obj()));
-                                        if let Ok(buf) = to_turtle(&indvs, &mut ctx.onto.prefixes) {
-                                            let mut ze = GzEncoder::new(Vec::new(), Compression::default());
-
-                                            ze.write_all(format!("# count elements: {}\n", indvs_count).as_bytes()).unwrap_or_default();
-                                            if let Err(e) = ze.write_all(buf.as_slice()) {
-                                                error!("failed compress, err = {:?}", e);
-                                                return;
-                                            } else {
-                                                if let Ok(compressed_bytes) = ze.finish() {
-                                                    let mut file_path = format!("./out/{}.ttl.gz", process.get_id().replace(':', "_"));
-                                                    let mut fc = 0;
-                                                    loop {
-                                                        if !std::path::Path::new(&file_path).exists() {
-                                                            break;
-                                                        }
-                                                        warn!("file {} already exists", file_path);
-                                                        fc += 1;
-                                                        file_path = format!("./out/{}_{}.ttl.gz", process.get_id().replace(':', "_"), fc);
-                                                    }
-
-                                                    if let Ok(mut file) = File::create(&(file_path)) {
-                                                        if let Err(e) = file.write_all(&compressed_bytes) {
-                                                            error!("failed to write to file {}, {:?}", file_path, e);
-                                                            return;
-                                                        }
-                                                        info!("stored: count = {}, bytes = {}", indvs_count, buf.len());
-                                                    } else {
-                                                        error!("failed to create file {}", file_path);
-                                                        return;
-                                                    }
-                                                } else {
-                                                    error!("failed compress");
-                                                    return;
-                                                }
-                                            }
-                                        }
+                                        collected.push(Individual::new_from_obj(header.get_obj()));
+                                        store_to_ttl(&mut collected, &mut ctx.onto.prefixes, &process.get_id().replace(':', "_"));
                                     }
 
                                     if ctx.operations.contains("remove") {
-                                        for s in indvs.iter_mut() {
+                                        for s in collected.iter_mut() {
                                             remove(s, ctx);
                                         }
                                     }
 
-                                    total_count += indvs.len();
+                                    total_count += collected.len();
 
                                     info!("total_count : {}", total_count);
                                 }
@@ -277,7 +237,7 @@ fn get_query_for_work_item_in_output_condition(output_conditions_list: &[String]
     )
 }
 
-fn collect_membership(process_elements: &mut HashMap<String, ProcessElement>, ctx: &mut CleanerContext) {
+fn _collect_membership(process_elements: &mut HashMap<String, ProcessElement>, ctx: &mut CleanerContext) {
     let mut where_ids = String::new();
     for id in process_elements.keys() {
         if !where_ids.is_empty() {
@@ -292,7 +252,7 @@ fn collect_membership(process_elements: &mut HashMap<String, ProcessElement>, ct
     }
 }
 
-fn collect_permission_statement(process_elements: &mut HashMap<String, ProcessElement>, ctx: &mut CleanerContext) {
+fn _collect_permission_statement(process_elements: &mut HashMap<String, ProcessElement>, ctx: &mut CleanerContext) {
     let mut where_ids = String::new();
     for id in process_elements.keys() {
         if !where_ids.is_empty() {
@@ -367,7 +327,7 @@ fn add_to_collect(id: &str, name: &str, parent_id: &str, process_elements: &mut 
 }
 
 fn check_subprocesses(indvs: &mut Vec<Individual>, output_conditions_list: &[String]) -> bool {
-    let date_before = Utc::now().naive_utc().sub(Duration::days(365));
+    let date_before = Utc::now().naive_utc().sub(Duration::days(182));
 
     let mut wp = HashMap::new();
 

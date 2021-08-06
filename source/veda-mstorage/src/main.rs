@@ -12,18 +12,18 @@ use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::str;
 use v_authorization::common::{Access, Trace};
-use v_az_lmdb::_authorize;
-use v_module::info::ModuleInfo;
-use v_module::module::*;
-use v_module::ticket::Ticket;
-use v_module::v_api::app::ResultCode;
-use v_module::v_api::IndvOp;
-use v_module::v_onto::individual::{Individual, RawObj};
-use v_module::v_onto::individual2msgpack::to_msgpack;
-use v_module::v_onto::json2individual::parse_json_to_individual;
-use v_module::v_onto::parser::parse_raw;
-use v_module::v_storage::storage::*;
-use v_module::veda_backend::*;
+use v_common::az_lmdb::az_lmdb::f_authorize;
+use v_common::module::info::ModuleInfo;
+use v_common::module::module::{create_sys_ticket, init_log, Module};
+use v_common::module::ticket::Ticket;
+use v_common::module::veda_backend::{get_storage_use_prop, indv_apply_cmd};
+use v_common::onto::individual::{Individual, RawObj};
+use v_common::onto::individual2msgpack::to_msgpack;
+use v_common::onto::json2individual::parse_json_to_individual;
+use v_common::onto::parser::parse_raw;
+use v_common::storage::storage::{StorageId, StorageMode, VStorage};
+use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::*;
 use v_queue::queue::Queue;
 use v_queue::record::Mode;
 
@@ -291,7 +291,7 @@ fn operation_prepare(
 
     if is_need_authorize {
         if cmd == IndvOp::Remove {
-            if _authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8 {
+            if f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanDelete as u8 {
                 error!("operation [Remove], Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
                 return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
             }
@@ -299,13 +299,13 @@ fn operation_prepare(
             if !prev_state.is_empty() {
                 if let Some(is_deleted) = new_indv.get_first_bool("v-s:deleted") {
                     if is_deleted
-                        && _authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0)
+                        && f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0)
                             != Access::CanDelete as u8
                     {
                         error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
-                } else if _authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0)
+                } else if f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0)
                     != Access::CanUpdate as u8
                 {
                     error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
@@ -337,7 +337,7 @@ fn operation_prepare(
                 }
 
                 for type_id in added_types.iter() {
-                    if _authorize(type_id, &transaction.ticket.user_uri, Access::CanCreate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanCreate as u8 {
+                    if f_authorize(type_id, &transaction.ticket.user_uri, Access::CanCreate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanCreate as u8 {
                         error!("failed to update, Not Authorized, user = {}, request [can create], type = {}", transaction.ticket.user_uri, type_id);
                         return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                     }
