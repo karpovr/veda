@@ -4,7 +4,6 @@ use regex::Regex;
 use ring::rand::SecureRandom;
 use ring::{digest, pbkdf2, rand};
 use std::num::NonZeroU32;
-use v_authorization::common::Trace;
 use v_common::az_lmdb::az_lmdb::f_authorize;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::module::create_new_ticket;
@@ -15,6 +14,7 @@ use v_common::onto::individual::Individual;
 use v_common::search::common::{FTQuery, QueryResult};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::ResultCode;
+use v_common::v_authorization::common::Trace;
 
 pub const EMPTY_SHA256_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 pub const ALLOW_TRUSTED_GROUP: &str = "cfg:TrustedAuthenticationUserGroup";

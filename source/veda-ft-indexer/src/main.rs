@@ -19,8 +19,8 @@ use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::storage::storage::StorageMode;
-use v_queue::consumer::*;
 use xapian_rusty::*;
+use v_common::v_queue::consumer::Consumer;
 
 const BASE_PATH: &str = "./data";
 const FAILED_LIST_FILE_NAME: &str = "ft-indexer-failed-ids-list.dat";

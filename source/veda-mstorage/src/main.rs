@@ -11,7 +11,6 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::str;
-use v_authorization::common::{Access, Trace};
 use v_common::az_lmdb::az_lmdb::f_authorize;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module::{create_sys_ticket, init_log, Module};
@@ -24,8 +23,9 @@ use v_common::onto::parser::parse_raw;
 use v_common::storage::storage::{StorageId, StorageMode, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::*;
-use v_queue::queue::Queue;
-use v_queue::record::Mode;
+use v_common::v_queue::queue::Queue;
+use v_common::v_queue::record::Mode;
+use v_common::v_authorization::common::{Access, Trace};
 
 pub const MSTORAGE_ID: i64 = 1;
 

@@ -14,7 +14,7 @@ use v_common::onto::datatype::{DataType, Lang};
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::onto::resource::{Resource, Value};
-use v_queue::consumer::*;
+use v_common::v_queue::consumer::Consumer;
 
 pub struct Context {
     onto: Onto,

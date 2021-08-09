@@ -3,13 +3,13 @@ extern crate log;
 
 use crate::common::*;
 use std::env;
-use v_authorization::common::{Access, FILTER_PREFIX, MEMBERSHIP_PREFIX, PERMISSION_PREFIX};
 use v_common::module::info::ModuleInfo;
 use v_common::module::module::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::storage::storage::{StorageId, StorageMode, VStorage};
-use v_queue::consumer::*;
+use v_common::v_queue::consumer::Consumer;
+use v_common::v_authorization::common::{MEMBERSHIP_PREFIX, Access, FILTER_PREFIX, PERMISSION_PREFIX};
 
 mod common;
 

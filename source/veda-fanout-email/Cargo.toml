@@ -9,6 +9,4 @@ log = "0.4"
 lettre = "0.9"
 lettre_email = "0.9"
 
-v_queue = "0.1.9"
-
-v_common = { package = "v-common", version = "=0.1.52" }
+v_common = { package = "v-common", version = "=0.1.53" }

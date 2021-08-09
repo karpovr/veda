@@ -8,8 +8,8 @@ use std::time::Duration;
 use v_common::module::module::wait_load_ontology;
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::parser::parse_raw;
-use v_queue::consumer::*;
-use v_queue::record::*;
+use v_common::v_queue::consumer::Consumer;
+use v_common::v_queue::record::ErrorQueue;
 
 const QUEUE_CHECK_INTERVAL: Duration = Duration::from_millis(300);
 const STAT_INTERVAL: Duration = Duration::from_millis(10000);

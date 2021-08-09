@@ -7,8 +7,6 @@ extern crate scan_fmt;
 
 use std::sync::Mutex;
 use std::{env, thread, time};
-use v_queue::consumer::Consumer;
-use v_queue::record::Mode;
 use v_v8::callback::*;
 use v_v8::common::{is_filter_pass, HashVec, ScriptInfo, ScriptInfoContext};
 use v_v8::rusty_v8 as v8;
@@ -27,6 +25,8 @@ use v_v8::v_common::search::common::FTQuery;
 use v_v8::v_common::storage::storage::StorageMode;
 use v_v8::v_common::v_api::api_client::{APIClient, IndvOp};
 use v_v8::v_common::v_api::obj::ResultCode;
+use v_v8::v_common::v_queue::consumer::Consumer;
+use v_v8::v_common::v_queue::record::Mode;
 
 const MAX_COUNT_LOOPS: i32 = 100;
 const MAIN_QUEUE_CS: &str = "scripts_main0";

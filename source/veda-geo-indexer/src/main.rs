@@ -13,8 +13,8 @@ use std::io::Write;
 use std::{thread, time};
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::parser::parse_raw;
-use v_queue::consumer::*;
-use v_queue::record::*;
+use v_common::v_queue::consumer::Consumer;
+use v_common::v_queue::record::ErrorQueue;
 
 //const SPATIAL_CLASS: &str = "v-s:Spatial";
 const LONGITUDE_PREDICATE: &str = "v-s:longitude";

@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use v_authorization::common::Access;
-use v_authorization::formats::{decode_rec_to_rightset, encode_rightset, update_counters, M_IGNORE_EXCLUSIVE, M_IS_EXCLUSIVE};
-use v_authorization::{Right, RightSet};
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
 use v_common::storage::storage::{StorageId, VStorage};
+use v_common::v_authorization::formats::{update_counters, decode_rec_to_rightset, M_IS_EXCLUSIVE, M_IGNORE_EXCLUSIVE, encode_rightset};
+use v_common::v_authorization::common::Access;
+use v_common::v_authorization::{RightSet, Right};
 
 pub struct Context {
     pub permission_statement_counter: u32,
@@ -53,6 +53,8 @@ fn get_access_from_individual(state: &mut Individual) -> u8 {
 }
 
 pub fn index_right_sets(prev_state: &mut Individual, new_state: &mut Individual, prd_rsc: &str, prd_in_set: &str, prefix: &str, default_access: u8, ctx: &mut Context) {
+    let is_drop_count = new_state.get_first_bool("v-s:dropCount").unwrap_or_default();
+
     let n_is_del = new_state.get_first_bool("v-s:deleted").unwrap_or_default();
     let p_is_del = prev_state.get_first_bool("v-s:deleted").unwrap_or_default();
 
@@ -90,7 +92,23 @@ pub fn index_right_sets(prev_state: &mut Individual, new_state: &mut Individual,
 
     if n_is_del && !p_is_del {
         // IS DELETE
-        add_or_del_right_sets(id, &use_filter, &resc, &in_set, &pre_resc, &pre_in_set, marker, p_acs, n_acs, n_is_del, prefix, ctx, &mut HashMap::new(), &Cache::None);
+        add_or_del_right_sets(
+            id,
+            &use_filter,
+            &resc,
+            &in_set,
+            &pre_resc,
+            &pre_in_set,
+            marker,
+            p_acs,
+            n_acs,
+            n_is_del,
+            is_drop_count,
+            prefix,
+            ctx,
+            &mut HashMap::new(),
+            &Cache::None,
+        );
     } else if !n_is_del && p_is_del {
         // IS RESTORE
         let mut cache = HashMap::new();
@@ -98,15 +116,15 @@ pub fn index_right_sets(prev_state: &mut Individual, new_state: &mut Individual,
         //    add_or_sub_right_sets(id, &use_filter, &pre_resc, &pre_in_set, &vec![], &vec![], marker, p_acs, p_acs, true, prefix, ctx, &mut cache, &Cache::Write);
         //}
 
-        add_or_del_right_sets(id, &use_filter, &resc, &in_set, &pre_resc, &pre_in_set, marker, p_acs, n_acs, false, prefix, ctx, &mut cache, &Cache::Read);
+        add_or_del_right_sets(id, &use_filter, &resc, &in_set, &pre_resc, &pre_in_set, marker, p_acs, n_acs, false, is_drop_count, prefix, ctx, &mut cache, &Cache::Read);
     } else if !n_is_del && !p_is_del {
         // IS UPDATE
         let mut cache = HashMap::new();
         if !pre_resc.is_empty() {
-            add_or_del_right_sets(id, &use_filter, &pre_resc, &pre_in_set, &[], &[], marker, p_acs, p_acs, true, prefix, ctx, &mut cache, &Cache::None);
+            add_or_del_right_sets(id, &use_filter, &pre_resc, &pre_in_set, &[], &[], marker, p_acs, p_acs, true, is_drop_count, prefix, ctx, &mut cache, &Cache::None);
         }
 
-        add_or_del_right_sets(id, &use_filter, &resc, &in_set, &pre_resc, &pre_in_set, marker, p_acs, n_acs, false, prefix, ctx, &mut cache, &Cache::Read);
+        add_or_del_right_sets(id, &use_filter, &resc, &in_set, &pre_resc, &pre_in_set, marker, p_acs, n_acs, false, is_drop_count, prefix, ctx, &mut cache, &Cache::Read);
     }
 }
 
@@ -128,6 +146,7 @@ fn add_or_del_right_sets(
     prev_access: u8,
     new_access: u8,
     is_deleted: bool,
+    is_drop_count: bool,
     prefix: &str,
     ctx: &mut Context,
     cache: &mut HashMap<String, String>,
@@ -137,17 +156,17 @@ fn add_or_del_right_sets(
     let removed_in_set = get_disappeared(prev_in_set, in_set);
 
     if is_deleted && resource.is_empty() && in_set.is_empty() {
-        update_right_set(id, prev_resource, prev_in_set, marker, is_deleted, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, prev_resource, prev_in_set, marker, is_deleted, is_drop_count, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     } else {
-        update_right_set(id, resource, in_set, marker, is_deleted, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, resource, in_set, marker, is_deleted, is_drop_count, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     }
 
     if !removed_resource.is_empty() {
-        update_right_set(id, &removed_resource, in_set, marker, true, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, &removed_resource, in_set, marker, true, is_drop_count, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     }
 
     if !removed_in_set.is_empty() {
-        update_right_set(id, resource, &removed_in_set, marker, true, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
+        update_right_set(id, resource, &removed_in_set, marker, true, is_drop_count, use_filter, prefix, prev_access, new_access, ctx, cache, mode);
     }
 }
 
@@ -157,6 +176,7 @@ fn update_right_set(
     in_set: &[String],
     marker: char,
     is_deleted: bool,
+    is_drop_count: bool,
     filter: &str,
     prefix: &str,
     prev_access: u8,
@@ -188,12 +208,12 @@ fn update_right_set(
                 rr.is_deleted = is_deleted;
                 rr.marker = marker;
                 if is_deleted {
-                    rr.access = update_counters(&mut rr.counters, prev_access, rr.access | prev_access, is_deleted);
+                    rr.access = update_counters(&mut rr.counters, prev_access, rr.access | prev_access, is_deleted, is_drop_count);
                     if rr.access != 0 && !rr.counters.is_empty() {
                         rr.is_deleted = false;
                     }
                 } else {
-                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted);
+                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, is_drop_count);
                 }
             } else {
                 new_right_set.insert(

@@ -7,8 +7,8 @@ use v_common::onto::individual2msgpack::to_msgpack;
 use v_common::storage::storage::{StorageId, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::ResultCode;
-use v_queue::queue::Queue;
-use v_queue::record::MsgType;
+use v_common::v_queue::record::MsgType;
+use v_common::v_queue::queue::Queue;
 
 pub struct TransactionItem {
     pub indv_id: String,

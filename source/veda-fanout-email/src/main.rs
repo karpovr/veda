@@ -16,7 +16,7 @@ use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::search::common::FTQuery;
 use v_common::v_api::obj::ResultCode;
-use v_queue::consumer::*;
+use v_common::v_queue::consumer::Consumer;
 
 const ATTACHMENTS_DB_PATH: &str = "data/files";
 

@@ -9,4 +9,4 @@ log = "0.4"
 rust-ini = "0.16"
 nng = "0.5.1"
 
-v_common = { package = "v-common", version = "=0.1.52" }
+v_common = { package = "v-common", version = "=0.1.53" }
