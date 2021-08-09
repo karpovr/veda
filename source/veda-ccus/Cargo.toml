@@ -21,4 +21,4 @@ rand = "0.7"
 
 v_queue = "0.1.9"
 
-v_common = { package = "v-common", version = "0.1.51" }
+v_common = { package = "v-common", version = "=0.1.52" }

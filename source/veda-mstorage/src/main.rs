@@ -37,6 +37,9 @@ fn main() -> std::io::Result<()> {
     let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
     let section = conf.section(None::<String>).expect("fail parse veda.properties");
 
+    let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
+    info!("total count: {}", primary_storage.count(StorageId::Individuals));
+
     let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
     let notify_channel_url = section.get("notify_channel_url");
@@ -51,8 +54,6 @@ fn main() -> std::io::Result<()> {
     } else {
         info!("bind to notify_channel = {}", notify_channel_url.unwrap());
     }
-
-    let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
 
     let mut sys_ticket = Ticket::default();
     if let Ok(ticket_id) = Module::get_sys_ticket_id_from_db(&mut primary_storage) {

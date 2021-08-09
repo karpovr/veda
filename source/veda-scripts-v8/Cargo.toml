@@ -14,5 +14,5 @@ scan_fmt = "0.2.6"
 
 v_queue = "0.1.9"
 
-v_v8 = { package = "v-common-v8", version = "0.1.67" }
-v_common = { package = "v-common",  version = "0.1.51" }
+v_v8 = { package = "v-common-v8", version = "=0.1.68" }
+#v_common = { package = "v-common", version = "=0.1.52" }
