@@ -5,7 +5,9 @@ use flate2::Compression;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
-
+use std::thread;
+use std::time::Duration as std_Duration;
+use systemstat::{Platform, System};
 use v_common::onto::individual::Individual;
 use v_common::onto::individual2turtle::to_turtle;
 use v_common::v_api::api_client::IndvOp;
@@ -55,6 +57,25 @@ pub fn store_to_ttl(indvs: &mut Vec<Individual>, prefixes: &mut HashMap<String, 
             } else {
                 error!("failed compress");
                 return;
+            }
+        }
+    }
+}
+
+pub fn pause_if_overload(sys: &System, max_load: usize) {
+    loop {
+        match sys.load_average() {
+            Ok(loadavg) => {
+                if loadavg.one > max_load as f32 {
+                    info!("Load average one: {} > {}, sleep", loadavg.one, max_load);
+                    thread::sleep(std_Duration::from_millis(10000));
+                } else {
+                    break;
+                }
+            }
+            Err(x) => {
+                info!("\nLoad average: error: {}", x);
+                break;
             }
         }
     }

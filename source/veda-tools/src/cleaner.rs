@@ -16,6 +16,7 @@ use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::onto::Onto;
 use v_common::search::clickhouse_client::*;
+use v_common::storage::storage::StorageId;
 
 pub struct CleanerContext {
     pub(crate) backend: Backend,
@@ -40,7 +41,7 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
 
     let mut cleaners = HashMap::new();
     cleaners.insert("email", clean_email as for<'r> fn(&'r mut CleanerContext));
-    cleaners.insert("permissionstatement", clean_invalid_permissionstatement as for<'r> fn(&'r mut CleanerContext));
+    cleaners.insert("permission_statement", clean_invalid_permissionstatement as for<'r> fn(&'r mut CleanerContext));
     cleaners.insert("membership", clean_invalid_membership as for<'r> fn(&'r mut CleanerContext));
     cleaners.insert("membership1", remove_membership1 as for<'r> fn(&'r mut CleanerContext));
     cleaners.insert("membership2", remove_membership2 as for<'r> fn(&'r mut CleanerContext));
@@ -57,6 +58,8 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
     let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
 
     let mut backend = Backend::default();
+
+    info!("total count individuals: {}", backend.storage.count(StorageId::Individuals));
 
     let mut onto = Onto::default();
     load_onto(&mut backend.storage, &mut onto);

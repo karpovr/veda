@@ -1,12 +1,10 @@
 use crate::cleaner::CleanerContext;
-use crate::common::{remove, store_to_ttl};
+use crate::common::{pause_if_overload, remove, store_to_ttl};
 use chrono::prelude::*;
 use chrono::Duration;
 use std::collections::HashMap;
 use std::io::Write;
 use std::ops::Sub;
-use std::thread;
-use std::time::Duration as std_Duration;
 use stopwatch::Stopwatch;
 use systemstat::{Platform, System};
 use v_common::module::info::ModuleInfo;
@@ -158,23 +156,8 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                         }
                     }
                     if sw.elapsed_ms() > 1000 {
-                        loop {
-                            match sys.load_average() {
-                                Ok(loadavg) => {
-                                    if loadavg.one > max_load as f32 {
-                                        info!("Load average one: {} > {}, sleep", loadavg.one, max_load);
-                                        thread::sleep(std_Duration::from_millis(10000));
-                                        sw = Stopwatch::start_new();
-                                    } else {
-                                        break;
-                                    }
-                                }
-                                Err(x) => {
-                                    info!("\nLoad average: error: {}", x);
-                                    break;
-                                }
-                            }
-                        }
+                        pause_if_overload(&sys, max_load);
+                        sw = Stopwatch::start_new();
                     }
                 }
                 if let Err(e) = module_info.put_info(pos, pos) {

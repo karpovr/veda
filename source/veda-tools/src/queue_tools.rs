@@ -9,9 +9,9 @@ use v_common::onto::parser::parse_raw;
 use v_common::search::common::FTQuery;
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::*;
+use v_common::v_queue::consumer::Consumer;
 use v_common::v_queue::queue::Queue;
 use v_common::v_queue::record::{Mode, MsgType};
-use v_common::v_queue::consumer::Consumer;
 
 pub fn export_from_query(query: &str) -> Result<(), PrepareError> {
     let mut backend = Backend::default();
