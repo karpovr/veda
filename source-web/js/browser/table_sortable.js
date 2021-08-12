@@ -41,8 +41,8 @@ System.import('moment').then((module) => {
 
         const order = function (compare) {
           return function (a, b) {
-            const valueA = $(a).children(':nth-child(' + (index + 1) + ')').text().toLowerCase().trim();
-            const valueB = $(b).children(':nth-child(' + (index + 1) + ')').text().toLowerCase().trim();
+            let valueA = $(a).children(':nth-child(' + (index + 1) + ')').text().toLowerCase().trim();
+            let valueB = $(b).children(':nth-child(' + (index + 1) + ')').text().toLowerCase().trim();
             if ( !isNaN(valueA) ) {
               valueA = parseFloat(valueA);
               valueB = parseFloat(valueB);
