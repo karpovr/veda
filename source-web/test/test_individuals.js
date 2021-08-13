@@ -3132,4 +3132,168 @@ for (i = 0; i < 1; i++) {
         //#5
         assert.ok(compare(new_test_doc1, read_individual2));
     });
+
+    QUnit.test("#056 Test Membership dropCount",
+        function (assert) {
+            var ticket_admin = get_admin_ticket();
+            var ticket_user = get_user1_ticket();
+            var doc_group = 'g:doc_resource_group';
+            var doc = create_test_document3(ticket_admin);
+       
+            // #1 
+            test_success_read(assert, ticket_admin, doc['@'], doc);
+
+            // #2 
+            test_fail_read(assert, ticket_user, doc['@'], doc);
+
+            // doc добавляем в doc_gr с RUD
+            addToGroup(ticket_admin, doc_group, doc['@'], [can_read, can_update, can_delete]);
+            // User RUD doc_gr
+            res = addRight(ticket_admin.id, [can_read, can_update, can_delete], ticket_user.user_uri, doc_group);
+            var op_id = res[1].op_id;
+            Backend.wait_module(m_acl, res[1].op_id);
+
+            // #3 
+            check_rights_success(assert, ticket_user.id, doc_group, [can_read, can_update, can_delete]);
+
+            // #4
+            check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+            // doc  в doc_gr с R, UD обнуляем
+            var test_memb_dropCount_uri = genUri();
+            var test_memb_dropCount = {
+                '@': test_memb_dropCount_uri,
+                'rdf:type': newUri('v-s:Membership'),
+                'v-s:dropCount': newBool(true),
+                'v-s:resource': newUri(doc),
+                'v-s:memberOf': newUri(doc_group),
+                'v-s:canUpdate': newBool(true),
+                'v-s:canDeleted': newBool(true),
+                'v-s:deleted': newBool(true),
+            };
+
+            // #5 У User есть RUD на doc_group
+            check_rights_success(assert, ticket_user.id, doc_group, [can_read, can_update, can_delete]);
+
+            // #6 У User есть R на doc
+            check_rights_success(assert, ticket_user.id, doc['@'], [can_read]);
+
+            // #7  У User нет UD на doc
+            check_rights_fail(assert, ticket_user.id, doc['@'], [can_update, can_delete]);
+
+            // doc  в doc_gr с RUD
+            var test_memb_dropCount_uri = genUri();
+            var test_memb_dropCount = {
+                '@': test_memb_dropCount_uri,
+                'rdf:type': newUri('v-s:Membership'),
+                'v-s:dropCount': newBool(true),
+                'v-s:resource': newUri(doc),
+                'v-s:memberOf': newUri(doc_group)
+            };
+
+            // #8 У User есть RUD на doc
+            check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+
+            // Обнуление всех вхождений doc в doc_gr
+            var test_memb_dropCount_uri = genUri();
+            var test_memb_dropCount = {
+                '@': test_memb_dropCount_uri,
+                'rdf:type': newUri('v-s:Membership'),
+                'v-s:dropCount': newBool(true),
+                'v-s:resource': newUri(doc),
+                'v-s:memberOf': newUri(doc_group),
+                'v-s:deleted': newBool(true)
+            };
+
+            // #9 У User нет RUD на doc
+            check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+            
+        });
+
+    QUnit.test("#057 Test PermissionStatement dropCount",
+        function (assert) {
+            var ticket_user = get_user1_ticket();
+            var user = ticket_user.user_uri;
+            var ticket_admin = get_admin_ticket();
+            var doc = create_test_document1(ticket_admin);
+            var res;
+
+        // R - 3, U - 2, D - 2 
+        res = addRight(ticket_admin.id, [can_read, can_update, can_delete], user, doc);
+        var right1 = res[0];
+        assert.ok(res[1].result == 200);
+        Backend.wait_module(m_acl, res[1].op_id);
+        res = addRight(ticket_admin.id, [can_read, can_update, can_delete], user, doc);
+        var right2 = res[0];
+        assert.ok(res[1].result == 200);
+        Backend.wait_module(m_acl, res[1].op_id);
+        res = addRight(ticket_admin.id, [can_read], user, doc);
+        var right3 = res[0];
+        assert.ok(res[1].result == 200);
+        Backend.wait_module(m_acl, res[1].op_id);
+
+        // #1 User RUD doc
+        check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+
+        // #2 3R2U2D -> 3R2U0D (забираем D)
+        var test_perm1_dropCount_uri = genUri();
+        var test_perm1_dropCount = {
+            '@': test_perm1_dropCount_uri,
+            'rdf:type': newUri('v-s:PermissionStatement'),
+            'v-s:dropCount': newBool(true),
+            'v-s:permissionObject': newUri(doc),
+            'v-s:permissionSubject': newUri(user),
+            'v-s:canDelete': newBool(true),
+            'v-s:deleted': newBool(true)
+        };
+
+        // #3
+        check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update]);
+
+        // #4
+        check_rights_fail(assert, ticket_user.id, doc['@'], [can_delete]);
+
+        // 3R2U0D -> 3R1U0D (забираем U и ставим U=1)
+        var test_perm2_dropCount_uri = genUri();
+        var test_perm2_dropCount = {
+            '@': test_perm2_dropCount_uri,
+            'rdf:type': newUri('v-s:PermissionStatement'),
+            'v-s:dropCount': newBool(true),
+            'v-s:permissionObject': newUri(doc),
+            'v-s:permissionSubject': newUri(user),
+            'v-s:canUpdate': newBool(true),
+        };    
+
+        // #5 
+        check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update]);
+
+        // #6
+        check_rights_fail(assert, ticket_user.id, doc['@'], [can_delete]);
+
+        // 3R1U0D -> 2R0U0D
+        res = Backend.remove_individual(ticket_admin.id, right1["@"]);
+        Backend.wait_module(m_acl, res.op_id);
+
+        // #7
+        check_rights_success(assert, ticket_user.id, doc['@'], [can_read]);
+
+        // #8
+        check_rights_fail(assert, ticket_user.id, doc['@'], [can_update, can_delete]);
+
+        // 2R0U0 ->    
+        var test_perm4_dropCount_uri = genUri();
+        var test_perm4_dropCount = {
+            '@': test_perm4_dropCount_uri,
+            'rdf:type': newUri('v-s:PermissionStatement'),
+            'v-s:dropCount': newBool(true),
+            'v-s:permissionObject': newUri(doc),
+            'v-s:permissionSubject': newUri(ticket_user.user_uri),
+            'v-s:canRead': newBool(true),
+            'v-s:canUpdate': newBool(true),
+            'v-s:deleted': newBool(true)
+        };
+
+        // #9
+        check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+
+        });
 }
