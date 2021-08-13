@@ -10,5 +10,5 @@ rust-ini = "0.16"
 nng = "0.5.1"
 serde_json = "1.0"
 
-v_common = { package = "v-common", version = "=0.1.53" }
+v_common = { package = "v-common", version = "=0.1.54" }
 

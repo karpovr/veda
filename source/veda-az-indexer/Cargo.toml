@@ -7,4 +7,5 @@ edition = "2018"
 [dependencies]
 log = "0.4"
 
-v_common = { package = "v-common", version = "=0.1.53" }
+v_common = { package = "v-common", version = "=0.1.54" }
+#v_common = { package = "v-common", path = "../../../v-common" }

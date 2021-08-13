@@ -2,9 +2,9 @@ use std::collections::HashMap;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
 use v_common::storage::storage::{StorageId, VStorage};
-use v_common::v_authorization::formats::{update_counters, decode_rec_to_rightset, M_IS_EXCLUSIVE, M_IGNORE_EXCLUSIVE, encode_rightset};
 use v_common::v_authorization::common::Access;
-use v_common::v_authorization::{RightSet, Right};
+use v_common::v_authorization::formats::{decode_rec_to_rightset, encode_rightset, update_counters, M_IGNORE_EXCLUSIVE, M_IS_EXCLUSIVE};
+use v_common::v_authorization::{Right, RightSet};
 
 pub struct Context {
     pub permission_statement_counter: u32,
@@ -207,13 +207,20 @@ fn update_right_set(
             if let Some(rr) = new_right_set.get_mut(in_set_id) {
                 rr.is_deleted = is_deleted;
                 rr.marker = marker;
-                if is_deleted {
-                    rr.access = update_counters(&mut rr.counters, prev_access, rr.access | prev_access, is_deleted, is_drop_count);
+                if is_drop_count {
+                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, is_drop_count);
                     if rr.access != 0 && !rr.counters.is_empty() {
                         rr.is_deleted = false;
                     }
                 } else {
-                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, is_drop_count);
+                    if is_deleted {
+                        rr.access = update_counters(&mut rr.counters, prev_access, rr.access | prev_access, is_deleted, false);
+                        if rr.access != 0 && !rr.counters.is_empty() {
+                            rr.is_deleted = false;
+                        }
+                    } else {
+                        rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, false);
+                    }
                 }
             } else {
                 new_right_set.insert(
