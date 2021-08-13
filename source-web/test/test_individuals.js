@@ -3139,6 +3139,7 @@ for (i = 0; i < 1; i++) {
             var ticket_user = get_user1_ticket();
             var doc_group = 'g:doc_resource_group';
             var doc = create_test_document3(ticket_admin);
+            var res;
        
             // #1 
             test_success_read(assert, ticket_admin, doc['@'], doc);
