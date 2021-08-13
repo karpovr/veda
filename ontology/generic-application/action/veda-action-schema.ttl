@@ -428,7 +428,7 @@ v-s:NewSingleScheduledActionTemplate
         </div>
       </div>
     </section>
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save edit cancel delete"></span>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save edit cancel delete journal"></span>
   </div>
 </div>
   """ ;
