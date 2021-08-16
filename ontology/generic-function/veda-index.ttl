@@ -132,7 +132,7 @@ vdi:index_person
   vdi:indexed_field v-s:firstName ;
   vdi:indexed_field v-s:lastName ;
   vdi:indexed_field v-s:middleName ;
-  vdi:indexed_field v-s:tabNumber ;
+  #vdi:indexed_field v-s:tabNumber ;
   vdi:indexed_field v-s:hasAccount ;
 .
 
