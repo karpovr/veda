@@ -41,7 +41,7 @@ jobs:
           name: "test"
           command: |
             ./control-start.sh
-            sleep 120
+            sleep 180
             grunt test --stack --verbose
             sleep 1
             testcafe chrome:headless qa/testcafe/testLogin.js --screenshots screens --screenshots-on-fails screens --speed 1
