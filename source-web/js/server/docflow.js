@@ -1150,7 +1150,9 @@ Workflow.prepare_start_form = function (ticket, document) {
     isTrace = false;
   }
 
-  const hasStatusWorkflowif = document['v-wf:hasStatusWorkflow'];
+  const cur_doc = get_individual(ticket, document['@']);
+
+  const hasStatusWorkflowif = cur_doc['v-wf:hasStatusWorkflow'];
   if (hasStatusWorkflowif) {
     if (veda.Util.getUri(hasStatusWorkflowif) != 'v-wf:ToBeSent') {
       print('[WORKFLOW]:prepare_start_form, not ready to start.');
@@ -1160,7 +1162,7 @@ Workflow.prepare_start_form = function (ticket, document) {
     return;
   }
 
-  if (document['v-wf:isProcess']) {
+  if (cur_doc['v-wf:isProcess']) {
     print('[WORKFLOW]:prepare_start_form, already started.');
     return;
   }
