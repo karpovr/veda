@@ -1,5 +1,5 @@
 use crate::cleaner::CleanerContext;
-use crate::common::{pause_if_overload, remove, store_to_ttl};
+use crate::common::{pause_if_overload, store_to_file_and_remove_from_storage};
 use stopwatch::Stopwatch;
 use systemstat::{Platform, System};
 use v_common::module::info::ModuleInfo;
@@ -35,7 +35,7 @@ pub fn clean_invalid_permissionstatement(ctx: &mut CleanerContext) {
 
                 for id in res.result.iter() {
                     if collected.len() > MAX_SIZE_COLLECTED as usize {
-                        store_to_file_and_remove_from_storage(&mut collected, ctx, pos);
+                        store_to_file_and_remove_from_storage(&mut collected, "permission_statement", ctx, pos);
                     }
 
                     pos += 1;
@@ -66,22 +66,8 @@ pub fn clean_invalid_permissionstatement(ctx: &mut CleanerContext) {
                     error!("err = {:?}", e);
                     return;
                 }
-
             }
-            store_to_file_and_remove_from_storage(&mut collected, ctx, pos);
+            store_to_file_and_remove_from_storage(&mut collected, "permission_statement", ctx, pos);
         }
     }
-}
-
-fn store_to_file_and_remove_from_storage(mut collected: &mut Vec<Individual>, ctx: &mut CleanerContext, pos: i64) {
-    if !collected.is_empty() && ctx.operations.contains("to_ttl") {
-        store_to_ttl(&mut collected, &mut ctx.onto.prefixes, &format!("permission_statement_{}", pos));
-    }
-    if ctx.operations.contains("remove") {
-        for s in collected.iter_mut() {
-            remove(s, ctx);
-        }
-    }
-
-    *collected = Vec::new();
 }

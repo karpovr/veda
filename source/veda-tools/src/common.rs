@@ -80,3 +80,16 @@ pub fn pause_if_overload(sys: &System, max_load: usize) {
         }
     }
 }
+
+pub fn store_to_file_and_remove_from_storage(mut collected: &mut Vec<Individual>, name: &str, ctx: &mut CleanerContext, pos: i64) {
+    if !collected.is_empty() && ctx.operations.contains("to_ttl") {
+        store_to_ttl(&mut collected, &mut ctx.onto.prefixes, &format!("{}_{}", name, pos));
+    }
+    if ctx.operations.contains("remove") {
+        for s in collected.iter_mut() {
+            remove(s, ctx);
+        }
+    }
+
+    *collected = Vec::new();
+}
