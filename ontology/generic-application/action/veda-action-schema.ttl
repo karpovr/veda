@@ -174,7 +174,7 @@ v-s:PsHasPeriodForScheduledAction
   v-ui:forClass v-s:ScheduledAction;
   v-ui:forProperty v-s:hasPeriod ;
   v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
+  v-ui:maxCardinality 10 ;
   v-ui:queryPrefix "'rdf:type'=='v-s:Period'"^^xsd:string ;
   rdfs:label "Спецификация свойства v-s:hasPeriod для класса v-s:ScheduledAction"@ru ;
   rdfs:label "v-s:hasPeriod property specification for v-s:ScheduledAction class"@en ;
