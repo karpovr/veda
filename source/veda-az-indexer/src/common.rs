@@ -53,7 +53,16 @@ fn get_access_from_individual(state: &mut Individual) -> u8 {
 }
 
 pub fn index_right_sets(prev_state: &mut Individual, new_state: &mut Individual, prd_rsc: &str, prd_in_set: &str, prefix: &str, default_access: u8, ctx: &mut Context) {
-    let is_drop_count = new_state.get_first_bool("v-s:dropCount").unwrap_or_default();
+    let mut is_drop_count = false;
+
+    if let Some(b) = new_state.get_first_bool("v-s:dropCount") {
+        if new_state.get_first_integer("v-s:updateCounter").unwrap_or(0) > 1 {
+            warn!("detected v-s:updateCounter > 1 with v-s:dropCount, skip indexing {}", new_state.get_id());
+            return;
+        }
+
+        is_drop_count = b;
+    }
 
     let n_is_del = new_state.get_first_bool("v-s:deleted").unwrap_or_default();
     let p_is_del = prev_state.get_first_bool("v-s:deleted").unwrap_or_default();
