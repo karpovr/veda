@@ -3160,9 +3160,9 @@ for (i = 0; i < 1; i++) {
             // #4
             check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
             // doc  в doc_gr с R, UD обнуляем
-            var test_memb_dropCount_uri = genUri();
-            var test_memb_dropCount = {
-                '@': test_memb_dropCount_uri,
+            var test_memb1_dropCount_uri = genUri();
+            var test_memb1_dropCount = {
+                '@': test_memb1_dropCount_uri,
                 'rdf:type': newUri('v-s:Membership'),
                 'v-s:dropCount': newBool(true),
                 'v-s:resource': newUri(doc['@']),
@@ -3171,7 +3171,7 @@ for (i = 0; i < 1; i++) {
                 'v-s:canDeleted': newBool(true),
                 'v-s:deleted': newBool(true),
             };
-    	    res = Backend.put_individual(ticket_admin.id, test_memb_dropCount);
+    	    res = Backend.put_individual(ticket_admin.id, test_memb1_dropCount);
     	    Backend.wait_module(m_acl, res.op_id);
 
             // #5 У User есть RUD на doc_group
@@ -3184,34 +3184,83 @@ for (i = 0; i < 1; i++) {
             check_rights_fail(assert, ticket_user.id, doc['@'], [can_update, can_delete]);
 
             // doc  в doc_gr с RUD
-            var test_memb_dropCount_uri = genUri();
-            var test_memb_dropCount = {
-                '@': test_memb_dropCount_uri,
+            var test_memb2_dropCount_uri = genUri();
+            var test_memb2_dropCount = {
+                '@': test_memb2_dropCount_uri,
                 'rdf:type': newUri('v-s:Membership'),
                 'v-s:dropCount': newBool(true),
                 'v-s:resource': newUri(doc['@']),
                 'v-s:memberOf': newUri(doc_group)
             };
-    	    res = Backend.put_individual(ticket_admin.id, test_memb_dropCount);
+    	    res = Backend.put_individual(ticket_admin.id, test_memb2_dropCount);
     	    Backend.wait_module(m_acl, res.op_id);
 
             // #8 У User есть RUD на doc
             check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
 
             // Обнуление всех вхождений doc в doc_gr
-            var test_memb_dropCount_uri = genUri();
-            var test_memb_dropCount = {
-                '@': test_memb_dropCount_uri,
+            var test_memb3_dropCount_uri = genUri();
+            var test_memb3_dropCount = {
+                '@': test_memb3_dropCount_uri,
                 'rdf:type': newUri('v-s:Membership'),
                 'v-s:dropCount': newBool(true),
                 'v-s:resource': newUri(doc['@']),
                 'v-s:memberOf': newUri(doc_group),
                 'v-s:deleted': newBool(true)
             };
-    	    res = Backend.put_individual(ticket_admin.id, test_memb_dropCount);
+    	    res = Backend.put_individual(ticket_admin.id, test_memb3_dropCount);
     	    Backend.wait_module(m_acl, res.op_id);
 
             // #9 У User нет RUD на doc
+            check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+
+            // doc в doc_gr с RUD
+            var test_memb4_dropCount_uri = genUri();
+            var test_memb4_dropCount = {
+                '@': test_memb4_dropCount_uri,
+                'rdf:type': newUri('v-s:Membership'),
+                'v-s:dropCount': newBool(true),
+                'v-s:resource': newUri(doc['@']),
+                'v-s:memberOf': newUri(doc_group),
+            };
+            res = Backend.put_individual(ticket_admin.id, test_memb4_dropCount);
+    	    Backend.wait_module(m_acl, res.op_id);
+
+            // #10 
+            check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+
+            // В предыдущий membership добавляем v-s:deleted, пытаемся забрать права. Не должно срабатывать
+            var test_memb4_dropCount = {
+                '@': test_memb4_dropCount_uri,
+                'rdf:type': newUri('v-s:Membership'),
+                'v-s:dropCount': newBool(true),
+                'v-s:resource': newUri(doc['@']),
+                'v-s:memberOf': newUri(doc_group),
+                'v-s:deleted': newBool(true)
+            };
+            res = Backend.put_individual(ticket_admin.id, test_memb4_dropCount);
+    	    Backend.wait_module(m_acl, res.op_id);
+
+            // #11 Права остались RUD
+            check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
+
+            //Создаём новый membership всё обнуляем
+            var test_memb5_dropCount_uri = genUri();
+            var test_memb5_dropCount = {
+                '@': test_memb5_dropCount_uri,
+                'rdf:type': newUri('v-s:Membership'),
+                'v-s:dropCount': newBool(true),
+                'v-s:resource': newUri(doc['@']),
+                'v-s:memberOf': newUri(doc_group),
+                'v-s:canRead': newBool(true),
+                'v-s:canUpdate': newBool(true),
+                'v-s:canDeleted': newBool(true),
+                'v-s:deleted': newBool(true)
+            };
+            res = Backend.put_individual(ticket_admin.id, test_memb5_dropCount);
+    	    Backend.wait_module(m_acl, res.op_id);
+
+            // #12 Прав нет
             check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
             
         });
@@ -3291,10 +3340,33 @@ for (i = 0; i < 1; i++) {
         // #8
         check_rights_fail(assert, ticket_user.id, doc['@'], [can_update, can_delete]);
 
+
+        //В предыдущий Perm добавляем мощности и v-s:deleted=true, пытаемся обнулить
+        var test_perm2_dropCount = {
+            '@': test_perm2_dropCount_uri,
+            'rdf:type': newUri('v-s:PermissionStatement'),
+            'v-s:dropCount': newBool(true),
+            'v-s:permissionObject': newUri(doc['@']),
+            'v-s:permissionSubject': newUri(user),
+            'v-s:canRead': newBool(true),
+            'v-s:canUpdate': newBool(true),
+            'v-s:canDelete': newBool(true),
+            'v-s:deleted': newBool(true)
+        }; 
+        res = Backend.put_individual(ticket_admin.id, test_perm2_dropCount);
+        Backend.wait_module(m_acl, res.op_id);
+
+         // #9 (права на R должны остаться)
+        check_rights_success(assert, ticket_user.id, doc['@'], [can_read]);
+
+        // #10 
+        check_rights_fail(assert, ticket_user.id, doc['@'], [can_update, can_delete]);
+
+        
         // 2R0U0 ->    
-        var test_perm4_dropCount_uri = genUri();
-        var test_perm4_dropCount = {
-            '@': test_perm4_dropCount_uri,
+        var test_perm3_dropCount_uri = genUri();
+        var test_perm3_dropCount = {
+            '@': test_perm3_dropCount_uri,
             'rdf:type': newUri('v-s:PermissionStatement'),
             'v-s:dropCount': newBool(true),
             'v-s:permissionObject': newUri(doc['@']),
@@ -3303,8 +3375,9 @@ for (i = 0; i < 1; i++) {
             'v-s:canUpdate': newBool(true),
             'v-s:deleted': newBool(true)
         };
-
-        // #9
+        res = Backend.put_individual(ticket_admin.id, test_perm3_dropCount);
+        Backend.wait_module(m_acl, res.op_id);
+        // #11
         check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
 
         });
