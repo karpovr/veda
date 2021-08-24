@@ -1236,12 +1236,6 @@ v-s:TS_Membership
   v-ui:defaultTemplate v-s:MembershipTemplate;
   v-ui:forClass v-s:Membership
 .
-v-s:TS_PermissionStatement
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate v-s:PermissionStatementTemplate;
-  v-ui:forClass v-s:PermissionStatement
-.
 
 v-s:MembershipBlank
   a v-fc:Blank ;
@@ -1354,6 +1348,19 @@ v-ui:template """
     <label>
       <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
       <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <hr>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
+      <em about="v-s:deleted" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:dropCount" data-type="boolean"></veda-control>
+      <em about="v-s:dropCount" property="rdfs:label"></em>
     </label>
   </div>
   <hr>
@@ -1554,6 +1561,19 @@ v-ui:template """
     <label>
       <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
       <em about="v-s:canDelete" property="rdfs:label"></em>
+    </label>
+  </div>
+  <hr>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
+      <em about="v-s:deleted" property="rdfs:label"></em>
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <veda-control property="v-s:dropCount" data-type="boolean"></veda-control>
+      <em about="v-s:dropCount" property="rdfs:label"></em>
     </label>
   </div>
   <hr>
@@ -1828,6 +1848,30 @@ v-ui:PermissionStatementTemplate
     </div>
   </div>
   <br>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
+          <em about="v-s:deleted" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr class="margin-md">
+  <div class="row">
+    <div class="col-md-4 col-xs-5 text-right name"></div>
+    <div class="col-md-8 col-xs-7 value">
+      <div class="checkbox">
+        <label>
+          <veda-control property="v-s:dropCount" data-type="boolean"></veda-control>
+          <em about="v-s:dropCount" property="rdfs:label"></em>
+        </label>
+      </div>
+    </div>
+  </div>
   <br>
   <div class="actions">
     <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
