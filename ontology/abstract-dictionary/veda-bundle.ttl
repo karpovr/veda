@@ -441,6 +441,6 @@ v-s:AppointmentsBundle
 
 v-s:PositionsBundle
   rdf:type v-s:Bundle;
-  rdfs:label "Позиции"@ru ;
+  rdfs:label "Должности"@ru ;
   rdfs:label "Positions"@en ;
 .

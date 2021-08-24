@@ -860,7 +860,8 @@ v-s:ContactsStructureTemplate
     if (parent.hasValue('rdf:type', 'v-s:Department')) {
       queryStringArray = [queryDepartments, queryAppointment, queryPositions];
     } else if (parent.hasValue('rdf:type', 'v-s:OrgGroup')) {
-      queryStringArray = [queryAppointment, queryPositions];
+      var queryOrgGroup = selectPart + "FROM veda_tt.`v-s:OrgGroup` " + wherePart + endingPart;
+      queryStringArray = [queryOrgGroup, queryAppointment, queryPositions];
     } else if (parent.hasValue('rdf:type', 'v-s:Organization')) {
       var queryOrgGroup = selectPart + "FROM veda_tt.`v-s:OrgGroup` " + wherePart + endingPart;
       var querySubsidiary = selectPart + "FROM veda_tt.`v-s:Subsidiary` WHERE v_s_parent_str=['" + parentUri + "'] AND v_s_deleted_int=[0]" + endingPart;
@@ -1303,7 +1304,7 @@ v-s:ContactsStructureTemplate
       return false;
     }
     return  new veda.IndividualModel(uri).load().then(function(loaded) {
-      if (!loaded.hasValue("rdf:type", "v-s:Department")) {
+      if (!loaded.hasValue("rdf:type", "v-s:Department") && !loaded.hasValue("rdf:type", "v-s:OrgGroup")) {
         return false;
       }
       return Promise.resolve().then(function(){
