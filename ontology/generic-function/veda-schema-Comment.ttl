@@ -265,17 +265,6 @@ v-s:RecursiveCommentTemplate
   
 </script>
 <div class="media" style="overflow:initial;">
-  <div class="media-left" rel="v-s:creator">
-    <div about="@" rel="v-s:employee">
-      <script>
-        individual.hasValue("v-s:hasImage") ? $(".no-image", template).remove() : $(".has-image", template).remove() ;
-      </script>
-      <div style="width:50px;">
-        <div class="has-image" about="@" rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></div>
-        <div class="no-image"><span class="text-muted fa fa-user fa-4x"></span></div>
-      </div>
-    </div>
-  </div>
   <div class="media-body" style="overflow:initial;">
     <div id="comment-content">
       <div>
