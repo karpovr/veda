@@ -224,7 +224,7 @@ v-s:Appointment
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:OrganizationUnit ;
   v-ui:hasModel v-s:OrganizationUnitModel ;
-  v-s:labelPattern "{@.v-s:employee.rdfs:label} {@.v-s:occupation.rdfs:label}" ;
+  v-s:labelPattern "{@.v-s:employee.rdfs:label} {@.v-s:occupation.rdfs:label} {@.v-s:hasDelegationPurpose.v-s:shortLabel}" ;
 .
 v-s:official
   rdf:type owl:DatatypeProperty ;
