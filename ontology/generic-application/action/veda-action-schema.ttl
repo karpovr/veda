@@ -139,6 +139,11 @@ v-s:BacwardTargetBundle
   rdfs:label "Документ"@ru ;
   rdfs:label "Document"@en ;
 .
+v-s:ScheduledActionsBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Запланированные события"@ru ;
+  rdfs:label "Scheduled actions"@en ;
+.
 
 #-- Спецификации --
 
@@ -230,7 +235,7 @@ v-s:ScheduledActionTemplate
   rdfs:label "Template for ScheduledAction rendering"@en ;
   v-ui:template """
 <div>
-  <h3 about="v-s:ScheduledAction" property="rdfs:label"></h3>
+  <h3 about="v-s:ScheduledActionsBundle" property="rdfs:label"></h3>
   <div about="@" rel="v-s:hasScheduledAction" data-template="v-s:RecursiveScheduledActionTemplate"></div>
   <div id="new-ScheduledAction"></div>
   <button class="margin-sm btn btn-success" id="add-ScheduledAction" about="v-s:AddScheduledAction" property="rdfs:label"></button>
@@ -285,8 +290,6 @@ v-s:ScheduledActionTemplate
       cntr.empty();
     });
   });
-
-  
 </script>
     """;
 .
@@ -428,6 +431,9 @@ v-s:NewSingleScheduledActionTemplate
         </div>
       </div>
     </section>
+    <hr>
+    <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
+    <br>
     <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save edit cancel delete journal"></span>
   </div>
 </div>
@@ -476,8 +482,17 @@ v-s:RecursiveScheduledActionTemplate
 </script>
 <div class="media" style="overflow:initial;">
   <div class="media-body" style="overflow:initial;">
-    <div rel="v-s:backwardTarget" data-template="v-ui:ClassNameLabelLinkTemplate" class="view -edit -search"></div>
     <div id="ScheduledAction-content">
+      <span rel="v-s:creator">
+        <span>
+          <strong rel="v-s:employee" data-template="v-ui:LabelTemplate"></strong>
+          <small rel="v-s:occupation" data-template="v-ui:LabelTemplate"></small>
+        </span>
+      </span>
+      <small>
+        <span>&bullet;&nbsp;&nbsp;</span>
+        <span property="v-s:created"></span>
+      </small>
       <em about="v-s:description" property="rdfs:label"></em>
       <div property="v-s:description" class="view -edit -search"></div>
       <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
