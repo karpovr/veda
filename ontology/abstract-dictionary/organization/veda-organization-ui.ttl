@@ -1720,6 +1720,14 @@ v-s:PersonTemplate
             </button>
           </div>
         </div>
+        <div class="row row-attribute">
+          <div class="col-sm-3 col-xs-5">
+            <label about="rdfs:comment" property="rdfs:label" class="-view edit search"></label>
+          </div>
+          <div class="col-sm-9 col-xs-7">
+            <veda-control property="rdfs:comment" data-type="string" class="-view edit search"></veda-control>
+          </div>
+        </div>
     </div>
     <div class="col-md-3">
       <div rel="v-s:hasImage">
@@ -1728,7 +1736,6 @@ v-s:PersonTemplate
       <br class="-view edit search"/>
       <veda-control rel="v-s:hasImage" data-type="file" accept=".png, .jpg, .jpeg" class="-view edit -search"></veda-control>
     </div>
-
   </div>
 
     <div class="col-sm-12 col-xs-12">
