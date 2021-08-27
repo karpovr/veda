@@ -14,7 +14,9 @@
   v-s:loadPriority 6 ;
 .
 
-# ------------------------------------------------------------ КЛАССЫ --
+# -------------------------------------------------------------------- КЛАССЫ --
+
+#------------------------------------------------------------ Организационная единица --
 
 v-s:OrganizationUnit
   rdf:type owl:Class ;
@@ -51,7 +53,7 @@ v-s:hasFieldChief
   rdfs:label "Field chief"@en ;
   rdfs:range v-s:Appointment ;
 .
-# ------------------------------------------------------------
+#-------------------------------------------------------------------- Организация--
 v-s:Organization
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:OrganizationUnit ;
@@ -64,6 +66,19 @@ v-s:Organization
   rdfs:label "Organization"@en ;
   v-ui:hasModel v-s:OrganizationUnitModel ;
 .
+#-----Полное наименование
+#v-s:title
+
+#-----Наименование
+#rdfs:label
+
+#-----Страна
+#v-s:hasClassifierCountry
+
+#-----Организационно-правовая форма
+#v-s:hasClassifierLegalForm
+
+#-----ИНН
 v-s:taxId
   rdf:type owl:DatatypeProperty ;
   rdfs:label "ИНН"@ru ;
@@ -72,6 +87,8 @@ v-s:taxId
   rdfs:domain v-s:Organization ;
   rdfs:domain v-s:Contractor ;
 .
+
+#-----КПП
 v-s:taxRegistrationCause
   rdf:type owl:DatatypeProperty ;
   rdfs:label "КПП"@ru ;
@@ -80,6 +97,8 @@ v-s:taxRegistrationCause
   rdfs:domain v-s:Organization ;
   rdfs:domain v-s:Contractor ;
 .
+
+#-----ОГРН
 v-s:taxRegistrationNumber
   rdf:type owl:DatatypeProperty ;
   rdfs:label "ОГРН"@ru ;
@@ -87,6 +106,18 @@ v-s:taxRegistrationNumber
   rdfs:range xsd:string ;
   rdfs:domain v-s:Organization ;
 .
+
+#------Юридический адрес
+#v-s:legalAddress
+
+#------Почтовый адрес
+#v-s:postalAddress
+
+#------Период существования юридического лица
+#v-s:dateFromFact
+#v-s:dateToFact
+
+#------Филиал
 v-s:hasSubsidiary
   rdf:type owl:ObjectProperty ;
   rdfs:label "Обособленное подразделение"@ru ;
@@ -135,7 +166,7 @@ v-s:hasContractorProfileSafety
   rdfs:domain v-s:Organization ;
 .
 
-# ------------------------------------------------------------
+#-------------------------------------------------------------------- Подразделение --
 v-s:Department
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:OrganizationUnit ;
@@ -143,6 +174,8 @@ v-s:Department
   rdfs:label "Department"@en ;
   v-ui:hasModel v-s:OrganizationUnitModel ;
 .
+
+#------Основная организация
 v-s:parentOrganization
   rdf:type owl:ObjectProperty ;
   rdfs:label "Основная организация"@ru ;
@@ -151,6 +184,91 @@ v-s:parentOrganization
   rdfs:domain v-s:Department ;
 .
 
+#------Родительская единица
+#v-s:parentUnit
+
+#------Наименование
+#rdfs:label
+
+#------Краткое наименование
+#v-s:shortLabel
+
+#------Код подразделения
+#v-s:DepartmentCode
+
+#------Непосредственный руководитель
+#v-s:hasChief
+
+#------Функциональный руководитель
+#v-s:hasFunctionalChief
+
+#------Руководитель по направлению
+#v-s:hasFieldChief
+
+#------Почтовый адрес
+#v-s:postalAddress
+
+
+
+#---------------------------------------------------------------------------- Филиал --
+v-s:Subsidiary
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Organization ;
+  rdfs:subClassOf v-s:Department ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:label "Филиал"@ru ;
+  rdfs:label "Subsidiary"@en ;
+  v-ui:hasModel v-s:OrganizationUnitModel ;
+.
+
+#------Основная организация
+#v-s:parentOrganization
+
+#------Полное наименование
+#v-s:title
+
+#------Наименование
+#rdfs:label
+
+#------КПП
+#v-s:taxRegistrationCause
+
+#------Почтовый адрес
+#v-s:postalAddress
+
+#------Комментарий
+#rdfs:comment
+
+
+#-------------------------------------------------------------------- Oрганизационная группа --
+v-s:OrgGroup
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:OrganizationUnit ;
+  rdfs:isDefinedBy v-s: ;
+  rdfs:label "Oрганизационная группа"@ru ;
+  rdfs:label "Organizational group"@en ;
+  v-ui:hasModel v-s:OrganizationUnitModel ;
+.
+
+#--------------------------------------------------------------------------- Должность --
+v-s:Position
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:OrganizationUnit ;
+  rdfs:label "Должность"@ru ;
+  rdfs:label "Position"@en ;
+  v-ui:hasModel v-s:OrganizationUnitModel ;
+.
+
+#------Организация
+#v-s:parentOrganization
+
+#------Подразделение
+#v-s:parentUnit
+
+#------Название
+#rdfs:label
+
+#-----Код должности
 v-s:subjectCode
   rdf:type owl:DatatypeProperty ;
   rdfs:comment "Код субъекта"@ru ;
@@ -161,61 +279,11 @@ v-s:subjectCode
   rdfs:label "Subject code"@en ;
   rdfs:range xsd:string ;
 .
-# ------------------------------------------------------------
-v-s:Subsidiary
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:Organization ;
-  rdfs:subClassOf v-s:Department ;
-  rdfs:subClassOf v-s:BackwardLink ;
-  rdfs:label "Филиал"@ru ;
-  rdfs:label "Subsidiary"@en ;
-  v-ui:hasModel v-s:OrganizationUnitModel ;
-.
-# ------------------------------------------------------------
-v-s:OrgGroup
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:OrganizationUnit ;
-  rdfs:isDefinedBy v-s: ;
-  rdfs:label "Oрганизационная группа"@ru ;
-  rdfs:label "Organizational group"@en ;
-  v-ui:hasModel v-s:OrganizationUnitModel ;
-.
 
-# ------------------------------------------------------------
-v-s:Position
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:OrganizationUnit ;
-  rdfs:label "Должность"@ru ;
-  rdfs:label "Position"@en ;
-  v-ui:hasModel v-s:OrganizationUnitModel ;
-.
-#v-s:subjectCode
-# ------------------------------------------------------------
-v-s:HRRecord
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:UserThing ;
-  rdfs:subClassOf v-s:Temporal ;
-  rdfs:label "Кадровая запись"@ru ;
-  rdfs:label "HR record"@en ;
-.
+#-----Комментарий
+#rdfs:comment
 
-# Тут не хватает полей, которые описаны в v-s:PermissionStatement  v-s:startTime   v-s:endTime
-
-v-s:employee
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:HRRecord ;
-  rdfs:label "Работник"@ru ;
-  rdfs:label "Employee"@en ;
-  rdfs:range v-s:Person ;
-.
-v-s:occupation
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Должность"@ru ;
-  rdfs:label "Position"@en ;
-  rdfs:range v-s:Position ;
-  rdfs:domain v-s:HRRecord ;
-.
-# ------------------------------------------------------------
+#------------------------------------------------------------------------- Назначение --
 v-s:Appointment
   rdf:type owl:Class ;
   rdfs:label "Назначение"@ru ;
@@ -226,15 +294,11 @@ v-s:Appointment
   v-ui:hasModel v-s:OrganizationUnitModel ;
   v-s:labelPattern "{@.v-s:employee.rdfs:label} {@.v-s:occupation.rdfs:label} {@.v-s:hasDelegationPurpose.v-s:shortLabel}" ;
 .
-v-s:official
-  rdf:type owl:DatatypeProperty ;
-  rdfs:domain v-s:Appointment ;
-  rdfs:label "Официально"@ru ;
-  rdfs:label "Official"@en ;
-  rdfs:range xsd:boolean ;
-.
-# v-s:valid
 
+#-----Организация
+#v-s:parentOrganization
+
+#------Филиал
 v-s:parentSubsidiary
   rdf:type owl:ObjectProperty ;
   rdfs:label "Родительский филиал"@ru ;
@@ -244,7 +308,42 @@ v-s:parentSubsidiary
   rdfs:domain v-s:Organization ;
 .
 
-# ------------------------------------------------------------
+#------Подразделение
+#v-s:parentUnit
+
+#------Работник
+v-s:employee
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:HRRecord ;
+  rdfs:label "Работник"@ru ;
+  rdfs:label "Employee"@en ;
+  rdfs:range v-s:Person ;
+.
+
+#------Должность
+v-s:occupation
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Должность"@ru ;
+  rdfs:label "Position"@en ;
+  rdfs:range v-s:Position ;
+  rdfs:domain v-s:HRRecord ;
+.
+
+#------Дата
+#v-s:dateFrom
+#v-s:dateTo
+
+#------Официально
+v-s:official
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Appointment ;
+  rdfs:label "Официально"@ru ;
+  rdfs:label "Official"@en ;
+  rdfs:range xsd:boolean ;
+.
+#v-s:origin
+
+#------------------------------------------------------------------------- Персона --
 v-s:Person
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Identification ;
@@ -256,24 +355,10 @@ v-s:Person
   rdfs:label "Person"@en ;
   v-s:labelPattern "{@.v-s:lastName} {@.v-s:firstName} {@.v-s:middleName [0,1]}." ;
 .
-v-s:tabNumber
-  rdf:type owl:DatatypeProperty ;
-  rdfs:comment "Табельный номер"@ru ;
-  rdfs:comment "Personnel number"@en ;
-  rdfs:domain v-s:Person ;
-  rdfs:label "Табельный номер"@ru ;
-  rdfs:label "Personnel number"@en ;
-  rdfs:range xsd:integer ;
-.
-v-s:firstName
-  rdf:type owl:DatatypeProperty ;
-  rdfs:comment "Имя персоны."@ru ;
-  rdfs:comment "The first name of a person."@en ;
-  rdfs:domain v-s:Person ;
-  rdfs:label "Имя"@ru ;
-  rdfs:label "First name"@en ;
-  rdfs:range xsd:string ;
-.
+
+#rdfs:label
+
+#------Фамилия
 v-s:lastName
   rdf:type owl:DatatypeProperty ;
   rdfs:comment "Фамилия персоны"@ru ;
@@ -283,6 +368,19 @@ v-s:lastName
   rdfs:label "Last name"@en ;
   rdfs:range xsd:string ;
 .
+
+#------Имя
+v-s:firstName
+  rdf:type owl:DatatypeProperty ;
+  rdfs:comment "Имя персоны."@ru ;
+  rdfs:comment "The first name of a person."@en ;
+  rdfs:domain v-s:Person ;
+  rdfs:label "Имя"@ru ;
+  rdfs:label "First name"@en ;
+  rdfs:range xsd:string ;
+.
+
+#------Отчество
 v-s:middleName
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:Person ;
@@ -290,6 +388,46 @@ v-s:middleName
   rdfs:label "Middle name"@en ;
   rdfs:range xsd:string ;
 .
+
+#------Дата рождения
+#v-s:birthday
+
+#------Табельный номер
+v-s:tabNumber
+  rdf:type owl:DatatypeProperty ;
+  rdfs:comment "Табельный номер"@ru ;
+  rdfs:comment "Personnel number"@en ;
+  rdfs:domain v-s:Person ;
+  rdfs:label "Табельный номер"@ru ;
+  rdfs:label "Personnel number"@en ;
+  rdfs:range xsd:integer ;
+.
+
+#------Основная организация
+#v-s:parentOrganization
+
+#------Назначение по-умолчанию
+v-s:defaultAppointment
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Назначение по-умолчанию"@ru ;
+  rdfs:label "Default appointment"@en ;
+  rdfs:range v-s:Appointment ;
+  rdfs:domain v-s:Person ;
+.
+
+#------Назначение
+v-s:hasAppointment
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Назначение"@ru ;
+  rdfs:label "Appointment"@en ;
+  rdfs:range v-s:Appointment ;
+  rdfs:domain v-s:Person ;
+.
+
+#------Средства связи
+#v-s:hasCommunicationMean
+
+#------Логин
 v-s:hasAccount
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:OrganizationUnit ;
@@ -298,17 +436,28 @@ v-s:hasAccount
   rdfs:label "Account"@en ;
   rdfs:range v-s:Account ;
 .
-v-s:hasAppointment
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Назначение"@ru ;
-  rdfs:label "Appointment"@en ;
-  rdfs:range v-s:Appointment ;
-  rdfs:domain v-s:Person ;
+
+#------Происхождение
+#v-s:origin
+
+#------Комментарий
+#rdfs:comment
+
+
+#----------------------------------------------------------------------- Кадровая запись --
+v-s:HRRecord
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Temporal ;
+  rdfs:label "Кадровая запись"@ru ;
+  rdfs:label "HR record"@en ;
 .
-v-s:defaultAppointment
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Назначение по-умолчанию"@ru ;
-  rdfs:label "Default appointment"@en ;
-  rdfs:range v-s:Appointment ;
-  rdfs:domain v-s:Person ;
-.
+
+# Тут не хватает полей, которые описаны в v-s:PermissionStatement  v-s:startTime   v-s:endTime
+
+
+
+
+
+
+
