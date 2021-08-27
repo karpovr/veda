@@ -22,4 +22,4 @@ stopwatch = "0.0.7"
 num_cpus = "1.0"
 diligent-date-parser = "0.1.2"
 
-v_common = { package = "v-common", version = "=0.1.55" }
+v_common = { package = "v-common", version = "=0.1.56" }

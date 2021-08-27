@@ -11,7 +11,7 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::str;
-use v_common::az_lmdb::az_lmdb::f_authorize;
+use v_common::az_impl::common::f_authorize;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module::{create_sys_ticket, init_log, Module};
 use v_common::module::ticket::Ticket;

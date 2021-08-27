@@ -3,7 +3,7 @@ use std::ffi::CString;
 use std::os::raw::c_char;
 use std::ptr;
 
-use v_common::az_lmdb::az_lmdb::f_authorize;
+use v_common::az_impl::common::f_authorize;
 use v_common::v_authorization::common::Trace;
 
 const TRACE_ACL: u8 = 0;
