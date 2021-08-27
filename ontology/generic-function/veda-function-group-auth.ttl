@@ -590,7 +590,7 @@ v-s:Event_GroupGenerator
   rdfs:label "Скрипт распределения по группам авторизации" ;
   v-s:triggerByType v-s:GroupAuthorized ;
   v-s:preventByType v-s:Version;
-  v-s:executeIfEvent "exim";
+#  v-s:executeIfEvent "exim";
   v-s:runAt "V8.LowPriority" ;
   v-s:script """
 /* Available variables:
@@ -1041,7 +1041,7 @@ cfg:Event_7
   rdfs:comment "Скрипт включает индивид в группу индивидов своего класса." ;
   v-s:triggerByType v-s:ClassAuthorized ;
   v-s:preventByType v-s:Version;
-  v-s:executeIfEvent "exim";
+#  v-s:executeIfEvent "exim";
   v-s:script """
 /* Available variables:
  * ticket = superuser ticket
