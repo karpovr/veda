@@ -298,7 +298,12 @@ v-s:RecursiveCommentTemplate
     </div>
     <div id="new-reply"></div>
     <hr class="margin-sm">
-    <div about="@" rel="v-s:hasComment" data-template="v-s:RecursiveCommentTemplate"></div>
+    <div class="row">
+      <div class="col-sm-1 col-xs-1"></div>
+      <div class="col-sm-11 col-xs-11">
+        <div about="@" rel="v-s:hasComment" data-template="v-s:RecursiveCommentTemplate"></div>
+      </div>
+    </div>
   </div>
 </div>
   """ ;
