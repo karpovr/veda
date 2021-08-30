@@ -19,4 +19,4 @@ log = "0.4"
 rust-ini = "0.13"
 rand = "0.7"
 
-v_common = { package = "v-common", version = "=0.1.56" }
+v_common = { package = "v-common", version = "=0.1.57" }
