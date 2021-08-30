@@ -195,6 +195,10 @@ $.fn.veda_string = function ( options ) {
     this.removeAttr('tabindex');
     control.attr('tabindex', tabindex);
   }
+  const inputType = this.data("input-type");
+  if (inputType) {
+    control.attr('type', inputType); 
+  } 
 
   this.append(control);
   return this;
@@ -2234,7 +2238,7 @@ function cropImage (imageForCrop, ratio, maxWidth) {
 $.fn.veda_file = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_file.defaults, options );
   const control = $(opts.template);
-  const fileInput = control.find('input');
+  const fileInput = control.find('input[type="file"]');
   const indicatorPercentage = $('.indicator-percentage', control);
   const indicatorSpinner = $('.indicator-spinner', control);
   const spec = opts.spec;
@@ -2279,6 +2283,11 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:fileUri'] = [uri];
     fileIndividual['v-s:filePath'] = [path];
     fileIndividual['v-s:parent'] = [parent];
+	fileIndividual['v-s:backwardTarget'] = [parent];
+    fileIndividual['v-s:backwardProperty'] = [rel_uri];
+    fileIndividual["v-s:canRead"] = [true];
+    fileIndividual["v-s:canUpdate"] = [true];
+    fileIndividual["v-s:canDelete"] = [true];
     return new Promise((resolve, reject) => {
       // If file is image && !thumbnail
       if ( file.name && (/^(?!thumbnail-).+\.(jpg|jpeg|gif|png|bmp|svg)$/i).test(file.name) ) {
