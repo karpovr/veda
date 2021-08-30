@@ -13,13 +13,16 @@
   v-s:loadPriority 6 ;
 .
 
-### -------------------------------------------------------
+# ------------------------------------------------------------- КЛАССЫ --
+
+#------------------------------------------------------------- Сущность --
 v-s:Thing
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
   rdfs:label "Сущность"@ru ;
   rdfs:label "Thing"@en ;
 .
+
 v-s:updateCounter
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Счетчик обновлений"@ru ;
@@ -70,15 +73,14 @@ v-s:creator
   rdfs:range v-s:Appointment ;
   rdfs:domain v-s:Thing ;
 .
-v-s:PS_creator
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:Thing ;
-  v-ui:forProperty v-s:creator;
-  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:employee.v-s:hasAccount.isExists'=='true' && 'v-s:official'=='true')"^^xsd:string ;
-  rdfs:label "Спецификация к свойству v-s:creator для класса v-s:Thing"@ru ;
-  rdfs:label "Spec for property v-s:creator for class v-s:Thing"@en ;
-.
-
+  v-s:PS_creator
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:Thing ;
+    v-ui:forProperty v-s:creator;
+    v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:employee.v-s:hasAccount.isExists'=='true' && 'v-s:official'=='true')"^^xsd:string ;
+    rdfs:label "Спецификация к свойству v-s:creator для класса v-s:Thing"@ru ;
+    rdfs:label "Spec for property v-s:creator for class v-s:Thing"@en ;
+  .
 v-s:lastEditor
   rdf:type owl:ObjectProperty ;
   rdfs:label "Последний редактор"@ru ;
@@ -86,14 +88,14 @@ v-s:lastEditor
   rdfs:range v-s:Appointment ;
   rdfs:domain v-s:Thing ;
 .
-v-s:PS_lastEditor
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:Thing ;
-  v-ui:forProperty v-s:lastEditor;
-  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:employee.v-s:hasAccount.isExists'=='true' && 'v-s:official'=='true')"^^xsd:string ;
-  rdfs:label "Спецификация к свойству v-s:creator для класса v-s:Thing"@ru ;
-  rdfs:label "Spec for property v-s:creator for class v-s:Thing"@en ;
-.
+  v-s:PS_lastEditor
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:Thing ;
+    v-ui:forProperty v-s:lastEditor;
+    v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:employee.v-s:hasAccount.isExists'=='true' && 'v-s:official'=='true')"^^xsd:string ;
+    rdfs:label "Спецификация к свойству v-s:creator для класса v-s:Thing"@ru ;
+    rdfs:label "Spec for property v-s:creator for class v-s:Thing"@en ;
+  .
 v-s:created
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Дата создания"@ru ;
@@ -206,37 +208,12 @@ v-s:attachment
   rdfs:range v-s:File ;
   rdfs:domain v-s:Thing ;
 .
-
-# Найти упоминания удалить
-v-s:scanAttachment
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Сканированный вариант документа"@ru ;
-  rdfs:label "Scanned document"@en ;
-  rdfs:range v-s:File ;
-  rdfs:domain v-s:Thing ;
-  rdfs:subPropertyOf v-s:attachment ;
-.
-v-s:companionAttachment
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Сопутствующий документ"@ru ;
-  rdfs:label "Companion document"@en ;
-  rdfs:range v-s:File ;
-  rdfs:domain v-s:Thing ;
-  rdfs:subPropertyOf v-s:attachment ;
-.
 v-s:hasLink
   rdf:type owl:ObjectProperty ;
   rdfs:label "Связанные документы"@ru ;
   rdfs:label "Linked documents"@en ;
   rdfs:range v-s:Link ;
   rdfs:domain v-s:Thing ;
-.
-v-s:linkedObject
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Связанный документ"@ru ;
-  rdfs:label "Linked object"@en ;
-  rdfs:range v-s:UserThing ;
-  rdfs:domain v-s:UserThing ;
 .
 v-s:tag
   rdf:type owl:DatatypeProperty ;
@@ -372,6 +349,13 @@ v-s:ignoreExclusive
   rdfs:label "Ignore exclusive rigths"@en ;
   rdfs:range xsd:boolean ;
 .
+v-s:dropCount
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Thing ;
+  rdfs:label "Обнулить счётчики в базе авторизации"@ru ;
+  rdfs:label "Reset counters in the authorization database"@en ;
+  rdfs:range xsd:boolean ;
+.
 v-s:colorDescription
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:Thing ;
@@ -379,7 +363,25 @@ v-s:colorDescription
   rdfs:label "color"@en ;
   rdfs:range xsd:string ;
 .
-### -------------------------------------------------------
+# Найти упоминания удалить
+v-s:scanAttachment
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Сканированный вариант документа"@ru ;
+  rdfs:label "Scanned document"@en ;
+  rdfs:range v-s:File ;
+  rdfs:domain v-s:Thing ;
+  rdfs:subPropertyOf v-s:attachment ;
+.
+v-s:companionAttachment
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Сопутствующий документ"@ru ;
+  rdfs:label "Companion document"@en ;
+  rdfs:range v-s:File ;
+  rdfs:domain v-s:Thing ;
+  rdfs:subPropertyOf v-s:attachment ;
+.
+
+#------------------------------------------------------------- Пользовательская сущность --
 v-s:UserThing
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Thing ;
@@ -389,21 +391,31 @@ v-s:UserThing
   rdfs:label "Пользовательская сущность"@ru ;
   rdfs:label "User thing"@en ;
 .
-### -------------------------------------------------------
+v-s:linkedObject
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Связанный документ"@ru ;
+  rdfs:label "Linked object"@en ;
+  rdfs:range v-s:UserThing ;
+  rdfs:domain v-s:UserThing ;
+.
+
+#---------------------------------------------------------------- Системная сущность --
 v-s:SystemThing
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Thing ;
   rdfs:label "Системная сущность"@ru ;
   rdfs:label "System thing"@en ;
 .
-### -------------------------------------------------------
+
+#--------------------------------------------------------------------- Функция--
 v-s:Function
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:SystemThing ;
   rdfs:label "Функция"@ru ;
   rdfs:label "Function"@en ;
 .
-### -------------------------------------------------------
+
+#-------------------------------------------------------------- Удостоверение личности--
 v-s:Identification
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource  ;
@@ -421,7 +433,7 @@ v-s:birthday
   rdfs:range xsd:dateTime ;
 .
 
-### -------------------------------------------------------
+#--------------------------------------------------------------- Временная сущность--
 v-s:Temporal
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource  ;
@@ -540,7 +552,8 @@ v-s:hasTerm
   rdfs:range v-s:Term ;
   rdfs:domain v-s:Temporal ;
 .
-### -------------------------------------------------------
+
+#------------------------------------------------------------- Cущность с местоположением --
 v-s:Spatial
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -604,7 +617,7 @@ v-s:latitude
   rdfs:domain v-s:Spatial ;
 .
 
-### -------------------------------------------------------
+#------------------------------------------------------------- Контрактная сущность --
 v-s:Contractual
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -698,6 +711,21 @@ v-s:hasContractor
   rdfs:range v-s:Contractor ;
   rdfs:domain v-s:Contractual ;
 .
+v-s:hasOrganization
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Организация"@ru ;
+  rdfs:label "Organization"@en ;
+  rdfs:range v-s:Organization ;
+  rdfs:domain v-s:Contractual ;
+.
+  v-s:Ps_ContractParticipant
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:ContractParticipant ;
+    v-ui:forProperty v-s:hasContractor ;
+    v-ui:forProperty v-s:hasOrganization ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 1 ;
+  .
 v-s:hasObligationKind
   rdf:type owl:ObjectProperty ;
   rdfs:label "Вид обязательств"@ru ;
@@ -789,13 +817,6 @@ v-s:hasConfidentialDocument
   rdfs:range v-s:InternalDocument ;
   rdfs:domain v-s:Contractual ;
 .
-v-s:hasOrganization
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Организация"@ru ;
-  rdfs:label "Organization"@en ;
-  rdfs:range v-s:Organization ;
-  rdfs:domain v-s:Contractual ;
-.
 v-s:hasContractParticipantCustomer
   rdf:type owl:ObjectProperty ;
   rdfs:label "Заказчик"@ru ;
@@ -817,6 +838,15 @@ v-s:hasContractParticipantStakeholder
   rdfs:range v-s:ContractParticipantStakeholder ;
   rdfs:domain v-s:Contractual ;
 .
+  v-s:PsHasContractParticipant_Contract
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Contract ;
+    v-ui:forProperty v-s:hasContractParticipantCustomer ;
+    v-ui:forProperty v-s:hasContractParticipantSupplier ;
+    v-ui:forProperty v-s:hasContractParticipantStakeholder ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+  .
 v-s:supportSpecialistOfContract
   rdf:type owl:ObjectProperty ;
   rdfs:label "Специалист по сопровождению"@ru ;
@@ -832,7 +862,7 @@ v-s:hasContractScale
   rdfs:domain v-s:Contractual ;
 .
 
-### -------------------------------------------------------
+#----------------------------------------------------------- Контролируемая сущность --
 v-s:Controlled
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -874,15 +904,6 @@ v-s:checkedProcess
   rdfs:range v-s:Process ;
   rdfs:domain v-s:Controlled ;
 .
-v-s:PScheckedRequirement_Controlled
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:Controlled ;
-  v-ui:forProperty v-s:checkedRequirement ;
-  rdfs:label "Спецификация свойства v-s:checkedRequirement для класса v-s:Controlled"@ru ;
-  rdfs:label "v-s:checkedRequirement property specification for v-s:Controlled class"@en ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-.
 v-s:checkedRequirement
   rdf:type owl:ObjectProperty ;
   rdfs:label "Проверяемое требование"@ru ;
@@ -890,6 +911,15 @@ v-s:checkedRequirement
   rdfs:range v-s:NormativeDocumentRequirement ;
   rdfs:domain v-s:Controlled ;
 .
+  v-s:PScheckedRequirement_Controlled
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:Controlled ;
+    v-ui:forProperty v-s:checkedRequirement ;
+    rdfs:label "Спецификация свойства v-s:checkedRequirement для класса v-s:Controlled"@ru ;
+    rdfs:label "v-s:checkedRequirement property specification for v-s:Controlled class"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:responsibleDescription
   rdf:type owl:ObjectProperty ;
   rdfs:label "Ответственный. Описание"@ru ;
@@ -917,13 +947,6 @@ v-s:responsibleOrganization
   rdfs:label "Responsible organization"@en ;
   rdfs:range v-s:Organization ;
   rdfs:domain v-s:Controlled ;
-.
-v-s:financialOrganization
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Финансовая организация"@ru ;
-  rdfs:label "Financial organization"@en ;
-  rdfs:range v-s:Organization ;
-  rdfs:domain v-s:Financial ;
 .
 v-s:responsibleProcess
   rdf:type owl:ObjectProperty ;
@@ -975,13 +998,15 @@ v-s:scriptHandlered
   rdfs:range xsd:boolean ;
   rdfs:domain v-s:Controlled ;
 .
-### -------------------------------------------------------
+
+#-------------------------------------------------------------- Регистрируемая сущность --
 v-s:Registered
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
   rdfs:label "Регистрируемая сущность"@ru ;
   rdfs:label "Registered thing"@en ;
 .
+
 v-s:registrationDate
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Дата регистрации"@ru ;
@@ -1053,19 +1078,14 @@ v-s:hasRegistrationRecord
   rdfs:domain v-s:Registered ;
 .
 
-### ------------------------------------------------------
+#--------------------------------------------------------------- Измеряемая сущность --
 v-s:Measurable
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
   rdfs:label "Измеряемая сущность"@ru ;
   rdfs:label "Measurable thing"@en ;
 .
-v-s:UnitOfMeasure
-  rdf:type owl:Class ;
-  rdfs:subClassOf rdfs:Resource ;
-  rdfs:label "Единица измерения"@ru ;
-  rdfs:label "Unit of measure"@en ;
-.
+
 v-s:hasLevel
   rdf:type owl:ObjectProperty ;
   rdfs:label "Уровень"@ru ;
@@ -1154,7 +1174,15 @@ v-s:weight
   rdfs:range xsd:decimal ;
   rdfs:domain v-s:Measurable ;
 .
-### ------------------------------------------------------
+#---------------------------------------------------------------- Единица измерения --
+v-s:UnitOfMeasure
+  rdf:type owl:Class ;
+  rdfs:subClassOf rdfs:Resource ;
+  rdfs:label "Единица измерения"@ru ;
+  rdfs:label "Unit of measure"@en ;
+.
+
+#-------------------------------------------- Классифицируемая сущность общероссийскими классификаторами --
 v-s:ClassifiedRus
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -1203,7 +1231,7 @@ v-s:itemNumber
   rdfs:range xsd:integer ;
   rdfs:domain v-s:ClassifiedRus ;
 .
-### ------------------------------------------------------------
+#----------------------------------------------------------------- Обслуживаемая сущность --
 v-s:Maintained
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -1217,8 +1245,6 @@ v-s:hasMaintainedObject
   rdfs:range v-s:MaintainedObject ;
   rdfs:domain v-s:Maintained ;
 .
-
-#------------------------------------------------------
 v-s:eliminatingTime
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Время устранения"@ru ;
@@ -1255,7 +1281,7 @@ v-s:hasLifecycleStage
   rdfs:domain v-s:Maintained ;
 .
 
-### ------------------------------------------------------------
+#------------------------------------------------------------------ Финансовая сущность --
 v-s:Financial
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -1268,13 +1294,6 @@ v-s:expectedValueOfContract
   rdfs:label "Expected value of contract"@en ;
   rdfs:range v-s:Price ;
   rdfs:domain v-s:Financial ;
-.
-v-s:hasBudgetCategory
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Financial ;
-  rdfs:label "Категория бюджета"@ru ;
-  rdfs:label "Budget category"@en ;
-  rdfs:range v-s:BudgetCategory ;
 .
 v-s:hasPrice
   rdf:type owl:ObjectProperty ;
@@ -1304,8 +1323,22 @@ v-s:transactionDate
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Financial ;
 .
+v-s:financialOrganization
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Финансовая организация"@ru ;
+  rdfs:label "Financial organization"@en ;
+  rdfs:range v-s:Organization ;
+  rdfs:domain v-s:Financial ;
+.
+v-s:hasBudgetCategory
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Financial ;
+  rdfs:label "Категория бюджета"@ru ;
+  rdfs:label "Budget category"@en ;
+  rdfs:range v-s:BudgetCategory ;
+.
 
-### ------------------------------------------------------------
+#--------------------------------------------------------------- Проектная сущность --
 v-s:Projectable
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -1348,7 +1381,8 @@ v-s:hasProjectStage
   rdfs:range v-s:ProjectStage ;
   rdfs:domain v-s:Projectable ;
 .
-### ------------------------------------------------------------
+
+#--------------------------------------------------------------- Доставляемая сущность --
 v-s:Deliverable2
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -1453,99 +1487,95 @@ v-s:transportOrganization
   rdfs:domain v-s:Deliverable2 ;
 .
 
-### ------------------------------------------------------------
+#------------------------------------------------------------ Содержание химического элемента --
 v-s:containingChemicalElement
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Содержание химического элемента"@ru ;
   rdfs:label "Containing chemical element"@en ;
 .
-
- v-s:containsAurum
+v-s:containsAurum
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание золота(грамм)"@ru ;
   rdfs:label "Contains Aurum"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsArgentum
+v-s:containsArgentum
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание серебра(грамм)"@ru ;
   rdfs:label "Contains Argentum"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsPalladium
+v-s:containsPalladium
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание палладия(грамм)"@ru ;
   rdfs:label "Contains Palladium"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsPlatinum
+v-s:containsPlatinum
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание платины(грамм)"@ru ;
   rdfs:label "Contains Platinum"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsIridium
+v-s:containsIridium
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание иридия(грамм)"@ru ;
   rdfs:label "Contains Iridium"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsRadium
+v-s:containsRadium
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание радия(грамм)"@ru ;
   rdfs:label "Contains Radium"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsRuthenium
+v-s:containsRuthenium
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание рутения(грамм)"@ru ;
   rdfs:label "Contains Ruthenium"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-
- v-s:containsOsmium
+v-s:containsOsmium
   rdf:type owl:ObjectProperty ;
   rdfs:label "Содержание осмия(грамм)"@ru ;
   rdfs:label "Contains Osmium"@en ;
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
-#------------------------------------------------------
+
+#--------------------------------------------------------------------- Документ --
 v-s:Document
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Документ"@ru ;
   rdfs:label "Document"@en ;
 .
-#------------------------------------------------------
+
+#---------------------------------------------------- Документы, доступные для поиска пользователю --
 v-s:UserSearchableDocument
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Документы, доступные для поиска пользователю"@ru ;
   rdfs:label "User searchable document"@en ;
 .
-#------------------------------------------------------
+
+#-------------------------------------------------------------------- Справочник --
 v-s:Dictionary
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Справочник"@ru ;
   rdfs:label "Dictionary"@en ;
 .
-#------------------------------------------------------
+
+#-------------------------------------------------------------------- Удаляемый --
 v-s:Deletable
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:SystemThing ;
@@ -1553,7 +1583,7 @@ v-s:Deletable
   rdfs:label "Deletable"@en ;
 .
 
-### ------------------------------------------------------------
+#-------------------------------------------------------------- Иерархическая сущность --
 v-s:Hierarchical
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -1574,8 +1604,12 @@ v-s:parentUnit
   rdfs:label "Parent unit"@en ;
   owl:inverseOf v-s:childUnit ;
 .
-#--------------Template--------------------------------
 
+
+
+# ------------------------------------------------------------------- ШАБЛОНЫ --
+
+# ------------------------------------------------------------ Шаблон объектов ТОРО --
 v-s:hasMaintainedObjectTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон объектов ТОРО"@ru ;
@@ -1614,14 +1648,13 @@ v-s:hasMaintainedObjectTemplate
 """ ;
 .
 
+# ------------------------------------------------- Шаблон объектов v-s:Deletable(Удаляемый) --
 v-s:TS_Deletable
   rdf:type v-ui:TemplateSpecification ;
   v-s:loadPriority 15 ;
   v-ui:defaultTemplate v-s:DeletableTemplate ;
   v-ui:forClass v-s:Deletable ;
 .
-
-#--------------Template--------------------------------
 #----v-s:Deletable ствится вторым классом, рядом с классом документа, чтобы 2 шаблона не отображались на экране 
 v-s:DeletableTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -1631,46 +1664,17 @@ v-s:DeletableTemplate
 <div></div>
 """ ;
 .
-# ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
-v-s:PsHasRoleInContract_ContractParticipantCustomer
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:ContractParticipantCustomer ;
-  v-ui:forProperty v-s:hasRoleInContract ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'@' == 'd:dsxyd1uxsxuui6f1t3s4ki3rdp' || '@' == 'd:a14fhdnimgodskj2jlmzwausubs' || '@' == 'd:ji9b5cqs5ucr1uy8ou7s78989x' || '@' == 'd:xxsa1kfknh7anmo6688y026udp' || '@' == 'd:a1268rvzfsml3g4j0wcjxf2skc9' || '@' == 'd:h77kc056374cpeyqk9qj2nl20e' || '@' == 'd:d7baxl3cu7w5hbzl2g560vyvb0'" ;
-.
-v-s:PsHasRoleInContract_ContractParticipantSupplier
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:ContractParticipantSupplier ;
-  v-ui:forProperty v-s:hasRoleInContract ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'@' == 'd:wws2oz313z6xpl1hd4u3laxzfg' || '@' == 'd:jslj1t0dm3o6sg8jas931um4kw' || '@' == 'd:a1nzzs06xqqx3fvud0bsjq78cdq' || '@' == 'd:wh0t3y7ou4k9o0ec5vw4j5df5c' || '@' == 'd:p7xxv9vvwex8f1jfs2lhqjl85v' || '@' == 'd:hmmpzblf01agptcfl0kn704l2a' || '@' == 'd:kwe8nsn9qn3e6u9dczwn7wpu67'" ;
-.
-v-s:PsHasRoleInContract_ContractParticipantStakeholder
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:ContractParticipantStakeholder ;
-  v-ui:forProperty v-s:hasRoleInContract ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'@' == 'd:dm44s17tayal8frdutpnb2matk' || '@' == 'd:rdvfeae7ylufawj02z492cxmto' || '@' == 'd:tv2r6lzebfk6p3298jsnwokgxk'" ;
-.
 
-v-s:PsHasContractParticipant_Contract
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Contract ;
-  v-ui:forProperty v-s:hasContractParticipantCustomer ;
-  v-ui:forProperty v-s:hasContractParticipantSupplier ;
-  v-ui:forProperty v-s:hasContractParticipantStakeholder ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-.
-v-s:Ps_ContractParticipant
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:ContractParticipant ;
-  v-ui:forProperty v-s:hasContractor ;
-  v-ui:forProperty v-s:hasOrganization ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;
-.
+
+
+
+
+
+
+
+
+
+
+
+
+

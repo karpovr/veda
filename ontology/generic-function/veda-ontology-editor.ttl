@@ -17,6 +17,76 @@
   v-s:loadPriority 8 ;
 .
 
+# ---------------------------------------------------------------------- BUNDLES --
+v-s:PropertiesBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Свойства"@ru ;
+  rdfs:label "Properties"@en ;
+.
+v-s:SuperClassesBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Супер классы"@ru ;
+  rdfs:label "Super classes"@en ;
+.
+v-s:SuperPropertiesBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Супер свойства"@ru ;
+  rdfs:label "Super properties"@en ;
+.
+v-s:SpecificationsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Спецификации"@ru ;
+  rdfs:label "Specifications"@en ;
+.
+
+
+
+# --------------------------------------------------------------------- МОДЕЛИ --
+
+#---------------------------------------------------------------- Модель класса Class --
+v-ui:ClassClassModel
+  rdf:type v-ui:ClassModel;
+  rdfs:label "Модель класса Class"@ru ;
+  rdfs:label "Class class model"@en ;
+  v-ui:forClass owl:Class ;
+  v-ui:forClass rdfs:Class ;
+  v-s:script """
+  this.addProperty = function (property) {
+    if (property instanceof String || typeof property === "string" ) {
+      property = new veda.IndividualModel( property.valueOf() );
+    }
+    if ( !(property instanceof veda.IndividualModel) ) { return; }
+    property.addDomain(this);
+    this.domainProperties[property.id] = property;
+  };
+
+  this.createProperty = function () {
+    var property = new veda.IndividualModel();
+    property["rdf:type"] = [ new veda.IndividualModel("rdf:Property") ];
+    property.addDomain(self);
+    this.domainProperties[property.id] = property;
+  };
+
+  this.isSubClassOf = function (_super) {
+    return this.getSuperClasses().then(function (superClasses) {
+      var result = false;
+      for (var i = 0, superClass; (superClass = superClasses[i]) && !result; i++) {
+        result = _super === superClass.id;
+      }
+      return result;
+    });
+  };
+
+  this.getSuperClasses = function () {
+    return this.prefetch(Infinity, "rdfs:subClassOf").then(function (superClasses) {
+      return superClasses.slice(1);
+    });
+  };
+  
+  """ ;
+.
+
+#-------------------------------------------------------------- Модель класса Property --
 v-ui:PropertyClassModel
   rdf:type v-ui:ClassModel ;
   rdfs:label "Модель класса Property"@ru ;
@@ -108,69 +178,9 @@ v-ui:PropertyClassModel
   """ ;
 .
 
-v-ui:ClassClassModel
-  rdf:type v-ui:ClassModel;
-  rdfs:label "Модель класса Class"@ru ;
-  rdfs:label "Class class model"@en ;
-  v-ui:forClass owl:Class ;
-  v-ui:forClass rdfs:Class ;
-  v-s:script """
-  this.addProperty = function (property) {
-    if (property instanceof String || typeof property === "string" ) {
-      property = new veda.IndividualModel( property.valueOf() );
-    }
-    if ( !(property instanceof veda.IndividualModel) ) { return; }
-    property.addDomain(this);
-    this.domainProperties[property.id] = property;
-  };
 
-  this.createProperty = function () {
-    var property = new veda.IndividualModel();
-    property["rdf:type"] = [ new veda.IndividualModel("rdf:Property") ];
-    property.addDomain(self);
-    this.domainProperties[property.id] = property;
-  };
 
-  this.isSubClassOf = function (_super) {
-    return this.getSuperClasses().then(function (superClasses) {
-      var result = false;
-      for (var i = 0, superClass; (superClass = superClasses[i]) && !result; i++) {
-        result = _super === superClass.id;
-      }
-      return result;
-    });
-  };
-
-  this.getSuperClasses = function () {
-    return this.prefetch(Infinity, "rdfs:subClassOf").then(function (superClasses) {
-      return superClasses.slice(1);
-    });
-  };
-  
-  """ ;
-.
-
-v-s:PropertiesBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Свойства"@ru ;
-  rdfs:label "Properties"@en ;
-.
-v-s:SuperClassesBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Супер классы"@ru ;
-  rdfs:label "Super classes"@en ;
-.
-v-s:SuperPropertiesBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Супер свойства"@ru ;
-  rdfs:label "Super properties"@en ;
-.
-v-s:SpecificationsBundle
-  rdf:type v-s:Bundle;
-  rdfs:label "Спецификации"@ru ;
-  rdfs:label "Specifications"@en ;
-.
-
+# --------------------------------------------------------------------- СПЕЦИФИКАЦИИ --
 v-s:ClassLabelSpec
   rdf:type v-ui:PropertySpecification;
   v-ui:forClass rdfs:Class ;
@@ -184,12 +194,79 @@ v-s:ClassSubClassOfSpec
   v-ui:minCardinality 0;
   v-ui:maxCardinality 100;
 .
+v-ui:PsTypeClassSpec
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация типа для класса Resource"@ru ;
+  rdfs:label "Type specification for Resource class"@en ;
+  v-ui:forClass owl:Class ;
+  v-ui:forClass rdfs:Class ;
+  v-ui:forProperty rdf:type ;
+  v-ui:optionValue owl:Class ;
+  v-ui:optionValue rdfs:Class ;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 1 ;
+.
+
+
 v-s:PropertySubPropertyOfSpec
   rdf:type v-ui:PropertySpecification;
   v-ui:forClass rdf:Property ;
   v-ui:forProperty rdfs:subPropertyOf ;
   v-ui:minCardinality 0;
   v-ui:maxCardinality 100;
+.
+v-ui:PsTypePropertySpec
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация типа для класса Resource"@ru ;
+  rdfs:label "Type specification for Resource class"@en ;
+  v-ui:forProperty rdf:type ;
+  v-ui:forClass rdf:Property ;
+  v-ui:forClass owl:ObjectProperty ;
+  v-ui:forClass owl:DatatypeProperty ;
+  v-ui:optionValue rdf:Property ;
+  v-ui:optionValue owl:ObjectProperty ;
+  v-ui:optionValue owl:DatatypeProperty ;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 1 ;
+.
+v-ui:PsMandatoryPropertiesForPropertySpec
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация свойств для класса PropertySpecifications"@ru ;
+  rdfs:label "Properties specification for PropertySpecifications class"@en ;
+  v-ui:forClass v-ui:PropertySpecification ;
+  v-ui:forProperty v-ui:forProperty ;
+  v-ui:forProperty v-ui:forClass ;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 100 ;
+.
+
+v-ui:PsMultiValuePropertiesForObjectPropertySpec
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация свойств для класса PropertySpecifications"@ru ;
+  rdfs:label "Properties specification for PropertySpecifications class"@en ;
+  v-ui:forClass v-ui:ObjectPropertySpecification ;
+  v-ui:forProperty v-ui:treeRoot ;
+  v-ui:forProperty v-ui:treeOutProperty ;
+  v-ui:forProperty v-ui:treeInProperty ;
+  v-ui:forProperty v-ui:treeAllowedClass ;
+  v-ui:forProperty v-ui:treeSelectableClass ;
+  v-ui:forProperty v-ui:treeSelectableFilter ;
+  v-ui:forProperty v-ui:treeDisplayedProperty ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 100 ;
+.
+
+v-ui:PsForClassSpec
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация типа для класса Resource"@ru ;
+  rdfs:label "Type specification for Resource class"@en ;
+  v-ui:forClass v-ui:ClassTemplate ;
+  v-ui:forProperty v-ui:forClass ;
+  v-ui:tooltip "Ссылка на объект типа Класс."@ru ;
+  v-ui:tooltip "Link to object of type Class"@en ;
+  v-ui:queryPrefix "('rdf:type'=='owl:Class' || 'rdf:type'=='rdfs:Class')"^^xsd:string ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 100 ;
 .
 
 v-s:PropertySpecificationSearch
@@ -210,6 +287,10 @@ v-s:PropertySpecificationSearchBlank
   v-fc:targetType v-ui:ObjectPropertySpecification ;
 .
 
+
+# ---------------------------------------------------------------------- ШАБЛОНЫ --
+
+#---------------------------------------------------------------- Общий шаблон онтологии --
 v-ui:CommonOntologyTemplate
   rdf:type v-ui:ClassTemplate;
   rdfs:label "Общий шаблон онтологии"@ru ;
@@ -242,7 +323,7 @@ v-ui:CommonOntologyTemplate
 </div>
   """ ;
 .
-
+#-------------------------------------------------------------- Шаблон класса Class --
 v-ui:ClassClassTemplate
   rdf:type v-ui:ClassTemplate;
   rdfs:label "Шаблон класса Class"@ru ;
@@ -394,19 +475,7 @@ v-ui:ClassClassTemplate
   """ ;
 .
 
-v-ui:PsTypeClassSpec
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация типа для класса Resource"@ru ;
-  rdfs:label "Type specification for Resource class"@en ;
-  v-ui:forClass owl:Class ;
-  v-ui:forClass rdfs:Class ;
-  v-ui:forProperty rdf:type ;
-  v-ui:optionValue owl:Class ;
-  v-ui:optionValue rdfs:Class ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-.
-
+#------------------------------------------------------------ Шаблон класса rdf:Property --
 v-ui:PropertyClassTemplate
   rdf:type v-ui:ClassTemplate;
   rdfs:label "Шаблон класса rdf:Property"@ru ;
@@ -443,21 +512,8 @@ v-ui:PropertyClassTemplate
   """ ;
 .
 
-v-ui:PsTypePropertySpec
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация типа для класса Resource"@ru ;
-  rdfs:label "Type specification for Resource class"@en ;
-  v-ui:forProperty rdf:type ;
-  v-ui:forClass rdf:Property ;
-  v-ui:forClass owl:ObjectProperty ;
-  v-ui:forClass owl:DatatypeProperty ;
-  v-ui:optionValue rdf:Property ;
-  v-ui:optionValue owl:ObjectProperty ;
-  v-ui:optionValue owl:DatatypeProperty ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-.
 
+#------------------------------------------------------ Шаблон класса v-ui:PropertySpecification --
 v-s:TS_PropertySpecification 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -570,6 +626,7 @@ v-ui:PropertySpecificationTemplate
   """ ;
 .
 
+#------------------------------------------------ Шаблон класса v-ui:DatatypePropertySpecification --
 v-s:TS_DatatypePropertySpecification 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -578,7 +635,7 @@ v-s:TS_DatatypePropertySpecification
 .
 v-ui:DatatypePropertySpecificationTemplate
   rdf:type v-ui:ClassTemplate;
-  rdfs:label "Шаблон класса v-ui:PropertySpecification"@ru ;
+  rdfs:label "Шаблон класса v-ui:DatatypePropertySpecification"@ru ;
   rdfs:label "v-ui:PropertySpecification class template"@en ;
   v-ui:forClass v-ui:DatatypePropertySpecification ;
   v-ui:template """
@@ -732,6 +789,7 @@ v-ui:DatatypePropertySpecificationTemplate
   """ ;
 .
 
+#-------------------------------------------------- Шаблон класса v-ui:ObjectPropertySpecification --
 v-s:TS_ObjectPropertySpecification 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -740,7 +798,7 @@ v-s:TS_ObjectPropertySpecification
 .
 v-ui:ObjectPropertySpecificationTemplate
   rdf:type v-ui:ClassTemplate;
-  rdfs:label "Шаблон класса v-ui:PropertySpecification"@ru ;
+  rdfs:label "Шаблон класса v-ui:ObjectPropertySpecification"@ru ;
   rdfs:label "v-ui:PropertySpecification class template"@en ;
   v-ui:forClass v-ui:ObjectPropertySpecification ;
   v-ui:template """
@@ -944,34 +1002,7 @@ v-ui:ObjectPropertySpecificationTemplate
   """ ;
 .
 
-v-ui:PsMandatoryPropertiesForPropertySpec
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация свойств для класса PropertySpecifications"@ru ;
-  rdfs:label "Properties specification for PropertySpecifications class"@en ;
-  v-ui:forClass v-ui:PropertySpecification ;
-  v-ui:forProperty v-ui:forProperty ;
-  v-ui:forProperty v-ui:forClass ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 100 ;
-.
-
-v-ui:PsMultiValuePropertiesForObjectPropertySpec
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация свойств для класса PropertySpecifications"@ru ;
-  rdfs:label "Properties specification for PropertySpecifications class"@en ;
-  v-ui:forClass v-ui:ObjectPropertySpecification ;
-  v-ui:forProperty v-ui:treeRoot ;
-  v-ui:forProperty v-ui:treeOutProperty ;
-  v-ui:forProperty v-ui:treeInProperty ;
-  v-ui:forProperty v-ui:treeAllowedClass ;
-  v-ui:forProperty v-ui:treeSelectableClass ;
-  v-ui:forProperty v-ui:treeSelectableFilter ;
-  v-ui:forProperty v-ui:treeDisplayedProperty ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-.
-
-
+#------------------------------------------------------- Шаблон класса v-ui:ClassTemplate --
 v-s:TS_ClassTemplate 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -999,6 +1030,7 @@ v-ui:ClassTemplateTemplate
   """ ;
 .
 
+#------------------------------------------------------- Шаблон класса v-ui:ClassModel --
 v-s:TS_ClassModel 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -1026,19 +1058,7 @@ v-ui:ClassModelTemplate
   """ ;
 .
 
-v-ui:PsForClassSpec
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация типа для класса Resource"@ru ;
-  rdfs:label "Type specification for Resource class"@en ;
-  v-ui:forClass v-ui:ClassTemplate ;
-  v-ui:forProperty v-ui:forClass ;
-  v-ui:tooltip "Ссылка на объект типа Класс."@ru ;
-  v-ui:tooltip "Link to object of type Class"@en ;
-  v-ui:queryPrefix "('rdf:type'=='owl:Class' || 'rdf:type'=='rdfs:Class')"^^xsd:string ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-.
-
+#---------------------------------------------------------- Шаблон класса v-s:Event --
 v-s:TS_Event 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -1132,6 +1152,7 @@ v-ui:EventTemplate
   """ ;
 .
 
+#--------------------------------------------------------- Шаблон класса v-s:Module --
 v-s:TS_Module 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -1214,6 +1235,9 @@ v-ui:ModuleTemplate
 
 # -- ПРАВА --
 
+
+
+
 v-s:RightsApplication
   rdf:type v-s:Application ;
   rdfs:label "Управление правами"@ru ;
@@ -1230,25 +1254,23 @@ v-s:RightsApplication
   v-s:hasRegistry v-s:GroupGeneratorRegistry ;
   v-s:hasRegistry v-s:PermissionGeneratorRegistry ;
 .
-v-s:TS_Membership
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate v-s:MembershipTemplate;
-  v-ui:forClass v-s:Membership
-.
 
-v-s:MembershipBlank
-  a v-fc:Blank ;
-  rdfs:label "Запись о включении в группу"@ru ;
-  rdfs:label "Membership"@en ;
-  v-fc:targetType v-s:Membership ;
-.
+
+
+#--------------------------------------------------------- ШАБЛОНЫ/БЛАНКИ ДЛЯ КЛАССА v-s:Membership --
 v-s:MembershipCreate
   a v-fc:Create ;
   rdfs:label "Запись о включении в группу"@ru ;
   rdfs:label "Membership"@en ;
   v-fc:hasBlank v-s:MembershipBlank ;
 .
+v-s:MembershipBlank
+  a v-fc:Blank ;
+  rdfs:label "Запись о включении в группу"@ru ;
+  rdfs:label "Membership"@en ;
+  v-fc:targetType v-s:Membership ;
+.
+
 v-s:MembershipRegistry
   a v-fs:AttributiveSearch ;
   rdfs:label "Записи о включении в группу"@ru ;
@@ -1265,42 +1287,18 @@ v-s:MembershipRegistryBlank
   rdfs:label "Membership"@en ;
   v-fc:targetType v-s:Membership ;
 .
-
-v-s:PermissionStatementBlank
-  a v-fc:Blank ;
-  rdfs:label "Право"@ru ;
-  rdfs:label "Permission"@en ;
-  v-fc:targetType v-s:PermissionStatement ;
+v-s:TS_Membership 
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-ui:MembershipTemplate;
+  v-ui:forClass v-s:Membership
 .
-v-s:PermissionStatementCreate
-  a v-fc:Create ;
-  rdfs:label "Запись о выдаче прав"@ru ;
-  rdfs:label "Permission"@en ;
-  v-fc:hasBlank v-s:PermissionStatementBlank ;
-.
-v-s:PermissionStatementRegistry
-  a v-fs:AttributiveSearch ;
-  rdfs:label "Запись о выдаче прав"@ru ;
-  rdfs:label "Permission"@en ;
-  v-fs:searchBlank v-s:PermissionStatementRegistryBlank ;
-  v-fs:searchBlankTemplate v-s:PermissionStatementRegistryTemplate ;
-  v-fs:searchResultTemplate v-s:PermissionStatementRegistryResultTemplate ;
-  v-fs:searchOnLoad true;
-  v-fs:queryLanguage "sql"^^xsd:string;
-.
-v-s:PermissionStatementRegistryBlank
-  rdf:type v-fc:Blank ;
-  rdfs:label "Запись о выдаче прав"@ru ;
-  rdfs:label "Permission"@en ;
-  v-fc:targetType v-s:PermissionStatement ;
-.
-
-v-s:MembershipTemplate
-rdf:type v-ui:ClassTemplate ;
-v-ui:forClass v-s:Membership ;
-rdfs:label "Шаблон для класса v-s:Membership"@ru ;
-rdfs:label "Template for v-s:Membership class"@en ;
-v-ui:template """
+v-ui:MembershipTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+  rdfs:label "Template for v-s:PermissionStatement class"@en ;
+  v-ui:forClass v-s:Membership ;
+  v-ui:template """
 <div class="container sheet">
   <h2 about="v-s:Membership" property="rdfs:label"></h2>
   <hr>
@@ -1390,10 +1388,10 @@ v-ui:template """
       individual["v-s:resource"] = [];
     }
   });
-  
 </script>
-""" ;
+  """ ;
 .
+
 v-s:MembershipRegistryTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Membership ;
@@ -1523,12 +1521,51 @@ v-s:MembershipRegistryResultTemplate
   """ ;
 .
 
-v-s:PermissionStatementTemplate
-rdf:type v-ui:ClassTemplate ;
-v-ui:forClass v-s:PermissionStatement;
-rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
-rdfs:label "Template for v-s:PermissionStatement class"@en ;
-v-ui:template """
+
+#------------------------------------------------------- ШАБЛОНЫ/БЛАНКИ ДЛЯ КЛАССА v-s:PermissionStatement --
+v-s:PermissionStatementCreate
+  a v-fc:Create ;
+  rdfs:label "Запись о выдаче прав"@ru ;
+  rdfs:label "Permission"@en ;
+  v-fc:hasBlank v-s:PermissionStatementBlank ;
+.
+v-s:PermissionStatementBlank
+  a v-fc:Blank ;
+  rdfs:label "Право"@ru ;
+  rdfs:label "Permission"@en ;
+  v-fc:targetType v-s:PermissionStatement ;
+.
+
+
+v-s:PermissionStatementRegistry
+  a v-fs:AttributiveSearch ;
+  rdfs:label "Запись о выдаче прав"@ru ;
+  rdfs:label "Permission"@en ;
+  v-fs:searchBlank v-s:PermissionStatementRegistryBlank ;
+  v-fs:searchBlankTemplate v-s:PermissionStatementRegistryTemplate ;
+  v-fs:searchResultTemplate v-s:PermissionStatementRegistryResultTemplate ;
+  v-fs:searchOnLoad true;
+  v-fs:queryLanguage "sql"^^xsd:string;
+.
+v-s:PermissionStatementRegistryBlank
+  rdf:type v-fc:Blank ;
+  rdfs:label "Запись о выдаче прав"@ru ;
+  rdfs:label "Permission"@en ;
+  v-fc:targetType v-s:PermissionStatement ;
+.
+
+v-s:TS_PermissionStatement 
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-ui:PermissionStatementTemplate;
+  v-ui:forClass v-s:PermissionStatement
+.
+v-ui:PermissionStatementTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
+  rdfs:label "Template for v-s:PermissionStatement class"@en ;
+  v-ui:forClass v-s:PermissionStatement ;
+  v-ui:template """
 <div class="container sheet">
   <h2 about="v-s:PermissionStatement" property="rdfs:label"></h2>
   <hr>
@@ -1585,7 +1622,7 @@ v-ui:template """
   </div>
 </div>
 <script>
-  $("#object", template).change(function () {
+  $("#object", template).change(function () {``
     var uri = $(this).val();
     if (uri) {
       individual["v-s:permissionObject"] = [new veda.IndividualModel(uri)];
@@ -1602,10 +1639,8 @@ v-ui:template """
       individual["v-s:permissionSubject"] = [];
     }
   });
-
-  
 </script>
-""" ;
+  """ ;
 .
 
 v-s:PermissionStatementRegistryTemplate
@@ -1721,6 +1756,8 @@ v-s:PermissionStatementRegistryResultTemplate
   """ ;
 .
 
+
+#---------------------------------------------------------- ШАБЛОНЫ/БЛАНКИ ДЛЯ КЛАССА v-s:Group --
 v-s:TS_Group 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -1766,206 +1803,6 @@ v-ui:GroupTemplate
   """ ;
 .
 
-v-s:TS_PermissionStatement 
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-ui:PermissionStatementTemplate;
-  v-ui:forClass v-s:PermissionStatement
-.
-v-ui:PermissionStatementTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
-  rdfs:label "Template for v-s:PermissionStatement class"@en ;
-  v-ui:forClass v-s:PermissionStatement ;
-  v-ui:template """
-<div class="container sheet">
-  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name">
-      <strong about="v-s:permissionSubject" property="rdfs:label" class="text-muted"></strong>
-    </div>
-    <div class="col-md-8 col-xs-7 value">
-      <div rel="v-s:permissionSubject" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-      <veda-control property="v-s:permissionSubject" data-type="generic" class="-view edit search"></veda-control>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name">
-      <strong about="v-s:permissionObject" property="rdfs:label" class="text-muted"></strong>
-    </div>
-    <div class="col-md-8 col-xs-7 value">
-      <div rel="v-s:permissionObject" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-      <veda-control property="v-s:permissionObject" data-type="generic" class="-view edit search"></veda-control>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
-          <em about="v-s:canCreate" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
-          <em about="v-s:canRead" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
-          <em about="v-s:canUpdate" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
-          <em about="v-s:canDelete" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <br>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
-          <em about="v-s:deleted" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:dropCount" data-type="boolean"></veda-control>
-          <em about="v-s:dropCount" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <br>
-  <div class="actions">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
-  </div>
-</div>
-  """ ;
-.
 
-v-s:TS_Membership 
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-ui:MembershipTemplate;
-  v-ui:forClass v-s:Membership
-.
-v-ui:MembershipTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для класса v-s:PermissionStatement"@ru ;
-  rdfs:label "Template for v-s:PermissionStatement class"@en ;
-  v-ui:forClass v-s:Membership ;
-  v-ui:template """
-<div class="container sheet">
-  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name">
-      <strong about="v-s:memberOf" property="rdfs:label" class="text-muted"></strong>
-    </div>
-    <div class="col-md-8 col-xs-7 value">
-      <div rel="v-s:memberOf" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-      <veda-control property="v-s:memberOf" data-type="generic" class="-view edit search"></veda-control>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name">
-      <strong about="v-s:resource" property="rdfs:label" class="text-muted"></strong>
-    </div>
-    <div class="col-md-8 col-xs-7 value">
-      <div rel="v-s:resource" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
-      <veda-control property="v-s:resource" data-type="generic" class="-view edit search"></veda-control>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canCreate" data-type="boolean"></veda-control>
-          <em about="v-s:canCreate" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canRead" data-type="boolean"></veda-control>
-          <em about="v-s:canRead" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canUpdate" data-type="boolean"></veda-control>
-          <em about="v-s:canUpdate" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <hr class="margin-md">
-  <div class="row">
-    <div class="col-md-4 col-xs-5 text-right name"></div>
-    <div class="col-md-8 col-xs-7 value">
-      <div class="checkbox">
-        <label>
-          <veda-control property="v-s:canDelete" data-type="boolean"></veda-control>
-          <em about="v-s:canDelete" property="rdfs:label"></em>
-        </label>
-      </div>
-    </div>
-  </div>
-  <br>
-  <br>
-  <div class="actions">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
-  </div>
-</div>
-  """ ;
-.
+
+
