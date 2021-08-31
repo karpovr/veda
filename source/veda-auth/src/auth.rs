@@ -207,7 +207,7 @@ impl<'a> AuthWorkPlace<'a> {
         self.credential.remove("v-s:secret");
         self.credential.remove("v-s:SecretDateFrom");
 
-        let res = self.backend.api.update(self.sys_ticket, IndvOp::Put, self.credential);
+        let res = self.backend.mstorage_api.update(self.sys_ticket, IndvOp::Put, self.credential);
         if res.result != ResultCode::Ok {
             error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::AuthenticationFailed
@@ -307,7 +307,7 @@ impl<'a> AuthWorkPlace<'a> {
         self.credential.set_string("v-s:secret", &n_secret, Lang::NONE);
         self.credential.set_datetime("v-s:SecretDateFrom", now);
 
-        let res = self.backend.api.update(self.sys_ticket, IndvOp::Put, self.credential);
+        let res = self.backend.mstorage_api.update(self.sys_ticket, IndvOp::Put, self.credential);
         if res.result != ResultCode::Ok {
             error!("failed to store new secret, user = {}, result = {:?}", user.get_id(), res);
             return ResultCode::InternalServerError;
@@ -355,7 +355,7 @@ impl<'a> AuthWorkPlace<'a> {
                 mail_with_secret.add_string("v-s:subject", from_utf8(subject.as_slice()).unwrap_or_default(), Lang::NONE);
                 mail_with_secret.add_string("v-s:messageBody", from_utf8(body.as_slice()).unwrap_or_default(), Lang::NONE);
 
-                let res = self.backend.api.update(self.sys_ticket, IndvOp::Put, &mail_with_secret);
+                let res = self.backend.mstorage_api.update(self.sys_ticket, IndvOp::Put, &mail_with_secret);
                 if res.result != ResultCode::Ok {
                     error!("failed to store email with new secret, user = {}", account.get_id());
                     return ResultCode::AuthenticationFailed;

@@ -11,4 +11,4 @@ path = "src/main.rs"
 [dependencies]
 log = "0.4"
 
-v_common = { package = "v-common", version = "=0.1.59" }
+v_common = { package = "v-common", version = "=0.1.61" }

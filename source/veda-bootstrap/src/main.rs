@@ -20,7 +20,6 @@ use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::v_api::api_client::IndvOp;
-use v_common::v_api::obj::*;
 
 pub const MSTORAGE_ID: i64 = 1;
 
@@ -213,7 +212,7 @@ impl App {
 
     fn mstorage_watchdog_check(&mut self) -> bool {
         if self.systicket.is_empty() {
-            while !self.backend.api.connect() {
+            while !self.backend.mstorage_api.connect() {
                 info!("waiting for main module start...");
                 thread::sleep(std::time::Duration::from_millis(100));
             }
@@ -231,7 +230,7 @@ impl App {
         let mut test_indv = Individual::default();
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
-        if self.backend.api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).result != ResultCode::Ok {
+        if self.backend.mstorage_api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).is_ok() {
             error!("failed to store test individual, uri = {}", test_indv.get_id());
             return false;
         }

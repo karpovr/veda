@@ -11,4 +11,4 @@ xapian-rusty = "=0.0.48"
 #xapian-rusty = { path = "../xapian-rusty" }
 
 
-v_common = { package = "v-common", version = "=0.1.59" }
+v_common = { package = "v-common", version = "=0.1.61" }

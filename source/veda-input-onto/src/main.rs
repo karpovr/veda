@@ -69,7 +69,7 @@ fn main() -> NotifyResult<()> {
 
     let mut backend = Backend::default();
 
-    while !backend.api.connect() {
+    while !backend.mstorage_api.connect() {
         info!("waiting for start of main module...");
         thread::sleep(std::time::Duration::from_millis(100));
     }
@@ -331,7 +331,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                         loaded_owl_ontology.insert(indv_file.get_id().to_owned());
                     }
 
-                    let res = backend.api.update(systicket, IndvOp::Put, &indv_file);
+                    let res = backend.mstorage_api.update(systicket, IndvOp::Put, &indv_file);
 
                     // thread::sleep(std::time::Duration::from_millis(100));
 
@@ -362,7 +362,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
             }
 
             prefix_indv.set_string("v-s:fullUrl", &url, Lang::NONE);
-            let res = backend.api.update(systicket, IndvOp::Put, &prefix_indv);
+            let res = backend.mstorage_api.update(systicket, IndvOp::Put, &prefix_indv);
             if res.result != ResultCode::Ok {
                 error!("failed to store {}", prefix_indv.get_obj().as_json_str());
             }

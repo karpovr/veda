@@ -160,7 +160,7 @@ pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, crede
     credential.set_uri("rdf:type", "v-s:Credential");
     set_password(credential, &password);
 
-    let res = module.api.update(systicket, IndvOp::Put, credential);
+    let res = module.mstorage_api.update(systicket, IndvOp::Put, credential);
     if res.result != ResultCode::Ok {
         error!("failed to update, uri = {}, result_code = {:?}", credential.get_id(), res.result);
         return false;
@@ -170,7 +170,7 @@ pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, crede
         account.remove("v-s:password");
         account.set_uri("v-s:usesCredential", credential.get_id());
 
-        let res = module.api.update(systicket, IndvOp::Put, account);
+        let res = module.mstorage_api.update(systicket, IndvOp::Put, account);
         if res.result != ResultCode::Ok {
             error!("failed to update, uri = {}, res = {:?}", account.get_id(), res);
             return false;
@@ -203,7 +203,7 @@ pub(crate) fn remove_secret(uses_credential: &mut Individual, person_id: &str, m
     if uses_credential.get_first_literal("v-s:secret").is_some() {
         uses_credential.remove("v-s:secret");
 
-        let res = module.api.update(systicket, IndvOp::Remove, uses_credential);
+        let res = module.mstorage_api.update(systicket, IndvOp::Remove, uses_credential);
         if res.result != ResultCode::Ok {
             error!("failed to remove secret code for user, user = {}", person_id);
         }
