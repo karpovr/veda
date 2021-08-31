@@ -338,6 +338,7 @@ v-s:CS_EffectList
   rdf:type v-s:ClassSpecification ;
   v-s:hasClass v-s:EffectList ;
   v-s:listProperties v-s:hasEffect ;
+   v-s:loadPriority 15 ;
 .
 
 v-s:hasTotalPlanYearEffect
@@ -468,6 +469,7 @@ v-s:CS_ProjectPlan
   rdf:type v-s:ClassSpecification ;
   v-s:hasClass v-s:ProjectPlan ;
   v-s:listProperties v-s:hasProjectMilestone, v-s:hasProjectPhase ;
+   v-s:loadPriority 15 ;
 .
 
 
