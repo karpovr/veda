@@ -23,7 +23,7 @@ use v_v8::v_common::onto::individual::Individual;
 use v_v8::v_common::onto::onto::Onto;
 use v_v8::v_common::search::common::FTQuery;
 use v_v8::v_common::storage::storage::StorageMode;
-use v_v8::v_common::v_api::api_client::{APIClient, IndvOp};
+use v_v8::v_common::v_api::api_client::{IndvOp, MStorageClient};
 use v_v8::v_common::v_api::obj::ResultCode;
 use v_v8::v_common::v_queue::consumer::Consumer;
 use v_v8::v_common::v_queue::record::Mode;
@@ -55,7 +55,7 @@ fn setup() -> SetupGuard {
 }
 
 pub struct MyContext<'a> {
-    api_client: APIClient,
+    api_client: MStorageClient,
     xr: XapianReader,
     onto: Onto,
     workplace: ScriptsWorkPlace<'a, ScriptInfoContext>,
@@ -122,7 +122,7 @@ fn main0<'a>(isolate: &'a mut Isolate) -> Result<(), i32> {
 
     if let Some(xr) = XapianReader::new("russian", &mut backend.storage) {
         let mut ctx = MyContext {
-            api_client: APIClient::new(Module::get_property("main_module_url").unwrap_or_default()),
+            api_client: MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default()),
             workplace: ScriptsWorkPlace::new(isolate),
             onto,
             vm_id: "main".to_owned(),
