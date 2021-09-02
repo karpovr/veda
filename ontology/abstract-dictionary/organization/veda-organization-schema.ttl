@@ -4,7 +4,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
-
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
 
 <http://semantic-machines.com/veda/veda-organization-schema>
   rdf:type owl:Ontology ;

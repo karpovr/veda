@@ -3,6 +3,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
 
 
