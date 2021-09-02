@@ -15,8 +15,41 @@
   rdfs:label "Veda system ontology. Action. Schema."@en ;
   v-s:loadPriority 11 ;
 .
+# ------------------------------------------------------------ СТРОКИ --
+v-s:TaskPeriodBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Выдать задачу за"@ru ;
+  rdfs:label "Task start before"@en ;
+.
+v-s:TaskDateBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Дата события"@ru ;
+  rdfs:label "Task date"@en ;
+.
+v-s:TaskGiveAwatDateBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Задача выдана"@ru ;
+  rdfs:label "Task give away"@en ;
+.
+v-s:BacwardTargetBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Документ"@ru ;
+  rdfs:label "Document"@en ;
+.
+v-s:ScheduledActionsBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Запланированные события"@ru ;
+  rdfs:label "Scheduled actions"@en ;
+.
+v-s:AddScheduledAction
+  rdf:type v-s:Bundle ;
+  rdfs:label "Добавить"@ru ;
+  rdfs:label "Add"@en ;
+.
 
 # ------------------------------------------------------------ КЛАССЫ --
+
+# ---------------------------------------------------------- Мероприятие --
 v-s:Action
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -73,7 +106,7 @@ v-s:PsResponsibleForAction
   rdfs:label "Responsible property specification for Action class"@en ;
 .
 
-# ------------------------------------------------------------ Запланированное событие --
+# ---------------------------------------------------------- Запланированное событие --
 v-s:ScheduledAction
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Action ;
@@ -88,9 +121,46 @@ v-s:ScheduledAction
 # v-s:parent
 # rdfs:label
 # v-s:description
+  v-s:PsDescriptionForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:description ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация свойства v-s:description для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:description property specification for v-s:ScheduledAction class"@en ;
+  .
 # v-s:responsible
+  v-s:PsResponsibleForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:responsible ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация свойства v-s:responsible для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:responsible property specification for v-s:ScheduledAction class"@en ;
+  .
 # v-s:controller
+  v-s:PscontrollerForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:controller ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' )  && ('v-s:employee.v-s:hasAccount.isExists'=='true') && ('v-s:origin'=='sap hr' || 'v-s:origin'=='Group') || ('rdf:type'=='v-s:Position') && ( 'v-s:origin'=='Role')"^^xsd:string;
+    rdfs:label "Спецификация свойства v-s:controller для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:controller property specification for v-s:ScheduledAction class"@en ;
+  .
 # v-s:dateToPlan
+  v-s:PsDateToPlanForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:dateToPlan ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация свойства v-s:dateToPlan для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:dateToPlan property specification for v-s:ScheduledAction class"@en ;
+  .
 # v-s:scriptHandlered
 v-s:hasPeriod
   rdf:type owl:ObjectProperty ;
@@ -99,6 +169,16 @@ v-s:hasPeriod
   rdfs:domain v-s:ScheduledAction ;
   rdfs:range v-s:Period ;
 .
+  v-s:PsHasPeriodForScheduledAction
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:hasPeriod ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 10 ;
+    v-ui:queryPrefix "'rdf:type'=='v-s:Period'"^^xsd:string ;
+    rdfs:label "Спецификация свойства v-s:hasPeriod для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:hasPeriod property specification for v-s:ScheduledAction class"@en ;
+  .
 # v-s:dateToFact
 # v-s:hasStatus
 
@@ -109,6 +189,7 @@ v-s:hasScheduledAction
   rdfs:domain v-s:ScheduledAction ;
   rdfs:range v-s:UserThing ;
 .
+
 # ------------------------------------------------------------ Справочник Период --
 
 v-s:Period
@@ -116,84 +197,6 @@ v-s:Period
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Период"@ru ;
   rdfs:label "Period"@en ;
-.
-
-# ------------------------------------------------------------ СТРОКИ --
-v-s:TaskPeriodBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Выдать задачу за"@ru ;
-  rdfs:label "Task start before"@en ;
-.
-v-s:TaskDateBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Дата события"@ru ;
-  rdfs:label "Task date"@en ;
-.
-v-s:TaskGiveAwatDateBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Задача выдана"@ru ;
-  rdfs:label "Task give away"@en ;
-.
-v-s:BacwardTargetBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Документ"@ru ;
-  rdfs:label "Document"@en ;
-.
-v-s:ScheduledActionsBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Запланированные события"@ru ;
-  rdfs:label "Scheduled actions"@en ;
-.
-
-#-- Спецификации --
-
-v-s:PsDescriptionForScheduledAction
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:ScheduledAction;
-  v-ui:forProperty v-s:description ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация свойства v-s:description для класса v-s:ScheduledAction"@ru ;
-  rdfs:label "v-s:description property specification for v-s:ScheduledAction class"@en ;
-.
-v-s:PsResponsibleForScheduledAction
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:ScheduledAction;
-  v-ui:forProperty v-s:responsible ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация свойства v-s:responsible для класса v-s:ScheduledAction"@ru ;
-  rdfs:label "v-s:responsible property specification for v-s:ScheduledAction class"@en ;
-.
-v-s:PsDateToPlanForScheduledAction
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:ScheduledAction;
-  v-ui:forProperty v-s:dateToPlan ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация свойства v-s:dateToPlan для класса v-s:ScheduledAction"@ru ;
-  rdfs:label "v-s:dateToPlan property specification for v-s:ScheduledAction class"@en ;
-.
-v-s:PsHasPeriodForScheduledAction
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:ScheduledAction;
-  v-ui:forProperty v-s:hasPeriod ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 10 ;
-  v-ui:queryPrefix "'rdf:type'=='v-s:Period'"^^xsd:string ;
-  rdfs:label "Спецификация свойства v-s:hasPeriod для класса v-s:ScheduledAction"@ru ;
-  rdfs:label "v-s:hasPeriod property specification for v-s:ScheduledAction class"@en ;
-.
-
-v-s:PscontrollerForScheduledAction
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:ScheduledAction;
-  v-ui:forProperty v-s:controller ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' )  && ('v-s:employee.v-s:hasAccount.isExists'=='true') && ('v-s:origin'=='sap hr' || 'v-s:origin'=='Group') || ('rdf:type'=='v-s:Position') && ( 'v-s:origin'=='Role')"^^xsd:string;
-  rdfs:label "Спецификация свойства v-s:controller для класса v-s:ScheduledAction"@ru ;
-  rdfs:label "v-s:controller property specification for v-s:ScheduledAction class"@en ;
 .
 
 # ------------------------------------------------------------ УПРАВЛЕНИЕ ПРАВАМИ --
@@ -214,21 +217,21 @@ v-s:AllUsersGroup_ScheduledActionBaseUser_membership
   v-s:resource cfg:AllUsersGroup ;
   rdfs:label "Все пользователи входят в группу Основные пользователи ScheduledAction" ;
 .
-#--------------------- ScheduledAction template ---------------------
-
-v-s:AddScheduledAction
-  rdf:type v-s:Bundle ;
-  rdfs:label "Добавить"@ru ;
-  rdfs:label "Add"@en ;
-.
-
+# ------------------------------------------------------------ ШАБЛОНЫ --
 v-s:TS_ScheduledAction
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:NewSingleScheduledActionTemplate;
   v-ui:forClass v-s:ScheduledAction
 .
-
+v-s:CS_ScheduledAction
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:ScheduledAction "@ru, "Class specification v-s:ScheduledAction "@en;
+  v-s:hasClass v-s:ScheduledAction ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:ScheduledActionTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:ScheduledActionTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для отображения Событий"@ru ;

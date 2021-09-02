@@ -15,9 +15,16 @@
   v-s:loadPriority 20 ;
 .
 
+# ------------------------------------------------------------ СТРОКИ --
+v-s:AddDateactions
+  rdf:type v-s:Bundle ;
+  rdfs:label "Период действия документа"@ru ;
+  rdfs:label "The period of validity of the document"@en ;
+.
+
 # ------------------------------------------------------------ КЛАССЫ --
 
-# ------------------------------------------------------------ДОСЬЕ_КОНТРАГЕНТА
+# -------------------------------------------------------ДОСЬЕ_КОНТРАГЕНТА
 v-s:ContractorProfile
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -43,6 +50,41 @@ v-s:hasContractorCategoryRequest
   rdfs:range v-s:ContractorCategoryRequest ;
 .
 # v-s:hasClassifierOKVED
+  v-s:PshasClassifierOKVED
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:hasClassifierOKVED;
+    v-ui:treeRoot  d:46f5101930b84318a2729e325a3bbe11;
+    v-ui:treeRoot  d:db173864f36b40b6a8c0aa54698993e5;
+    v-ui:treeRoot  d:e231e61f533d4efca26f8f4dcb89d526;
+    v-ui:treeRoot  d:03b99870220c4298bbb5205d4baef223;
+    v-ui:treeRoot  d:2bfd5785f27d404d91f9ea0c6776be0b;
+    v-ui:treeRoot  d:a6cbc433502a435facc0101d3011dd57;
+    v-ui:treeRoot  d:de3025d1094c462583c2768330138016;
+    v-ui:treeRoot  d:7d5ed218d3594d1bad1c795b4dd5b72c;
+    v-ui:treeRoot  d:a6481e4b18a649faac50e06a041b7c6e;
+    v-ui:treeRoot  d:2bf1c3d5d7c24c00b9d21a316f593d59;
+    v-ui:treeRoot  d:750324185e0f4754a3a166c7477c025d;
+    v-ui:treeRoot  d:c3faddd518fb4fe1b7239c5b77c3ebae;
+    v-ui:treeRoot  d:8e847f9c954a41ad91ce75a1b9fe5965;
+    v-ui:treeRoot  d:82e994b8848c40fe8b649acffff1ff06;
+    v-ui:treeRoot  d:f2fed1092af94be484fb7f9fd72c765c;
+    v-ui:treeRoot  d:ede091781b2f4cb6bfaadbd9f13be0e0;
+    v-ui:treeRoot  d:69291c45bd304e6f8203f9ef2a6a1f77;
+    v-ui:treeRoot  d:a96a921db73d4d6aa80a7f51ca0a4789;
+    v-ui:treeRoot  d:570d8b83f2604204834bbe0f724ad1fe;
+    v-ui:treeRoot  d:7f654ba3a8b041f3a928aca9985a9029;
+    v-ui:treeRoot  d:fb77ef1adefc41769b9f4bdb6d6124a2;
+    v-ui:treeInProperty v-s:hasParentLink ;
+    v-ui:treeAllowedClass v-s:ClassifierOKVED ;
+    v-ui:treeSelectableClass v-s:ClassifierOKVED ;
+    v-ui:treeDisplayedProperty rdfs:label ;
+    v-ui:treeDisplayedProperty v-s:registrationNumber ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    v-ui:placeholder "Выберите вид деятельности ОКВЭД"@ru ;
+    v-ui:placeholder "Select the type of activity OKVED"@en ;
+  .
 v-s:isDirectManufacturer
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Непосредственный изготовитель продукции"@ru ;
@@ -66,6 +108,15 @@ v-s:organizationProperties
 .
 # v-s:contactInfo
 # v-s:mailBox
+  v-s:PsContractorProfileMailbox
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:mailbox ;
+    v-ui:tooltip "E-mail генерального директора или руководителя финансовой службы."@ru ;
+    v-ui:tooltip "E-mail the general manager or head of finance department"@en ;
+    rdfs:label "Спецификация к свойству v-s:mailbox для класса v-s:ContractorProfile"@ru ;
+    rdfs:label "Spec for property v-s:mailbox for class v-s:ContractorProfile"@en ;
+  .
 # v-s:phone
 # v-s:fax
 v-s:lastContractorCategory
@@ -89,6 +140,15 @@ v-s:attachOrganizationProperties
   rdfs:label "Organization properties"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachOrganizationProperties
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachOrganizationProperties;
+    v-ui:tooltip "Реквизиты организации"@ru ;
+    v-ui:tooltip "Organization properties"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachCertificateRegistrationLegal
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -96,6 +156,15 @@ v-s:attachCertificateRegistrationLegal
   rdfs:label "Legal registration certificate"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachCertificateRegistrationLegal
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachCertificateRegistrationLegal ;
+    v-ui:tooltip "Свидетельство о государственной регистрации юридического лица. Свидетельство налогового (компетентного) органа (в соответствии с Соглашением об избежании двойного налогообложения) о регистрации контрагента в качестве налогоплательщика по месту нахождения его основной деятельности с проставленным апостилем и переводом на русский язык"@ru ;
+    v-ui:tooltip "Certificate of state registration of legal entities"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachExcerptFromEGRUL
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -103,6 +172,15 @@ v-s:attachExcerptFromEGRUL
   rdfs:label "Excerpt from EGRUL"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachExcerptFromEGRUL
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachExcerptFromEGRUL ;
+    v-ui:tooltip "Выписка из ЕГРЮЛ (актуальная на момент формирования досье контрагента)"@ru ;
+    v-ui:tooltip "Extract from EGRUL (correct at the time of formation of the dossier of the counterparty)"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachCertificateTaxRegistration
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -110,6 +188,15 @@ v-s:attachCertificateTaxRegistration
   rdfs:label "Certificate tax registration"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachCertificateTaxRegistration
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachCertificateTaxRegistration;
+    v-ui:tooltip "Свидетельство о постановке на налоговый учет"@ru ;
+    v-ui:tooltip "Certificate of tax registration"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachAppointingOrder
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -117,6 +204,15 @@ v-s:attachAppointingOrder
   rdfs:label "Appointing order"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachAppointingOrder
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachAppointingOrder;
+    v-ui:tooltip "Документы о назначении директора и главного бухгалтера"@ru ;
+    v-ui:tooltip "Documents on the appointment of the director and chief accountant."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachWarrant
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -124,6 +220,15 @@ v-s:attachWarrant
   rdfs:label "Warrant"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachWarrant
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachWarrant;
+    v-ui:tooltip "Документы (доверенности, приказы и др.), подтверждающие полномочия лиц на подписание договоров, счетов-фактур, ТТН (ТОРГ-12) и других документов с заверенными подписями лиц, уполномоченных на подписание документов"@ru ;
+    v-ui:tooltip "Documents Confirming the authority of persons to sign contracts, invoices, TTN (TORG-12) and other documents with the certified signatures of the persons authorized to sign documents."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachSignatureSample
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -131,6 +236,15 @@ v-s:attachSignatureSample
   rdfs:label "Signature sample"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachSignatureSample
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachSignatureSample;
+    v-ui:tooltip "Банковская карточка с образцами подписей."@ru ;
+    v-ui:tooltip "Bank card with samples of signatures."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachLicense
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -138,6 +252,15 @@ v-s:attachLicense
   rdfs:label "License"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachLicense
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachLicense;
+    v-ui:tooltip "Лицензия или другой документ (например, Свидетельство СРО и т.п.), удостоверяющий право на осуществление данного вида деятельности (если деятельность подлежит лицензированию или иной форме регулирования)"@ru ;
+    v-ui:tooltip "License"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachOtherDoc
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -145,12 +268,30 @@ v-s:attachOtherDoc
   rdfs:label "OtherDoc"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachOtherDoc
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachOtherDoc;
+    v-ui:tooltip "Иные документы и сведения, предусмотренные пунктом 3.3 настоящей Инструкции."@ru ;
+    v-ui:tooltip "Other documents."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachTaxReport
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
   rdfs:label "Справки о состоянии расчетов с бюджетом"@ru ;
   rdfs:label "Tax report"@en ;
   rdfs:range v-s:ContractorProfileFile ;
+.
+v-s:PsattachTaxReport
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:ContractorProfile ;
+  v-ui:forProperty v-s:attachTaxReport;
+  v-ui:tooltip "Справка налогового органа о состоянии расчетов с бюджетом"@ru ;
+  v-ui:tooltip "Help fiscal body on the status of settlements with the budget"@en ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 100 ;
 .
 v-s:attachAccountBalance
   rdf:type owl:ObjectProperty ;
@@ -159,6 +300,15 @@ v-s:attachAccountBalance
   rdfs:label "Account balance"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachAccountBalance
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachAccountBalance;
+    v-ui:tooltip "Бухгалтерский баланс и отчет о финансовых результатах на последнюю отчетную дату с отметкой налогового органа о получении"@ru ;
+    v-ui:tooltip "Balance sheet"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachTaxDeclaration
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -166,6 +316,15 @@ v-s:attachTaxDeclaration
   rdfs:label "Tax VAT declaration"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachTaxDeclaration
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachTaxDeclaration;
+    v-ui:tooltip "Налоговые декларации по НДС на последнюю отчетную дату с отметкой налогового органа о получении"@ru ;
+    v-ui:tooltip "Tax returns"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachDocConfirmUseAddresses
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -173,6 +332,15 @@ v-s:attachDocConfirmUseAddresses
   rdfs:label "Doc confirm use addresses"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachDocConfirmUseAddresses
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachDocConfirmUseAddresses;
+    v-ui:tooltip "Документы, подтверждающие основания для использования контрагентом юридического адреса, адреса фактического места нахождения (например, договор аренды и т.п.)"@ru ;
+    v-ui:tooltip "Documents proving grounds for the counterparty of the legal address"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachInsurancePayments
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -180,6 +348,15 @@ v-s:attachInsurancePayments
   rdfs:label "Insurance payments"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachInsurancePayments
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachInsurancePayments;
+    v-ui:tooltip "1-ый лист Расчета РСВ-1 ПФР  или  Сведения о среднесписочной численности работников  КНД 1110018  или иной аналогичный расчет, содержащий сведения о среднесписочной численности работников(на последнюю отчетную дату с отметкой ПФ РФ/налоговогооргана о получении)"@ru ;
+    v-ui:tooltip "Calculation of insurance premiums to the Pension Fund of Russia"@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachSubcontract
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -187,6 +364,15 @@ v-s:attachSubcontract
   rdfs:label "Subcontract"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachSubcontract
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachSubcontract;
+    v-ui:tooltip "Договоры с субподрядчиками и т.п. третьими лицами, привлеченными контрагентом к выполнению договорных обязательств или  Реестр таких договоров с субподрядчиками, третьими лицами (с указанием наименования третьего лица, ИНН, юридического адреса, № и даты договора, вида работ, услуг)."@ru ;
+    v-ui:tooltip "Subcontract."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachDocSpecialTaxSystem
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -194,6 +380,15 @@ v-s:attachDocSpecialTaxSystem
   rdfs:label "Special Tax System"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachDocSpecialTaxSystem
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachDocSpecialTaxSystem ;
+    v-ui:tooltip "Сведения (письмо) о применении специальных налоговых режимов (ЕНВД, УСН и т.п.)"@ru ;
+    v-ui:tooltip "Information about the application of special tax regimes."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachSubcontractorInteraction
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -201,6 +396,15 @@ v-s:attachSubcontractorInteraction
   rdfs:label "Subcontractor Interaction"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsttachSubcontractorInteraction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachSubcontractorInteraction;
+    v-ui:tooltip "Схема взаимодействия с субподрядчиками и т.п. третьими лицами, привлеченными контрагентом к выполнению договорных обязательств с описанием их функционала (письмо)."@ru ;
+    v-ui:tooltip "Working with subcontractors scheme."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachDocConfirmUseTransport
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -215,6 +419,15 @@ v-s:attachDocConfirmUseWood
   rdfs:label "Doc Confirm Use Wood"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachDocConfirmUseWood
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachDocConfirmUseWood;
+    v-ui:tooltip "Документы, подтверждающие право собственности на поставляемую лесопродукцию (договор купли-продажи лесных насаждений, договор аренды лесных участков)"@ru ;
+    v-ui:tooltip "Documents for timber."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:attachDocConfirmUseForestryEquipment
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ContractorProfile ;
@@ -222,8 +435,39 @@ v-s:attachDocConfirmUseForestryEquipment
   rdfs:label "Doc Confirm Use Forestry Equipment"@en ;
   rdfs:range v-s:ContractorProfileFile ;
 .
+  v-s:PsattachDocConfirmUseForestryEquipment
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ContractorProfile ;
+    v-ui:forProperty v-s:attachDocConfirmUseForestryEquipment;
+    v-ui:tooltip "Документы, подтверждающие право собственности и/или пользования лесозаготовительной техникой для оказания услуг (паспорта самоходных машин, договор аренды, договор на оказание услуг и/или др.)"@ru ;
+    v-ui:tooltip "Documents lesozagovitelnuyu technique."@en ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 
-# ------------------------------------------------------------
+
+
+v-s:PshasClassifierCountry
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:ContractorProfile ;
+  v-ui:forProperty v-s:hasClassifierCountry;
+  v-ui:forProperty v-s:hasClassifierLegalForm;
+  v-ui:forProperty v-s:isDirectManufacturer;
+  v-ui:forProperty v-s:isSpecialTax;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 1 ;
+.
+v-s:PsattachDocConfirmUseTransport
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:ContractorProfile ;
+  v-ui:forProperty v-s:attachDocConfirmUseTransport;
+  v-ui:tooltip "Документы, подтверждающие право собственности и/или пользования транспортными средствами для оказания услуг (ПТС на собственные и арендованные транспортные средства, договор аренды транспортных средств, договор на оказание услуг и/или др."@ru ;
+  v-ui:tooltip "Documents the service."@en ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 100 ;
+.
+
+# ----------------------------------------------------- v-s:ContractorProfileFile --
 v-s:ContractorProfileFile
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:File ;
@@ -231,7 +475,7 @@ v-s:ContractorProfileFile
   rdfs:label "Файл досье контрагента"@ru ;
   rdfs:label "Contractor profile file"@en ;
 .
-# ------------------------------------------------------------
+# ------------------------------------------------------ v-s:ContractorCategoryRequest --
 v-s:ContractorCategoryRequest
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Request ;
@@ -299,8 +543,37 @@ v-s:subContractorOf
   rdfs:range v-s:Organization ;
   rdfs:domain v-s:ContractorCategoryRequest ;
 .
+v-s:hasClassifierOKVEDFORContractorCategoryRequest
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass  v-s:ContractorCategoryRequest;
+  v-ui:forProperty v-s:hasClassifierOKVED;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 100;
+  v-ui:placeholder "Выберите вид деятельности ОКВЭД"@ru ;
+  v-ui:placeholder "Select the type of activity OKVED"@en ;
+  rdfs:label "Спецификация к свойству v-s:hasClassifierOKVED для класса v-s:ContractorCategoryRequest"@ru ;
+  rdfs:label "Spec for property v-s:hasClassifierOKVED for class v-s:ContractorCategoryRequest"@en ;
+ .
 
-# ------------------------------------------------------------
+  v-s:PshasContractorInteractionCategoryZapros
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:ContractorCategoryRequest ;
+    v-ui:forProperty v-s:hasContractorInteractionCategory ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Specification Legal Department summary"@en ;
+    rdfs:label "Спецификация к свойству hasContractorInteractionCategory for class v-s:ContractorCategoryRequest"@en ;
+  .
+  v-s:PsContractorCategoryRequestexpectedValueOfContract
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass  v-s:ContractorCategoryRequest;
+    v-ui:forProperty v-s:expectedValueOfContract;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация к свойству v-s:expectedValueOfContract для класса v-s:expectedValueOfContract"@ru ;
+    rdfs:label "Spec for property v-s:expectedValueOfContract for class v-s:expectedValueOfContract"@en ;
+   .
+# ----------------------------------------------------- v-s:ContractorCategoryDecision --
 v-s:ContractorCategoryDecision
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -319,7 +592,6 @@ v-s:isOrganizationOk
   rdfs:range xsd:boolean ;
   rdfs:domain v-s:ContractorCategoryDecision ;
 .
-
 v-s:hasContractorCategoryDecisionSecurity
   rdf:type owl:ObjectProperty ;
   rdfs:label "Заключение СБ"@ru ;
@@ -348,7 +620,7 @@ v-s:hasContractorCategoryDecisionManagement
   rdfs:range v-s:ContractorCategoryDecisionManagement ;
   rdfs:domain v-s:ContractorCategoryDecision ;
 .
-# ------------------------------------------------------------
+# --------------------------------------------------- v-s:ContractorCategoryDecisionSecurity --
 v-s:ContractorCategoryDecisionSecurity
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -409,7 +681,16 @@ v-s:isContractorOkSecurityDepSummary
   rdfs:range xsd:boolean ;
   rdfs:domain v-s:ContractorCategoryDecisionSecurity ;
 .
-# ------------------------------------------------------------
+  v-s:PsIsContractorOkSecurityDepSummary
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:ContractorCategoryDecisionSecurity ;
+    v-ui:forProperty v-s:isContractorOkSecurityDepSummary ;
+    v-ui:defaultValue "false"^^xsd:boolean ;
+    v-ui:minCardinality 1 ;
+    rdfs:label "Спецификация заключения СБ положительное?"@ru ;
+    rdfs:label "Specification Security department summary"@en ;
+  .
+# --------------------------------------------------- v-s:ContractorCategoryDecisionLegal --
 v-s:ContractorCategoryDecisionLegal
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -442,7 +723,16 @@ v-s:isContractorOkLegalDepSummary
   rdfs:range xsd:boolean ;
   rdfs:domain v-s:ContractorCategoryDecisionLegal ;
 .
-#--------------------------------------------
+  v-s:PsIsContractorOkLegalDepSummary
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:ContractorCategoryDecisionLegal ;
+    v-ui:forProperty v-s:isContractorOkLegalDepSummary ;
+    v-ui:defaultValue "false"^^xsd:boolean ;
+    v-ui:minCardinality 1 ;
+    rdfs:label "Спецификация заключения ЮРО положительное?"@ru ;
+    rdfs:label "Specification Legal Department summary"@en ;
+  .
+# --------------------------------------------------- v-s:ContractorCategoryDecisionFinancial --
 v-s:ContractorCategoryDecisionFinancial
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -461,6 +751,15 @@ v-s:isContractorOkFinancialDepSummary
   rdfs:range xsd:boolean ;
   rdfs:domain v-s:ContractorCategoryDecisionFinancial ;
 .
+  v-s:PsIsContractorOkFinancialDepSummary
+    rdf:type v-ui:DatatypePropertySpecification;
+    v-ui:forClass v-s:ContractorCategoryDecisionFinancial;
+    v-ui:forProperty v-s:isContractorOkFinancialDepSummary;
+    v-ui:minCardinality 1 ;
+    v-ui:defaultValue "false"^^xsd:boolean ;
+    rdfs:label "Заключение Бухгалтерии?"@ru ;
+    rdfs:label "Specification Resolution Financial"@en ;
+  .
 v-s:contractorFinancialDepSummary
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Заключение бухгалтерии"@ru ;
@@ -468,7 +767,7 @@ v-s:contractorFinancialDepSummary
   rdfs:range xsd:string ;
   rdfs:domain v-s:ContractorCategoryDecisionFinancial ;
 .
-#--------------------------------------------
+# --------------------------------------------------- v-s:ContractorCategoryDecisionManagement --
 v-s:ContractorCategoryDecisionManagement
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -494,25 +793,30 @@ v-s:contractorManagementSummary
   rdfs:range xsd:string ;
   rdfs:domain v-s:ContractorCategoryDecisionFinancial ;
 .
-# ------------------------------------------------------------
+# --------------------------------------------------- v-s:ContractorInteractionCategory --
 v-s:ContractorInteractionCategory
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Характер планируемого взаимодействия"@ru ;
   rdfs:label "Contractor interaction category"@en ;
 .
-# ------------------------------------------------------------
 
-# ------------------------------------------------------------ Расширение класса v-s:Contractor
+# --------------------------------------------------- Расширение класса v-s:Contractor
 # v-s:locked
 # v-s:lockedInOrigin
 # v-s:deletedInOrigin
 # v-s:isCreditor
 # v-s:isDebitor
 
-#------------------Строки--------------------------------
-v-s:AddDateactions
-  rdf:type v-s:Bundle ;
-  rdfs:label "Период действия документа"@ru ;
-  rdfs:label "The period of validity of the document"@en ;
+
+
+# ------------------------------------------------------------ПЕЧАТНАЯ_ФОРМА-----
+v-s:ContractorCategoryDecision_printBlank
+  rdf:type v-s:ReportsForClass ;
+  v-ui:forClass v-s:ContractorCategoryDecision ;
+  v-s:reportPath "/reports/Contract/ContractorCategoryDecision_PrintBlank" ;
+  v-s:reportFormat "pdf";
+  rdfs:label "Печатная форма листа оценки"@ru ;
+  rdfs:label "ContractorCategoryDecision print blank"@en ;
+  v-s:deleted "true"^^xsd:boolean ;
 .

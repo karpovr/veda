@@ -16,37 +16,8 @@
   v-s:loadPriority 9 ;
 .
 
-########## NEWS FUNCTION ###########
 
-v-s:News
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:UserThing;
-  rdfs:subClassOf v-s:Codelet;
-  rdfs:subClassOf v-s:Labeled;
-  rdfs:label "Новость"@ru ;
-  rdfs:label "News"@en ;
-  v-s:labelPattern "{@.v-s:title} {@.v-s:created}" ;
-.
-
-v-s:newsAudience
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Аудитория новости"@ru ;
-  rdfs:label "News audience"@en ;
-  rdfs:domain v-s:News ;
-  rdfs:range rdfs:Resource ;
-.
-
-v-s:PS_newsAudience
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация свойства v-s:newsAudience для класса v-s:News"@ru ;
-  rdfs:label "v-s:newsAudience property specification for v-s:News class"@en ;
-  v-ui:forClass v-s:News ;
-  v-ui:forProperty v-s:newsAudience ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 100 ;
-  v-ui:queryPrefix "('rdf:type' == 'v-s:OrganizationUnit' || 'rdf:type' === 'v-s:Group')" ;
-.
-
+# ------------------------------------------------------------ СТРОКИ --
 v-s:NotifyBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Уведомить пользователей"@ru ;
@@ -59,6 +30,39 @@ v-s:AllNotificationsBundle
   rdfs:label "All notifications"@en ;
 .
 
+# ------------------------------------------------------------ КЛАССЫ --
+
+# ------------------------------------------------------------ Новость --
+v-s:News
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing;
+  rdfs:subClassOf v-s:Codelet;
+  rdfs:subClassOf v-s:Labeled;
+  rdfs:label "Новость"@ru ;
+  rdfs:label "News"@en ;
+  v-s:labelPattern "{@.v-s:title} {@.v-s:created}" ;
+.
+v-s:newsAudience
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Аудитория новости"@ru ;
+  rdfs:label "News audience"@en ;
+  rdfs:domain v-s:News ;
+  rdfs:range rdfs:Resource ;
+.
+  v-s:PS_newsAudience
+    rdf:type v-ui:ObjectPropertySpecification ;
+    rdfs:label "Спецификация свойства v-s:newsAudience для класса v-s:News"@ru ;
+    rdfs:label "v-s:newsAudience property specification for v-s:News class"@en ;
+    v-ui:forClass v-s:News ;
+    v-ui:forProperty v-s:newsAudience ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 100 ;
+    v-ui:queryPrefix "('rdf:type' == 'v-s:OrganizationUnit' || 'rdf:type' === 'v-s:Group')" ;
+  .
+
+# ------------------------------------------------------------ ШАБЛОНЫ --
+
+# ----------------------------------------------------------- v-s:News --
 v-s:TS_News
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -141,7 +145,20 @@ v-s:NewsTemplate
 </div>
   """ ;
 .
+v-s:NewsBlank
+  rdf:type v-fc:Blank ;
+  rdfs:label "Новость"@ru ;
+  rdfs:label "News"@en ;
+  v-fc:targetType v-s:News ;
+.
 
+v-s:NewsCreate
+  rdf:type v-fc:Create ;
+  rdfs:label "Новость"@ru ;
+  rdfs:label "News"@en ;
+  v-fc:hasBlank v-s:NewsBlank ;
+.
+# ----------------------------------------------------- v-s:ClientNotification --
 v-s:ClientNotificationTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон уведомления клиента"@ru ;
@@ -193,7 +210,7 @@ v-s:ClientNotificationTemplate
 </div>
 """ ;
 .
-
+# -------------------------------------------------------- v-s:NewsIndicator --
 v-s:NewsIndicatorTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон индикатора новостей"@ru ;
@@ -214,20 +231,9 @@ v-s:NewsIndicatorTemplate
   """
 .
 
-v-s:NewsBlank
-  rdf:type v-fc:Blank ;
-  rdfs:label "Новость"@ru ;
-  rdfs:label "News"@en ;
-  v-fc:targetType v-s:News ;
-.
+# ------------------------------------------------------------- ПОИСК --
 
-v-s:NewsCreate
-  rdf:type v-fc:Create ;
-  rdfs:label "Новость"@ru ;
-  rdfs:label "News"@en ;
-  v-fc:hasBlank v-s:NewsBlank ;
-.
-
+# ------------------------------------------------------------ Новости --
 v-s:NewsSearchUser
   rdf:type v-fs:AttributiveSearch ;
   rdfs:label "Новости"@ru ;
@@ -328,7 +334,7 @@ v-s:NewsSearchResultTemplate
   """ ;
 .
 
-########## УПРАВЛЕНИЕ ПРАВАМИ ###########
+# ----------------------------------------------------------- УПРАВЛЕНИЕ ПРАВАМИ --
 
 v-s:News_permission
   rdf:type v-s:PermissionStatement ;

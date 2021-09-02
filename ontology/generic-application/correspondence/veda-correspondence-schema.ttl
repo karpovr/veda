@@ -15,6 +15,7 @@
 
 # ------------------------------------------------------------ КЛАССЫ --
 
+# -------------------------------------------------------- Корреспондент --
 v-s:Correspondent
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -30,6 +31,16 @@ v-s:correspondentOrganization
   rdfs:range v-s:Organization ;
   rdfs:domain v-s:Correspondent ;
 .
+  v-s:PsOrganizationForCorrespondent
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Correspondent ;
+    v-ui:forProperty v-s:correspondentOrganization ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:queryPrefix "('rdf:type'=='v-s:Organization') || ('rdf:type'=='v-s:Subsidiary')"^^xsd:string ;
+    rdfs:label "Спецификация v-s:correspondentOrganization для класса v-s:Correspondent"@ru ;
+    rdfs:label "v-s:correspondentOrganization specification for v-s:Correspondent class"@en ;
+  .
 v-s:correspondentOrganizationDescription
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Организация отправитель (текст)"@ru ;
@@ -44,6 +55,16 @@ v-s:correspondentDepartment
   rdfs:range v-s:Department ;
   rdfs:domain v-s:Correspondent ;
 .
+  v-s:PsDepartmentForCorrespondent
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Correspondent ;
+    v-ui:forProperty v-s:correspondentDepartment ;
+    v-ui:forProperty v-s:correspondentPerson ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация v-s:correspondentDepartment для класса v-s:Correspondent"@ru ;
+    rdfs:label "v-s:correspondentDepartment specification for v-s:Correspondent class"@en ;
+  .
 v-s:correspondentDepartmentDescription
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Подразделение (текст)"@ru ;
@@ -66,7 +87,10 @@ v-s:correspondentPersonDescription
   rdfs:domain v-s:Correspondent ;
 .
 
-# ----------------------------------------------------------------------
+
+
+
+# -------------------------------------------------------------- v-s:Letter --
 v-s:Letter
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Document ;
@@ -92,6 +116,16 @@ v-s:hasLetterRegistrationRecordRecipient
   rdfs:label "Регистрационная запись получателя"@ru ;
   rdfs:label "Registration record recipient"@en ;
 .
+  v-s:PsRegistrationRecordForLetter
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Letter ;
+    v-ui:forProperty v-s:hasLetterRegistrationRecordSender ;
+    v-ui:forProperty v-s:hasLetterRegistrationRecordRecipient ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация v-s:hasLetterRegistrationRecordSender, v-s:hasLetterRegistrationRecordRecipient для класса v-s:Letter"@ru ;
+    rdfs:label "v-s:hasLetterRegistrationRecordSender, v-s:hasLetterRegistrationRecordRecipient specification for v-s:Letter class"@en ;
+  .
 v-s:hasRelatedLetter
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:Letter ;
@@ -103,17 +137,50 @@ v-s:hasRelatedLetter
 # rdfs:label
 # v-s:hasRegistrationRecord
 # v-s:sender
+  v-s:PsSenderRecipientForLetter
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Letter ;
+    v-ui:forProperty v-s:sender ;
+    v-ui:forProperty v-s:recipient ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 50 ;
+    rdfs:label "Спецификация v-s:sender, v-s:recipient для класса v-s:Letter"@ru ;
+    rdfs:label "v-s:sender, v-s:recipient specification for v-s:Letter class"@en ;
+  .
 # v-s:recipient
 
 # v-s:hasDocumentKind
-# v-s:deliverBy
+  v-s:PsHasDocumentKindForLetter
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Letter ;
+    v-ui:forProperty v-s:hasDocumentKind ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация v-s:hasDocumentKind для класса v-s:Letter"@ru ;
+    rdfs:label "v-s:hasDocumentKind specification for v-s:Letter class"@en ;
+  .
+# v-s:hasDelivery
+  v-s:PsHasDeliveryKindForLetter
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Letter ;
+    v-ui:forProperty v-s:hasDelivery ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 10 ;
+    rdfs:label "Спецификация v-s:hasDelivery для класса v-s:Letter"@ru ;
+    rdfs:label "v-s:hasDelivery specification for v-s:Letter class"@en ;
+  .
 # v-s:desription
 # v-s:sheetsCount
 # v-s:dueDate
 # rdfs:comment
 # v-s:attachment
 
-# ----------------------------------------------------------------------
+
+
+
+
+
+# -------------------------------------------------------------- v-s:IncomingLetter --
 v-s:IncomingLetter
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Letter ;
@@ -123,7 +190,7 @@ v-s:IncomingLetter
   rdfs:label "Incoming letter"@en ;
 .
 
-# ----------------------------------------------------------------------
+# -------------------------------------------------------------- v-s:OutgoingLetter --
 v-s:OutgoingLetter
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Letter ;
@@ -133,7 +200,7 @@ v-s:OutgoingLetter
   rdfs:label "Outgoing letter"@en ;
 .
 
-# ----------------------------------------------------------------------
+# -------------------------------------------------------------- v-s:Delivery --
 v-s:Delivery
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -147,7 +214,16 @@ v-s:Delivery
   rdfs:label "Доставка"@ru ;
   rdfs:label "Delivery"@en ;
 .
-
+  v-s:PsDeliveryMethodForDelivery
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Delivery ;
+    v-ui:forProperty v-s:deliverBy ;
+    v-ui:forProperty v-s:date ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация v-s:deliverBy, v-s:date  для класса v-s:Delivery"@ru ;
+    rdfs:label "v-s:deliverBy, v-s:date for v-s:Delivery class"@en ;
+  .
 # ----------------------------------------------------------------------
 v-s:RegistrationRecord
   rdf:type owl:Class ;
@@ -189,3 +265,9 @@ v-s:LetterRegistrationRecordRecipient
 
 # v-s:registrationNumber
 # v-s:registrationDate
+
+
+
+
+
+

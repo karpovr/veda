@@ -633,6 +633,14 @@ v-s:TS_DatatypePropertySpecification
   v-ui:defaultTemplate v-ui:DatatypePropertySpecificationTemplate;
   v-ui:forClass v-ui:DatatypePropertySpecification
 .
+v-s:CS_DatatypePropertySpecification
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-ui:DatatypePropertySpecification "@ru, "Class specification v-ui:DatatypePropertySpecification "@en;
+  v-s:hasClass v-ui:DatatypePropertySpecification ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:DatatypePropertySpecificationTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:DatatypePropertySpecificationTemplate
   rdf:type v-ui:ClassTemplate;
   rdfs:label "Шаблон класса v-ui:DatatypePropertySpecification"@ru ;
@@ -1009,6 +1017,14 @@ v-s:TS_ClassTemplate
   v-ui:defaultTemplate v-ui:ClassTemplateTemplate;
   v-ui:forClass v-ui:ClassTemplate
 .
+v-s:CS_ClassTemplateTemplate
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-ui:ClassTemplate "@ru, "Class specification v-ui:ClassTemplate "@en;
+  v-s:hasClass v-ui:ClassTemplate ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:ClassTemplateTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:ClassTemplateTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса -Шаблон класса-"@ru ;
@@ -1037,6 +1053,14 @@ v-s:TS_ClassModel
   v-ui:defaultTemplate v-ui:ClassModelTemplate;
   v-ui:forClass v-ui:ClassModel
 .
+v-s:CS_ClassModel
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-ui:ClassModel "@ru, "Class specification v-ui:ClassModel "@en;
+  v-s:hasClass v-ui:ClassModel ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:ClassModelTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:ClassModelTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-ui:ClassModel"@ru ;
@@ -1064,6 +1088,14 @@ v-s:TS_Event
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:EventTemplate;
   v-ui:forClass v-s:Event
+.
+v-s:CS_Event
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Event"@ru, "Class specification v-s:Event"@en;
+  v-s:hasClass v-s:Event ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:EventTemplate;
+  v-s:loadPriority 15 ;
 .
 v-ui:EventTemplate
   rdf:type v-ui:ClassTemplate ;

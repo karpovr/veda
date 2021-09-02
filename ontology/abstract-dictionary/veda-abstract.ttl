@@ -1655,6 +1655,14 @@ v-s:TS_Deletable
   v-ui:defaultTemplate v-s:DeletableTemplate ;
   v-ui:forClass v-s:Deletable ;
 .
+v-s:CS_Deletable
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Deletable "@ru, "Class specification v-s:Deletable "@en;
+  v-s:hasClass v-s:Deletable ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:DeletableTemplate ;
+  v-s:loadPriority 15 ;
+.
 #----v-s:Deletable ствится вторым классом, рядом с классом документа, чтобы 2 шаблона не отображались на экране 
 v-s:DeletableTemplate
   rdf:type v-ui:ClassTemplate ;

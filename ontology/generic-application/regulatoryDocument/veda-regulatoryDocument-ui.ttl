@@ -21,7 +21,15 @@ v-s:TS_Addendum
   v-ui:defaultTemplate v-s:AddendumTemplate;
   v-ui:forClass v-s:Addendum
 .
-
+v-s:CS_Addendum
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Addendum"@ru, "Class specification v-s:Addendum"@en;
+  v-s:hasClass v-s:Addendum ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment ;
+  v-ui:defaultTemplate v-s:AddendumTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:AddendumTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Addendum ;

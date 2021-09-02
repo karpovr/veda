@@ -16,8 +16,16 @@
   v-s:loadPriority 3 ;
 .
 
+# ------------------------------------------------------------ СТРОКИ --
+v-s:GroupGeneratorUri
+  rdf:type v-s:Bundle ;
+  rdfs:label "URI группы авторизации для выбранного значения"@ru ;
+  rdfs:label "Auth group URI for chosen value"@en ;
+.
+
 # ------------------------------------------------------------ КЛАССЫ --
 
+# ------------------------------------------------------ v-s:GroupAuthorized --
 v-s:GroupAuthorized
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -27,6 +35,7 @@ v-s:GroupAuthorized
   rdfs:comment "Superclass for classes whose individuals should be authorized by auto generated groups class."@en ;
 .
 
+# ------------------------------------------------------ v-s:ClassAuthorized --
 v-s:ClassAuthorized
   rdf:type owl:Class ;
   rdfs:subClassOf rdfs:Resource ;
@@ -36,6 +45,7 @@ v-s:ClassAuthorized
   rdfs:comment "Суперкласс всех классов, индивиды которых могут авторизоваться по классу"@en ;
 .
 
+# ------------------------------------------------------ v-s:GroupGenerator --
 v-s:GroupGenerator
   rdf:type owl:Class ;
   rdfs:label "Генератор групп авторизации"@ru ;
@@ -44,7 +54,6 @@ v-s:GroupGenerator
   rdfs:comment "Used to distribute individuals to auth groups based on calculated value of predicate or function."@en ;
   rdfs:subClassOf v-s:SystemThing ;
 .
-
 v-s:authClass
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:GroupGenerator ;
@@ -52,7 +61,6 @@ v-s:authClass
   rdfs:label "Authorized class"@en ;
   rdfs:range rdfs:Class ;
 .
-
 v-s:authProperty
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:GroupGenerator ;
@@ -60,7 +68,6 @@ v-s:authProperty
   rdfs:label "Authorized property"@en ;
   rdfs:range rdf:Property ;
 .
-
 v-s:authFunction
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:GroupGenerator ;
@@ -68,7 +75,6 @@ v-s:authFunction
   rdfs:label "Function to calculate authorized value"@en ;
   rdfs:range xsd:string ;
 .
-
 v-s:authValue
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:GroupGenerator ;
@@ -77,7 +83,6 @@ v-s:authValue
   rdfs:label "Authorized value"@en ;
   rdfs:range rdfs:Resource ;
 .
-
 v-s:authGroupFunction
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:GroupGenerator ;
@@ -85,7 +90,6 @@ v-s:authGroupFunction
   rdfs:label "Function to calculate authorization group"@en ;
   rdfs:range xsd:string ;
 .
-
 v-s:keepMembershipOnDelete
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:GroupGenerator ;
@@ -94,13 +98,13 @@ v-s:keepMembershipOnDelete
   rdfs:range xsd:boolean ;
 .
 
+# ------------------------------------------------------ v-s:PermissionGenerator --
 v-s:PermissionGenerator
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:SystemThing ;
   rdfs:label "Генератор прав"@ru ;
   rdfs:label "Permissions generator"@en ;
 .
-
 v-s:objectGroupGenerator
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:PermissionGenerator ;
@@ -108,7 +112,6 @@ v-s:objectGroupGenerator
   rdfs:label "Object group generator"@en ;
   rdfs:range v-s:GroupGenerator ;
 .
-
 v-s:objectGroupGeneratorValue
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:PermissionGenerator ;
@@ -116,7 +119,6 @@ v-s:objectGroupGeneratorValue
   rdfs:label "Object group generator value"@en ;
   rdfs:range rdfs:Resource ;
 .
-
 v-s:subjectGroupGenerator
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:PermissionGenerator ;
@@ -124,7 +126,6 @@ v-s:subjectGroupGenerator
   rdfs:label "Subject group generator"@en ;
   rdfs:range v-s:GroupGenerator ;
 .
-
 v-s:subjectGroupGeneratorValue
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:PermissionGenerator ;
@@ -133,26 +134,23 @@ v-s:subjectGroupGeneratorValue
   rdfs:range rdfs:Resource ;
 .
 
-# ------------------------------------------------------------ ШАБЛОНЫ --
+# ------------------------------------------------------------- ШАБЛОНЫ --
+
+# ------------------------------------------------------- v-s:GroupGenerator --
+v-s:CS_GroupGenerator
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:GroupGenerator"@ru, "Class specification v-s:GroupGenerator"@en;
+  v-s:hasClass v-s:GroupGenerator ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:GroupGeneratorTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_GroupGenerator
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:GroupGeneratorTemplate;
   v-ui:forClass v-s:GroupGenerator
 .
-v-s:TS_PermissionGenerator
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:PermissionGeneratorTemplate;
-  v-ui:forClass v-s:PermissionGenerator
-.
-
-v-s:GroupGeneratorUri
-  rdf:type v-s:Bundle ;
-  rdfs:label "URI группы авторизации для выбранного значения"@ru ;
-  rdfs:label "Auth group URI for chosen value"@en ;
-.
-
 v-s:GroupGeneratorTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:GroupGenerator ;
@@ -270,6 +268,21 @@ v-s:GroupGeneratorTemplate
 """ ;
 .
 
+# ----------------------------------------------------- v-s:PermissionGenerator --
+v-s:TS_PermissionGenerator
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:PermissionGeneratorTemplate;
+  v-ui:forClass v-s:PermissionGenerator
+.
+v-s:CS_PermissionGenerator
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:PermissionGenerator"@ru, "Class specification v-s:PermissionGenerator"@en;
+  v-s:hasClass v-s:PermissionGenerator ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:PermissionGeneratorTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:PermissionGeneratorTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:GroupGenerator ;
@@ -388,8 +401,10 @@ v-s:PermissionGeneratorTemplate
 """ ;
 .
 
-# ------------- РЕЕСТРЫ ---------------
+# ----------------------------------------------------- РЕЕСТРЫ --
 
+
+# ----------------------------------------------- v-s:GroupGenerator --
 v-s:GroupGeneratorBlank
   a v-fc:Blank ;
   rdfs:label "Генератор групп авторизации"@ru ;
@@ -455,6 +470,7 @@ v-s:GroupGeneratorRegistryResultTemplate
   """ ;
 .
 
+# ---------------------------------------------- v-s:PermissionGenerator --
 v-s:PermissionGeneratorBlank
   a v-fc:Blank ;
   rdfs:label "Генератор прав"@ru ;

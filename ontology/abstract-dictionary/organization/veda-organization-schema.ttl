@@ -68,12 +68,34 @@ v-s:Organization
 .
 #-----Полное наименование
 #v-s:title
+  v-s:PslabelForOrganization
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:Organization ;
+    v-ui:forProperty rdfs:label ;
+    v-ui:forProperty v-s:title;
+    v-ui:forProperty v-s:legalAddress;
+    v-ui:forProperty v-s:postalAddress;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация свойств rdfs:label, v-s:title, v-s:legalAddress, v-s:postalAddress для класса v-s:Organization"@ru ;
+    rdfs:label "rdfs:label, v-s:title, v-s:legalAddress, v-s:postalAddress property specification for v-s:Organization"@en ;
+  .
 
 #-----Наименование
 #rdfs:label
 
 #-----Страна
 #v-s:hasClassifierCountry
+  v-s:PsHasClassifierCountryOrganization
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Organization;
+    v-ui:forProperty v-s:hasClassifierCountry ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:defaultValue d:Country_RUS;
+    rdfs:label "Спецификация свойства v-s:hasClassifierCountry для класса v-s:Organization"@ru ;
+    rdfs:label "v-s:hasClassifierCountry property specification for v-s:Organization"@en ;
+  .
 
 #-----Организационно-правовая форма
 #v-s:hasClassifierLegalForm
@@ -87,6 +109,16 @@ v-s:taxId
   rdfs:domain v-s:Organization ;
   rdfs:domain v-s:Contractor ;
 .
+  v-s:PsTaxIdForOrganization
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:Organization ;
+    v-ui:forProperty v-s:taxId ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:regexp "^([A-Z]{2,3}[0-9]{4,}|([0-9]{10}|[0-9]{12}))$" ;
+    v-ui:tooltip "Цифро-буквенное значение, минимум 6 символов. Примеры: 123456789101, KZ4438, NL123456789B11"@ru ;
+    v-ui:tooltip "Alphanumeric value, 6 characters minimum. Ex: 123456789101, KZ4438, NL123456789B11"@en ;
+  .
 
 #-----КПП
 v-s:taxRegistrationCause
@@ -97,6 +129,18 @@ v-s:taxRegistrationCause
   rdfs:domain v-s:Organization ;
   rdfs:domain v-s:Contractor ;
 .
+  v-s:taxRegistrationCauseForOrganization
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:Organization ;
+    v-ui:forProperty v-s:taxRegistrationCause;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 1;
+    v-ui:regexp "^[0-9]{9}$";
+    rdfs:label "Спецификация свойств v-s:taxRegistrationCause для класса v-s:Organization"@ru ;
+    rdfs:label "v-s:taxRegistrationCause property specification for v-s:Organization"@en ;
+    v-ui:tooltip "Числовое значение, 9 символов, например: 123456789"@ru ;
+    v-ui:tooltip "Numeric value, 9 characters, i.e. 123456789"@en ;
+  .
 
 #-----ОГРН
 v-s:taxRegistrationNumber
@@ -115,7 +159,27 @@ v-s:taxRegistrationNumber
 
 #------Период существования юридического лица
 #v-s:dateFromFact
+  v-s:PsContractorProfileDateFromFact
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Organization ;
+    v-ui:forProperty v-s:dateFromFact ;
+    v-ui:placeholder "Дата регистрации юр лица"@ru ;
+    v-ui:placeholder "Registered legal persons"@en ;
+    rdfs:label "Спецификация к свойству v-s:dateFromFact для класса v-s:ContractorProfile"@ru ;
+    rdfs:label "Spec for property v-s:dateFromFact for class v-s:ContractorProfile"@en ;
+  .
 #v-s:dateToFact
+  v-s:PsContractorProfileDateToFact
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Organization ;
+    v-ui:forProperty v-s:dateToFact ;
+    rdfs:label "Спецификация к свойству v-s:dateToFact для класса v-s:ContractorProfile"@ru ;
+    rdfs:label "Spec for property v-s:dateToFact for class v-s:ContractorProfile"@en ;
+    v-ui:placeholder "Дата ликвидации юр лица"@ru ;
+    v-ui:placeholder "Registered legal persons"@en ;
+  .
+
+
 
 #------Филиал
 v-s:hasSubsidiary
@@ -125,6 +189,14 @@ v-s:hasSubsidiary
   rdfs:range v-s:Department ;
   rdfs:domain v-s:Organization ;
 .
+  v-s:PsHasSubsidiaryForOrganization
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Organization ;
+    v-ui:forProperty v-s:hasSubsidiary ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    v-ui:rangeRestriction v-s:Subsidiary ;
+  .
 v-s:isOwnOrganization
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Собственная организация?"@ru ;
@@ -166,6 +238,19 @@ v-s:hasContractorProfileSafety
   rdfs:domain v-s:Organization ;
 .
 
+v-s:PsHasContractorOrganization
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:Organization;
+  v-ui:forProperty v-s:hasContractor ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 100 ;
+  v-ui:rangeRestriction v-s:Contractor;
+  rdfs:label "Спецификация свойства v-s:hasContractor для класса v-s:Organization"@ru ;
+  rdfs:label "v-s:hasContractor property specification for v-s:Organization"@en ;
+.
+
+
+
 #-------------------------------------------------------------------- Подразделение --
 v-s:Department
   rdf:type owl:Class ;
@@ -183,12 +268,33 @@ v-s:parentOrganization
   rdfs:range v-s:Organization ;
   rdfs:domain v-s:Department ;
 .
+  v-s:PsParentsForDepartment
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Department ;
+    v-ui:forProperty v-s:parentOrganization ;
+    v-ui:forProperty v-s:parentUnit ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация к свойствам v-s:parentOrganization и v-s:parentUnit для класса v-s:Department"@ru ;
+    rdfs:label "Spec for property v-s:parentOrganization and v-s:parentUnit for class v-s:Department"@en ;
+  .
 
 #------Родительская единица
 #v-s:parentUnit
 
 #------Наименование
 #rdfs:label
+  v-s:PsTextLabelForDepartment
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:Department ;
+    v-ui:forProperty rdfs:label ;
+    v-ui:forProperty v-s:shortLabel ;
+    v-ui:forProperty v-s:subjectCode ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация к свойствам rdfs:label и v-s:shortLabel и v-s:subjectCode для класса v-s:Department"@ru ;
+    rdfs:label "Spec for property rdfs:label and v-s:shortLabel and v-s:subjectCode for class v-s:Department"@en ;
+  .
 
 #------Краткое наименование
 #v-s:shortLabel
@@ -238,6 +344,15 @@ v-s:Subsidiary
 
 #------Комментарий
 #rdfs:comment
+
+v-s:PsParentUnitForSubsidiary
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:Subsidiary ;
+  v-ui:forProperty v-s:parentUnit ;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 100 ;
+  v-ui:rangeRestriction v-s:Organization ;
+.
 
 
 #-------------------------------------------------------------------- Oрганизационная группа --
@@ -454,6 +569,42 @@ v-s:HRRecord
 .
 
 # Тут не хватает полей, которые описаны в v-s:PermissionStatement  v-s:startTime   v-s:endTime
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
+
+
+
+
+
+# Перенести в управление контрагентами
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
