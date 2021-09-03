@@ -97,6 +97,19 @@ v-s:hasThirdPartyParticipant
   rdfs:range v-s:ThirdPartyParticipant ;
   rdfs:domain v-s:Activity ;
 .
+
+#v-s:responsible
+v-df:PsresponsibleInDecision
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:Activity ;
+  v-ui:forProperty v-s:responsible ;
+  v-ui:maxCardinality 1 ;
+  v-ui:minCardinality 1 ;
+  v-ui:tooltip "Необязательно к заполнению, единичное значение. Ссылка на объект класса Назначение."@ru ;
+  v-ui:tooltip "Non-required, single value. Link to instance of Appointment class"@en ;
+  rdfs:label "Спецификация руководителя проекта для класса Решение тех.комитета"@ru ;
+  rdfs:label "Projeсt manager property specification for AgDecision class"@en ;
+.
 #---------------------------------------------------------
 
 v-s:ThirdPartyParticipant

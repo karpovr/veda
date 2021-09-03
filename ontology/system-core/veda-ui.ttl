@@ -1022,6 +1022,14 @@ v-s:TS_Version
   v-ui:defaultTemplate v-ui:VersionTemplate;
   v-ui:forClass v-s:Version
 .
+v-s:CS_Version
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Version "@ru, "Class specification v-s:Version"@en;
+  v-s:hasClass v-s:Version ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:VersionTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:VersionTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Version"@ru ;
@@ -1443,6 +1451,14 @@ v-s:TS_Bundle
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:LabelTemplate;
   v-ui:forClass v-s:Bundle
+.
+v-s:CS_Bundle
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Bundle "@ru, "Class specification v-s:Bundle "@en;
+  v-s:hasClass v-s:Bundle ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:LabelTemplate;
+  v-s:loadPriority 15 ;
 .
 v-ui:LabelTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -1993,6 +2009,14 @@ v-s:TS_Journal
   v-ui:defaultTemplate v-ui:SimplifiedJournalTemplate;
   v-ui:forClass v-s:Journal
 .
+v-s:CS_Journal
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Journal"@ru, "Class specification v-s:Journal"@en;
+  v-s:hasClass v-s:Journal ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:SimplifiedJournalTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:SimplifiedJournalTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Упрощенный"@ru ;
@@ -2521,6 +2545,14 @@ v-s:TS_Tree
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:TreeTemplate;
   v-ui:forClass v-ui:Tree
+.
+v-s:CS_Tree
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-ui:Tree "@ru, "Class specification v-ui:Tree"@en;
+  v-s:hasClass v-ui:Tree ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:TreeTemplate;
+  v-s:loadPriority 15 ;
 .
 v-ui:TreeTemplate
   rdf:type v-ui:ClassTemplate ;
