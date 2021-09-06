@@ -231,7 +231,7 @@ impl App {
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
         if self.backend.mstorage_api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).is_ok() {
-            error!("failed to store test individual, uri = {}", test_indv.get_id());
+            error!("failed to store test individual, uri = {}", test_indv_id);
             return false;
         }
         true

@@ -173,7 +173,7 @@ fn request_prepare(
         tickets_cache.insert(ticket_id.to_string(), ticket.clone());
     }
 
-    if !ticket.is_ticket_valid() {
+    if !(ticket.is_ticket_valid() == ResultCode::Ok) {
         error!("ticket [{}] not valid", ticket.id);
         return Err(ResultCode::TicketExpired);
     }
