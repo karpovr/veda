@@ -68,6 +68,15 @@ v-s:TS_MedicalCheckupCertificationDocument
   v-ui:forClass v-s:MedicalCheckupCertificationDocument
 .
 
+v-s:CS_CertificationDocument
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:CertificationDocument "@ru, "Class specification v-s:CertificationDocument "@en;
+  v-s:hasClass v-s:CertificationDocument  ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment, v-s:hasComment;
+  v-ui:defaultTemplate v-s:CertificationDocumentTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:CertificationDocumentTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:CertificationDocument ;

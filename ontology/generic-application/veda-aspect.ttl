@@ -18,132 +18,7 @@
   v-s:loadPriority 9 ;
 .
 
-v-s:Aspect
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:SystemThing ;
-  rdfs:label "Аспект"@ru ;
-  rdfs:label "Aspect"@en ;
-.
-
-v-s:PersonalAspect
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:Aspect ;
-  rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:owner.rdfs:label}" ;
-  rdfs:label "Персональный аспект"@ru ;
-  rdfs:label "Personal aspect"@en ;
-.
-v-s:CS_PersonalAspect
-  rdf:type v-s:ClassSpecification ;
-  rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
-  v-s:hasClass v-s:PersonalAspect ;
-  v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
-  v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
-  v-s:loadPriority 15 ;
-.
-
-v-s:BusinessAspect
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:Aspect ;
-  rdfs:label "Деловой аспект"@ru ;
-  rdfs:label "Business aspect"@en ;
-.
-
-v-s:hasApplication
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range v-s:Application ;
-  rdfs:label "Приложение"@ru ;
-  rdfs:label "Application"@en ;
-.
-
-v-s:hasFavorite
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range rdfs:Resource ;
-  rdfs:label "Избранное"@ru ;
-  rdfs:label "Favorite"@en ;
-.
-
-v-s:hasBlank
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range v-fc:Blank ;
-  rdfs:label "Бланк"@ru ;
-  rdfs:label "Blank"@en ;
-.
-
-v-s:hasCreate
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range v-fc:Create ;
-  rdfs:label "Бланк"@ru ;
-  rdfs:label "Blank"@en ;
-.
-
-v-s:hasRegistry
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range v-fs:AttributiveSearch ;
-  rdfs:range v-s:LinksTree ;
-  rdfs:range v-ui:Tree ;
-  rdfs:label "Реестр"@ru ;
-  rdfs:label "Registry"@en ;
-.
-
-v-s:hasReport
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range rdfs:Resource ;
-  rdfs:label "Отчет"@ru ;
-  rdfs:label "Report"@en ;
-.
-
-v-s:hasArbitraryLink
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range rdfs:Resource ;
-  rdfs:label "Произвольная ссылка"@ru ;
-  rdfs:label "Arbitrary link"@en ;
-.
-
-v-s:hasWidget
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range rdfs:Resource ;
-  rdfs:label "Виджет"@ru ;
-  rdfs:label "Widget"@en ;
-.
-
-v-s:hasBusinessAspect
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Aspect ;
-  rdfs:range v-s:BusinessAspect ;
-  rdfs:label "Связанный деловой аспект"@ru ;
-  rdfs:label "Related business aspect"@en ;
-.
-
-v-s:hasAspect
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Person ;
-  rdfs:label "Персональный аспект"@ru ;
-  rdfs:label "Personal aspect"@en ;
-  rdfs:range v-s:Aspect ;
-.
-
-v-s:PsHasAspect
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация персонального аспекта класса Персона"@ru ;
-  rdfs:label "Personal aspect specification for Person class"@en ;
-  v-ui:forClass v-s:Person ;
-  v-ui:forProperty v-s:hasAspect ;
-  v-ui:minCardinality "1"^^xsd:nonNegativeInteger ;
-  v-ui:maxCardinality "1"^^xsd:nonNegativeInteger ;
-  v-ui:tooltip "Обязательно к заполнению, единичное значений. Ссылка на субъект класса Персональный аспект."@ru ;
-  v-ui:tooltip "Required, single value. Link to instance of Personal aspect class"@en ;
-  v-ui:queryPrefix "('rdf:type'=='v-s:PersonalAspect')"^^xsd:string ;
-.
-
+# ------------------------------------------------------------ СТРОКИ --
 v-s:PersonalInfo
   rdf:type v-s:Bundle ;
   rdfs:label "Личная информация"@ru ;
@@ -169,21 +44,168 @@ v-s:RemoveFromFavorites
   rdfs:label "Удалить избранное"@ru ;
   rdfs:label "Remove favorite"@en ;
 .
-
-# Templates-------------------------
-v-s:TS_Aspect
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:AspectTemplate;
-  v-ui:forClass v-s:Aspect
+v-s:UISettingsBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Настройки интерфейса"@ru ;
+  rdfs:label "Interface settings"@en ;
 .
+v-s:MessageSettingsBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Настройки сообщений"@ru ;
+  rdfs:label "Message settings"@en ;
+.
+v-s:RejectBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Отказаться"@ru ;
+  rdfs:label "Reject"@en ;
+.
+v-s:TheseMessagesBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "от этих сообщений:"@ru ;
+  rdfs:label "these messages:"@en ;
+.
+
+
+# ------------------------------------------------------------ КЛАССЫ --
+
+# --------------------------------------------------------- v-s:Aspect --
+v-s:Aspect
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:SystemThing ;
+  rdfs:label "Аспект"@ru ;
+  rdfs:label "Aspect"@en ;
+.
+v-s:hasAspect
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Person ;
+  rdfs:label "Персональный аспект"@ru ;
+  rdfs:label "Personal aspect"@en ;
+  rdfs:range v-s:Aspect ;
+.
+v-s:PsHasAspect
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация персонального аспекта класса Персона"@ru ;
+  rdfs:label "Personal aspect specification for Person class"@en ;
+  v-ui:forClass v-s:Person ;
+  v-ui:forProperty v-s:hasAspect ;
+  v-ui:minCardinality "1"^^xsd:nonNegativeInteger ;
+  v-ui:maxCardinality "1"^^xsd:nonNegativeInteger ;
+  v-ui:tooltip "Обязательно к заполнению, единичное значений. Ссылка на субъект класса Персональный аспект."@ru ;
+  v-ui:tooltip "Required, single value. Link to instance of Personal aspect class"@en ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:PersonalAspect')"^^xsd:string ;
+.
+v-s:hasApplication
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:Application ;
+  rdfs:label "Приложение"@ru ;
+  rdfs:label "Application"@en ;
+.
+v-s:hasFavorite
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range rdfs:Resource ;
+  rdfs:label "Избранное"@ru ;
+  rdfs:label "Favorite"@en ;
+.
+v-s:hasBlank
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-fc:Blank ;
+  rdfs:label "Бланк"@ru ;
+  rdfs:label "Blank"@en ;
+.
+v-s:hasCreate
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-fc:Create ;
+  rdfs:label "Бланк"@ru ;
+  rdfs:label "Blank"@en ;
+.
+v-s:hasRegistry
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-fs:AttributiveSearch ;
+  rdfs:range v-s:LinksTree ;
+  rdfs:range v-ui:Tree ;
+  rdfs:label "Реестр"@ru ;
+  rdfs:label "Registry"@en ;
+.
+v-s:hasReport
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range rdfs:Resource ;
+  rdfs:label "Отчет"@ru ;
+  rdfs:label "Report"@en ;
+.
+v-s:hasArbitraryLink
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range rdfs:Resource ;
+  rdfs:label "Произвольная ссылка"@ru ;
+  rdfs:label "Arbitrary link"@en ;
+.
+v-s:hasWidget
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range rdfs:Resource ;
+  rdfs:label "Виджет"@ru ;
+  rdfs:label "Widget"@en ;
+.
+
+v-s:hasBusinessAspect
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:BusinessAspect ;
+  rdfs:label "Связанный деловой аспект"@ru ;
+  rdfs:label "Related business aspect"@en ;
+.
+
+# ----------------------------------------------------- v-s:PersonalAspect --
+v-s:PersonalAspect
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Aspect ;
+  rdfs:subClassOf v-s:Labeled ;
+  v-s:labelPattern "{@.v-s:owner.rdfs:label}" ;
+  rdfs:label "Персональный аспект"@ru ;
+  rdfs:label "Personal aspect"@en ;
+.
+v-s:CS_PersonalAspect
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
+  v-s:hasClass v-s:PersonalAspect ;
+  v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
+  v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
+  v-s:loadPriority 15 ;
+.
+
+# ----------------------------------------------------- v-s:BusinessAspect --
+v-s:BusinessAspect
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Aspect ;
+  rdfs:label "Деловой аспект"@ru ;
+  rdfs:label "Business aspect"@en ;
+.
+
+
+# ----------------------------------------------------------- ШАБЛОНЫ --
+
+
+# ------------------------------------------------------ v-s:PersonalAspect --
 v-s:TS_PersonalAspect
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:PersonalAspectTemplate;
   v-ui:forClass v-s:PersonalAspect
 .
-
+v-s:CS_PersonalAspect
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:PersonalAspect "@ru, "Class specification v-s:PersonalAspect "@en;
+  v-s:hasClass v-s:PersonalAspect ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:PersonalAspectTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса Персональный аспект"@ru ;
@@ -277,6 +299,41 @@ v-s:PersonalAspectTemplate
   """ ;
 .
 
+# ------------------------------------------------------ v-s:Aspect --
+v-s:TS_Aspect
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:AspectTemplate;
+  v-ui:forClass v-s:Aspect
+.
+v-s:CS_Aspect
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Aspect "@ru, "Class specification v-s:Aspect "@en;
+  v-s:hasClass v-s:Aspect ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:AspectTemplate ;
+  v-s:loadPriority 15 ;
+.
+v-s:AspectTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон аспекта"@ru ;
+  rdfs:label "Aspect template"@en ;
+  v-ui:forClass v-s:Aspect ;
+  v-ui:template """
+<div class="container" style="position:relative;">
+  <h2 property="rdfs:label" class="text-center" style="color:#555"></h2>
+  <div class="row margin-xl" about="@" rel="v-s:hasApplication" style="display: flex; flex-flow: row wrap;">
+    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="display: flex;">
+      <div about="@" data-template="v-s:ApplicationSmallCardTemplate" style="display: flex; width:100%;"></div>
+    </div>
+  <div>
+</div>
+  """ ;
+.
+
+
+
+
 v-s:PersonalImageTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон отображения персональной информации"@ru ;
@@ -301,7 +358,6 @@ v-s:PersonalImageTemplate
 </div>
   """ ;
 .
-
 v-s:PersonalInfoTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон отображения персональной информации"@ru ;
@@ -368,31 +424,6 @@ v-s:PersonalInfoTemplate
 </div>
   """;
 .
-
-v-s:UISettingsBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Настройки интерфейса"@ru ;
-  rdfs:label "Interface settings"@en ;
-.
-
-v-s:MessageSettingsBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Настройки сообщений"@ru ;
-  rdfs:label "Message settings"@en ;
-.
-
-v-s:RejectBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Отказаться"@ru ;
-  rdfs:label "Reject"@en ;
-.
-
-v-s:TheseMessagesBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "от этих сообщений:"@ru ;
-  rdfs:label "these messages:"@en ;
-.
-
 v-s:PersonalPreferencesTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон персональных предпочтений"@ru ;
@@ -430,22 +461,6 @@ v-s:PersonalPreferencesTemplate
   """ ;
 .
 
-v-s:AspectTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон аспекта"@ru ;
-  rdfs:label "Aspect template"@en ;
-  v-ui:forClass v-s:Aspect ;
-  v-ui:template """
-<div class="container" style="position:relative;">
-  <h2 property="rdfs:label" class="text-center" style="color:#555"></h2>
-  <div class="row margin-xl" about="@" rel="v-s:hasApplication" style="display: flex; flex-flow: row wrap;">
-    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" style="display: flex;">
-      <div about="@" data-template="v-s:ApplicationSmallCardTemplate" style="display: flex; width:100%;"></div>
-    </div>
-  <div>
-</div>
-  """ ;
-.
 
 v-s:DefaultPhoto
   a v-s:File;

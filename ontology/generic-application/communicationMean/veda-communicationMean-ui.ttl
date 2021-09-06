@@ -64,7 +64,14 @@ v-s:TS_CommunicationMean
   v-ui:defaultTemplate v-s:CommunicationMeanTemplate;
   v-ui:forClass v-s:CommunicationMean
 .
-
+v-s:CS_CommunicationMean
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:CommunicationMean  "@ru, "Class specification v-s:CommunicationMean  "@en;
+  v-s:hasClass v-s:CommunicationMean  ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:CommunicationMeanTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:CommunicationMeanTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:CommunicationMean ;

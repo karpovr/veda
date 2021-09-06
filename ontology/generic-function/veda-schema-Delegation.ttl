@@ -18,6 +18,8 @@
 .
 
 # ------------------------------------------------------------ КЛАССЫ --
+
+# ----------------------------------------------------- v-s:RequestDelegation --
 v-s:RequestDelegation
   rdf:type owl:Class ;
   rdfs:label "Заявка на делегирование"@ru ;
@@ -26,7 +28,7 @@ v-s:RequestDelegation
   rdfs:subClassOf v-s:OrganizationUnit ;
   rdfs:subClassOf v-s:Temporal ;
 .
-#-------------
+
 v-s:delegator
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:RequestDelegation ;
@@ -34,16 +36,15 @@ v-s:delegator
   rdfs:label "Delegator"@en ;
   rdfs:range v-s:Appointment ;
 .
-v-s:PsDelegatorForRequestDelegation
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:RequestDelegation ;
-  v-ui:forProperty v-s:delegator ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'rdf:type'=='v-s:Appointment' && 'v-s:official'=='true' && 'v-s:employee.v-s:hasAccount.isExists'=='true'" ;
-  #v-ui:queryPrefix "('rdf:type' === 'v-s:Appointment' || 'rdf:type' === 'v-s:Person') && 'v-s:hasAccount.isExists'=='true'" ;
-.
-#-------------
+  v-s:PsDelegatorForRequestDelegation
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:RequestDelegation ;
+    v-ui:forProperty v-s:delegator ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:queryPrefix "'rdf:type'=='v-s:Appointment' && 'v-s:official'=='true' && 'v-s:employee.v-s:hasAccount.isExists'=='true'" ;
+    #v-ui:queryPrefix "('rdf:type' === 'v-s:Appointment' || 'rdf:type' === 'v-s:Person') && 'v-s:hasAccount.isExists'=='true'" ;
+  .
 v-s:delegate
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:RequestDelegation ;
@@ -51,16 +52,15 @@ v-s:delegate
   rdfs:label "Delegate"@en ;
   rdfs:range v-s:Appointment ;
 .
-v-s:PsDelegateForRequestDelegation
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:RequestDelegation ;
-  v-ui:forProperty v-s:delegate ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "'rdf:type'=='v-s:Appointment' && 'v-s:official'=='true' && 'v-s:employee.v-s:hasAccount.isExists'=='true'" ;
-  #v-ui:queryPrefix "('rdf:type' === 'v-s:Appointment' || 'rdf:type' === 'v-s:Person') && 'v-s:hasAccount.isExists'=='true'" ;
-.
-#---------------
+  v-s:PsDelegateForRequestDelegation
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:RequestDelegation ;
+    v-ui:forProperty v-s:delegate ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:queryPrefix "'rdf:type'=='v-s:Appointment' && 'v-s:official'=='true' && 'v-s:employee.v-s:hasAccount.isExists'=='true'" ;
+    #v-ui:queryPrefix "('rdf:type' === 'v-s:Appointment' || 'rdf:type' === 'v-s:Person') && 'v-s:hasAccount.isExists'=='true'" ;
+  .
 v-s:delegatedPosition
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:RequestDelegation ;
@@ -68,15 +68,14 @@ v-s:delegatedPosition
   rdfs:label "Delegated position"@en ;
   rdfs:range v-s:Position ;
 .
-v-s:PsDelegatedPositionForRequestDelegation
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:RequestDelegation ;
-  v-ui:forProperty v-s:delegatedPosition ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 10 ;
-  v-ui:queryPrefix "'rdf:type' === 'v-s:Position'" ;
-.
-#----------------
+  v-s:PsDelegatedPositionForRequestDelegation
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:RequestDelegation ;
+    v-ui:forProperty v-s:delegatedPosition ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 10 ;
+    v-ui:queryPrefix "'rdf:type' === 'v-s:Position'" ;
+  .
 v-s:createdAppointment
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:RequestDelegation ;
@@ -84,7 +83,6 @@ v-s:createdAppointment
   rdfs:label "Created appointment"@en ;
   rdfs:range v-s:Appointment ;
 .
-#----------------
 v-s:hasDelegationPurpose
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:RequestDelegation ;
@@ -92,17 +90,17 @@ v-s:hasDelegationPurpose
   rdfs:label "Delegation purpose"@en ;
   rdfs:range v-s:DelegationPurpose ;
 .
-#----------------
-#v-s:dateFrom v-s:dateTo
-v-s:PsDatesRequestDelegation
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:RequestDelegation ;
-  v-ui:forProperty v-s:dateFrom, v-s:dateTo ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-.
+#v-s:dateFrom 
+#v-s:dateTo
+  v-s:PsDatesRequestDelegation
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:RequestDelegation ;
+    v-ui:forProperty v-s:dateFrom, v-s:dateTo ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+  .
 
-#----------------заявка для пользователя---------
+# --------------------------------------------------- v-s:RequestDelegationUser --
 v-s:RequestDelegationUser
   rdf:type owl:Class ;
   rdfs:label "Заявка на делегирование для пользователя"@ru ;
@@ -120,7 +118,7 @@ v-s:PsDelegationPurposeForRequestDelegationUser
   v-ui:defaultValue d:delegate_Acting;
 .
 
-#----------------заявка для администратора---------
+# -------------------------------------------------- v-s:RequestDelegationAdmin --
 v-s:RequestDelegationAdmin
   rdf:type owl:Class ;
   rdfs:label "Заявка на делегирование для администратора"@ru ;
@@ -145,17 +143,41 @@ v-s:TS_RequestDelegation
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-ui:forClass v-s:RequestDelegation
 .
+v-s:CS_RequestDelegation
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:RequestDelegation "@ru, "Class specification v-s:RequestDelegation "@en;
+  v-s:hasClass v-s:RequestDelegation ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:RequestDelegationTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_RequestDelegationUser
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-ui:forClass v-s:RequestDelegationUser
 .
+v-s:CS_RequestDelegationUser
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:RequestDelegationUser "@ru, "Class specification v-s:RequestDelegationUser "@en;
+  v-s:hasClass v-s:RequestDelegationUser ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:RequestDelegationTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_RequestDelegationAdmin
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-ui:forClass v-s:RequestDelegationAdmin
+.
+v-s:CS_RequestDelegationAdmin
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:RequestDelegationAdmin "@ru, "Class specification v-s:RequestDelegationAdmin "@en;
+  v-s:hasClass v-s:RequestDelegationAdmin ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:RequestDelegationTemplate;
+  v-s:loadPriority 15 ;
 .
 
 v-s:RequestDelegationTemplate
@@ -400,9 +422,7 @@ v-s:RequestDelegationTemplate
 """ ;
 .
 
-# ------------- РЕЕСТРЫ ---------------
-
-# ------------- Delegation registry templates ---------------
+# ------------------------------------------------------------ РЕЕСТРЫ --
 
 v-s:RequestDelegationRegistryResultTemplate
   rdf:type v-ui:ClassTemplate ;

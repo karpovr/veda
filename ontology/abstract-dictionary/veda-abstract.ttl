@@ -861,6 +861,24 @@ v-s:hasContractScale
   rdfs:range v-s:ContractScale ;
   rdfs:domain v-s:Contractual ;
 .
+v-s:customersRoleInContract
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Роль заказчика в контракте"@ru ;
+  rdfs:label "Customers role in contract"@en ;
+  rdfs:domain v-s:Contractual ;
+.
+v-s:suppliersRoleInContract
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Роль исполнителя в контракте"@ru ;
+  rdfs:label "Suppliers role in contract"@en ;
+  rdfs:domain v-s:Contractual ;
+.
+v-s:stakeholdersRoleInContract
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Роль заинтересованной стороны в контракте"@ru ;
+  rdfs:label "Stakeholders role in contract"@en ;
+  rdfs:domain v-s:Contractual ;
+.
 
 #----------------------------------------------------------- Контролируемая сущность --
 v-s:Controlled
@@ -1654,6 +1672,14 @@ v-s:TS_Deletable
   v-s:loadPriority 15 ;
   v-ui:defaultTemplate v-s:DeletableTemplate ;
   v-ui:forClass v-s:Deletable ;
+.
+v-s:CS_Deletable
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Deletable "@ru, "Class specification v-s:Deletable "@en;
+  v-s:hasClass v-s:Deletable ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:DeletableTemplate ;
+  v-s:loadPriority 15 ;
 .
 #----v-s:Deletable ствится вторым классом, рядом с классом документа, чтобы 2 шаблона не отображались на экране 
 v-s:DeletableTemplate

@@ -17,8 +17,37 @@
 #  owl:versionInfo "1.3" ;
   v-s:loadPriority 7 ;
 .
+# ------------------------------------------------------------ СТРОКИ --
+v-s:RunBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Запустить"@ru ;
+  rdfs:label "Run"@en ;
+.
+v-s:StartBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Запустить"@ru ;
+  rdfs:label "Start"@en ;
+.
+v-s:RestartBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Перезапустить"@ru ;
+  rdfs:label "Restart"@en ;
+.
+v-s:ClearBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Очистить"@ru ;
+  rdfs:label "Clear"@en ;
+.
+v-s:StopBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Остановить"@ru ;
+  rdfs:label "Stop"@en ;
+.
 
-# --------------------------User scripts--------------------------------
+
+# ------------------------------------------------------------ КЛАССЫ --
+
+# -------------------------------------------------------- v-s:UserScript --
 
 v-s:UserScript
   rdf:type owl:Class ;
@@ -26,7 +55,6 @@ v-s:UserScript
   rdfs:label "Пользовательский скрипт"@ru ;
   rdfs:label "User script"@en ;
 .
-
 v-s:executeAt
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Исполнять в"@ru ;
@@ -34,7 +62,18 @@ v-s:executeAt
   rdfs:domain v-s:UserScript ;
   rdfs:range xsd:string ;
 .
-
+  v-s:PsExecuteAtUserScript
+    rdf:type v-ui:DatatypePropertySpecification ;
+    rdfs:label "Спецификация свойства v-s:executeAt для класса v-s:UserScript"@ru ;
+    rdfs:label "v-s:executeAt property specification for v-s:UserScript class"@en ;
+    v-ui:forClass v-s:UserScript ;
+    v-ui:forProperty v-s:executeAt ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:defaultValue "Browser" ;
+    v-ui:optionValue "Browser" ;
+    v-ui:optionValue "Server" ;
+  .
 v-s:output
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Вывод"@ru ;
@@ -43,7 +82,6 @@ v-s:output
   rdfs:domain v-s:Operation ;
   rdfs:range xsd:string ;
 .
-
 v-s:toBeRun
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Выполнить"@ru ;
@@ -51,7 +89,6 @@ v-s:toBeRun
   rdfs:domain v-s:UserScript ;
   rdfs:range xsd:boolean ;
 .
-
 v-s:lastRun
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Последний запуск"@ru ;
@@ -61,19 +98,148 @@ v-s:lastRun
   rdfs:range xsd:dateTime ;
 .
 
-v-s:PsExecuteAtUserScript
-  rdf:type v-ui:DatatypePropertySpecification ;
-  rdfs:label "Спецификация свойства v-s:executeAt для класса v-s:UserScript"@ru ;
-  rdfs:label "v-s:executeAt property specification for v-s:UserScript class"@en ;
-  v-ui:forClass v-s:UserScript ;
-  v-ui:forProperty v-s:executeAt ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:defaultValue "Browser" ;
-  v-ui:optionValue "Browser" ;
-  v-ui:optionValue "Server" ;
+# ------------------------------------------------------------ v-s:Operation --
+v-s:Operation
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:SystemThing ;
+  rdfs:subClassOf v-s:Temporal ;
+  rdfs:label "Операция"@ru ;
+  rdfs:label "Operation"@en ;
 .
 
+
+# ---------------------------------------------------------- v-s:GenericOperation --
+v-s:GenericOperation
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Operation ;
+  rdfs:label "Общая операция"@ru ;
+  rdfs:label "Generic operation"@en ;
+.
+
+# v-s:dateFrom
+# v-s:dateTo
+# v-s:duration
+# v-s:hasStatus
+# v-s:output
+
+v-s:dataQuery
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Запрос"@ru ;
+  rdfs:label "Query"@en ;
+  rdfs:domain v-s:Operation ;
+  rdfs:range xsd:string ;
+.
+
+v-s:data
+  rdf:type rdf:Property ;
+  rdfs:label "Данные"@ru ;
+  rdfs:label "Data"@en ;
+  rdfs:domain v-s:Operation ;
+  rdfs:range rdfs:Resource ;
+.
+
+v-s:processed
+  rdf:type rdf:Property ;
+  rdfs:label "Обработано"@ru ;
+  rdfs:label "Processed"@en ;
+  rdfs:domain v-s:Operation ;
+  rdfs:range xsd:integer ;
+.
+
+v-s:progress
+  rdf:type rdf:Property ;
+  rdfs:label "Прогресс"@ru ;
+  rdfs:label "Progress"@en ;
+  rdfs:domain v-s:Operation ;
+  rdfs:range xsd:integer ;
+.
+
+# ---------------------------------------------------------- v-s:OperationDelete --
+v-s:OperationDelete
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:GenericOperation ;
+  rdfs:label "Удалить"@ru ;
+  rdfs:label "Delete"@en ;
+  v-ui:hasModel v-s:OperationDeleteModel ;
+.
+v-s:OperationDeleteModel
+  rdf:type v-ui:ClassModel ;
+  rdfs:label "Модель операции удаления"@ru ;
+  rdfs:label "Delete operation model"@en ;
+  v-s:script """
+this.fn = function (individual_uri) {
+  set_in_individual(veda.ticket, {
+    "@": individual_uri,
+    "v-s:deleted": veda.Util.newBool(true)
+  });
+};
+  """ ;
+.
+
+# ---------------------------------------------------------- v-s:OperationRemove --
+v-s:OperationRemove
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:GenericOperation ;
+  rdfs:label "Уничтожить"@ru ;
+  rdfs:label "Remove"@en ;
+  v-ui:hasModel v-s:OperationRemoveModel ;
+.
+
+v-s:OperationRemoveModel
+  rdf:type v-ui:ClassModel ;
+  rdfs:label "Модель операции уничтожения"@ru ;
+  rdfs:label "Remove operation model"@en ;
+  v-s:script """
+this.fn = function (individual_uri) {
+  remove_individual(veda.ticket, individual_uri);
+};
+  """ ;
+.
+
+# ---------------------------------------------------------- v-s:OperationRestore --
+v-s:OperationRestore
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:GenericOperation ;
+  rdfs:label "Восстановить"@ru ;
+  rdfs:label "Restore"@en ;
+  v-ui:hasModel v-s:OperationRestoreModel ;
+.
+v-s:OperationRestoreModel
+  rdf:type v-ui:ClassModel ;
+  rdfs:label "Модель операции восстановления"@ru ;
+  rdfs:label "Restore operation model"@en ;
+  v-s:script """
+this.fn = function (individual_uri) {
+  remove_from_individual(veda.ticket, {
+    "@": individual_uri,
+    "v-s:deleted": veda.Util.newBool(true)
+  });
+};
+  """ ;
+.
+
+# ---------------------------------------------------------- v-s:OperationUpdate --
+v-s:OperationUpdate
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:GenericOperation ;
+  rdfs:label "Обновить"@ru ;
+  rdfs:label "Update"@en ;
+  v-ui:hasModel v-s:OperationUpdateModel ;
+  v-ui:hasTemplate v-s:OperationTemplate ;
+.
+v-s:OperationUpdateModel
+  rdf:type v-ui:ClassModel ;
+  rdfs:label "Модель операции обновления"@ru ;
+  rdfs:label "Update operation model"@en ;
+  v-s:script """
+this.fn = function (individual_uri) {
+  var individual = get_individual(veda.ticket, individual_uri);
+  put_individual(veda.ticket, individual);
+};
+  """ ;
+.
+
+# ------------------------------------------------------------ СОБЫТИЯ --
 v-s:UserScriptEvent
   rdf:type v-s:Event ;
   v-s:triggerByType v-s:UserScript ;
@@ -154,34 +320,24 @@ this.console = nativeConsole;
 """
 .
 
-v-s:RunBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Запустить"@ru ;
-  rdfs:label "Run"@en ;
-.
-v-s:StartBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Запустить"@ru ;
-  rdfs:label "Start"@en ;
-.
-v-s:RestartBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Перезапустить"@ru ;
-  rdfs:label "Restart"@en ;
-.
-v-s:ClearBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Очистить"@ru ;
-  rdfs:label "Clear"@en ;
-.
 
+# ------------------------------------------------------------ ШАБЛОНЫ --
+
+# -------------------------------------------------------- v-s:UserScript --
 v-s:TS_UserScript
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:UserScriptTemplate;
   v-ui:forClass v-s:UserScript
 .
-
+v-s:CS_UserScript
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:UserScript "@ru, "Class specification v-s:UserScript "@en;
+  v-s:hasClass v-s:UserScript ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:UserScriptTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:UserScriptTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:UserScript ;
@@ -305,188 +461,21 @@ v-s:UserScriptTemplate
   """
 .
 
-# --------------------------User operations-----------------------------
-
-v-s:Operation
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:SystemThing ;
-  rdfs:subClassOf v-s:Temporal ;
-  rdfs:label "Операция"@ru ;
-  rdfs:label "Operation"@en ;
-.
-
-v-s:GenericOperation
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:Operation ;
-  rdfs:label "Общая операция"@ru ;
-  rdfs:label "Generic operation"@en ;
-.
-
-# v-s:dateFrom
-# v-s:dateTo
-# v-s:duration
-# v-s:hasStatus
-# v-s:output
-
-v-s:dataQuery
-  rdf:type owl:DatatypeProperty ;
-  rdfs:label "Запрос"@ru ;
-  rdfs:label "Query"@en ;
-  rdfs:domain v-s:Operation ;
-  rdfs:range xsd:string ;
-.
-
-v-s:data
-  rdf:type rdf:Property ;
-  rdfs:label "Данные"@ru ;
-  rdfs:label "Data"@en ;
-  rdfs:domain v-s:Operation ;
-  rdfs:range rdfs:Resource ;
-.
-
-v-s:processed
-  rdf:type rdf:Property ;
-  rdfs:label "Обработано"@ru ;
-  rdfs:label "Processed"@en ;
-  rdfs:domain v-s:Operation ;
-  rdfs:range xsd:integer ;
-.
-
-v-s:progress
-  rdf:type rdf:Property ;
-  rdfs:label "Прогресс"@ru ;
-  rdfs:label "Progress"@en ;
-  rdfs:domain v-s:Operation ;
-  rdfs:range xsd:integer ;
-.
-
-v-s:OperationDelete
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:GenericOperation ;
-  rdfs:label "Удалить"@ru ;
-  rdfs:label "Delete"@en ;
-  v-ui:hasModel v-s:OperationDeleteModel ;
-.
-
-v-s:OperationDeleteModel
-  rdf:type v-ui:ClassModel ;
-  rdfs:label "Модель операции удаления"@ru ;
-  rdfs:label "Delete operation model"@en ;
-  v-s:script """
-this.fn = function (individual_uri) {
-  set_in_individual(veda.ticket, {
-    "@": individual_uri,
-    "v-s:deleted": veda.Util.newBool(true)
-  });
-};
-  """ ;
-.
-
-v-s:OperationRemove
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:GenericOperation ;
-  rdfs:label "Уничтожить"@ru ;
-  rdfs:label "Remove"@en ;
-  v-ui:hasModel v-s:OperationRemoveModel ;
-.
-
-v-s:OperationRemoveModel
-  rdf:type v-ui:ClassModel ;
-  rdfs:label "Модель операции уничтожения"@ru ;
-  rdfs:label "Remove operation model"@en ;
-  v-s:script """
-this.fn = function (individual_uri) {
-  remove_individual(veda.ticket, individual_uri);
-};
-  """ ;
-.
-
-v-s:OperationRestore
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:GenericOperation ;
-  rdfs:label "Восстановить"@ru ;
-  rdfs:label "Restore"@en ;
-  v-ui:hasModel v-s:OperationRestoreModel ;
-.
-
-v-s:OperationRestoreModel
-  rdf:type v-ui:ClassModel ;
-  rdfs:label "Модель операции восстановления"@ru ;
-  rdfs:label "Restore operation model"@en ;
-  v-s:script """
-this.fn = function (individual_uri) {
-  remove_from_individual(veda.ticket, {
-    "@": individual_uri,
-    "v-s:deleted": veda.Util.newBool(true)
-  });
-};
-  """ ;
-.
-
-v-s:OperationUpdate
-  rdf:type owl:Class ;
-  rdfs:subClassOf v-s:GenericOperation ;
-  rdfs:label "Обновить"@ru ;
-  rdfs:label "Update"@en ;
-  v-ui:hasModel v-s:OperationUpdateModel ;
-  v-ui:hasTemplate v-s:OperationTemplate ;
-.
-
-v-s:OperationUpdateModel
-  rdf:type v-ui:ClassModel ;
-  rdfs:label "Модель операции обновления"@ru ;
-  rdfs:label "Update operation model"@en ;
-  v-s:script """
-this.fn = function (individual_uri) {
-  var individual = get_individual(veda.ticket, individual_uri);
-  put_individual(veda.ticket, individual);
-};
-  """ ;
-.
-
-v-s:StopBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Остановить"@ru ;
-  rdfs:label "Stop"@en ;
-.
-
+# -------------------------------------------------------- v-s:Operation --
 v-s:TS_Operation
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-ui:forClass v-s:Operation
 .
-v-s:TS_GenericOperation
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
+v-s:CS_Operation
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Operation "@ru, "Class specification v-s:Operation "@en;
+  v-s:hasClass v-s:Operation ;
+  v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
-  v-ui:forClass v-s:GenericOperation
+  v-s:loadPriority 15 ;
 .
-v-s:TS_OperationDelete
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
-  v-ui:forClass v-s:OperationDelete
-.
-v-s:TS_OperationRemove
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
-  v-ui:forClass v-s:OperationRemove
-.
-v-s:TS_OperationRestore
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
-  v-ui:forClass v-s:OperationRestore
-.
-v-s:TS_OperationUpdate
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "10"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OperationTemplate;
-  v-ui:forClass v-s:OperationUpdate
-.
-
 v-s:OperationTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Operation ;
@@ -499,6 +488,88 @@ v-s:OperationTemplate
 </div>
   """ ;
 .
+
+# ------------------------------------------------------ v-s:GenericOperation --
+v-s:TS_GenericOperation
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:forClass v-s:GenericOperation
+.
+v-s:CS_GenericOperation
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:GenericOperation "@ru, "Class specification v-s:GenericOperation "@en;
+  v-s:hasClass v-s:GenericOperation;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-s:loadPriority 15 ;
+.
+
+# ------------------------------------------------------ v-s:OperationDelete --
+v-s:TS_OperationDelete
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:forClass v-s:OperationDelete
+.
+v-s:CS_OperationDelete
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:OperationDelete "@ru, "Class specification v-s:OperationDelete "@en;
+  v-s:hasClass v-s:OperationDelete;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-s:loadPriority 15 ;
+.
+
+# ------------------------------------------------------ v-s:OperationRemove --
+v-s:TS_OperationRemove
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:forClass v-s:OperationRemove
+.
+v-s:CS_OperationRemove
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:OperationRemove "@ru, "Class specification v-s:OperationRemove "@en;
+  v-s:hasClass v-s:OperationRemove;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-s:loadPriority 15 ;
+.
+
+# ------------------------------------------------------ v-s:OperationRestore --
+v-s:TS_OperationRestore
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:forClass v-s:OperationRestore
+.
+v-s:CS_OperationRestore
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:OperationRestore "@ru, "Class specification v-s:OperationRestore "@en;
+  v-s:hasClass v-s:OperationRestore;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-s:loadPriority 15 ;
+.
+
+# ------------------------------------------------------ v-s:OperationUpdate --
+v-s:TS_OperationUpdate
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-ui:forClass v-s:OperationUpdate
+.
+v-s:CS_OperationUpdate
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:OperationUpdate"@ru, "Class specification v-s:OperationUpdate "@en;
+  v-s:hasClass v-s:OperationUpdate;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:OperationTemplate;
+  v-s:loadPriority 15 ;
+.
+
+
 
 v-s:OperationHeaderTemplate
   rdf:type v-ui:ClassTemplate ;

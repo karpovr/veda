@@ -14,7 +14,15 @@
   v-s:loadPriority 9 ;
 .
 
-### ------------------------------------------------------
+# ------------------------------------------------------------ СТРОКИ --
+v-s:AddLink
+  rdf:type v-s:Bundle ;
+  rdfs:label "Добавить"@ru ;
+  rdfs:label "Add"@en ;
+.
+# ------------------------------------------------------------ КЛАССЫ --
+
+# ----------------------------------------------------------- v-s:Link --
 v-s:Link
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
@@ -29,6 +37,16 @@ v-s:from
   rdfs:label "Source"@en ;
   rdfs:range v-s:Thing ;
 .
+  v-s:PSFromToForLink
+    rdf:type v-ui:ObjectPropertySpecification ;
+    rdfs:label "Спецификация свойств from to для класса v-s:Link"@ru ;
+    rdfs:label "Specification from to for v-s:Link class"@en ;
+    v-ui:forClass v-s:Link ;
+    v-ui:forProperty v-s:from, v-s:to ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:queryPrefix "('rdf:type'=='v-s:Document')"^^xsd:string ;
+  .
 v-s:to
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:Link ;
@@ -58,8 +76,7 @@ v-s:fromMemberOfTo
   rdfs:range xsd:boolean ;
 .
 
-# ---------------- Class links tree -----------------
-
+# ---------------------------------------------------------- v-s:LinksTree --
 v-s:LinksTree
   rdf:type owl:Class ;
   rdfs:label "Настройки ссылок для класса"@ru ;
@@ -67,7 +84,6 @@ v-s:LinksTree
   rdfs:comment "Дерево документов"@ru ;
   rdfs:comment "Documents tree"@en ;
 .
-
 v-s:hasLinksTree
   rdf:type owl:ObjectProperty ;
   rdfs:label "Дерево ссылок для класса"@ru ;
@@ -75,7 +91,15 @@ v-s:hasLinksTree
   rdfs:domain rdfs:Class ;
   rdfs:range v-s:LinksTree ;
 .
-
+  v-s:PSHasLinkThing
+    rdf:type v-ui:ObjectPropertySpecification ;
+    rdfs:label "Спецификация свойства v-s:hasLink для класса v-s:Thing"@ru ;
+    rdfs:label "Specification v-s:hasLink for v-s:Thing class"@en ;
+    v-ui:forClass v-s:Thing ;
+    v-ui:forProperty v-s:hasLink ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+  .
 v-s:hasRoot
   rdf:type owl:ObjectProperty ;
   rdfs:label "Корень"@ru ;
@@ -83,7 +107,6 @@ v-s:hasRoot
   rdfs:domain v-s:LinksTree ;
   rdfs:range rdfs:Resource ;
 .
-
 v-s:inProperty
   rdf:type owl:ObjectProperty ;
   rdfs:label "Входящие свойства"@ru ;
@@ -91,7 +114,6 @@ v-s:inProperty
   rdfs:domain v-s:LinksTree ;
   rdfs:range rdf:Property ;
 .
-
 v-s:outProperty
   rdf:type owl:ObjectProperty ;
   rdfs:label "Исходящие свойства"@ru ;
@@ -99,7 +121,6 @@ v-s:outProperty
   rdfs:domain v-s:LinksTree ;
   rdfs:range rdf:Property ;
 .
-
 v-s:allowedType
   rdf:type owl:ObjectProperty ;
   rdfs:label "Исходящие свойства"@ru ;
@@ -108,40 +129,23 @@ v-s:allowedType
   rdfs:range rdfs:Class ;
 .
 
-# ---------------- Link template -----------------
+# ------------------------------------------------------------ ШАБЛОНЫ --
+
+# ------------------------------------------------------------ v-s:Link --
 v-s:TS_Link 
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:LinkTemplate;
   v-ui:forClass v-s:Link
 .
-v-s:TS_LinksTree 
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:StandaloneLinksTreeTemplate;
-  v-ui:forClass v-s:LinksTree
+v-s:CS_Link
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Link "@ru, "Class specification v-s:Link "@en;
+  v-s:hasClass v-s:Link ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:LinkTemplate;
+  v-s:loadPriority 15 ;
 .
-
-v-s:PSHasLinkThing
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация свойства v-s:hasLink для класса v-s:Thing"@ru ;
-  rdfs:label "Specification v-s:hasLink for v-s:Thing class"@en ;
-  v-ui:forClass v-s:Thing ;
-  v-ui:forProperty v-s:hasLink ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-.
-v-s:PSFromToForLink
-  rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация свойств from to для класса v-s:Link"@ru ;
-  rdfs:label "Specification from to for v-s:Link class"@en ;
-  v-ui:forClass v-s:Link ;
-  v-ui:forProperty v-s:from, v-s:to ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type'=='v-s:Document')"^^xsd:string ;
-.
-
 v-s:LinkTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для отображения связи"@ru ;
@@ -175,6 +179,51 @@ v-s:LinkTemplate
 </div>
 """ ;
 .
+
+# --------------------------------------------------------- v-s:LinksTree --
+v-s:TS_LinksTree
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:StandaloneLinksTreeTemplate;
+  v-ui:forClass v-s:LinksTree
+.
+v-s:CS_
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:LinksTree "@ru, "Class specification v-s:LinksTree "@en;
+  v-s:hasClass v-s:LinksTree ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:LinksTreeTemplate;
+  v-s:loadPriority 15 ;
+.
+v-s:LinksTreeTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для отображения дерева связей документа"@ru ;
+  rdfs:label "Template to view document links tree"@en ;
+  rdfs:comment "Дерево"@ru ;
+  rdfs:label "Tree"@en ;
+  v-ui:template """
+<div>
+  <style>
+    .links-tree ul {
+      list-style-type: none;
+      padding-left: 18px;
+    }
+
+    .links-tree ul li {
+      margin: 10px 0;
+    }
+
+    .links-tree .expand,
+    .links-tree .expand-type {
+      text-decoration: none;
+    }
+  </style>
+  <div class="links-tree" about="@" data-template="v-s:LinksTreeRecursiveTemplate"></div>
+</div>
+""" ;
+.
+
+
 
 v-s:LinksTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -215,11 +264,11 @@ v-s:LinksTemplate
 """ ;
 .
 
-v-s:AddLink
-  rdf:type v-s:Bundle ;
-  rdfs:label "Добавить"@ru ;
-  rdfs:label "Add"@en ;
-.
+
+
+
+
+
 
 v-s:LinksListTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -371,30 +420,7 @@ v-s:StandaloneLinksTreeTemplate
   """ ;
 .
 
-v-s:LinksTreeTemplate
-  rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для отображения дерева связей документа"@ru ;
-  rdfs:label "Template to view document links tree"@en ;
-  rdfs:comment "Дерево"@ru ;
-  rdfs:label "Tree"@en ;
-  v-ui:template """
-<div>
-  <style>
-    .links-tree ul {
-      list-style-type: none;
-      padding-left: 18px;
-    }
-    .links-tree ul li {
-      margin: 10px 0;
-    }
-    .links-tree .expand, .links-tree .expand-type {
-      text-decoration: none;
-    }
-  </style>
-  <div class="links-tree" about="@" data-template="v-s:LinksTreeRecursiveTemplate"></div>
-</div>
-""" ;
-.
+
 
 v-s:LinksTreeRecursiveTemplate
   rdf:type v-ui:ClassTemplate ;

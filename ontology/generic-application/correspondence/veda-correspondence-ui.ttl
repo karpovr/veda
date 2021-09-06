@@ -12,80 +12,6 @@
 #  owl:versionInfo "1.3" ;
   v-s:loadPriority 6 ;
 .
-
-# ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
-
-v-s:PsHasDocumentKindForLetter
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Letter ;
-  v-ui:forProperty v-s:hasDocumentKind ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-  rdfs:label "Спецификация v-s:hasDocumentKind для класса v-s:Letter"@ru ;
-  rdfs:label "v-s:hasDocumentKind specification for v-s:Letter class"@en ;
-.
-v-s:PsHasDeliveryKindForLetter
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Letter ;
-  v-ui:forProperty v-s:hasDelivery ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 10 ;
-  rdfs:label "Спецификация v-s:hasDelivery для класса v-s:Letter"@ru ;
-  rdfs:label "v-s:hasDelivery specification for v-s:Letter class"@en ;
-.
-v-s:PsSenderRecipientForLetter
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Letter ;
-  v-ui:forProperty v-s:sender ;
-  v-ui:forProperty v-s:recipient ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 50 ;
-  rdfs:label "Спецификация v-s:sender, v-s:recipient для класса v-s:Letter"@ru ;
-  rdfs:label "v-s:sender, v-s:recipient specification for v-s:Letter class"@en ;
-.
-v-s:PsRegistrationRecordForLetter
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Letter ;
-  v-ui:forProperty v-s:hasLetterRegistrationRecordSender ;
-  v-ui:forProperty v-s:hasLetterRegistrationRecordRecipient ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация v-s:hasLetterRegistrationRecordSender, v-s:hasLetterRegistrationRecordRecipient для класса v-s:Letter"@ru ;
-  rdfs:label "v-s:hasLetterRegistrationRecordSender, v-s:hasLetterRegistrationRecordRecipient specification for v-s:Letter class"@en ;
-.
-v-s:PsOrganizationForCorrespondent
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Correspondent ;
-  v-ui:forProperty v-s:correspondentOrganization ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type'=='v-s:Organization') || ('rdf:type'=='v-s:Subsidiary')"^^xsd:string ;
-  rdfs:label "Спецификация v-s:correspondentOrganization для класса v-s:Correspondent"@ru ;
-  rdfs:label "v-s:correspondentOrganization specification for v-s:Correspondent class"@en ;
-.
-
-v-s:PsDepartmentForCorrespondent
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Correspondent ;
-  v-ui:forProperty v-s:correspondentDepartment ;
-  v-ui:forProperty v-s:correspondentPerson ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-  rdfs:label "Спецификация v-s:correspondentDepartment для класса v-s:Correspondent"@ru ;
-  rdfs:label "v-s:correspondentDepartment specification for v-s:Correspondent class"@en ;
-.
-
-v-s:PsDeliveryMethodForDelivery
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Delivery ;
-  v-ui:forProperty v-s:deliverBy ;
-  v-ui:forProperty v-s:date ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация v-s:deliverBy, v-s:date  для класса v-s:Delivery"@ru ;
-  rdfs:label "v-s:deliverBy, v-s:date for v-s:Delivery class"@en ;
-.
-
 # ------------------------------------------------------------ СТРОКИ --
 
 v-s:AutomaticallyBundle
@@ -93,13 +19,11 @@ v-s:AutomaticallyBundle
   rdfs:label "Автоматически"@ru ;
   rdfs:label "Automatically"@en ;
 .
-
 v-s:ManuallyBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Вручную"@ru ;
   rdfs:label "Manually"@en ;
 .
-
 v-s:OutgoingLetterPrintBlank
   rdf:type v-s:Bundle ;
   rdfs:label "Печатная форма"@ru ;
@@ -107,31 +31,76 @@ v-s:OutgoingLetterPrintBlank
 .
 
 # ------------------------------------------------------------ ШАБЛОНЫ --
-v-s:TS_Letter
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:LetterTemplate;
-  v-ui:forClass v-s:Letter
-.
+
+# ------------------------------------------------------ v-s:IncomingLetter --
 v-s:TS_IncomingLetter
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:LetterTemplate;
   v-ui:forClass v-s:IncomingLetter
 .
+v-s:CS_IncomingLetter
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:IncomingLetter "@ru, "Class specification v-s:IncomingLetter "@en;
+  v-s:hasClass v-s:IncomingLetter ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasLetterRegistrationRecordSender, v-s:recipient,
+  v-s:hasLetterRegistrationRecordRecipient, v-s:sender, v-s:hasDelivery ;
+  v-ui:defaultTemplate v-s:LetterTemplate;
+  v-s:loadPriority 15 ;
+.
+
+# ------------------------------------------------------ v-s:OutgoingLetter --
 v-s:TS_OutgoingLetter
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:LetterTemplate;
   v-ui:forClass v-s:OutgoingLetter
 .
+v-s:CS_OutgoingLetter
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:OutgoingLetter "@ru, "Class specification v-s:OutgoingLetter "@en;
+  v-s:hasClass v-s:OutgoingLetter ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasLetterRegistrationRecordSender, v-s:recipient,
+  v-s:hasLetterRegistrationRecordRecipient, v-s:sender, v-s:hasDelivery ;
+  v-ui:defaultTemplate v-s:LetterTemplate;
+  v-s:loadPriority 15 ;
+.
+
+# ---------------------------------------------------------- v-s:Delivery --
 v-s:TS_Delivery
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:DeliveryTemplate;
   v-ui:forClass v-s:Delivery
 .
+v-s:CS_Delivery
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Delivery "@ru, "Class specification v-s:Delivery "@en;
+  v-s:hasClass v-s:Delivery ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment ;
+  v-ui:defaultTemplate v-s:DeliveryTemplate;
+  v-s:loadPriority 15 ;
+.
 
+# ------------------------------------------------------------ v-s:Letter --
+v-s:TS_Letter
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:LetterTemplate;
+  v-ui:forClass v-s:Letter
+.
+v-s:CS_Letter
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Letter "@ru, "Class specification v-s:Letter "@en;
+  v-s:hasClass v-s:Letter ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasLetterRegistrationRecordSender, v-s:recipient, v-s:hasLetterRegistrationRecordRecipient,  v-s:sender, v-s:hasDelivery  ;
+  v-ui:defaultTemplate v-s:LetterTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:LetterTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Letter ;
@@ -389,6 +358,7 @@ v-s:LetterTemplate
   """ ;
 .
 
+# ------------------------------------------------------------ v-s:Correspondent --
 v-s:CorrespondentTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон корреспондента"@ru ;
@@ -503,6 +473,7 @@ v-s:CorrespondentTemplate
   """ ;
 .
 
+# ----------------------------------------------------------------- v-s:Delivery --
 v-s:DeliveryTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон доставки"@ru ;
@@ -581,6 +552,7 @@ v-s:DeliveryEmbeddedTemplate
   """ ;
 .
 
+# -------------------------------------------------------- v-s:LetterRegistrationRecord --
 v-s:LetterRegistrationRecordTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон регистрационной записи для письма"@ru ;

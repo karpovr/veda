@@ -74,7 +74,15 @@ v-s:AddComment
   rdfs:label "Добавить"@ru ;
   rdfs:label "Add"@en ;
 .
-
+v-s:CS_Comment
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Comment "@ru, "Class specification v-s:Comment "@en;
+  v-s:hasClass v-s:Comment  ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:attachment;
+  v-ui:defaultTemplate v-s:CommentsTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:CommentsTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для отображения комментариев"@ru ;
@@ -145,6 +153,14 @@ v-s:TS_Comment
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:SingleCommentTemplate;
   v-ui:forClass v-s:Comment
+.
+v-s:CS_Comment
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Comment "@ru, "Class specification v-s:Comment "@en;
+  v-s:hasClass v-s:Comment ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:SingleCommentTemplate;
+  v-s:loadPriority 15 ;
 .
 v-s:SingleCommentTemplate
   rdf:type v-ui:ClassTemplate ;

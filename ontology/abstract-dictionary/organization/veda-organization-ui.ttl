@@ -15,7 +15,7 @@
 #  owl:versionInfo "1.3" ;
   v-s:loadPriority 6 ;
 .
-
+# ------------------------------------------------------------ СТРОКИ --
 v-s:DeleteAppointmentBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Удалить назначение"@ru ;
@@ -65,6 +65,78 @@ v-s:FullNameOrgBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Полное наименование"@ru ;
   rdfs:label "Full name"@en ;
+.
+v-s:NonUniqueTaxId
+  rdf:type v-s:Bundle ;
+  rdfs:label "Сообщение не уникальный ИНН"@ru ;
+  rdfs:label "Non unique tax id message"@en ;
+  rdfs:comment "Организация с таким ИНН уже существует"@ru ;
+  rdfs:comment "Organization with this tax number already exists"@en ;
+.
+v-s:ForSafeTaxId
+  rdf:type v-s:Bundle ;
+  rdfs:label "Сообщение не уникальный ИНН"@ru ;
+  rdfs:label "Non unique tax id message"@en ;
+  rdfs:comment "Нельзя создать огранизацию с таким ИНН"@ru ;
+  rdfs:comment "Нельзя создать огранизацию с таким ИНН"@en ;
+.
+v-s:LegalEntityExistencePeriodBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Период существования юридического лица"@ru ;
+  rdfs:label "Legal entity existence period"@en ;
+.
+v-s:AddProfile
+  rdf:type v-s:Bundle ;
+  rdfs:label "Создать досье"@ru ;
+  rdfs:label "Add profile"@en ;
+.
+v-s:AddSubsidiary
+  rdf:type v-s:Bundle ;
+  rdfs:label "Добавить филиал"@ru ;
+  rdfs:label "Add subsidiary"@en ;
+.
+v-s:DepartmentCode
+  rdf:type v-s:Bundle ;
+  rdfs:label "Код подразделения"@ru ;
+  rdfs:label "Department code"@en ;
+.
+v-s:PositionCode
+  rdf:type v-s:Bundle ;
+  rdfs:label "Код должности"@ru ;
+  rdfs:label "Position code"@en ;
+.
+v-s:NonUniqueDepartmentCode
+  rdf:type v-s:Bundle ;
+  rdfs:label "Сообщение о не уникальном коде подразделения"@ru ;
+  rdfs:label "Non unique department code message"@en ;
+  rdfs:comment "Подразделение с таким кодом уже существует"@ru ;
+  rdfs:comment "Department with this code already exists"@en ;
+.
+v-s:NonUniquePositionCode
+  rdf:type v-s:Bundle ;
+  rdfs:label "Сообщение о не уникальном коде должности"@ru ;
+  rdfs:label "Non unique position code message"@en ;
+  rdfs:comment "Должность с таким кодом уже существует"@ru ;
+  rdfs:comment "Position with this code already exists"@en ;
+.
+v-s:NonUniqueTabNumber
+  rdf:type v-s:Bundle ;
+  rdfs:label "Сообщение о не уникальном табельном номере"@ru ;
+  rdfs:label "Non unique tab number message"@en ;
+  rdfs:comment "Персона с таким табельным номером уже существует"@ru ;
+  rdfs:comment "Person with this tab number already exists"@en ;
+.
+v-s:NotValidCode
+  rdf:type v-s:Bundle ;
+  rdfs:label "Сообщение о не корректном коде (должности, подразделения, табельном номере)"@ru ;
+  rdfs:label "Not valid subject code message"@en ;
+  rdfs:comment "Поле может содержать только латинские буквы и цифры"@ru ;
+  rdfs:comment "Field must consist only a-z character and digits"@en ;
+.
+v-s:DefaultAppointmentBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Основное назначение"@ru ;
+  rdfs:label "Default appointment"@en ;
 .
 
 
@@ -154,243 +226,22 @@ v-s:OrganizationUnitModel
   """ ;
 .
 
-# ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
-
-v-s:PsHasSubsidiaryForOrganization
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Organization ;
-  v-ui:forProperty v-s:hasSubsidiary ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-  v-ui:rangeRestriction v-s:Subsidiary ;
-.
-
-v-s:PsTaxIdForOrganization
-  rdf:type v-ui:DatatypePropertySpecification ;
-  v-ui:forClass v-s:Organization ;
-  v-ui:forProperty v-s:taxId ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:regexp "^([A-Z]{2,3}[0-9]{4,}|([0-9]{10}|[0-9]{12}))$" ;
-  v-ui:tooltip "Цифро-буквенное значение, минимум 6 символов. Примеры: 123456789101, KZ4438, NL123456789B11"@ru ;
-  v-ui:tooltip "Alphanumeric value, 6 characters minimum. Ex: 123456789101, KZ4438, NL123456789B11"@en ;
-.
-
-# Перенести в управление контрагентами
-
-v-s:PsHasContractorOrganization
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Organization;
-  v-ui:forProperty v-s:hasContractor ;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 100 ;
-  v-ui:rangeRestriction v-s:Contractor;
-  rdfs:label "Спецификация свойства v-s:hasContractor для класса v-s:Organization"@ru ;
-  rdfs:label "v-s:hasContractor property specification for v-s:Organization"@en ;
-.
-
-v-s:PsHasClassifierCountryOrganization
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Organization;
-  v-ui:forProperty v-s:hasClassifierCountry ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  v-ui:defaultValue d:Country_RUS;
-  rdfs:label "Спецификация свойства v-s:hasClassifierCountry для класса v-s:Organization"@ru ;
-  rdfs:label "v-s:hasClassifierCountry property specification for v-s:Organization"@en ;
-.
-
-v-s:PslabelForOrganization
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:Organization ;
-  v-ui:forProperty rdfs:label ;
-  v-ui:forProperty v-s:title;
-  v-ui:forProperty v-s:legalAddress;
-  v-ui:forProperty v-s:postalAddress;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 100 ;
-  rdfs:label "Спецификация свойств rdfs:label, v-s:title, v-s:legalAddress, v-s:postalAddress для класса v-s:Organization"@ru ;
-  rdfs:label "rdfs:label, v-s:title, v-s:legalAddress, v-s:postalAddress property specification for v-s:Organization"@en ;
-.
-
-v-s:taxRegistrationCauseForOrganization
-  rdf:type v-ui:PropertySpecification ;
-  v-ui:forClass v-s:Organization ;
-  v-ui:forProperty v-s:taxRegistrationCause;
-  v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1;
-  v-ui:regexp "^[0-9]{9}$";
-  rdfs:label "Спецификация свойств v-s:taxRegistrationCause для класса v-s:Organization"@ru ;
-  rdfs:label "v-s:taxRegistrationCause property specification for v-s:Organization"@en ;
-  v-ui:tooltip "Числовое значение, 9 символов, например: 123456789"@ru ;
-  v-ui:tooltip "Numeric value, 9 characters, i.e. 123456789"@en ;
-.
-
-v-s:PsContractorProfileDateToFact
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Organization ;
-  v-ui:forProperty v-s:dateToFact ;
-
-  rdfs:label "Спецификация к свойству v-s:dateToFact для класса v-s:ContractorProfile"@ru ;
-  rdfs:label "Spec for property v-s:dateToFact for class v-s:ContractorProfile"@en ;
-  v-ui:placeholder "Дата ликвидации юр лица"@ru ;
-  v-ui:placeholder "Registered legal persons"@en ;
-.
-
-v-s:PsContractorProfileDateFromFact
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Organization ;
-  v-ui:forProperty v-s:dateFromFact ;
-  v-ui:placeholder "Дата регистрации юр лица"@ru ;
-  v-ui:placeholder "Registered legal persons"@en ;
-  rdfs:label "Спецификация к свойству v-s:dateFromFact для класса v-s:ContractorProfile"@ru ;
-  rdfs:label "Spec for property v-s:dateFromFact for class v-s:ContractorProfile"@en ;
-.
-
-v-s:PsParentsForDepartment
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Department ;
-  v-ui:forProperty v-s:parentOrganization ;
-  v-ui:forProperty v-s:parentUnit ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 1 ;
-  rdfs:label "Спецификация к свойствам v-s:parentOrganization и v-s:parentUnit для класса v-s:Department"@ru ;
-  rdfs:label "Spec for property v-s:parentOrganization and v-s:parentUnit for class v-s:Department"@en ;
-.
-
-v-s:PsTextLabelForDepartment
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Department ;
-  v-ui:forProperty rdfs:label ;
-  v-ui:forProperty v-s:shortLabel ;
-  v-ui:forProperty v-s:subjectCode ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 100 ;
-  rdfs:label "Спецификация к свойствам rdfs:label и v-s:shortLabel и v-s:subjectCode для класса v-s:Department"@ru ;
-  rdfs:label "Spec for property rdfs:label and v-s:shortLabel and v-s:subjectCode for class v-s:Department"@en ;
-.
-
-v-s:PsParentUnitForSubsidiary
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:Subsidiary ;
-  v-ui:forProperty v-s:parentUnit ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 100 ;
-  v-ui:rangeRestriction v-s:Organization ;
-.
-
-# ------------------------------------------------------------ СТРОКИ --
-
-v-s:NonUniqueTaxId
-  rdf:type v-s:Bundle ;
-  rdfs:label "Сообщение не уникальный ИНН"@ru ;
-  rdfs:label "Non unique tax id message"@en ;
-  rdfs:comment "Организация с таким ИНН уже существует"@ru ;
-  rdfs:comment "Organization with this tax number already exists"@en ;
-.
-v-s:ForSafeTaxId
-  rdf:type v-s:Bundle ;
-  rdfs:label "Сообщение не уникальный ИНН"@ru ;
-  rdfs:label "Non unique tax id message"@en ;
-  rdfs:comment "Нельзя создать огранизацию с таким ИНН"@ru ;
-  rdfs:comment "Нельзя создать огранизацию с таким ИНН"@en ;
-.
-v-s:LegalEntityExistencePeriodBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Период существования юридического лица"@ru ;
-  rdfs:label "Legal entity existence period"@en ;
-.
-v-s:AddProfile
-  rdf:type v-s:Bundle ;
-  rdfs:label "Создать досье"@ru ;
-  rdfs:label "Add profile"@en ;
-.
-v-s:AddSubsidiary
-  rdf:type v-s:Bundle ;
-  rdfs:label "Добавить филиал"@ru ;
-  rdfs:label "Add subsidiary"@en ;
-.
-v-s:DepartmentCode
-  rdf:type v-s:Bundle ;
-  rdfs:label "Код подразделения"@ru ;
-  rdfs:label "Department code"@en ;
-.
-v-s:PositionCode
-  rdf:type v-s:Bundle ;
-  rdfs:label "Код должности"@ru ;
-  rdfs:label "Position code"@en ;
-.
-v-s:NonUniqueDepartmentCode
-  rdf:type v-s:Bundle ;
-  rdfs:label "Сообщение о не уникальном коде подразделения"@ru ;
-  rdfs:label "Non unique department code message"@en ;
-  rdfs:comment "Подразделение с таким кодом уже существует"@ru ;
-  rdfs:comment "Department with this code already exists"@en ;
-.
-v-s:NonUniquePositionCode
-  rdf:type v-s:Bundle ;
-  rdfs:label "Сообщение о не уникальном коде должности"@ru ;
-  rdfs:label "Non unique position code message"@en ;
-  rdfs:comment "Должность с таким кодом уже существует"@ru ;
-  rdfs:comment "Position with this code already exists"@en ;
-.
-v-s:NonUniqueTabNumber
-  rdf:type v-s:Bundle ;
-  rdfs:label "Сообщение о не уникальном табельном номере"@ru ;
-  rdfs:label "Non unique tab number message"@en ;
-  rdfs:comment "Персона с таким табельным номером уже существует"@ru ;
-  rdfs:comment "Person with this tab number already exists"@en ;
-.
-v-s:NotValidCode
-  rdf:type v-s:Bundle ;
-  rdfs:label "Сообщение о не корректном коде (должности, подразделения, табельном номере)"@ru ;
-  rdfs:label "Not valid subject code message"@en ;
-  rdfs:comment "Поле может содержать только латинские буквы и цифры"@ru ;
-  rdfs:comment "Field must consist only a-z character and digits"@en ;
-.
-v-s:DefaultAppointmentBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Основное назначение"@ru ;
-  rdfs:label "Default appointment"@en ;
-.
-# ------------------------------------------------------------ ШАБЛОНЫ --
+# ------------------------------------------------------------ Организация --
 v-s:TS_Organization
   rdf:type v-ui:TemplateSpecification ;
   v-ui:forClass v-s:Organization ;
   v-ui:defaultTemplate v-s:OrganizationTemplate ;
   v-s:loadPriority "15" ;
 .
-v-s:TS_Department rdf:type
-  v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:DepartmentTemplate;
-  v-ui:forClass v-s:Department;
+v-s:CS_Organization
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Organization"@ru, "Class specification v-s:Organization"@en;
+  v-s:hasClass v-s:Organization ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:hasSubsidiary ;
+  v-ui:defaultTemplate v-s:OrganizationTemplate ;
+  v-s:loadPriority 15 ;
 .
-v-s:TS_Subsidiary
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:SubsidiaryTemplate;
-  v-ui:forClass v-s:Subsidiary;
-.
-v-s:TS_OrgGroup
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:OrgGroupTemplate;
-  v-ui:forClass v-s:OrgGroup;
-.
-v-s:TS_Position
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:PositionTemplate;
-  v-ui:forClass v-s:Position;
-.
-v-s:TS_Person
-  rdf:type v-ui:TemplateSpecification;
-  v-s:loadPriority "15"^^xsd:integer;
-  v-ui:defaultTemplate v-s:PersonTemplate;
-  v-ui:forClass v-s:Person;
-.
-
 v-s:OrganizationTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Organization ;
@@ -570,15 +421,15 @@ v-s:OrganizationTemplate
           <td about="@" data-template="v-ui:IconModalTemplate"></td>
           <td>
             <div property="rdfs:label" class="view -edit -search"></div>
-            <veda-control property="rdfs:label" data-type="string" class="-view edit search"></div>
+            <veda-control property="rdfs:label" data-type="string" class="-view edit search"></veda-control>
           </td>
           <td>
             <div property="v-s:taxRegistrationCause" class="view -edit -search"></div>
-            <veda-control property="v-s:taxRegistrationCause" data-type="string" class="-view edit search"></div>
+            <veda-control property="v-s:taxRegistrationCause" data-type="string" class="-view edit search"></veda-control>
           </td>
           <td>
             <div property="v-s:postalAddress" class="view -edit -search"></div>
-            <veda-control property="v-s:postalAddress" data-type="string" class="-view edit search"></div>
+            <veda-control property="v-s:postalAddress" data-type="string" class="-view edit search"></veda-control>
           </td>
         </tr>
       </tbody>
@@ -647,184 +498,21 @@ v-s:OrganizationTemplate
   """ ;
 .
 
-
-v-s:hasMembership
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Person ;
-  rdfs:label "Досье сотрудника"@ru ;
-  rdfs:label "Employee proile"@en ;
-  rdfs:range v-s:Membership ;
+# --------------------------------------------------------------- Филиал --
+v-s:TS_Subsidiary
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:SubsidiaryTemplate;
+  v-ui:forClass v-s:Subsidiary;
 .
-
-v-s:OrganizationForAdminTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:Organization ;
-  rdfs:label "Шаблон для класса v-s:Organization"@ru ;
-  rdfs:label "Template for v-s:Organization class"@en ;
-  v-ui:template """
-<script>
-
-
-  
-</script>
-<div>
-  <div class="container sheet">
-    <h2>
-      <span about="v-s:Organization" property="rdfs:label"></span>
-      <small about="@" property="rdfs:label"></small>
-    </h2>
-    <hr>
-    <!--<h3 about="v-s:hasMembership" property="rdfs:label"></h3>-->
-    <div class="memberships" data-limit="10"></div>
-
-    <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
-    <br>
-    <!-- BUTTONS -->
-    <div class="actions">
-      <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete journal"></span>
-      <span id="rigthsForAdmin" class="hide">
-        <button class="btn btn-secondary view -edit -search" id="add-OrgVedaAccount" >
-          <span  about="v-s:AddInGroupOrgWithVedaAccount" property="rdfs:label"></span>
-        </button>
-        <button class="btn btn-secondary view -edit -search" id="add-OrgADAccount" >
-          <span  about="v-s:AddInGroupOrgWithVedaADAccount" property="rdfs:label"></span>
-        </button>
-        <button class="btn btn-secondary view -edit -search" id="add-OrgWithLimited" >
-          <span  about="v-s:AddInGroupOrgWithLimitedClassTypes" property="rdfs:label"></span>
-        </button>
-        <button class="btn btn-secondary view -edit -search" id="add-OrgWithoutLimited" >
-          <span  about="v-s:AddInGroupOrgWithoutLimitedClassTypes" property="rdfs:label"></span>
-        </button>
-      </span>
-    </div>
-  </div>
-  <div about="@" class="container sheet view edit -search" data-template="v-s:LinksTemplate" data-embedded="true"></div>
-  <div about="@" class="container sheet view -edit -search" data-template="v-s:CommentsTemplate"></div>
-</div>
-<script>
-  function forAdmin(){
-    if (veda.appointment.id == 'cfg:AdministratorAppointment' && individual.id != 'd:org_RU1121003135' )  $("#rigthsForAdmin").removeClass('hide');
-  }
-  forAdmin();
-
-  $("#add-OrgVedaAccount", template).click(function() {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new veda.IndividualModel(individual+"_group");
-
-    var _class = new veda.IndividualModel("v-s:Membership"),
-        OrgWithVedaAccount = new veda.IndividualModel();
-    OrgWithVedaAccount["rdf:type"]=[_class];
-    OrgWithVedaAccount["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithVedaAccount")];
-    OrgWithVedaAccount["v-s:resource"] = [org_gr];
-    OrgWithVedaAccount.id = "v-s:OrganizationsWithVedaAccount" +"_"+org1;
-    OrgWithVedaAccount.save();
-  });
-  $("#add-OrgADAccount", template).click(function() {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new veda.IndividualModel(individual+"_group");
-
-    var _class = new veda.IndividualModel("v-s:Membership"),
-        OrgWithADAccount = new veda.IndividualModel();
-    OrgWithADAccount["rdf:type"]=[_class];
-    OrgWithADAccount["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithADAccount")];
-    OrgWithADAccount["v-s:resource"] = [org_gr];
-    OrgWithADAccount.id = "v-s:OrganizationsWithADAccount" +"_"+org1;
-    OrgWithADAccount.save();
-  });
-  $("#add-OrgWithLimited", template).click(function() {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new veda.IndividualModel(individual+"_group");
-
-    var _class = new veda.IndividualModel("v-s:Membership"),
-        OrgWithLimited = new veda.IndividualModel();
-    OrgWithLimited["rdf:type"]=[_class];
-    OrgWithLimited["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithLimitedClassTypes")];
-    OrgWithLimited["v-s:resource"] = [org_gr];
-    OrgWithLimited.id = "v-s:OrganizationsWithLimitedClassTypes" +"_"+org1;
-    OrgWithLimited.save();
-  });
-  $("#add-OrgWithoutLimited", template).click(function() {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new veda.IndividualModel(individual+"_group");
-
-    var _class = new veda.IndividualModel("v-s:Membership"),
-        OrgWithoutLimited = new veda.IndividualModel();
-    OrgWithoutLimited["rdf:type"]=[_class];
-    OrgWithoutLimited["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithoutLimitedClassTypes")];
-    OrgWithoutLimited["v-s:resource"] = [org_gr];
-    OrgWithoutLimited.id = "v-s:OrganizationsWithoutLimitedClassTypes" +"_"+org1;
-    OrgWithoutLimited.save();
-  });
-
-  var membershipRegistry = new veda.IndividualModel("v-s:OrganizationMembershipRegistry", false);
-  var orgUri = individual.id;
-  var membershipContainer = $(".memberships", template);
-  membershipRegistry.load().then(function(loaded) {
-    loaded["v-fs:top"] = [10];
-    loaded["v-fs:fulltextQuery"] = ["'rdf:type' == 'v-s:Membership' && 'v-s:resource' == '" + orgUri + "_group'"];
-    //loaded["v-fs:fulltextQuery"] = ["'rdf:type'=='v-s:Membership'"];
-    loaded.present(membershipContainer, "v-fs:AttributiveSearchInlineTemplate");
-  })
-
-  
-</script>
-  """ ;
+v-s:CS_Subsidiary
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Subsidiary"@ru, "Class specification v-s:Subsidiary"@en;
+  v-s:hasClass v-s:Subsidiary ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:SubsidiaryTemplate ;
+  v-s:loadPriority 15 ;
 .
-
-# --------------------------------------------- Реестр, вложенный в шаблон
-
-v-s:OrganizationMembershipRegistry
-  a v-fs:AttributiveSearch;
-  rdfs:label "Вхождения организации в группы"@ru ;
-  rdfs:label "Entries of the organization into groups"@en ;
-  v-fs:searchBlank v-s:OrganizationMembershipRegistryBlank ;
-  v-fs:searchResultTemplate v-s:OrganizationMembershipRegistryResultTemplate ;
-  v-fs:searchOnLoad true ;
-.
-
-v-s:OrganizationMembershipRegistryBlank
-  rdf:type v-fc:Blank ;
-  rdfs:label "Тестовый бланк"@ru ;
-  rdfs:label "Test blank"@en ;
-  v-fc:targetType v-s:Membership;
-.
-
-v-s:OrganizationMembershipRegistryResultTemplate
-  rdf:type v-ui:ClassTemplate ;
-  v-ui:template """
-<table class="table table-condensed table-bordered">
-  <thead>
-    <tr class="active">
-      <th width="1%">#</th>
-      <th width="1%"><span class="glyphicon glyphicon-search"></th>
-      <th about="rdfs:label" property="rdfs:label"></th>
-      <!--<th about="v-s:hasAppointment" property="rdfs:label"></th>
-      <th about="mnd-s:hasEmployeeProfile" property="rdfs:label"></th>-->
-    </tr>
-  </thead>
-  <tbody class="result-container">
-    <tr>
-      <td class="serial-number"></td>
-      <td about="@" data-template="v-ui:IconModalTemplate"></td>
-      <td about="@" property="rdfs:label" class="view edit -search"></td>
-      <!--<td about="@" rel="v-s:hasAppointment" data-template="v-ui:LabelTemplate" class="view edit -search"></td>
-      <td about="@" rel="mnd-s:hasEmployeeProfile" class="view edit -search" data-template="v-ui:ClassNameLabelLinkTemplate"></td>-->
-    </tr>
-  </tbody>
-</table>
-  """ ;
-.
-
-
-
-
-
-
-
 v-s:SubsidiaryTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Subsidiary ;
@@ -880,18 +568,34 @@ v-s:SubsidiaryTemplate
   <br>
   <!-- BUTTONS -->
   <div class="actions">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
+    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
+      data-buttons="edit save cancel delete"></span>
   </div>
 </div>
-  """ ;
+""" ;
 .
 
+# -------------------------------------------------------------- OrgGroup --
+v-s:TS_OrgGroup
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:OrgGroupTemplate;
+  v-ui:forClass v-s:OrgGroup;
+.
+v-s:CS_OrgGroup
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:OrgGroup"@ru, "Class specification v-s:OrgGroup"@en;
+  v-s:hasClass v-s:OrgGroup ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:OrgGroupTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:OrgGroupTemplate
-rdf:type v-ui:ClassTemplate ;
-v-ui:forClass v-s:OrgGroup ;
-rdfs:label "Шаблон для класса v-s:OrgGroup"@ru ;
-rdfs:label "Template for v-s:OrgGroup class"@en ;
-v-ui:template """
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:OrgGroup ;
+  rdfs:label "Шаблон для класса v-s:OrgGroup"@ru ;
+  rdfs:label "Template for v-s:OrgGroup class"@en ;
+  v-ui:template """
 <div class="container sheet">
   <h2>
     <span about="v-s:OrgGroup" property="rdfs:label"></span>
@@ -939,6 +643,21 @@ v-ui:template """
 """ ;
 .
 
+# ----------------------------------------------------------- Подразделение --
+v-s:TS_Department rdf:type
+  v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:DepartmentTemplate;
+  v-ui:forClass v-s:Department;
+.
+v-s:CS_Department
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Department"@ru, "Class specification v-s:Department"@en;
+  v-s:hasClass v-s:Department ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:DepartmentTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:DepartmentTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Department ;
@@ -1035,17 +754,22 @@ v-s:DepartmentTemplate
   """ ;
 .
 
-##########НАЗНАЧЕНИЕ############
+# ------------------------------------------------------------- Назначение --
 v-s:TS_Appointment
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:AppointmentTemplate;
   v-ui:forClass v-s:Appointment
 .
-
-
-###################################################НОВОЕ########################################################
-#-------шаблон создания НАЗНАЧЕНИЯ для админа
+v-s:CS_Appointment
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Appointment"@ru, "Class specification v-s:Appointment"@en;
+  v-s:hasClass v-s:Appointment ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:occupation, v-s:employee ;
+  v-ui:defaultTemplate v-s:AppointmentTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:AppointmentTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:Appointment ;
@@ -1461,9 +1185,90 @@ v-s:AppointmentTemplate
 </script>
   """ ;
 .
+v-s:AppointmentEmbeddedTableTemplate
+rdf:type v-ui:ClassTemplate ;
+v-ui:forClass v-s:Appointment ;
+rdfs:label "Шаблон для класса v-s:CommunicationMean"@ru ;
+rdfs:label "Template for v-s:CommunicationMean class"@en ;
+v-ui:template """
+<script>
+  var canUpdateAppointment = individual.canUpdate();
+  Promise.all([canUpdateAppointment]).then(function (results) {
+    if (!results[0]) {
+      $("#deleteAppointment", template).remove();
+      $("#moveToAnotherDepartment", template).attr('disabled', 'disabled');
+    }
+  })
+</script>
+<tr>
+  <td about="@" data-template="v-ui:IconModalTemplate" class="view -edit -search"></td>
+  <td>
+    <div about="@" property="rdfs:label" class="view edit -search"></div>
+  </td>
+  <td>
+    <div about="@" property="v-s:dateFrom" class="view -edit -search"></div>
+    <veda-control property="v-s:dateFrom" data-type="date" class="-view edit search"></veda-control>
+  </td>
+  <td>
+    <div about="@" property="v-s:dateTo" class="view -edit -search"></div>
+    <veda-control property="v-s:dateTo" data-type="date" class="-view edit search"></veda-control>
+  </td>
+  <td class="view -edit -search">
+    <button class="btn btn-xs btn-success" id="moveToAnotherDepartment">
+      <span about="v-s:AnotherDepartmentBundle" property="rdfs:label"> </span>
+    </button>
+  </td>
+  <td class="view -edit -search">
+    <button class="btn btn-xs btn-danger" id="deleteAppointment">
+      <span about="v-s:DeleteAppointmentBundle" property="rdfs:label"> </span>
+    </button>
+  </td>
+</tr>
+<script>
+  //нельзя удалить назначение по умолчанию
+  individual.getPropertyChain("v-s:employee", "v-s:defaultAppointment").then(function (defaultAppointment) {
+    if (individual == defaultAppointment[0]) $("#deleteAppointment", template).attr('disabled', 'disabled');
+  });
+
+  $("#deleteAppointment", template).click(function () {
+    individual["rdf:type"] = individual["rdf:type"].concat("v-s:Deletable");
+    individual["v-s:deleted"] = [true];
+    individual.save();
+  });
 
 
-#-------шаблон создания ПЕРСОНЫ для админа
+  $("#moveToAnotherDepartment", template).click(function () {
+    var current_occupation = individual['v-s:occupation'][0].id;
+    var Occupation = new veda.IndividualModel(current_occupation);
+    var tmpl = new veda.IndividualModel('v-s:PositionMinimalTemplate');
+    var modal = veda.Util.showModal(Occupation, tmpl, "edit");
+    Occupation.one("afterSave", function () {
+      individual.save();
+      modal.modal("hide").remove();
+    });
+  });
+
+
+</script>
+""" ;
+.
+
+# ------------------------------------------------------------ Персона --
+v-s:CS_Person
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Person "@ru, "Class specification v-s:Person "@en;
+  v-s:hasClass v-s:Person ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:hasAppointmnet, v-s:hsaAccount, v-s:hasCommunicationMean ;
+  v-ui:defaultTemplate v-s:PersonTemplate;
+  v-s:loadPriority 15 ;
+.
+v-s:TS_Person
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:PersonTemplate;
+  v-ui:forClass v-s:Person;
+.
 v-s:PersonTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон отображения персональной информации"@ru ;
@@ -1850,7 +1655,6 @@ v-s:PersonTemplate
 </script>
   """;
 .
-#-------шаблон создания ПЕРСОНЫ для админа (вложенный)
 v-s:PersonEmbeddedTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон отображения персональной информации"@ru ;
@@ -2015,7 +1819,22 @@ v-s:PersonEmbeddedTemplate
 </script>
   """;
 .
-#-------шаблон создания Должности для админа
+# ------------------------------------------------------------ Должность --
+v-s:CS_Position
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Position "@ru, "Class specification v-s:Position "@en;
+  v-s:hasClass v-s:Position ;
+  v-s:isShelfLifeAlways true ;
+  v-s:listPropertie v-s:hasCommunicationMean ;
+  v-ui:defaultTemplate v-s:PositionTemplate;
+  v-s:loadPriority 15 ;
+.
+v-s:TS_Position
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:PositionTemplate;
+  v-ui:forClass v-s:Position;
+.
 v-s:PositionTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Position при создании v-s:Appoinment"@ru ;
@@ -2160,7 +1979,6 @@ v-s:PositionTemplate
 </script>
   """ ;
 .
-
 v-s:PositionMinimalTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Position "@ru ;
@@ -2270,13 +2088,9 @@ v-s:PositionMinimalTemplate
   </div>
 </div>
 <script>
-
-  
 </script>
   """ ;
 .
-
-#-------шаблон создания Должности для админа
 v-s:PositionEmbeddedTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Position при создании v-s:Appoinment"@ru ;
@@ -2364,13 +2178,19 @@ v-s:PositionEmbeddedTemplate
   </div>
 </div>
 <script>
-
-  
 </script>
   """ ;
 .
 
-
+# ------------------------------------------------------------ Аккаунт --
+v-s:CS_Account
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Account"@ru, "Class specification v-s:Account"@en;
+  v-s:hasClass v-s:Account ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:AccountTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_Account
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -2528,7 +2348,6 @@ v-s:AccountTemplate
 </script>
   """ ;
 .
-
 v-s:AccountEmbeddedTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Account при создании v-s:Person"@ru ;
@@ -2626,76 +2445,174 @@ v-s:AccountEmbeddedTemplate
     individual["v-s:authOrigin"]=["veda"];
   }
 
-
-
-  
 </script>
   """ ;
 .
-v-s:AppointmentEmbeddedTableTemplate
+
+
+
+
+# --------------------------------------------- Реестр, вложенный в шаблон
+v-s:hasMembership
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Person ;
+  rdfs:label "Досье сотрудника"@ru ;
+  rdfs:label "Employee proile"@en ;
+  rdfs:range v-s:Membership ;
+.
+
+v-s:OrganizationForAdminTemplate
   rdf:type v-ui:ClassTemplate ;
-  v-ui:forClass v-s:Appointment ;
-  rdfs:label "Шаблон для класса v-s:CommunicationMean"@ru ;
-  rdfs:label "Template for v-s:CommunicationMean class"@en ;
+  v-ui:forClass v-s:Organization ;
+  rdfs:label "Шаблон для класса v-s:Organization"@ru ;
+  rdfs:label "Template for v-s:Organization class"@en ;
   v-ui:template """
 <script>
-  var canUpdateAppointment = individual.canUpdate();
-  Promise.all([canUpdateAppointment]).then(function(results) {
-    if ( !results[0]) {
-      $("#deleteAppointment", template).remove();
-      $("#moveToAnotherDepartment", template).attr('disabled', 'disabled');
-    }
-  })
 </script>
-<tr>
-  <td about="@" data-template="v-ui:IconModalTemplate" class="view -edit -search"></td>
-  <td>
-    <div about="@" property="rdfs:label" class="view edit -search"></div>
-  </td>
-  <td>
-    <div about="@" property="v-s:dateFrom" class="view -edit -search"></div>
-    <veda-control property="v-s:dateFrom" data-type="date" class="-view edit search"></veda-control>
-  </td>
-  <td>
-    <div about="@" property="v-s:dateTo" class="view -edit -search"></div>
-    <veda-control property="v-s:dateTo" data-type="date" class="-view edit search"></veda-control>
-  </td>
-  <td class="view -edit -search">
-    <button class="btn btn-xs btn-success" id="moveToAnotherDepartment">
-      <span  about="v-s:AnotherDepartmentBundle" property="rdfs:label"> </span>
-    </button>
-  </td>
-  <td class="view -edit -search">
-    <button class="btn btn-xs btn-danger" id="deleteAppointment">
-      <span  about="v-s:DeleteAppointmentBundle" property="rdfs:label"> </span>
-    </button>
-  </td>
- </tr>
+<div>
+  <div class="container sheet">
+    <h2>
+      <span about="v-s:Organization" property="rdfs:label"></span>
+      <small about="@" property="rdfs:label"></small>
+    </h2>
+    <hr>
+    <!--<h3 about="v-s:hasMembership" property="rdfs:label"></h3>-->
+    <div class="memberships" data-limit="10"></div>
+
+    <div about="@" data-template="v-ui:SystemPropertiesTemplate" data-embedded="true"></div>
+    <br>
+    <!-- BUTTONS -->
+    <div class="actions">
+      <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
+        data-buttons="edit save cancel delete journal"></span>
+      <span id="rigthsForAdmin" class="hide">
+        <button class="btn btn-secondary view -edit -search" id="add-OrgVedaAccount">
+          <span about="v-s:AddInGroupOrgWithVedaAccount" property="rdfs:label"></span>
+        </button>
+        <button class="btn btn-secondary view -edit -search" id="add-OrgADAccount">
+          <span about="v-s:AddInGroupOrgWithVedaADAccount" property="rdfs:label"></span>
+        </button>
+        <button class="btn btn-secondary view -edit -search" id="add-OrgWithLimited">
+          <span about="v-s:AddInGroupOrgWithLimitedClassTypes" property="rdfs:label"></span>
+        </button>
+        <button class="btn btn-secondary view -edit -search" id="add-OrgWithoutLimited">
+          <span about="v-s:AddInGroupOrgWithoutLimitedClassTypes" property="rdfs:label"></span>
+        </button>
+      </span>
+    </div>
+  </div>
+  <div about="@" class="container sheet view edit -search" data-template="v-s:LinksTemplate" data-embedded="true"></div>
+  <div about="@" class="container sheet view -edit -search" data-template="v-s:CommentsTemplate"></div>
+</div>
 <script>
-  //нельзя удалить назначение по умолчанию
-  individual.getPropertyChain("v-s:employee","v-s:defaultAppointment").then(function (defaultAppointment) {
-    if(individual == defaultAppointment[0] ) $("#deleteAppointment", template).attr('disabled', 'disabled');
+  function forAdmin() {
+    if (veda.appointment.id == 'cfg:AdministratorAppointment' && individual.id != 'd:org_RU1121003135') $("#rigthsForAdmin").removeClass('hide');
+  }
+  forAdmin();
+
+  $("#add-OrgVedaAccount", template).click(function () {
+    var org = individual.id;
+    var org1 = org.slice(6);
+    var org_gr = new veda.IndividualModel(individual + "_group");
+
+    var _class = new veda.IndividualModel("v-s:Membership"),
+      OrgWithVedaAccount = new veda.IndividualModel();
+    OrgWithVedaAccount["rdf:type"] = [_class];
+    OrgWithVedaAccount["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithVedaAccount")];
+    OrgWithVedaAccount["v-s:resource"] = [org_gr];
+    OrgWithVedaAccount.id = "v-s:OrganizationsWithVedaAccount" + "_" + org1;
+    OrgWithVedaAccount.save();
+  });
+  $("#add-OrgADAccount", template).click(function () {
+    var org = individual.id;
+    var org1 = org.slice(6);
+    var org_gr = new veda.IndividualModel(individual + "_group");
+
+    var _class = new veda.IndividualModel("v-s:Membership"),
+      OrgWithADAccount = new veda.IndividualModel();
+    OrgWithADAccount["rdf:type"] = [_class];
+    OrgWithADAccount["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithADAccount")];
+    OrgWithADAccount["v-s:resource"] = [org_gr];
+    OrgWithADAccount.id = "v-s:OrganizationsWithADAccount" + "_" + org1;
+    OrgWithADAccount.save();
+  });
+  $("#add-OrgWithLimited", template).click(function () {
+    var org = individual.id;
+    var org1 = org.slice(6);
+    var org_gr = new veda.IndividualModel(individual + "_group");
+
+    var _class = new veda.IndividualModel("v-s:Membership"),
+      OrgWithLimited = new veda.IndividualModel();
+    OrgWithLimited["rdf:type"] = [_class];
+    OrgWithLimited["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithLimitedClassTypes")];
+    OrgWithLimited["v-s:resource"] = [org_gr];
+    OrgWithLimited.id = "v-s:OrganizationsWithLimitedClassTypes" + "_" + org1;
+    OrgWithLimited.save();
+  });
+  $("#add-OrgWithoutLimited", template).click(function () {
+    var org = individual.id;
+    var org1 = org.slice(6);
+    var org_gr = new veda.IndividualModel(individual + "_group");
+
+    var _class = new veda.IndividualModel("v-s:Membership"),
+      OrgWithoutLimited = new veda.IndividualModel();
+    OrgWithoutLimited["rdf:type"] = [_class];
+    OrgWithoutLimited["v-s:memberOf"] = [new veda.IndividualModel("v-s:OrganizationsWithoutLimitedClassTypes")];
+    OrgWithoutLimited["v-s:resource"] = [org_gr];
+    OrgWithoutLimited.id = "v-s:OrganizationsWithoutLimitedClassTypes" + "_" + org1;
+    OrgWithoutLimited.save();
   });
 
-  $("#deleteAppointment", template).click(function() {
-     individual["rdf:type"] = individual["rdf:type"].concat("v-s:Deletable");
-    individual["v-s:deleted"] = [true];
-    individual.save();
-    });
-
-
-  $("#moveToAnotherDepartment", template).click(function() {
-    var current_occupation = individual['v-s:occupation'][0].id;
-    var Occupation = new veda.IndividualModel(current_occupation);
-    var tmpl = new veda.IndividualModel('v-s:PositionMinimalTemplate');
-    var modal = veda.Util.showModal(Occupation, tmpl, "edit");
-    Occupation.one("afterSave", function () {
-      individual.save();
-      modal.modal("hide").remove();
-    });
-  });
+  var membershipRegistry = new veda.IndividualModel("v-s:OrganizationMembershipRegistry", false);
+  var orgUri = individual.id;
+  var membershipContainer = $(".memberships", template);
+  membershipRegistry.load().then(function (loaded) {
+    loaded["v-fs:top"] = [10];
+    loaded["v-fs:fulltextQuery"] = ["'rdf:type' == 'v-s:Membership' && 'v-s:resource' == '" + orgUri + "_group'"];
+    //loaded["v-fs:fulltextQuery"] = ["'rdf:type'=='v-s:Membership'"];
+    loaded.present(membershipContainer, "v-fs:AttributiveSearchInlineTemplate");
+  })
 
 
 </script>
-  """ ;
+""" ;
+.
+v-s:OrganizationMembershipRegistry
+  a v-fs:AttributiveSearch;
+  rdfs:label "Вхождения организации в группы"@ru ;
+  rdfs:label "Entries of the organization into groups"@en ;
+  v-fs:searchBlank v-s:OrganizationMembershipRegistryBlank ;
+  v-fs:searchResultTemplate v-s:OrganizationMembershipRegistryResultTemplate ;
+  v-fs:searchOnLoad true ;
+.
+v-s:OrganizationMembershipRegistryBlank
+  rdf:type v-fc:Blank ;
+  rdfs:label "Тестовый бланк"@ru ;
+  rdfs:label "Test blank"@en ;
+  v-fc:targetType v-s:Membership;
+.
+v-s:OrganizationMembershipRegistryResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<table class="table table-condensed table-bordered">
+  <thead>
+    <tr class="active">
+      <th width="1%">#</th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></th>
+      <th about="rdfs:label" property="rdfs:label"></th>
+      <!--<th about="v-s:hasAppointment" property="rdfs:label"></th>
+      <th about="mnd-s:hasEmployeeProfile" property="rdfs:label"></th>-->
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td class="serial-number"></td>
+      <td about="@" data-template="v-ui:IconModalTemplate"></td>
+      <td about="@" property="rdfs:label" class="view edit -search"></td>
+      <!--<td about="@" rel="v-s:hasAppointment" data-template="v-ui:LabelTemplate" class="view edit -search"></td>
+      <td about="@" rel="mnd-s:hasEmployeeProfile" class="view edit -search" data-template="v-ui:ClassNameLabelLinkTemplate"></td>-->
+    </tr>
+  </tbody>
+</table>
+""" ;
 .

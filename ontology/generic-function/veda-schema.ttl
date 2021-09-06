@@ -304,6 +304,14 @@ v-s:TS_DocumentLinkRules
   v-ui:defaultTemplate v-s:DocumentLinkRulesTemplate;
   v-ui:forClass v-s:DocumentLinkRules
 .
+v-s:CS_DocumentLinkRules
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:DocumentLinkRules"@ru, "Class specification v-s:DocumentLinkRules"@en;
+  v-s:hasClass v-s:DocumentLinkRules ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-s:DocumentLinkRulesTemplate ;
+  v-s:loadPriority 15 ;
+.
 v-s:DocumentLinkRulesTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:isDefinedBy v-s: ;

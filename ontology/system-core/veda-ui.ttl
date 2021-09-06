@@ -1022,6 +1022,14 @@ v-s:TS_Version
   v-ui:defaultTemplate v-ui:VersionTemplate;
   v-ui:forClass v-s:Version
 .
+v-s:CS_Version
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Version "@ru, "Class specification v-s:Version"@en;
+  v-s:hasClass v-s:Version ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:VersionTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:VersionTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Version"@ru ;
@@ -1444,6 +1452,14 @@ v-s:TS_Bundle
   v-ui:defaultTemplate v-ui:LabelTemplate;
   v-ui:forClass v-s:Bundle
 .
+v-s:CS_Bundle
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Bundle "@ru, "Class specification v-s:Bundle "@en;
+  v-s:hasClass v-s:Bundle ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:LabelTemplate;
+  v-s:loadPriority 15 ;
+.
 v-ui:LabelTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон с меткой"@ru ;
@@ -1846,7 +1862,14 @@ v-ui:FileMinTemplate
 </div>
   """ ;
 .
-
+v-s:CS_File
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:File "@ru, "Class specification v-s:File"@en;
+  v-s:hasClass v-s:File ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:FileTemplateWithComment;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_File
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
@@ -1985,6 +2008,14 @@ v-s:TS_Journal
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:SimplifiedJournalTemplate;
   v-ui:forClass v-s:Journal
+.
+v-s:CS_Journal
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:Journal"@ru, "Class specification v-s:Journal"@en;
+  v-s:hasClass v-s:Journal ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:SimplifiedJournalTemplate;
+  v-s:loadPriority 15 ;
 .
 v-ui:SimplifiedJournalTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -2250,11 +2281,27 @@ v-s:TS_DocumentCreated
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-ui:forClass v-s:DocumentCreated
 .
+v-s:CS_DocumentCreated
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:DocumentCreated"@ru, "Class specification v-s:DocumentCreated"@en;
+  v-s:hasClass v-s:DocumentCreated ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:DocumentEventTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_DocumentUpdated
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-ui:forClass v-s:DocumentUpdated
+.
+v-s:CS_DocumentUpdated
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:DocumentUpdated"@ru, "Class specification v-s:DocumentUpdated"@en;
+  v-s:hasClass v-s:DocumentUpdated ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:DocumentEventTemplate;
+  v-s:loadPriority 15 ;
 .
 v-s:TS_DocumentDeleted
   rdf:type v-ui:TemplateSpecification;
@@ -2262,11 +2309,27 @@ v-s:TS_DocumentDeleted
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-ui:forClass v-s:DocumentDeleted
 .
+v-s:CS_DocumentDeleted
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:DocumentDeleted"@ru, "Class specification v-s:DocumentDeleted"@en;
+  v-s:hasClass v-s:DocumentDeleted ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:DocumentEventTemplate;
+  v-s:loadPriority 15 ;
+.
 v-s:TS_ProcessStarted
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-ui:forClass v-s:ProcessStarted
+.
+v-s:CS_ProcessStarted
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:ProcessStarted"@ru, "Class specification v-s:ProcessStarted"@en;
+  v-s:hasClass v-s:ProcessStarted ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:DocumentEventTemplate;
+  v-s:loadPriority 15 ;
 .
 v-ui:DocumentEventTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -2482,6 +2545,14 @@ v-s:TS_Tree
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:TreeTemplate;
   v-ui:forClass v-ui:Tree
+.
+v-s:CS_Tree
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-ui:Tree "@ru, "Class specification v-ui:Tree"@en;
+  v-s:hasClass v-ui:Tree ;
+  v-s:isShelfLifeAlways true ;
+  v-ui:defaultTemplate v-ui:TreeTemplate;
+  v-s:loadPriority 15 ;
 .
 v-ui:TreeTemplate
   rdf:type v-ui:ClassTemplate ;
