@@ -13,6 +13,7 @@ use v_common::v_api::obj::OptAuthorize;
 use v_common::v_api::obj::ResultCode;
 
 const MAX_SIZE_BATCH: i64 = 100000;
+const BEFORE_DAYS: i64 = 100;
 
 struct ProcessElement {
     name: String,
@@ -310,7 +311,7 @@ fn add_to_collect(id: &str, name: &str, parent_id: &str, process_elements: &mut 
 }
 
 fn check_subprocesses(indvs: &mut Vec<Individual>, output_conditions_list: &[String]) -> bool {
-    let date_before = Utc::now().naive_utc().sub(Duration::days(182));
+    let date_before = Utc::now().naive_utc().sub(Duration::days(BEFORE_DAYS));
 
     let mut wp = HashMap::new();
 

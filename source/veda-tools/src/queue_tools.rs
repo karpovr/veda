@@ -127,7 +127,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
                 }
 
                 if is_update {
-                    let res = backend.api.update(&sys_ticket, IndvOp::Put, &mut new_state);
+                    let res = backend.mstorage_api.update(&sys_ticket, IndvOp::Put, &mut new_state);
                     if res.result != ResultCode::Ok {
                         error!("failed to store individual, id = {}", new_state.get_id());
                         return;

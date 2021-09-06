@@ -7,7 +7,7 @@ use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::OptAuthorize;
 use v_common::v_api::obj::ResultCode;
 
-const MAX_SIZE_BATCH: i64 = 100000;
+const MAX_SIZE_BATCH: i64 = 1000000;
 
 pub fn clean_email(ctx: &mut CleanerContext) {
     let date_before = Utc::now().naive_utc().sub(Duration::days(30));
@@ -27,7 +27,7 @@ pub fn clean_email(ctx: &mut CleanerContext) {
                         NaiveDateTime::from_timestamp(rindv.get_first_datetime("v-s:created").unwrap_or_default(), 0).format("%d.%m.%Y %H:%M:%S"),
                         id,
                     );
-                    ctx.backend.api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(id));
+                    ctx.backend.mstorage_api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(id));
                 }
             }
         }

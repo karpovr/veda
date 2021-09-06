@@ -13,7 +13,7 @@ use v_common::onto::individual2turtle::to_turtle;
 use v_common::v_api::api_client::IndvOp;
 
 pub fn remove(indv: &mut Individual, ctx: &mut CleanerContext) {
-    let res = ctx.backend.api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(indv.get_id()));
+    let res = ctx.backend.mstorage_api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(indv.get_id()));
     info!(
         "remove {}, created = {}, id = {}, result = {:?}",
         indv.get_first_literal("rdf:type").unwrap_or_default(),
