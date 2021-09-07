@@ -141,6 +141,10 @@ if [ -z $1 ] || [ $1 == "ft-query" ] || [ $1 == "veda-ft-query" ] || [ $1 == "ba
     build_server_module "veda-ft-query"
 fi
 
+if [ -z $1 ] || [ $1 == "web-api" ] || [ $1 == "veda-web-api" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-web-api"
+fi
+
 if [ -z $1 ] || [ $1 == "gowebserver" ] || [ $1 == "veda-gowebserver" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
 
     if [ -z $GOROOT ]; then
