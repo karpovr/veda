@@ -112,5 +112,5 @@ pub(crate) async fn get_individual(
         return Ok(HttpResponse::Ok().json(res.get_obj().as_json()));
     }
 
-    return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));
+    Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()))
 }

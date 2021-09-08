@@ -61,6 +61,18 @@ pub(crate) struct QueryRequest {
     pub from: Option<i32>,
 }
 
+async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str, az: &web::Data<Mutex<LmdbAzContext>>) -> io::Result<(Individual, ResultCode)> {
+    if az.lock().unwrap().authorize(uri, user_uri, Access::CanRead as u8, false, None).unwrap_or(0) != Access::CanRead as u8 {
+        return Ok((indv, ResultCode::NotAuthorized));
+    }
+
+    if indv.get_id().is_empty() {
+        return Ok((indv, ResultCode::NotFound));
+    }
+    indv.parse_all();
+    return Ok((indv, ResultCode::Ok));
+}
+
 pub(crate) async fn get_individual_from_db(
     uri: &str,
     user_uri: &str,
@@ -73,26 +85,16 @@ pub(crate) async fn get_individual_from_db(
         let mut iraw = Individual::default();
         iraw.set_raw(&response.data[5..]);
         if parse_raw(&mut iraw).is_ok() {
-            if az.lock().unwrap().authorize(&uri, user_uri, Access::CanRead as u8, false, None).unwrap_or(0) != Access::CanRead as u8 {
-                return Ok((iraw, ResultCode::NotAuthorized));
-            }
-
-            if iraw.get_id().is_empty() {
-                return Ok((iraw, ResultCode::NotFound));
-            }
-            iraw.parse_all();
-            return Ok((iraw, ResultCode::Ok));
+            return check_indv_access_read(iraw, uri, user_uri, az).await;
         }
         return Ok((iraw, ResultCode::UnprocessableEntity));
     }
     if let Some(lmdb) = &db.lmdb {
         let mut iraw = Individual::default();
-        if lmdb.lock().unwrap().get_individual_from_db(StorageId::Tickets, &uri, &mut iraw) {
-            if iraw.get_id().is_empty() {
-                return Ok((iraw, ResultCode::NotFound));
-            }
-            iraw.parse_all();
-            return Ok((iraw, ResultCode::Ok));
+        if lmdb.lock().unwrap().get_individual_from_db(StorageId::Individuals, &uri, &mut iraw) {
+            return check_indv_access_read(iraw, uri, user_uri, az).await;
+        } else {
+            return Ok((Individual::default(), ResultCode::NotFound));
         }
     }
 

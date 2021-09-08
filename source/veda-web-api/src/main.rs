@@ -19,6 +19,7 @@ use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer
 use futures::{select, FutureExt};
 use rusty_tarantool::tarantool::{Client, ClientConfig};
 use serde_derive::Deserialize;
+use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -30,7 +31,6 @@ use v_common::search::ft_client::FTClient;
 use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::storage::storage::StorageMode;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
-use std::env;
 
 #[get("/ping")]
 async fn ping() -> std::io::Result<HttpResponse> {
@@ -92,7 +92,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
-    let mut port= "8080".to_owned();
+    let mut port = "8080".to_owned();
     let args: Vec<String> = env::args().collect();
     for el in args.iter() {
         if el.starts_with("--http_port") {
@@ -104,7 +104,6 @@ async fn main() -> std::io::Result<()> {
     info!("listen {}", port);
 
     let mut server_future = HttpServer::new(move || {
-
         let (read, write) = evmap::new();
         let db = if let Some(cfg) = &tt_config {
             Storage {
@@ -157,6 +156,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_rights_origin)
             .service(load_file)
             .service(ping)
+            .service(web::resource("/apps/{app_name}").route(web::get().to(apps_doc)))
             .route("/tests", web::get().to(tests_doc))
             .route("/ontology.json", web::get().to(onto_doc))
             .route("/manifest", web::get().to(manifest_doc))
@@ -164,7 +164,6 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/files").route(web::post().to(save_file)))
             .service(web::resource("/query").route(web::get().to(query_get)).route(web::post().to(query_post)))
             .service(Files::new("/", "./public"))
-            .service(web::resource("/apps/{app_name}/{data}").route(web::get().to(apps_doc)))
     })
     .bind(format!("0.0.0.0:{}", port))?
     .run()
