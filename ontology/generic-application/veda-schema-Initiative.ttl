@@ -176,6 +176,20 @@ v-s:involvedDepartment
   rdfs:range v-s:Department ;
   rdfs:domain v-s:Process ;
 .
+v-s:inputProcess
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Взаимодействие на входе"@ru ;
+  rdfs:label "Input interaction"@en ;
+  rdfs:range v-s:Process ;
+  rdfs:domain v-s:Process ;
+.
+v-s:outputProcess
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Взаимодействие на выходе"@ru ;
+  rdfs:label "Output interaction"@en ;
+  rdfs:range v-s:Process ;
+  rdfs:domain v-s:Process ;
+.
 
 #--------------------------------------------------
 v-s:Effect
