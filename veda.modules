@@ -45,9 +45,13 @@ ontologist
 
 ccus
 
-gowebserver
+#gowebserver
     module = gowebserver
     args = --use_clickhouse=false --http_port=8080
+
+web-api
+    module = web-api
+    args = --http_port=8080
 
 input-onto
 
