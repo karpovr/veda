@@ -47,7 +47,7 @@ pub(crate) async fn get_rights(
     let rights = az
         .lock()
         .unwrap()
-        .authorize(&params.uri, &user_uri.unwrap(), Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false, None)
+        .authorize(&params.uri, &user_uri.unwrap(), Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false)
         .unwrap_or(0);
     let mut pstm = Individual::default();
 
@@ -84,7 +84,7 @@ pub(crate) async fn get_membership(
         str_num: 0,
     };
 
-    if az.lock().unwrap().authorize(&params.uri, &user_uri.unwrap(), Access::CanRead as u8, false, Some(&mut acl_trace)).unwrap_or(0) == Access::CanRead as u8 {
+    if az.lock().unwrap().authorize_and_trace(&params.uri, &user_uri.unwrap(), Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
         let mut mbshp = Individual::default();
 
         mbshp.set_id("_");
@@ -128,12 +128,12 @@ pub(crate) async fn get_rights_origin(
     if az
         .lock()
         .unwrap()
-        .authorize(
+        .authorize_and_trace(
             &params.uri,
             &user_uri.unwrap(),
             Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8,
             false,
-            Some(&mut acl_trace),
+            &mut acl_trace,
         )
         .unwrap_or(0)
         & Access::CanRead as u8

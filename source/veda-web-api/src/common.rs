@@ -62,7 +62,7 @@ pub(crate) struct QueryRequest {
 }
 
 async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str, az: &web::Data<Mutex<LmdbAzContext>>) -> io::Result<(Individual, ResultCode)> {
-    if az.lock().unwrap().authorize(uri, user_uri, Access::CanRead as u8, false, None).unwrap_or(0) != Access::CanRead as u8 {
+    if az.lock().unwrap().authorize(uri, user_uri, Access::CanRead as u8, false).unwrap_or(0) != Access::CanRead as u8 {
         return Ok((indv, ResultCode::NotAuthorized));
     }
 

@@ -37,5 +37,5 @@ base64 = "0.13.0"
 url = "2.1.1"
 async-log = "1.0.4"
 
-v_common = { package = "v-common", version = "=0.1.64" }
+v_common = { package = "v-common", version = "=0.1.65" }
 #v_common = { package = "v-common", path = "../../../v-common" }
