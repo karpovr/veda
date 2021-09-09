@@ -809,7 +809,83 @@ v-ui:StandardButtonsTemplate
   $("#rights", template).on("click", function () {
     veda.Util.showRights(individual);
   });
+  $("#files", template).click(function (e) {
+    var btn = $(this);
+    //toggleSpin(btn);
+    e.preventDefault();
+    var docTemplate = template.parent().closest("[resource]");
 
+    var fileLinks = $("a:has(>span[property='v-s:fileName'])", docTemplate);
+
+    var filesPromises;
+
+    if (fileLinks.length) {
+      filesPromises = fileLinks.map(function () {
+        var link = $(this);
+        var fileName = link.text().trim();
+        var fileUrl = link.attr("href");
+        return filePromise(fileUrl, fileName);
+      });
+    } else {
+      filesPromises = [];
+    }
+
+    Promise.all(filesPromises).then(function (files) {
+      System.import("jszip").then(function (module) {
+        var JSZip = module.default;
+        var zip = new JSZip();
+        var folder = zip.folder("files");
+        var unique = {};
+        files.forEach(function (file) {
+          var name = file.name;
+          var i = 1;
+          while (unique[name]) {
+            name = file.name.replace(/(.*?).([^.]*)$/, "$1 ("+ i +").$2");
+            if (name === file.name) { name = file.name + " ("+ i +")"; }
+            i++;
+          }
+          file.name = name;
+          unique[file.name] = true;
+          $("[href=" + veda.Util.escape4$(file.url) + "]", docTemplate).attr("href", "/files/" + file.name).text(file.name);
+          folder.file(file.name, file);
+        });
+        zip.generateAsync({type:"blob"}).then(function(content) {
+          System.import("filesaver").then(function (module) {
+            var saveAs = module.default;
+            saveAs(content, "registry.zip");
+          });
+        });
+      });
+    }).catch(function (error) {
+      console.log(error, error.stack);
+      var notify = new veda.Notify();
+      notify("danger", { message: "Ошибка выгрузки реестра. Обратитесь в поддержку." });
+    }).then(function () {
+      //toggleSpin(btn);
+    });
+  });
+
+  function filePromise(url, name) {
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url + "?" + Math.random(), true);
+      xhr.responseType = 'blob';
+      xhr.onload = function(e) {
+        if (this.status == 200) {
+          var file = new Blob([this.response], {type: 'application/octet-stream'});
+          file.name = name;
+          file.url = url;
+          resolve(file);
+        } else {
+          reject(xhr.statusText);
+        }
+      };
+      xhr.onerror = function () {
+        reject(xhr.statusText);
+      }
+      xhr.send();
+    });
+  }
   // Standard task
   template.on("click", "ul#standard-task a", function (e) {
     e.preventDefault();
@@ -851,6 +927,7 @@ v-ui:StandardButtonsTemplate
   <button type="button" class="rm hidden action btn btn-danger allButtons view edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"></button>
   <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
   <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="rights" about="v-s:Rights" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="files" about="v-fs:FilesRegistry" property="rdfs:label"></button>
   <div class="rm hidden action btn-group dropup allButtons view -edit -search" id="task">
     <button class="action btn btn-warning btn-block dropdown-toggle" id="task-button" data-toggle="dropdown">
       <span about="v-s:SendTask" property="rdfs:label"> </span>
