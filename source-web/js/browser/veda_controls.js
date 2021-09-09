@@ -908,7 +908,7 @@ $.fn.veda_actor = function ( options ) {
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   const actorType = this.attr('data-actor-type') || 'v-s:Appointment v-s:Person v-s:Position v-s:Department';
   const complex = this.attr('data-complex') || false;
-  const isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
+  let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   const withDeleted = false || this.attr('data-deleted');
   let chosenActorType;
   let fullName;
@@ -1100,7 +1100,7 @@ $.fn.veda_actor = function ( options ) {
   this.on('view edit search', function (e) {
     e.stopPropagation();
     if (e.type === 'search') {
-      const isSingle = false || $(e.delegateTarget).data('single');
+      isSingle = false || $(e.delegateTarget).data('single');
       if (isSingle) {
         header.hide();
       } else {
