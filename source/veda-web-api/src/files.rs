@@ -12,6 +12,8 @@ use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use async_std::io;
 use async_std::path::Path;
 use base64::decode;
+use chrono::{DateTime, NaiveDateTime, Utc};
+use filetime::FileTime;
 use futures::{AsyncWriteExt, StreamExt, TryStreamExt};
 use std::sync::Mutex;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
@@ -38,17 +40,22 @@ pub(crate) async fn load_file(
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
 
-        if let Ok(mut resp) = NamedFile::open(&path)?.respond_to(&req).await {
+        let file = NamedFile::open(&path)?;
+        let metadata = file.metadata()?;
+        if let Ok(mut resp) = file.respond_to(&req).await {
             let original_file_name = file_info.get_first_literal_or_err("v-s:fileName")?;
 
             let file_path = Path::new(&original_file_name);
             let file_ext = file_path.extension().unwrap().to_str().unwrap();
             let file_mime = actix_files::file_extension_to_mime(&file_ext);
-            let content_type = format!("{}/{}", file_mime.type_(), file_mime.subtype());
 
-            let resp = HttpResponse::Ok()
+            let last_modified =
+                DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(FileTime::from_last_modification_time(&metadata).unix_seconds(), 0), Utc).to_rfc2822();
+
+            let mut http_resp = HttpResponse::Ok()
+                .header(header::LAST_MODIFIED, last_modified)
                 .header(header::ACCEPT_RANGES, "bytes")
-                .header(header::CONTENT_LENGTH, HeaderValue::from(file_info.get_first_integer("v-s:fileSize").unwrap_or_default() as u64))
+                .header(header::CONTENT_LENGTH, file_info.get_first_integer("v-s:fileSize").unwrap_or_default() as u64)
                 .header(
                     header::CONTENT_DISPOSITION,
                     header::ContentDisposition {
@@ -60,9 +67,12 @@ pub(crate) async fn load_file(
                         })],
                     },
                 )
-                .content_type(content_type)
+                .content_type(file_mime.essence_str())
                 .streaming(resp.take_body());
-            return Ok(resp);
+
+            http_resp.headers_mut().insert(header::CONTENT_LENGTH, HeaderValue::from(50));
+
+            return Ok(http_resp);
         }
     }
 
