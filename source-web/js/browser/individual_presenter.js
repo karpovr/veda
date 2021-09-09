@@ -860,6 +860,10 @@ function processTemplate (individual, container, template, mode) {
         }
         return acc && validation[property_uri].state;
       }, true);
+      validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
+        const embeddedValidation = embeddedTemplate.data('validation');
+        return embeddedValidation ? acc && embeddedValidation.state : acc;
+      }, true);
       template.trigger('internal-validated', [validation]);
     }
   };
