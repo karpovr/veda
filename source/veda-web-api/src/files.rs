@@ -69,15 +69,24 @@ pub(crate) async fn load_file(
     return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
 }
 
+async fn check_and_create_file(path: &str, uri: &str, f: &mut Vec<async_std::fs::File>) -> io::Result<()> {
+    if !path.is_empty() && !uri.is_empty() && f.is_empty() {
+        async_std::fs::create_dir_all(format!("./data/files/{}", &path)).await?;
+        f.push(async_std::fs::File::create(format!("./data/files/{}/{}", path, sanitize_filename::sanitize(&uri))).await?);
+    }
+    Ok(())
+}
+
 pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Responder> {
     let mut path = String::new();
     let mut uri = String::new();
+    let mut f: Vec<async_std::fs::File> = Vec::default();
 
     while let Ok(Some(mut field)) = payload.try_next().await {
         let content_type = field.content_disposition().ok_or_else(|| actix_web::error::ParseError::Incomplete)?;
 
         if let Some(name) = content_type.get_name() {
-            if let Some(chunk) = field.next().await {
+            while let Some(chunk) = field.next().await {
                 match name {
                     "path" => {
                         path = std::str::from_utf8(&chunk?)?.to_owned();
@@ -85,29 +94,52 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                     "uri" => {
                         uri = std::str::from_utf8(&chunk?)?.to_owned();
                     }
-                    "content" => {
-                        let q = &chunk?;
-
-                        let mut pos = 0;
-                        for (idx, b) in q.iter().enumerate() {
-                            if b == &(',' as u8) {
-                                pos = idx + 1;
-                                break;
-                            }
-                        }
-
-                        if pos > 7 {
-                            async_std::fs::create_dir_all(format!("./data/files/{}", &path)).await?;
-                            let mut f = async_std::fs::File::create(format!("./data/files/{}/{}", path, sanitize_filename::sanitize(&uri))).await?;
-                            if let Ok(buf) = decode(q.split_at(pos).1) {
-                                AsyncWriteExt::write_all(&mut f, &buf).await?;
+                    "file" => {
+                        if let Ok(buf) = &chunk {
+                            check_and_create_file(&path, &uri, &mut f).await?;
+                            if let Some(ff) = f.get_mut(0) {
+                                AsyncWriteExt::write_all(ff, &buf).await?;
                             }
                         }
                     }
-                    _ => {}
+                    "content" => {
+                        let cur_chunk = &chunk?;
+
+                        if f.is_empty() {
+                            let mut pos = 0;
+                            for (idx, b) in cur_chunk.iter().enumerate() {
+                                if b == &(',' as u8) {
+                                    pos = idx + 1;
+                                    break;
+                                }
+                            }
+                            if pos > 7 {
+                                if let Ok(buf) = decode(cur_chunk.split_at(pos).1) {
+                                    check_and_create_file(&path, &uri, &mut f).await?;
+                                    if let Some(ff) = f.get_mut(0) {
+                                        AsyncWriteExt::write_all(ff, &buf).await?;
+                                    }
+                                }
+                            }
+                        } else {
+                            if let Ok(buf) = decode(cur_chunk) {
+                                check_and_create_file(&path, &uri, &mut f).await?;
+                                if let Some(ff) = f.get_mut(0) {
+                                    AsyncWriteExt::write_all(ff, &buf).await?;
+                                }
+                            }
+                        }
+                    }
+                    _ => {
+                        error!("unknown param [{}]", name);
+                    }
                 }
             }
         }
     }
+    if let Some(ff) = f.get_mut(0) {
+        AsyncWriteExt::flush(ff).await?;
+    }
+
     Ok(HttpResponse::Ok())
 }
