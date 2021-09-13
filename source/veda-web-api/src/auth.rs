@@ -89,7 +89,7 @@ pub(crate) async fn get_membership(
 
         mbshp.set_id("_");
         mbshp.add_uri("rdf:type", "v-s:Membership");
-        for el in acl_trace.group.split("\n") {
+        for el in acl_trace.group.split('\n') {
             let n = el.trim();
             if !n.is_empty() {
                 mbshp.add_uri("v-s:memberOf", n);
@@ -100,7 +100,7 @@ pub(crate) async fn get_membership(
         return Ok(HttpResponse::Ok().json(mbshp.get_obj().as_json()));
     }
 
-    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+    Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
 #[get("/get_rights_origin")]
@@ -168,5 +168,5 @@ pub(crate) async fn get_rights_origin(
         return Ok(HttpResponse::Ok().json(res));
     }
 
-    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+    Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }

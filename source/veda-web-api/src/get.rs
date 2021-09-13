@@ -47,9 +47,9 @@ async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Dat
             .select_async(
                 &user,
                 &data.sql.clone().unwrap_or_default(),
-                data.top.clone().unwrap_or_default() as i64,
-                data.limit.clone().unwrap_or_default() as i64,
-                data.from.clone().unwrap_or_default() as i64,
+                data.top.unwrap_or_default() as i64,
+                data.limit.unwrap_or_default() as i64,
+                data.from.unwrap_or_default() as i64,
                 OptAuthorize::YES,
             )
             .await?
@@ -60,10 +60,10 @@ async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Dat
             query: data.query.clone().unwrap_or_default(),
             sort: data.sort.clone().unwrap_or_default(),
             databases: data.databases.clone().unwrap_or_default(),
-            reopen: data.reopen.clone().unwrap_or_default(),
-            top: data.top.clone().unwrap_or_default(),
-            limit: data.limit.clone().unwrap_or_default(),
-            from: data.from.clone().unwrap_or_default(),
+            reopen: data.reopen.unwrap_or_default(),
+            top: data.top.unwrap_or_default(),
+            limit: data.limit.unwrap_or_default(),
+            from: data.from.unwrap_or_default(),
         };
 
         ft_client.lock().unwrap().query(ft_req)
@@ -86,12 +86,12 @@ pub(crate) async fn get_individuals(
     let mut res = vec![];
     let user_uri = user_uri.unwrap_or_default();
     for uri in &payload.uris {
-        let (indv, res_code) = get_individual_from_db(&uri, &user_uri, &db, &az).await?;
+        let (indv, res_code) = get_individual_from_db(uri, &user_uri, &db, &az).await?;
         if res_code == ResultCode::Ok {
             res.push(indv.get_obj().as_json());
         }
     }
-    return Ok(HttpResponse::Ok().json(res));
+    Ok(HttpResponse::Ok().json(res))
 }
 
 #[get("/get_individual")]

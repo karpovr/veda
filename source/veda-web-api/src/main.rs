@@ -58,7 +58,7 @@ async fn apps_doc(info: web::Path<Info>) -> std::io::Result<NamedFile> {
     eprintln!("@1 {}/{:?}", info.app_name, info.data);
     if let Some(v) = &info.data {
         if v == "manifest" {
-            return Ok(NamedFile::open(format!("public/{}/{}", info.app_name, &info.data.clone().unwrap()).parse::<PathBuf>().unwrap())?);
+            return NamedFile::open(format!("public/{}/{}", info.app_name, &info.data.clone().unwrap()).parse::<PathBuf>().unwrap());
         }
     }
     Ok(NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())?)

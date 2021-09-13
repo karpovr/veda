@@ -70,7 +70,7 @@ async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str,
         return Ok((indv, ResultCode::NotFound));
     }
     indv.parse_all();
-    return Ok((indv, ResultCode::Ok));
+    Ok((indv, ResultCode::Ok))
 }
 
 pub(crate) async fn get_individual_from_db(
@@ -91,14 +91,14 @@ pub(crate) async fn get_individual_from_db(
     }
     if let Some(lmdb) = &db.lmdb {
         let mut iraw = Individual::default();
-        if lmdb.lock().unwrap().get_individual_from_db(StorageId::Individuals, &uri, &mut iraw) {
+        if lmdb.lock().unwrap().get_individual_from_db(StorageId::Individuals, uri, &mut iraw) {
             return check_indv_access_read(iraw, uri, user_uri, az).await;
         } else {
             return Ok((Individual::default(), ResultCode::NotFound));
         }
     }
 
-    return Ok((Individual::default(), ResultCode::UnprocessableEntity));
+    Ok((Individual::default(), ResultCode::UnprocessableEntity))
 }
 
 pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &web::Data<TicketCache>, db: &Storage) -> io::Result<(ResultCode, Option<String>)> {
@@ -107,7 +107,7 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &we
     }
 
     let ticket_id = w_ticket_id.as_ref().unwrap();
-    if ticket_id == "" || ticket_id == "systicket" {
+    if ticket_id.is_empty() || ticket_id == "systicket" {
         return Ok((ResultCode::Ok, Some("cfg:Guest".to_owned())));
     }
 
@@ -116,9 +116,9 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &we
             if t.is_ticket_valid() != ResultCode::Ok {
                 return Ok((ResultCode::TicketNotFound, None));
             }
-            return Ok((ResultCode::Ok, Some(t.user_uri.clone())));
+            Ok((ResultCode::Ok, Some(t.user_uri.clone())))
         } else {
-            return Ok((ResultCode::TicketNotFound, None));
+            Ok((ResultCode::TicketNotFound, None))
         }
     } else {
         let mut ticket_obj = Ticket::default();
@@ -135,7 +135,7 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &we
         }
         if let Some(lmdb) = &db.lmdb {
             let mut to = Individual::default();
-            if lmdb.lock().unwrap().get_individual_from_db(StorageId::Tickets, &ticket_id, &mut to) {
+            if lmdb.lock().unwrap().get_individual_from_db(StorageId::Tickets, ticket_id, &mut to) {
                 ticket_obj.update_from_individual(&mut to);
                 ticket_obj.result = ResultCode::Ok;
             }
@@ -153,7 +153,7 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &we
             t.insert(ticket_id.to_owned(), ticket_obj);
             t.refresh();
         }
-        return Ok((ResultCode::Ok, Some(user_uri)));
+        Ok((ResultCode::Ok, Some(user_uri)))
     }
 }
 
@@ -177,10 +177,9 @@ pub(crate) fn get_module_name(id: u64) -> &'static str {
 pub(crate) fn get_ticket(req: &HttpRequest, in_ticket: &Option<String>) -> Option<String> {
     if let Some(t) = in_ticket {
         return Some(t.to_owned());
-    } else {
-        if let Some(c) = req.cookie("ticket") {
-            return Some(c.value().to_owned());
-        }
+    } else if let Some(c) = req.cookie("ticket") {
+        return Some(c.value().to_owned());
     }
+
     None
 }

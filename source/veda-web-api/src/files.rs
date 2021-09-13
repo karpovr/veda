@@ -47,7 +47,7 @@ pub(crate) async fn load_file(
 
             let file_path = Path::new(&original_file_name);
             let file_ext = file_path.extension().unwrap().to_str().unwrap();
-            let file_mime = actix_files::file_extension_to_mime(&file_ext);
+            let file_mime = actix_files::file_extension_to_mime(file_ext);
 
             let last_modified =
                 DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(FileTime::from_last_modification_time(&metadata).unix_seconds(), 0), Utc).to_rfc2822();
@@ -76,7 +76,7 @@ pub(crate) async fn load_file(
         }
     }
 
-    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+    Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
 async fn check_and_create_file(path: &str, uri: &str, f: &mut Vec<async_std::fs::File>) -> io::Result<()> {
@@ -93,7 +93,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
     let mut f: Vec<async_std::fs::File> = Vec::default();
 
     while let Ok(Some(mut field)) = payload.try_next().await {
-        let content_type = field.content_disposition().ok_or_else(|| actix_web::error::ParseError::Incomplete)?;
+        let content_type = field.content_disposition().ok_or(actix_web::error::ParseError::Incomplete)?;
 
         if let Some(name) = content_type.get_name() {
             while let Some(chunk) = field.next().await {
@@ -108,7 +108,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                         if let Ok(buf) = &chunk {
                             check_and_create_file(&path, &uri, &mut f).await?;
                             if let Some(ff) = f.get_mut(0) {
-                                AsyncWriteExt::write_all(ff, &buf).await?;
+                                AsyncWriteExt::write_all(ff, buf).await?;
                             }
                         }
                     }
@@ -118,7 +118,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                         if f.is_empty() {
                             let mut pos = 0;
                             for (idx, b) in cur_chunk.iter().enumerate() {
-                                if b == &(',' as u8) {
+                                if b == &(b',') {
                                     pos = idx + 1;
                                     break;
                                 }
@@ -131,12 +131,10 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                                     }
                                 }
                             }
-                        } else {
-                            if let Ok(buf) = decode(cur_chunk) {
-                                check_and_create_file(&path, &uri, &mut f).await?;
-                                if let Some(ff) = f.get_mut(0) {
-                                    AsyncWriteExt::write_all(ff, &buf).await?;
-                                }
+                        } else if let Ok(buf) = decode(cur_chunk) {
+                            check_and_create_file(&path, &uri, &mut f).await?;
+                            if let Some(ff) = f.get_mut(0) {
+                                AsyncWriteExt::write_all(ff, &buf).await?;
                             }
                         }
                     }

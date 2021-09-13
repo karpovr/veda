@@ -39,17 +39,15 @@ pub(crate) async fn update(
             if let Some(jvec) = jseg.as_array() {
                 for ji in jvec {
                     let mut new_indv = Individual::default();
-                    if parse_json_to_individual(&ji, &mut new_indv) {
-                        if !new_indv.get_id().is_empty() {
-                            inds.push(new_indv);
-                        }
+                    if parse_json_to_individual(ji, &mut new_indv) && !new_indv.get_id().is_empty() {
+                        inds.push(new_indv);
                     }
                 }
             }
         } else {
             let mut new_indv = Individual::default();
             if let Some(i) = v.get("individual") {
-                if !parse_json_to_individual(&i, &mut new_indv) {
+                if !parse_json_to_individual(i, &mut new_indv) {
                     return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
                 }
             } else if let Some(i) = v.get("uri") {
