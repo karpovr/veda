@@ -228,7 +228,7 @@ fn main() -> std::io::Result<()> {
             // websocket
             .service(web::resource("/ccus").to(ccus_route))
     })
-    .bind("[::]:".to_owned() + &ccus_port)?
+    .bind(format!("0.0.0.0:{}", ccus_port))?
     //.keep_alive(75)
     .start();
 
