@@ -15,7 +15,7 @@ use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state, query_get, query_post};
 use crate::update::*;
 use actix_files::{Files, NamedFile};
-use actix_web::{get, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
 use futures::{select, FutureExt};
 use rusty_tarantool::tarantool::{Client, ClientConfig};
 use serde_derive::Deserialize;
@@ -31,6 +31,11 @@ use v_common::search::ft_client::FTClient;
 use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::storage::storage::StorageMode;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
+
+#[head("/")]
+async fn head() -> std::io::Result<HttpResponse> {
+    return Ok(HttpResponse::Ok().finish());
+}
 
 #[get("/ping")]
 async fn ping() -> std::io::Result<HttpResponse> {
@@ -156,6 +161,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_rights_origin)
             .service(load_file)
             .service(ping)
+            .service(head)
             .service(web::resource("/apps/{app_name}").route(web::get().to(apps_doc)))
             .route("/tests", web::get().to(tests_doc))
             .route("/ontology.json", web::get().to(onto_doc))
