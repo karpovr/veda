@@ -32,7 +32,7 @@ pub(crate) async fn load_file(
     }
 
     if let Some(file_id) = req.path().strip_prefix("/files/") {
-        let (mut file_info, res_code) = get_individual_from_db(file_id, &user_uri.unwrap_or_default(), &db, &az).await?;
+        let (mut file_info, res_code) = get_individual_from_db(file_id, &user_uri.unwrap_or_default(), &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
             return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));

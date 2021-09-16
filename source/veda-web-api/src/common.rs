@@ -61,7 +61,7 @@ pub(crate) struct QueryRequest {
     pub from: Option<i32>,
 }
 
-async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str, az: &web::Data<Mutex<LmdbAzContext>>) -> io::Result<(Individual, ResultCode)> {
+async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str, az: &Mutex<LmdbAzContext>) -> io::Result<(Individual, ResultCode)> {
     if az.lock().unwrap().authorize(uri, user_uri, Access::CanRead as u8, false).unwrap_or(0) != Access::CanRead as u8 {
         return Ok((indv, ResultCode::NotAuthorized));
     }
@@ -73,26 +73,25 @@ async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str,
     Ok((indv, ResultCode::Ok))
 }
 
-pub(crate) async fn get_individual_from_db(
-    uri: &str,
-    user_uri: &str,
-    db: &web::Data<Storage>,
-    az: &web::Data<Mutex<LmdbAzContext>>,
-) -> io::Result<(Individual, ResultCode)> {
+pub(crate) async fn get_individual_from_db(uri: &str, user_uri: &str, db: &Storage, az: Option<&Mutex<LmdbAzContext>>) -> io::Result<(Individual, ResultCode)> {
     if let Some(tt) = &db.tt {
         let response = tt.select(INDIVIDUALS_SPACE_ID, 0, &(uri,), 0, 100, IteratorType::EQ).await?;
 
         let mut iraw = Individual::default();
         iraw.set_raw(&response.data[5..]);
         if parse_raw(&mut iraw).is_ok() {
-            return check_indv_access_read(iraw, uri, user_uri, az).await;
+            if let Some(a) = az {
+                return check_indv_access_read(iraw, uri, user_uri, a).await;
+            }
         }
         return Ok((iraw, ResultCode::UnprocessableEntity));
     }
     if let Some(lmdb) = &db.lmdb {
         let mut iraw = Individual::default();
         if lmdb.lock().unwrap().get_individual_from_db(StorageId::Individuals, uri, &mut iraw) {
-            return check_indv_access_read(iraw, uri, user_uri, az).await;
+            if let Some(a) = az {
+                return check_indv_access_read(iraw, uri, user_uri, a).await;
+            }
         } else {
             return Ok((Individual::default(), ResultCode::NotFound));
         }

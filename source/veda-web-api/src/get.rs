@@ -86,7 +86,7 @@ pub(crate) async fn get_individuals(
     let mut res = vec![];
     let user_uri = user_uri.unwrap_or_default();
     for uri in &payload.uris {
-        let (indv, res_code) = get_individual_from_db(uri, &user_uri, &db, &az).await?;
+        let (indv, res_code) = get_individual_from_db(uri, &user_uri, &db, Some(&az)).await?;
         if res_code == ResultCode::Ok {
             res.push(indv.get_obj().as_json());
         }
@@ -106,7 +106,7 @@ pub(crate) async fn get_individual(
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
 
-    let (res, res_code) = get_individual_from_db(&params.uri, &user_uri.unwrap_or_default(), &db, &az).await?;
+    let (res, res_code) = get_individual_from_db(&params.uri, &user_uri.unwrap_or_default(), &db, Some(&az)).await?;
 
     if res_code == ResultCode::Ok {
         return Ok(HttpResponse::Ok().json(res.get_obj().as_json()));
