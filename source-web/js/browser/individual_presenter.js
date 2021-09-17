@@ -40,7 +40,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
 
   toAppend = typeof toAppend !== 'undefined' ? toAppend : true;
 
-  if (typeof container === 'string') {
+  if (typeof container === 'string' || container instanceof HTMLElement) {
     container = $(container);
   }
 
@@ -53,7 +53,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         if (this.hasValue('v-ui:hasTemplate') && !isClass) {
           const templateIndividual = this['v-ui:hasTemplate'][0];
           if (!templateIndividual instanceof IndividualModel) {
-            throw Error('Custom template must be an individual!');
+            throw new TypeError('Custom template must be an individual!');
           }
           return getTemplateString(templateIndividual);
         } else {
@@ -76,19 +76,7 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
       return rendered;
     })
     .catch(errorHandler)
-    .catch((error) => {
-      console.log(`presenter error: ${this.id}`, error, error.stack);
-      const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
-      return errorIndividual.load().then((errorIndividual) => {
-        const msg = $(`<div><a href="#/${this.id}"><code>${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}</code></a></div>`);
-        container.append(msg);
-        return msg;
-      }).catch(() => {
-        const msg = $(`<div><a href="#/${this.id}"><code>${error.name} ${error.message}</code></a></div>`);
-        container.append(msg);
-        return msg;
-      });
-    });
+    .catch((error) => errorPrinter.call(this, error, container));
 }
 
 /**
@@ -102,7 +90,7 @@ function getTemplateString (template) {
   if (template instanceof IndividualModel) {
     return template.load().then((templateIndividual) => {
       if (!templateIndividual.hasValue('rdf:type', 'v-ui:ClassTemplate')) {
-        throw Error('Template type violation!');
+        throw new TypeError('v-ui:ClassTemplate required!');
       }
       const templateName = template.id;
       const templateString = template['v-ui:template'][0];
@@ -165,6 +153,31 @@ function errorHandler (error) {
     }
   }).catch(console.log);
   throw error;
+}
+
+/**
+ * Print error message in coontainer
+ * @param {Error} error to print
+ * @param {Object} container for error
+ */
+function errorPrinter (error, container) {
+  console.log(`presenter error: ${this.id}`, error, error.stack);
+  const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
+  return errorIndividual.load().then((errorIndividual) => {
+    let msg = $(`<div><span class="padding-sm bg-${errorIndividual['v-s:tag'][0]} text-${errorIndividual['v-s:tag'][0]}" title="${this.id}"><strong>${error.code}</strong> ${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}</span></div>`);
+    if (container.prop("tagName") === 'TBODY' || container.prop("tagName") === 'TABLE') {
+      msg = $(`<tr><td colspan="999">${msg.html()}</td></tr>`);
+    }
+    container.append(msg);
+    return msg;
+  }).catch(() => {
+    const msg = $(`<div><span class="padding-sm bg-danger text-danger" title="${this.id}"><strong>${error.code}</strong> ${error.name} ${error.message}></span></div>`);
+    if (container.prop("tagName") === 'TBODY' || container.prop("tagName") === 'TABLE') {
+      msg = $(`<tr><td colspan="999">${msg.html()}</td></tr>`);
+    }
+    container.append(msg);
+    return msg;
+  });
 }
 
 /**
@@ -556,12 +569,7 @@ function processTemplate (individual, container, template, mode) {
 
       renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
     })
-      .catch((error) => {
-        console.log(`presenter error: ${about.id}`, error, error.stack);
-        const msg = $(`<div><code>${error.name} ${error.message} ${about.id}</code></div>`);
-        propertyContainer.append(msg);
-        return msg;
-      });
+      .catch((error) => errorPrinter.call(about, error, propertyContainer));
   }).get();
 
   // Max displayed values
