@@ -124,190 +124,222 @@ v-s:Error_0
   v-s:errorCode "0" ;
   v-s:errorMessage "Сервер недоступен"@ru ;
   v-s:errorMessage "Server unavailable"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_400
   rdf:type v-s:BugReport ;
   v-s:errorCode "400" ;
   v-s:errorMessage "Некорректный запрос"@ru ;
   v-s:errorMessage "Bad request"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_403
   rdf:type v-s:BugReport ;
   v-s:errorCode "403" ;
   v-s:errorMessage "Запрещено"@ru ;
   v-s:errorMessage "Forbidden"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_404
   rdf:type v-s:BugReport ;
   v-s:errorCode "404" ;
   v-s:errorMessage "Ресурс не найден"@ru ;
   v-s:errorMessage "Resource not found"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_422
   rdf:type v-s:BugReport ;
   v-s:errorCode "422" ;
   v-s:errorMessage "Необработанная сущность"@ru ;
   v-s:errorMessage "Unprocessable entity"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_423
   rdf:type v-s:BugReport ;
   v-s:errorCode "423" ;
   v-s:errorMessage "Заблокировано"@ru ;
   v-s:errorMessage "Locked"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_429
   rdf:type v-s:BugReport ;
   v-s:errorCode "429" ;
   v-s:errorMessage "Слишком много запросов"@ru ;
   v-s:errorMessage "Too many requests"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_430
   rdf:type v-s:BugReport ;
   v-s:errorCode "430" ;
   v-s:errorMessage "Слишком много ошибок смены пароля"@ru ;
   v-s:errorMessage "Too many password change fails"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_463
   rdf:type v-s:BugReport ;
   v-s:errorCode "463" ;
   v-s:errorMessage "Смена пароля не разрешена"@ru ;
   v-s:errorMessage "Password change is not allowed"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_464
   rdf:type v-s:BugReport ;
   v-s:errorCode "464" ;
   v-s:errorMessage "Секретный код просрочен"@ru ;
   v-s:errorMessage "Secret expired"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_465
   rdf:type v-s:BugReport ;
   v-s:errorCode "465" ;
   v-s:errorMessage "Пустой пароль"@ru ;
   v-s:errorMessage "Empty password"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_466
   rdf:type v-s:BugReport ;
   v-s:errorCode "466" ;
   v-s:errorMessage "Новый пароль совпадает со старым"@ru ;
   v-s:errorMessage "New password is equal to old"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_467
   rdf:type v-s:BugReport ;
   v-s:errorCode "467" ;
   v-s:errorMessage "Некорректный пароль"@ru ;
   v-s:errorMessage "Invalid password"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_468
   rdf:type v-s:BugReport ;
   v-s:errorCode "468" ;
   v-s:errorMessage "Некорректный секретный код"@ru ;
   v-s:errorMessage "Invalid secret"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_469
   rdf:type v-s:BugReport ;
   v-s:errorCode "469" ;
   v-s:errorMessage "Пароль просрочен"@ru ;
   v-s:errorMessage "Password expired"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_470
   rdf:type v-s:BugReport ;
   v-s:errorCode "470" ;
   v-s:errorMessage "Сессионный билет не найден"@ru ;
   v-s:errorMessage "Ticket not found"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_471
   rdf:type v-s:BugReport ;
   v-s:errorCode "471" ;
   v-s:errorMessage "Сессионный билет просрочен"@ru ;
   v-s:errorMessage "Ticket expired"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_472
   rdf:type v-s:BugReport ;
   v-s:errorCode "472" ;
   v-s:errorMessage "Нет прав"@ru ;
   v-s:errorMessage "Not authorized"@en ;
+  v-s:tag "warning" ;
 .
 v-s:Error_473
   rdf:type v-s:BugReport ;
   v-s:errorCode "473" ;
   v-s:errorMessage "Отказ аутентификации"@ru ;
   v-s:errorMessage "Authentication failed"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_474
   rdf:type v-s:BugReport ;
   v-s:errorCode "474" ;
   v-s:errorMessage "Не готов"@ru ;
   v-s:errorMessage "Not ready"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_475
   rdf:type v-s:BugReport ;
   v-s:errorCode "475" ;
   v-s:errorMessage "Отказ открытия транзакции"@ru ;
   v-s:errorMessage "Fail open transaction"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_476
   rdf:type v-s:BugReport ;
   v-s:errorCode "476" ;
   v-s:errorMessage "Отказ коммита"@ru ;
   v-s:errorMessage "Fail commit"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_477
   rdf:type v-s:BugReport ;
   v-s:errorCode "477" ;
   v-s:errorMessage "Отказ хранилища"@ru ;
   v-s:errorMessage "Fail store"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_500
   rdf:type v-s:BugReport ;
   v-s:errorCode "500" ;
   v-s:errorMessage "Внутренняя ошибка сервера"@ru ;
   v-s:errorMessage "Internal server error"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_501
   rdf:type v-s:BugReport ;
   v-s:errorCode "501" ;
   v-s:errorMessage "Не реализовано"@ru ;
   v-s:errorMessage "Not implemented"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_503
   rdf:type v-s:BugReport ;
   v-s:errorCode "503" ;
   v-s:errorMessage "Сервис недоступен"@ru ;
   v-s:errorMessage "Service unavailable"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_904
   rdf:type v-s:BugReport ;
   v-s:errorCode "904" ;
   v-s:errorMessage "Некорректный идентификатор"@ru ;
   v-s:errorMessage "Invalid identifier"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_999
   rdf:type v-s:BugReport ;
   v-s:errorCode "999" ;
   v-s:errorMessage "Ошибка модификации базы данных"@ru ;
   v-s:errorMessage "Database modified error"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_1021
   rdf:type v-s:BugReport ;
   v-s:errorCode "1021" ;
   v-s:errorMessage "Диск полон"@ru ;
   v-s:errorMessage "Disk full"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_1022
   rdf:type v-s:BugReport ;
   v-s:errorCode "1022" ;
   v-s:errorMessage "Повторяющийся ключ"@ru ;
   v-s:errorMessage "Duplicate key"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_1118
   rdf:type v-s:BugReport ;
   v-s:errorCode "1118" ;
   v-s:errorMessage "Размер слишком велик"@ru ;
   v-s:errorMessage "Size too large"@en ;
+  v-s:tag "danger" ;
 .
 v-s:Error_4000
   rdf:type v-s:BugReport ;
   v-s:errorCode "4000" ;
   v-s:errorMessage "Ошибка соединения"@ru ;
   v-s:errorMessage "Connect error"@en ;
+  v-s:tag "danger" ;
 .
