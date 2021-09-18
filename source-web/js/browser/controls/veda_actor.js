@@ -6,7 +6,7 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-import { interpolate, ftQuery } from './veda_control_util.js';
+import {interpolate, ftQuery} from './veda_control_util.js';
 
 $.fn.veda_actor = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_actor.defaults, options );

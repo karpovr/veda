@@ -8,7 +8,7 @@ import Util from '../../common/util.js';
 
 import Backend from '../../common/backend.js';
 
-export { ftQuery, renderValue, interpolate };
+export {ftQuery, renderValue, interpolate};
 
 /**
  * Perform full text search query

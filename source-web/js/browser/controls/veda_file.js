@@ -175,11 +175,11 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:fileUri'] = [uri];
     fileIndividual['v-s:filePath'] = [path];
     fileIndividual['v-s:parent'] = [parent];
-  fileIndividual['v-s:backwardTarget'] = [parent];
+    fileIndividual['v-s:backwardTarget'] = [parent];
     fileIndividual['v-s:backwardProperty'] = [rel_uri];
-    fileIndividual["v-s:canRead"] = [true];
-    fileIndividual["v-s:canUpdate"] = [true];
-    fileIndividual["v-s:canDelete"] = [true];
+    fileIndividual['v-s:canRead'] = [true];
+    fileIndividual['v-s:canUpdate'] = [true];
+    fileIndividual['v-s:canDelete'] = [true];
     return new Promise((resolve, reject) => {
       // If file is image && !thumbnail
       if ( file.name && (/^(?!thumbnail-).+\.(jpg|jpeg|gif|png|bmp|svg)$/i).test(file.name) ) {

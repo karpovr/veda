@@ -6,9 +6,7 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-import Backend from '../../common/backend.js';
-
-import { interpolate, ftQuery, renderValue } from './veda_control_util.js';
+import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_link = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_link.defaults, options );

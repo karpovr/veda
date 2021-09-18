@@ -4,7 +4,7 @@ import $ from 'jquery';
 
 import IndividualModel from '../../common/individual_model.js';
 
-import { interpolate, ftQuery, renderValue } from './veda_control_util.js';
+import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_checkbox = function (params) {
   const opts = $.extend( {}, $.fn.veda_checkbox.defaults, params );
