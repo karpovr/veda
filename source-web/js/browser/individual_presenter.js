@@ -14,7 +14,7 @@ import riot from '../common/lib/riot.js';
 
 import Notify from '../browser/notify.js';
 
-import '../browser/veda_controls.js';
+import '../browser/controls/veda_controls.js';
 
 import $ from 'jquery';
 

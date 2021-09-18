@@ -1,0 +1,36 @@
+// Text control
+
+import $ from 'jquery';
+
+import autosize from 'autosize';
+
+import veda_literal from './veda_literal.js';
+
+$.fn.veda_text = function ( options ) {
+  const opts = $.extend( {}, $.fn.veda_text.defaults, options );
+  const control = veda_literal.call(this, opts);
+
+  const tabindex = this.attr('tabindex');
+  if (tabindex) {
+    this.removeAttr('tabindex');
+    control.attr('tabindex', tabindex);
+  }
+
+  control.attr('rows', this.attr('rows'));
+  autosize(control);
+  this.on('edit', function () {
+    autosize.update(control);
+  });
+  this.one('remove', function () {
+    autosize.destroy(control);
+  });
+  this.append(control);
+  return this;
+};
+$.fn.veda_text.defaults = {
+  template: $('#text-control-template').html(),
+  parser: function (input) {
+    return (input ? String(input) : null);
+  },
+  isSingle: true,
+};
