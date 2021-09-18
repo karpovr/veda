@@ -1,10 +1,10 @@
 use crate::auth::TicketCache;
 use crate::Storage;
 use actix_web::{web, HttpMessage, HttpRequest};
+use futures::lock::Mutex;
 use rusty_tarantool::tarantool::IteratorType;
 use serde_derive::{Deserialize, Serialize};
 use std::io;
-use std::sync::Mutex;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::ticket::Ticket;
 use v_common::onto::individual::Individual;
@@ -62,7 +62,7 @@ pub(crate) struct QueryRequest {
 }
 
 async fn check_indv_access_read(mut indv: Individual, uri: &str, user_uri: &str, az: &Mutex<LmdbAzContext>) -> io::Result<(Individual, ResultCode)> {
-    if az.lock().unwrap().authorize(uri, user_uri, Access::CanRead as u8, false).unwrap_or(0) != Access::CanRead as u8 {
+    if az.lock().await.authorize(uri, user_uri, Access::CanRead as u8, false).unwrap_or(0) != Access::CanRead as u8 {
         return Ok((indv, ResultCode::NotAuthorized));
     }
 
@@ -88,7 +88,7 @@ pub(crate) async fn get_individual_from_db(uri: &str, user_uri: &str, db: &Stora
     }
     if let Some(lmdb) = &db.lmdb {
         let mut iraw = Individual::default();
-        if lmdb.lock().unwrap().get_individual_from_db(StorageId::Individuals, uri, &mut iraw) {
+        if lmdb.lock().await.get_individual_from_db(StorageId::Individuals, uri, &mut iraw) {
             if let Some(a) = az {
                 return check_indv_access_read(iraw, uri, user_uri, a).await;
             }
@@ -134,7 +134,7 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &we
         }
         if let Some(lmdb) = &db.lmdb {
             let mut to = Individual::default();
-            if lmdb.lock().unwrap().get_individual_from_db(StorageId::Tickets, ticket_id, &mut to) {
+            if lmdb.lock().await.get_individual_from_db(StorageId::Tickets, ticket_id, &mut to) {
                 ticket_obj.update_from_individual(&mut to);
                 ticket_obj.result = ResultCode::Ok;
             }
@@ -148,10 +148,10 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &we
         }
 
         let user_uri = ticket_obj.user_uri.clone();
-        if let Ok(mut t) = ticket_cache.write.lock() {
-            t.insert(ticket_id.to_owned(), ticket_obj);
-            t.refresh();
-        }
+        let mut t = ticket_cache.write.lock().await;
+        t.insert(ticket_id.to_owned(), ticket_obj);
+        t.refresh();
+
         Ok((ResultCode::Ok, Some(user_uri)))
     }
 }

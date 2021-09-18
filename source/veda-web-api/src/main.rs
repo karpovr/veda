@@ -16,13 +16,13 @@ use crate::get::{get_individual, get_individuals, get_operation_state, query_get
 use crate::update::*;
 use actix_files::{Files, NamedFile};
 use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
+use futures::lock::Mutex;
 use futures::{select, FutureExt};
 use rusty_tarantool::tarantool::{Client, ClientConfig};
 use serde_derive::Deserialize;
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::sync::Mutex;
 use url::Url;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module::{init_log_with_params, Module};

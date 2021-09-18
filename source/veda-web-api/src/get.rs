@@ -6,8 +6,8 @@ use crate::Storage;
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
+use futures::lock::Mutex;
 use std::io;
-use std::sync::Mutex;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
 use v_common::search::clickhouse_client::CHClient;
@@ -66,7 +66,7 @@ async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Dat
             from: data.from.unwrap_or_default(),
         };
 
-        ft_client.lock().unwrap().query(ft_req)
+        ft_client.lock().await.query(ft_req)
     };
     Ok(HttpResponse::Ok().json(res))
 }

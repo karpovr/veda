@@ -1,10 +1,10 @@
 use crate::common::TicketRequest;
 use actix_web::http::StatusCode;
 use actix_web::{put, web, HttpResponse};
+use futures::lock::Mutex;
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::io;
-use std::sync::Mutex;
 use v_common::onto::individual::Individual;
 use v_common::onto::json2individual::parse_json_to_individual;
 use v_common::v_api::api_client::{IndvOp, MStorageClient};
@@ -64,7 +64,7 @@ pub(crate) async fn update(
             inds.push(new_indv);
         }
 
-        return match mstorage.lock().unwrap().updates_use_param(&params.ticket, event_id, src, assigned_subsystems, cmd, &inds) {
+        return match mstorage.lock().await.updates_use_param(&params.ticket, event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
                 if r.result == ResultCode::Ok {
                     Ok(HttpResponse::Ok().json(json!({"op_id":r.op_id,"result":r.result})))

@@ -3,8 +3,9 @@ use crate::Storage;
 use actix_web::get;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse};
+use futures::lock::Mutex;
 use std::io;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::ticket::Ticket;
 use v_common::onto::datatype::Lang;
@@ -26,7 +27,7 @@ pub(crate) async fn is_ticket_valid(params: web::Query<TicketRequest>, ticket_ca
 
 #[get("/authenticate")]
 pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>) -> io::Result<HttpResponse> {
-    return match auth.lock().unwrap().authenticate(&params.login, &params.password, &params.secret) {
+    return match auth.lock().await.authenticate(&params.login, &params.password, &params.secret) {
         Ok(r) => Ok(HttpResponse::Ok().json(r)),
         Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
     };
@@ -46,7 +47,7 @@ pub(crate) async fn get_rights(
 
     let rights = az
         .lock()
-        .unwrap()
+        .await
         .authorize(&params.uri, &user_uri.unwrap(), Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false)
         .unwrap_or(0);
     let mut pstm = Individual::default();
@@ -84,7 +85,7 @@ pub(crate) async fn get_membership(
         str_num: 0,
     };
 
-    if az.lock().unwrap().authorize_and_trace(&params.uri, &user_uri.unwrap(), Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
+    if az.lock().await.authorize_and_trace(&params.uri, &user_uri.unwrap(), Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
         let mut mbshp = Individual::default();
 
         mbshp.set_id("_");
@@ -127,7 +128,7 @@ pub(crate) async fn get_rights_origin(
 
     if az
         .lock()
-        .unwrap()
+        .await
         .authorize_and_trace(
             &params.uri,
             &user_uri.unwrap(),
