@@ -20,8 +20,8 @@ import 'adoptedStyleSheets';
  * @this jQuery
  * @return {jQuery}
  */
-function veda_literal_input (options) {
-  const opts = $.extend( {}, veda_literal_input.defaults, options );
+function veda_literal (options) {
+  const opts = $.extend( {}, veda_literal.defaults, options );
   const input = $(opts.template);
   const spec = opts.spec;
   const placeholder = this.attr('placeholder') || (spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : '');
@@ -141,7 +141,7 @@ function veda_literal_input (options) {
   }
   return input;
 };
-veda_literal_input.defaults = {
+veda_literal.defaults = {
   template: $('#string-control-template').html(),
   parser: function (input) {
     return (input || null);
@@ -151,7 +151,7 @@ veda_literal_input.defaults = {
 // Generic input
 $.fn.veda_generic = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_generic.defaults, options );
-  const control = veda_literal_input.call(this, opts);
+  const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -188,7 +188,7 @@ $.fn.veda_generic.defaults = {
 // String input
 $.fn.veda_string = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_string.defaults, options );
-  const control = veda_literal_input.call(this, opts);
+  const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -197,8 +197,8 @@ $.fn.veda_string = function ( options ) {
   }
   const inputType = this.data("input-type");
   if (inputType) {
-    control.attr('type', inputType); 
-  } 
+    control.attr('type', inputType);
+  }
 
   this.append(control);
   return this;
@@ -255,7 +255,7 @@ $.fn.veda_uri.defaults = {
 // Text input
 $.fn.veda_text = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_text.defaults, options );
-  const control = veda_literal_input.call(this, opts);
+  const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -285,7 +285,7 @@ $.fn.veda_text.defaults = {
 // Integer control
 $.fn.veda_integer = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_integer.defaults, options );
-  const control = veda_literal_input.call(this, opts);
+  const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -313,7 +313,7 @@ $.fn.veda_integer.defaults = {
 // WorkTime control
 $.fn.veda_worktime = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_worktime.defaults, options );
-  const mainInput = veda_literal_input.call(this, opts);
+  const mainInput = veda_literal.call(this, opts);
 
   this.append( mainInput.hide() );
   this.append( $('#worktime-control-template').html() );
@@ -364,7 +364,7 @@ $.fn.veda_worktime.defaults = {
 // Decimal control
 $.fn.veda_decimal = function ( options ) {
   const opts = $.extend( {}, $.fn.veda_decimal.defaults, options );
-  const control = veda_literal_input.call(this, opts);
+  const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -2283,7 +2283,7 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:fileUri'] = [uri];
     fileIndividual['v-s:filePath'] = [path];
     fileIndividual['v-s:parent'] = [parent];
-	fileIndividual['v-s:backwardTarget'] = [parent];
+    fileIndividual['v-s:backwardTarget'] = [parent];
     fileIndividual['v-s:backwardProperty'] = [rel_uri];
     fileIndividual["v-s:canRead"] = [true];
     fileIndividual["v-s:canUpdate"] = [true];
