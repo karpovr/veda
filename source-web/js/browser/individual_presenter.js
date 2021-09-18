@@ -151,7 +151,7 @@ function errorHandler (error) {
       notify(severity, {name: errorIndividual['v-s:errorCode'][0], message: errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')});
     }).catch(console.log);
   } else {
-    notify('danger', {name: errorMsg.toString()});
+    notify('danger', {name: error.toString()});
   }
   throw error;
 }
