@@ -30,20 +30,20 @@ pub(crate) async fn query_post(
     params: web::Query<QueryRequest>,
     data: web::Json<QueryRequest>,
     ft_client: web::Data<Mutex<FTClient>>,
-    ch_client: web::Data<CHClient>,
+    ch_client: web::Data<Mutex<CHClient>>,
 ) -> io::Result<HttpResponse> {
     let ticket = get_ticket(&req, &params.ticket);
     query(&ticket, &*data, ft_client, ch_client).await
 }
 
-pub(crate) async fn query_get(params: web::Query<QueryRequest>, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<CHClient>) -> io::Result<HttpResponse> {
+pub(crate) async fn query_get(params: web::Query<QueryRequest>, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<Mutex<CHClient>>) -> io::Result<HttpResponse> {
     query(&params.ticket, &*params, ft_client, ch_client).await
 }
 
-async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<CHClient>) -> io::Result<HttpResponse> {
+async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<Mutex<CHClient>>) -> io::Result<HttpResponse> {
     let res = if data.sql.is_some() {
         let user = data.user.clone().unwrap_or_default();
-        ch_client
+        ch_client.lock().await
             .select_async(
                 &user,
                 &data.sql.clone().unwrap_or_default(),

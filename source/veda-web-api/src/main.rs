@@ -144,7 +144,7 @@ async fn main() -> std::io::Result<()> {
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))
             .data(Mutex::new(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default())))
             .data(Mutex::new(FTClient::new(Module::get_property("ft_query_service_url").unwrap_or_default())))
-            .data(ch)
+            .data(Mutex::new(ch))
             .service(get_rights)
             .service(authenticate)
             .service(get_individual)
