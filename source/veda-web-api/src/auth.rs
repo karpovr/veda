@@ -1,26 +1,19 @@
-use crate::common::{check_ticket, AuthenticateRequest, TicketRequest, TicketUriRequest};
-use crate::Storage;
+use crate::common::{AuthenticateRequest, TicketRequest, TicketUriRequest};
 use actix_web::get;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
-use std::sync::Arc;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
-use v_common::module::ticket::Ticket;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
+use v_common::storage::async_storage::{check_ticket, AStorage, TicketCache};
 use v_common::v_api::api_client::AuthClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
 
-pub(crate) struct TicketCache {
-    pub read: evmap::ReadHandle<String, Ticket>,
-    pub(crate) write: Arc<Mutex<evmap::WriteHandle<String, Ticket>>>,
-}
-
 #[get("/is_ticket_valid")]
-pub(crate) async fn is_ticket_valid(params: web::Query<TicketRequest>, ticket_cache: web::Data<TicketCache>, tt: web::Data<Storage>) -> io::Result<HttpResponse> {
+pub(crate) async fn is_ticket_valid(params: web::Query<TicketRequest>, ticket_cache: web::Data<TicketCache>, tt: web::Data<AStorage>) -> io::Result<HttpResponse> {
     let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
 }
@@ -37,7 +30,7 @@ pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: 
 pub(crate) async fn get_rights(
     params: web::Query<TicketUriRequest>,
     ticket_cache: web::Data<TicketCache>,
-    db: web::Data<Storage>,
+    db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
 ) -> io::Result<HttpResponse> {
     let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;
@@ -67,7 +60,7 @@ pub(crate) async fn get_rights(
 pub(crate) async fn get_membership(
     params: web::Query<TicketUriRequest>,
     ticket_cache: web::Data<TicketCache>,
-    db: web::Data<Storage>,
+    db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
 ) -> io::Result<HttpResponse> {
     let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;
@@ -108,7 +101,7 @@ pub(crate) async fn get_membership(
 pub(crate) async fn get_rights_origin(
     params: web::Query<TicketUriRequest>,
     ticket_cache: web::Data<TicketCache>,
-    db: web::Data<Storage>,
+    db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
 ) -> io::Result<HttpResponse> {
     let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;

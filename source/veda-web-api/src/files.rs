@@ -1,6 +1,4 @@
-use crate::auth::TicketCache;
-use crate::common::{check_ticket, get_individual_from_db, get_ticket};
-use crate::Storage;
+use crate::common::get_ticket;
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::http::header::ExtendedValue;
@@ -17,12 +15,13 @@ use filetime::FileTime;
 use futures::lock::Mutex;
 use futures::{AsyncWriteExt, StreamExt, TryStreamExt};
 use v_common::az_impl::az_lmdb::LmdbAzContext;
+use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
 
 #[get("/files/{file_id}")]
 pub(crate) async fn load_file(
     ticket_cache: web::Data<TicketCache>,
-    db: web::Data<Storage>,
+    db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {

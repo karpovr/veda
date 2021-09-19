@@ -11,5 +11,5 @@ env_logger = "0.6"
 log = "0.4"
 rust-ini = "0.16"
 
-v_common = { package = "v-common", version = "=0.1.67" }
+v_common = { package = "v-common", version = "=0.1.68" }
 #v_common = { package = "v-common", path = "../../../v-common" }

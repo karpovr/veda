@@ -1,8 +1,4 @@
-use crate::auth::TicketCache;
-use crate::common::{
-    check_ticket, get_individual_from_db, get_module_name, get_ticket, GetOperationStateRequest, QueryRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH,
-};
-use crate::Storage;
+use crate::common::{get_module_name, get_ticket, GetOperationStateRequest, QueryRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -13,6 +9,7 @@ use v_common::module::info::ModuleInfo;
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::FTQuery;
 use v_common::search::ft_client::FTClient;
+use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 #[get("/get_operation_state")]
@@ -36,14 +33,20 @@ pub(crate) async fn query_post(
     query(&ticket, &*data, ft_client, ch_client).await
 }
 
-pub(crate) async fn query_get(params: web::Query<QueryRequest>, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<Mutex<CHClient>>) -> io::Result<HttpResponse> {
+pub(crate) async fn query_get(
+    params: web::Query<QueryRequest>,
+    ft_client: web::Data<Mutex<FTClient>>,
+    ch_client: web::Data<Mutex<CHClient>>,
+) -> io::Result<HttpResponse> {
     query(&params.ticket, &*params, ft_client, ch_client).await
 }
 
 async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<Mutex<CHClient>>) -> io::Result<HttpResponse> {
     let res = if data.sql.is_some() {
         let user = data.user.clone().unwrap_or_default();
-        ch_client.lock().await
+        ch_client
+            .lock()
+            .await
             .select_async(
                 &user,
                 &data.sql.clone().unwrap_or_default(),
@@ -76,7 +79,7 @@ pub(crate) async fn get_individuals(
     params: web::Query<TicketRequest>,
     ticket_cache: web::Data<TicketCache>,
     payload: web::Json<Uris>,
-    db: web::Data<Storage>,
+    db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
 ) -> io::Result<HttpResponse> {
     let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &db).await?;
@@ -98,7 +101,7 @@ pub(crate) async fn get_individuals(
 pub(crate) async fn get_individual(
     params: web::Query<TicketUriRequest>,
     ticket_cache: web::Data<TicketCache>,
-    db: web::Data<Storage>,
+    db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
 ) -> io::Result<HttpResponse> {
     let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;

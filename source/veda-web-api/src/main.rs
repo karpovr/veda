@@ -9,7 +9,7 @@ mod update;
 
 extern crate serde_derive;
 extern crate serde_json;
-use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, is_ticket_valid, TicketCache};
+use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, is_ticket_valid};
 use crate::common::BASE_PATH;
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state, query_get, query_post};
@@ -18,7 +18,7 @@ use actix_files::{Files, NamedFile};
 use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
 use futures::lock::Mutex;
 use futures::{select, FutureExt};
-use rusty_tarantool::tarantool::{Client, ClientConfig};
+use rusty_tarantool::tarantool::ClientConfig;
 use serde_derive::Deserialize;
 use std::env;
 use std::path::PathBuf;
@@ -28,6 +28,7 @@ use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module::{init_log_with_params, Module};
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::ft_client::FTClient;
+use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::storage::storage::StorageMode;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
@@ -69,11 +70,6 @@ async fn apps_doc(info: web::Path<Info>) -> std::io::Result<NamedFile> {
     Ok(NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())?)
 }
 
-struct Storage {
-    tt: Option<Client>,
-    lmdb: Option<Mutex<LMDBStorage>>,
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
@@ -111,12 +107,12 @@ async fn main() -> std::io::Result<()> {
     let mut server_future = HttpServer::new(move || {
         let (read, write) = evmap::new();
         let db = if let Some(cfg) = &tt_config {
-            Storage {
+            AStorage {
                 tt: Some(cfg.clone().build()),
                 lmdb: None,
             }
         } else {
-            Storage {
+            AStorage {
                 tt: None,
                 lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly))),
             }
