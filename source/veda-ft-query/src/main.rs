@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 
+use futures::executor::block_on;
 use ini::Ini;
 use nng::options::{Options, RecvTimeout, SendTimeout};
 use nng::{Error, Message, Protocol, Socket};
@@ -8,8 +9,10 @@ use serde_json::value::Value as JSONValue;
 use std::time::Duration;
 use std::{env, str};
 use v_common::ft_xapian::xapian_reader::XapianReader;
+use v_common::module::common::load_onto;
 use v_common::module::module::init_log;
 use v_common::module::veda_backend::Backend;
+use v_common::onto::onto::Onto;
 use v_common::search::common::FTQuery;
 use v_common::v_api::obj::*;
 
@@ -100,7 +103,7 @@ const TOP: usize = 5;
 const LIMIT: usize = 6;
 const FROM: usize = 7;
 
-fn req_prepare(module: &mut Backend, s: &str, xr: &mut XapianReader) -> Message {
+fn req_prepare(backend: &mut Backend, s: &str, xr: &mut XapianReader) -> Message {
     let v: JSONValue = if let Ok(v) = serde_json::from_slice(s.as_bytes()) {
         v
     } else {
@@ -127,7 +130,7 @@ fn req_prepare(module: &mut Backend, s: &str, xr: &mut XapianReader) -> Message 
             if ticket_id.starts_with("UU=") {
                 user_uri = ticket_id.trim_start_matches("UU=").to_owned();
             } else {
-                let ticket = module.get_ticket_from_db(&ticket_id);
+                let ticket = backend.get_ticket_from_db(&ticket_id);
                 if ticket.result == ResultCode::Ok {
                     user_uri = ticket.user_uri;
                 }
@@ -156,7 +159,11 @@ fn req_prepare(module: &mut Backend, s: &str, xr: &mut XapianReader) -> Message 
             ticket_id, request.user, request.query, request.sort, request.databases, request.top, request.limit, request.from
         );
 
-        if let Ok(mut res) = xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut module.storage, &mut ctx) {
+        let mut fn_reload_onto = |onto: &mut Onto| {
+            load_onto(&mut backend.storage, onto);
+        };
+
+        if let Ok(mut res) = block_on(xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut ctx, &mut fn_reload_onto)) {
             res.result = ctx;
             info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
             if let Ok(s) = serde_json::to_string(&res) {
