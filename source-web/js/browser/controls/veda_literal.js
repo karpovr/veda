@@ -133,8 +133,9 @@ function veda_literal (options) {
   }
   return input;
 };
+
 veda_literal.defaults = {
-  template: $('#string-control-template').html(),
+  template: `<input type="text" class="form-control" autocomplete="on" />`,
   parser: function (input) {
     return (input || null);
   },

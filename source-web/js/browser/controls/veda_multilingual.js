@@ -156,6 +156,7 @@ function veda_multilingual (options) {
 
   return self;
 };
+
 veda_multilingual.defaults = {
   parser: function (input, el) {
     if (input) {

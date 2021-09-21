@@ -20,6 +20,12 @@ $.fn.veda_multilingualString = function (options) {
   });
   return this;
 };
+
 $.fn.veda_multilingualString.defaults = {
-  template: $('#multilingual-string-control-template').html(),
+  template: `
+<div class="input-group">
+  <div class="input-group-addon"><small class="language-tag"></small></div>
+  <input type="text" class="form-control" lang="" autocomplete="on" />
+</div>
+  `,
 };

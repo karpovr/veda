@@ -27,8 +27,9 @@ $.fn.veda_text = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_text.defaults = {
-  template: $('#text-control-template').html(),
+  template: `<textarea class="form-control" rows="1" />`,
   parser: function (input) {
     return (input ? String(input) : null);
   },

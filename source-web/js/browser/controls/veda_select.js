@@ -164,6 +164,11 @@ $.fn.veda_select = function (params) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_select.defaults = {
-  template: $('#select-control-template').html(),
+  template: `
+<select class="form-control">
+  <option></option>
+</select>
+  `,
 };

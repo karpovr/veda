@@ -23,8 +23,9 @@ $.fn.veda_decimal = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_decimal.defaults = {
-  template: $('#decimal-control-template').html(),
+  template: `<input type="text" class="form-control" placeholder="#.#" />`,
   parser: function (input) {
     const float = parseFloat( input.split(' ').join('').split(',').join('.') );
     return !isNaN(float) ? float : null;

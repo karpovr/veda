@@ -266,5 +266,12 @@ $.fn.veda_file = function ( options ) {
 };
 
 $.fn.veda_file.defaults = {
-  template: $('#file-control-template').html(),
+  template: `
+<label class="btn btn-default">
+  Browse...
+  <strong class="indicator-percentage"></strong>
+  <span class="indicator-spinner fa fa-spinner fa-pulse fa-lg fa-fw text-info" style="display:none"></span>
+  <input type="file" style="display:none"/>
+</label>
+  `,
 };

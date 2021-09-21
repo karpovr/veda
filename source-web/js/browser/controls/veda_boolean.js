@@ -71,6 +71,7 @@ $.fn.veda_boolean = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_boolean.defaults = {
-  template: $('#boolean-control-template').html(),
+  template: `<input type="checkbox" />`,
 };

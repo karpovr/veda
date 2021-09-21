@@ -19,8 +19,9 @@ $.fn.veda_generic = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_generic.defaults = {
-  template: $('#string-control-template').html(),
+  template: `<input type="text" class="form-control" autocomplete="on" />`,
   parser: function (input) {
     if (!input || !input.trim()) {
       return null;

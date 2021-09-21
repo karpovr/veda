@@ -23,8 +23,9 @@ $.fn.veda_integer = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_integer.defaults = {
-  template: $('#integer-control-template').html(),
+  template: `<input type="text" class="form-control" placeholder="#" />`,
   parser: function (input) {
     const int = parseInt( input.split(' ').join('').split(',').join('.'), 10 );
     return !isNaN(int) ? int : null;

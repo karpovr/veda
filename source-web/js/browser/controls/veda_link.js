@@ -575,6 +575,36 @@ $.fn.veda_link = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_link.defaults = {
-  template: $('#link-control-template').html(),
+  template: `
+<div class="link-control">
+  <div class="input-group">
+    <div class="input-group-addon btn btn-default tree" tabindex="0">
+      <i class="fa fa-sitemap"></i>
+    </div>
+    <textarea rows="1" class="form-control fulltext"></textarea>
+    <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
+    <div class="input-group-addon btn btn-default dropdown" tabindex="0">
+      <i class="caret"></i>
+    </div>
+    <div class="input-group-addon btn btn-default create" tabindex="0">
+      <i class="glyphicon glyphicon-plus"></i>
+    </div>
+  </div>
+  <div class="fulltext-menu">
+    <div class="header clearfix">
+      <small class="actions pull-left">
+        <span class="select-all"></span>
+        <span class="cancel-selection"></span>
+        <span class="invert-selection"></span>
+      </small>
+      <small class="actions pull-right">
+        <span class="close-menu"></span>
+      </small>
+    </div>
+    <div class="suggestions"></div>
+  </div>
+</div>
+  `,
 };

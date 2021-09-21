@@ -121,8 +121,16 @@ System.import('moment').then((module) => {
 
       return control;
     };
+
     veda_dateTime.defaults = {
-      template: $('#datetime-control-template').html(),
+      template: `
+        <div class="input-group date">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-time"></span>
+          </span>
+          <input type="text" class="form-control" autocomplete="off"/>
+        </div>
+      `,
       parser: function (input) {
         if (input) {
           const timestamp = moment(input, 'DD.MM.YYYY HH:mm').toDate();
@@ -147,8 +155,16 @@ System.import('moment').then((module) => {
       this.append(control);
       return this;
     };
+
     $.fn.veda_date.defaults = {
-      template: $('#datetime-control-template').html(),
+      template: `
+        <div class="input-group date">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-time"></span>
+          </span>
+          <input type="text" class="form-control" autocomplete="off"/>
+        </div>
+      `,
       parser: function (input) {
         if (input) {
           const timestamp = moment(input, 'DD.MM.YYYY').toDate();
@@ -179,8 +195,16 @@ System.import('moment').then((module) => {
       this.append(control);
       return this;
     };
+
     $.fn.veda_time.defaults = {
-      template: $('#datetime-control-template').html(),
+      template: `
+        <div class="input-group date">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-time"></span>
+          </span>
+          <input type="text" class="form-control" autocomplete="off"/>
+        </div>
+      `,
       parser: function (input) {
         if (input) {
           const timestamp = moment(input, 'HH:mm').toDate();
@@ -209,8 +233,16 @@ System.import('moment').then((module) => {
       this.append(control);
       return this;
     };
+
     $.fn.veda_dateTime.defaults = {
-      template: $('#datetime-control-template').html(),
+      template: `
+        <div class="input-group date">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-time"></span>
+          </span>
+          <input type="text" class="form-control" autocomplete="off"/>
+        </div>
+      `,
       parser: function (input) {
         if (input) {
           const timestamp = moment(input, 'DD.MM.YYYY HH:mm').toDate();

@@ -141,6 +141,13 @@ $.fn.veda_checkbox = function (params) {
   });
   return this;
 };
+
 $.fn.veda_checkbox.defaults = {
-  template: $('#checkbox-control-template').html(),
+  template: `
+<div class="checkbox">
+  <label>
+    <input type="checkbox" />
+  </label>
+</div>
+  `,
 };

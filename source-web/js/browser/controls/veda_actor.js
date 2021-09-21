@@ -588,6 +588,70 @@ $.fn.veda_actor = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_actor.defaults = {
-  template: $('#actor-control-template').html(),
+  template: `
+<div class="link-control">
+  <div class="input-group">
+    <div class="input-group-addon btn btn-default dropdown" style="padding:0;" tabindex="0">
+      <span data-toggle="dropdown" id="actor-type-menu" aria-haspopup="true" aria-expanded="true" style="padding:10px;">
+        <i class="glyphicon glyphicon-search"></i><i class="caret"></i>
+      </span>
+      <div class="dropdown-menu actor-type-menu padding-lg-h" aria-labelledby="actor-type-menu">
+        <div class="radio">
+          <label>
+            <input type="radio" name="actor-type" value="v-s:Appointment"/>
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="actor-type" value="v-s:Person"/>
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="actor-type" value="v-s:Position"/>
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="actor-type" value="v-s:Department"/>
+          </label>
+        </div>
+        <hr class="margin-sm">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="only-deleted" value="v-s:OnlyDeleted"/>
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="full-name" value="v-s:FullNameBundle"/>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="input-group-addon btn btn-default tree" tabindex="0">
+      <i class="fa fa-sitemap"></i>
+    </div>
+    <textarea class="form-control fulltext" autocomplete="off" rows="1"></textarea>
+    <div class="input-group-addon btn btn-default clear" tabindex="0">
+      <span>&#10005;</span>
+    </div>
+  </div>
+  <div class="fulltext-menu">
+    <div class="header clearfix">
+      <small class="actions pull-left">
+        <span class="select-all"></span>
+        <span class="cancel-selection"></span>
+        <span class="invert-selection"></span>
+      </small>
+      <small class="actions pull-right">
+        <span class="close-menu"></span>
+      </small>
+    </div>
+    <div class="suggestions"></div>
+  </div>
+</div>
+  `,
 };

@@ -77,9 +77,10 @@ $.fn.veda_source = function (options) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_source.defaults = {
   value: '',
-  template: $('#source-control-template').html(),
+  template: `<div class="panel panel-default" style="min-height:300px"></div>`,
   mode: 'javascript',
   parser: function (input) {
     return (input || null);

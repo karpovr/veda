@@ -106,6 +106,13 @@ $.fn.veda_booleanRadio = function (params) {
   });
   return this;
 };
+
 $.fn.veda_booleanRadio.defaults = {
-  template: $('#radio-control-template').html(),
+  template: `
+<div class="radio">
+  <label>
+    <input type="radio" />
+  </label>
+</div>
+  `,
 };

@@ -31,6 +31,12 @@ $.fn.veda_multilingualText = function (options) {
   });
   return this;
 };
+
 $.fn.veda_multilingualText.defaults = {
-  template: $('#multilingual-text-control-template').html(),
+  template: `
+<div class="input-group">
+  <div class="input-group-addon"><small class="language-tag"></small></div>
+  <textarea class="form-control" lang="" rows="1"></textarea>
+</div>
+  `,
 };

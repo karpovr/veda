@@ -11,7 +11,7 @@ $.fn.veda_worktime = function ( options ) {
   const mainInput = veda_literal.call(this, opts);
 
   this.append( mainInput.hide() );
-  this.append( $('#worktime-control-template').html() );
+  this.append( opts.template );
 
   const pseudoInputs = $('div.input-group>input', this);
   const summaryText = $('#worktime-summary-text', this);
@@ -49,7 +49,40 @@ $.fn.veda_worktime = function ( options ) {
   });
   return this;
 };
+
 $.fn.veda_worktime.defaults = {
+  template: `
+<table>
+  <tbody>
+    <tr>
+      <td width="25%">
+        <div class="input-group">
+          <span class="input-group-addon">DD</span>
+          <input type="text" class="form-control">
+        </div>
+      </td>
+      <td width="25%">
+        <div class="input-group">
+          <span class="input-group-addon">HH</span>
+          <input type="text" class="form-control">
+        </div>
+      </td>
+      <td width="25%">
+        <div class="input-group">
+          <span class="input-group-addon">mm</span>
+          <input type="text" class="form-control">
+        </div>
+      </td>
+      <td>
+        <div class="input-group" style="width:100%">
+          <span class="input-group-addon">&sum;</span>
+          <span id="worktime-summary-text" class="text-right form-control"></span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+  `,
   parser: function (input) {
     const int = parseInt( input.split(' ').join('').split(',').join('.'), 10 );
     return !isNaN(int) ? int : null;

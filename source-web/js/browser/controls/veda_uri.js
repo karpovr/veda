@@ -38,6 +38,7 @@ $.fn.veda_uri = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_uri.defaults = {
-  template: $('#string-control-template').html(),
+  template: `<input type="text" class="form-control" autocomplete="on" />`,
 };

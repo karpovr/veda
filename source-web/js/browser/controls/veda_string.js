@@ -21,8 +21,9 @@ $.fn.veda_string = function ( options ) {
   this.append(control);
   return this;
 };
+
 $.fn.veda_string.defaults = {
-  template: $('#string-control-template').html(),
+  template: `<input type="text" class="form-control" autocomplete="on" />`,
   parser: function (input) {
     return (input ? String(input) : null);
   },

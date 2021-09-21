@@ -140,6 +140,13 @@ $.fn.veda_radio = function (params) {
   });
   return this;
 };
+
 $.fn.veda_radio.defaults = {
-  template: $('#radio-control-template').html(),
+  template: `
+<div class="radio">
+  <label>
+    <input type="radio" />
+  </label>
+</div>
+  `,
 };
