@@ -27,3 +27,7 @@ Cервер.API:
 
 5.8.8
 
+Сервер:
+
+- для обьектов класса v-s:Membership/v-s:Permission добавлено управляющее поле v-s:dropCount 
+

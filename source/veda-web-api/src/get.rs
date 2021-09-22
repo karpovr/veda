@@ -28,27 +28,42 @@ pub(crate) async fn query_post(
     data: web::Json<QueryRequest>,
     ft_client: web::Data<Mutex<FTClient>>,
     ch_client: web::Data<Mutex<CHClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
     let ticket = get_ticket(&req, &params.ticket);
-    query(&ticket, &*data, ft_client, ch_client).await
+    query(&ticket, &*data, ticket_cache, ft_client, ch_client, db).await
 }
 
 pub(crate) async fn query_get(
     params: web::Query<QueryRequest>,
     ft_client: web::Data<Mutex<FTClient>>,
     ch_client: web::Data<Mutex<CHClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    query(&params.ticket, &*params, ft_client, ch_client).await
+    query(&params.ticket, &*params, ticket_cache, ft_client, ch_client, db).await
 }
 
-async fn query(ticket: &Option<String>, data: &QueryRequest, ft_client: web::Data<Mutex<FTClient>>, ch_client: web::Data<Mutex<CHClient>>) -> io::Result<HttpResponse> {
+async fn query(
+    ticket: &Option<String>,
+    data: &QueryRequest,
+    ticket_cache: web::Data<TicketCache>,
+    ft_client: web::Data<Mutex<FTClient>>,
+    ch_client: web::Data<Mutex<CHClient>>,
+    db: web::Data<AStorage>,
+) -> io::Result<HttpResponse> {
     let res = if data.sql.is_some() {
-        let user = data.user.clone().unwrap_or_default();
+        let (res, user) = check_ticket(&ticket, &ticket_cache, &db).await?;
+        if res != ResultCode::Ok {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        }
+
         ch_client
             .lock()
             .await
             .select_async(
-                &user,
+                &user.unwrap_or_default(),
                 &data.sql.clone().unwrap_or_default(),
                 data.top.unwrap_or_default() as i64,
                 data.limit.unwrap_or_default() as i64,
