@@ -20,9 +20,26 @@ v-s:CurrencyExchangeRate
   rdfs:subClassOf v-s:Measurable ;
   rdfs:subClassOf v-s:Temporal ;
   rdfs:subClassOf v-s:Journaling ;
+  rdfs:subClassOf v-s:Labeled ;
   rdfs:label "Курс обмена валюты"@ru ;
   rdfs:label "Currency exchange rate"@en ;
+  v-s:labelPattern "{@.v-s:hasCurrencySource.rdfs:label} - {@.v-s:date} - {@.v-s:hasCurrencyExchangeRatePurpose.rdfs:label}" ;
 .
+v-s:PsHasCurrency_CurrencyExchangeRate
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:CurrencyExchangeRate ;
+  v-ui:forProperty v-s:hasCurrencySource ;
+  v-ui:forProperty v-s:hasCurrencyTarget ;
+  v-ui:maxCardinality 1 ;
+  v-ui:minCardinality 1 ;
+  v-ui:queryPrefix "('rdf:type'==='v-s:Currency')"^^xsd:string ;
+  v-ui:placeholder "Выберите валюту"@ru ;
+  v-ui:placeholder "Select currency"@en ;
+  rdfs:label "Спецификация свойства v-s:hasCurrencySource, v-s:hasCurrencyTarget для класса v-s:CurrencyExchangeRate"@ru ;
+  rdfs:label "v-s:hasCurrencySource, v-s:hasCurrencyTarget property specification for v-s:CurrencyExchangeRate class"@en ;
+.
+
+#----
 v-s:hasCurrencySource
   rdf:type owl:ObjectProperty ;
   rdfs:label "Исходная валюта"@ru ;
@@ -45,21 +62,7 @@ v-s:hasCurrencyExchangeRatePurpose
   rdfs:domain  v-s:CurrencyExchangeRate;
 .
 
-# ------------------------------------------------------------ СПЕЦИФИКАЦИИ --
-
-v-s:PsHasCurrency_CurrencyExchangeRate
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:CurrencyExchangeRate ;
-  v-ui:forProperty v-s:hasCurrencySource ;
-  v-ui:forProperty v-s:hasCurrencyTarget ;
-  v-ui:maxCardinality 1 ;
-  v-ui:minCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type'==='v-s:Currency')"^^xsd:string ;
-  v-ui:placeholder "Выберите валюту"@ru ;
-  v-ui:placeholder "Select currency"@en ;
-  rdfs:label "Спецификация свойства v-s:hasCurrencySource, v-s:hasCurrencyTarget для класса v-s:CurrencyExchangeRate"@ru ;
-  rdfs:label "v-s:hasCurrencySource, v-s:hasCurrencyTarget property specification for v-s:CurrencyExchangeRate class"@en ;
-.
+#v-s:rate
 v-s:PsRate_CurrencyExchangeRate
   rdf:type v-ui:PropertySpecification ;
   v-ui:forClass v-s:CurrencyExchangeRate ;
@@ -70,6 +73,30 @@ v-s:PsRate_CurrencyExchangeRate
   rdfs:label "Спецификация свойства v-s:rate для класса v-s:CurrencyExchangeRate"@ru ;
   rdfs:label "v-s:rate property specification for v-s:CurrencyExchangeRate class"@en ;
 .
+
+#v-s:date
+v-s:Ps_date_CurrencyExchangeRate
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:CurrencyExchangeRate ;
+  v-ui:forProperty v-s:date ;
+  v-ui:maxCardinality 1 ;
+  v-ui:minCardinality 1 ;
+  rdfs:label "Спецификация свойства v-s:date для класса v-s:CurrencyExchangeRate"@ru ;
+  rdfs:label "v-s:date property specification for v-s:CurrencyExchangeRate class"@en ;
+.
+
+#v-s:valid
+v-s:Ps_valid_CurrencyExchangeRate
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:CurrencyExchangeRate ;
+  v-ui:forProperty v-s:valid ;
+  v-ui:maxCardinality 1 ;
+  v-ui:minCardinality 1 ;
+  rdfs:label "Спецификация свойства v-s:valid для класса v-s:CurrencyExchangeRate"@ru ;
+  rdfs:label "v-s:valid property specification for v-s:CurrencyExchangeRate class"@en ;
+.
+
+#v-s:hasCurrencyExchangeRatePurpose
 v-s:Ps_hasCurrencyExchangeRatePurpose_CurrencyExchangeRate
   rdf:type v-ui:PropertySpecification ;
   v-ui:forClass v-s:CurrencyExchangeRate ;

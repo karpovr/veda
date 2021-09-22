@@ -12,3 +12,16 @@
 #  owl:versionInfo "1.3" ;
   v-s:loadPriority 6 ;
 .
+#---------------Бланки----------------------
+v-s:CurrencyExchangeRateBlank
+  a v-fc:Blank;
+  rdfs:label "Курс обмена валюты"@ru ;
+  rdfs:label "Currency exchange rate"@en ;
+  v-fc:targetType v-s:CurrencyExchangeRate ;
+.
+v-s:CurrencyExchangeRateRegistrySearchBlank
+  a v-fc:Blank;
+  rdfs:label "Курс обмена валюты"@ru ;
+  rdfs:label "Currency exchange rate"@en ;
+  v-fc:targetType v-s:CurrencyExchangeRate ;
+.

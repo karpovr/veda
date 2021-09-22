@@ -1,0 +1,146 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+
+<http://semantic-machines.com/veda/veda-currencyExchangeRate-search>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Курс обмена валюты. Реестры."@ru ;
+  rdfs:label "Veda system ontology. Currency exchange rate. Registries."@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+# ------------- Search ---------------
+v-s:CurrencyExchangeRateSearch
+  a v-fs:AttributiveSearch;
+  rdfs:label "Курсы обмена валют"@ru;
+  rdfs:label "Currency exchange rates"@en;
+  v-fs:searchBlank v-s:CurrencyExchangeRateSearchBlank ;
+  v-fs:searchBlankTemplate v-s:CurrencyExchangeRateSearchTemplate;
+  v-fs:searchResultTemplate v-s:CurrencyExchangeRateSearchResultTemplate ;
+.
+# ------------- Search templates ---------------
+v-s:CurrencyExchangeRateSearchResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результатов реестра Курсы обмена валют"@ru ;
+  rdfs:label "Currency exchange rates registry result template"@en ;
+  v-ui:template """
+<table class="table table-bordered">
+  <thead class="result-header">
+    <tr>
+      <th colspan="8" about="v-s:CurrencyExchangeRate" property="rdfs:label"></th>
+    </tr>
+    <tr class="active">
+      <th width="1%">#</span></th>
+      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+      <th class="orderby" data-orderby="v-s:date"><span about="v-s:date" property="rdfs:label"></span></th>
+      <th class="orderby" data-orderby="v-s:hasCurrencyExchangeRatePurpose"><span about="v-s:hasCurrencyExchangeRatePurpose" property="rdfs:label"></span></th>
+      <th width="1%"></span></th>
+      <th class="orderby" data-orderby="v-s:hasCurrencySource"><span about="v-s:hasCurrency" property="rdfs:label"></span></th>
+      <th class="orderby" data-orderby="v-s:rate"><span about="v-s:rate" property="rdfs:label"></span></th>
+      <th class="orderby" data-orderby="v-s:hasCurrencyTarget"><span about="v-s:hasCurrency" property="rdfs:label"></span></th>
+      <!--th width="1%"><button class="btn btn-primary btn-xs glyphicon glyphicon-edit"></button><button class="hidden btn btn-success btn-xs glyphicon glyphicon-save"></button></th-->
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td class="serial-number"></td>
+      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+      <td>
+        <span property="v-s:date" class="view -edit -search"></span>
+        <veda-control data-type="date" property="v-s:date" class="-view edit search"></veda-control>
+      </td>
+      <td>
+        <span rel="v-s:hasCurrencyExchangeRatePurpose" data-template="v-ui:LabelTemplate" class="view -edit -search"></span>
+        <veda-control data-type="link" rel="v-s:hasCurrencyExchangeRatePurpose" class="-view edit search fulltext dropdown"></veda-control>
+      </td>
+      <td>
+        <strong>1</strong>
+      </td>
+      <td>
+        <span rel="v-s:hasCurrencySource" data-template="v-ui:LabelTemplate" class="view -edit -search"></span>
+        <veda-control data-type="link" rel="v-s:hasCurrencySource" class="-view edit search fulltext dropdown"></veda-control>
+      </td>
+      <td>
+        <span property="v-s:rate" class="view -edit -search"></span>
+        <veda-control data-type="decimal" property="v-s:rate" class="-view edit search"></veda-control>
+      </td>
+      <td>
+        <span rel="v-s:hasCurrencyTarget" data-template="v-ui:LabelTemplate" class="view -edit -search"></span>
+        <veda-control data-type="link" rel="v-s:hasCurrencyTarget" class="-view edit search fulltext dropdown"></veda-control>
+      </td>
+      <!--td>
+        <button class="btn btn-default btn-xs glyphicon glyphicon-edit"></button>
+        <button class="hidden btn btn-default btn-xs glyphicon glyphicon-save"></button>
+      </td-->
+    </tr>
+  </tbody>
+</table>
+  """ ;
+.
+
+v-s:CurrencyExchangeRateSearchTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса v-s:CurrencyExchangeRate"@ru ;
+  rdfs:label "Template for v-s:CurrencyExchangeRate class"@en ;
+  v-ui:template """
+<div class="container sheet">
+  <h3 class="margin-sm">
+    <span about="v-s:CurrencyExchangeRate" property="rdfs:label"></span>
+    <small about="@" property="rdfs:label"></small>
+  </h3>
+  <hr>
+      <div class="row row-attribute">
+        <div class="col-sm-3 col-xs-5"></div>
+        <div class="col-sm-9 col-xs-7">
+          <div class="checkbox no-margin">
+            <label>
+              <veda-control property="v-s:valid" data-type="boolean"></veda-control>
+              <span about="v-s:valid" property="rdfs:label"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+	  <div class="row row-attribute">
+      <div class="col-sm-3 col-xs-5">
+        <label about="v-s:date" property="rdfs:label"></label>
+      </div>
+      <div class="col-sm-3 col-xs-3">
+            <div property="v-s:date" class="view -edit search"></div>
+            <veda-control data-type="date" property="v-s:date" class="-view edit search"></veda-control>
+      </div>
+    </div>
+	  <div class="row row-attribute">
+      <div class="col-sm-3 col-xs-5">
+        <label about="v-s:hasCurrencyExchangeRatePurpose" property="rdfs:label"></label>
+      </div>
+      <div class="col-sm-9 col-xs-7">
+            <div rel="v-s:hasCurrencyExchangeRatePurpose" data-template="v-ui:LabelTemplate" class="view -edit search"></div>
+            <veda-control data-type="link" rel="v-s:hasCurrencyExchangeRatePurpose" class="-view edit search fulltext dropdown"></veda-control>
+      </div>
+    </div>
+	  <div class="row row-attribute">
+      <div class="col-sm-3 col-xs-5">
+        <label about="v-s:hasCurrencySource" property="rdfs:label"></label>
+      </div>
+      <div class="col-sm-9 col-xs-7">
+            <div rel="v-s:hasCurrencySource" data-template="v-ui:LabelTemplate" class="view -edit search"></div>
+            <veda-control data-type="link" rel="v-s:hasCurrencySource" class="-view edit search fulltext dropdown"></veda-control>
+      </div>
+    </div>
+	  <div class="row row-attribute">
+      <div class="col-sm-3 col-xs-5">
+        <label about="v-s:Comment" property="rdfs:label"></label>
+      </div>
+      <div class="col-sm-9 col-xs-7">
+          <div property="v-s:Comment" class="view -edit -search"></div>
+          <veda-control data-type="string" property="v-s:Comment" class="-view edit search"></veda-control>
+      </div>
+    </div>  
+  <hr>
+</div>
+  """ ;
+.

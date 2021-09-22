@@ -1,0 +1,24 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+
+
+<http://semantic-machines.com/veda/veda-currencyExchangeRate-create>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Курс обмена валюты. Создание."@ru ;
+  rdfs:label "Veda system ontology. Currency exchange rate. Create."@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+#---------------Create----------------------
+v-s:CurrencyExchangeRateCreate
+  a v-fc:Create;
+  rdfs:label "Курс обмена валюты"@ru ;
+  rdfs:label "Currency exchange rate"@en ;
+  v-fc:hasBlank v-s:CurrencyExchangeRateBlank ;
+.
