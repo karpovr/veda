@@ -341,7 +341,7 @@ v-fs:AttributiveSearchModel
                   query.vql = vql;
                 }
               } else if (queryLanguage === 'sql') {
-                var sql = queryBuilder(blankObject, sort);
+                var sql = queryBuilder(blankObject, sort, blankObject.hasValue('v-s:deleted', true));
                 if (sql) {
                   query.sql = sql;
                 }
