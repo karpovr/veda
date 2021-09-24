@@ -51,7 +51,7 @@ ccus
 
 web-api
     module = web-api
-    args = --http_port=8080
+    args = --http_port=8080 --use-direct-ft-query=true
 
 input-onto
 
