@@ -12,9 +12,9 @@ use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::load_onto;
 use v_common::module::module::init_log;
 use v_common::module::veda_backend::Backend;
-use v_common::onto::onto::Onto;
 use v_common::search::common::FTQuery;
 use v_common::v_api::obj::*;
+use v_common::onto::onto_index::OntoIndex;
 
 fn main() {
     init_log("FT_QUERY");
@@ -159,11 +159,17 @@ fn req_prepare(backend: &mut Backend, s: &str, xr: &mut XapianReader) -> Message
             ticket_id, request.user, request.query, request.sort, request.databases, request.top, request.limit, request.from
         );
 
-        let mut fn_reload_onto = |onto: &mut Onto| {
-            load_onto(&mut backend.storage, onto);
-        };
+        if let Some(t) = OntoIndex::get_modified() {
+            if t > xr.onto_modified {
+                load_onto(&mut backend.storage, &mut xr.onto);
+                xr.onto_modified = t;
+            }
+        }
+        if xr.index_schema.is_empty() {
+            xr.load_index_schema(&mut backend.storage);
+        }
 
-        if let Ok(mut res) = block_on(xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut ctx, &mut fn_reload_onto)) {
+        if let Ok(mut res) = block_on(xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut ctx)) {
             res.result = ctx;
             info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
             if let Ok(s) = serde_json::to_string(&res) {
