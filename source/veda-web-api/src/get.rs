@@ -5,9 +5,12 @@ use actix_web::{web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
+use v_common::ft_xapian::xapian_reader::XapianReader;
+use v_common::module::common::c_load_onto;
 use v_common::module::info::ModuleInfo;
+use v_common::onto::onto_index::OntoIndex;
 use v_common::search::clickhouse_client::CHClient;
-use v_common::search::common::FTQuery;
+use v_common::search::common::{FTQuery, QueryResult};
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
@@ -26,30 +29,33 @@ pub(crate) async fn query_post(
     req: HttpRequest,
     params: web::Query<QueryRequest>,
     data: web::Json<QueryRequest>,
-    ft_client: web::Data<Mutex<FTClient>>,
+    ft_client: web::Data<Option<Mutex<FTClient>>>,
+    xr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
     let ticket = get_ticket(&req, &params.ticket);
-    query(&ticket, &*data, ticket_cache, ft_client, ch_client, db).await
+    query(&ticket, &*data, ticket_cache, ft_client, xr, ch_client, db).await
 }
 
 pub(crate) async fn query_get(
     params: web::Query<QueryRequest>,
-    ft_client: web::Data<Mutex<FTClient>>,
+    ft_client: web::Data<Option<Mutex<FTClient>>>,
+    xr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    query(&params.ticket, &*params, ticket_cache, ft_client, ch_client, db).await
+    query(&params.ticket, &*params, ticket_cache, ft_client, xr, ch_client, db).await
 }
 
 async fn query(
     ticket: &Option<String>,
     data: &QueryRequest,
     ticket_cache: web::Data<TicketCache>,
-    ft_client: web::Data<Mutex<FTClient>>,
+    ft_client: web::Data<Option<Mutex<FTClient>>>,
+    xr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
@@ -72,7 +78,7 @@ async fn query(
             )
             .await?
     } else {
-        let ft_req = FTQuery {
+        let mut ft_req = FTQuery {
             ticket: ticket.clone().unwrap_or_default(),
             user: data.user.clone().unwrap_or_default(),
             query: data.query.clone().unwrap_or_default(),
@@ -84,7 +90,46 @@ async fn query(
             from: data.from.unwrap_or_default(),
         };
 
-        ft_client.lock().await.query(ft_req)
+        let mut res_out_list = vec![];
+        fn add_out_element(id: &str, ctx: &mut Vec<String>) {
+            ctx.push(id.to_owned());
+        }
+
+        let (res, user) = check_ticket(&ticket, &ticket_cache, &db).await?;
+        if res != ResultCode::Ok {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        }
+
+        ft_req.user = user.unwrap_or_default();
+
+        if !(ft_req.query.find("==").is_some() || ft_req.query.find("&&").is_some() || ft_req.query.find("||").is_some()) {
+            ft_req.query = "'*' == '".to_owned() + &ft_req.query + "'";
+        }
+
+        if let Some(xr) = xr.get_ref() {
+            let mut qq = xr.lock().await;
+
+            let mut res = qq.query_use_collect_fn(&ft_req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
+            res.result = res_out_list;
+
+            if let Some(t) = OntoIndex::get_modified() {
+                if t > qq.onto_modified {
+                    c_load_onto(&db, &mut qq.onto).await;
+                    qq.onto_modified = t;
+                }
+            }
+            if qq.index_schema.is_empty() {
+                qq.c_load_index_schema(&db).await;
+            }
+
+            res
+        } else {
+            if let Some(f) = ft_client.get_ref() {
+                f.lock().await.query(ft_req)
+            } else {
+                QueryResult::default()
+            }
+        }
     };
     Ok(HttpResponse::Ok().json(res))
 }

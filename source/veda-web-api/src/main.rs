@@ -25,6 +25,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use url::Url;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
+use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::module::{init_log_with_params, Module};
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::ft_client::FTClient;
@@ -94,11 +95,15 @@ async fn main() -> std::io::Result<()> {
     }
 
     let mut port = "8080".to_owned();
+    let mut use_direct_ft_query = false;
+
     let args: Vec<String> = env::args().collect();
     for el in args.iter() {
         if el.starts_with("--http_port") {
-            let p: Vec<&str> = el.split('=').collect();
-            port = p[1].to_owned().trim().to_owned();
+            port = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
+        }
+        if el.starts_with("--use-direct-ft-query") {
+            use_direct_ft_query = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned() == "true";
         }
     }
 
@@ -121,6 +126,20 @@ async fn main() -> std::io::Result<()> {
         let mut ch = CHClient::new(Module::get_property("query_search_db").unwrap_or_default());
         ch.connect();
 
+        let xr = if use_direct_ft_query {
+            info!("use direct-ft-query");
+            Some(Mutex::new(XapianReader::new_without_init("ru").expect("fail init direct-ft-query")))
+        } else {
+            None
+        };
+
+        let ft_client = if !use_direct_ft_query {
+            info!("use ft-query-service");
+            Some(Mutex::new(FTClient::new(Module::get_property("ft_query_service_url").unwrap_or_default())))
+        } else {
+            None
+        };
+
         App::new()
             .wrap(middleware::Compress::default())
             .wrap(
@@ -136,11 +155,12 @@ async fn main() -> std::io::Result<()> {
                 write: Arc::new(Mutex::new(write)),
             })
             .data(db)
+            .data(xr)
+            .data(ft_client)
+            .data(Mutex::new(ch))
             .data(Mutex::new(LmdbAzContext::new()))
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))
             .data(Mutex::new(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default())))
-            .data(Mutex::new(FTClient::new(Module::get_property("ft_query_service_url").unwrap_or_default())))
-            .data(Mutex::new(ch))
             .service(get_rights)
             .service(authenticate)
             .service(get_individual)
