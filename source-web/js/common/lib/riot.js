@@ -23,10 +23,12 @@ riot.observable = function(el) {
   el.off = function(events, fn) {
     if (events === "*") callbacks = {};
     else if (fn) {
-      var arr = callbacks[events];
-      for (var i = 0, cb; (cb = arr && arr[i]); ++i) {
-        if (cb === fn) { arr.splice(i, 1); i--; }
-      }
+      events.replace(/[^\s]+/g, function(name) {
+        var arr = callbacks[name];
+        for (var i = 0, cb; (cb = arr && arr[i]); ++i) {
+          if (cb === fn) { arr.splice(i, 1); i--; }
+        }
+      });
     } else {
       events.replace(/[^\s]+/g, function(name) {
         callbacks[name] = [];
