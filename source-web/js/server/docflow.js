@@ -421,7 +421,7 @@ Workflow.prepare_work_order = function (ticket, document) {
         } else {
           workOrder = document;
         }
-        is_have_enforce_order = is_have_enforce_order || veda.Util.hasValue(workOrder, 'v-wf:enforceProcessing', {data: true, type: "Boolean"});
+        is_have_enforce_order = is_have_enforce_order || veda.Util.hasValue(workOrder, 'v-wf:enforceProcessing', {data: true, type: 'Boolean'});
         // print("[WORKFLOW][WO3.1] workOrder=" + veda.Util.toJson(workOrder) + "");
 
         const outVars = workOrder['v-wf:outVars'];
@@ -478,7 +478,7 @@ Workflow.prepare_work_order = function (ticket, document) {
     const workItemList = [];
 
     if (is_goto_to_next_task) {
-      //правка прекращает дублирование задач при автозакрытии, и оставляет рабочей кнопку #repeat-workOrder
+      // правка прекращает дублирование задач при автозакрытии, и оставляет рабочей кнопку #repeat-workOrder
       if (!is_have_enforce_order && work_item['v-wf:isCompleted'] && work_item['v-wf:isCompleted'][0].data == true) {
         veda.Util.traceToJournal(ticket, trace_journal_uri, '[WO4] work_item already is completed, stop. ', veda.Util.toJson(work_item));
       } else {

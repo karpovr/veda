@@ -99,7 +99,7 @@ proto.getClassSpecifications = function (_class_uri) {
 };
 
 proto.getClassTemplate = function (_class_uri) {
-  let classTemplates = this.templates[_class_uri] ;
+  let classTemplates = this.templates[_class_uri];
   if (!classTemplates) {
     classTemplates = this.classes[_class_uri].get('v-ui:hasTemplate');
   }

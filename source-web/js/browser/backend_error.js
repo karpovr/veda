@@ -1,7 +1,5 @@
 // Backend error
 
-import veda from '../common/veda.js';
-
 export default BackendError;
 
 const errorCodes = {
@@ -38,7 +36,10 @@ const errorCodes = {
   1118: 'Size too large',
   4000: 'Connect error',
 };
-
+/**
+ * Backend error
+ * @param {Error} result
+ */
 function BackendError (result) {
   this.code = result.status;
   this.message = typeof this.code !== 'undefined' ? `${this.code}: ${errorCodes[this.code]}` : undefined;
