@@ -7,7 +7,7 @@ import veda_literal from './veda_literal.js';
 import Util from '../../common/util.js';
 
 $.fn.veda_worktime = function ( options ) {
-  const opts = $.extend( {}, $.fn.veda_worktime.defaults, options );
+  const opts = {...$.fn.veda_worktime.defaults, ...options};
   const mainInput = veda_literal.call(this, opts);
 
   this.append( mainInput.hide() );

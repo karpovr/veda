@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 $.fn.veda_uri = function ( options ) {
-  const opts = $.extend( {}, $.fn.veda_uri.defaults, options );
+  const opts = {...$.fn.veda_uri.defaults, ...options};
   const control = $( opts.template );
   const individual = opts.individual;
 

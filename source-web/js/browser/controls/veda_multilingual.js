@@ -13,7 +13,7 @@ export default veda_multilingual;
  * @this jQuery
  */
 function veda_multilingual (options) {
-  const opts = $.extend( {}, veda_multilingual.defaults, options );
+  const opts = {...veda_multilingual.defaults, ...options};
   const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri;

@@ -13,7 +13,7 @@ export default veda_literal;
  * @return {jQuery}
  */
 function veda_literal (options) {
-  const opts = $.extend( {}, veda_literal.defaults, options );
+  const opts = {...veda_literal.defaults, ...options};
   const input = $(opts.template);
   const spec = opts.spec;
   const placeholder = this.attr('placeholder') || (spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : '');

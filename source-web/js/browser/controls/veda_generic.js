@@ -7,7 +7,7 @@ import IndividualModel from '../../common/individual_model.js';
 import veda_literal from './veda_literal.js';
 
 $.fn.veda_generic = function ( options ) {
-  const opts = $.extend( {}, $.fn.veda_generic.defaults, options );
+  const opts = {...$.fn.veda_generic.defaults, ...options};
   const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');

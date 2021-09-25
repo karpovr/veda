@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 $.fn.veda_source = function (options) {
-  const opts = $.extend( {}, $.fn.veda_source.defaults, options );
+  const opts = {...$.fn.veda_source.defaults, ...options};
   const control = $(opts.template);
   const individual = opts.individual;
   const property_uri = opts.property_uri;

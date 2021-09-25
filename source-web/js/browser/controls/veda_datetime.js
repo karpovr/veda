@@ -23,7 +23,7 @@ System.import('moment').then((module) => {
      * @this jQuery
      */
     function veda_dateTime (options) {
-      const opts = $.extend( {}, veda_dateTime.defaults, options );
+      const opts = {...veda_dateTime.defaults, ...options};
       const control = $(opts.template);
       const format = opts.format;
       const spec = opts.spec;
@@ -143,7 +143,7 @@ System.import('moment').then((module) => {
 
     // Date control
     $.fn.veda_date = function ( options ) {
-      const opts = $.extend( {}, $.fn.veda_date.defaults, options );
+      const opts = {...$.fn.veda_date.defaults, ...options};
       const control = veda_dateTime.call(this, opts);
 
       const tabindex = this.attr('tabindex');
@@ -183,7 +183,7 @@ System.import('moment').then((module) => {
 
     // Time control
     $.fn.veda_time = function ( options ) {
-      const opts = $.extend( {}, $.fn.veda_time.defaults, options );
+      const opts = {...$.fn.veda_time.defaults, ...options};
       const control = veda_dateTime.call(this, opts);
 
       const tabindex = this.attr('tabindex');
@@ -221,7 +221,7 @@ System.import('moment').then((module) => {
 
     // Date-Time control
     $.fn.veda_dateTime = function ( options ) {
-      const opts = $.extend( {}, $.fn.veda_dateTime.defaults, options );
+      const opts = {...$.fn.veda_dateTime.defaults, ...options};
       const control = veda_dateTime.call(this, opts);
 
       const tabindex = this.attr('tabindex');

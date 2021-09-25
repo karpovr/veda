@@ -5,7 +5,7 @@ import $ from 'jquery';
 import veda_literal from './veda_literal.js';
 
 $.fn.veda_string = function ( options ) {
-  const opts = $.extend( {}, $.fn.veda_string.defaults, options );
+  const opts = {...$.fn.veda_string.defaults, ...options};
   const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');

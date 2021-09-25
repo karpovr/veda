@@ -9,7 +9,7 @@ import veda from '../../common/veda.js';
 import veda_multilingual from './veda_multilingual.js';
 
 $.fn.veda_multilingualText = function (options) {
-  const opts = $.extend( {}, $.fn.veda_multilingualText.defaults, options );
+  const opts = {...$.fn.veda_multilingualText.defaults, ...options};
   const self = $(this);
   const init = function () {
     self.empty();

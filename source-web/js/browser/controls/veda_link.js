@@ -9,7 +9,7 @@ import Util from '../../common/util.js';
 import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_link = function ( options ) {
-  const opts = $.extend( {}, $.fn.veda_link.defaults, options );
+  const opts = {...$.fn.veda_link.defaults, ...options};
   const control = $(opts.template);
   const template = this.attr('data-template') || '{@.rdfs:label}';
   const individual = opts.individual;

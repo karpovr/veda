@@ -9,7 +9,7 @@ import IndividualModel from '../../common/individual_model.js';
 import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_select = function (params) {
-  const opts = $.extend( {}, $.fn.veda_select.defaults, params );
+  const opts = {...$.fn.veda_select.defaults, ...params};
   const control = $(opts.template);
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
