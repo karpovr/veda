@@ -55,7 +55,7 @@ async fn query(
     data: &QueryRequest,
     ticket_cache: web::Data<TicketCache>,
     ft_client: web::Data<Option<Mutex<FTClient>>>,
-    xr: web::Data<Option<Mutex<XapianReader>>>,
+    wxr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
@@ -106,21 +106,21 @@ async fn query(
             ft_req.query = "'*' == '".to_owned() + &ft_req.query + "'";
         }
 
-        if let Some(xr) = xr.get_ref() {
-            let mut qq = xr.lock().await;
-
-            let mut res = qq.query_use_collect_fn(&ft_req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
-            res.result = res_out_list;
+        if let Some(mxr) = wxr.get_ref() {
+            let mut xr = mxr.lock().await;
 
             if let Some(t) = OntoIndex::get_modified() {
-                if t > qq.onto_modified {
-                    c_load_onto(&db, &mut qq.onto).await;
-                    qq.onto_modified = t;
+                if t > xr.onto_modified {
+                    c_load_onto(&db, &mut xr.onto).await;
+                    xr.onto_modified = t;
                 }
             }
-            if qq.index_schema.is_empty() {
-                qq.c_load_index_schema(&db).await;
+            if xr.index_schema.is_empty() {
+                xr.c_load_index_schema(&db).await;
             }
+
+            let mut res = xr.query_use_collect_fn(&ft_req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
+            res.result = res_out_list;
 
             res
         } else {
