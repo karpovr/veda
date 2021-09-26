@@ -36,7 +36,7 @@ use v_common::v_api::api_client::{AuthClient, MStorageClient};
 
 #[head("/")]
 async fn head() -> std::io::Result<HttpResponse> {
-    return Ok(HttpResponse::Ok().finish());
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[get("/ping")]
@@ -103,7 +103,7 @@ async fn main() -> std::io::Result<()> {
             port = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
         }
         if el.starts_with("--use-direct-ft-query") {
-            use_direct_ft_query = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned() == "true";
+            use_direct_ft_query = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim() == "true";
         }
     }
 

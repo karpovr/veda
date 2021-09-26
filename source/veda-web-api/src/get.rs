@@ -60,7 +60,7 @@ async fn query(
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
     let res = if data.sql.is_some() {
-        let (res, user) = check_ticket(&ticket, &ticket_cache, &db).await?;
+        let (res, user) = check_ticket(ticket, &ticket_cache, &db).await?;
         if res != ResultCode::Ok {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         }
@@ -95,14 +95,14 @@ async fn query(
             ctx.push(id.to_owned());
         }
 
-        let (res, user) = check_ticket(&ticket, &ticket_cache, &db).await?;
+        let (res, user) = check_ticket(ticket, &ticket_cache, &db).await?;
         if res != ResultCode::Ok {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         }
 
         ft_req.user = user.unwrap_or_default();
 
-        if !(ft_req.query.find("==").is_some() || ft_req.query.find("&&").is_some() || ft_req.query.find("||").is_some()) {
+        if !(ft_req.query.contains("==") || ft_req.query.contains("&&") || ft_req.query.contains("||")) {
             ft_req.query = "'*' == '".to_owned() + &ft_req.query + "'";
         }
 
@@ -123,12 +123,10 @@ async fn query(
             res.result = res_out_list;
 
             res
+        } else if let Some(f) = ft_client.get_ref() {
+            f.lock().await.query(ft_req)
         } else {
-            if let Some(f) = ft_client.get_ref() {
-                f.lock().await.query(ft_req)
-            } else {
-                QueryResult::default()
-            }
+            QueryResult::default()
         }
     };
     Ok(HttpResponse::Ok().json(res))
@@ -170,7 +168,6 @@ pub(crate) async fn get_individual(
     }
 
     let (res, res_code) = get_individual_from_db(&params.uri, &user_uri.unwrap_or_default(), &db, Some(&az)).await?;
-
     if res_code == ResultCode::Ok {
         return Ok(HttpResponse::Ok().json(res.get_obj().as_json()));
     }
