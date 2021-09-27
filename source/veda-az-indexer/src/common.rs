@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
-use v_common::storage::storage::{StorageId, VStorage};
 use v_common::v_authorization::common::Access;
 use v_common::v_authorization::formats::{decode_rec_to_rightset, encode_rightset, update_counters, M_IGNORE_EXCLUSIVE, M_IS_EXCLUSIVE};
 use v_common::v_authorization::{Right, RightSet};
+use v_common::storage::common::{VStorage, StorageId};
 
 pub struct Context {
     pub permission_statement_counter: u32,

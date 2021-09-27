@@ -18,7 +18,7 @@ use v_common::module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
-use v_common::storage::storage::StorageMode;
+use v_common::storage::common::StorageMode;
 use xapian_rusty::*;
 use v_common::v_queue::consumer::Consumer;
 

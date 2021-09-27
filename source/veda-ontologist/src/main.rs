@@ -16,9 +16,9 @@ use v_common::onto::individual2turtle::to_turtle;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::onto::parser::parse_raw;
 use v_common::search::common::FTQuery;
-use v_common::storage::storage::StorageMode;
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::ResultCode;
+use v_common::storage::common::StorageMode;
 
 struct OntologistModule {
     last_found_changes: Instant,

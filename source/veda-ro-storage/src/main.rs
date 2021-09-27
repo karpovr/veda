@@ -7,7 +7,7 @@ use std::str;
 use v_common::module::module::init_log;
 use v_common::module::veda_backend::get_storage_use_prop;
 use v_common::onto::individual::Individual;
-use v_common::storage::storage::{StorageId, StorageMode, VStorage};
+use v_common::storage::common::{StorageId, StorageMode, VStorage};
 
 /**
  * storage service

@@ -16,7 +16,7 @@ use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::onto::Onto;
 use v_common::search::clickhouse_client::*;
-use v_common::storage::storage::StorageId;
+use v_common::storage::common::StorageId;
 
 pub struct CleanerContext {
     pub(crate) backend: Backend,

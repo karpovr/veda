@@ -20,7 +20,7 @@ use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::individual2msgpack::to_msgpack;
 use v_common::onto::json2individual::parse_json_to_individual;
 use v_common::onto::parser::parse_raw;
-use v_common::storage::storage::{StorageId, StorageMode, VStorage};
+use v_common::storage::common::{StorageId, StorageMode, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::*;
 use v_common::v_queue::queue::Queue;

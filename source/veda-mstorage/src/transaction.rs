@@ -4,7 +4,7 @@ use v_common::module::ticket::Ticket;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
 use v_common::onto::individual2msgpack::to_msgpack;
-use v_common::storage::storage::{StorageId, VStorage};
+use v_common::storage::common::{StorageId, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::record::MsgType;

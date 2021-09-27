@@ -18,7 +18,7 @@ mod server;
 use crate::server::CMessage;
 use v_common::module::veda_backend::get_storage_use_prop;
 use v_common::onto::individual::Individual;
-use v_common::storage::storage::StorageMode;
+use v_common::storage::common::StorageMode;
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_millis(5000);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);

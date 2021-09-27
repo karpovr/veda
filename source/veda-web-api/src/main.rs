@@ -31,7 +31,7 @@ use v_common::search::clickhouse_client::CHClient;
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::storage::lmdb_storage::LMDBStorage;
-use v_common::storage::storage::StorageMode;
+use v_common::storage::common::StorageMode;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
 
 #[head("/")]
