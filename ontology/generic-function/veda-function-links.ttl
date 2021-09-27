@@ -20,6 +20,21 @@ v-s:AddLink
   rdfs:label "Добавить"@ru ;
   rdfs:label "Add"@en ;
 .
+v-s:RigthsBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Права"@ru ;
+  rdfs:label "Rights"@en ;
+.
+v-s:MainDocumentBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Основной документ"@ru ;
+  rdfs:label "Main document"@en ;
+.
+v-s:LinkedDocumentBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Связанный документ"@ru ;
+rdfs:label "Linked Document"@en ;
+.
 # ------------------------------------------------------------ КЛАССЫ --
 
 # ----------------------------------------------------------- v-s:Link --
@@ -74,6 +89,24 @@ v-s:fromMemberOfTo
   rdfs:label "Источник включить в цель"@ru ;
   rdfs:label "From member of to"@en ;
   rdfs:range xsd:boolean ;
+.
+v-s:type
+  rdf:type rdf:Property ;
+  rdfs:comment "The subject is an instance of a class." ;
+  rdfs:domain rdfs:Resource ;
+  rdfs:label "Tип"@ru, "Type"@en ;
+  rdfs:range rdfs:Class ;
+.
+v-s:PS_type
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация свойств from to для класса v-s:Link"@ru ;
+  rdfs:label "Specification from to for v-s:Link class"@en ;
+  v-ui:forClass v-s:Link ;
+  v-ui:forProperty v-s:type ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 1 ;  
+  v-ui:placeholder "Выберите тип документа"@ru ;
+  v-ui:placeholder "Select the type of document"@en ;
 .
 
 # ---------------------------------------------------------- v-s:LinksTree --
@@ -156,27 +189,47 @@ v-s:LinkTemplate
   <h3 about="v-s:Link" property="rdfs:label"></h3>
   <div class="row">
     <div class="col-md-3">
-      <em about="v-s:from" property="rdfs:label"></em>
+      <em about="v-s:MainDocumentBundle" property="rdfs:label"></em>
       <div about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
     </div>
+    <div class="col-md-1">
+        <em about="v-s:RigthsBundle" property="rdfs:label"></em>
+        <span id="mutualMembership" class="glyphicon glyphicon-resize-horizontal hidden"></span>
+        <span id="fromMemberOfTo" class="glyphicon glyphicon-arrow-right hidden"></span>
+        <span id="toMemberOfFrom" class="glyphicon glyphicon-arrow-left hidden"></span>
+        <span id="empty" class="glyphicon glyphicon-ban-circle hidden"></span>
+    </div>
     <div class="col-md-3">
-      <em about="v-s:to" property="rdfs:label"></em>
+      <em about="v-s:LinkedDocumentBundle" property="rdfs:label"></em>
       <div about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
     </div>
     <div class="col-md-3">
       <em about="rdfs:comment" property="rdfs:label"></em>
-      <div about="@" property="rdfs:comment"></div>
-    </div>
-    <div class="col-md-3">
-      <div class="checkbox disabled">
-        <label>
-          <veda-control property="v-s:mutualMembership" data-type="boolean"></veda-control>
-          <strong about="v-s:mutualMembership" property="rdfs:label"></strong>
-        </label>
-      </div>
+      <div about="@" property="rdfs:comment" class="view -edit -search"></div>
+      <veda-control data-type="string" property="rdfs:comment" class="-view edit search"></veda-control>
     </div>
   </div>
+  <div about="@" data-template="v-ui:SystemPropertiesNewTemplate" data-embedded="true"></div><br>
+<!-- BUTTONS -->
+<div class="actions view edit -search">
+  <span about="@" class="pull-left" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
 </div>
+</div>
+<script>
+if(individual.hasValue("v-s:mutualMembership")){
+  $('#mutualMembership', template).removeClass('hidden');
+}
+else if (individual.hasValue("v-s:fromMemberOfTo")) {
+  $('#fromMemberOfTo', template).removeClass('hidden');
+} 
+else if (individual.hasValue("v-s:toMemberOfFrom")) {
+  $('#toMemberOfFrom', template).removeClass('hidden');
+}
+else {
+  $('#empty', template).removeClass('hidden');
+}
+
+</script>
 """ ;
 .
 
@@ -302,6 +355,7 @@ v-s:LinksListTemplate
         newRow.remove();
       });
       if ( individual.isNew() ) {
+        
         newRow.find(".action#save").hide();
       }
     });
@@ -317,11 +371,11 @@ v-s:LinksListTemplate
       var link_template = $(this);
       var link_uri = link_template.attr("resource");
       var link = new veda.IndividualModel(link_uri);
+      this["v-s:type"] = [];
       link.save();
       link_template.trigger("view");
     });
   }
-
   individual.on("v-s:hasLink", linksHandler);
   template.one("remove", function () {
     individual.off("v-s:hasLink", linksHandler);
@@ -334,6 +388,17 @@ v-s:LinksListTemplate
       $(".links-table", template).addClass("hidden");
     }
   }
+  function cl(){
+    console.log(this);
+  }
+  individual.on("beforeSave", cl);
+  template.one("remove", function () {
+    individual.off("beforeSave", cl);
+  });
+
+
+  
+
 
 
 </script>
@@ -341,12 +406,12 @@ v-s:LinksListTemplate
   <table class="hidden links-table table table-condensed table-striped table-sortable">
     <thead>
       <tr>
-        <th width="30%" about="v-s:Document" property="rdfs:label"></th>
+        <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+        <th width="45%" about="v-s:Document" property="rdfs:label"></th>
         <th width="10%" about="v-s:created" property="rdfs:label"></th>
         <th width="20%" about="rdfs:comment" property="rdfs:label"></th>
-        <th width="15%" about="v-s:mutualMembership" property="rdfs:label"></th>
         <th width="15%" about="v-s:creator" property="rdfs:label"></th>
-        <th width="10%"></th>
+        <th width="9%"></th>
       </tr>
     </thead>
     <tbody about="@" rel="v-s:hasLink" data-embedded="true" data-limit="5" data-more="true">
@@ -357,12 +422,54 @@ v-s:LinksListTemplate
         } else if ( this.hasValue("v-s:to", displayedDoc) ) {
           $(".link-to", template).remove();
         }
+        
+        template.on("validate", function () {
+          var result = {};
+          if(!individual.hasValue('v-s:to')){
+            result["v-s:type"] = {
+              state: individual.hasValue("v-s:type"),
+              cause: ["v-ui:minCardinality"]
+            };
+          }
+
+          template.trigger("validated", result);
+        });
+
+        function documentHandler() {
+          if(this.isNew()){
+            if (this.hasValue('v-s:to')) {
+              this["v-s:type"] = [];
+              $('veda-control[rel="v-s:type"]', template).addClass("hidden");
+            }
+            else{
+              $('veda-control[rel="v-s:type"]', template).removeClass("hidden");
+            }
+          }
+        }
+        this.on('v-s:to', documentHandler);
+        this.on('v-s:type', documentHandler);
+        template.one('remove', function () {
+          this.off('v-s:to', documentHandler);
+          this.off('v-s:type', documentHandler);
+        });
+        documentHandler.apply(this);
+
       </script>
       <tr>
+        <td><a href="#/@" class="glyphicon glyphicon-search view -edit -search" ></a></td>
+
         <td>
-          <span class="link-from" about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
-          <span class="link-to view -edit -search" about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
-          <veda-control data-type="link" rel="v-s:to" class="-view edit search fulltext"></veda-control>
+          <div class="col-md-5">
+            <veda-control rel="v-s:type" data-type="link" class="fulltext -view edit -search" data-single="true"
+            data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+          </div>
+          <div class="col-md-7">
+            <veda-control data-type="link" rel="v-s:to" class="-view edit search fulltext disabled" data-query-prefix="'rdf:type'=='{@.v-s:type.id}'"></veda-control>
+          </div>
+          <div class="col-md-12">
+            <span class="link-from" about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
+            <span class="link-to view -edit -search" about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
+          </div>
         </td>
         <td>
           <span class="link-from" about="@" rel="v-s:from"><span about="@" property="v-s:created"></span></span>
@@ -371,13 +478,6 @@ v-s:LinksListTemplate
         <td>
           <div class="view -edit -search" about="@" property="rdfs:comment"></div>
           <veda-control data-type="string" property="rdfs:comment" class="-view edit search"></veda-control>
-        </td>
-        <td about="@" class="form-inline">
-          <div class="checkbox disabled">
-            <label>
-              <veda-control property="v-s:mutualMembership" data-type="boolean"></veda-control>
-            </label>
-          </div>
         </td>
         <td>
           <i><small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> <small about="@" property="v-s:created"></small></i>
@@ -388,6 +488,9 @@ v-s:LinksListTemplate
   </table>
   <button class="margin-sm btn btn-success" id="add-link" about="v-s:AddLink" property="rdfs:label"></button>
 </div>
+<script>
+
+</script>
 """ ;
 .
 
