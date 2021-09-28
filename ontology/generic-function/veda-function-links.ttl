@@ -33,7 +33,7 @@ v-s:MainDocumentBundle
 v-s:LinkedDocumentBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Связанный документ"@ru ;
-rdfs:label "Linked Document"@en ;
+  rdfs:label "Linked Document"@en ;
 .
 # ------------------------------------------------------------ КЛАССЫ --
 
@@ -61,6 +61,8 @@ v-s:from
     v-ui:minCardinality 1 ;
     v-ui:maxCardinality 1 ;
     v-ui:queryPrefix "('rdf:type'=='v-s:Document')"^^xsd:string ;
+    v-ui:placeholder "Документ"@ru ;
+    v-ui:placeholder "Document"@en ;
   .
 v-s:to
   rdf:type owl:ObjectProperty ;
@@ -105,8 +107,8 @@ v-s:PS_type
   v-ui:forProperty v-s:type ;
   v-ui:minCardinality 0 ;
   v-ui:maxCardinality 1 ;  
-  v-ui:placeholder "Выберите тип документа"@ru ;
-  v-ui:placeholder "Select the type of document"@en ;
+  v-ui:placeholder "Тип документа"@ru ;
+  v-ui:placeholder "Type"@en ;
 .
 
 # ---------------------------------------------------------- v-s:LinksTree --
