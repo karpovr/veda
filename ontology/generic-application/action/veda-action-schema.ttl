@@ -254,6 +254,7 @@ v-s:ScheduledActionTemplate
     ScheduledAction["v-s:backwardTarget"] = [individual];
     ScheduledAction["v-s:backwardProperty"] = [new veda.IndividualModel("v-s:hasScheduledAction")];
     ScheduledAction["v-s:canRead"] = [ true ];
+    ScheduledAction["v-s:mutualMembership"] = [ true ];
     ScheduledAction["v-s:scriptHandlered"] = [ false ];
     ScheduledAction.present(cntr, tmpl, "edit");
     ScheduledAction.one("afterSave beforeReset", function () {
