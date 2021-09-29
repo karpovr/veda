@@ -138,7 +138,7 @@ export default function AppPresenter () {
     // Router function
     riot.route((hash) => {
       const loadIndicator = document.getElementById('load-indicator');
-      loadIndicator.style.display = '';
+      const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
 
       if (typeof hash === 'string') {
         const hash_index = hash.indexOf('#');
@@ -146,11 +146,17 @@ export default function AppPresenter () {
           hash = hash.substring(hash_index);
         } else {
           $('#main').empty();
-          return main.present('#main').then(() => loadIndicator.style.display = 'none');
+          return main.present('#main').then(() => {
+            clearTimeout(loadIndicatorTimer);
+            loadIndicator.style.display = 'none';
+          });
         }
       } else {
         $('#main').empty();
-        return main.present('#main').then(() => loadIndicator.style.display = 'none');
+        return main.present('#main').then(() => {
+          clearTimeout(loadIndicatorTimer);
+          loadIndicator.style.display = 'none';
+        });
       }
       const tokens = decodeURI(hash).slice(2).split('/');
       const uri = tokens[0];
@@ -173,6 +179,7 @@ export default function AppPresenter () {
         const individual = new IndividualModel(uri);
         $(container).empty();
         individual.present(container, template, mode, extra).then(() => {
+          clearTimeout(loadIndicatorTimer);
           loadIndicator.style.display = 'none';
           if (!individual.scroll) {
             window.scrollTo(0, 0);
@@ -180,7 +187,10 @@ export default function AppPresenter () {
         });
       } else {
         $('#main').empty();
-        main.present('#main').then(() => loadIndicator.style.display = 'none');
+        main.present('#main').then(() => {
+          clearTimeout(loadIndicatorTimer);
+          loadIndicator.style.display = 'none';
+        });
       }
     });
   }

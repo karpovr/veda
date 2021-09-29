@@ -482,9 +482,12 @@ export default function Auth () {
       }, ticketDelay);
     }
 
-    document.getElementById('load-indicator').style.display = 'block';
+    const loadIndicator = document.getElementById('load-indicator');
+    const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
+
     veda.init(veda.user_uri).then(() => {
-      document.getElementById('load-indicator').style.display = 'none';
+      clearTimeout(loadIndicatorTimer);
+      loadIndicator.style.display = 'none';
       veda.trigger('started');
     });
   });
@@ -500,7 +503,9 @@ export default function Auth () {
   });
 
   // Init application
-  document.getElementById('load-indicator').style.display = 'block';
+  const loadIndicator = document.getElementById('load-indicator');
+  const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
+
   veda.init('cfg:Guest')
     .then(() => {
       // Check if ticket is valid
@@ -536,6 +541,7 @@ export default function Auth () {
       }
     })
     .then(() => {
-      document.getElementById('load-indicator').style.display = 'none';
+      clearTimeout(loadIndicatorTimer);
+      loadIndicator.style.display = 'none';
     });
 }
