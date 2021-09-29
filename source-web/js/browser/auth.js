@@ -211,6 +211,7 @@ export default function Auth () {
     const authLockedError = loginForm.querySelector('#auth-locked-error');
     const passChangeLockedError = loginForm.querySelector('#pass-change-locked-error');
     const unavailableError = loginForm.querySelector('#unavailable-error');
+    const networkError = loginForm.querySelector('#network-error');
 
     const secretRequestInfo = loginForm.querySelector('#secret-request-info');
 
@@ -234,6 +235,16 @@ export default function Auth () {
     };
 
     switch (error.code) {
+    case 0: // Network error
+      networkError.style.display = 'block';
+      ok.style.display = 'block';
+      okHandler = function () {
+        networkError.style.display = 'none';
+        enterLoginPassword.style.display = 'block';
+        ok.removeEventListener('click', okHandler);
+        ok.style.display = 'none';
+      };
+      break;
     case 423: // Password change is allowed once a day
       frequentPassChangeWarning.style.display = 'block';
       ok.style.display = 'block';

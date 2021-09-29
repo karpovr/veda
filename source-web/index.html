@@ -77,6 +77,10 @@
     <!-- Login form -->
     <form style="display:none; max-width: 400px; margin: 10% auto; padding: 2em;" id="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
       <h3>Войдите / Sign in</h3>
+      <div id="network-error" style="display:none;" class="alert alert-danger">
+        <p><strong>Ошибка!</strong> Отсутствует сетевое соединение с системой.</p>
+        <p><strong>Error!</strong> Network connection to the system is unavailable.</p>
+      </div>
       <div id="unavailable-error" style="display:none;" class="alert alert-danger">
         <p><strong>Ошибка!</strong> Система недоступна.</p>
         <p><strong>Error!</strong> System unavailable.</p>
