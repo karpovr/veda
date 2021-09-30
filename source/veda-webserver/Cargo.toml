@@ -28,5 +28,5 @@ rusty_tarantool = "0.2.10"
 url = "2.2.0"
 serde_json = "1.0.61"
 
-v_common = { package = "v-common", version = "=0.1.73" }
+v_common = { package = "v-common", version = "=0.1.74" }
 #v_common = { package = "v-common", path = "../../../v-common" }
