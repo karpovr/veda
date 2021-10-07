@@ -879,6 +879,13 @@ v-s:stakeholdersRoleInContract
   rdfs:label "Stakeholders role in contract"@en ;
   rdfs:domain v-s:Contractual ;
 .
+v-s:hasContractType
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Тип контракта"@ru ;
+  rdfs:label "Contract type"@en ;
+  rdfs:range v-s:ContractType ;
+  rdfs:domain v-s:Contractual ;
+.
 
 #----------------------------------------------------------- Контролируемая сущность --
 v-s:Controlled
