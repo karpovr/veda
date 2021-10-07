@@ -66,7 +66,7 @@ fn q1<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &str) 
         if let Some(s) = scr_inf.compiled_script {
             let mut session_data = CallbackSharedData::default();
             session_data.g_key2attr.insert("$ticket".to_owned(), sys_ticket.id.to_owned());
-            session_data.g_key2attr.insert("$data".to_owned(), json!(el).to_string());
+            session_data.g_key2attr.insert("$data".to_owned(), el.to_owned());
 
             let mut sh_g_vars = G_VARS.lock().unwrap();
             let g_vars = sh_g_vars.get_mut();
