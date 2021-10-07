@@ -79,7 +79,7 @@ fn req_prepare(backend: &mut Backend, request: &Message, ch_client: &mut CHClien
             }
 
             let res = ch_client.select(&user_uri, query, top, limit, from, OptAuthorize::YES);
-
+            info!("found & authorized: {}, query time: {}, authorize time: {}", res.count, res.query_time, res.authorize_time);
             if let Ok(s) = serde_json::to_string(&res) {
                 return Message::from(s.as_bytes());
             }
