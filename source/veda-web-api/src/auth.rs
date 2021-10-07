@@ -1,4 +1,4 @@
-use crate::common::{AuthenticateRequest, TicketRequest, TicketUriRequest};
+use crate::common::{AuthenticateRequest, TicketLoginRequest, TicketRequest, TicketUriRequest};
 use actix_web::get;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse};
@@ -11,6 +11,16 @@ use v_common::storage::async_storage::{check_ticket, AStorage, TicketCache};
 use v_common::v_api::api_client::AuthClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
+
+#[get("get_ticket_trusted")]
+pub(crate) async fn get_ticket_trusted(
+    params: web::Query<TicketLoginRequest>,
+    ticket_cache: web::Data<TicketCache>,
+    tt: web::Data<AStorage>,
+) -> io::Result<HttpResponse> {
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &tt).await?;
+    Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
+}
 
 #[get("/is_ticket_valid")]
 pub(crate) async fn is_ticket_valid(params: web::Query<TicketRequest>, ticket_cache: web::Data<TicketCache>, tt: web::Data<AStorage>) -> io::Result<HttpResponse> {

@@ -4,6 +4,12 @@ use serde_derive::{Deserialize, Serialize};
 pub(crate) const BASE_PATH: &str = "./data";
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub(crate) struct TicketLoginRequest {
+    pub ticket: String,
+    pub(crate) login: String,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub(crate) struct TicketRequest {
     pub ticket: String,
 }
