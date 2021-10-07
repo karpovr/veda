@@ -1,5 +1,6 @@
 mod cleaner;
 mod common;
+mod exec_js_on_query;
 mod queue_tools;
 mod v_s_email;
 mod v_s_membership;
@@ -7,6 +8,7 @@ mod v_s_membership1;
 mod v_s_membership2;
 mod v_s_permissionstatement;
 mod v_wf_process;
+use crate::exec_js_on_query::exec_js_on_query;
 
 #[macro_use]
 extern crate log;
@@ -19,6 +21,16 @@ use v_common::module::module::init_log;
 #[derive(CLI)]
 #[help = "veda tools"]
 enum Tools {
+    #[help = "Execute js script on query result"]
+    ExecJsOnQuery {
+        #[named]
+        #[help = "path to query"]
+        path_to_query: String,
+
+        #[named]
+        #[help = "path to js"]
+        path_to_js: String,
+    },
     #[help = "Store individuals from queue to storage"]
     QueueToStorage {
         #[named]
@@ -92,6 +104,12 @@ fn main() {
     init_log("VEDA-TOOLS");
 
     match Tools::process() {
+        Tools::ExecJsOnQuery {
+            path_to_query,
+            path_to_js,
+        } => {
+            exec_js_on_query(&path_to_query, &path_to_js);
+        }
         Tools::QueryToQueue(query) => {
             info!("query={}", query);
             export_from_query(&query).expect("fail create query from queue");

@@ -116,11 +116,10 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
 
     if let Ok(t) = ctx.backend.get_sys_ticket_id() {
         ctx.sys_ticket = ctx.backend.get_ticket_from_db(&t);
-        {
-            for module in cleaner_modules.iter() {
-                if let Some(f) = cleaners.get(module.as_str()) {
-                    f(&mut ctx);
-                }
+
+        for module in cleaner_modules.iter() {
+            if let Some(f) = cleaners.get(module.as_str()) {
+                f(&mut ctx);
             }
         }
     }

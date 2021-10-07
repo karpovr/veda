@@ -24,3 +24,4 @@ diligent-date-parser = "0.1.2"
 
 v_common = { package = "v-common", version = "=0.1.74" }
 #v_common = { package = "v-common", path = "../../../v-common" }
+v_v8 = { package = "v-common-v8", version = "=0.1.78" }
