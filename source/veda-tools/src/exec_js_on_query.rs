@@ -1,12 +1,9 @@
+use crate::common::pause_if_overload;
 use ini::Ini;
-use serde_json::json;
 use std::io::{Error, ErrorKind};
 use std::{fs, io, thread};
-use v_common::module::module::{Module, PrepareError};
-use v_common::module::remote_indv_r_storage::inproc_storage_manager;
-use v_common::module::veda_backend::Backend;
-use v_common::search::clickhouse_client::CHClient;
-use v_common::v_api::obj::OptAuthorize;
+use stopwatch::Stopwatch;
+use systemstat::{Platform, System};
 use v_v8::callback::*;
 use v_v8::common::{ScriptInfo, ScriptInfoContext};
 use v_v8::jsruntime::JsRuntime;
@@ -14,18 +11,25 @@ use v_v8::rusty_v8 as v8;
 use v_v8::rusty_v8::ContextScope;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::{commit, CallbackSharedData, Transaction};
+use v_v8::v_common::module::module::Module;
+use v_v8::v_common::module::remote_indv_r_storage::inproc_storage_manager;
+use v_v8::v_common::module::veda_backend::Backend;
+use v_v8::v_common::search::clickhouse_client::CHClient;
 use v_v8::v_common::v_api::api_client::MStorageClient;
-use v_v8::v_common::v_api::obj::ResultCode;
-
-struct Context {}
+use v_v8::v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 pub(crate) fn exec_js_on_query<'a>(path_to_query: &str, path_to_js: &str) {
     thread::spawn(move || inproc_storage_manager());
     let mut js_runtime = JsRuntime::new();
-    q1(&mut js_runtime, path_to_query, path_to_js);
+    if let Err(e) = prepare(&mut js_runtime, path_to_query, path_to_js) {
+        error!("{:?}", e);
+    }
 }
 
-fn q1<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &str) -> io::Result<()> {
+fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &str) -> io::Result<()> {
+    let sys = System::new();
+    let max_load = num_cpus::get() / 2;
+
     let mut backend = Backend::default();
     let mut veda_client = MStorageClient::new(Module::get_property("main_module_url").unwrap());
 
@@ -62,6 +66,7 @@ fn q1<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &str) 
     }
 
     let query = fs::read_to_string(path_to_query)?;
+    let mut sw = Stopwatch::start_new();
     for el in ch_client.select(&sys_ticket.user_uri, &query, 1000000, 1000000, 0, OptAuthorize::NO).result.iter() {
         if let Some(s) = scr_inf.compiled_script {
             let mut session_data = CallbackSharedData::default();
@@ -101,6 +106,11 @@ fn q1<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &str) 
             if res != ResultCode::Ok {
                 info!("fail exec event script : {}, result={:?}", script_id, res);
                 return Err(Error::new(ErrorKind::Other, ""));
+            }
+
+            if sw.elapsed_ms() > 1000 {
+                pause_if_overload(&sys, max_load);
+                sw = Stopwatch::start_new();
             }
         }
     }

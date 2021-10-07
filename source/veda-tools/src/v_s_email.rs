@@ -2,10 +2,10 @@ use crate::cleaner::CleanerContext;
 use chrono::prelude::*;
 use std::ops::Sub;
 use time::Duration;
-use v_common::onto::individual::Individual;
-use v_common::v_api::api_client::IndvOp;
-use v_common::v_api::obj::OptAuthorize;
-use v_common::v_api::obj::ResultCode;
+use v_v8::v_common::onto::individual::Individual;
+use v_v8::v_common::v_api::api_client::IndvOp;
+use v_v8::v_common::v_api::obj::OptAuthorize;
+use v_v8::v_common::v_api::obj::ResultCode;
 
 const MAX_SIZE_BATCH: i64 = 1000000;
 

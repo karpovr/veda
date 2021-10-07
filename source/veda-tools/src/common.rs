@@ -8,9 +8,9 @@ use std::io::Write;
 use std::thread;
 use std::time::Duration as std_Duration;
 use systemstat::{Platform, System};
-use v_common::onto::individual::Individual;
-use v_common::onto::individual2turtle::to_turtle;
-use v_common::v_api::api_client::IndvOp;
+use v_v8::v_common::onto::individual::Individual;
+use v_v8::v_common::onto::individual2turtle::to_turtle;
+use v_v8::v_common::v_api::api_client::IndvOp;
 
 pub fn remove(indv: &mut Individual, ctx: &mut CleanerContext) {
     let res = ctx.backend.mstorage_api.update(&ctx.sys_ticket.id, IndvOp::Remove, &Individual::default().set_id(indv.get_id()));

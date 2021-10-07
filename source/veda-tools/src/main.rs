@@ -16,7 +16,7 @@ extern crate log;
 use crate::queue_tools::{export_from_query, queue_crc, queue_to_json, queue_to_veda};
 use cleaner::clean;
 use type_cli::CLI;
-use v_common::module::module::init_log;
+use v_v8::v_common::module::module::init_log;
 
 #[derive(CLI)]
 #[help = "veda tools"]
