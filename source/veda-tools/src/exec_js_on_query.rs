@@ -116,9 +116,6 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
             }
 
             if sw.elapsed_ms() > 1000 {
-                pause_if_overload(&sys, max_load);
-                sw = Stopwatch::start_new();
-            } else {
                 match Consumer::new_with_mode(base_path, consumer_name, queue_name, Mode::Read) {
                     Ok(mut queue_consumer) => {
                         queue_consumer.open(false);
@@ -133,6 +130,9 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
                         error!("fail read queue, err={:?}", e);
                     }
                 }
+
+                pause_if_overload(&sys, max_load);
+                sw = Stopwatch::start_new();
             }
         }
     }
