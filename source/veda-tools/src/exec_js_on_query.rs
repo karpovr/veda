@@ -67,7 +67,7 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
 
     let query = fs::read_to_string(path_to_query)?;
     let mut sw = Stopwatch::start_new();
-    for el in ch_client.select(&sys_ticket.user_uri, &query, 1000000, 1000000, 0, OptAuthorize::NO).result.iter() {
+    for el in ch_client.select(&sys_ticket.user_uri, &query, 1000000, 0, 0, OptAuthorize::NO).result.iter() {
         if let Some(s) = scr_inf.compiled_script {
             let mut session_data = CallbackSharedData::default();
             session_data.g_key2attr.insert("$ticket".to_owned(), sys_ticket.id.to_owned());
