@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 $.fn.veda_source = function (options) {
-  const opts = {...$.fn.veda_source.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $(opts.template);
   const individual = opts.individual;
   const property_uri = opts.property_uri;
@@ -78,7 +78,7 @@ $.fn.veda_source = function (options) {
   return this;
 };
 
-$.fn.veda_source.defaults = {
+const defaults = {
   value: '',
   template: `<div class="panel panel-default" style="min-height:300px"></div>`,
   mode: 'javascript',

@@ -13,7 +13,7 @@ export default veda_multilingual;
  * @this jQuery
  */
 function veda_multilingual (options) {
-  const opts = {...veda_multilingual.defaults, ...options};
+  const opts = {...defaults, ...options};
   const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri;
@@ -157,7 +157,7 @@ function veda_multilingual (options) {
   return self;
 };
 
-veda_multilingual.defaults = {
+const defaults = {
   parser: function (input, el) {
     if (input) {
       let value = String(input);

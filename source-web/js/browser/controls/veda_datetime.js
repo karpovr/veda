@@ -19,7 +19,7 @@ export default veda_dateTime;
  * @this jQuery
  */
 function veda_dateTime (options) {
-  const opts = {...veda_dateTime.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $(opts.template);
   const format = opts.format;
   const spec = opts.spec;
@@ -124,7 +124,7 @@ function veda_dateTime (options) {
   return control;
 };
 
-veda_dateTime.defaults = {
+const defaults = {
   template: `
     <div class="input-group date">
       <span class="input-group-addon">

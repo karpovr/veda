@@ -128,7 +128,7 @@ function cropImage (imageForCrop, ratio, maxWidth) {
 };
 
 $.fn.veda_file = function ( options ) {
-  const opts = {...$.fn.veda_file.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $(opts.template);
   const fileInput = control.find('input[type="file"]');
   const indicatorPercentage = $('.indicator-percentage', control);
@@ -265,7 +265,7 @@ $.fn.veda_file = function ( options ) {
   return this;
 };
 
-$.fn.veda_file.defaults = {
+const defaults = {
   template: `
 <label class="btn btn-default">
   Browse...

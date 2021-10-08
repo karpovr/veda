@@ -9,7 +9,7 @@ import Util from '../../common/util.js';
 import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_link = function ( options ) {
-  const opts = {...$.fn.veda_link.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $(opts.template);
   const template = this.attr('data-template') || '{@.rdfs:label}';
   const individual = opts.individual;
@@ -576,7 +576,7 @@ $.fn.veda_link = function ( options ) {
   return this;
 };
 
-$.fn.veda_link.defaults = {
+const defaults = {
   template: `
 <div class="link-control">
   <div class="input-group">

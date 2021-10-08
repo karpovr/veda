@@ -13,7 +13,7 @@ export default veda_literal;
  * @return {jQuery}
  */
 function veda_literal (options) {
-  const opts = {...veda_literal.defaults, ...options};
+  const opts = {...defaults, ...options};
   const input = $(opts.template);
   const spec = opts.spec;
   const placeholder = this.attr('placeholder') || (spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : '');
@@ -134,7 +134,7 @@ function veda_literal (options) {
   return input;
 };
 
-veda_literal.defaults = {
+const defaults = {
   template: `<input type="text" class="form-control" autocomplete="on" />`,
   parser: function (input) {
     return (input || null);

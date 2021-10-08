@@ -5,7 +5,7 @@ import $ from 'jquery';
 import veda_literal from './veda_literal.js';
 
 $.fn.veda_string = function ( options ) {
-  const opts = {...$.fn.veda_string.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
@@ -22,7 +22,7 @@ $.fn.veda_string = function ( options ) {
   return this;
 };
 
-$.fn.veda_string.defaults = {
+const defaults = {
   template: `<input type="text" class="form-control" autocomplete="on" />`,
   parser: function (input) {
     return (input ? String(input) : null);

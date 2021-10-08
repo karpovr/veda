@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 $.fn.veda_boolean = function ( options ) {
-  const opts = {...$.fn.veda_boolean.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $( opts.template );
   const individual = opts.individual;
   const property_uri = opts.property_uri;
@@ -72,6 +72,6 @@ $.fn.veda_boolean = function ( options ) {
   return this;
 };
 
-$.fn.veda_boolean.defaults = {
+const defaults = {
   template: `<input type="checkbox" />`,
 };

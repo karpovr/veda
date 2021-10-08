@@ -9,7 +9,7 @@ import veda from '../../common/veda.js';
 import veda_multilingual from './veda_multilingual.js';
 
 $.fn.veda_multilingualText = function (options) {
-  const opts = {...$.fn.veda_multilingualText.defaults, ...options};
+  const opts = {...defaults, ...options};
   const self = $(this);
   const init = function () {
     self.empty();
@@ -32,7 +32,7 @@ $.fn.veda_multilingualText = function (options) {
   return this;
 };
 
-$.fn.veda_multilingualText.defaults = {
+const defaults = {
   template: `
 <div class="input-group">
   <div class="input-group-addon"><small class="language-tag"></small></div>

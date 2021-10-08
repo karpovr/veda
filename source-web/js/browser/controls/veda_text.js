@@ -7,7 +7,7 @@ import autosize from 'autosize';
 import veda_literal from './veda_literal.js';
 
 $.fn.veda_text = function ( options ) {
-  const opts = {...$.fn.veda_text.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
@@ -28,7 +28,7 @@ $.fn.veda_text = function ( options ) {
   return this;
 };
 
-$.fn.veda_text.defaults = {
+const defaults = {
   template: `<textarea class="form-control" rows="1" />`,
   parser: function (input) {
     return (input ? String(input) : null);

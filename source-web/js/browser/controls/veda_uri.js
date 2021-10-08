@@ -3,7 +3,7 @@
 import $ from 'jquery';
 
 $.fn.veda_uri = function ( options ) {
-  const opts = {...$.fn.veda_uri.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $( opts.template );
   const individual = opts.individual;
 
@@ -39,6 +39,6 @@ $.fn.veda_uri = function ( options ) {
   return this;
 };
 
-$.fn.veda_uri.defaults = {
+const defaults = {
   template: `<input type="text" class="form-control" autocomplete="on" />`,
 };

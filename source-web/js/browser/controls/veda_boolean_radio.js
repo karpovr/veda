@@ -7,7 +7,7 @@ import Util from '../../common/util.js';
 import IndividualModel from '../../common/individual_model.js';
 
 $.fn.veda_booleanRadio = function (params) {
-  const opts = {...$.fn.veda_booleanRadio.defaults, ...params};
+  const opts = {...defaults, ...params};
   const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
@@ -107,7 +107,7 @@ $.fn.veda_booleanRadio = function (params) {
   return this;
 };
 
-$.fn.veda_booleanRadio.defaults = {
+const defaults = {
   template: `
 <div class="radio">
   <label>

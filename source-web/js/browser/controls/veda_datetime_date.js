@@ -7,7 +7,7 @@ import moment from 'moment';
 import veda_dateTime from './veda_datetime.js';
 
 $.fn.veda_date = function ( options ) {
-  const opts = {...$.fn.veda_date.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = veda_dateTime.call(this, opts);
 
   const tabindex = this.attr('tabindex');
@@ -20,7 +20,7 @@ $.fn.veda_date = function ( options ) {
   return this;
 };
 
-$.fn.veda_date.defaults = {
+const defaults = {
   template: `
     <div class="input-group date">
       <span class="input-group-addon">

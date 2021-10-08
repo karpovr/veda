@@ -7,7 +7,7 @@ import IndividualModel from '../../common/individual_model.js';
 import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_checkbox = function (params) {
-  const opts = {...$.fn.veda_checkbox.defaults, ...params};
+  const opts = {...defaults, ...params};
   const self = this;
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
@@ -142,7 +142,7 @@ $.fn.veda_checkbox = function (params) {
   return this;
 };
 
-$.fn.veda_checkbox.defaults = {
+const defaults = {
   template: `
 <div class="checkbox">
   <label>

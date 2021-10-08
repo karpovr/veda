@@ -7,7 +7,7 @@ import IndividualModel from '../../common/individual_model.js';
 import veda_literal from './veda_literal.js';
 
 $.fn.veda_generic = function ( options ) {
-  const opts = {...$.fn.veda_generic.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = veda_literal.call(this, opts);
 
   const tabindex = this.attr('tabindex');
@@ -20,7 +20,7 @@ $.fn.veda_generic = function ( options ) {
   return this;
 };
 
-$.fn.veda_generic.defaults = {
+const defaults = {
   template: `<input type="text" class="form-control" autocomplete="on" />`,
   parser: function (input) {
     if (!input || !input.trim()) {

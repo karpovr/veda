@@ -9,7 +9,7 @@ import Util from '../../common/util.js';
 import {interpolate, ftQuery} from './veda_control_util.js';
 
 $.fn.veda_actor = function ( options ) {
-  const opts = {...$.fn.veda_actor.defaults, ...options};
+  const opts = {...defaults, ...options};
   const control = $( opts.template );
   const individual = opts.individual;
   const rel_uri = opts.property_uri;
@@ -589,7 +589,7 @@ $.fn.veda_actor = function ( options ) {
   return this;
 };
 
-$.fn.veda_actor.defaults = {
+const defaults = {
   template: `
 <div class="link-control">
   <div class="input-group">
