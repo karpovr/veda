@@ -1,6 +1,7 @@
 use crate::common::pause_if_overload;
 use ini::Ini;
 use std::io::{Error, ErrorKind};
+use std::time;
 use std::{fs, io, thread};
 use stopwatch::Stopwatch;
 use systemstat::{Platform, System};
@@ -17,6 +18,8 @@ use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::search::clickhouse_client::CHClient;
 use v_v8::v_common::v_api::api_client::MStorageClient;
 use v_v8::v_common::v_api::obj::{OptAuthorize, ResultCode};
+use v_v8::v_common::v_queue::consumer::Consumer;
+use v_v8::v_common::v_queue::record::Mode;
 
 pub(crate) fn exec_js_on_query<'a>(path_to_query: &str, path_to_js: &str) {
     thread::spawn(move || inproc_storage_manager());
@@ -45,6 +48,10 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
     workplace.load_ext_scripts(&sys_ticket.id);
 
     let f = fs::read_to_string(path_to_js)?;
+
+    let consumer_name = "fanout_sql";
+    let queue_name = "individuals-flow";
+    let base_path = "./data";
 
     let str_script = "\
       (function () { \
@@ -111,6 +118,21 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
             if sw.elapsed_ms() > 1000 {
                 pause_if_overload(&sys, max_load);
                 sw = Stopwatch::start_new();
+            } else {
+                match Consumer::new_with_mode(base_path, consumer_name, queue_name, Mode::Read) {
+                    Ok(mut queue_consumer) => {
+                        queue_consumer.open(false);
+                        queue_consumer.get_info();
+                        if queue_consumer.queue.get_info_of_part(queue_consumer.id, false).is_ok() {
+                            if queue_consumer.count_popped + 1000 < queue_consumer.queue.count_pushed {
+                                thread::sleep(time::Duration::from_millis(100));
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        error!("fail read queue, err={:?}", e);
+                    }
+                }
             }
         }
     }

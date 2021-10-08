@@ -22,7 +22,7 @@ use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::onto::individual::Individual;
 use v_v8::v_common::onto::onto::Onto;
 use v_v8::v_common::search::common::FTQuery;
-use v_v8::v_common::storage::storage::StorageMode;
+use v_v8::v_common::storage::common::StorageMode;
 use v_v8::v_common::v_api::api_client::{IndvOp, MStorageClient};
 use v_v8::v_common::v_api::obj::ResultCode;
 use v_v8::v_common::v_queue::consumer::Consumer;
