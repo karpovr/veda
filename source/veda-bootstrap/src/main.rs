@@ -230,7 +230,7 @@ impl App {
         let mut test_indv = Individual::default();
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
-        if self.backend.mstorage_api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).is_ok() {
+        if self.backend.mstorage_api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).is_err() {
             error!("failed to store test individual, uri = {}", test_indv_id);
             return false;
         }
