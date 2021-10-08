@@ -4,7 +4,7 @@ import $ from 'jquery';
 
 import moment from 'moment';
 
-import veda_dateTime from './veda_datetime_generic.js';
+import veda_dateTime from './veda_datetime.js';
 
 $.fn.veda_dateTime = function ( options ) {
   const opts = {...$.fn.veda_dateTime.defaults, ...options};
