@@ -121,7 +121,9 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
                         queue_consumer.open(false);
                         queue_consumer.get_info();
                         if queue_consumer.queue.get_info_of_part(queue_consumer.id, false).is_ok() {
+                            info!("queue_consumer.count_popped={}, queue_consumer.queue.count_pushed={}", queue_consumer.count_popped, queue_consumer.queue.count_pushed);
                             if queue_consumer.count_popped + 1000 < queue_consumer.queue.count_pushed {
+                                info!("sleep...");
                                 thread::sleep(time::Duration::from_millis(100));
                             }
                         }
