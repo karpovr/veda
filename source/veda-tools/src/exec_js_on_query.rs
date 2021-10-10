@@ -51,7 +51,7 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
 
     let consumer_name = "fanout_sql";
     let queue_name = "individuals-flow";
-    let base_path = "./data";
+    let base_path = "./data/queue";
 
     let str_script = "\
       (function () { \
