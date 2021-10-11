@@ -29,9 +29,9 @@ v-s:TechnicalDocument
   rdfs:subClassOf v-s:Financial ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:ClassifiedRus ;
-  v-s:labelPattern "{@.v-s:shortLabel} - {@.v-s:title} - {@.v-s:hasClassifierSectionOfProjectDocumentation.v-s:shortLabel} - {@.v-s:hasClassifierMarkOfWorkingDrawingsSet.v-s:shortLabel}" ;
   rdfs:label "Технический документ"@ru ;
   rdfs:label "Technical document"@en ;
+  v-s:labelPattern "{@.v-s:shortLabel} - {@.v-s:title} - {@.v-s:hasClassifierSectionOfProjectDocumentation.v-s:shortLabel} - {@.v-s:hasClassifierMarkOfWorkingDrawingsSet.v-s:shortLabel}" ;
   v-s:hasNumeration v-s:RegistrationNumberYearNumeration2_6 ;
 .
 

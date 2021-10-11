@@ -64,9 +64,9 @@ v-s:Action
   rdfs:subClassOf v-s:Document ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:registrationNumber} - {@.v-s:description [0,100]}" ;
   rdfs:label "Мероприятие"@ru ;
   rdfs:label "Action"@en ;
+  v-s:labelPattern "{@.v-s:registrationNumber} - {@.v-s:description [0,100]}" ;
 #  v-ui:hasTemplate v-s:Action_Template ;
 .
 # --- В связи с вводом класса возникает предикат v-s:hasAction. Он описан в классе v-s:Activity
@@ -230,6 +230,7 @@ v-s:CS_ScheduledAction
   v-s:hasClass v-s:ScheduledAction ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:ScheduledActionTemplate;
+  v-s:labelPattern "{@.v-s:dateToPlan} - {@.v-s:description [0,100]}" ;
   v-s:loadPriority 15 ;
 .
 v-s:ScheduledActionTemplate

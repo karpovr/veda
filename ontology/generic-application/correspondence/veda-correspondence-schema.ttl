@@ -97,9 +97,9 @@ v-s:Letter
   rdfs:subClassOf v-s:Deliverable2 ;
   rdfs:subClassOf v-s:Journaling ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description}" ;
   rdfs:label "Письмо"@ru ;
   rdfs:label "Letter"@en ;
+  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description}" ;
 .
 
 v-s:hasLetterRegistrationRecordSender
@@ -185,9 +185,9 @@ v-s:IncomingLetter
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Letter ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description [0,100]}..." ;
   rdfs:label "Входящее письмо"@ru ;
   rdfs:label "Incoming letter"@en ;
+  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description [0,100]}..." ;
 .
 
 # -------------------------------------------------------------- v-s:OutgoingLetter --
@@ -195,9 +195,9 @@ v-s:OutgoingLetter
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Letter ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description [0,100]}..." ;
   rdfs:label "Исходящее письмо"@ru ;
   rdfs:label "Outgoing letter"@en ;
+  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description [0,100]}..." ;
 .
 
 # -------------------------------------------------------------- v-s:Delivery --
@@ -210,9 +210,9 @@ v-s:Delivery
   rdfs:subClassOf v-s:Embedded ;
   rdfs:subClassOf v-s:UserSearchableDocument;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:backwardTarget.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:backwardTarget.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:backwardTarget.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:backwardTarget.v-s:description}" ;
   rdfs:label "Доставка"@ru ;
   rdfs:label "Delivery"@en ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:backwardTarget.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:backwardTarget.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:backwardTarget.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:backwardTarget.v-s:description}" ;
 .
   v-s:PsDeliveryMethodForDelivery
     rdf:type v-ui:ObjectPropertySpecification ;

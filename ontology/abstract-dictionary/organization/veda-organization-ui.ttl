@@ -240,6 +240,7 @@ v-s:CS_Organization
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:hasSubsidiary ;
   v-ui:defaultTemplate v-s:OrganizationTemplate ;
+  v-s:hasLinksTree v-s:OrganizationLinksTree
   v-s:loadPriority 15 ;
 .
 v-s:OrganizationTemplate
@@ -768,6 +769,7 @@ v-s:CS_Appointment
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:occupation, v-s:employee ;
   v-ui:defaultTemplate v-s:AppointmentTemplate ;
+  v-s:labelPattern "{@.v-s:employee.rdfs:label} {@.v-s:occupation.rdfs:label} {@.v-s:hasDelegationPurpose.v-s:shortLabel}";
   v-s:loadPriority 15 ;
 .
 v-s:AppointmentTemplate

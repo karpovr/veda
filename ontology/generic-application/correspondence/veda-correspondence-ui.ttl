@@ -47,6 +47,7 @@ v-s:CS_IncomingLetter
   v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasLetterRegistrationRecordSender, v-s:recipient,
   v-s:hasLetterRegistrationRecordRecipient, v-s:sender, v-s:hasDelivery ;
   v-ui:defaultTemplate v-s:LetterTemplate;
+  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label}(№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description [0,100]}..." ;
   v-s:loadPriority 15 ;
 .
 
@@ -65,6 +66,7 @@ v-s:CS_OutgoingLetter
   v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasLetterRegistrationRecordSender, v-s:recipient,
   v-s:hasLetterRegistrationRecordRecipient, v-s:sender, v-s:hasDelivery ;
   v-ui:defaultTemplate v-s:LetterTemplate;
+  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description [0,100]}..." ;
   v-s:loadPriority 15 ;
 .
 
@@ -99,6 +101,7 @@ v-s:CS_Letter
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasLetterRegistrationRecordSender, v-s:recipient, v-s:hasLetterRegistrationRecordRecipient,  v-s:sender, v-s:hasDelivery  ;
   v-ui:defaultTemplate v-s:LetterTemplate;
+  v-s:labelPattern "{@.v-s:sender.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordSender.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordSender.v-s:registrationDate}) -> {@.v-s:recipient.v-s:correspondentOrganization.rdfs:label} (№{@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationNumber}, {@.v-s:hasLetterRegistrationRecordRecipient.v-s:registrationDate}) - {@.v-s:hasDocumentKind.v-s:shortLabel} - {@.v-s:description}" ;
   v-s:loadPriority 15 ;
 .
 v-s:LetterTemplate

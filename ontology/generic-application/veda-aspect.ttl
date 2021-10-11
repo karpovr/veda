@@ -166,18 +166,10 @@ v-s:PersonalAspect
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:Aspect ;
   rdfs:subClassOf v-s:Labeled ;
-  v-s:labelPattern "{@.v-s:owner.rdfs:label}" ;
   rdfs:label "Персональный аспект"@ru ;
   rdfs:label "Personal aspect"@en ;
 .
-v-s:CS_PersonalAspect
-  rdf:type v-s:ClassSpecification ;
-  rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
-  v-s:hasClass v-s:PersonalAspect ;
-  v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
-  v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
-  v-s:loadPriority 15 ;
-.
+
 
 # ----------------------------------------------------- v-s:BusinessAspect --
 v-s:BusinessAspect
@@ -200,10 +192,11 @@ v-s:TS_PersonalAspect
 .
 v-s:CS_PersonalAspect
   rdf:type v-s:ClassSpecification ;
-  rdfs:label "Спецификация класса v-s:PersonalAspect "@ru, "Class specification v-s:PersonalAspect "@en;
+  rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
   v-s:hasClass v-s:PersonalAspect ;
-  v-s:isShelfLifeAlways true ;
+  v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
   v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
+  v-s:labelPattern "{@.v-s:owner.rdfs:label}" ;
   v-s:loadPriority 15 ;
 .
 v-s:PersonalAspectTemplate
