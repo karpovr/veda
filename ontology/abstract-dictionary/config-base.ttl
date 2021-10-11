@@ -1045,9 +1045,9 @@ for (var i = 0; i < types.length; i++) {
   for (var specInd = 0; specInd < result.length;specInd++) {
     print("  spec: ", result[specInd]);
     var spec = get_individual(veda.ticket, result[specInd]);
-    if (spec["v-s:listProperties"] == undefined) continue;
-    for (var propInd = 0; propInd < spec["v-s:listProperties"].length; propInd++) {
-      var property = spec["v-s:listProperties"][propInd];
+    if (spec["v-s:hasDeletedProperties"] == undefined) continue;
+    for (var propInd = 0; propInd < spec["v-s:hasDeletedProperties"].length; propInd++) {
+      var property = spec["v-s:hasDeletedProperties"][propInd];
       print("    property.data: ", property.data);
       if (!veda.Util.hasValue(document, property.data)) continue;
       var propValues = document[property.data];
@@ -1132,11 +1132,11 @@ for (var i = 0; i < result.length; i++) {
     var dateProperty = veda.Util.hasValue(spec, "v-s:dateProperties")? spec["v-s:dateProperties"][0].data : "v-s:created";
     var forClass = spec["v-s:hasClass"][0].data;
     var timeLife = spec["v-s:shelfLife"][0].data;
-    var listProperties = spec["v-s:listProperties"];
+    var deletedProperties = spec["v-s:hasDeletedProperties"];
     
     // print("forClass: ", forClass);
     // print("timeLife: ", timeLife);
-    // print("listProperties: ", veda.Util.toJson(listProperties));
+    // print("deletedProperties: ", veda.Util.toJson(deletedProperties));
 
     var datePeriod = [new Date(+lastDate-msInDay*(365)*timeLife-1), new Date(+today-msInDay*365*timeLife)];
     var docQueryString = "'rdf:type'==='"+forClass+"' && '"+dateProperty+"'==["+ datePeriod[0].toISOString() +","+ datePeriod[1].toISOString() +"]";

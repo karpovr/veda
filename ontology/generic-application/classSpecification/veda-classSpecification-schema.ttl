@@ -55,6 +55,40 @@ v-s:listProperties
     rdfs:label "v-s:listProperties property specification in v-s:ClassSpecification"@en ;
   . 
 
+v-s:hasDeletedProperties
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Поля для удаления"@ru ;
+  rdfs:label "Fields to delete"@en ;
+  rdfs:range owl:ObjectProperty ;
+  rdfs:domain v-s:ClassSpecification;
+.
+  v-s:PS_hasDeletedProperties_ClassSpecification
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:ClassSpecification ;
+    v-ui:forProperty v-s:hasDeletedProperties ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация cвойства v-s:hasDeletedProperties в v-s:ClassSpecification"@ru ;
+    rdfs:label "v-s:hasDeletedProperties property specification in v-s:ClassSpecification"@en ;
+  . 
+
+v-s:hasGenericProperties
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Основные поля"@ru ;
+  rdfs:label "Generic properties"@en ;
+  rdfs:range owl:ObjectProperty ;
+  rdfs:domain v-s:ClassSpecification;
+.
+  v-s:PS_hasGenericProperties_ClassSpecification
+    rdf:type v-ui:DatatypePropertySpecification ;
+    v-ui:forClass v-s:ClassSpecification ;
+    v-ui:forProperty v-s:hasGenericProperties ;
+    v-ui:minCardinality 0 ;
+    v-ui:maxCardinality 100 ;
+    rdfs:label "Спецификация cвойства v-s:hasGenericProperties в v-s:ClassSpecification"@ru ;
+    rdfs:label "v-s:hasGenericProperties property specification in v-s:ClassSpecification"@en ;
+  . 
+
 #-----Срок хранения
 v-s:shelfLife
   rdf:type owl:ObjectProperty ;

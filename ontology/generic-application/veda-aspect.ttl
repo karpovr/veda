@@ -195,6 +195,7 @@ v-s:CS_PersonalAspect
   rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
   v-s:hasClass v-s:PersonalAspect ;
   v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
+  v-s:hasDeletedProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
   v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
   v-s:labelPattern "{@.v-s:owner.rdfs:label}" ;
   v-s:loadPriority 15 ;
