@@ -228,7 +228,7 @@ v-s:CS_ScheduledAction
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:ScheduledAction "@ru, "Class specification v-s:ScheduledAction "@en;
   v-ui:forClass v-s:ScheduledAction ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-s:ScheduledActionTemplate;
   v-s:labelPattern "{@.v-s:dateToPlan} - {@.v-s:description [0,100]}" ;
   v-s:loadPriority 15 ;

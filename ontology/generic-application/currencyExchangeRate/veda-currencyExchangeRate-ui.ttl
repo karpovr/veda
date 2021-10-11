@@ -26,7 +26,7 @@ v-s:CS_CurrencyExchangeRate
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:CurrencyExchangeRate "@ru, "Class specification v-s:CurrencyExchangeRate "@en;
   v-ui:forClass v-s:CurrencyExchangeRate ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-s:CurrencyExchangeRateTemplate ;
   v-s:loadPriority 15 ;
 .

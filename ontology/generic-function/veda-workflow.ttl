@@ -535,7 +535,7 @@ v-s:CS_Net
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Net "@ru, "Class specification v-wf:Net "@en;
   v-ui:forClass v-wf:Net ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:NetTemplate;
   v-s:loadPriority 15 ;
 .
@@ -663,7 +663,7 @@ v-wf:CS_Process
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Process "@ru, "Class specification v-wf:Process "@en;
   v-ui:forClass v-wf:Process ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ProcessTemplate;
   v-s:loadPriority 15 ;
 .
@@ -902,7 +902,7 @@ v-wf:CS_Task
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Task "@ru, "Class specification v-wf:Task "@en;
   v-ui:forClass v-wf:Task ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:TaskTemplateAsProperties;
   v-s:loadPriority 15 ;
 .
@@ -1308,7 +1308,7 @@ v-wf:CS_Condition
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Condition"@ru, "Class specification v-wf:Condition"@en;
   v-ui:forClass v-wf:Condition ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ConditionTemplateAsProperties;
   v-s:loadPriority 15 ;
 .
@@ -1322,7 +1322,7 @@ v-wf:CS_InputCondition
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:InputCondition"@ru, "Class specification v-wf:InputCondition"@en;
   v-ui:forClass v-wf:InputCondition ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ConditionTemplateAsProperties;
   v-s:loadPriority 15 ;
 .
@@ -1336,7 +1336,7 @@ v-wf:CS_OutputCondition
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:OutputCondition"@ru, "Class specification v-wf:OutputCondition"@en;
   v-ui:forClass v-wf:OutputCondition ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ConditionTemplateAsProperties;
   v-s:loadPriority 15 ;
 .
@@ -1414,7 +1414,7 @@ v-wf:CS_Flow
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Flow "@ru, "Class specification v-wf:Flow"@en;
   v-ui:forClass v-s:PropertySpecification ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:FlowTemplateAsProperties;
   v-s:loadPriority 15 ;
 .
@@ -1579,7 +1579,7 @@ v-wf:CS_WorkItem
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:WorkItem "@ru, "Class specification v-wf:WorkItem "@en;
   v-ui:forClass v-wf:WorkItem ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:WorkItemTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1690,7 +1690,7 @@ v-s:CS_WorkOrder
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:WorkOrder"@ru, "Class specification v-wf:WorkOrder"@en;
   v-ui:forClass v-wf:WorkOrder ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:WorkOrderTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1765,7 +1765,7 @@ v-s:CS_DecisionForm
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:DecisionForm "@ru, "Class specification v-wf:DecisionForm "@en;
   v-ui:forClass v-wf:DecisionForm ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:DecisionFormTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2750,7 +2750,7 @@ v-s:CS_TaskGiven
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:TaskGiven "@ru, "Class specification v-wf:TaskGiven"@en;
   v-ui:forClass  v-wf:TaskGiven;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:TaskGivenTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2791,7 +2791,7 @@ v-s:CS_TaskCompleted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:TaskCompleted "@ru, "Class specification v-wf:TaskCompleted "@en;
   v-ui:forClass v-wf:TaskCompleted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:TaskCompletedTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2842,7 +2842,7 @@ v-s:CS_ProcessStarted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:ProcessStarted "@ru, "Class specification v-wf:ProcessStarted"@en;
   v-ui:forClass v-wf:ProcessStarted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ProcessEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2856,7 +2856,7 @@ v-s:CS_ProcessStopped
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:ProcessStopped "@ru, "Class specification v-wf:ProcessStopped"@en;
   v-ui:forClass v-wf:ProcessStopped;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ProcessEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2870,7 +2870,7 @@ v-s:CS_ProcessCompleted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:ProcessCompleted "@ru, "Class specification v-wf:ProcessCompleted"@en;
   v-ui:forClass v-wf:ProcessCompleted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:ProcessEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2915,7 +2915,7 @@ v-s:CS_SubProcessStarted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:SubProcessStarted"@ru, "Class specification v-wf:SubProcessStarted"@en;
   v-ui:forClass v-wf:SubProcessStarted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:SubProcessStartedEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2939,7 +2939,7 @@ v-s:CS_WorkItemStarted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:WorkItemStarted"@ru, "Class specification v-wf:WorkItemStarted"@en;
   v-ui:forClass v-wf:WorkItemStarted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:WorkItemStartedEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -2985,7 +2985,7 @@ v-wf:CS_WorkOrderStarted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:WorkOrderStarted "@ru, "Class specification v-wf:WorkOrderStarted "@en;
   v-ui:forClass v-wf:WorkOrderStarted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:WorkOrderStartedEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -3008,7 +3008,7 @@ v-wf:CS_DecisionFormStarted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:DecisionFormStarted"@ru, "Class specification v-wf:DecisionFormStarted "@en;
   v-ui:forClass v-wf:DecisionFormStarted ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:DecisionFormStartedEventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -3059,7 +3059,7 @@ v-wf:CS_TraceRecord
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:TraceRecord"@ru, "Class specification v-wf:TraceRecord "@en;
   v-ui:forClass v-wf:TraceRecord ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:TraceRecordTemplate;
   v-s:loadPriority 15 ;
 .
@@ -3443,7 +3443,7 @@ v-s:CS_Transform
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Transform "@ru, "Class specification v-wf:Transform "@en;
   v-ui:forClass v-wf:Transform ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:TransformationTemplate;
   v-s:loadPriority 15 ;
 .

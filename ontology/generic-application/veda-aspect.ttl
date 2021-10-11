@@ -304,7 +304,7 @@ v-s:CS_Aspect
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Aspect "@ru, "Class specification v-s:Aspect "@en;
   v-ui:forClass v-s:Aspect ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-s:AspectTemplate ;
   v-s:loadPriority 15 ;
 .

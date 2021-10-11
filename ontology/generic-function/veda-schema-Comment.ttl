@@ -78,7 +78,7 @@ v-s:CS_Comment
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Comment "@ru, "Class specification v-s:Comment "@en;
   v-ui:forClass v-s:Comment  ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-s:listPropertie v-s:attachment;
   v-ui:defaultTemplate v-s:CommentsTemplate;
   v-s:loadPriority 15 ;
@@ -158,7 +158,7 @@ v-s:CS_Comment
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Comment "@ru, "Class specification v-s:Comment "@en;
   v-ui:forClass v-s:Comment ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-s:SingleCommentTemplate;
   v-s:loadPriority 15 ;
 .

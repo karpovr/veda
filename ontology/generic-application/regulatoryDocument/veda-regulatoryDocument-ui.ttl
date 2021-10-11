@@ -25,7 +25,7 @@ v-s:CS_Addendum
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Addendum"@ru, "Class specification v-s:Addendum"@en;
   v-ui:forClass v-s:Addendum ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-s:listPropertie v-s:attachment ;
   v-ui:defaultTemplate v-s:AddendumTemplate ;
   v-s:loadPriority 15 ;

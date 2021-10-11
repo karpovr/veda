@@ -524,7 +524,7 @@ v-s:CS_PropertySpecification
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:PropertySpecification "@ru, "Class specification v-ui:PropertySpecification "@en;
   v-ui:forClass v-s:PropertySpecification ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:PropertySpecificationTemplate;
   v-s:loadPriority 15 ;
 .
@@ -645,7 +645,7 @@ v-s:CS_DatatypePropertySpecification
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:DatatypePropertySpecification "@ru, "Class specification v-ui:DatatypePropertySpecification "@en;
   v-ui:forClass v-ui:DatatypePropertySpecification ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:DatatypePropertySpecificationTemplate;
   v-s:loadPriority 15 ;
 .
@@ -816,7 +816,7 @@ v-s:CS_ObjectPropertySpecification
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:ObjectPropertySpecification  "@ru, "Class specification v-s:ObjectPropertySpecification "@en;
   v-ui:forClass v-s:ObjectPropertySpecification  ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:ObjectPropertySpecificationTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1037,7 +1037,7 @@ v-s:CS_ClassTemplateTemplate
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:ClassTemplate "@ru, "Class specification v-ui:ClassTemplate "@en;
   v-ui:forClass v-ui:ClassTemplate ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:ClassTemplateTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1073,7 +1073,7 @@ v-s:CS_ClassModel
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:ClassModel "@ru, "Class specification v-ui:ClassModel "@en;
   v-ui:forClass v-ui:ClassModel ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:ClassModelTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1109,7 +1109,7 @@ v-s:CS_Event
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Event"@ru, "Class specification v-s:Event"@en;
   v-ui:forClass v-s:Event ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:EventTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1211,7 +1211,7 @@ v-s:CS_Module
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Module "@ru, "Class specification v-s:Module "@en;
   v-ui:forClass v-s:Module ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:ModuleTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1353,7 +1353,7 @@ v-s:CS_Membership
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Membership "@ru, "Class specification v-s:Membership "@en;
   v-ui:forClass v-s:Membership ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:MembershipTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1628,7 +1628,7 @@ v-s:CS_PermissionStatement
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:PermissionStatement "@ru, "Class specification v-s:PermissionStatement "@en;
   v-ui:forClass v-s:PermissionStatement ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:PermissionStatementTemplate;
   v-s:loadPriority 15 ;
 .
@@ -1840,7 +1840,7 @@ v-s:CS_Group
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Group  "@ru, "Class specification v-s:Group  "@en;
   v-ui:forClass v-s:Group ;
-  v-s:isShelfLifeAlways true ;
+  v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:GroupTemplate;
   v-s:loadPriority 15 ;
 .
