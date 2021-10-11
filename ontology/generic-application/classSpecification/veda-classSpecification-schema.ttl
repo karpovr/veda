@@ -22,11 +22,13 @@ v-s:ClassSpecification
   rdfs:subClassOf v-s:Labeled ;
   rdfs:label "Спецификация класса"@ru ;
   rdfs:label "Class specification"@en ;
-  v-s:labelPattern "{@.v-s:hasClass}" ;
+  v-s:labelPattern "{@.v-ui:forClass}" ;
 .
 
 
-#-----Класс 
+#-----Класс
+#v-ui:forClass
+#не используется был заменён на v-ui:forClass 
 v-s:hasClass
   rdf:type owl:ObjectProperty ;
   rdfs:label "Класс"@ru ;
@@ -55,6 +57,7 @@ v-s:listProperties
     rdfs:label "v-s:listProperties property specification in v-s:ClassSpecification"@en ;
   . 
 
+#-----Поля для удаления
 v-s:hasDeletedProperties
   rdf:type owl:ObjectProperty ;
   rdfs:label "Поля для удаления"@ru ;
@@ -72,6 +75,7 @@ v-s:hasDeletedProperties
     rdfs:label "v-s:hasDeletedProperties property specification in v-s:ClassSpecification"@en ;
   . 
 
+#-----Основные поля
 v-s:hasGenericProperties
   rdf:type owl:ObjectProperty ;
   rdfs:label "Основные поля"@ru ;

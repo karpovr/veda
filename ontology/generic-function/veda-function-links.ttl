@@ -176,7 +176,7 @@ v-s:TS_Link
 v-s:CS_Link
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Link "@ru, "Class specification v-s:Link "@en;
-  v-s:hasClass v-s:Link ;
+  v-ui:forClass v-s:Link ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:LinkTemplate;
   v-s:loadPriority 15 ;
@@ -245,7 +245,7 @@ v-s:TS_LinksTree
 v-s:CS_
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:LinksTree "@ru, "Class specification v-s:LinksTree "@en;
-  v-s:hasClass v-s:LinksTree ;
+  v-ui:forClass v-s:LinksTree ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:LinksTreeTemplate;
   v-s:loadPriority 15 ;

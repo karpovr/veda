@@ -146,7 +146,7 @@ v-s:TS_RequestDelegation
 v-s:CS_RequestDelegation
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:RequestDelegation "@ru, "Class specification v-s:RequestDelegation "@en;
-  v-s:hasClass v-s:RequestDelegation ;
+  v-ui:forClass v-s:RequestDelegation ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-s:loadPriority 15 ;
@@ -160,7 +160,7 @@ v-s:TS_RequestDelegationUser
 v-s:CS_RequestDelegationUser
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:RequestDelegationUser "@ru, "Class specification v-s:RequestDelegationUser "@en;
-  v-s:hasClass v-s:RequestDelegationUser ;
+  v-ui:forClass v-s:RequestDelegationUser ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-s:loadPriority 15 ;
@@ -174,7 +174,7 @@ v-s:TS_RequestDelegationAdmin
 v-s:CS_RequestDelegationAdmin
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:RequestDelegationAdmin "@ru, "Class specification v-s:RequestDelegationAdmin "@en;
-  v-s:hasClass v-s:RequestDelegationAdmin ;
+  v-ui:forClass v-s:RequestDelegationAdmin ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:RequestDelegationTemplate;
   v-s:loadPriority 15 ;

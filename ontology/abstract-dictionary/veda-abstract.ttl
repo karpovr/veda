@@ -1683,7 +1683,7 @@ v-s:TS_Deletable
 v-s:CS_Deletable
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Deletable "@ru, "Class specification v-s:Deletable "@en;
-  v-s:hasClass v-s:Deletable ;
+  v-ui:forClass v-s:Deletable ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:DeletableTemplate ;
   v-s:loadPriority 15 ;

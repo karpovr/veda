@@ -193,7 +193,7 @@ v-s:TS_PersonalAspect
 v-s:CS_PersonalAspect
   rdf:type v-s:ClassSpecification ;
   rdfs:label "v-s:PersonalAspect"@ru, "v-s:PersonalAspect"@en ;
-  v-s:hasClass v-s:PersonalAspect ;
+  v-ui:forClass v-s:PersonalAspect ;
   v-s:listProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
   v-s:hasDeletedProperties v-s:hasCreate, v-s:hasRegistry, v-s:hasReport ;
   v-ui:defaultTemplate v-s:PersonalAspectTemplate ;
@@ -303,7 +303,7 @@ v-s:TS_Aspect
 v-s:CS_Aspect
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Aspect "@ru, "Class specification v-s:Aspect "@en;
-  v-s:hasClass v-s:Aspect ;
+  v-ui:forClass v-s:Aspect ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:AspectTemplate ;
   v-s:loadPriority 15 ;

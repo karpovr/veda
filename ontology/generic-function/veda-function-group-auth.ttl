@@ -140,7 +140,7 @@ v-s:subjectGroupGeneratorValue
 v-s:CS_GroupGenerator
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:GroupGenerator"@ru, "Class specification v-s:GroupGenerator"@en;
-  v-s:hasClass v-s:GroupGenerator ;
+  v-ui:forClass v-s:GroupGenerator ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:GroupGeneratorTemplate ;
   v-s:loadPriority 15 ;
@@ -278,7 +278,7 @@ v-s:TS_PermissionGenerator
 v-s:CS_PermissionGenerator
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:PermissionGenerator"@ru, "Class specification v-s:PermissionGenerator"@en;
-  v-s:hasClass v-s:PermissionGenerator ;
+  v-ui:forClass v-s:PermissionGenerator ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:PermissionGeneratorTemplate ;
   v-s:loadPriority 15 ;

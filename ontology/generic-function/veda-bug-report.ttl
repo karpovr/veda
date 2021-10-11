@@ -86,7 +86,7 @@ v-s:TS_BugReport
 v-s:CS_BugReport
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:BugReport"@ru, "Class specification v-s:BugReport"@en;
-  v-s:hasClass v-s:BugReport ;
+  v-ui:forClass v-s:BugReport ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:BugReportTemplate ;
   v-s:loadPriority 15 ;

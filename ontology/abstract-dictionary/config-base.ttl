@@ -1039,7 +1039,7 @@ for (var i = 0; i < types.length; i++) {
   var type = types[i];
   print("type.data: ", type.data);
   if (type.data == "v-s:Deletable") continue;
-  var querySpec = "'rdf:type'=='v-s:ClassSpecification' && 'v-s:hasClass'==='"+type.data+"'";
+  var querySpec = "'rdf:type'=='v-s:ClassSpecification' && 'v-ui:forClass'==='"+type.data+"'";
   print("  querySpec: ", querySpec);
   var result = query(veda.ticket, querySpec).result;
   for (var specInd = 0; specInd < result.length;specInd++) {
@@ -1124,13 +1124,13 @@ for (var i = 0; i < result.length; i++) {
       print("Skip " + result[i] + ": empty shelfLife");
       continue; 
     };
-    if (!veda.Util.hasValue(spec, "v-s:hasClass")) {
+    if (!veda.Util.hasValue(spec, "v-ui:forClass")) {
       print("Skip " + result[i] + ": empty hasClass");
       continue; 
     };
 
     var dateProperty = veda.Util.hasValue(spec, "v-s:dateProperties")? spec["v-s:dateProperties"][0].data : "v-s:created";
-    var forClass = spec["v-s:hasClass"][0].data;
+    var forClass = spec["v-ui:forClass"][0].data;
     var timeLife = spec["v-s:shelfLife"][0].data;
     var deletedProperties = spec["v-s:hasDeletedProperties"];
     

@@ -333,7 +333,7 @@ v-s:TS_UserScript
 v-s:CS_UserScript
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:UserScript "@ru, "Class specification v-s:UserScript "@en;
-  v-s:hasClass v-s:UserScript ;
+  v-ui:forClass v-s:UserScript ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:UserScriptTemplate;
   v-s:loadPriority 15 ;
@@ -471,7 +471,7 @@ v-s:TS_Operation
 v-s:CS_Operation
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Operation "@ru, "Class specification v-s:Operation "@en;
-  v-s:hasClass v-s:Operation ;
+  v-ui:forClass v-s:Operation ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-s:loadPriority 15 ;
@@ -499,7 +499,7 @@ v-s:TS_GenericOperation
 v-s:CS_GenericOperation
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:GenericOperation "@ru, "Class specification v-s:GenericOperation "@en;
-  v-s:hasClass v-s:GenericOperation;
+  v-ui:forClass v-s:GenericOperation;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-s:loadPriority 15 ;
@@ -515,7 +515,7 @@ v-s:TS_OperationDelete
 v-s:CS_OperationDelete
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:OperationDelete "@ru, "Class specification v-s:OperationDelete "@en;
-  v-s:hasClass v-s:OperationDelete;
+  v-ui:forClass v-s:OperationDelete;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-s:loadPriority 15 ;
@@ -531,7 +531,7 @@ v-s:TS_OperationRemove
 v-s:CS_OperationRemove
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:OperationRemove "@ru, "Class specification v-s:OperationRemove "@en;
-  v-s:hasClass v-s:OperationRemove;
+  v-ui:forClass v-s:OperationRemove;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-s:loadPriority 15 ;
@@ -547,7 +547,7 @@ v-s:TS_OperationRestore
 v-s:CS_OperationRestore
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:OperationRestore "@ru, "Class specification v-s:OperationRestore "@en;
-  v-s:hasClass v-s:OperationRestore;
+  v-ui:forClass v-s:OperationRestore;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-s:loadPriority 15 ;
@@ -563,7 +563,7 @@ v-s:TS_OperationUpdate
 v-s:CS_OperationUpdate
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:OperationUpdate"@ru, "Class specification v-s:OperationUpdate "@en;
-  v-s:hasClass v-s:OperationUpdate;
+  v-ui:forClass v-s:OperationUpdate;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OperationTemplate;
   v-s:loadPriority 15 ;

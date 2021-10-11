@@ -93,7 +93,7 @@ v-s:TS_InternalDocument
 v-s:CS_InternalDocument
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:InternalDocument"@ru, "Class specification v-s:InternalDocument"@en;
-  v-s:hasClass v-s:InternalDocument ;
+  v-ui:forClass v-s:InternalDocument ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:InternalDocumentTemplate ;
   v-s:loadPriority 15 ;

@@ -24,7 +24,7 @@ v-s:TS_Contractor
 v-s:CS_Contractor
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Contractor "@ru, "Class specification v-s:Contractor "@en;
-  v-s:hasClass v-s:Contractor ;
+  v-ui:forClass v-s:Contractor ;
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:attachment, v-s:hasComment, v-s:hasContractorLock ;
   v-ui:defaultTemplate v-s:ContractorTemplate;

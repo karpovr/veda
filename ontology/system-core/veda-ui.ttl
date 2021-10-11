@@ -1102,7 +1102,7 @@ v-s:TS_Version
 v-s:CS_Version
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Version "@ru, "Class specification v-s:Version"@en;
-  v-s:hasClass v-s:Version ;
+  v-ui:forClass v-s:Version ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:VersionTemplate;
   v-s:loadPriority 15 ;
@@ -1532,7 +1532,7 @@ v-s:TS_Bundle
 v-s:CS_Bundle
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Bundle "@ru, "Class specification v-s:Bundle "@en;
-  v-s:hasClass v-s:Bundle ;
+  v-ui:forClass v-s:Bundle ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:LabelTemplate;
   v-s:loadPriority 15 ;
@@ -1942,7 +1942,7 @@ v-ui:FileMinTemplate
 v-s:CS_File
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:File "@ru, "Class specification v-s:File"@en;
-  v-s:hasClass v-s:File ;
+  v-ui:forClass v-s:File ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:FileTemplateWithComment;
   v-s:loadPriority 15 ;
@@ -2089,7 +2089,7 @@ v-s:TS_Journal
 v-s:CS_Journal
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Journal"@ru, "Class specification v-s:Journal"@en;
-  v-s:hasClass v-s:Journal ;
+  v-ui:forClass v-s:Journal ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:SimplifiedJournalTemplate;
   v-s:loadPriority 15 ;
@@ -2361,7 +2361,7 @@ v-s:TS_DocumentCreated
 v-s:CS_DocumentCreated
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:DocumentCreated"@ru, "Class specification v-s:DocumentCreated"@en;
-  v-s:hasClass v-s:DocumentCreated ;
+  v-ui:forClass v-s:DocumentCreated ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-s:loadPriority 15 ;
@@ -2375,7 +2375,7 @@ v-s:TS_DocumentUpdated
 v-s:CS_DocumentUpdated
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:DocumentUpdated"@ru, "Class specification v-s:DocumentUpdated"@en;
-  v-s:hasClass v-s:DocumentUpdated ;
+  v-ui:forClass v-s:DocumentUpdated ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-s:loadPriority 15 ;
@@ -2389,7 +2389,7 @@ v-s:TS_DocumentDeleted
 v-s:CS_DocumentDeleted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:DocumentDeleted"@ru, "Class specification v-s:DocumentDeleted"@en;
-  v-s:hasClass v-s:DocumentDeleted ;
+  v-ui:forClass v-s:DocumentDeleted ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-s:loadPriority 15 ;
@@ -2403,7 +2403,7 @@ v-s:TS_ProcessStarted
 v-s:CS_ProcessStarted
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:ProcessStarted"@ru, "Class specification v-s:ProcessStarted"@en;
-  v-s:hasClass v-s:ProcessStarted ;
+  v-ui:forClass v-s:ProcessStarted ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:DocumentEventTemplate;
   v-s:loadPriority 15 ;
@@ -2626,7 +2626,7 @@ v-s:TS_Tree
 v-s:CS_Tree
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:Tree "@ru, "Class specification v-ui:Tree"@en;
-  v-s:hasClass v-ui:Tree ;
+  v-ui:forClass v-ui:Tree ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-ui:TreeTemplate;
   v-s:loadPriority 15 ;

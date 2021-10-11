@@ -86,7 +86,7 @@ v-s:TS_Email
 v-s:CS_Email
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Email"@ru, "Class specification v-s:Email"@en;
-  v-s:hasClass v-s:Email ;
+  v-ui:forClass v-s:Email ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:EmailTemplate ;
   v-s:loadPriority 15 ;

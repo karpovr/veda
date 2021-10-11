@@ -236,7 +236,7 @@ v-s:TS_Organization
 v-s:CS_Organization
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Organization"@ru, "Class specification v-s:Organization"@en;
-  v-s:hasClass v-s:Organization ;
+  v-ui:forClass v-s:Organization ;
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:hasSubsidiary ;
   v-ui:defaultTemplate v-s:OrganizationTemplate ;
@@ -509,7 +509,7 @@ v-s:TS_Subsidiary
 v-s:CS_Subsidiary
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Subsidiary"@ru, "Class specification v-s:Subsidiary"@en;
-  v-s:hasClass v-s:Subsidiary ;
+  v-ui:forClass v-s:Subsidiary ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:SubsidiaryTemplate ;
   v-s:loadPriority 15 ;
@@ -586,7 +586,7 @@ v-s:TS_OrgGroup
 v-s:CS_OrgGroup
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:OrgGroup"@ru, "Class specification v-s:OrgGroup"@en;
-  v-s:hasClass v-s:OrgGroup ;
+  v-ui:forClass v-s:OrgGroup ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:OrgGroupTemplate ;
   v-s:loadPriority 15 ;
@@ -654,7 +654,7 @@ v-s:TS_Department rdf:type
 v-s:CS_Department
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Department"@ru, "Class specification v-s:Department"@en;
-  v-s:hasClass v-s:Department ;
+  v-ui:forClass v-s:Department ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:DepartmentTemplate ;
   v-s:loadPriority 15 ;
@@ -765,7 +765,7 @@ v-s:TS_Appointment
 v-s:CS_Appointment
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Appointment"@ru, "Class specification v-s:Appointment"@en;
-  v-s:hasClass v-s:Appointment ;
+  v-ui:forClass v-s:Appointment ;
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:occupation, v-s:employee ;
   v-ui:defaultTemplate v-s:AppointmentTemplate ;
@@ -1259,7 +1259,7 @@ v-ui:template """
 v-s:CS_Person
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Person "@ru, "Class specification v-s:Person "@en;
-  v-s:hasClass v-s:Person ;
+  v-ui:forClass v-s:Person ;
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:hasAppointmnet, v-s:hsaAccount, v-s:hasCommunicationMean ;
   v-ui:defaultTemplate v-s:PersonTemplate;
@@ -1825,7 +1825,7 @@ v-s:PersonEmbeddedTemplate
 v-s:CS_Position
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Position "@ru, "Class specification v-s:Position "@en;
-  v-s:hasClass v-s:Position ;
+  v-ui:forClass v-s:Position ;
   v-s:isShelfLifeAlways true ;
   v-s:listPropertie v-s:hasCommunicationMean ;
   v-ui:defaultTemplate v-s:PositionTemplate;
@@ -2188,7 +2188,7 @@ v-s:PositionEmbeddedTemplate
 v-s:CS_Account
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Account"@ru, "Class specification v-s:Account"@en;
-  v-s:hasClass v-s:Account ;
+  v-ui:forClass v-s:Account ;
   v-s:isShelfLifeAlways true ;
   v-ui:defaultTemplate v-s:AccountTemplate ;
   v-s:loadPriority 15 ;
