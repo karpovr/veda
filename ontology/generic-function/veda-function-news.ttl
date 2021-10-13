@@ -122,6 +122,8 @@ v-s:NewsTemplate
     <em about="v-s:content" property="rdfs:label" class="-view edit search"></em>
     <div about="@" property="v-s:content" class="markdown view -edit -search"></div>
     <veda-control data-type="text" rows="10" property="v-s:content" class="-view edit search"></veda-control>
+    <div about="@" rel="v-s:attachment" data-template="v-ui:FileTemplate" data-embedded="true"></div>
+    <veda-control data-type="file" property="v-s:attachment" class="-view edit search"></veda-control>
     <b><small about="@" property="v-s:created" class="view -edit -search"></small></b>
     <em about="v-s:created" property="rdfs:label" class="-view edit search"></em>
     <veda-control data-type="date" property="v-s:created" class="-view edit search"></veda-control>
