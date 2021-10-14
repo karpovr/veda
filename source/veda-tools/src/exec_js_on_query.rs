@@ -116,23 +116,29 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
             }
 
             if sw.elapsed_ms() > 1000 {
-                match Consumer::new_with_mode(base_path, consumer_name, queue_name, Mode::Read) {
-                    Ok(mut queue_consumer) => {
-                        queue_consumer.open(false);
-                        queue_consumer.get_info();
-                        if queue_consumer.queue.get_info_of_part(queue_consumer.id, false).is_ok() {
-                            //info!("queue_consumer.count_popped={}, queue_consumer.queue.count_pushed={}", queue_consumer.count_popped, queue_consumer.queue.count_pushed);
-                            if queue_consumer.count_popped + 1000 < queue_consumer.queue.count_pushed {
-                                info!("sleep...");
-                                thread::sleep(time::Duration::from_millis(500));
+                loop {
+                    match Consumer::new_with_mode(base_path, consumer_name, queue_name, Mode::Read) {
+                        Ok(mut queue_consumer) => {
+                            queue_consumer.open(false);
+                            queue_consumer.get_info();
+                            if queue_consumer.queue.get_info_of_part(queue_consumer.id, false).is_ok() {
+                                //info!("queue_consumer.count_popped={}, queue_consumer.queue.count_pushed={}", queue_consumer.count_popped, queue_consumer.queue.count_pushed);
+                                if queue_consumer.count_popped + 1000 < queue_consumer.queue.count_pushed {
+                                    info!("sleep...");
+                                    thread::sleep(time::Duration::from_millis(5000));
+                                } else {
+                                    break;
+                                }
+                            } else {
+                                break;
                             }
                         }
-                    }
-                    Err(e) => {
-                        error!("fail read queue, err={:?}", e);
+                        Err(e) => {
+                            error!("fail read queue, err={:?}", e);
+                            break;
+                        }
                     }
                 }
-
                 pause_if_overload(&sys, max_load);
                 sw = Stopwatch::start_new();
             }

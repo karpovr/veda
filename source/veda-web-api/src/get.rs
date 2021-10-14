@@ -1,4 +1,4 @@
-use crate::common::{get_module_name, get_ticket, GetOperationStateRequest, QueryRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{get_module_name, get_ticket, GetOperationStateRequest, PrefixesCache, QueryRequest, SparqlClient, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -32,11 +32,13 @@ pub(crate) async fn query_post(
     ft_client: web::Data<Option<Mutex<FTClient>>>,
     xr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
+    prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
     let ticket = get_ticket(&req, &params.ticket);
-    query(&ticket, &*data, ticket_cache, ft_client, xr, ch_client, db).await
+    query(&ticket, &*data, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache).await
 }
 
 pub(crate) async fn query_get(
@@ -44,10 +46,12 @@ pub(crate) async fn query_get(
     ft_client: web::Data<Option<Mutex<FTClient>>>,
     xr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
+    prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
-    query(&params.ticket, &*params, ticket_cache, ft_client, xr, ch_client, db).await
+    query(&params.ticket, &*params, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache).await
 }
 
 async fn query(
@@ -57,14 +61,17 @@ async fn query(
     ft_client: web::Data<Option<Mutex<FTClient>>>,
     wxr: web::Data<Option<Mutex<XapianReader>>>,
     ch_client: web::Data<Mutex<CHClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
     db: web::Data<AStorage>,
+    prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
-    let res = if data.sql.is_some() {
-        let (res, user) = check_ticket(ticket, &ticket_cache, &db).await?;
-        if res != ResultCode::Ok {
-            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-        }
-
+    let (res, user) = check_ticket(ticket, &ticket_cache, &db).await?;
+    if res != ResultCode::Ok {
+        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+    }
+    let res = if data.sparql.is_some() {
+        sparql_client.lock().await.prepare_sparql(&user.unwrap_or_default(), data.sparql.clone().unwrap(), db, prefix_cache).await
+    } else if data.sql.is_some() {
         ch_client
             .lock()
             .await
@@ -93,11 +100,6 @@ async fn query(
         let mut res_out_list = vec![];
         fn add_out_element(id: &str, ctx: &mut Vec<String>) {
             ctx.push(id.to_owned());
-        }
-
-        let (res, user) = check_ticket(ticket, &ticket_cache, &db).await?;
-        if res != ResultCode::Ok {
-            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         }
 
         ft_req.user = user.unwrap_or_default();

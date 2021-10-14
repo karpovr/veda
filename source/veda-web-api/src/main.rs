@@ -9,12 +9,14 @@ mod update;
 
 extern crate serde_derive;
 extern crate serde_json;
+
 use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, is_ticket_valid};
-use crate::common::BASE_PATH;
+use crate::common::{PrefixesCache, SparqlClient, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state, query_get, query_post};
 use crate::update::*;
 use actix_files::{Files, NamedFile};
+use actix_web::client::Client;
 use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
 use futures::lock::Mutex;
 use futures::{select, FutureExt};
@@ -110,7 +112,6 @@ async fn main() -> std::io::Result<()> {
     info!("listen {}", port);
 
     let mut server_future = HttpServer::new(move || {
-        let (read, write) = evmap::new();
         let db = if let Some(cfg) = &tt_config {
             AStorage {
                 tt: Some(cfg.clone().build()),
@@ -140,6 +141,9 @@ async fn main() -> std::io::Result<()> {
             None
         };
 
+        let (ticket_cache_read, ticket_cache_write) = evmap::new();
+        let (prefixes_cache_read, prefixes_cache_write) = evmap::new();
+
         App::new()
             .wrap(middleware::Compress::default())
             .wrap(
@@ -151,9 +155,18 @@ async fn main() -> std::io::Result<()> {
                     .header("Cache-Control", "no-cache, no-store, must-revalidate, private"),
             )
             .data(TicketCache {
-                read,
-                write: Arc::new(Mutex::new(write)),
+                read: ticket_cache_read,
+                write: Arc::new(Mutex::new(ticket_cache_write)),
             })
+            .data(PrefixesCache {
+                read: prefixes_cache_read,
+                write: Arc::new(Mutex::new(prefixes_cache_write)),
+            })
+            .data(Mutex::new(SparqlClient {
+                point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "query", "default").to_string(),
+                client: Client::default(),
+                az: LmdbAzContext::new(),
+            }))
             .data(db)
             .data(xr)
             .data(ft_client)

@@ -31,6 +31,7 @@ pub(crate) async fn load_file(
     }
 
     if let Some(file_id) = req.path().strip_prefix("/files/") {
+        info!("file_id: {}, user: {:?}", file_id, user_uri);
         let (mut file_info, res_code) = get_individual_from_db(file_id, &user_uri.unwrap_or_default(), &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
