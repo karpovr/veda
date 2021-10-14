@@ -137,6 +137,10 @@ if [ -z $1 ] || [ $1 == "ft-indexer" ] || [ $1 == "veda-ft-indexer" ] || [ $1 ==
     build_server_module "veda-ft-indexer"
 fi
 
+if [ -z $1 ] || [ $1 == "sparql-indexer" ] || [ $1 == "sparql-ft-indexer" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-sparql-indexer"
+fi
+
 if [ -z $1 ] || [ $1 == "ft-query" ] || [ $1 == "veda-ft-query" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     build_server_module "veda-ft-query"
 fi
