@@ -163,7 +163,7 @@ const defaults = {
       let value = String(input);
       const lang = $(el).attr('lang');
       if (lang) {
-        value = value + '@' + lang;
+        value = value + '^' + lang;
       }
       return value;
     }
