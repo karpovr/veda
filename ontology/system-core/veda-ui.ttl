@@ -1878,7 +1878,10 @@ v-ui:SectionHeaderTemplate
     var parentHeader = self.closest(".section-header");
     parentHeader.siblings(".section-content").toggle();
   });
-
+  var sectionContent = template.closest(".section-header").siblings(".section-content");
+  if (sectionContent.data("default-closed") == true) {
+    $("span.glyphicon", template).click();
+  };
 </script>
 """
 .
