@@ -58,7 +58,14 @@ impl Default for AuthConf {
     }
 }
 
-pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, login: Option<&str>, xr: &mut XapianReader, module: &mut Backend) -> Ticket {
+pub(crate) fn get_ticket_trusted(
+    conf: &AuthConf,
+    tr_ticket_id: Option<&str>,
+    login: Option<&str>,
+    ip: Option<&str>,
+    xr: &mut XapianReader,
+    module: &mut Backend,
+) -> Ticket {
     let login = login.unwrap_or_default();
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
 
@@ -119,7 +126,7 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
 
                     let mut ticket = Ticket::default();
                     if is_allow_trusted || tr_ticket.user_login == user_login {
-                        create_new_ticket(login, &user_id, conf.ticket_lifetime, &mut ticket, &mut module.storage);
+                        create_new_ticket(login, &user_id, ip.unwrap_or_default(), conf.ticket_lifetime, &mut ticket, &mut module.storage);
                         info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;

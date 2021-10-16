@@ -73,6 +73,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
             let login = v["login"].as_str().unwrap_or_default();
             let password = v["password"].as_str().unwrap_or_default();
             let secret = v["secret"].as_str().unwrap_or_default();
+            let ip = v["addr"].as_str().unwrap_or_default();
 
             let user_stat = suspicious.entry(login.to_owned()).or_insert_with(UserStat::default);
 
@@ -80,6 +81,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
                 conf,
                 login,
                 password,
+                ip,
                 secret,
                 sys_ticket: systicket,
                 xr,
@@ -107,7 +109,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
             return Message::from(res.to_string().as_bytes());
         }
         "get_ticket_trusted" => {
-            let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), xr, module);
+            let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), v["addr"].as_str(), xr, module);
 
             let mut res = JSONValue::default();
             res["type"] = json!("ticket");

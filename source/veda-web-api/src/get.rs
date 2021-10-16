@@ -38,7 +38,7 @@ pub(crate) async fn query_post(
     prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
     let ticket = get_ticket(&req, &params.ticket);
-    query(&ticket, &*data, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache).await
+    query(&ticket, &*data, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache, req).await
 }
 
 pub(crate) async fn query_get(
@@ -50,8 +50,9 @@ pub(crate) async fn query_get(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     prefix_cache: web::Data<PrefixesCache>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    query(&params.ticket, &*params, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache).await
+    query(&params.ticket, &*params, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache, req).await
 }
 
 async fn query(
@@ -64,8 +65,9 @@ async fn query(
     sparql_client: web::Data<Mutex<SparqlClient>>,
     db: web::Data<AStorage>,
     prefix_cache: web::Data<PrefixesCache>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user) = check_ticket(ticket, &ticket_cache, &db).await?;
+    let (res, user) = check_ticket(ticket, &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -141,8 +143,9 @@ pub(crate) async fn get_individuals(
     payload: web::Json<Uris>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &db).await?;
+    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -163,8 +166,9 @@ pub(crate) async fn get_individual(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

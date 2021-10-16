@@ -25,7 +25,7 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, &db).await?;
+    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

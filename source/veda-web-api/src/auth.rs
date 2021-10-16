@@ -1,6 +1,6 @@
 use crate::common::{AuthenticateRequest, TicketLoginRequest, TicketRequest, TicketUriRequest};
-use actix_web::get;
 use actix_web::http::StatusCode;
+use actix_web::{get, HttpRequest};
 use actix_web::{web, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
@@ -17,20 +17,26 @@ pub(crate) async fn get_ticket_trusted(
     params: web::Query<TicketLoginRequest>,
     ticket_cache: web::Data<TicketCache>,
     tt: web::Data<AStorage>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &tt).await?;
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
 }
 
 #[get("/is_ticket_valid")]
-pub(crate) async fn is_ticket_valid(params: web::Query<TicketRequest>, ticket_cache: web::Data<TicketCache>, tt: web::Data<AStorage>) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &tt).await?;
+pub(crate) async fn is_ticket_valid(
+    params: web::Query<TicketRequest>,
+    ticket_cache: web::Data<TicketCache>,
+    tt: web::Data<AStorage>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
 }
 
 #[get("/authenticate")]
-pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>) -> io::Result<HttpResponse> {
-    return match auth.lock().await.authenticate(&params.login, &params.password, &params.secret) {
+pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
+    return match auth.lock().await.authenticate(&params.login, &params.password, req.peer_addr(), &params.secret) {
         Ok(r) => Ok(HttpResponse::Ok().json(r)),
         Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
     };
@@ -42,8 +48,9 @@ pub(crate) async fn get_rights(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -72,8 +79,9 @@ pub(crate) async fn get_membership(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -113,8 +121,9 @@ pub(crate) async fn get_rights_origin(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
+    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

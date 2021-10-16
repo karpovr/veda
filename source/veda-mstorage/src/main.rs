@@ -23,9 +23,9 @@ use v_common::onto::parser::parse_raw;
 use v_common::storage::common::{StorageId, StorageMode, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::*;
+use v_common::v_authorization::common::{Access, Trace};
 use v_common::v_queue::queue::Queue;
 use v_common::v_queue::record::Mode;
-use v_common::v_authorization::common::{Access, Trace};
 
 pub const MSTORAGE_ID: i64 = 1;
 
@@ -173,15 +173,21 @@ fn request_prepare(
         tickets_cache.insert(ticket_id.to_string(), ticket.clone());
     }
 
-    if !(ticket.is_ticket_valid() == ResultCode::Ok) {
-        error!("ticket [{}] not valid", ticket.id);
-        return Err(ResultCode::TicketExpired);
-    }
-
     let assigned_subsystems = v["assigned_subsystems"].as_i64();
     let event_id = v["event_id"].as_str();
     let src = v["src"].as_str();
     let cmd;
+
+    let addr = if let Ok(v) = v["addr"].as_str().unwrap_or_default().parse::<std::net::SocketAddr>() {
+        Some(v)
+    } else {
+        None
+    };
+
+    if !(ticket.is_ticket_valid(addr) == ResultCode::Ok) {
+        error!("ticket [{}] not valid", ticket.id);
+        return Err(ResultCode::TicketExpired);
+    }
 
     match v["function"].as_str().unwrap_or_default() {
         "put" => {
