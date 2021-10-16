@@ -96,42 +96,42 @@ pub(crate) fn get_ticket_trusted(conf: &AuthConf, tr_ticket_id: Option<&str>, lo
             Err(e) => error!("failed to get authorization group, user = {}, err = {}", &tr_ticket.user_uri, e),
         }
 
-        if is_allow_trusted {
-            let candidate_account_ids = get_candidate_users_of_login(login, module, xr);
-            if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
-                for account_id in &candidate_account_ids.result {
-                    if let Some(account) = module.get_individual(account_id, &mut Individual::default()) {
-                        let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
-                        if user_id.is_empty() {
-                            error!("user id is null, user_indv = {}", account);
-                            continue;
-                        }
+        let candidate_account_ids = get_candidate_users_of_login(login, module, xr);
+        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
+            for account_id in &candidate_account_ids.result {
+                if let Some(account) = module.get_individual(account_id, &mut Individual::default()) {
+                    let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
+                    if user_id.is_empty() {
+                        error!("user id is null, user_indv = {}", account);
+                        continue;
+                    }
 
-                        let user_login = account.get_first_literal("v-s:login").unwrap_or_default();
-                        if user_login.is_empty() {
-                            warn!("user login {:?} not equal request login {}, skip", user_login, login);
-                            continue;
-                        }
+                    let user_login = account.get_first_literal("v-s:login").unwrap_or_default();
+                    if user_login.is_empty() {
+                        warn!("user login {:?} not equal request login {}, skip", user_login, login);
+                        continue;
+                    }
 
-                        if user_login.to_lowercase() != login.to_lowercase() {
-                            warn!("user login {} not equal request login {}, skip", user_login, login);
-                            continue;
-                        }
+                    if user_login.to_lowercase() != login.to_lowercase() {
+                        warn!("user login {} not equal request login {}, skip", user_login, login);
+                        continue;
+                    }
 
-                        let mut ticket = Ticket::default();
+                    let mut ticket = Ticket::default();
+                    if is_allow_trusted || tr_ticket.user_login == user_login {
                         create_new_ticket(login, &user_id, conf.ticket_lifetime, &mut ticket, &mut module.storage);
                         info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;
                     } else {
-                        warn!("trusted authenticate: account {} not pass, login {}", account_id, login);
+                        error!("failed trusted authentication: user {} must be a member of group {} or self", tr_ticket.user_uri, ALLOW_TRUSTED_GROUP);
                     }
+                } else {
+                    warn!("trusted authenticate: account {} not pass, login {}", account_id, login);
                 }
-            } else {
-                error!("failed trusted authentication: not found users for login {}", login);
             }
         } else {
-            error!("failed trusted authentication: user {} must be a member of group {}", tr_ticket.user_uri, ALLOW_TRUSTED_GROUP);
+            error!("failed trusted authentication: not found users for login {}", login);
         }
     } else {
         error!("trusted authenticate: problem ticket {}", tr_ticket_id);
