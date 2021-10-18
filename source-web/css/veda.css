@@ -571,11 +571,9 @@ ol.no-marks, ul.no-marks {
 .link-control {
   position: relative;
 }
-
 .link-control .input-group {
   width: 100%;
 }
-
 .link-control .fulltext-menu {
   display: none;
   width: 100%;
@@ -591,13 +589,17 @@ ol.no-marks, ul.no-marks {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   background-clip: padding-box;
 }
-
-.link-control .header {
+.link-control .header, .link-control .footer {
   width: 100%;
   padding: 8px 15px;
-  border-bottom: 1px solid #ccc;
   background-color: #eee;
   clear: both;
+}
+.link-control .header {
+  border-bottom: 1px solid #ccc;
+}
+.link-control .footer {
+  border-top: 1px solid #ccc;
 }
 .link-control .header > .actions > * {
   cursor:pointer;
@@ -607,22 +609,18 @@ ol.no-marks, ul.no-marks {
 .link-control .header > .actions > *:last-child {
   margin-right: 0px;
 }
-
 .link-control .suggestions {
   padding: 10px;
 }
-
 .link-control .suggestion {
   padding: 5px;
   color: inherit;
   display: block;
   text-decoration: none;
 }
-
 .link-control .suggestion.active {
   background-color: #eee;
 }
-
 .link-control .suggestion.selected {
   color: #ffffff!important;
   background-color: #428bca;
@@ -631,18 +629,15 @@ ol.no-marks, ul.no-marks {
   color: #ffffff!important;
   background-color: #3774A8;
 }
-
 .link-control .suggestion.selected:hover {
   color: #ffffff!important;
   background-color: #3b7db5;
   cursor: pointer;
 }
-
 .link-control .suggestion:hover {
   background-color: #eee;
   cursor: pointer;
 }
-
 .link-control .input-group > .form-control:first-child {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
