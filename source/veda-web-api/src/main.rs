@@ -5,18 +5,23 @@ mod auth;
 mod common;
 mod files;
 mod get;
+mod query;
+mod sparql_client;
 mod update;
+mod vql_query_client;
 
 extern crate serde_derive;
 extern crate serde_json;
 
 use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
-use crate::common::{PrefixesCache, SparqlClient, BASE_PATH};
+use crate::common::{PrefixesCache, BASE_PATH};
 use crate::files::{load_file, save_file};
-use crate::get::{get_individual, get_individuals, get_operation_state, query_get, query_post};
+use crate::get::{get_individual, get_individuals, get_operation_state};
+use crate::query::{query_get, query_post, VQLClient, VQLClientConnectType};
+use crate::sparql_client::SparqlClient;
 use crate::update::*;
+use crate::vql_query_client::VQLHttpClient;
 use actix_files::{Files, NamedFile};
-use actix_web::client::Client;
 use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
 use futures::lock::Mutex;
 use futures::{select, FutureExt};
@@ -64,7 +69,6 @@ struct Info {
     data: Option<String>,
 }
 async fn apps_doc(info: web::Path<Info>) -> std::io::Result<NamedFile> {
-    eprintln!("@1 {}/{:?}", info.app_name, info.data);
     if let Some(v) = &info.data {
         if v == "manifest" {
             return NamedFile::open(format!("public/{}/{}", info.app_name, &info.data.clone().unwrap()).parse::<PathBuf>().unwrap());
@@ -127,19 +131,27 @@ async fn main() -> std::io::Result<()> {
         let mut ch = CHClient::new(Module::get_property("query_search_db").unwrap_or_default());
         ch.connect();
 
-        let xr = if use_direct_ft_query {
-            info!("use direct-ft-query");
-            Some(Mutex::new(XapianReader::new_without_init("russian").expect("fail init direct-ft-query")))
-        } else {
-            None
-        };
+        let mut ft_client = VQLClient::default();
 
-        let ft_client = if !use_direct_ft_query {
+        if use_direct_ft_query {
+            info!("use direct-ft-query");
+            ft_client.xr = Some(XapianReader::new_without_init("russian").expect("fail init direct-ft-query"));
+            ft_client.query_type = VQLClientConnectType::DIRECT;
+        }
+
+        if !use_direct_ft_query {
             info!("use ft-query-service");
-            Some(Mutex::new(FTClient::new(Module::get_property("ft_query_service_url").unwrap_or_default())))
-        } else {
-            None
-        };
+
+            if let Ok(url) = Module::get_property("ft_query_service_url").unwrap_or_default().parse::<Url>() {
+                if url.scheme() == "tcp" {
+                    ft_client.nng_client = Some(FTClient::new(url.to_string()));
+                    ft_client.query_type = VQLClientConnectType::NNG;
+                } else {
+                    ft_client.http_client = Some(VQLHttpClient::new(url.to_string()));
+                    ft_client.query_type = VQLClientConnectType::HTTP;
+                }
+            }
+        }
 
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
         let (prefixes_cache_read, prefixes_cache_write) = evmap::new();
@@ -162,14 +174,9 @@ async fn main() -> std::io::Result<()> {
                 read: prefixes_cache_read,
                 write: Arc::new(Mutex::new(prefixes_cache_write)),
             })
-            .data(Mutex::new(SparqlClient {
-                point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "query", "default").to_string(),
-                client: Client::default(),
-                az: LmdbAzContext::new(),
-            }))
+            .data(Mutex::new(SparqlClient::default()))
             .data(db)
-            .data(xr)
-            .data(ft_client)
+            .data(Mutex::new(ft_client))
             .data(Mutex::new(ch))
             .data(Mutex::new(LmdbAzContext::new()))
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))

@@ -1,19 +1,13 @@
-use crate::common::{get_module_name, get_ticket, GetOperationStateRequest, PrefixesCache, QueryRequest, SparqlClient, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
-use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::common::c_load_onto;
 use v_common::module::info::ModuleInfo;
-use v_common::onto::onto_index::OntoIndex;
-use v_common::search::clickhouse_client::CHClient;
-use v_common::search::common::{FTQuery, QueryResult};
-use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
-use v_common::v_api::obj::{OptAuthorize, ResultCode};
+use v_common::v_api::obj::ResultCode;
 
 #[get("/get_operation_state")]
 pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequest>) -> io::Result<HttpResponse> {
@@ -23,117 +17,6 @@ pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequ
         }
     }
     return Ok(HttpResponse::Ok().content_type("text/plain").body("-1"));
-}
-
-pub(crate) async fn query_post(
-    req: HttpRequest,
-    params: web::Query<QueryRequest>,
-    data: web::Json<QueryRequest>,
-    ft_client: web::Data<Option<Mutex<FTClient>>>,
-    xr: web::Data<Option<Mutex<XapianReader>>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
-    ticket_cache: web::Data<TicketCache>,
-    db: web::Data<AStorage>,
-    prefix_cache: web::Data<PrefixesCache>,
-) -> io::Result<HttpResponse> {
-    let ticket = get_ticket(&req, &params.ticket);
-    query(&ticket, &*data, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache, req).await
-}
-
-pub(crate) async fn query_get(
-    params: web::Query<QueryRequest>,
-    ft_client: web::Data<Option<Mutex<FTClient>>>,
-    xr: web::Data<Option<Mutex<XapianReader>>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
-    ticket_cache: web::Data<TicketCache>,
-    db: web::Data<AStorage>,
-    prefix_cache: web::Data<PrefixesCache>,
-    req: HttpRequest,
-) -> io::Result<HttpResponse> {
-    query(&params.ticket, &*params, ticket_cache, ft_client, xr, ch_client, sparql_client, db, prefix_cache, req).await
-}
-
-async fn query(
-    ticket: &Option<String>,
-    data: &QueryRequest,
-    ticket_cache: web::Data<TicketCache>,
-    ft_client: web::Data<Option<Mutex<FTClient>>>,
-    wxr: web::Data<Option<Mutex<XapianReader>>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
-    db: web::Data<AStorage>,
-    prefix_cache: web::Data<PrefixesCache>,
-    req: HttpRequest,
-) -> io::Result<HttpResponse> {
-    let (res, user) = check_ticket(ticket, &ticket_cache, req.peer_addr(), &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
-    let res = if data.sparql.is_some() {
-        sparql_client.lock().await.prepare_sparql(&user.unwrap_or_default(), data.sparql.clone().unwrap(), db, prefix_cache).await
-    } else if data.sql.is_some() {
-        ch_client
-            .lock()
-            .await
-            .select_async(
-                &user.unwrap_or_default(),
-                &data.sql.clone().unwrap_or_default(),
-                data.top.unwrap_or_default() as i64,
-                data.limit.unwrap_or_default() as i64,
-                data.from.unwrap_or_default() as i64,
-                OptAuthorize::YES,
-            )
-            .await?
-    } else {
-        let mut ft_req = FTQuery {
-            ticket: ticket.clone().unwrap_or_default(),
-            user: data.user.clone().unwrap_or_default(),
-            query: data.query.clone().unwrap_or_default(),
-            sort: data.sort.clone().unwrap_or_default(),
-            databases: data.databases.clone().unwrap_or_default(),
-            reopen: data.reopen.unwrap_or_default(),
-            top: data.top.unwrap_or_default(),
-            limit: data.limit.unwrap_or_default(),
-            from: data.from.unwrap_or_default(),
-        };
-
-        let mut res_out_list = vec![];
-        fn add_out_element(id: &str, ctx: &mut Vec<String>) {
-            ctx.push(id.to_owned());
-        }
-
-        ft_req.user = user.unwrap_or_default();
-
-        if !(ft_req.query.contains("==") || ft_req.query.contains("&&") || ft_req.query.contains("||")) {
-            ft_req.query = "'*' == '".to_owned() + &ft_req.query + "'";
-        }
-
-        if let Some(mxr) = wxr.get_ref() {
-            let mut xr = mxr.lock().await;
-
-            if let Some(t) = OntoIndex::get_modified() {
-                if t > xr.onto_modified {
-                    c_load_onto(&db, &mut xr.onto).await;
-                    xr.onto_modified = t;
-                }
-            }
-            if xr.index_schema.is_empty() {
-                xr.c_load_index_schema(&db).await;
-            }
-
-            let mut res = xr.query_use_collect_fn(&ft_req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
-            res.result = res_out_list;
-
-            res
-        } else if let Some(f) = ft_client.get_ref() {
-            f.lock().await.query(ft_req)
-        } else {
-            QueryResult::default()
-        }
-    };
-    Ok(HttpResponse::Ok().json(res))
 }
 
 #[post("/get_individuals")]
