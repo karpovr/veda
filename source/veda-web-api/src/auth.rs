@@ -14,10 +14,10 @@ use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACC
 
 #[get("get_ticket_trusted")]
 pub(crate) async fn get_ticket_trusted(
+    req: HttpRequest,
     params: web::Query<TicketLoginRequest>,
     ticket_cache: web::Data<TicketCache>,
     tt: web::Data<AStorage>,
-    req: HttpRequest,
 ) -> io::Result<HttpResponse> {
     let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))

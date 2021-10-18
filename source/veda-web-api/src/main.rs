@@ -10,7 +10,7 @@ mod update;
 extern crate serde_derive;
 extern crate serde_json;
 
-use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, is_ticket_valid};
+use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
 use crate::common::{PrefixesCache, SparqlClient, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state, query_get, query_post};
@@ -174,12 +174,16 @@ async fn main() -> std::io::Result<()> {
             .data(Mutex::new(LmdbAzContext::new()))
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))
             .data(Mutex::new(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default())))
-            .service(get_rights)
+            //
             .service(authenticate)
+            .service(get_ticket_trusted)
+            .service(is_ticket_valid)
+            .service(get_rights)
+            .service(get_rights_origin)
+            .service(get_membership)
+            //
             .service(get_individual)
             .service(get_individuals)
-            .service(is_ticket_valid)
-            .service(get_membership)
             .service(get_operation_state)
             .service(remove_individual)
             .service(remove_from_individual)
@@ -187,7 +191,6 @@ async fn main() -> std::io::Result<()> {
             .service(put_individuals)
             .service(add_to_individual)
             .service(set_in_individual)
-            .service(get_rights_origin)
             .service(load_file)
             .service(ping)
             .service(head)
