@@ -335,12 +335,12 @@ v-s:PersonalImageTemplate
   v-ui:forClass v-s:Person ;
   v-ui:template """
 <script>
-  this.on("v-s:hasImage", this.save);
+  individual.on("v-s:hasImage", individual.save);
   template.one("remove", function () {
-      this.off("v-s:hasImage", this.save);
+    individual.off("v-s:hasImage", individual.save);
   });
-  if ( !this.hasValue("v-s:hasImage") ) {
-    this["v-s:hasImage"] = [ new veda.IndividualModel("v-s:DefaultPhoto") ];
+  if ( !individual.hasValue("v-s:hasImage") ) {
+    individual["v-s:hasImage"] = [ new veda.IndividualModel("v-s:DefaultPhoto") ];
   }
 </script>
 <div class="sheet" style="display: flex; flex-flow: column; width: 100%">
