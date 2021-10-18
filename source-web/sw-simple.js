@@ -24,14 +24,6 @@ const API = [
   '/remove_from_individual',
   '/put_individuals',
 ];
-const NTLM = [
-  '/ntlm',
-  '/ntlm/',
-  '/no',
-  '/no/',
-  '/ad',
-  '/ad/',
-];
 
 addEventListener('message', (event) => {
   if (event.data === 'veda_version') {
@@ -61,9 +53,8 @@ self.addEventListener('fetch', function (event) {
   const url = new URL(event.request.url);
   const pathname = url.pathname;
   const isAPI = API.indexOf(pathname) >= 0;
-  const isNTLM = NTLM.indexOf(pathname) >= 0;
   const isFILES = pathname.indexOf('/files') === 0;
-  const isSTATIC = !isAPI && !isFILES && !isNTLM;
+  const isSTATIC = !isAPI && !isFILES;
   if (event.request.method === 'GET') {
     if (isSTATIC) {
       event.respondWith(handleFetch(event, STATIC));
