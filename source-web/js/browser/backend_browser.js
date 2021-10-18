@@ -219,9 +219,6 @@ browserBackend.get_membership = function (ticket, uri) {
 
 
 browserBackend.authenticate = function (login, password, secret) {
-  if (login == 'VedaNTLMFilter') {
-    login = 'cfg:Guest';
-  }
   const arg = login;
   const isObj = typeof arg === 'object';
   const params = {
@@ -256,7 +253,14 @@ browserBackend.get_ticket_trusted = function (ticket, login) {
       'login': isObj ? arg.login : login,
     },
   };
-  return call_server(params);
+  return call_server(params)
+    .then((result) => {
+      return {
+        ticket: result.id,
+        user_uri: result.user_uri,
+        end_time: Math.floor((result.end_time - 621355968000000000) / 10000),
+      };
+    });
 };
 
 browserBackend.is_ticket_valid = function (ticket) {
