@@ -66,17 +66,20 @@ pub(crate) fn get_ticket_trusted(
     xr: &mut XapianReader,
     module: &mut Backend,
 ) -> Ticket {
-    let login = login.unwrap_or_default();
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
+    let mut tr_ticket = module.get_ticket_from_db(tr_ticket_id);
 
+    let login = if let Some(l) = login {
+        l
+    } else {
+        &tr_ticket.user_login
+    };
     info!("get_ticket_trusted, login = {}, ticket = {}", login, tr_ticket_id);
 
     if login.is_empty() || tr_ticket_id.len() < 6 {
         warn!("trusted authenticate: invalid login {} or ticket {}", login, tr_ticket_id);
         return Ticket::default();
     }
-
-    let mut tr_ticket = module.get_ticket_from_db(tr_ticket_id);
 
     if tr_ticket.result == ResultCode::Ok {
         let mut is_allow_trusted = false;
@@ -105,28 +108,28 @@ pub(crate) fn get_ticket_trusted(
 
         let candidate_account_ids = get_candidate_users_of_login(login, module, xr);
         if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
-            for account_id in &candidate_account_ids.result {
-                if let Some(account) = module.get_individual(account_id, &mut Individual::default()) {
-                    let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
-                    if user_id.is_empty() {
+            for check_account_id in &candidate_account_ids.result {
+                if let Some(account) = module.get_individual(check_account_id, &mut Individual::default()) {
+                    let check_user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
+                    if check_user_id.is_empty() {
                         error!("user id is null, user_indv = {}", account);
                         continue;
                     }
 
-                    let user_login = account.get_first_literal("v-s:login").unwrap_or_default();
-                    if user_login.is_empty() {
-                        warn!("user login {:?} not equal request login {}, skip", user_login, login);
+                    let check_user_login = account.get_first_literal("v-s:login").unwrap_or_default();
+                    if check_user_login.is_empty() {
+                        warn!("user login {:?} not equal request login {}, skip", check_user_login, login);
                         continue;
                     }
 
-                    if user_login.to_lowercase() != login.to_lowercase() {
-                        warn!("user login {} not equal request login {}, skip", user_login, login);
+                    if check_user_login.to_lowercase() != login.to_lowercase() {
+                        warn!("user login {} not equal request login {}, skip", check_user_login, login);
                         continue;
                     }
 
                     let mut ticket = Ticket::default();
-                    if is_allow_trusted || tr_ticket.user_login == user_login {
-                        create_new_ticket(login, &user_id, ip.unwrap_or_default(), conf.ticket_lifetime, &mut ticket, &mut module.storage);
+                    if is_allow_trusted || tr_ticket.user_login.to_lowercase() == check_user_login.to_lowercase() {
+                        create_new_ticket(login, &check_user_id, ip.unwrap_or_default(), conf.ticket_lifetime, &mut ticket, &mut module.storage);
                         info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;
@@ -134,7 +137,7 @@ pub(crate) fn get_ticket_trusted(
                         error!("failed trusted authentication: user {} must be a member of group {} or self", tr_ticket.user_uri, ALLOW_TRUSTED_GROUP);
                     }
                 } else {
-                    warn!("trusted authenticate: account {} not pass, login {}", account_id, login);
+                    warn!("trusted authenticate: account {} not pass, login {}", check_account_id, login);
                 }
             }
         } else {

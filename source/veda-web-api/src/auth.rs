@@ -18,9 +18,16 @@ pub(crate) async fn get_ticket_trusted(
     params: web::Query<TicketLoginRequest>,
     ticket_cache: web::Data<TicketCache>,
     tt: web::Data<AStorage>,
+    auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
     let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &tt).await?;
-    Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
+    if res != ResultCode::Ok {
+        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+    }
+    return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), req.peer_addr()) {
+        Ok(r) => Ok(HttpResponse::Ok().json(r)),
+        Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
+    };
 }
 
 #[get("/is_ticket_valid")]
