@@ -51,7 +51,12 @@ ccus
 
 web-api
     module = web-api
-    args = --http_port=8080 --use-direct-ft-query=false
+    args = --http_port=8080 --use-direct-ft-query=true
+
+#ft-query
+#    module = web-api
+#    args = --http_port=8080 --use-direct-ft-query=true
+#    memory-limit = 5 Gb
 
 input-onto
 
