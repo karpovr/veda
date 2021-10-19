@@ -69,6 +69,9 @@ fn main() -> std::io::Result<()> {
         error!("failed to find parameter [{}] in properties file", param_name);
         return Ok(());
     }
+
+    let check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
+
     let main_module_url = main_module_url.unwrap();
 
     let server = Socket::new(Protocol::Rep0)?;
@@ -97,7 +100,7 @@ fn main() -> std::io::Result<()> {
         if let Ok(recv_msg) = server.recv() {
             let mut out_msg = JSONValue::default();
             out_msg["type"] = json!("OpResult");
-            let resp = request_prepare(&sys_ticket, &mut op_id, &recv_msg, &mut primary_storage, &mut queue_out, &mut mstorage_info, &mut tickets_cache);
+            let resp = request_prepare(&sys_ticket, &mut op_id, &recv_msg, &mut primary_storage, &mut queue_out, &mut mstorage_info, &mut tickets_cache, check_ticket_ip);
             if let Ok(v) = resp {
                 for el in v.iter() {
                     if el.res == ResultCode::Ok {
@@ -148,6 +151,7 @@ fn request_prepare(
     queue_out: &mut Queue,
     mstorage_info: &mut ModuleInfo,
     tickets_cache: &mut HashMap<String, Ticket>,
+    check_ticket_ip: bool,
 ) -> Result<Vec<Response>, ResultCode> {
     let v: JSONValue = if let Ok(v) = serde_json::from_slice(request.as_slice()) {
         v
@@ -185,7 +189,7 @@ fn request_prepare(
         None
     };
 
-    if !(ticket.is_ticket_valid(addr) == ResultCode::Ok) {
+    if !(ticket.is_ticket_valid(addr, check_ticket_ip) == ResultCode::Ok) {
         error!("ticket [{}] not valid", ticket.id);
         return Err(ResultCode::TicketExpired);
     }
