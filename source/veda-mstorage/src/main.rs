@@ -189,7 +189,7 @@ fn request_prepare(
         None
     };
 
-    if !(ticket.is_ticket_valid(addr, check_ticket_ip) == ResultCode::Ok) {
+    if !(ticket.is_ticket_valid(addr, check_ticket_ip & addr.is_some()) == ResultCode::Ok) {
         error!("ticket [{}] not valid", ticket.id);
         return Err(ResultCode::TicketExpired);
     }
