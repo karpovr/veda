@@ -6,7 +6,7 @@ use ring::{digest, pbkdf2, rand};
 use std::num::NonZeroU32;
 use v_common::az_impl::common::f_authorize;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module::create_new_ticket;
+use v_common::module::module::{create_new_ticket, Module};
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;
@@ -40,6 +40,7 @@ pub(crate) struct AuthConf {
     pub secret_lifetime: i64,
     pub pass_lifetime: i64,
     pub expired_pass_notification_template: Option<(String, String)>,
+    pub check_ticket_ip: bool
 }
 
 impl Default for AuthConf {
@@ -54,6 +55,7 @@ impl Default for AuthConf {
             secret_lifetime: 12 * 60 * 60,
             pass_lifetime: 90 * 24 * 60 * 60,
             expired_pass_notification_template: None,
+            check_ticket_ip: true
         }
     }
 }
@@ -233,6 +235,8 @@ pub(crate) fn read_duration_param(indv: &mut Individual, param: &str) -> Option<
 
 pub(crate) fn read_auth_configuration(backend: &mut Backend) -> AuthConf {
     let mut res = AuthConf::default();
+
+    res.check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
 
     if let Some(mut node) = backend.get_individual_s("cfg:standart_node") {
         if let Some(d) = read_duration_param(&mut node, "cfg:user_password_lifetime") {

@@ -153,6 +153,8 @@ async fn main() -> std::io::Result<()> {
             }
         }
 
+        let check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
+        info!("PARAM [check_ticket_ip] = {}", check_ticket_ip);
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
         let (prefixes_cache_read, prefixes_cache_write) = evmap::new();
 
@@ -169,6 +171,7 @@ async fn main() -> std::io::Result<()> {
             .data(TicketCache {
                 read: ticket_cache_read,
                 write: Arc::new(Mutex::new(ticket_cache_write)),
+                check_ticket_ip: check_ticket_ip,
             })
             .data(PrefixesCache {
                 read: prefixes_cache_read,
