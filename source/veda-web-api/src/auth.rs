@@ -20,7 +20,7 @@ pub(crate) async fn get_ticket_trusted(
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, extract_addr(&req), &tt).await?;
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &extract_addr(&req), &tt).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -37,7 +37,7 @@ pub(crate) async fn is_ticket_valid(
     tt: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, extract_addr(&req), &tt).await?;
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &extract_addr(&req), &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
 }
 
@@ -57,7 +57,7 @@ pub(crate) async fn get_rights(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -88,7 +88,7 @@ pub(crate) async fn get_membership(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -130,7 +130,7 @@ pub(crate) async fn get_rights_origin(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

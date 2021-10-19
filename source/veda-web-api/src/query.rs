@@ -78,7 +78,8 @@ async fn query(
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user) = check_ticket(ticket, &ticket_cache, extract_addr(&req), &db).await?;
+    let addr = extract_addr(&req);
+    let (res, user) = check_ticket(ticket, &ticket_cache, &addr, &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -145,7 +146,7 @@ async fn query(
             }
             VQLClientConnectType::HTTP => {
                 if let Some(n) = vc.http_client.as_mut() {
-                    res = n.query(ft_req).await;
+                    res = n.query(ticket, &addr, ft_req).await;
                 }
             }
             VQLClientConnectType::NNG => {

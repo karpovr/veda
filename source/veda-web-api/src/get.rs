@@ -28,7 +28,7 @@ pub(crate) async fn get_individuals(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, extract_addr(&req), &db).await?;
+    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -51,7 +51,7 @@ pub(crate) async fn get_individual(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
