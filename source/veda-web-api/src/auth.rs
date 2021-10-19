@@ -43,7 +43,7 @@ pub(crate) async fn is_ticket_valid(
 
 #[get("/authenticate")]
 pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
-    return match auth.lock().await.authenticate(&params.login, &params.password, req.peer_addr(), &params.secret) {
+    return match auth.lock().await.authenticate(&params.login, &params.password, extract_addr(&req), &params.secret) {
         Ok(r) => Ok(HttpResponse::Ok().json(r)),
         Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
     };
