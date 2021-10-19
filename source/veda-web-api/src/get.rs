@@ -1,4 +1,4 @@
-use crate::common::{get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{extract_addr, get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -28,7 +28,7 @@ pub(crate) async fn get_individuals(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -51,7 +51,7 @@ pub(crate) async fn get_individual(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

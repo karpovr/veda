@@ -3,6 +3,7 @@ use async_std::sync::Arc;
 use futures::lock::Mutex;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
+use std::net::IpAddr;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage};
 
@@ -134,4 +135,17 @@ pub(crate) async fn get_short_prefix(storage: &AStorage, full_prefix: &str, pref
     }
 
     full_prefix.to_owned()
+}
+
+pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
+    if let Some(xf) = req.headers().get(actix_web::http::header::HeaderName::from_static("x-real-ip")) {
+        if let Ok(xfu) = xf.to_str() {
+            let (f1, _) = xfu.split_once(',').unwrap_or((xfu, ""));
+            if let Ok(a) = f1.parse::<IpAddr>() {
+                return Some(a);
+            }
+        }
+    }
+
+    Some(req.peer_addr().unwrap().ip())
 }

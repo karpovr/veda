@@ -1,4 +1,4 @@
-use crate::common::{get_ticket, PrefixesCache, QueryRequest};
+use crate::common::{extract_addr, get_ticket, PrefixesCache, QueryRequest};
 use crate::sparql_client::SparqlClient;
 use crate::vql_query_client::VQLHttpClient;
 use actix_web::http::StatusCode;
@@ -78,7 +78,7 @@ async fn query(
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user) = check_ticket(ticket, &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user) = check_ticket(ticket, &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

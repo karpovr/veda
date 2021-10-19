@@ -1,4 +1,4 @@
-use crate::common::get_ticket;
+use crate::common::{extract_addr, get_ticket};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::http::header::ExtendedValue;
@@ -25,7 +25,7 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }

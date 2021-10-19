@@ -1,4 +1,4 @@
-use crate::common::{AuthenticateRequest, TicketLoginRequest, TicketRequest, TicketUriRequest};
+use crate::common::{extract_addr, AuthenticateRequest, TicketLoginRequest, TicketRequest, TicketUriRequest};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
 use actix_web::{web, HttpResponse};
@@ -20,11 +20,11 @@ pub(crate) async fn get_ticket_trusted(
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &tt).await?;
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, extract_addr(&req), &tt).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
-    return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), req.peer_addr()) {
+    return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), extract_addr(&req)) {
         Ok(r) => Ok(HttpResponse::Ok().json(r)),
         Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
     };
@@ -37,7 +37,7 @@ pub(crate) async fn is_ticket_valid(
     tt: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, req.peer_addr(), &tt).await?;
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, extract_addr(&req), &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
 }
 
@@ -57,7 +57,7 @@ pub(crate) async fn get_rights(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -88,7 +88,7 @@ pub(crate) async fn get_membership(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -130,7 +130,7 @@ pub(crate) async fn get_rights_origin(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, req.peer_addr(), &db).await?;
+    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
