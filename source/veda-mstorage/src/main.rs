@@ -10,6 +10,7 @@ use nng::{Message, Protocol, Socket};
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
+use std::net::IpAddr;
 use std::str;
 use v_common::az_impl::common::f_authorize;
 use v_common::module::info::ModuleInfo;
@@ -178,7 +179,7 @@ fn request_prepare(
     let src = v["src"].as_str();
     let cmd;
 
-    let addr = if let Ok(v) = v["addr"].as_str().unwrap_or_default().parse::<std::net::SocketAddr>() {
+    let addr = if let Ok(v) = v["addr"].as_str().unwrap_or_default().parse::<IpAddr>() {
         Some(v)
     } else {
         None
