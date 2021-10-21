@@ -1,9 +1,10 @@
-use crate::common::{extract_addr, AuthenticateRequest, TicketLoginRequest, TicketRequest, TicketUriRequest};
+use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
 use actix_web::{web, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
+use std::net::IpAddr;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
@@ -15,16 +16,28 @@ use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACC
 #[get("get_ticket_trusted")]
 pub(crate) async fn get_ticket_trusted(
     req: HttpRequest,
-    params: web::Query<TicketLoginRequest>,
+    params: web::Query<GetTicketTrustedRequest>,
     ticket_cache: web::Data<TicketCache>,
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &extract_addr(&req), &tt).await?;
+    let addr = extract_addr(&req);
+    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &addr, &tt).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
-    return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), extract_addr(&req)) {
+
+    let user_addr = if let Some(ip) = &params.ip {
+        if let Ok(i) = ip.parse::<IpAddr>() {
+            Some(i)
+        } else {
+            None
+        }
+    } else {
+        addr
+    };
+
+    return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), user_addr) {
         Ok(r) => Ok(HttpResponse::Ok().json(r)),
         Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
     };

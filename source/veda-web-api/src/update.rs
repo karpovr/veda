@@ -1,6 +1,6 @@
 use crate::common::{extract_addr, TicketRequest};
 use actix_web::http::StatusCode;
-use actix_web::{put, web, HttpResponse, HttpRequest};
+use actix_web::{put, web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
@@ -88,31 +88,61 @@ pub(crate) async fn update(
 }
 
 #[put("/put_individuals")]
-async fn put_individuals(    req: HttpRequest, params: web::Query<TicketRequest>, data: web::Json<JSONValue>, mstorage: web::Data<Mutex<MStorageClient>>) -> io::Result<HttpResponse> {
+async fn put_individuals(
+    req: HttpRequest,
+    params: web::Query<TicketRequest>,
+    data: web::Json<JSONValue>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
+) -> io::Result<HttpResponse> {
     update(extract_addr(&req), params, IndvOp::Put, data, mstorage).await
 }
 
 #[put("/put_individual")]
-async fn put_individual(    req: HttpRequest, params: web::Query<TicketRequest>, data: web::Json<JSONValue>, mstorage: web::Data<Mutex<MStorageClient>>) -> io::Result<HttpResponse> {
+async fn put_individual(
+    req: HttpRequest,
+    params: web::Query<TicketRequest>,
+    data: web::Json<JSONValue>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
+) -> io::Result<HttpResponse> {
     update(extract_addr(&req), params, IndvOp::Put, data, mstorage).await
 }
 
 #[put("/remove_individual")]
-async fn remove_individual(    req: HttpRequest,params: web::Query<TicketRequest>, data: web::Json<JSONValue>, mstorage: web::Data<Mutex<MStorageClient>>) -> io::Result<HttpResponse> {
+async fn remove_individual(
+    req: HttpRequest,
+    params: web::Query<TicketRequest>,
+    data: web::Json<JSONValue>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
+) -> io::Result<HttpResponse> {
     update(extract_addr(&req), params, IndvOp::Remove, data, mstorage).await
 }
 
 #[put("/add_to_individual")]
-async fn add_to_individual(    req: HttpRequest,params: web::Query<TicketRequest>, data: web::Json<JSONValue>, mstorage: web::Data<Mutex<MStorageClient>>) -> io::Result<HttpResponse> {
+async fn add_to_individual(
+    req: HttpRequest,
+    params: web::Query<TicketRequest>,
+    data: web::Json<JSONValue>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
+) -> io::Result<HttpResponse> {
     update(extract_addr(&req), params, IndvOp::AddTo, data, mstorage).await
 }
 
 #[put("/set_in_individual")]
-async fn set_in_individual(    req: HttpRequest,params: web::Query<TicketRequest>, data: web::Json<JSONValue>, mstorage: web::Data<Mutex<MStorageClient>>) -> io::Result<HttpResponse> {
+async fn set_in_individual(
+    req: HttpRequest,
+    params: web::Query<TicketRequest>,
+    data: web::Json<JSONValue>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
+) -> io::Result<HttpResponse> {
     update(extract_addr(&req), params, IndvOp::SetIn, data, mstorage).await
 }
 
 #[put("/remove_from_individual")]
-async fn remove_from_individual(    req: HttpRequest,params: web::Query<TicketRequest>, data: web::Json<JSONValue>, mstorage: web::Data<Mutex<MStorageClient>>) -> io::Result<HttpResponse> {
+async fn remove_from_individual(
+    req: HttpRequest,
+    params: web::Query<TicketRequest>,
+    data: web::Json<JSONValue>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
+) -> io::Result<HttpResponse> {
     update(extract_addr(&req), params, IndvOp::RemoveFrom, data, mstorage).await
 }

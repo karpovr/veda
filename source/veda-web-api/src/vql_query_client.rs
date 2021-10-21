@@ -10,7 +10,7 @@ pub struct VQLHttpClient {
 impl VQLHttpClient {
     pub fn new(addr: String) -> VQLHttpClient {
         VQLHttpClient {
-            point: format!("{}{}", addr, "query").to_string(),
+            point: format!("{}{}", addr, "query"),
             client: Client::default(),
         }
     }

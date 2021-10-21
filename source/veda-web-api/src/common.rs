@@ -29,9 +29,10 @@ pub(crate) struct Bindings {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
-pub(crate) struct TicketLoginRequest {
+pub(crate) struct GetTicketTrustedRequest {
     pub ticket: String,
     pub(crate) login: Option<String>,
+    pub(crate) ip: Option<String>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]

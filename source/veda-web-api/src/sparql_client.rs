@@ -17,7 +17,7 @@ pub struct SparqlClient {
 impl Default for SparqlClient {
     fn default() -> Self {
         SparqlClient {
-            point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "query", "default").to_string(),
+            point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "query", "default"),
             client: Client::default(),
             az: LmdbAzContext::new(),
         }

@@ -171,7 +171,7 @@ async fn main() -> std::io::Result<()> {
             .data(TicketCache {
                 read: ticket_cache_read,
                 write: Arc::new(Mutex::new(ticket_cache_write)),
-                check_ticket_ip: check_ticket_ip,
+                check_ticket_ip,
             })
             .data(PrefixesCache {
                 read: prefixes_cache_read,
