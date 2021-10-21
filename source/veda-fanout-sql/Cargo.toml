@@ -2,7 +2,7 @@
 name = "veda-fanout-sql"
 version = "0.1.0"
 authors = ["Roman Karpov <roman.karpov@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 mysql = "17.0.0"

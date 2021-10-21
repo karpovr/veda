@@ -40,7 +40,7 @@ pub(crate) struct AuthConf {
     pub secret_lifetime: i64,
     pub pass_lifetime: i64,
     pub expired_pass_notification_template: Option<(String, String)>,
-    pub check_ticket_ip: bool
+    pub check_ticket_ip: bool,
 }
 
 impl Default for AuthConf {
@@ -55,7 +55,7 @@ impl Default for AuthConf {
             secret_lifetime: 12 * 60 * 60,
             pass_lifetime: 90 * 24 * 60 * 60,
             expired_pass_notification_template: None,
-            check_ticket_ip: true
+            check_ticket_ip: true,
         }
     }
 }

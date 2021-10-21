@@ -2,7 +2,7 @@
 name = "veda-input-onto"
 version = "0.1.0"
 authors = ["Valeriy Bushenev <ValeriyBushenev@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [[bin]]
 name = "veda-input-onto"

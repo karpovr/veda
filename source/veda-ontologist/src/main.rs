@@ -16,9 +16,9 @@ use v_common::onto::individual2turtle::to_turtle;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::onto::parser::parse_raw;
 use v_common::search::common::FTQuery;
+use v_common::storage::common::StorageMode;
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::ResultCode;
-use v_common::storage::common::StorageMode;
 
 struct OntologistModule {
     last_found_changes: Instant,
@@ -142,7 +142,7 @@ impl OntologistModule {
             }
         }
 
-        if let Ok(buf) = to_turtle(&indvs, &mut prefixes) {
+        if let Ok(buf) = to_turtle(&indvs, &prefixes) {
             let file_path = self.ontology_file_path.clone() + ".ttl";
             if let Ok(mut file) = File::create(&(file_path)) {
                 if let Err(e) = file.write_all(buf.as_slice()) {
@@ -291,11 +291,11 @@ fn test_on_onto(queue_element: &mut Individual, onto_types: &[String]) -> Option
 
         if cmd != IndvOp::Remove {
             let is_deleted = new_state.is_exists_bool("v-s:deleted", true);
-            if new_state.any_exists_v("rdf:type", &onto_types) {
+            if new_state.any_exists_v("rdf:type", onto_types) {
                 info!("found ontology changes from storage, uri = {}", new_state.get_id());
                 return Some((new_state.get_id().to_owned(), new_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), is_deleted));
             }
-        } else if prev_state.any_exists_v("rdf:type", &onto_types) {
+        } else if prev_state.any_exists_v("rdf:type", onto_types) {
             info!("found ontology changes from storage, uri = {}", prev_state.get_id());
             return Some((prev_state.get_id().to_owned(), prev_state.get_first_integer("v-s:updateCounter").unwrap_or_default(), true));
         }

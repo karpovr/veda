@@ -136,7 +136,7 @@ async fn main() -> std::io::Result<()> {
         if use_direct_ft_query {
             info!("use direct-ft-query");
             ft_client.xr = Some(XapianReader::new_without_init("russian").expect("fail init direct-ft-query"));
-            ft_client.query_type = VQLClientConnectType::DIRECT;
+            ft_client.query_type = VQLClientConnectType::Direct;
         }
 
         if !use_direct_ft_query {
@@ -145,10 +145,10 @@ async fn main() -> std::io::Result<()> {
             if let Ok(url) = Module::get_property("ft_query_service_url").unwrap_or_default().parse::<Url>() {
                 if url.scheme() == "tcp" {
                     ft_client.nng_client = Some(FTClient::new(url.to_string()));
-                    ft_client.query_type = VQLClientConnectType::NNG;
+                    ft_client.query_type = VQLClientConnectType::Nng;
                 } else {
                     ft_client.http_client = Some(VQLHttpClient::new(url.to_string()));
-                    ft_client.query_type = VQLClientConnectType::HTTP;
+                    ft_client.query_type = VQLClientConnectType::Http;
                 }
             }
         }

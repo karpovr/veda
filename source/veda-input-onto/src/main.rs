@@ -331,7 +331,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                         loaded_owl_ontology.insert(indv_file.get_id().to_owned());
                     }
 
-                    let res = backend.mstorage_api.update(systicket, IndvOp::Put, &indv_file);
+                    let res = backend.mstorage_api.update(systicket, IndvOp::Put, indv_file);
 
                     // thread::sleep(std::time::Duration::from_millis(100));
 
@@ -389,7 +389,7 @@ fn full_file_info_indv(onto_id: &str, individuals: &mut HashMap<String, Individu
     new_indv.clear("v-s:resource");
 
     for indv in individuals.values_mut() {
-        new_indv.add_uri("v-s:resource", &indv.get_id());
+        new_indv.add_uri("v-s:resource", indv.get_id());
 
         if !indv.is_exists("rdfs:isDefinedBy") {
             indv.set_uri("rdfs:isDefinedBy", onto_id);
@@ -424,7 +424,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                     NamedOrBlankNode::NamedNode(n) => n.iri,
                 };
 
-                let s = to_prefix_form(&subject, &prefixes.namespaces2id);
+                let s = to_prefix_form(subject, &prefixes.namespaces2id);
                 if s.is_empty() {
                     error!("invalid subject = {:?}", subject);
                 }
@@ -514,7 +514,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                     }
 
                     if let Some(s) = prefixes.id2orignamespaces.get(indv.get_id()) {
-                        indv.set_string("v-s:fullUrl", &s, Lang::NONE);
+                        indv.set_string("v-s:fullUrl", s, Lang::NONE);
                     }
 
                     if let Some(s) = prefixes.id2namespaces.get(indv.get_id()) {

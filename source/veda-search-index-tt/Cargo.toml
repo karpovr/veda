@@ -2,7 +2,7 @@
 name = "veda-search-index-tt"
 version = "0.1.0"
 authors = ["Roman Karpov <roman.karpov@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 clickhouse-rs = {package = "v-clickhouse-rs", version = "0.2.0-alpha.6", default-features = false, features = ["async_std"] }

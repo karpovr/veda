@@ -15,10 +15,10 @@ use v_common::storage::async_storage::{check_ticket, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 pub(crate) enum VQLClientConnectType {
-    DIRECT,
-    HTTP,
-    NNG,
-    UNKNOWN,
+    Direct,
+    Http,
+    Nng,
+    Unknown,
 }
 
 pub(crate) struct VQLClient {
@@ -31,7 +31,7 @@ pub(crate) struct VQLClient {
 impl Default for VQLClient {
     fn default() -> Self {
         VQLClient {
-            query_type: VQLClientConnectType::UNKNOWN,
+            query_type: VQLClientConnectType::Unknown,
             http_client: None,
             nng_client: None,
             xr: None,
@@ -128,7 +128,7 @@ async fn query(
         let mut vc = vql_client.lock().await;
 
         match vc.query_type {
-            VQLClientConnectType::DIRECT => {
+            VQLClientConnectType::Direct => {
                 if let Some(xr) = vc.xr.as_mut() {
                     if let Some(t) = OntoIndex::get_modified() {
                         if t > xr.onto_modified {
@@ -144,17 +144,17 @@ async fn query(
                     res.result = res_out_list;
                 }
             }
-            VQLClientConnectType::HTTP => {
+            VQLClientConnectType::Http => {
                 if let Some(n) = vc.http_client.as_mut() {
                     res = n.query(ticket, &addr, ft_req).await;
                 }
             }
-            VQLClientConnectType::NNG => {
+            VQLClientConnectType::Nng => {
                 if let Some(n) = vc.nng_client.as_mut() {
                     res = n.query(ft_req);
                 }
             }
-            VQLClientConnectType::UNKNOWN => {}
+            VQLClientConnectType::Unknown => {}
         }
     }
 
