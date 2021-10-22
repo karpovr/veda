@@ -289,12 +289,10 @@ impl Actor for CCUSServer {
 
                 // заголовок взят успешно, занесем содержимое сообщения в структуру Individual
                 if let Err(e) = act.queue_consumer.pop_body(&mut raw.data) {
-                    if e == ErrorQueue::FailReadTailMessage {
-                        break;
-                    } else {
+                    if e != ErrorQueue::FailReadTailMessage {
                         error!("failed to extract message from queue, total processed = {}, err = {}", act.total_prepared_count, e.as_str());
-                        break;
                     }
+                    break;
                 }
 
                 let mut indv = Individual::new_raw(raw);
@@ -378,7 +376,7 @@ impl Handler<Connect> for CCUSServer {
         let id = self.rng.gen::<usize>();
         self.sessions.insert(id, msg.addr);
 
-        info!("registred [{}]", id);
+        info!("registered [{}]", id);
 
         // send id back
         id
@@ -392,7 +390,7 @@ impl Handler<Disconnect> for CCUSServer {
     fn handle(&mut self, msg: Disconnect, _: &mut Context<Self>) {
         // remove address
         if self.sessions.remove(&msg.id).is_some() {
-            info!("unregistred [{}]", &msg.id);
+            info!("unregistered [{}]", &msg.id);
             self.unsubscribe_all(msg.id, true);
         }
     }

@@ -171,11 +171,13 @@ impl WsCCUSSession {
     }
 }
 
+const STORAGE_RECONNECT_SIZE: i32 = 10000;
 fn storage_manager(rx: Receiver<CMessage>) {
     info!("start storage manager");
 
     let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
+    let mut readed_count = 0;
     loop {
         if let Ok((msg, msg_id, sender)) = rx.recv() {
             //info!("main:recv={:?}", msg);
@@ -189,6 +191,11 @@ fn storage_manager(rx: Receiver<CMessage>) {
 
             if let Err(e) = sender.send((out_counter, msg_id)) {
                 error!("failed to send response, err = {}", e);
+            }
+            readed_count += 1;
+            if readed_count % STORAGE_RECONNECT_SIZE == 0 {
+                storage = get_storage_use_prop(StorageMode::ReadOnly);
+                info!("reconnect to storage");
             }
         }
     }
