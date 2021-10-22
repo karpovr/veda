@@ -171,7 +171,7 @@ impl WsCCUSSession {
     }
 }
 
-const STORAGE_RECONNECT_SIZE: i32 = 10000;
+const NUMBER_OF_OPERATIONS_BEFORE_STORAGE_RECONNECTION: i32 = 10000;
 fn storage_manager(rx: Receiver<CMessage>) {
     info!("start storage manager");
 
@@ -193,7 +193,7 @@ fn storage_manager(rx: Receiver<CMessage>) {
                 error!("failed to send response, err = {}", e);
             }
             readed_count += 1;
-            if readed_count % STORAGE_RECONNECT_SIZE == 0 {
+            if readed_count % NUMBER_OF_OPERATIONS_BEFORE_STORAGE_RECONNECTION == 0 {
                 storage = get_storage_use_prop(StorageMode::ReadOnly);
                 info!("reconnect to storage");
             }

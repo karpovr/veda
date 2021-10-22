@@ -36,11 +36,19 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
+    const NUMBER_OF_OPERATIONS_BEFORE_STORAGE_RECONNECTION: i32 = 10000;
+
+    let mut readed_count = 0;
     loop {
         if let Ok(recv_msg) = server.recv() {
             let res = req_prepare(&recv_msg, &mut storage);
             if let Err(e) = server.send(res) {
                 error!("failed to send reply, err = {:?}", e);
+            }
+            readed_count += 1;
+            if readed_count % NUMBER_OF_OPERATIONS_BEFORE_STORAGE_RECONNECTION == 0 {
+                storage = get_storage_use_prop(StorageMode::ReadOnly);
+                info!("reconnect to storage");
             }
         }
     }
