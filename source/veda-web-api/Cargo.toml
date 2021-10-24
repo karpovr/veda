@@ -28,7 +28,7 @@ derivative = "2.1.1"
 log = "0.4"
 lmdb-rs-m = "0.7.7"
 lazy_static = "1.4"
-nng = "0.5.1"
+nng = "1.0.0"
 nanoid = "0.3.0"
 evmap = "10.0.2"
 crc32fast = "1.2.0"
@@ -38,5 +38,5 @@ url = "2.1.1"
 filetime = "0.2.15"
 reqwest = { version = "0.11" }
 
-v_common = { package = "v-common", version = "=0.1.90" }
+v_common = { package = "v-common", version = "=0.1.91" }
 #v_common = { package = "v-common", path = "../../../v-common" }

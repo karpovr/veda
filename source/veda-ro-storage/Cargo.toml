@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 log = "0.4"
 rust-ini = "0.16"
-nng = "0.5.1"
+nng = "1.0.0"
 
-v_common = { package = "v-common", version = "=0.1.90" }
+v_common = { package = "v-common", version = "=0.1.91" }
 #v_common = { package = "v-common", path = "../../../v-common" }
