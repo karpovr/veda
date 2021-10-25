@@ -54,7 +54,8 @@ self.addEventListener('fetch', function (event) {
   const pathname = url.pathname;
   const isAPI = API.indexOf(pathname) >= 0;
   const isFILES = pathname.indexOf('/files') === 0;
-  const isSTATIC = !isAPI && !isFILES;
+  const isNTLM = pathname.indexOf('/ntlm') === 0;
+  const isSTATIC = !isAPI && !isFILES && !isNTLM;
   if (event.request.method === 'GET') {
     if (isSTATIC) {
       event.respondWith(handleFetch(event, STATIC));

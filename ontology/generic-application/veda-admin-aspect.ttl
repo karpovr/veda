@@ -36,7 +36,7 @@ v-s:AdministrationImage
   v-s:filePath "/veda"^^xsd:string ;
 .
 
-v-s:OrganizationStructureApplication 
+v-s:OrganizationStructureApplication
   rdf:type v-s:Application;
   rdfs:label "Управление оргструктурой"@ru, "Organization structure"@en;
   v-s:hasCreate v-s:AppointmentCreate, v-s:OccupationCreate, v-s:EmployeeCreate, v-s:DepartmentCreate;
@@ -45,42 +45,42 @@ v-s:OrganizationStructureApplication
   v-ui:hasTemplate v-s:ApplicationTemplate;
 .
 #---------------Создание------------
-  v-s:EmployeeCreate 
+  v-s:EmployeeCreate
     rdf:type v-fc:Create;
     rdfs:label "Персона"@ru, "Person"@en;
     v-fc:hasBlank v-s:EmployeeBlank;
   .
-  v-s:EmployeeBlank 
+  v-s:EmployeeBlank
     rdf:type v-fc:Blank;
     rdfs:label "Персона"@ru, "Person"@en;
     v-fc:targetType v-s:Person;
   .
-  v-s:OccupationCreate 
+  v-s:OccupationCreate
     rdf:type v-fc:Create;
     rdfs:label "Должность"@ru, "Position"@en;
     v-fc:hasBlank v-s:OccupationBlank;
   .
-  v-s:OccupationBlank 
+  v-s:OccupationBlank
     rdf:type v-fc:Blank;
     rdfs:label "Должность"@ru, "Position"@en;
     v-fc:targetType v-s:Position;
   .
-  v-s:AppointmentCreate 
+  v-s:AppointmentCreate
     rdf:type v-fc:Create;
     rdfs:label "Назначение"@ru, "Appointment"@en;
     v-fc:hasBlank v-s:AppointmentBlank;
   .
-  v-s:AppointmentBlank 
+  v-s:AppointmentBlank
     rdf:type v-fc:Blank;
     rdfs:label "Назначение"@ru, "Appointment"@en;
     v-fc:targetType v-s:Appointment;
   .
-  v-s:DepartmentCreate 
+  v-s:DepartmentCreate
     rdf:type v-fc:Create;
     rdfs:label "Подразделение"@ru, "Department"@en;
     v-fc:hasBlank v-s:DepartmentBlank;
   .
-  v-s:DepartmentBlank 
+  v-s:DepartmentBlank
     rdf:type v-fc:Blank;
     rdfs:label "Подразделение"@ru, "Department"@en;
     v-fc:targetType v-s:Department;
@@ -88,50 +88,50 @@ v-s:OrganizationStructureApplication
 
 
 #---------------Поиск------------
-  v-s:EmployeeSearch 
+  v-s:EmployeeSearch
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Персона"@ru, "Person"@en;
     v-fs:searchBlank v-s:EmployeeSearchBlank;
     v-fs:searchBlankTemplate v-s:PersonTemplate;
     v-fs:searchResultTemplate v-s:EmployeeSearchResultTemplate;
   .
-  v-s:EmployeeSearchBlank 
+  v-s:EmployeeSearchBlank
     rdf:type v-fc:Blank;
     rdfs:label "Персона"@ru, "Person"@en;
     v-fc:targetType v-s:Person;
   .
-  v-s:AppointmentSearch 
+  v-s:AppointmentSearch
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Назначение"@ru, "Appointment"@en;
     v-fs:searchBlank v-s:AppointmentSearchBlank;
     v-fs:searchBlankTemplate v-s:AppointmentTemplate;
     v-fs:searchResultTemplate v-s:AppointmentSearchResultTemplate;
   .
-  v-s:AppointmentSearchBlank 
+  v-s:AppointmentSearchBlank
     rdf:type v-fc:Blank;
     rdfs:label "Назначение"@ru, "Appointment"@en;
     v-fc:targetType v-s:Appointment;
   .
-  v-s:OccupationSearch 
+  v-s:OccupationSearch
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Должность"@ru, "Position"@en;
     v-fs:searchBlank v-s:OccupationSearchBlank;
     v-fs:searchBlankTemplate v-s:PositionTemplate;
     v-fs:searchResultTemplate v-s:OccupationSearchResultTemplate;
   .
-  v-s:OccupationSearchBlank 
+  v-s:OccupationSearchBlank
     rdf:type v-fc:Blank;
     rdfs:label "Должность"@ru, "Position"@en;
     v-fc:targetType v-s:Position;
   .
-  v-s:DepartmentSearch 
+  v-s:DepartmentSearch
     rdf:type v-fs:AttributiveSearch;
     rdfs:label "Подразделение"@ru, "Department"@en;
     v-fs:searchBlank v-s:DepartmentSearchBlank;
     v-fs:searchBlankTemplate v-s:DepartmentTemplate;
     v-fs:searchResultTemplate v-s:DepartmentSearchResultTemplate;
   .
-  v-s:DepartmentSearchBlank 
+  v-s:DepartmentSearchBlank
     rdf:type v-fc:Blank;
     rdfs:label "Подразделение"@ru, "Department"@en;
     v-fc:targetType v-s:Department;
@@ -610,7 +610,7 @@ v-ui:AdminBlankTemplate
       container.siblings(".search-button").click();
     }
   });
-  
+
 </script>
   """ ;
 .
@@ -716,14 +716,14 @@ v-ui:TrustedTicketTemplate
   function submitLogin (e) {
     e.preventDefault();
     var useLogin = $("#login", template).val();
-    veda.Backend.get_ticket_trusted(veda.ticket, useLogin).then(function(result) {
-      veda.end_time = localStorage["end_time"] = Math.floor((result["end_time"] - 621355968000000000) / 10000 );
-      veda.ticket = localStorage["ticket"] = result["id"];
-      veda.user_uri = localStorage["user_uri"] = result["user_uri"];
+    veda.Backend.get_ticket_trusted(veda.ticket, useLogin).then(function(authResult) {
+      veda.end_time = localStorage.end_time = authResult.end_time;
+      veda.ticket = localStorage.ticket = authResult.ticket;
+      veda.user_uri = localStorage.user_uri = authResult.user_uri;
       location.assign(location.origin);
     });
   }
-  
+
 </script>
 """ ;
   .
@@ -1070,14 +1070,14 @@ v-ui:AdministrationAspectTemplate
       $("#admin-tabs a:first", template).tab("show");
     }
   }, 0);
-  
+
 </script>
   """ ;
 .
 
 
 
-v-s:EmployeeSearchResultTemplate 
+v-s:EmployeeSearchResultTemplate
   rdf:type v-ui:ClassTemplate;
   rdfs:label "Шаблон для класса v-s:Person (Персона)"@ru, "Template for v-s:Person class"@en;
   v-ui:template """
@@ -1111,7 +1111,7 @@ v-s:AppointmentSearchResultTemplate
   rdfs:label "Шаблон для класса v-s:Appointment (Назначение)"@ru, "Template for v-s:Appointment class"@en;
   v-ui:template """
 
-  
+
 <table class="table table-bordered">
   <thead class="result-header">
     <tr>

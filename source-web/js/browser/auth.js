@@ -22,7 +22,8 @@ import {delegateHandler} from '../browser/dom_helpers.js';
 function ntlmAuth (path, login, password) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', path, true);
+    xhr.open(login && password ? 'POST' : 'GET', path, true);
+    xhr.withCredentials = true;
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     xhr.responseType = 'json';
     xhr.onload = function () {
@@ -34,7 +35,7 @@ function ntlmAuth (path, login, password) {
     };
     xhr.onerror = reject;
     xhr.onabort = reject;
-    login && password ? xhr.send(`login=${login}&password=${password}`) : xhr.send();
+    login && password ? xhr.send(`username=${login}&password=${password}`) : xhr.send();
   });
 }
 
@@ -432,12 +433,11 @@ veda.on('login:failed', function () {
     return;
   }
 
-  // NTLM auth using iframe
+  // Auto login using NTLM
   const ntlmProvider = new IndividualModel('cfg:NTLMAuthProvider', true, false);
   ntlmProvider.load().then((ntlmProvider) => {
     const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
     if (path) {
-      // Auto login using ntlm
       ntlmAuth(path)
         .then((authResult) => veda.trigger('login:success', authResult))
         .catch((err) => {
