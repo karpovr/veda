@@ -4,6 +4,7 @@
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix sys: <http://semantic-machines.com/veda/system/> .
 
 <http://semantic-machines.com/veda/veda-abstract>
   rdf:type owl:Ontology ;
@@ -379,6 +380,13 @@ v-s:companionAttachment
   rdfs:range v-s:File ;
   rdfs:domain v-s:Thing ;
   rdfs:subPropertyOf v-s:attachment ;
+.
+sys:source
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Источник"@ru ;
+  rdfs:label "Source"@en ;
+  rdfs:range rdfs:Resource ;
+  rdfs:domain v-s:Thing ;
 .
 
 #------------------------------------------------------------- Пользовательская сущность --
@@ -1630,6 +1638,13 @@ v-s:parentUnit
   owl:inverseOf v-s:childUnit ;
 .
 
+#--------------------------------------------------------------Узел-----
+sys:Node
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:SystemThing ;
+  rdfs:label "Узел"@ru ;
+  rdfs:label "Node"@en ;
+.
 
 
 # ------------------------------------------------------------------- ШАБЛОНЫ --
