@@ -1,12 +1,11 @@
 #[macro_use]
 extern crate log;
 
-use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::*;
 use std::{str, thread};
-use v_common::module::module::init_log;
+use v_common::module::module::{init_log, Module};
 use v_common::module::veda_backend::Backend;
 use v_common::search::clickhouse_client::CHClient;
 use v_common::v_api::obj::OptAuthorize;
@@ -15,14 +14,10 @@ use v_common::v_api::obj::*;
 fn main() {
     init_log("SEARCH_QUERY");
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-    let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
-
-    let query_url = section.get("search_query_url").expect("param [search_query_url] not found in veda.properties");
+    let query_search_db = Module::get_property("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
+    let query_url = Module::get_property("search_query_url").expect("param [search_query_url] not found in veda.properties");
 
     let mut backend = Backend::default();
-
     let mut ch_client = CHClient::new(query_search_db.to_owned());
 
     loop {

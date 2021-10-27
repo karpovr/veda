@@ -2,7 +2,6 @@
 extern crate log;
 
 use futures::executor::block_on;
-use ini::Ini;
 use nng::options::{Options, RecvTimeout, SendTimeout};
 use nng::{Error, Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
@@ -10,19 +9,16 @@ use std::time::Duration;
 use std::{env, str};
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::load_onto;
-use v_common::module::module::init_log;
+use v_common::module::module::{init_log, Module};
 use v_common::module::veda_backend::Backend;
+use v_common::onto::onto_index::OntoIndex;
 use v_common::search::common::FTQuery;
 use v_common::v_api::obj::*;
-use v_common::onto::onto_index::OntoIndex;
 
 fn main() {
     init_log("FT_QUERY");
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-
-    let mut query_url = section.get("ft_query_service_url").expect("param [search_query_url] not found in veda.properties").to_owned();
+    let mut query_url = Module::get_property("ft_query_service_url").expect("param [search_query_url] not found in veda.properties").to_owned();
 
     let args: Vec<String> = env::args().collect();
     for el in args.iter() {

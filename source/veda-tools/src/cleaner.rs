@@ -6,12 +6,12 @@ use crate::v_s_permissionstatement::*;
 use crate::v_wf_process::*;
 use chrono::NaiveDateTime;
 use diligent_date_parser::parse_date;
-use ini::Ini;
 use std::collections::{HashMap, HashSet};
 use std::fs::{File, OpenOptions};
 use std::thread;
 use std::time::*;
 use v_v8::v_common::module::common::load_onto;
+use v_v8::v_common::module::module::Module;
 use v_v8::v_common::module::ticket::Ticket;
 use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::onto::onto::Onto;
@@ -53,9 +53,7 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
         return;
     }
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-    let query_search_db = section.get("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
+    let query_search_db = Module::get_property("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
 
     let mut backend = Backend::default();
 

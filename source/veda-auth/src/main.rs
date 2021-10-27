@@ -8,26 +8,22 @@ mod common;
 
 use crate::auth::*;
 use crate::common::{get_ticket_trusted, read_auth_configuration, AuthConf, UserStat};
-use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module::{create_sys_ticket, init_log};
+use v_common::module::module::{create_sys_ticket, init_log, Module};
 use v_common::module::veda_backend::Backend;
 use v_common::storage::common::StorageMode;
 
 fn main() -> std::io::Result<()> {
     init_log("AUTH");
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-
-    let auth_url = section.get("auth_url").expect("param [auth_url] not found in veda.properties");
+    let auth_url = Module::get_property("auth_url").expect("param [auth_url] not found in veda.properties");
 
     let server = Socket::new(Protocol::Rep0)?;
-    if let Err(e) = server.listen(auth_url) {
+    if let Err(e) = server.listen(&auth_url) {
         error!("failed to listen, err = {:?}", e);
         return Ok(());
     }

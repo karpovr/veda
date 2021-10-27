@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate log;
 
-use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use std::str;
 use v_common::module::module::init_log;
+use v_common::module::module::Module;
 use v_common::module::veda_backend::get_storage_use_prop;
 use v_common::onto::individual::Individual;
 use v_common::storage::common::{StorageId, StorageMode, VStorage};
@@ -21,11 +21,7 @@ use v_common::storage::common::{StorageId, StorageMode, VStorage};
 fn main() -> std::io::Result<()> {
     init_log("RO_STORAGE");
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-
-    let ro_storage_url = section.get("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
-
+    let ro_storage_url = Module::get_property("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
     let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
     info!("total count: {}", storage.count(StorageId::Individuals));

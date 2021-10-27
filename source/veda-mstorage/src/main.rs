@@ -5,7 +5,6 @@ mod transaction;
 
 use crate::transaction::{Transaction, TransactionItem};
 use chrono::Utc;
-use ini::Ini;
 use nng::{Message, Protocol, Socket};
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
@@ -35,25 +34,19 @@ fn main() -> std::io::Result<()> {
 
     let base_path = "./data";
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-
     let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
     info!("total count: {}", primary_storage.count(StorageId::Individuals));
 
     let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
-    let notify_channel_url = section.get("notify_channel_url");
-    if notify_channel_url.is_none() {
-        error!("failed to read property [notify_channel_url]");
-        return Ok(());
-    };
+    let notify_channel_url = Module::get_property("notify_channel_url").expect("failed to read property [notify_channel_url]");
+
     let notify_soc = Socket::new(Protocol::Pub0).unwrap();
-    if let Err(e) = notify_soc.listen(notify_channel_url.unwrap()) {
-        error!("failed to connect to {}, err = {}", notify_channel_url.unwrap(), e);
+    if let Err(e) = notify_soc.listen(&notify_channel_url) {
+        error!("failed to connect to {}, err = {}", notify_channel_url, e);
         return Ok(());
     } else {
-        info!("bind to notify_channel = {}", notify_channel_url.unwrap());
+        info!("bind to notify_channel = {}", notify_channel_url);
     }
 
     let mut sys_ticket = Ticket::default();

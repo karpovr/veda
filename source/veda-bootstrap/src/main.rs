@@ -3,7 +3,6 @@ extern crate log;
 
 use chrono::prelude::*;
 use env_logger::Builder;
-use ini::Ini;
 use log::LevelFilter;
 use nix::sys::signal::{self, Signal};
 use nix::unistd::Pid;
@@ -17,6 +16,7 @@ use std::process::{Child, Command};
 use std::time::SystemTime;
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
+use v_common::module::module::Module;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::v_api::api_client::IndvOp;
@@ -94,10 +94,8 @@ impl App {
 
     fn watch_started_modules(&mut self) {
         let mut mstorage_watchdog_check_period = None;
-        let conf = Ini::load_from_file("veda.properties").expect("failed to load veda.properties file");
-        let section = conf.section(None::<String>).expect("failed to parse veda.properties");
-        if let Some(p) = section.get("mstorage_watchdog_period") {
-            if let Ok(t) = parse_duration::parse(p) {
+        if let Some(p) = Module::get_property("mstorage_watchdog_period") {
+            if let Ok(t) = parse_duration::parse(&p) {
                 mstorage_watchdog_check_period = Some(t);
                 info!("started mstorage watchdog, period = {}", p);
             }

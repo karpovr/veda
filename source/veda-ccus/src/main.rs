@@ -6,13 +6,13 @@ use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
 use chrono::Local;
 use env_logger::Builder;
-use ini::Ini;
 use log::LevelFilter;
 use std::io::Write;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::{Duration, Instant};
+use v_common::module::module::Module;
 
 mod server;
 use crate::server::CMessage;
@@ -213,9 +213,7 @@ fn main() -> std::io::Result<()> {
         .filter(None, LevelFilter::Info)
         .init();
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load [veda.properties] file");
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-    let ccus_port = section.get("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
+    let ccus_port = Module::get_property("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
 
     info!("ccus port = {:?}", ccus_port);
 

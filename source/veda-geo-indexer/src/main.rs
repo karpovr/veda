@@ -5,12 +5,12 @@ extern crate env_logger;
 
 use chrono::Local;
 use env_logger::Builder;
-use ini::Ini;
 use log::LevelFilter;
 use redis::geo::Coord;
 use redis::{Commands, Connection};
 use std::io::Write;
 use std::{thread, time};
+use v_common::module::module::Module;
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::parser::parse_raw;
 use v_common::v_queue::consumer::Consumer;
@@ -32,11 +32,7 @@ fn main() -> Result<(), i32> {
         .filter(None, LevelFilter::Info)
         .init();
 
-    let conf = Ini::load_from_file("veda.properties").expect("fail load veda.properties file");
-
-    let section = conf.section(None::<String>).expect("fail parse veda.properties");
-
-    let redis_addr = if let Some(p) = section.get("redis_addr") {
+    let redis_addr = if let Some(p) = Module::get_property("redis_addr") {
         "redis://".to_owned() + &p.to_owned() + "/"
     } else {
         warn!("param [redis_addr] not found in veda.properties");
