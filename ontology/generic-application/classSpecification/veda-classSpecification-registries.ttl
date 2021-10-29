@@ -1,0 +1,109 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+<http://semantic-machines.com/veda/veda-classSpecification-registries>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Спецификация класса. Реестры."@ru ;
+  rdfs:label "Veda system ontology. Class specification. Registries."@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+v-s:ClassSpecificationSearch
+  a v-fs:AttributiveSearch;
+  rdfs:label "Спецификации класса"@ru ;
+  rdfs:label "Class specification"@en ;
+  v-fs:searchBlank v-s:ClassSpecificationSearchBlank ;
+  v-fs:searchBlankTemplate v-s:ClassSpecificationTemplate ;
+  v-fs:searchResultTemplate v-s:ClassSpecificationSearchResultTemplate ;
+.
+
+v-s:ClassSpecificationSearchResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результатов реестра класса v-s:ClassSpecification"@ru ;
+  rdfs:label "v-s:ClassSpecification registry result template"@en ;
+  v-ui:template """
+<table class="table table-bordered">
+  <thead class="result-header">
+    <tr>
+      <th colspan="9" about="v-s:ClassSpecification" property="rdfs:label"></th>
+    </tr>
+    <tr class="active">
+      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+      <th><span about="v-ui:forClass" property="rdfs:label"></span></th>
+      <th><span about="v-s:hasDeletedProperties" property="rdfs:label"></span></th>
+      <th><span about="v-s:dateProperties" property="rdfs:label"></span></th>
+      <th><span about="v-s:shelfLife" property="rdfs:label"></span></th>
+      <th><span about="v-s:isShelfLifeAlways" property="rdfs:label"></span></th>
+      <th><span about="v-s:responsible" property="rdfs:label"></span></th>
+      <th><span about="v-s:hasApplication" property="rdfs:label"></span></th>
+      <th><span about="v-s:hasAspect" property="rdfs:label"></span></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+      <td rel="v-ui:forClass" data-template="v-ui:LabelTemplate"></td>
+      <td rel="v-s:hasDeletedProperties" data-template="v-ui:LabelTemplate"></td>
+      <td rel="v-s:dateProperties" data-template="v-ui:LabelTemplate"></td>
+      <td property="v-s:shelfLife"></td>
+      <td><veda-control property="v-s:isShelfLifeAlways" data-type="boolean"></veda-control>
+      </td>
+      <td rel="v-s:responsible" data-template="v-ui:LabelTemplate"></td>
+      <td rel="v-s:hasApplication" data-template="v-ui:LabelTemplate"></td>
+      <td rel="v-s:hasAspect" data-template="v-ui:LabelTemplate"></td>
+    </tr>
+  </tbody>
+</table>
+  """ ;
+.
+
+v-s:PropertySpecificationSearch
+  a v-fs:AttributiveSearch;
+  rdfs:label "Спецификации поля"@ru ;
+  rdfs:label "Property specification"@en ;
+  v-fs:searchBlank v-s:PropertySpecificationSearchBlank ;
+  v-fs:searchBlankTemplate v-s:PropertySpecificationTemplate ;
+  v-fs:searchResultTemplate v-s:PropertySpecificationSearchResultTemplate ;
+.
+
+v-s:PropertySpecificationSearchResultTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результатов реестра класса v-s:ObjectPropertySpecification"@ru ;
+  rdfs:label "v-s:ObjectPropertySpecification registry result template"@en ;
+  v-ui:template """
+<table class="table table-bordered">
+  <thead class="result-header">
+    <tr>
+      <th colspan="9" about="v-s:ClassSpecification" property="rdfs:label"></th>
+    </tr>
+    <tr class="active">
+      <th width="1%"><span class="glyphicon glyphicon-search"></span></th>
+      <th><span about="v-ui:forClass" property="rdfs:label"></span></th>
+      <th><span about="v-ui:forProperty" property="rdfs:label"></span></th>
+      <th><span about="v-ui:minCardinality" property="rdfs:label"></span></th>
+      <th><span about="v-ui:maxCardinality" property="rdfs:label"></span></th>
+      <th><span about="v-ui:queryPrefix" property="rdfs:label"></span></th>
+      <th><span about="v-ui:placeholder" property="rdfs:label"></span></th>
+    </tr>
+  </thead>
+  <tbody class="result-container">
+    <tr>
+      <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+      <td rel="v-ui:forClass" data-template="v-ui:LabelTemplate"></td>
+      <td rel="v-ui:forProperty" data-template="v-ui:LabelTemplate"></td>
+      <td property="v-ui:minCardinality"></td>
+      <td property="v-ui:maxCardinality"></td>
+      <td property="v-ui:queryPrefix"></td>
+      <td property="v-ui:placeholder"></td>
+    </tr>
+  </tbody>
+</table>
+  """ ;
+.

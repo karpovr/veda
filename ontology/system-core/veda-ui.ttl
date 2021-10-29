@@ -342,7 +342,7 @@ v-ui:treeDisplayedProperty
 .
 v-ui:TemplateSpecification
   rdf:type owl:Class ;
-  rdfs:subClassOf v-ui:PropertySpecification ;
+  rdfs:subClassOf v-s:SystemThing ;
   rdfs:label "Спецификация шаблона класса"@ru ;
   rdfs:label "Template specification"@en ;
 .

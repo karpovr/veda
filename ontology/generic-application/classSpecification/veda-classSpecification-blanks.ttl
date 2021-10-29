@@ -1,0 +1,35 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+<http://semantic-machines.com/veda/veda-classSpecification-blanks>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Спецификация класса. Бланки."@ru ;
+  rdfs:label "Veda system ontology. Class specification. Blanks."@en ;
+#  owl:versionInfo "1.3" ;
+  v-s:loadPriority 6 ;
+.
+
+v-s:ClassSpecificationBlank
+  rdf:type v-fc:Blank ;
+  rdfs:label "Спецификация класса"@ru ;
+  rdfs:label "Class Specification"@en ;
+  v-fc:targetType v-s:ClassSpecification ;
+. 
+v-s:ClassSpecificationSearchBlank
+  a v-fc:Blank;
+  rdfs:label "Спецификации классов"@ru ;
+  rdfs:label "Class Specification"@en ;
+  v-fc:targetType v-s:ClassSpecification;
+.
+v-s:PropertySpecificationSearchBlank
+  a v-fc:Blank;
+  rdfs:label "Спецификации полей"@ru ;
+  rdfs:label "Properies Specification"@en ;
+  v-fc:targetType v-ui:PropertySpecification ;
+.
