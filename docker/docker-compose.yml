@@ -1,0 +1,38 @@
+version: "3.3"
+
+services:
+  tarantool:
+    image: s7m7/veda-tarantool:1
+    volumes:
+      - type: bind
+        source: ./data/tarantool
+        target: /var/lib/tarantool
+    restart: always
+    hostname: tarantool
+    ports:
+      - "3309:3309"
+  veda: 
+    depends_on:
+      - tarantool
+    links:
+      - tarantool
+    image: s7m7/veda:v1
+    volumes:
+      - type: bind
+        source: ./data
+        target: /opt/veda/data
+      - type: bind
+        source: ./logs
+        target: /opt/veda/logs
+      - type: bind
+        source: ./ontology
+        target: /opt/veda/ontology
+        source: ./conf
+        target: /opt/veda/conf
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      LD_LIBRARY_PATH: "/opt/veda/bin/lib"
+      DB_CONNECTION: "tcp://veda6:123456@tarantool:3309"
+    command: "./control-start.sh ./logs/veda-console.log 2>&1"
