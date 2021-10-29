@@ -216,7 +216,7 @@ v-s:PersonalAspectTemplate
   <br>
   <div class="row" style="display: flex; flex-flow: row wrap;">
     <div class="col-md-4 col-sm-6 col-xs-12" style="display: flex;" about="@" rel="v-s:owner" data-template="v-s:PersonalImageTemplate" data-embedded="true"></div>
-    <div class="col-md-4 col-sm-6 col-xs-12" style="display: flex;" about="@" rel="v-s:owner" data-template="v-s:PersonalInfoTemplate" data-embedded="true"></div>
+    <div class="col-md-4 col-sm-6 col-xs-12" style="display: flex;" about="@" rel="v-s:owner" data-template="v-s:PersonalInfoTemplate"></div>
     <div class="col-md-4 col-sm-6 col-xs-12" style="display: flex;" about="@" rel="v-s:owner" data-embedded="true">
       <div about="@" style="display: flex; width: 100%" rel="v-ui:hasPreferences" data-template="v-s:PersonalPreferencesTemplate" data-embedded="true"></div>
     </div>
