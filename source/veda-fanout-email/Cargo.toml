@@ -9,5 +9,5 @@ log = "0.4"
 lettre = "0.9"
 lettre_email = "0.9"
 
-v_common = { package = "v-common", version = "=0.1.93" }
+v_common = { package = "v-common", version = "=0.1.94" }
 #v_common = { package = "v-common", path = "../../../v-common" }
