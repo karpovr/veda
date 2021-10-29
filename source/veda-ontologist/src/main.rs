@@ -233,7 +233,7 @@ fn main() -> std::io::Result<()> {
         query.push('\'');
     }
 
-    let ontology_file_path = "public/ontology.json";
+    let ontology_file_path = "data/ontology.json";
 
     //wait_load_ontology();
 
