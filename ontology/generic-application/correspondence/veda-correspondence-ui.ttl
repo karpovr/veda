@@ -580,10 +580,14 @@ v-s:LetterRegistrationRecordTemplate
 <script>
   var self = this;
   function setRegistrationDate() {
-    if ( this.hasValue("rdf:type", "v-s:LetterRegistrationRecordEnumerated") && !this.hasValue("v-s:registrationNumber") ) {
+    if (this.hasValue("rdf:type", "v-s:LetterRegistrationRecordEnumerated") && !this.hasValue("v-s:registrationNumber")) {
       var today = new Date();
-      today.setHours(0, 0, 0, 0);
-      individual["v-s:registrationDate"] = [ today ];
+      const d = today.getDate();
+      const m = today.getMonth();
+      const y = today.getFullYear();
+      today.setUTCFullYear(y, m, d);
+      today.setUTCHours(0, 0, 0, 0);
+      individual["v-s:registrationDate"] = [today];
     }
   }
   this.on("beforeSave", setRegistrationDate);
