@@ -1,0 +1,1 @@
+docker build --no-cache -t s7m7/veda-tarantool:1 .
