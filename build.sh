@@ -171,8 +171,8 @@ if [ -z $1 ] || [ $1 == "web" ] || [ $1 == "public" ] || [ $1 == "all" ]; then
     echo BUILD PUBLIC
 
     cd source-web
-    npm install
-    npm run build
+#    npm install
+#    npm run build
     cd $BUILD_PATH
 fi
 
