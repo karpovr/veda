@@ -32,6 +32,7 @@ services:
     restart: always
     ports:
       - "8080:8080"
+      - "8088:8088"
     environment:
       LD_LIBRARY_PATH: "/opt/veda/bin/lib"
       DB_CONNECTION: "tcp://veda6:123456@tarantool:3309"
