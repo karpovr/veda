@@ -16,7 +16,7 @@ services:
       - tarantool
     links:
       - tarantool
-    image: s7m7/veda:1
+    image: s7m7/veda:0.0.1
     volumes:
       - type: bind
         source: ./data
