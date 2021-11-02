@@ -613,6 +613,10 @@ for (var i=0; i<result.length; i++){
     print('Skip, because not found dateToPlan: ',result[i]);
     continue;
   }
+  if (!veda.Util.hasValue(individ, "v-s:responsible")) {
+    print('Skip, because not found responsible: ',result[i]);
+    continue;
+  }
   //print('dateToPlan=', individ['v-s:dateToPlan']);
   var deadline = individ['v-s:dateToPlan'][0].data;
   var isAll = true;
@@ -664,7 +668,6 @@ for (var i=0; i<result.length; i++){
       "v-wf:forNet" : veda.Util.newUri("s-wf:WrapUniversalNet"),
       "v-wf:processedDocument" : veda.Util.newUri(result[i]),
       "v-wf:useTransformation" : veda.Util.newUri("v-df:InstructionRouteStartFormToNet"),
-      "v-s:responsible" : individ['v-s:responsible'],
       "v-wf:hasStatusWorkflow" : veda.Util.newUri("v-wf:ToBeSent"),
       "v-wf:fromShedulerScript" : veda.Util.newBool(true),
       "v-s:creator" : veda.Util.newUri ('cfg:VedaSystemAppointment'),
@@ -672,6 +675,18 @@ for (var i=0; i<result.length; i++){
     };
     if (veda.Util.hasValue(individ, "v-s:description")){
       startForm['rdfs:comment'] = individ['v-s:description'];
+    }
+    var responible = get_individual(veda.ticket, individ["v-s:responsible"][0].data);
+    if (veda.Util.hasValue(responible, "v-s:deleted", { data: true, type: "Boolean" })) {
+      if (veda.Util.hasValue(individ, "v-s:controller")) {
+        startForm["v-s:responsible"] = individ['v-s:controller'];
+      } else {
+        startForm["v-s:responsible"] = individ['v-s:creator'];
+      }
+      var comment = "В запланированном событии "+individ["rdfs:label"][0].data+" ответственный не актуален";
+      startForm['rdfs:comment'] = veda.Util.newStr(comment);
+    } else {
+      startForm["v-s:responsible"] = individ['v-s:responsible'];
     }
     if (veda.Util.hasValue(individ, "v-s:controller")) {
       startForm['v-s:controller'] = individ['v-s:controller'];
