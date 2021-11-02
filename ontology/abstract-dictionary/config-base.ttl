@@ -1116,8 +1116,8 @@ for (var i = 0; i < result.length; i++) {
   print("***********spec: ", result[i]);
   if (result[i]) {
     var spec = get_individual(veda.ticket, result[i]);
-    if (!veda.Util.hasValue(spec, "v-s:isShelfLifeAlways", { data: false, type: "Boolean" })) {
-      print("Skip " + result[i] + ": isShelfLifeAlways not false");
+    if (veda.Util.hasValue(spec, "v-s:shelfLife", { data: 9999, type: "Integer" })) {
+      print("Skip " + result[i] + ": shelfLife == 9999");
       continue;
     }
     if (!veda.Util.hasValue(spec, "v-s:shelfLife")) {
