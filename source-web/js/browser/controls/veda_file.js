@@ -149,6 +149,42 @@ $.fn.veda_file = function ( options ) {
   if (accept) {
     fileInput.attr('accept', accept);
   }
+  const clipboardButton = control.find('.paste-btn');
+  const clipboardGroup = control.find("div.input-group");
+  const clipboardInput = clipboardGroup.find("input[type='text']");
+  const clipboardClose = clipboardGroup.find("span");
+  clipboardButton.tooltip({
+    container: control,
+    placement: "top",
+    trigger: "hover",
+    title: "Приложить файл из буфера обмена"
+  });
+  clipboardInput.tooltip({
+    container: control,
+    placement: "top",
+    trigger: "hover",
+    title: "Выполните вставку"
+  });
+
+  clipboardButton.click(function(){
+    clipboardButton.hide();
+    clipboardGroup.show();
+    clipboardInput.focus();
+  });
+
+  clipboardClose.click(function(){
+    clipboardButton.show();
+    clipboardGroup.hide();
+  });
+
+  function pasteListener(event) {
+    if (event.clipboardData != undefined && event.clipboardData.files.length > 0) {
+      fileInput[0].files = event.clipboardData.files;
+      fileInput.change();
+    }
+    event.preventDefault();
+  }
+  clipboardInput[0].addEventListener("paste", pasteListener);
 
   const progress = function (progressEvent) {
     if (progressEvent.lengthComputable) {
@@ -267,11 +303,22 @@ $.fn.veda_file = function ( options ) {
 
 const defaults = {
   template: `
-<label class="btn btn-default">
-  Browse...
-  <strong class="indicator-percentage"></strong>
-  <span class="indicator-spinner fa fa-spinner fa-pulse fa-lg fa-fw text-info" style="display:none"></span>
-  <input type="file" style="display:none"/>
-</label>
+<div style="display:flex">
+  <label class="btn btn-default">
+    Browse...
+    <strong class="indicator-percentage"></strong>
+    <span class="indicator-spinner fa fa-spinner fa-pulse fa-lg fa-fw text-info" style="display:none"></span>
+    <input type="file" style="display:none"/>
+  </label>
+  <label style="margin-left:5px;" class="paste-btn btn btn-default">
+    <span class="glyphicon glyphicon-paste"></span>
+  </label>
+  <div class="input-group" style="margin-left:5px; display:none">
+    <input type="text" class="form-control"/>
+    <span class="input-group-btn">
+      <button class="btn btn-default">&#10005;</button>
+    </span>
+  </div>
+</div>
   `,
 };
