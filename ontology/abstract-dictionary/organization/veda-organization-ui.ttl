@@ -222,7 +222,7 @@ v-s:OrganizationUnitModel
       }
     });
   };
-  
+
   """ ;
 .
 
@@ -240,7 +240,7 @@ v-s:CS_Organization
   v-s:shelfLife 9999;
   v-s:listPropertie v-s:hasSubsidiary ;
   v-ui:defaultTemplate v-s:OrganizationTemplate ;
-  v-s:hasLinksTree v-s:OrganizationLinksTree
+  v-s:hasLinksTree v-s:OrganizationLinksTree ;
   v-s:loadPriority 15 ;
 .
 v-s:OrganizationTemplate
@@ -328,7 +328,7 @@ v-s:OrganizationTemplate
     template.trigger("validated", result);
   });
 
-  
+
 </script>
 <div>
   <div class="container sheet">
@@ -494,7 +494,7 @@ v-s:OrganizationTemplate
       modal.modal("hide").remove();
     });
   });
-  
+
 </script>
   """ ;
 .
@@ -1183,7 +1183,7 @@ v-s:AppointmentTemplate
   });
 
 
-  
+
 </script>
   """ ;
 .
@@ -1653,7 +1653,7 @@ v-s:PersonTemplate
   });
 
 
-  
+
 </script>
   """;
 .
@@ -1817,7 +1817,7 @@ v-s:PersonEmbeddedTemplate
     $('span[property="v-s:birthday"]').text('Не указано');
   }
 
-  
+
 </script>
   """;
 .
@@ -1977,7 +1977,7 @@ v-s:PositionTemplate
   if(!individual.isNew() && veda.appointment.id != 'cfg:AdministratorAppointment')
     $('.notEditForUsers').addClass('hide');
 
-  
+
 </script>
   """ ;
 .
@@ -2346,7 +2346,7 @@ v-s:AccountTemplate
     individual["v-s:authOrigin"]=["veda"];
   }
 
-  
+
 </script>
   """ ;
 .
@@ -2396,7 +2396,7 @@ v-s:AccountEmbeddedTemplate
     }
     template.trigger("validated", result);
   });
-   
+
 </script>
 <div>
   <div class="container sheet">

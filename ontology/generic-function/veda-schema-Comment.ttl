@@ -143,7 +143,7 @@ v-s:CommentsTemplate
     });
   });
 
-  
+
 </script>
     """;
 .
@@ -278,7 +278,7 @@ v-s:RecursiveCommentTemplate
   function linkedHandler (values) {
     values.length ? $(".linked-object", template).show() : $(".linked-object", template).hide();
   }
-  
+
 </script>
 <div class="media" style="overflow:initial;">
   <div class="media-body" style="overflow:initial;">

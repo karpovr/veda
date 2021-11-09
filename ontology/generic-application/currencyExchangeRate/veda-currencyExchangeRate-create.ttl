@@ -5,7 +5,7 @@
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
-
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
 
 <http://semantic-machines.com/veda/veda-currencyExchangeRate-create>
   rdf:type owl:Ontology ;

@@ -4,7 +4,7 @@
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
-
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
 
 <http://semantic-machines.com/veda/veda-activity-schema/>
   rdf:type owl:Ontology ;
@@ -99,7 +99,7 @@ v-s:hasThirdPartyParticipant
 .
 
 #v-s:responsible
-v-df:PsresponsibleInDecision
+v-s:PsresponsibleInDecision
   rdf:type v-ui:ObjectPropertySpecification ;
   v-ui:forClass v-s:Activity ;
   v-ui:forProperty v-s:responsible ;

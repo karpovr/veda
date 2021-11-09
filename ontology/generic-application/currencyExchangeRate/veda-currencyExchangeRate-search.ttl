@@ -4,6 +4,8 @@
 @prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
 
 <http://semantic-machines.com/veda/veda-currencyExchangeRate-search>
   rdf:type owl:Ontology ;
@@ -104,7 +106,7 @@ v-s:CurrencyExchangeRateSearchTemplate
           </div>
         </div>
       </div>
-	  <div class="row row-attribute">
+    <div class="row row-attribute">
       <div class="col-sm-3 col-xs-5">
         <label about="v-s:date" property="rdfs:label"></label>
       </div>
@@ -113,7 +115,7 @@ v-s:CurrencyExchangeRateSearchTemplate
             <veda-control data-type="date" property="v-s:date" class="-view edit search"></veda-control>
       </div>
     </div>
-	  <div class="row row-attribute">
+    <div class="row row-attribute">
       <div class="col-sm-3 col-xs-5">
         <label about="v-s:hasCurrencyExchangeRatePurpose" property="rdfs:label"></label>
       </div>
@@ -122,7 +124,7 @@ v-s:CurrencyExchangeRateSearchTemplate
             <veda-control data-type="link" rel="v-s:hasCurrencyExchangeRatePurpose" class="-view edit search fulltext dropdown"></veda-control>
       </div>
     </div>
-	  <div class="row row-attribute">
+    <div class="row row-attribute">
       <div class="col-sm-3 col-xs-5">
         <label about="v-s:hasCurrencySource" property="rdfs:label"></label>
       </div>
@@ -131,7 +133,7 @@ v-s:CurrencyExchangeRateSearchTemplate
             <veda-control data-type="link" rel="v-s:hasCurrencySource" class="-view edit search fulltext dropdown"></veda-control>
       </div>
     </div>
-	  <div class="row row-attribute">
+    <div class="row row-attribute">
       <div class="col-sm-3 col-xs-5">
         <label about="v-s:Comment" property="rdfs:label"></label>
       </div>
@@ -139,7 +141,7 @@ v-s:CurrencyExchangeRateSearchTemplate
           <div property="v-s:Comment" class="view -edit -search"></div>
           <veda-control data-type="string" property="v-s:Comment" class="-view edit search"></veda-control>
       </div>
-    </div>  
+    </div>
   <hr>
 </div>
   """ ;
