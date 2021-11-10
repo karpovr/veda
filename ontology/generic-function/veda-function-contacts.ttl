@@ -6,6 +6,7 @@
 @prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
 @prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix mnd-s: <http://semantic-machines.com/veda/mondi-schema/> .
 
 <http://semantic-machines.com/veda/veda-function-contacts>
   rdf:type owl:Ontology ;
@@ -261,21 +262,20 @@ v-s:ContactCardTemplate
     </div>
   </td>
   <td>
-    <div class="communication-container">
+    <div class="communication-container row">
       <div class="work-phone col-lg-3 col-md-12"></div>
-      <div class="email col-lg-6 col-md-12"></div>
+      <div class="email col-lg-6 col-md-12" style="overflow-x: hidden;"></div>
       <div class="other-phone col-lg-3 col-md-12"></div>
     </div>
-    <!-- <div about="@" rel="v-s:employee">
-      <div class="work-phone col-lg-3 col-md-12"></div>
-      <div class="email col-lg-6 col-md-12"></div>
-      <div class="other-phone col-lg-3 col-md-12"></div>
-    </div>
-    <div about="@" rel="v-s:hasCommunicationMean" data-template="v-ui:CompactCommunicationMeanTemplate"></div> -->
   </td>
-  <td width="60px">
+  <td width="20px">
     <div>
       <span class="hidden faviconIcon pointer fa fa-lg fa-star-o"></span>
+    </div>
+    <div>
+      <a href="#" class="hidden margin-xs-h profileIcon pointer fa fa-lg fa-id-badge"></a>
+    </div>
+    <div>
       <span about="@" class="zoom hidden" style="float:right;" data-template="v-ui:IconModalTemplate"></span>
     </div>
   </td>
@@ -283,6 +283,14 @@ v-s:ContactCardTemplate
 <script>
   var commMeansPromises;
   if (individual.hasValue("v-s:employee")) {
+    if (individual["v-s:employee"][0].hasValue("mnd-s:hasEmployeeProfile")) {
+      var profile  = individual["v-s:employee"][0]["mnd-s:hasEmployeeProfile"][0];
+      $(".profileIcon", template).removeClass("hidden");
+      $(".profileIcon", template).click(function(e) {
+        e.preventDefault();
+        veda.Util.showModal(profile);
+      });
+    }
     var isAppHasComm = individual["v-s:employee"][0].hasValue("v-s:hasCommunicationMean");
     if (isAppHasComm) {
       commMeansPromises = individual["v-s:employee"][0]["v-s:hasCommunicationMean"].map(function(commMean) {
@@ -323,13 +331,30 @@ v-s:ContactCardTemplate
     return Promise.all(commMeansPromises).then(function(commMeans) {
       commMeans.forEach(function(commMean) {
         if (commMean.hasValue("v-s:hasCommunicationMeanChannel", "d:o3q2gagyvfwh430io88vvb8vel")) {
-          $(".work-phone", template).append("<span>" + commMean["v-s:description"][0] + "</span>");
+          var phones = commMean["v-s:description"][0];
+          if (phones.indexOf(",") > 0) {
+            phones = phones.split(", ");
+          } else {
+            phones = [phones];
+          }
+          phones.forEach(function(phone) {
+            $(".work-phone", template).append("<div><a href='tel:" + phone + "'>" + phone + "</a></div>");
+          });
         } else if (commMean.hasValue("v-s:hasCommunicationMeanChannel", "d:a1iwni0b54fvcz41vuts08bxqsh")) {
           var aDiv = $("<div><a class='email-link' style='cursor: pointer;'></a></div>");
           $("a", aDiv).attr("href", "mailto:" + commMean["v-s:description"][0]).text(commMean["v-s:description"][0]);
           $(".email", template).append(aDiv);
         } else {
-          $(".other-phone", template).append("<span>" + commMean["v-s:description"][0] + "</span>");
+          var phones = commMean["v-s:description"][0];
+          if (phones.indexOf(" ") > 0) {
+            phones = phones.split(" ");
+          } else {
+            phones = [phones];
+          }
+          phones.forEach(function(phone) {
+            $(".other-phone", template).append("<div><a href='tel:" + phone + "'>" + phone + "</a></div>");
+          });
+          
         }
       })
     })
@@ -440,14 +465,6 @@ v-s:ContactsStructureTemplate
         <span about="v-s:vedaInfo" rel="v-s:tenant" data-template="v-ui:LabelTemplate"></span>
       </button>
     </div>
-    <!-- <div class="col-md-1">
-      <div class="checkbox margin-sm">
-        <label id="deleted-checkbox">
-          <input type="checkbox"/>
-          <span about="v-s:deleted" property="rdfs:label"></span>
-        </label>
-      </div>
-    </div> -->
   </div>
   <div class="not-found alert alert-warning hidden">
     <strong about="v-fs:Empty" property="rdfs:label"></strong>
@@ -628,19 +645,19 @@ v-s:ContactsStructureTemplate
     if (basePos == undefined) return;
     e.preventDefault();
     var changedWidth = baseWidth + (e.clientX - basePos);
-    if (changedWidth < 300) {
-      orgTree.css("width", 300);
-      orgContent.css("width", maxWidth - 300);
+    if (changedWidth < 200) {
+      orgTree.css("width", 200);
+      orgContent.css("width", maxWidth - 200);
 
-    } else if (changedWidth > 800) {
-      orgTree.css("width", 800);
-      orgContent.css("width", maxWidth - 800);
+    } else if (changedWidth > 600) {
+      orgTree.css("width", 600);
+      orgContent.css("width", maxWidth - 600);
     } else {
       orgTree.css("width", changedWidth);
       orgContent.css("width", maxWidth - changedWidth);
     }
   });
-
+  
 
   var loadIndicator = $("#load-indicator");
   var findDeleted = false;
@@ -909,7 +926,7 @@ v-s:ContactsStructureTemplate
           var child = new veda.IndividualModel(childUri);
           return getRowTemplate(child).then(function (tmpl) {
             if (tmpl == null) {
-              return Promise.resolve();
+              return Promise.resolve(null);
             }
             return child.present(rootElement.children(".children"), tmpl);
           });
@@ -917,6 +934,9 @@ v-s:ContactsStructureTemplate
         return Promise.all(promises);
       }).then(function(result) {
         loadIndicator.hide();
+        result = result.filter(function(item) {
+          return item != null;
+        });
         return result.length;
       });
     };
