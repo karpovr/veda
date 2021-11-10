@@ -51,7 +51,7 @@ function veda_dateTime (options) {
       input.val( moment(individual.get(property_uri)[0]).format(format) );
     }
     individual.on(property_uri, singleValueHandler);
-    control.one('remove', function () {
+    this.one('remove', function () {
       individual.off(property_uri, singleValueHandler);
     });
   } else {
@@ -62,21 +62,16 @@ function veda_dateTime (options) {
   }
 
   if (spec && spec.hasValue('v-ui:tooltip')) {
-    control.tooltip({
+    this.tooltip({
       title: spec['v-ui:tooltip'].join(', '),
       placement: 'auto left',
       container: 'body',
       trigger: 'manual',
       animation: false,
     });
-    control.one('remove', function () {
-      control.tooltip('destroy');
-    });
-    input.on('focusin', function () {
-      control.tooltip('show');
-    }).on('focusout change', function () {
-      control.tooltip('hide');
-    });
+    this.one('remove', () => this.tooltip('destroy'));
+    input.on('focusin', () => this.tooltip('show'));
+    input.on('focusout change', () => this.tooltip('hide'));
   }
 
   System.import('datetimepicker/js/bootstrap-datetimepicker.min.js').then(() => {

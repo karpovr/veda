@@ -43,7 +43,7 @@ function veda_literal (options) {
     });
 
   individual.on(property_uri, propertyModifiedHandler);
-  input.one('remove', function () {
+  this.one('remove', function () {
     individual.off(property_uri, propertyModifiedHandler);
   });
   propertyModifiedHandler();
@@ -123,12 +123,13 @@ function veda_literal (options) {
       container: 'body',
       trigger: 'manual',
       animation: false,
-    }).one('remove', function () {
-      input.tooltip('destroy');
     }).on('focusin', function () {
       input.tooltip('show');
     }).on('focusout change', function () {
       input.tooltip('hide');
+    });
+    this.one('remove', function () {
+      input.tooltip('destroy');
     });
   }
   return input;

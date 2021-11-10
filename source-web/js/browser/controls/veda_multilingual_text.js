@@ -10,25 +10,18 @@ import veda_multilingual from './veda_multilingual.js';
 
 $.fn.veda_multilingualText = function (options) {
   const opts = {...defaults, ...options};
-  const self = $(this);
-  const init = function () {
-    self.empty();
-    veda_multilingual.call(self, opts);
+  const init = () => {
+    this.empty();
+    veda_multilingual.call(this, opts);
     const ta = $('textarea', self);
-    ta.attr('rows', self.attr('rows'));
+    ta.attr('rows', this.attr('rows'));
     autosize(ta);
-    self.on('edit', function () {
-      autosize.update(ta);
-    });
-    self.one('remove', function () {
-      autosize.destroy(ta);
-    });
+    this.on('edit', () => autosize.update(ta));
+    this.one('remove', () => autosize.destroy(ta));
   };
   init();
   veda.on('language:changed', init);
-  self.one('remove', function () {
-    veda.off('language:changed', init);
-  });
+  this.one('remove', () => veda.off('language:changed', init));
   return this;
 };
 

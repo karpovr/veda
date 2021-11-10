@@ -8,14 +8,13 @@ import veda_multilingual from './veda_multilingual.js';
 
 $.fn.veda_multilingualString = function (options) {
   const opts = {...defaults, ...options};
-  const self = $(this);
-  const init = function () {
-    self.empty();
-    veda_multilingual.call(self, opts);
+  const init = () => {
+    this.empty();
+    veda_multilingual.call(this, opts);
   };
   init();
   veda.on('language:changed', init);
-  self.one('remove', function () {
+  this.one('remove', function () {
     veda.off('language:changed', init);
   });
   return this;

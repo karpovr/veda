@@ -9,6 +9,7 @@ import Util from '../../common/util.js';
 import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
 
 $.fn.veda_link = function ( options ) {
+  const self = this;
   const opts = {...defaults, ...options};
   const control = $(opts.template);
   const template = this.attr('data-template') || '{@.rdfs:label}';
@@ -77,24 +78,12 @@ $.fn.veda_link = function ( options ) {
             modal = $(modal).modal({'show': false});
             $('body').append(modal);
             modal.modal('show');
-            create.one('remove', function () {
-              modal.modal('hide').remove();
-              $(document).off('keyup', escHandler);
-            });
             const ok = $('#ok', modal).click((e) => {
               select(newVal);
-              $(document).off('keyup', escHandler);
             });
             const close = $('.close', modal).click((e) => {
               newVal.delete();
-              $(document).off('keyup', escHandler);
             });
-            const escHandler = function (e) {
-              if (e.keyCode === 27) {
-                close.click();
-              }
-            };
-            $(document).on('keyup', escHandler);
             const cntr = $('.modal-body', modal);
             newVal.one('beforeReset', function () {
               modal.modal('hide').remove();
@@ -137,7 +126,7 @@ $.fn.veda_link = function ( options ) {
         }
       };
       individual.on(rel_uri, singleValueHandler);
-      create.one('remove', function () {
+      self.one('remove', function () {
         individual.off(rel_uri, singleValueHandler);
       });
       singleValueHandler(individual.get(rel_uri));
@@ -467,7 +456,7 @@ $.fn.veda_link = function ( options ) {
     };
 
     individual.on(rel_uri, propertyModifiedHandler);
-    control.one('remove', function () {
+    self.one('remove', function () {
       individual.off(rel_uri, propertyModifiedHandler);
     });
     propertyModifiedHandler();
@@ -562,14 +551,10 @@ $.fn.veda_link = function ( options ) {
       trigger: 'manual',
       animation: false,
     });
-    control.one('remove', function () {
-      control.tooltip('destroy');
-    });
-    $('textarea', control).on('focusin', function () {
-      control.tooltip('show');
-    }).on('focusout change', function () {
-      control.tooltip('hide');
-    });
+    this.one('remove', () => control.tooltip('destroy'));
+    $('textarea', control)
+      .on('focusin', () => control.tooltip('show'))
+      .on('focusout change', () => control.tooltip('hide'));
   }
 
   this.append(control);

@@ -14,7 +14,6 @@ $.fn.veda_select = function (params) {
   const individual = opts.individual;
   const property_uri = opts.property_uri || opts.rel_uri;
   const spec = opts.spec;
-  const first_opt = $('option', control);
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : (new IndividualModel(property_uri))['rdfs:range'];
   const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
@@ -60,7 +59,7 @@ $.fn.veda_select = function (params) {
   });
 
   individual.on(property_uri, handler);
-  control.one('remove', function () {
+  this.one('remove', function () {
     individual.off(property_uri, handler);
   });
 
@@ -101,12 +100,13 @@ $.fn.veda_select = function (params) {
    */
   function renderOptions (options) {
     control.empty();
+    const first_opt = $('<option></option>');
     first_opt.text(placeholder).data('value', null).appendTo(control);
     const optionsPromises = options.map((value, index) => {
       if (index >= 100) {
         return;
       }
-      const opt = first_opt.clone().appendTo(control);
+      const opt = $('<option></option>').appendTo(control);
       return renderValue(value, template).then((rendered) => {
         opt.text(rendered).data('value', value);
         if (value instanceof IndividualModel && value.hasValue('v-s:deleted', true)) {
@@ -145,7 +145,7 @@ $.fn.veda_select = function (params) {
       trigger: 'hover',
       animation: false,
     });
-    control.one('remove', function () {
+    this.one('remove', function () {
       control.tooltip('destroy');
     });
   }

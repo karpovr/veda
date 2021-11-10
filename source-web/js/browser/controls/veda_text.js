@@ -18,12 +18,8 @@ $.fn.veda_text = function ( options ) {
 
   control.attr('rows', this.attr('rows'));
   autosize(control);
-  this.on('edit', function () {
-    autosize.update(control);
-  });
-  this.one('remove', function () {
-    autosize.destroy(control);
-  });
+  this.on('edit', () => autosize.update(control));
+  this.one('remove', () => autosize.destroy(control));
   this.append(control);
   return this;
 };
