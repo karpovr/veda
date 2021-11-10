@@ -11,7 +11,7 @@ $.fn.veda_worktime = function ( options ) {
   const mainInput = veda_literal.call(this, opts);
 
   this.append( mainInput.hide() );
-  this.append( opts.template );
+  this.append( opts.view );
 
   const pseudoInputs = $('div.input-group>input', this);
   const summaryText = $('#worktime-summary-text', this);
@@ -51,7 +51,8 @@ $.fn.veda_worktime = function ( options ) {
 };
 
 const defaults = {
-  template: `
+  template: `<input type="text" class="form-control" autocomplete="on" />`,
+  view: `
 <table>
   <tbody>
     <tr>
