@@ -199,7 +199,7 @@ $.fn.veda_file = function ( options ) {
     }
   };
 
-  const createFileIndividual = function (file, name, parent) {
+  const createFileIndividual = function (file, name, parent, isThumbnail) {
     const fileName = file.name || name;
     const uri = Util.guid();
     const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
@@ -212,10 +212,14 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:filePath'] = [path];
     fileIndividual['v-s:parent'] = [parent];
     fileIndividual['v-s:backwardTarget'] = [parent];
-    fileIndividual['v-s:backwardProperty'] = [rel_uri];
     fileIndividual['v-s:canRead'] = [true];
     fileIndividual['v-s:canUpdate'] = [true];
     fileIndividual['v-s:canDelete'] = [true];
+    if (isThumbnail) {
+      fileIndividual['v-s:backwardProperty'] = ["v-s:thumbnail"];
+    } else {
+      fileIndividual['v-s:backwardProperty'] = [rel_uri];
+    }
     return new Promise((resolve, reject) => {
       // If file is image && !thumbnail
       if ( file.name && (/^(?!thumbnail-).+\.(jpg|jpeg|gif|png|bmp|svg)$/i).test(file.name) ) {
@@ -235,7 +239,7 @@ $.fn.veda_file = function ( options ) {
             } else {
               file = image;
               return resizeImage(image, 256).then((thumbnail) => {
-                createFileIndividual(thumbnail, 'thumbnail-' + fileName, fileIndividual)
+                createFileIndividual(thumbnail, 'thumbnail-' + fileName, fileIndividual, true)
                   .then((thumbnailIndividual) => {
                     fileIndividual['v-s:thumbnail'] = [thumbnailIndividual];
                     resolve(fileIndividual);
