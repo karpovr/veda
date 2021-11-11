@@ -154,16 +154,12 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
         AsyncWriteExt::close(ff).await?;
     }
 
-    info!("@10");
     let tmp_file = format!("{}/{}{}", tmp_path, upload_prefix, sanitize_filename::sanitize(&uri));
-    info!("@11 {}", tmp_file);
     let mut f_in = File::open(tmp_file.clone())?;
 
-    info!("@20");
     let mut decoder = base64::read::DecoderReader::new(&mut f_in, base64::STANDARD);
     let mut result = Vec::new();
     decoder.read_to_end(&mut result)?;
-    info!("@30");
 
     let mut out_file: Vec<async_std::fs::File> = Vec::default();
     check_and_create_file(&format!("{}/{}", base_path, path), None, &uri, &mut out_file).await?;
@@ -172,10 +168,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
         AsyncWriteExt::flush(ff).await?;
         AsyncWriteExt::close(ff).await?;
     }
-    info!("@40");
-
     fs::remove_file(tmp_file)?;
-    info!("@50");
 
     Ok(HttpResponse::Ok())
 }
