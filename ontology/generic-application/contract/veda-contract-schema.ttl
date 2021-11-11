@@ -80,7 +80,6 @@ v-s:ContractParticipantCustomer
     v-ui:forProperty v-s:hasRoleInContract ;
     v-ui:minCardinality 1 ;
     v-ui:maxCardinality 1 ;
-    v-ui:queryPrefix "'@' == 'd:dsxyd1uxsxuui6f1t3s4ki3rdp' || '@' == 'd:a14fhdnimgodskj2jlmzwausubs' || '@' == 'd:ji9b5cqs5ucr1uy8ou7s78989x' || '@' == 'd:xxsa1kfknh7anmo6688y026udp' || '@' == 'd:a1268rvzfsml3g4j0wcjxf2skc9' || '@' == 'd:h77kc056374cpeyqk9qj2nl20e' || '@' == 'd:d7baxl3cu7w5hbzl2g560vyvb0'" ;
   .
 # rdfs:comment
 
@@ -100,7 +99,6 @@ v-s:ContractParticipantSupplier
     v-ui:forProperty v-s:hasRoleInContract ;
     v-ui:minCardinality 1 ;
     v-ui:maxCardinality 1 ;
-    v-ui:queryPrefix "'@' == 'd:wws2oz313z6xpl1hd4u3laxzfg' || '@' == 'd:jslj1t0dm3o6sg8jas931um4kw' || '@' == 'd:a1nzzs06xqqx3fvud0bsjq78cdq' || '@' == 'd:wh0t3y7ou4k9o0ec5vw4j5df5c' || '@' == 'd:p7xxv9vvwex8f1jfs2lhqjl85v' || '@' == 'd:hmmpzblf01agptcfl0kn704l2a' || '@' == 'd:kwe8nsn9qn3e6u9dczwn7wpu67'" ;
   .
 # rdfs:comment
 
@@ -120,6 +118,5 @@ v-s:ContractParticipantStakeholder
     v-ui:forProperty v-s:hasRoleInContract ;
     v-ui:minCardinality 1 ;
     v-ui:maxCardinality 1 ;
-    v-ui:queryPrefix "'@' == 'd:dm44s17tayal8frdutpnb2matk' || '@' == 'd:rdvfeae7ylufawj02z492cxmto' || '@' == 'd:tv2r6lzebfk6p3298jsnwokgxk'" ;
   .
 # rdfs:comment
