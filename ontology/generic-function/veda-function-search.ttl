@@ -865,7 +865,7 @@ v-fs:SelectedResultsActionsTemplate
     </button>
     <ul class="dropdown-menu operations"></ul>
   </div>
-  <div rel="v-fs:operation" data-template="v-s:OperationStatusTemplate" class="pull-left operation-container margin-md-h"></div>
+  <div about="@" rel="v-fs:operation" data-template="v-s:OperationStatusTemplate" class="pull-left operation-container margin-md-h"></div>
 </div>
   """ ;
 .
@@ -1357,6 +1357,7 @@ v-fs:AttributiveSearchInlineTemplate
     return resultDelta.reduce(function(p, result, i) {
       return p.then(function(templates) {
         return result.present(resultContainer, individual.resultTemplate, undefined, undefined, false).then(function (tmpl) {
+          tmpl = $(tmpl);
           $(".serial-number", tmpl).text(total - delta + i + 1);
           if (result.id === self.marked) {
             tmpl.addClass("marked");

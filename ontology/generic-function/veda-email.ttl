@@ -77,7 +77,7 @@ v-s:attachmentEmailBundle
   rdfs:comment "The total size of investments should not exceed 15 Mb"@en ;
 .
 ### ------------------------------------------------------
-v-s:TS_Email 
+v-s:TS_Email
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:EmailTemplate;
@@ -109,12 +109,12 @@ v-s:EmailTemplate
         fileSizeSUM += +fileSize;
       });
       console.log(fileSizeSUM > 15728640); //15 мб
-      if (fileSizeSUM > 15728640) 
+      if (fileSizeSUM > 15728640)
         result["v-s:attachment"] = {
           state: false,
           cause: ["v-s:attachmentEmailBundle"]
         };
-      template.trigger("validated", result);
+      template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
     });
   })
 

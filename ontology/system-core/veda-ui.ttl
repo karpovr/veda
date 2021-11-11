@@ -749,14 +749,14 @@ v-ui:StandardButtonsTemplate
     veda.off("status", statusHandler);
   });
 
-  template.on("click", "#edit, #save, #cancel, #delete, #destroy", function (e) {
+  template.on("click", "#edit, #save, #cancel, #delete, #recover, #destroy", function (e) {
     e.preventDefault();
     var action = this.id;
     if (action === "destroy") {
       var warning = new veda.IndividualModel("v-s:AreYouSure");
       warning.load().then(function (warning) {
         if ( confirm( warning["rdfs:label"].map(veda.Util.formatValue).join(" ") ) ) {
-          template.parent().closest("[resource]").trigger(action);
+          template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
         }
       });
     }
@@ -768,7 +768,7 @@ v-ui:StandardButtonsTemplate
           var warning = new veda.IndividualModel("v-s:AreYouSure");
           warning.load().then(function (warning) {
             if ( confirm( warning["rdfs:label"].map(veda.Util.formatValue).join(" ") ) ) {
-              template.parent().closest("[resource]").trigger(action);
+              template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
             }
           });
         }
@@ -778,7 +778,7 @@ v-ui:StandardButtonsTemplate
       });
     }
     else {
-      template.parent().closest("[resource]").trigger(action);
+      template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
     }
   });
   $("#cancel", template).on("click", function () {
@@ -902,13 +902,13 @@ v-ui:StandardButtonsTemplate
   });
 
   // var allButtons = "send edit save cancel delete destroy journal task rights";
-  var defaultButtons = "send edit save cancel delete journal task";
+  var defaultButtons = "send edit save cancel delete recover journal task";
   return individual.rights.then(function (rights) {
     var canUpdate = rights.hasValue("v-s:canUpdate", true);
     var canDelete = rights.hasValue("v-s:canDelete", true);
     var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
     enabledButtons.forEach(function (id) {
-      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel") ) { return; }
+      if ( !canUpdate && (id === "save" || id === "edit" || id === "cancel" || id === "recover") ) { return; }
       if ( !canDelete && (id === "delete" || id === "destroy") ) { return; }
       $("#" + id, template).removeClass("rm hidden");
     });
@@ -918,17 +918,18 @@ v-ui:StandardButtonsTemplate
 
 </script>
 <span>
-  <button type="refresh" class="btn btn-success view -edit -search hidden" id="refresh"><span class="glyphicon glyphicon-refresh"></span></button>
-  <button type="submit" class="rm hidden action btn btn-warning allButtons view edit -search" id="send" about="v-s:Send" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-primary allButtons view -edit -search" id="edit"><span about="v-s:Edit" property="rdfs:label"></span></button>
-  <button type="submit" class="rm hidden action btn btn-success allButtons -view edit -search" id="save" about="v-s:Save" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-default allButtons -view edit -search" id="cancel"><span about="v-s:Cancel" property="rdfs:label"></span></button>
-  <button type="button" class="rm hidden action btn btn-link allButtons view -edit -search" id="delete" about="v-s:Delete" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-danger allButtons view edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="rights" about="v-s:Rights" property="rdfs:label"></button>
-  <button type="button" class="rm hidden action btn btn-default allButtons view -edit -search" id="files" about="v-fs:FilesRegistry" property="rdfs:label"></button>
-  <div class="rm hidden action btn-group dropup allButtons view -edit -search" id="task">
+  <button type="button" class="btn btn-success view -edit -search hidden glyphicon glyphicon-refresh" id="refresh"></button>
+  <button type="submit" class="rm hidden action btn btn-warning view edit -search" id="send" about="v-s:Send" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-primary view -edit -search" id="edit" about="v-s:Edit" property="rdfs:label"></button>
+  <button type="submit" class="rm hidden action btn btn-success -view edit -search" id="save" about="v-s:Save" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-default -view edit -search" id="cancel" about="v-s:Cancel" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-link view -edit -search" id="delete" about="v-s:Delete" property="rdfs:label"></button>
+  <button type="button" class="hidden action btn btn-primary view -edit -search" id="recover" about="v-s:Recover" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-danger view edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-default view -edit -search" id="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-default view -edit -search" id="rights" about="v-s:Rights" property="rdfs:label"></button>
+  <button type="button" class="rm hidden action btn btn-default view -edit -search" id="files" about="v-fs:FilesRegistry" property="rdfs:label"></button>
+  <div class="rm hidden action btn-group dropup view -edit -search" id="task">
     <button class="action btn btn-warning btn-block dropdown-toggle" id="task-button" data-toggle="dropdown">
       <span about="v-s:SendTask" property="rdfs:label"> </span>
       <span class="caret"></span>
@@ -944,7 +945,7 @@ v-ui:StandardButtonsTemplate
       <li><a href="#" about="v-wf:distributionRouteStartForm" property="rdfs:label"></a></li>
     </ul>
   </div>
-  <div class="rm hidden action btn-group dropup allButtons view -edit -search" id="process">
+  <div class="rm hidden action btn-group dropup view -edit -search" id="process">
     <button class="action btn btn-warning btn-block dropdown-toggle" id="process-button" data-toggle="dropdown">
       <span about="v-ui:StartProcess" property="rdfs:label"></span>
       <span class="caret"></span>
@@ -953,29 +954,29 @@ v-ui:StandardButtonsTemplate
       <li><a href="#" about="bpmn:SimpleTaskProcessDefinition" property="rdfs:label"></a></li>
     </ul>
   </div>
-  <button type="button" class="btn btn-link view edit -search action toggle-actions hidden">
-    <span class="glyphicon glyphicon-chevron-left"></span>
-  </button>
+  <button type="button" class="btn btn-link view edit -search action hidden glyphicon glyphicon-chevron-left" id="toggle-actions"></button>
 </span>
 <script>
-  function hiddenButtonsForDeleted(){
-    if(individual.hasValue("v-s:deleted",true) && veda.appointment.id !== "cfg:AdministratorAppointment"){
-       $(".allButtons", template).addClass("hidden");
+  function hideButtonsForDeleted() {
+    if (individual.hasValue("v-s:deleted", true)) {
+      template.find(":not(#delete, #recover, #refresh, #toggle-actions)").addClass("hidden");
+      $("#delete", template).addClass("hidden");
+      $("#recover", template).removeClass("hidden");
+    } else {
+      template.find(":not(#delete, #recover, #refresh, #toggle-actions)").removeClass("hidden");
+      $("#delete", template).removeClass("hidden");
+      $("#recover", template).addClass("hidden");
     }
-    else {$(".allButtons", template).removeClass("hidden");}
   }
-  hiddenButtonsForDeleted();
-  individual.on("v-s:deleted", hiddenButtonsForDeleted);
+  hideButtonsForDeleted();
+  individual.on("v-s:deleted", hideButtonsForDeleted);
   template.one("remove", function () {
-    individual.off("v-s:deleted", hiddenButtonsForDeleted);
+    individual.off("v-s:deleted", hideButtonsForDeleted);
   });
 
-  $(".toggle-actions", template).click(function () {
-    template.closest(".actions").children(":not(.toggle-actions)").toggleClass("hidden");
-    var button = $(this);
-    button.find(".glyphicon").toggleClass("glyphicon-chevron-left glyphicon-chevron-right");
-    button.find(".description").toggleClass("hidden");
-    button.toggleClass("btn-link btn-info");
+  $("#toggle-actions", template).click(function () {
+    template.closest(".actions").children(":not(#toggle-actions)").toggleClass("hidden");
+    $(this).toggleClass("glyphicon-chevron-left glyphicon-chevron-right btn-link btn-info");
   });
 
   // Make position fixed for buttons bar that doesn't fit the window
@@ -1012,13 +1013,14 @@ v-ui:StandardButtonsTemplate
     template.one("remove", function () {
       $(window).off("scroll", scrollHandler);
     });
-    $(".toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
+    $("#toggle-actions", template).detach().appendTo(actions).removeClass("hidden");
     setTimeout(checkOffset, 0, main, actions, placeholder);
   }
 
   // Respect validation state of parent template
   var closest = template.parent().closest("[resource]");
-  closest.on("internal-validated", function (e, validation) {
+  closest.on("internal-validated", function (e) {
+    var validation = e.detail;
     if (validation.state) {
       $(".action#save", template).removeAttr("disabled");
       $(".action#send", template).removeAttr("disabled");
@@ -1047,11 +1049,11 @@ v-ui:IconButtonsTemplate
       var warning = new veda.IndividualModel("v-s:AreYouSure");
       warning.load().then(function (warning) {
         if ( confirm( warning["rdfs:label"].map(veda.Util.formatValue).join(" ") ) ) {
-          template.parent().closest("[resource]").trigger(action);
+          template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
         }
       });
     } else {
-      template.parent().closest("[resource]").trigger(action);
+      template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
     }
   });
 
@@ -1080,7 +1082,8 @@ v-ui:IconButtonsTemplate
 <script>
   // Respect validation state of parent template
   var closest = template.parent().closest("[resource]");
-  closest.on("internal-validated", function (e, validation) {
+  closest.on("internal-validated", function (e) {
+    var validation = e.detail;
     if (validation.state) {
       $(".action#save", template).removeAttr("disabled");
     } else {
@@ -2202,7 +2205,7 @@ v-ui:SimplifiedJournalTemplate
                   $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
                 } else {
                   $(".docflow-buttons", template).remove();
-                } 
+                }
               } else {
                   $(".docflow-buttons", template).remove();
                 }
@@ -2709,9 +2712,12 @@ v-ui:TreeTemplate
   displayedProperty.forEach( function (property, index) {
     headTmpl += "<th>" + property["rdfs:label"].map(veda.Util.formatValue).join(" ") + "</th>";
     var isLiteral = (literals.indexOf(property["rdfs:range"][0].id) >= 0);
+    var isFile = property.hasValue('rdfs:range', 'v-s:File');
     if ( index === 0 ) {
       if (isLiteral) {
         rowTmpl += "<td><div class='spacer'><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' property='" + property.id + "'></span></div></td>";
+      } else if (isFile) {
+        rowTmpl += "<td><div class='spacer'><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' rel='" + property.id + "' data-template='v-ui:FileMinTemplate'></span></div></td>";
       } else {
         rowTmpl += "<td><div class='spacer'><a href='#' class='expand glyphicon glyphicon-chevron-right'></a> <span about='@' rel='" + property.id + "' data-template='v-ui:LabelTemplate'></span></div></td>";
       }
@@ -2719,6 +2725,8 @@ v-ui:TreeTemplate
     } else {
       if ( isLiteral ) {
         rowTmpl += "<td about='@' property='" + property.id + "'></td>";
+      } else if (isFile) {
+        rowTmpl += "<td about='@' rel='" + property.id + "' data-template='v-ui:FileMinTemplate'></td>";
       } else {
         rowTmpl += "<td about='@' rel='" + property.id + "' data-template='v-ui:LabelTemplate'></td>";
       }
@@ -3130,7 +3138,7 @@ v-ui:json
       if (validationState === false) {
         notify("success", {name: "JSON ok"});
       }
-      template.trigger("internal-validated", {state: true});
+      template[0].dispatchEvent(new CustomEvent("internal-validated", {detail: {state: true}}));
       validationState = true;
     } catch (error) {
       formatted = format(original);
@@ -3138,7 +3146,7 @@ v-ui:json
       if (validationState === true) {
         notify("danger", {name: "JSON error"});
       }
-      template.trigger("internal-validated", {state: false});
+      template[0].dispatchEvent(new CustomEvent("internal-validated", {detail: {state: false}}));
       validationState = false;
     }
     anchorized = anchorize(formatted);

@@ -11,6 +11,7 @@ import appPresenter from '../browser/app_presenter.js';
 import auth from '../browser/auth.js';
 
 import '../browser/individual_presenter.js';
+import '../browser/individual_presenter2.js';
 
 import 'regenerator-runtime/runtime';
 

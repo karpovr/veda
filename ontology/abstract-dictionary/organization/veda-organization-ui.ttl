@@ -307,7 +307,7 @@ v-s:OrganizationTemplate
             state: (!queryResult.length || queryResult[0] === individual.id),
             cause: ["v-s:NonUniqueTaxId"]
           }
-          template.trigger("validated", result);
+          template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
         });
       }
     }
@@ -325,7 +325,7 @@ v-s:OrganizationTemplate
         cause: ["v-ui:regexp"]
       }
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 
 
@@ -685,7 +685,7 @@ v-s:DepartmentTemplate
         cause: ["v-ui:minCardinality"]
       }
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 
 </script>
@@ -807,7 +807,7 @@ v-s:AppointmentTemplate
         cause: ["v-ui:minCardinality"]
       };
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
   template.on("special-validate", function (e, validStates) {
     setTimeout(function(){
@@ -1326,7 +1326,7 @@ v-s:PersonTemplate
         }
       });
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 
 
@@ -1712,7 +1712,7 @@ v-s:PersonEmbeddedTemplate
         }
       });
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 
   var canCreateSubsidiary = (new veda.IndividualModel("v-s:Subsidiary")).canCreate();
@@ -1897,7 +1897,7 @@ v-s:PositionTemplate
         }
       });
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 </script>
 <div>
@@ -2029,7 +2029,7 @@ v-s:PositionMinimalTemplate
         }
       });
     }*/
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 </script>
 <div>
@@ -2148,7 +2148,7 @@ v-s:PositionEmbeddedTemplate
         }
       });
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 </script>
 <div>
@@ -2243,7 +2243,7 @@ v-s:AccountTemplate
         }
       });
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 </script>
 <div>
@@ -2394,7 +2394,7 @@ v-s:AccountEmbeddedTemplate
         }
       });
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 
 </script>

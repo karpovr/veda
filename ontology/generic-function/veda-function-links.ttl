@@ -106,7 +106,7 @@ v-s:PS_type
   v-ui:forClass v-s:Link ;
   v-ui:forProperty v-s:type ;
   v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;  
+  v-ui:maxCardinality 1 ;
   v-ui:placeholder "Тип документа"@ru ;
   v-ui:placeholder "Type"@en ;
 .
@@ -167,7 +167,7 @@ v-s:allowedType
 # ------------------------------------------------------------ ШАБЛОНЫ --
 
 # ------------------------------------------------------------ v-s:Link --
-v-s:TS_Link 
+v-s:TS_Link
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-s:LinkTemplate;
@@ -223,7 +223,7 @@ if(individual.hasValue("v-s:mutualMembership")){
 }
 else if (individual.hasValue("v-s:fromMemberOfTo")) {
   $('#fromMemberOfTo', template).removeClass('hidden');
-} 
+}
 else if (individual.hasValue("v-s:toMemberOfFrom")) {
   $('#toMemberOfFrom', template).removeClass('hidden');
 }
@@ -357,7 +357,7 @@ v-s:LinksListTemplate
         newRow.remove();
       });
       if ( individual.isNew() ) {
-        
+
         newRow.find(".action#save").hide();
       }
     });
@@ -375,7 +375,7 @@ v-s:LinksListTemplate
       var link = new veda.IndividualModel(link_uri);
       this["v-s:type"] = [];
       link.save();
-      link_template.trigger("view");
+      link_template[0].dispatchEvent(new Event("view"));
     });
   }
   individual.on("v-s:hasLink", linksHandler);
@@ -399,7 +399,7 @@ v-s:LinksListTemplate
   });
 
 
-  
+
 
 
 
@@ -424,7 +424,7 @@ v-s:LinksListTemplate
         } else if ( this.hasValue("v-s:to", displayedDoc) ) {
           $(".link-to", template).remove();
         }
-        
+
         template.on("validate", function () {
           var result = {};
           if(!individual.hasValue('v-s:to')){
@@ -434,7 +434,7 @@ v-s:LinksListTemplate
             };
           }
 
-          template.trigger("validated", result);
+          template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
         });
 
         function documentHandler() {
@@ -717,7 +717,7 @@ v-s:TrimmedLinkTemplate
     label = label.substring(0, 70) + "...";
     template.text(label);
   }
-  
+
 </script>
   """ ;
 .

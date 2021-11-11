@@ -36,7 +36,7 @@ import { Selector, t } from 'testcafe';
       .click('.suggestion[resource="v-wf:ToBeSent"]')
       .click('button#save')
       .wait(3000)
-      .click('button.btn.btn-link.view.edit.-search.toggle-actions')
+      .click('button#toggle-actions')
       .click('div[rel="v-wf:isProcess"] span#label')
       .expect(red).eql(1)
       .expect(red1).eql(1)

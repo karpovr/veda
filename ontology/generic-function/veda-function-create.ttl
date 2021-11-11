@@ -139,7 +139,7 @@ v-fc:CreateByTypeTemplate
   if (self.hasValue("v-fc:targetType")) {
     typeHandler(self["v-fc:targetType"]);
   }
-  
+
 </script>
   """
 .
@@ -359,7 +359,7 @@ v-fc:BlankTemplate
 <script>
   return individual.initBlank();
 
-  
+
 </script>
 <div>
   <div id="object-container"></div>
@@ -381,6 +381,7 @@ v-fc:BlankTemplate
       var object_template = self.get("v-fc:targetTemplate")[0];
       object.present(objectContainer, object_template, "edit")
         .then(function (objectTemplate) {
+          objectTemplate = $(objectTemplate);
           objectTemplate.one("cancel", cancelHandler);
           object.one("afterSave", saveHandler);
           objectTemplate.one("remove", function () {
@@ -401,7 +402,7 @@ v-fc:BlankTemplate
     }
   });
 
-  
+
 </script>
   """
 .

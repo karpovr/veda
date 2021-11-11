@@ -18,7 +18,7 @@ import { Selector, t } from 'testcafe';
   const searchBtn = Selector('.search-button');
   const searchResult = Selector('.results a.glyphicon.glyphicon-search');
   const deleteBtn = Selector('#delete');
-  const recoverBtn = Selector('.recover');
+  const recoverBtn = Selector('#recover');
   const advancedSearch = Selector('.advanced-toggle');
   const deleteTypeValue = Selector('div[rel="rdf:type"] .rel-actions .button-delete');
   const estimatedResults = Selector('.stats-top span[property="v-fs:estimated"]');

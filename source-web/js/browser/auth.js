@@ -8,9 +8,7 @@ import IndividualModel from '../common/individual_model.js';
 
 import Sha256 from '../common/lib/sha256.js';
 
-import $ from 'jquery';
-
-import {delegateHandler} from '../browser/dom_helpers.js';
+import {delegateHandler, clear} from '../browser/dom_helpers.js';
 
 /**
  * Authenticat user using ntlm provider
@@ -421,7 +419,9 @@ function delTicketCookie () {
 }
 
 veda.on('login:failed', function () {
-  $('#app').empty();
+  const appContainer = document.getElementById('app');
+  clear(appContainer);
+
   delete storage.ticket;
   delete storage.user_uri;
   delete storage.end_time;

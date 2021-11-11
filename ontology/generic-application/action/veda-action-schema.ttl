@@ -308,7 +308,7 @@ v-s:SingleScheduledActionTemplate
 <script>
   $(".action", template).click(function (e) {
     e.preventDefault();
-    template.trigger(this.id);
+    template[0].dispatchEvent(new Event(this.id));
   });
 </script>
 <div class="panel panel-default" style="margin-top: 20px">
@@ -362,7 +362,7 @@ v-s:NewSingleScheduledActionTemplate
 <script>
   $(".action", template).click(function (e) {
     e.preventDefault();
-    template.trigger(this.id);
+    template[0].dispatchEvent(new Event(this.id));
   });
 </script>
 <div>
@@ -475,15 +475,15 @@ v-s:RecursiveScheduledActionTemplate
       warning.load().then(function (warning) {
         warning = warning["rdfs:label"].map(veda.Util.formatValue).join(" ");
         if ( confirm(warning) ) {
-          template.trigger(that.id);
+          template[0].dispatchEvent(new Event(that.id));
         }
       });
     } else {
-      template.trigger(that.id);
+      template[0].dispatchEvent(new Event(that.id));
     }
   });
 
-  
+
 </script>
 <div class="media" style="overflow:initial;">
   <div class="media-body" style="overflow:initial;">

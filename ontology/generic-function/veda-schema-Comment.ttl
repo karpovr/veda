@@ -171,7 +171,7 @@ v-s:SingleCommentTemplate
 <script>
   $(".action", template).click(function (e) {
     e.preventDefault();
-    template.trigger(this.id);
+    template[0].dispatchEvent(new Event(this.id));
   });
 </script>
 <div class="panel panel-default" style="margin-top: 20px">
@@ -201,7 +201,7 @@ v-s:EmbeddedSingleCommentTemplate
 <script>
   $(".action", template).click(function (e) {
     e.preventDefault();
-    template.trigger(this.id);
+    template[0].dispatchEvent(new Event(this.id));
   });
 
   template.on("validate", function () {
@@ -220,7 +220,7 @@ v-s:EmbeddedSingleCommentTemplate
         cause: ["v-ui:minCardinality"]
       };
     }
-    template.trigger("validated", result);
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
   });
 </script>
 <div class="panel panel-default" style="margin-top: 20px">
@@ -259,7 +259,7 @@ v-s:RecursiveCommentTemplate
     warning.load().then(function (warning) {
       warning = warning["rdfs:label"].map(veda.Util.formatValue).join(" ");
       if ( actionId === "delete" && !confirm(warning) ) { return; }
-      template.trigger(actionId);
+      template[0].dispatchEvent(new Event(actionId));
     });
   });
 

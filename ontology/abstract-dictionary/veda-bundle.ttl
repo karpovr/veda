@@ -170,8 +170,8 @@ v-s:Delete
 .
 v-s:DeletedAlert
   rdf:type v-s:Bundle ;
-  rdfs:label "Объект удален"@ru ;
-  rdfs:label "Object is deleted"@en ;
+  rdfs:label "Этот объект удален"@ru ;
+  rdfs:label "This object is deleted"@en ;
 .
 v-s:RemovedAlert
   rdf:type v-s:Bundle ;
@@ -185,8 +185,8 @@ v-s:PresenterError
 .
 v-s:InvalidAlert
   rdf:type v-s:Bundle ;
-  rdfs:label "Документ не актуален"@ru ;
-  rdfs:label "Document is invalid"@en ;
+  rdfs:label "Этот документ не актуален"@ru ;
+  rdfs:label "This document is invalid"@en ;
 .
 v-s:Destroy
   rdf:type v-s:Bundle ;

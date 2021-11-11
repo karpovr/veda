@@ -1,4 +1,21 @@
-// Individual presenter
+/*
+// Performance test
+
+const main = document.createElement('main');
+document.body.append(main);
+var a = new veda.IndividualModel('mnd-s:Main');
+async function test() {
+  console.time('presenter');
+  for (let i = 0; i < 100; i++) {
+    await a.present(main);
+  }
+  console.timeEnd('presenter');
+}
+test();
+*/
+
+
+// Individual presenter 2
 
 import veda from '../common/veda.js';
 
@@ -24,9 +41,11 @@ import 'tablesortable';
 
 import validate from '../browser/validate.js';
 
-IndividualModel.prototype.present2 = IndividualPresenter;
+import {clear} from '../browser/dom_helpers.js';
 
-export default IndividualPresenter;
+IndividualModel.prototype.present = IndividualPresenter2;
+
+export default IndividualPresenter2;
 
 /**
  * Individual presenter method for IndividualModel class
@@ -37,13 +56,15 @@ export default IndividualPresenter;
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function IndividualPresenter (container, template, mode, extra, toAppend) {
+function IndividualPresenter2 (container, template, mode, extra, toAppend) {
   mode = mode || 'view';
 
   toAppend = typeof toAppend !== 'undefined' ? toAppend : true;
 
-  if (typeof container === 'string' || container instanceof HTMLElement) {
-    container = $(container);
+  if (typeof container === 'string') {
+    container = document.querySelector(container);
+  } else if (container instanceof jQuery) {
+    container = container.get(0);
   }
 
   return this.load()
@@ -71,12 +92,6 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
       }
       return renderTemplate(this, container, template.template, template.name, mode, extra, toAppend);
     })
-    .then((rendered) => {
-      if (Array.isArray(rendered)) {
-        return rendered.reduce((acc, item) => acc.add(item), $());
-      }
-      return rendered;
-    })
     .catch(errorHandler)
     .catch((error) => errorPrinter.call(this, error, container));
 }
@@ -99,12 +114,12 @@ function getTemplateString (template) {
       if (reg_file.test(templateString)) {
         return veda.Backend.loadFile('/templates/' + templateString).then((data) => ({
           name: templateName,
-          template: data.trim(),
+          template: data,
         }));
       }
       return {
         name: templateName,
-        template: templateString.trim(),
+        template: templateString,
       };
     });
   } else if (typeof template === 'string' && reg_uri.test(template)) {
@@ -113,12 +128,12 @@ function getTemplateString (template) {
   } else if (typeof template === 'string') {
     return {
       name: String(template.length),
-      template: template.trim(),
+      template: template,
     };
   } else if (template instanceof HTMLElement) {
     return {
       name: String(template.length),
-      template: template.outerHTML.trim(),
+      template: template.outerHTML,
     };
   }
   const generic = new IndividualModel('v-ui:generic');
@@ -131,8 +146,8 @@ function getTemplateString (template) {
  * @return {void}
  */
 function successHandler (result) {
-  const successMsg = new IndividualModel('v-s:SuccessBundle').load();
-  successMsg.then((successMsg) => {
+  const successMsg = new IndividualModel('v-s:SuccessBundle');
+  successMsg.load().then((successMsg) => {
     const notify = new Notify();
     notify('success', {name: successMsg.toString()});
   }).catch(console.log);
@@ -163,7 +178,7 @@ function errorHandler (error) {
  * @param {Error} error to print
  * @param {Object} container for error
  * @this {IndividualModel}
- * @return {jQuery}
+ * @return {HTMLElement}
  */
 function errorPrinter (error, container) {
   console.log(`presenter error: ${this.id}`, error, error.stack);
@@ -178,13 +193,19 @@ function errorPrinter (error, container) {
         <strong>${error.code}</strong> ${error.name} ${error.message}>
       </span>`)
     .then((msg) => {
-      if (container.prop('tagName') === 'TBODY' || container.prop('tagName') === 'TABLE') {
-        msg = $(`<tr><td colspan="999">${msg}</td></tr>`);
+      let wrapper;
+      if (container.tagName === 'TBODY' || container.tagName === 'TABLE') {
+        const tr = document.createElement('tr');
+        const td = tr.appendChild(document.createElement('td'));
+        td.colSpan = 999;
+        td.innerHTML = msg;
+        wrapper = tr;
       } else {
-        msg = $(`<div>${msg}</div>`);
+        const div = document.createElement('div');
+        div.innerHTML = msg;
+        wrapper = div;
       }
-      container.append(msg);
-      return msg;
+      return container.appendChild(wrapper);
     });
 }
 
@@ -192,39 +213,65 @@ function errorPrinter (error, container) {
  * Render template
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
- * @param {IndividualModel|string} template - template string to render individual with
+ * @param {IndividualModel|string} templateStr - template string to render individual with
  * @param {string} name - name of template for sourceURL
  * @param {string} mode - view | edit | search
  * @param {Object} extra - extra parameters to pass ro template
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function renderTemplate (individual, container, template, name, mode, extra, toAppend) {
+function renderTemplate (individual, container, templateStr, name, mode, extra, toAppend) {
   // Extract pre script, template and post script
-  const match = template.match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
-  const pre_render_src = match[1];
-  template = $( match[2] );
-  const post_render_src = match[3];
+  const match = templateStr.trim().match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
+  const pre_render_src = match[1] && match[1].trim();
+  const post_render_src = match[3] && match[3].trim();
+
+  const content = match[2] && match[2].trim();
+  let tagName;
+  if (content.startsWith('<tr')) {
+    tagName = 'tbody';
+  } else if (content.startsWith('<td')) {
+    tagName = 'tr';
+  } else {
+    tagName = 'div';
+  }
+  const template = document.createElement(tagName);
+  template.innerHTML = content;
 
   let pre_result;
   if (pre_render_src) {
-    pre_result = eval(`(function () { 'use strict';\n${pre_render_src}\n}).call(individual);\n//# sourceURL=${name}_pre`);
+    pre_result = eval(
+      `(function (veda, individual, container, template, mode, extra) {
+   'use strict';
+   ${pre_render_src}
+ }).call(individual, veda, individual, $(container), $(template.children), mode, extra);
+ //# sourceURL=${name}_pre`,
+    );
   }
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
-    return processTemplate(individual, container, template, mode).then((processedTemplate) => {
-      processedTemplate.triggerHandler(mode);
-
-      if (toAppend) {
-        container.append(processedTemplate);
-      }
+    return processTemplate(individual, container, template, mode).then((renderedFragment) => {
+      const fragmentChildren = [...renderedFragment.children];
+      fragmentChildren.forEach((node) => {
+        if (toAppend) {
+          container.appendChild(node);
+        }
+        node.dispatchEvent(new Event(mode));
+      });
 
       let post_result;
       if (post_render_src) {
-        post_result = eval(`(function () { 'use strict';\n${post_render_src}\n}).call(individual);\n//# sourceURL=${name}_post`);
+        post_result = eval(
+          `(function (veda, individual, container, template, mode, extra) {
+  'use strict';
+  ${post_render_src}
+}).call(individual, veda, individual, $(container), $(fragmentChildren), mode, extra);
+//# sourceURL=${name}_post`,
+        );
       }
+
       return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
-        .then(() => processedTemplate);
+        .then(() => fragmentChildren);
     });
   });
 }
@@ -239,28 +286,26 @@ function renderTemplate (individual, container, template, name, mode, extra, toA
  * @return {Promise}
  */
 function processTemplate (individual, container, template, mode) {
-  // Get properties specifications
-  const ontology = veda.ontology;
-  const specs = $.extend.apply(
-    {}, [{}].concat(
-      individual['rdf:type'].map((_class) => {
-        return ontology.getClassSpecifications(_class.id);
-      }),
-    ),
-  );
-  template.attr({
-    'resource': individual.id,
-    'typeof': individual['rdf:type'].map((item) => {
-      return item.id;
-    }).join(' '),
-  }).addClass('template');
+  const templateChildren = [...template.children];
 
-  const view = template.find('.view').addBack('.view');
-  const edit = template.find('.edit').addBack('.edit');
-  const search = template.find('.search').addBack('.search');
-  const _view = template.find('.-view').addBack('.-view');
-  const _edit = template.find('.-edit').addBack('.-edit');
-  const _search = template.find('.-search').addBack('.-search');
+  // Get properties specifications
+  const specs = individual['rdf:type'].reduce((acc, type) => ({
+    ...acc,
+    ...veda.ontology.getClassSpecifications(type.id),
+  }), {});
+
+  templateChildren.forEach((node) => {
+    node.setAttribute('resource', individual.id);
+    node.setAttribute('typeof', individual['rdf:type'].map((item) => item.id).join(' '));
+    node.classList.add('template');
+  });
+
+  const view = template.querySelectorAll('.view');
+  const edit = template.querySelectorAll('.edit');
+  const search = template.querySelectorAll('.search');
+  const _view = template.querySelectorAll('.-view');
+  const _edit = template.querySelectorAll('.-edit');
+  const _search = template.querySelectorAll('.-search');
 
   // Embedded templates list
   const embedded = [];
@@ -273,43 +318,78 @@ function processTemplate (individual, container, template, mode) {
   const modeHandler = function (event) {
     event.stopPropagation();
     mode = event.type;
-    template.data('mode', mode);
+    templateChildren.forEach((node) => node.setAttribute('data-mode', mode));
     switch (mode) {
-    case 'view': view.show(); _view.hide(); break;
-    case 'edit': edit.show(); _edit.hide(); break;
-    case 'search': search.show(); _search.hide(); break;
+    case 'view':
+      view.forEach((node) => node.style.display = '');
+      _view.forEach((node) => node.style.display = 'none');
+      break;
+    case 'edit':
+      edit.forEach((node) => node.style.display = '');
+      _edit.forEach((node) => node.style.display = 'none');
+      break;
+    case 'search':
+      search.forEach((node) => node.style.display = '');
+      _search.forEach((node) => node.style.display = 'none');
+      break;
     }
+
     // sync mode for embedded templates
     embedded.map((item) => {
-      item.triggerHandler(event.type, individual.id);
+      item.dispatchEvent(new Event(mode));
     });
   };
-  template.on('view edit search', modeHandler);
+  templateChildren.forEach((node) => {
+    node.addEventListener('view', modeHandler);
+    node.addEventListener('edit', modeHandler);
+    node.addEventListener('search', modeHandler);
+  });
 
   // Define handlers
-  template.data({
-    'reset': resetHandler,
-    'save': saveHandler,
-    'delete': deleteHandler,
-    'recover': recoverHandler,
-    'remove': removeHandler,
+  templateChildren.forEach((node) => {
+    node.veda = {
+      'reset': resetHandler,
+      'save': saveHandler,
+      'delete': deleteHandler,
+      'recover': recoverHandler,
+      'remove': removeHandler,
+    };
   });
-  template.one('remove', function () {
-    template.removeData('reset', 'save', 'delete', 'recover', 'remove');
-  });
-  template.on('cancel save delete recover destroy', function (e) {
-    e.stopPropagation();
-    if (e.type === 'cancel') {
+
+  /**
+   * Call method
+   * @param {Event} event
+   */
+  function callMethod (event) {
+    event.stopPropagation();
+    const type = event.type;
+    if (type === 'cancel') {
       resetHandler();
-    } else if (e.type === 'save') {
+    } else if (type === 'save') {
       saveHandler();
-    } else if (e.type === 'delete') {
+    } else if (type === 'delete') {
       deleteHandler();
-    } else if (e.type === 'recover') {
+    } else if (type === 'recover') {
       recoverHandler();
-    } else if (e.type === 'destroy') {
+    } else if (type === 'destroy') {
       removeHandler();
     }
+  }
+
+  /**
+   * Remove veda methods from node
+   * @param {Event} event
+   */
+  function removeMethods (event) {
+    delete event.target.veda;
+  }
+  templateChildren.forEach((node) => {
+    node.addEventListener('cancel', callMethod);
+    node.addEventListener('save', callMethod);
+    node.addEventListener('delete', callMethod);
+    node.addEventListener('recover', callMethod);
+    node.addEventListener('destroy', callMethod);
+    node.addEventListener('remove', removeMethods);
   });
 
   /**
@@ -320,14 +400,14 @@ function processTemplate (individual, container, template, mode) {
    */
   function resetHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => typeof item.data('reset') === 'function' ? item.data('reset')(individual.id, acc) : acc, acc);
+    acc = embedded.reduce((acc, item) => typeof item.veda.reset === 'function' ? item.veda.reset(individual.id, acc) : acc, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
     }
     const uris = Util.unique(acc);
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset(true)), Promise.resolve())
-      .then(() => template.triggerHandler('view'))
+      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
       .catch(errorHandler);
   }
 
@@ -339,7 +419,9 @@ function processTemplate (individual, container, template, mode) {
    */
   function saveHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => typeof item.data('save') === 'function' ? item.data('save')(individual.id, acc) : acc, acc);
+    acc = embedded.reduce((acc, item) => {
+      return typeof item.veda.save === 'function' ? item.veda.save(individual.id, acc) : acc;
+    }, acc);
     if (parent !== individual.id) {
       acc.push(individual.id);
     }
@@ -365,7 +447,7 @@ function processTemplate (individual, container, template, mode) {
         });
       })
       .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
-      .then(() => template.triggerHandler('view'))
+      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -377,7 +459,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function deleteHandler () {
     return individual.delete()
-      .then(() => template.triggerHandler('view'))
+      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -389,7 +471,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function recoverHandler () {
     return individual.recover()
-      .then(() => template.triggerHandler('view'))
+      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -402,7 +484,9 @@ function processTemplate (individual, container, template, mode) {
    */
   function removeHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => typeof item.data('remove') === 'function' ? item.data('remove')(individual.id, acc) : acc, acc);
+    acc = embedded.reduce((acc, item) => {
+      return typeof item.veda.remove === 'function' ? item.veda.remove(individual.id, acc) : acc;
+    }, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
@@ -412,7 +496,10 @@ function processTemplate (individual, container, template, mode) {
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then((removedAlert) => {
-          template.empty().append(`<code>${removedAlert.toString()}</code>`);
+          templateChildren.forEach((node) => {
+            clear(node);
+            node.innerHTML = `<code>${removedAlert.toString()}</code>`;
+          });
         }).catch(console.log);
       })
       .then(successHandler)
@@ -426,125 +513,92 @@ function processTemplate (individual, container, template, mode) {
    */
   const deletedHandler = function () {
     if ( this.hasValue('v-s:deleted', true) ) {
-      if ( container && typeof container.prop === 'function' && container.prop('id') === 'main' && !template.hasClass('deleted') ) {
-        const alertModel = new IndividualModel('v-s:DeletedAlert');
-        const recoverModel = new IndividualModel('v-s:Recover');
-        Promise.all([alertModel.load(), recoverModel.load(), this.canUpdate()]).then((arr) => {
-          let alert = arr[0]['rdfs:label'].map(Util.formatValue).join(' ');
-          const recover = arr[1]['rdfs:label'].map(Util.formatValue).join(' ');
-          const canUpdate = arr[2];
-          if (canUpdate) {
-            alert = alert + '<button id="deleted-alert-recover" class="btn btn-primary btn-xs recover pull-right">' + recover + '</button>';
-          }
-          const deletedAlert = $(
-            `<div id="deleted-alert" class="container sheet margin-lg">
-              <div class="alert alert-warning no-margin clearfix" role="alert">
-                <p id="deleted-alert-msg">${alert}</p>
-              </div>
-            </div>`,
-          );
-          $('.recover', deletedAlert).click(() => {
-            template.triggerHandler('recover');
-          });
-          template.prepend(deletedAlert);
-        });
-      }
-      if (mode !== 'search') {
-        template.addClass('deleted');
+      templateChildren.forEach((node) => {
+        node.classList.add('deleted');
+      });
+      if (container && container.id === 'main') {
+        const notify = new Notify();
+        const msg = new IndividualModel('v-s:DeletedAlert');
+        msg.load().then((msg) => {
+          notify('warning', {name: msg['rdfs:label'].map(Util.formatValue).join(' ')});
+        }).catch(console.log);
       }
     } else {
-      template.removeClass('deleted');
-      if ( container && typeof container.prop === 'function' && container.prop('id') === 'main' ) {
-        $('#deleted-alert', template).remove();
-      }
+      templateChildren.forEach((node) => {
+        node.classList.remove('deleted');
+      });
     }
   };
   individual.on('v-s:deleted', deletedHandler);
-  template.one('remove', function () {
-    individual.off('v-s:deleted', deletedHandler);
-  });
+  templateChildren.forEach((node) => node.addEventListener('remove', () => individual.off('v-s:deleted', deletedHandler)));
   deletedHandler.call(individual);
 
   /**
-   * Individual v-s:valid handler. Shows alert whenb individual is invalid .
+   * Individual v-s:valid handler. Shows alert when individual is invalid .
    * @this Individual
    * @return {void}
    */
   const validHandler = function () {
-    if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) && mode === 'view' ) {
-      if ( (container.prop('id') === 'main' || container.hasClass('modal-body') ) && !template.hasClass('invalid') ) {
-        new IndividualModel('v-s:InvalidAlert').load().then((loaded) => {
-          const alert = loaded['rdfs:label'].map(Util.formatValue).join(' ');
-          const invalidAlert = $(
-            `<div id="invalid-alert" class="container sheet margin-lg">
-              <div class="alert alert-danger no-margin clearfix" role="alert">
-                <p id="invalid-alert-msg">${alert}</p>
-              </div>
-            </div>`,
-          );
-          template.prepend(invalidAlert);
-        });
+    if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) ) {
+      templateChildren.forEach((node) => {
+        node.classList.add('invalid');
+      });
+      if (container && container.id === 'main') {
+        const notify = new Notify();
+        const msg = new IndividualModel('v-s:InvalidAlert');
+        msg.load().then((msg) => {
+          notify('warning', {name: msg['rdfs:label'].map(Util.formatValue).join(' ')});
+        }).catch(console.log);
       }
-      template.addClass('invalid');
     } else {
-      template.removeClass('invalid');
-      if ( container.prop('id') === 'main' ) {
-        $('#invalid-alert', template).remove();
-      }
+      templateChildren.forEach((node) => {
+        node.classList.remove('invalid');
+      });
     }
   };
-  individual.on('v-s:valid', validHandler);
-  individual.on('v-s:deleted', validHandler);
-  template.one('remove', function () {
-    individual.off('v-s:valid', validHandler);
-    individual.off('v-s:deleted', validHandler);
-  });
+  individual.on('v-s:valid v-s:deleted', validHandler);
+  templateChildren.forEach((node) => node.addEventListener('remove', () => individual.off('v-s:valid v-s:deleted', validHandler)));
   validHandler.call(individual);
 
   // Process RDFa compliant template
 
   // Special (not RDFa)
-  template.find('[href*=\'@\']:not([rel] *):not([about] *)').addBack('[href*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
-    const self = $(el);
-    const str = self.attr('href');
-    self.attr('href', str.replace('@', individual.id));
+  template.querySelectorAll('[href*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+    const href = node.getAttribute('href');
+    node.setAttribute('href', href.replace('@', individual.id));
   });
 
-  template.find('[src*=\'@\']:not([rel] *):not([about] *)').addBack('[src*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
-    const self = $(el);
-    const str = self.attr('src');
-    self.attr('src', str.replace('@', individual.id));
+  template.querySelectorAll('[src*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+    const src = node.getAttribute('src');
+    node.setAttribute('src', src.replace('@', individual.id));
   });
 
-  template.find('[style*=\'@\']:not([rel] *):not([about] *)').addBack('[style*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
-    const self = $(el);
-    const style = self.attr('style');
-    self.attr('style', style.replace('@', individual.id));
+  template.querySelectorAll('[style*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+    const style = node.getAttribute('style');
+    node.setAttribute('style', style.replace('@', individual.id));
   });
 
-  template.find('[title]:not([rel] *):not([about] *)').addBack('[style*=\'@\']:not([rel] *):not([about] *)').map((i, el) => {
-    const self = $(el);
-    const title = self.attr('title');
-    if ( (/^(\w|-)+:.*?$/).test(title) ) {
+  template.querySelectorAll('[title]:not([rel] *):not([about] *)').forEach((node) => {
+    const title = node.getAttribute('title');
+    if ((/^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/).test(title) ) {
       const titleIndividual = new IndividualModel(title);
       titleIndividual.load().then((titleIndividual) => {
-        self.attr('title', titleIndividual);
+        node.setAttribute('title', titleIndividual.toString());
       });
     }
   });
 
   // Property values
-  const props = template.find('[property]:not(veda-control):not([rel] *):not([about] *)').addBack('[property]:not(veda-control):not([rel] *):not([about] *)').map((i, el) => {
-    const propertyContainer = $(el);
-    const property_uri = propertyContainer.attr('property');
-    const about_uri = propertyContainer.attr('about');
+  const props = Array.from(template.querySelectorAll('[property]:not(veda-control):not([rel] *):not([about] *)')).map((propertyContainer) => {
+    const property_uri = propertyContainer.getAttribute('property');
+    const about_uri = propertyContainer.getAttribute('about');
     let about;
     let isAbout;
 
     if (about_uri === '@') {
       about = individual;
       isAbout = true;
-      propertyContainer.attr('about', about.id);
+      propertyContainer.setAttribute('about', about.id);
     } else if (!about_uri) {
       about = individual;
       isAbout = false;
@@ -553,88 +607,51 @@ function processTemplate (individual, container, template, mode) {
       isAbout = true;
     }
 
-    return about.load().then((about) => {
-      const idModifiedHandler = function () {
-        propertyContainer.text(about.id);
-      };
-      if (property_uri === '@') {
-        propertyContainer.text(about.id);
-        about.on('idChanged', idModifiedHandler);
-        template.one('remove', function () {
-          about.off('idChanged', idModifiedHandler);
+    return about.load()
+      .then((about) => {
+        const idModifiedHandler = function () {
+          propertyContainer.textContent = about.id;
+        };
+        if (property_uri === '@') {
+          propertyContainer.textContent = about.id;
+          about.on('idChanged', idModifiedHandler);
+          templateChildren.forEach((node) => {
+            node.addEventListener('remove', () => about.off('idChanged', idModifiedHandler));
+          });
+          return;
+        }
+
+        // Re-render all property values if model's property was changed
+        const propertyModifiedHandler = function () {
+          renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
+        };
+        about.on(property_uri, propertyModifiedHandler);
+        templateChildren.forEach((node) => {
+          node.addEventListener('remove', () => about.off(property_uri, propertyModifiedHandler));
         });
-        return;
-      }
 
-      // Re-render all property values if model's property was changed
-      const propertyModifiedHandler = function () {
         renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
-      };
-      about.on(property_uri, propertyModifiedHandler);
-      template.one('remove', function () {
-        about.off(property_uri, propertyModifiedHandler);
-      });
-
-      renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
-    })
+      })
       .catch((error) => errorPrinter.call(about, error, propertyContainer));
-  }).get();
-
-  // Max displayed values
-  template.on('click', '.more', function (event) {
-    event.stopPropagation();
-    const $this = $(event.target);
-    const resource_uri = $this.closest('[resource]').attr('resource');
-    const resource = new IndividualModel(resource_uri);
-    const relContainer = $this.closest('[rel]');
-    const countDisplayed = relContainer.children().length - 1;// last children is .more button
-    const rel_uri = relContainer.attr('rel');
-
-    resource.trigger(rel_uri, resource.get(rel_uri), countDisplayed + 10);
-    $this.remove();
   });
 
   // Related resources & about resources
-  const rels = template.find('[rel]:not(veda-control):not([rel] *):not([about] *)').addBack('[rel]:not(veda-control):not([rel] *):not([about] *)').map((i, el) => {
-    const relContainer = $(el);
-    let about = relContainer.attr('about');
-    const rel_uri = relContainer.attr('rel');
-    const isEmbedded = relContainer.attr('data-embedded') === 'true';
-    const spec = specs[rel_uri] ? new IndividualModel( specs[rel_uri] ) : undefined;
-    const rel_inline_template = relContainer.html().trim();
-    const rel_template_uri = relContainer.attr('data-template');
-    let limit = relContainer.attr('data-limit') || Infinity;
-    const more = relContainer.attr('data-more') || false;
+  const rels = Array.from(template.querySelectorAll('[rel]:not(veda-control):not([rel] *):not([about] *)')).map((relContainer) => {
+    let about = relContainer.getAttribute('about');
+    const rel_uri = relContainer.getAttribute('rel');
+    const isEmbedded = relContainer.getAttribute('data-embedded') === 'true';
+    // const spec = specs[rel_uri] ? new IndividualModel( specs[rel_uri] ) : undefined;
+    const rel_inline_template = relContainer.innerHTML.trim();
+    const rel_template_uri = relContainer.getAttribute('data-template');
+    let limit = relContainer.getAttribute('data-limit') || Infinity;
+    const more = relContainer.getAttribute('data-more') || false;
     let relTemplate;
     let isAbout;
-
-    const sortableOptions = {
-      delay: 150,
-      placeholder: 'sortable-placeholder',
-      forcePlaceholderSize: true,
-      handle: '.button-drag',
-      cancel: '',
-      update: function () {
-        const uris = $(this).sortable('toArray', {attribute: 'resource'});
-        individual.set(
-          rel_uri,
-          uris.map((uri) => {
-            return new IndividualModel(uri);
-          }),
-        );
-      },
-    };
-    relContainer.sortable(sortableOptions);
-    template.one('remove', function () {
-      if (relContainer.sortable('instance')) {
-        relContainer.sortable('destroy');
-      }
-    });
 
     if (about) {
       isAbout = true;
       about = (about === '@' ? individual : new IndividualModel(about));
-      relContainer.attr('about', about.id);
+      relContainer.setAttribute('about', about.id);
     } else {
       isAbout = false;
       about = individual;
@@ -645,34 +662,7 @@ function processTemplate (individual, container, template, mode) {
     } else if ( rel_inline_template.length ) {
       relTemplate = rel_inline_template;
     }
-    relContainer.empty();
-
-    template.on('view edit search', function (e) {
-      if (e.type === 'view') {
-        relContainer.sortable('disable');
-      } else if (e.type === 'edit') {
-        relContainer.sortable('enable');
-        const property = new IndividualModel(rel_uri);
-        if ( isEmbedded &&
-            spec &&
-            spec['v-ui:minCardinality'][0] >= 1 &&
-            !individual.hasValue(rel_uri) &&
-            !(property.hasValue('rdfs:range') && property['rdfs:range'][0].id === 'v-s:File')
-        ) {
-          const valueType = spec && spec.hasValue('v-ui:rangeRestriction') ?
-            spec['v-ui:rangeRestriction'] : property.hasValue('rdfs:range') ?
-              property['rdfs:range'] : [];
-          const emptyValue = new IndividualModel();
-          if ( valueType.length ) {
-            emptyValue['rdf:type'] = valueType;
-          }
-          individual.set(rel_uri, [emptyValue]);
-        }
-      } else if (e.type === 'search') {
-        relContainer.sortable('enable');
-      }
-      e.stopPropagation();
-    });
+    relContainer.innerHTML = '';
 
     return about.load().then((about) => {
       let prev_rendered = {};
@@ -684,7 +674,7 @@ function processTemplate (individual, container, template, mode) {
           prev_rendered = {};
           curr_rendered = {};
           sort_required = false;
-          relContainer.empty();
+          relContainer.innerHTML = '';
           return;
         }
 
@@ -710,23 +700,34 @@ function processTemplate (individual, container, template, mode) {
                 return template;
               });
           }).filter(Boolean),
-        ).then((templates) => {
-          relContainer.append(templates);
+        ).then((nodes) => {
+          relContainer.append(...nodes.flat());
           const prev_uris = Object.keys(prev_rendered);
           if (prev_uris.length) {
             const selector = prev_uris.map((uri) => `[resource="${Util.escape4$(uri)}"]`).join(',');
-            $(selector, relContainer).remove();
+            relContainer.querySelectorAll(selector).forEach((node) => node.remove());
           }
           if (sort_required) {
-            const list = relContainer.children().detach().toArray();
+            const list = Array.from(relContainer.children).map((node) => node.remove());
             list.sort((a, b) => {
               return curr_rendered[a.getAttribute('resource')] - curr_rendered[b.getAttribute('resource')];
             });
-            relContainer.append(list);
+            relContainer.append(...list);
           }
           if (limit < values.length && more) {
-            relContainer.children('a.more').remove();
-            relContainer.append( '<a class=\'more badge\'>&darr; ' + (values.length - limit) + '</a>' );
+            let moreButton = relContainer.querySelector('a.more');
+            if (!moreButton) {
+              moreButton = document.createElement('a');
+              moreButton.classList.add('more', 'badge');
+            }
+            moreButton.textContent = `↓ ${values.length - limit}`;
+            moreButton.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const countDisplayed = relContainer.children.length - 1; // last children is .more button
+              about.trigger(rel_uri, about.get(rel_uri), countDisplayed + 10);
+              e.target.remove();
+            });
+            relContainer.append(moreButton);
           }
           prev_rendered = {...curr_rendered};
         });
@@ -756,61 +757,72 @@ function processTemplate (individual, container, template, mode) {
       if (isEmbedded) {
         embeddedHandler(values);
         about.on(rel_uri, embeddedHandler);
-        template.one('remove', function () {
-          about.off(rel_uri, embeddedHandler);
+        templateChildren.forEach((node) => {
+          node.addEventListener('remove', () => about.off(rel_uri, embeddedHandler));
         });
       }
 
       about.on(rel_uri, propertyModifiedHandler);
-      template.one('remove', function () {
-        about.off(rel_uri, propertyModifiedHandler);
+      templateChildren.forEach((node) => {
+        node.addEventListener('remove', () => {
+          about.off(rel_uri, propertyModifiedHandler);
+        });
       });
 
       return propertyModifiedHandler(values, limit);
     });
-  }).get();
+  });
 
   // About resource
-  const abouts = template.find('[about]:not([rel] *):not([about] *):not([rel]):not([property])').addBack('[about]:not([rel] *):not([about] *):not([rel]):not([property])').map((i, el) => {
-    const aboutContainer = $(el);
-    const about_template_uri = aboutContainer.attr('data-template');
-    const about_inline_template = aboutContainer.html().trim();
-    const isEmbedded = aboutContainer.attr('data-embedded') === 'true';
-    let about; let aboutTemplate;
+  const abouts = Array.from(template.querySelectorAll('[about]:not([rel] *):not([about] *):not([rel]):not([property])')).map((aboutContainer) => {
+    const about_template_uri = aboutContainer.getAttribute('data-template');
+    const about_inline_template = aboutContainer.innerHTML.trim();
+    const isEmbedded = aboutContainer.getAttribute('data-embedded') === 'true';
+    let about;
+    let aboutTemplate;
     if ( about_template_uri ) {
       aboutTemplate = new IndividualModel( about_template_uri );
     } else if ( about_inline_template.length ) {
       aboutTemplate = about_inline_template;
     }
-    aboutContainer.empty();
-    if (aboutContainer.attr('about') === '@') {
+    aboutContainer.innerHTML = '';
+    if (aboutContainer.getAttribute('about') === '@') {
       about = individual;
-      aboutContainer.attr('about', about.id);
+      aboutContainer.setAttribute('about', about.id);
     } else {
-      about = new IndividualModel(aboutContainer.attr('about'));
+      about = new IndividualModel(aboutContainer.getAttribute('about'));
     }
-    return about.present(aboutContainer, aboutTemplate, isEmbedded ? mode : undefined).then((aboutTemplate) => {
+    return about.present(aboutContainer, aboutTemplate, isEmbedded ? mode : undefined).then((rendered) => {
+      if (!Array.isArray(rendered)) {
+        rendered = [rendered];
+      } else {
+        rendered = rendered.flat();
+      }
       if (isEmbedded) {
-        aboutTemplate.data('isEmbedded', true);
-        embedded.push(aboutTemplate);
-        if (mode === 'edit') {
-          aboutTemplate.trigger('internal-validate');
-        }
+        rendered.forEach((node) => {
+          node.setAttribute('data-embedded', 'true');
+          if (mode === 'edit') {
+            node.dispatchEvent(new Event('internal-validate'));
+          }
+        });
+        embedded.push(...rendered);
       }
     });
-  }).get();
+  });
 
   // Validation with support of embedded templates (arbitrary depth)
 
   // Initial validation state
   const validation = {state: true};
-  template.data('validation', validation);
+  templateChildren.forEach((node) => {
+    node.setAttribute('data-valid', validation.state);
+  });
 
   /**
-   * Validate template handler
-   * @param {Event} event - custom 'internal-validate' event
-   * @return {void}
-   */
+  * Validate template handler
+  * @param {Event} event - custom 'internal-validate' event
+  * @return {void}
+  */
   const validateTemplate = function (event) {
     event.stopPropagation();
     if (mode === 'edit') {
@@ -821,7 +833,7 @@ function processTemplate (individual, container, template, mode) {
         const spec = specs[property_uri] ? new IndividualModel( specs[property_uri] ) : undefined;
         validation[property_uri] = validate(individual, property_uri, spec);
       });
-      template.trigger('validate');
+      templateChildren.forEach((node) => node.dispatchEvent(new Event('validate')));
       validation.state = Object.keys(validation).reduce((acc, property_uri) => {
         if (property_uri === 'state') {
           return acc;
@@ -829,41 +841,42 @@ function processTemplate (individual, container, template, mode) {
         return acc && validation[property_uri].state;
       }, true);
       validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
-        const embeddedValidation = embeddedTemplate.data('validation');
-        return embeddedValidation ? acc && embeddedValidation.state : acc;
+        const embeddedValidation = embeddedTemplate.getAttribute('data-valid') === 'true';
+        return acc && embeddedValidation;
       }, true);
-      template.trigger('internal-validated', [validation]);
+      templateChildren.forEach((node) => node.dispatchEvent(new CustomEvent('internal-validated', {detail: validation})));
     }
     // "validate" event should bubble up to be handled by parent template only if current template is embedded
-    if ( template.data('isEmbedded') ) {
-      container.trigger('internal-validate');
+    if ( container.getAttribute('data-embedded') === 'true' ) {
+      container.dispatchEvent(new Event('internal-validate'));
     }
   };
-  template.on('internal-validate', validateTemplate);
+  templateChildren.forEach((node) => node.addEventListener('internal-validate', validateTemplate));
 
   /**
-   * Trigger 'internal-validate' event on individual property change or when mode switches to 'edit'
-   * @return {void}
-   */
+  * Trigger 'internal-validate' event on individual property change or when mode switches to 'edit'
+  * @return {void}
+  */
   const triggerValidation = function () {
     if (mode === 'edit') {
-      template.trigger('internal-validate');
+      templateChildren.forEach((node) => node.dispatchEvent(new Event('internal-validate')));
     }
   };
   individual.on('propertyModified', triggerValidation);
 
-  template.one('remove', function () {
+  templateChildren.forEach((node) => node.addEventListener('remove', function () {
     individual.off('propertyModified', triggerValidation);
-  });
-  template.on('edit', triggerValidation);
+  }));
+  templateChildren.forEach((node) => node.addEventListener('edit', triggerValidation));
 
   /**
-   * Merge validation result from custom template validation
-   * @param {Event} event - custom 'validated' event
-   * @param {Object} validationResult - validation result object
-   * @return {void}
-   */
-  const mergeValidationResult = function (event, validationResult) {
+  * Merge validation result from custom template validation
+  * @param {Event} event - custom 'validated' event
+  * @param {Object} validationResult - validation result object
+  * @return {void}
+  */
+  const mergeValidationResult = function (event) {
+    const validationResult = event.detail;
     event.stopPropagation();
     if (mode === 'edit') {
       Object.keys(validationResult).map((property_uri) => {
@@ -878,20 +891,16 @@ function processTemplate (individual, container, template, mode) {
         }
         return acc && validation[property_uri].state;
       }, true);
-      validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
-        const embeddedValidation = embeddedTemplate.data('validation');
-        return embeddedValidation ? acc && embeddedValidation.state : acc;
-      }, true);
-      template.trigger('internal-validated', [validation]);
+      templateChildren.forEach((node) => node.dispatchEvent(new CustomEvent('internal-validated', {detail: validation})));
     }
   };
 
   // Handle validation events from template
-  template.on('validate', (e) => e.stopPropagation());
-  template.on('validated', mergeValidationResult);
+  templateChildren.forEach((node) => node.addEventListener('validate', (e) => e.stopPropagation()));
+  templateChildren.forEach((node) => node.addEventListener('validated', mergeValidationResult));
 
   // Controls
-  template.find('veda-control[property], veda-control[rel]').not('[rel] *').not('[about] *').map((i, el) => {
+  const controls = Array.from(template.querySelectorAll('veda-control:not([rel] *):not([about] *)')).map((el) => {
     const control = $(el);
     const property_uri = control.attr('property') || control.attr('rel');
     const type = control.attr('data-type') || 'generic';
@@ -903,7 +912,8 @@ function processTemplate (individual, container, template, mode) {
     // Initial validation state
     validation[property_uri] = {state: true, cause: []};
 
-    const validatedHandler = function (e, validation) {
+    const validatedHandler = function (e) {
+      const validation = e.detail;
       if ( validation.state || !validation[property_uri] || validation[property_uri].state === true ) {
         control.removeClass('has-error');
         control.popover('destroy');
@@ -937,12 +947,15 @@ function processTemplate (individual, container, template, mode) {
       }
       e.stopPropagation();
     };
-    template.on('internal-validated', validatedHandler);
+    templateChildren.forEach((node) => node.addEventListener('internal-validated', validatedHandler));
 
-    template.on('view edit search', function (e) {
+    const syncControl = (e) => {
       e.stopPropagation();
       control.triggerHandler(e.type);
-    });
+    };
+    templateChildren.forEach((node) => node.addEventListener('view', syncControl));
+    templateChildren.forEach((node) => node.addEventListener('edit', syncControl));
+    templateChildren.forEach((node) => node.addEventListener('search', syncControl));
 
     const assignDefaultValue = function (e) {
       if ( spec && spec.hasValue('v-ui:defaultValue') && !individual.hasValue(property_uri) ) {
@@ -950,7 +963,7 @@ function processTemplate (individual, container, template, mode) {
       }
       e.stopPropagation();
     };
-    template.on('edit', assignDefaultValue);
+    templateChildren.forEach((node) => node.addEventListener('edit', assignDefaultValue));
 
     const opts = {
       individual: individual,
@@ -979,36 +992,41 @@ function processTemplate (individual, container, template, mode) {
  * @return {void}
  */
 function renderPropertyValues (about, isAbout, property_uri, propertyContainer, template, mode) {
-  propertyContainer.empty();
+  propertyContainer.innerHTML = '';
   about.get(property_uri).map((value) => {
     const formattedValue = Util.formatValue(value);
     if (isAbout) {
-      const prevValue = propertyContainer.text();
-      propertyContainer.text( prevValue ? prevValue + (formattedValue ? ' ' + formattedValue : '') : formattedValue );
+      const prevValue = propertyContainer.textContent;
+      propertyContainer.textContent = prevValue ? prevValue + (formattedValue ? ' ' + formattedValue : '') : formattedValue;
     } else {
-      const valueHolder = $('<span class=\'value-holder\'></span>');
-      propertyContainer.append(valueHolder.text( Util.formatValue(value) ));
-      const btnGroup = $('<div class=\'prop-actions btn-group btn-group-xs\' role=\'group\'></div>');
-      const btnRemove = $('<button class=\'btn btn-default\' tabindex=\'-1\'><span class=\'glyphicon glyphicon-remove\'></span></button>');
-      btnGroup.append(btnRemove);
-
-      template.on('view edit search', function (e) {
-        if (e.type === 'view') btnGroup.hide();
-        else btnGroup.show();
-        e.stopPropagation();
-      });
+      const valueHolder = document.createElement('span');
+      valueHolder.classList.add('value-holder');
+      valueHolder.textContent = Util.formatValue(value);
+      propertyContainer.append(valueHolder);
+      const btnGroup = document.createElement('div');
+      btnGroup.classList.add('prop-actions', 'btn-group', 'btn-group-xs');
+      const btnRemove = document.createElement('button');
+      btnRemove.classList.add('btn', 'btn-default', 'glyphicon', 'glyphicon-remove');
+      btnRemove.setAttribute('tabindex', '-1');
+      btnGroup.appendChild(btnRemove);
       if (mode === 'view') {
-        btnGroup.hide();
+        btnGroup.style.display = 'none';
       }
-
-      btnRemove.click(() => {
-        about.removeValue( property_uri, value );
-      }).mouseenter(() => {
-        valueHolder.addClass('red-outline');
-      }).mouseleave(() => {
-        valueHolder.removeClass('red-outline');
-      });
-      valueHolder.append( btnGroup );
+      const show = (e) => {
+        e.stopPropagation();
+        btnGroup.style.display = '';
+      };
+      const hide = (e) => {
+        e.stopPropagation();
+        btnGroup.style.display = 'none';
+      };
+      template.addEventListener('view', hide);
+      template.addEventListener('edit', show);
+      template.addEventListener('search', show);
+      btnRemove.addEventListener('click', () => about.removeValue(property_uri, value));
+      btnRemove.addEventListener('mouseenter', () => valueHolder.classList.add('red-outline'));
+      btnRemove.addEventListener('mouseleave', () => valueHolder.classList.remove('red-outline'));
+      valueHolder.appendChild(btnGroup);
     }
   });
 }
@@ -1029,71 +1047,74 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
  * @return {void}
  */
 function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend) {
-  return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then((valTemplate) => {
+  return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then((rendered) => {
+    if (!Array.isArray(rendered)) {
+      rendered = [rendered];
+    } else {
+      rendered = rendered.flat();
+    }
     if (isEmbedded) {
-      valTemplate.data('isEmbedded', true);
-      embedded.push(valTemplate);
-      if (mode === 'edit') {
-        valTemplate.trigger('internal-validate');
-      }
-      valTemplate.one('remove', function () {
-        if (embedded.length) {
-          const index = embedded.indexOf(valTemplate);
-          if ( index >= 0 ) embedded.splice(index, 1);
+      rendered.forEach((node) => {
+        node.setAttribute('data-embedded', 'true');
+        if (mode === 'edit') {
+          node.dispatchEvent(new Event('internal-validate'));
         }
+        node.addEventListener('remove', () => {
+          if (embedded.length) {
+            const index = embedded.indexOf(node);
+            if ( index >= 0 ) embedded.splice(index, 1);
+          }
+        });
       });
+      embedded.push(...rendered);
     }
     if (!isAbout) {
-      const btnGroup = $('<div class=\'rel-actions btn-group btn-group-xs -view edit search\' role=\'group\'></div>');
-      const btnDrag = $('<button class=\'btn btn-default button-drag\' tabindex=\'-1\'><span class=\'glyphicon glyphicon-move\'></span></button>');
-      const btnRemove = $('<button class=\'btn btn-default button-delete\' tabindex=\'-1\'><span class=\'glyphicon glyphicon-remove\'></span></button>');
-      btnGroup.append(btnDrag, btnRemove);
-      template.on('view edit search', function (e) {
-        if (e.type === 'view') btnGroup.hide();
-        else btnGroup.show();
-        e.stopPropagation();
-      });
+      const btnGroup = document.createElement('div');
+      btnGroup.classList.add('rel-actions', 'btn-group', 'btn-group-xs');
+      const btnRemove = document.createElement('button');
+      btnRemove.classList.add('btn', 'btn-default', 'glyphicon', 'glyphicon-remove');
+      btnRemove.setAttribute('tabindex', '-1');
+      btnGroup.appendChild(btnRemove);
       if (mode === 'view') {
-        btnGroup.hide();
+        btnGroup.style.display = 'none';
       }
+      const show = (e) => {
+        e.stopPropagation();
+        btnGroup.style.display = '';
+      };
+      const hide = (e) => {
+        e.stopPropagation();
+        btnGroup.style.display = 'none';
+      };
+      template.addEventListener('view', hide);
+      template.addEventListener('edit', show);
+      template.addEventListener('search', show);
 
-      btnRemove.click((e) => {
+      btnRemove.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        valTemplate.remove();
-        about.removeValue( rel_uri, value );
+        about.removeValue(rel_uri, value);
         if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) ) {
           value.delete();
         }
-      }).mouseenter(() => {
-        valTemplate.addClass('red-outline');
-      }).mouseleave(() => {
-        valTemplate.removeClass('red-outline');
       });
+      btnRemove.addEventListener('mouseenter', () => rendered.forEach((item) => item.classList.add('red-outline')));
+      btnRemove.addEventListener('mouseleave', () => rendered.forEach((item) => item.classList.remove('red-outline')));
 
-      // Sortable scroll bugfix
-      btnDrag.mouseenter(() => {
-        valTemplate.addClass('gray-outline');
-      }).mouseleave(() => {
-        valTemplate.removeClass('gray-outline');
-      }).mousedown(() => {
-        relContainer.addClass('sortable-overflow');
-      }).mouseup(() => {
-        relContainer.removeClass('sortable-overflow');
+      rendered.forEach((item) => {
+        if (item.style.display !== 'inline') {
+          btnGroup.classList.add('block');
+        }
+        if (item.style.display === 'table-row' || item.tagName === 'TR') {
+          const cell = item.lastChild;
+          cell.style.position = 'relative';
+          cell.appendChild(btnGroup);
+        } else {
+          item.style.position = 'relative';
+          item.appendChild(btnGroup);
+        }
       });
-
-      if (valTemplate.css('display') !== 'inline') {
-        btnGroup.addClass('block');
-      }
-      if (valTemplate.css('display') === 'table-row' || valTemplate.prop('tagName') === 'TR') {
-        const cell = valTemplate.children().last();
-        cell.css('position', 'relative').append(btnGroup);
-      } else {
-        valTemplate.css('position', 'relative');
-        valTemplate.append(btnGroup);
-      }
     }
-    return valTemplate;
+    return rendered;
   });
 }
-
