@@ -455,8 +455,6 @@ v-s:UserScriptTemplate
   $(".action#clear", template).click(function () {
     individual["v-s:output"] = [];
   });
-
-  
 </script>
   """
 .
@@ -569,8 +567,6 @@ v-s:CS_OperationUpdate
   v-s:loadPriority 15 ;
 .
 
-
-
 v-s:OperationHeaderTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса v-s:Operation"@ru ;
@@ -665,7 +661,6 @@ v-s:OperationFooterTemplate
         break;
     }
   }
-
 </script>
 <div class="actions view edit -search clearfix">
   <div class="pull-left">
@@ -684,11 +679,11 @@ v-s:OperationStatusTemplate
   rdfs:label "Template for v-s:Operation class"@en ;
   v-ui:template """
 <script>
-  $(".action#start", template).click(function () {
+  $("#start", template).click(function () {
     individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusStarted")];
     individual.save();
   });
-  $(".action#stop", template).click(function () {
+  $("#stop", template).click(function () {
     veda.Backend.set_in_individual(veda.ticket, {
       "@": individual.id,
       "v-s:hasStatus": [{
@@ -697,7 +692,7 @@ v-s:OperationStatusTemplate
       }]
     });
   });
-  $(".action#restart", template).click(function () {
+  $("#restart", template).click(function () {
     individual["v-s:hasStatus"] = [new veda.IndividualModel("v-s:StatusRestarted")];
     individual["v-s:output"] = [""];
     individual["v-s:progress"] = [0];
@@ -712,27 +707,27 @@ v-s:OperationStatusTemplate
   individual.on("v-s:hasStatus", statusHandler);
 
   function statusHandler () {
-    var start = $(".action#start", template),
-        stop = $(".action#stop", template),
-        restart = $(".action#restart", template),
+    var start = $("#start", template),
+        stop = $("#stop", template),
+        restart = $("#restart", template),
         status = individual.hasValue("v-s:hasStatus") ? individual["v-s:hasStatus"][0].id : undefined;
 
     switch (status) {
       case "v-s:StatusStarted":
       case "v-s:StatusExecution":
-        start.addClass("hidden");
-        stop.removeClass("hidden");
-        restart.addClass("hidden");
+        start.hide();
+        stop.show();
+        restart.hide();
         break;
       case "v-s:StatusExecuted":
-        start.addClass("hidden");
-        stop.addClass("hidden");
-        restart.removeClass("hidden");
+        start.hide();
+        stop.hide();
+        restart.show();
         break;
       default:
-        start.removeClass("hidden");
-        stop.addClass("hidden");
-        restart.addClass("hidden");
+        start.show();
+        stop.hide();
+        restart.hide();
         break;
     }
   }
@@ -741,17 +736,15 @@ v-s:OperationStatusTemplate
     e.preventDefault();
     veda.Util.showSmallModal(individual);
   })
-
-
 </script>
 <div class="pull-left">
   <h5 class="pull-left margin-sm">
     <a class="show-operation-modal text-muted" href="#" about="@" rel="rdf:type" data-template="v-ui:LabelTemplate"></a>
   </h5>
   <div class="pull-left" about="@" data-template="v-s:OperationProgressTemplate"></div>
-  <button class="action btn btn-xs btn-success pull-left" id="start"><span class="glyphicon glyphicon-play"></span></button>
-  <button class="action btn btn-xs btn-info pull-left" id="restart"><span class="glyphicon glyphicon-repeat"></span></button>
-  <button class="action btn btn-xs btn-danger pull-left" id="stop"><span class="glyphicon glyphicon-stop"></span></button>
+  <button class="btn btn-xs btn-success pull-left" id="start"><span class="glyphicon glyphicon-play"></span></button>
+  <button class="btn btn-xs btn-info pull-left" id="restart"><span class="glyphicon glyphicon-repeat"></span></button>
+  <button class="btn btn-xs btn-danger pull-left" id="stop"><span class="glyphicon glyphicon-stop"></span></button>
 </div>
   """ ;
 .
@@ -792,7 +785,6 @@ v-s:OperationProgressTemplate
         break;
     }
   }
-
 </script>
 <div class="pull-left">
   <div class="progress pull-left" style="display: inline-block; height: 22px; width:100px; margin:0 5px;">
