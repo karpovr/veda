@@ -274,7 +274,7 @@ v-s:PropertySpecificationSearch
   rdfs:label "Спецификации свойств"@ru ;
   rdfs:label "Property specifications"@en ;
   v-fs:searchBlank v-s:PropertySpecificationSearchBlank ;
-  v-fs:searchOnLoad true ;
+  v-fs:searchOnLoad false ;
   v-fs:loadAll true ;
 .
 
@@ -1334,7 +1334,7 @@ v-s:MembershipRegistry
   v-fs:searchBlank v-s:MembershipRegistryBlank ;
   v-fs:searchBlankTemplate v-s:MembershipRegistryTemplate ;
   v-fs:searchResultTemplate v-s:MembershipRegistryResultTemplate ;
-  v-fs:searchOnLoad true;
+  v-fs:searchOnLoad false;
   v-fs:queryLanguage "sql"^^xsd:string;
 .
 v-s:MembershipRegistryBlank
@@ -1608,7 +1608,7 @@ v-s:PermissionStatementRegistry
   v-fs:searchBlank v-s:PermissionStatementRegistryBlank ;
   v-fs:searchBlankTemplate v-s:PermissionStatementRegistryTemplate ;
   v-fs:searchResultTemplate v-s:PermissionStatementRegistryResultTemplate ;
-  v-fs:searchOnLoad true;
+  v-fs:searchOnLoad false;
   v-fs:queryLanguage "sql"^^xsd:string;
 .
 v-s:PermissionStatementRegistryBlank
