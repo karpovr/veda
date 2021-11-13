@@ -226,33 +226,33 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
   const pre_render_src = match[1] && match[1].trim();
   const post_render_src = match[3] && match[3].trim();
 
-  const content = match[2] && match[2].trim();
+  const html = match[2] && match[2].trim();
   let tagName;
-  if (content.startsWith('<tr')) {
+  if (html.startsWith('<tr')) {
     tagName = 'tbody';
-  } else if (content.startsWith('<td')) {
+  } else if (html.startsWith('<td')) {
     tagName = 'tr';
   } else {
     tagName = 'div';
   }
   const template = document.createElement(tagName);
-  template.innerHTML = content;
+  template.innerHTML = html;
 
   let pre_result;
   if (pre_render_src) {
     pre_result = eval(
       `(function (veda, individual, container, template, mode, extra) {
-   'use strict';
-   ${pre_render_src}
- }).call(individual, veda, individual, $(container), $(template.children), mode, extra);
- //# sourceURL=${name}_pre`,
+  'use strict';
+  ${pre_render_src}
+}).call(individual, veda, individual, $(container), $(template.children), mode, extra);
+//# sourceURL=${window.location.origin}/_templates/${name}_pre`,
     );
   }
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
-    return processTemplate(individual, container, template, mode).then((renderedFragment) => {
-      const fragmentChildren = [...renderedFragment.children];
-      fragmentChildren.forEach((node) => {
+    return processTemplate(individual, container, template, mode).then((rendered) => {
+      const renderedChildren = [...rendered.children];
+      renderedChildren.forEach((node) => {
         if (toAppend) {
           container.appendChild(node);
         }
@@ -265,13 +265,13 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
           `(function (veda, individual, container, template, mode, extra) {
   'use strict';
   ${post_render_src}
-}).call(individual, veda, individual, $(container), $(fragmentChildren), mode, extra);
-//# sourceURL=${name}_post`,
+}).call(individual, veda, individual, $(container), $(renderedChildren), mode, extra);
+//# sourceURL=${window.location.origin}/_templates/${name}_post`,
         );
       }
 
       return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
-        .then(() => fragmentChildren);
+        .then(() => renderedChildren);
     });
   });
 }
