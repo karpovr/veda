@@ -158,6 +158,8 @@ async fn main() -> std::io::Result<()> {
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
         let (prefixes_cache_read, prefixes_cache_write) = evmap::new();
 
+        let json_cfg = web::JsonConfig::default().limit(5*1024*1024);
+
         App::new()
             .wrap(middleware::Compress::default())
             .wrap(
@@ -168,6 +170,7 @@ async fn main() -> std::io::Result<()> {
                     .header("X-Frame-Options", "sameorigin")
                     .header("Cache-Control", "no-cache, no-store, must-revalidate, private"),
             )
+            .app_data(json_cfg)
             .data(TicketCache {
                 read: ticket_cache_read,
                 write: Arc::new(Mutex::new(ticket_cache_write)),
