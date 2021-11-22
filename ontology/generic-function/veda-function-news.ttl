@@ -109,7 +109,7 @@ v-s:NewsTemplate
     }
   });
 
-  
+
 </script>
 <div class="container">
   <div class="sheet">
@@ -225,7 +225,7 @@ v-s:NewsIndicatorTemplate
     trigger: "hover",
     title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
   });
-  
+
 </script>
 <a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-newspaper-o fa-lg"></span> <span class="label label-default" id="news-counter"></span>
@@ -301,7 +301,7 @@ v-s:NewsSearchBlankTemplate
       container.siblings(".search-button").click();
     }
   });
-  
+
 </script>
   """ ;
 .
@@ -365,13 +365,7 @@ v-s:NewsReloadPage
   Reload now?
   """@en;
   v-s:script """
-var delReq = window.indexedDB.deleteDatabase("veda");
-delReq.onerror = console.log;
-delReq.onsuccess = console.log;
-document.cookie = "ticket=null; expires=" + new Date(0).toGMTString() + "; path=/files;";
-setTimeout(function () {
-  location.reload();
-}, 3000);
+veda.trigger('update');
   """;
   v-s:newsAudience cfg:AllUsersGroup;
 .
