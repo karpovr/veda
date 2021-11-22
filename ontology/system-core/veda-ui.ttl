@@ -2202,7 +2202,7 @@ v-ui:SimplifiedJournalTemplate
                   $(".revoke", template).click(takeDecision.bind(null, "v-wf:DecisionRevokeTask", "Задача отозвана"));
                 } else {
                   $(".docflow-buttons", template).remove();
-                } 
+                }
               } else {
                   $(".docflow-buttons", template).remove();
                 }
@@ -2424,7 +2424,13 @@ v-ui:DocumentEventTemplate
     $("div[rel='v-s:processJournal']", template).toggle();
     $(this).children(":first").toggleClass("glyphicon-chevron-down glyphicon-chevron-right");
   });
-
+  if (individual.hasValue('v-wf:onProcess')) {
+    var process = individual.get('v-wf:onProcess')[0];
+    return process.load().catch(function(err) {
+      console.log('process deleted:', process.id);
+      $(".on-process", template).remove();
+    });
+  }
 </script>
 <div class="journal-record">
   <hr class="margin-sm">
@@ -2438,7 +2444,7 @@ v-ui:DocumentEventTemplate
     </div>
     <div class="col-md-8 col-sm-6 event-desc">
       <div about="@" rel="v-s:documentVersion" data-template="v-ui:LabelLinkTemplate"></div>
-      <div about="@" rel="v-wf:onProcess">
+      <div about="@" rel="v-wf:onProcess" class="on-process">
         <script>
           if ( individual.hasValue("v-wf:hasStartForm") ) {
             var startForm = individual["v-wf:hasStartForm"][0];
@@ -2461,7 +2467,6 @@ v-ui:DocumentEventTemplate
               $("[about='start-form']", template).remove();
             }
           }
-
         </script>
         <div>
           <a about="@" class="process-id" href="#/@" rel="v-wf:instanceOf" data-template="v-ui:LabelTemplate"></a>
