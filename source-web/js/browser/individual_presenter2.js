@@ -23,6 +23,8 @@ import IndividualModel from '../common/individual_model.js';
 
 import Backend from '../common/backend.js';
 
+import BackendError from '../browser/backend_error.js';
+
 import Util from '../common/util.js';
 
 import '../browser/util.js';
@@ -161,7 +163,7 @@ function successHandler (result) {
  */
 function errorHandler (error) {
   const notify = new Notify();
-  if (typeof error.code !== 'undefined') {
+  if (error instanceof BackendError) {
     const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
     errorIndividual.load().then((errorIndividual) => {
       const severity = String(errorIndividual['v-s:tag'][0]) || 'danger';
@@ -182,11 +184,18 @@ function errorHandler (error) {
  */
 function errorPrinter (error, container) {
   console.log(`presenter error: ${this.id}`, error, error.stack);
-  const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
+  let errorIndividual;
+  if (error instanceof BackendError) {
+    errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
+  } else {
+    errorIndividual = new IndividualModel();
+    errorIndividual['v-s:tag'] = 'danger';
+    errorIndividual['v-s:errorMessage'] = error.toString();
+  }
   return errorIndividual.load()
     .then((errorIndividual) => `
       <span class="padding-sm bg-${errorIndividual['v-s:tag'][0]} text-${errorIndividual['v-s:tag'][0]}" title="${this.id}">
-        <strong>${error.code}</strong> ${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}
+        <strong>${errorIndividual['v-s:errorCode'][0] || ''}</strong> ${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}
       </span>`)
     .catch(() => `
       <span class="padding-sm bg-danger text-danger" title="${this.id}">
@@ -235,8 +244,15 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
   } else {
     tagName = 'div';
   }
-  const template = document.createElement(tagName);
-  template.innerHTML = html;
+  let wrapper = document.createElement(tagName);
+  wrapper.innerHTML = html;
+
+  const template = wrapper.firstElementChild;
+  const last = wrapper.lastElementChild;
+
+  if (last !== template) {
+    errorHandler(SyntaxError(`Unwrapped templates are not supported, template = ${name}, uri = ${individual.id}`));
+  }
 
   let pre_result;
   if (pre_render_src) {
@@ -244,20 +260,17 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
       `(function (veda, individual, container, template, mode, extra) {
   'use strict';
   ${pre_render_src}
-}).call(individual, veda, individual, $(container), $(template.children), mode, extra);
+}).call(individual, veda, individual, $(container), $(template), mode, extra);
 //# sourceURL=${window.location.origin}/_templates/${name}_pre`,
     );
   }
 
   return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
-    return processTemplate(individual, container, template, mode).then((rendered) => {
-      const renderedChildren = [...rendered.children];
-      renderedChildren.forEach((node) => {
-        if (toAppend) {
-          container.appendChild(node);
-        }
-        node.dispatchEvent(new Event(mode));
-      });
+    return processTemplate(individual, container, wrapper, mode).then((template) => {
+      if (toAppend) {
+        container.appendChild(template);
+      }
+      template.dispatchEvent(new Event(mode));
 
       let post_result;
       if (post_render_src) {
@@ -265,13 +278,15 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
           `(function (veda, individual, container, template, mode, extra) {
   'use strict';
   ${post_render_src}
-}).call(individual, veda, individual, $(container), $(renderedChildren), mode, extra);
+}).call(individual, veda, individual, $(container), $(template), mode, extra);
 //# sourceURL=${window.location.origin}/_templates/${name}_post`,
         );
       }
 
+      wrapper.remove();
+      wrapper = null;
       return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
-        .then(() => renderedChildren);
+        .then(() => template);
     });
   });
 }
@@ -280,13 +295,13 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
  * Process template
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
- * @param {Element} template - template to render individual with
+ * @param {Element} wrapper - template wrapper
  * @param {string} mode - view | edit | search
  * @this Individual
  * @return {Promise}
  */
-function processTemplate (individual, container, template, mode) {
-  const templateChildren = [...template.children];
+function processTemplate (individual, container, wrapper, mode) {
+  const template = wrapper.firstElementChild;
 
   // Get properties specifications
   const specs = individual['rdf:type'].reduce((acc, type) => ({
@@ -294,18 +309,16 @@ function processTemplate (individual, container, template, mode) {
     ...veda.ontology.getClassSpecifications(type.id),
   }), {});
 
-  templateChildren.forEach((node) => {
-    node.setAttribute('resource', individual.id);
-    node.setAttribute('typeof', individual['rdf:type'].map((item) => item.id).join(' '));
-    node.classList.add('template');
-  });
+  template.setAttribute('resource', individual.id);
+  template.setAttribute('typeof', individual['rdf:type'].map((item) => item.id).join(' '));
+  template.classList.add('template');
 
-  const view = template.querySelectorAll('.view');
-  const edit = template.querySelectorAll('.edit');
-  const search = template.querySelectorAll('.search');
-  const _view = template.querySelectorAll('.-view');
-  const _edit = template.querySelectorAll('.-edit');
-  const _search = template.querySelectorAll('.-search');
+  const view = wrapper.querySelectorAll('.view');
+  const edit = wrapper.querySelectorAll('.edit');
+  const search = wrapper.querySelectorAll('.search');
+  const _view = wrapper.querySelectorAll('.-view');
+  const _edit = wrapper.querySelectorAll('.-edit');
+  const _search = wrapper.querySelectorAll('.-search');
 
   // Embedded templates list
   const embedded = [];
@@ -318,7 +331,7 @@ function processTemplate (individual, container, template, mode) {
   const modeHandler = function (event) {
     event.stopPropagation();
     mode = event.type;
-    templateChildren.forEach((node) => node.setAttribute('data-mode', mode));
+    template.setAttribute('data-mode', mode);
     switch (mode) {
     case 'view':
       view.forEach((node) => node.style.display = '');
@@ -339,22 +352,18 @@ function processTemplate (individual, container, template, mode) {
       item.dispatchEvent(new Event(mode));
     });
   };
-  templateChildren.forEach((node) => {
-    node.addEventListener('view', modeHandler);
-    node.addEventListener('edit', modeHandler);
-    node.addEventListener('search', modeHandler);
-  });
+  template.addEventListener('view', modeHandler);
+  template.addEventListener('edit', modeHandler);
+  template.addEventListener('search', modeHandler);
 
   // Define handlers
-  templateChildren.forEach((node) => {
-    node.veda = {
-      'reset': resetHandler,
-      'save': saveHandler,
-      'delete': deleteHandler,
-      'recover': recoverHandler,
-      'remove': removeHandler,
-    };
-  });
+  template.veda = {
+    'reset': resetHandler,
+    'save': saveHandler,
+    'delete': deleteHandler,
+    'recover': recoverHandler,
+    'remove': removeHandler,
+  };
 
   /**
    * Call method
@@ -383,14 +392,14 @@ function processTemplate (individual, container, template, mode) {
   function removeMethods (event) {
     delete event.target.veda;
   }
-  templateChildren.forEach((node) => {
-    node.addEventListener('cancel', callMethod);
-    node.addEventListener('save', callMethod);
-    node.addEventListener('delete', callMethod);
-    node.addEventListener('recover', callMethod);
-    node.addEventListener('destroy', callMethod);
-    node.addEventListener('remove', removeMethods);
-  });
+  template.addEventListener('cancel', callMethod);
+  template.addEventListener('save', callMethod);
+  template.addEventListener('delete', callMethod);
+  template.addEventListener('recover', callMethod);
+  template.addEventListener('destroy', callMethod);
+  template.addEventListener('remove', removeMethods);
+
+  const switchToView = () => template.dispatchEvent(new Event('view'));
 
   /**
    * Reset individual and embedded individuals
@@ -407,7 +416,7 @@ function processTemplate (individual, container, template, mode) {
     }
     const uris = Util.unique(acc);
     return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset(true)), Promise.resolve())
-      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
+      .then(switchToView)
       .catch(errorHandler);
   }
 
@@ -447,7 +456,7 @@ function processTemplate (individual, container, template, mode) {
         });
       })
       .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
-      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
+      .then(switchToView)
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -459,7 +468,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function deleteHandler () {
     return individual.delete()
-      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
+      .then(switchToView)
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -471,7 +480,7 @@ function processTemplate (individual, container, template, mode) {
    */
   function recoverHandler () {
     return individual.recover()
-      .then(() => templateChildren.forEach((node) => node.dispatchEvent(new Event('view'))))
+      .then(switchToView)
       .then(successHandler)
       .catch(errorHandler);
   }
@@ -496,10 +505,8 @@ function processTemplate (individual, container, template, mode) {
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then((removedAlert) => {
-          templateChildren.forEach((node) => {
-            clear(node);
-            node.innerHTML = `<code>${removedAlert.toString()}</code>`;
-          });
+          clear(template);
+          template.innerHTML = `<code>${removedAlert.toString()}</code>`;
         }).catch(console.log);
       })
       .then(successHandler)
@@ -513,9 +520,7 @@ function processTemplate (individual, container, template, mode) {
    */
   const deletedHandler = function () {
     if ( this.hasValue('v-s:deleted', true) ) {
-      templateChildren.forEach((node) => {
-        node.classList.add('deleted');
-      });
+      template.classList.add('deleted');
       if (container && container.id === 'main') {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
@@ -524,13 +529,11 @@ function processTemplate (individual, container, template, mode) {
         }).catch(console.log);
       }
     } else {
-      templateChildren.forEach((node) => {
-        node.classList.remove('deleted');
-      });
+      template.classList.remove('deleted');
     }
   };
   individual.on('v-s:deleted', deletedHandler);
-  templateChildren.forEach((node) => node.addEventListener('remove', () => individual.off('v-s:deleted', deletedHandler)));
+  template.addEventListener('remove', () => individual.off('v-s:deleted', deletedHandler));
   deletedHandler.call(individual);
 
   /**
@@ -540,9 +543,7 @@ function processTemplate (individual, container, template, mode) {
    */
   const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) ) {
-      templateChildren.forEach((node) => {
-        node.classList.add('invalid');
-      });
+      template.classList.add('invalid');
       if (container && container.id === 'main') {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:InvalidAlert');
@@ -551,34 +552,32 @@ function processTemplate (individual, container, template, mode) {
         }).catch(console.log);
       }
     } else {
-      templateChildren.forEach((node) => {
-        node.classList.remove('invalid');
-      });
+      template.classList.remove('invalid');
     }
   };
   individual.on('v-s:valid v-s:deleted', validHandler);
-  templateChildren.forEach((node) => node.addEventListener('remove', () => individual.off('v-s:valid v-s:deleted', validHandler)));
+  template.addEventListener('remove', () => individual.off('v-s:valid v-s:deleted', validHandler));
   validHandler.call(individual);
 
   // Process RDFa compliant template
 
   // Special (not RDFa)
-  template.querySelectorAll('[href*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+  wrapper.querySelectorAll('[href*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
     const href = node.getAttribute('href');
     node.setAttribute('href', href.replace('@', individual.id));
   });
 
-  template.querySelectorAll('[src*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+  wrapper.querySelectorAll('[src*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
     const src = node.getAttribute('src');
     node.setAttribute('src', src.replace('@', individual.id));
   });
 
-  template.querySelectorAll('[style*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+  wrapper.querySelectorAll('[style*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
     const style = node.getAttribute('style');
     node.setAttribute('style', style.replace('@', individual.id));
   });
 
-  template.querySelectorAll('[title]:not([rel] *):not([about] *)').forEach((node) => {
+  wrapper.querySelectorAll('[title]:not([rel] *):not([about] *)').forEach((node) => {
     const title = node.getAttribute('title');
     if ((/^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/).test(title) ) {
       const titleIndividual = new IndividualModel(title);
@@ -589,7 +588,7 @@ function processTemplate (individual, container, template, mode) {
   });
 
   // Property values
-  const props = Array.from(template.querySelectorAll('[property]:not(veda-control):not([rel] *):not([about] *)')).map((propertyContainer) => {
+  const props = Array.from(wrapper.querySelectorAll('[property]:not(veda-control):not([rel] *):not([about] *)')).map((propertyContainer) => {
     const property_uri = propertyContainer.getAttribute('property');
     const about_uri = propertyContainer.getAttribute('about');
     let about;
@@ -615,9 +614,7 @@ function processTemplate (individual, container, template, mode) {
         if (property_uri === '@') {
           propertyContainer.textContent = about.id;
           about.on('idChanged', idModifiedHandler);
-          templateChildren.forEach((node) => {
-            node.addEventListener('remove', () => about.off('idChanged', idModifiedHandler));
-          });
+          template.addEventListener('remove', () => about.off('idChanged', idModifiedHandler));
           return;
         }
 
@@ -626,9 +623,7 @@ function processTemplate (individual, container, template, mode) {
           renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
         };
         about.on(property_uri, propertyModifiedHandler);
-        templateChildren.forEach((node) => {
-          node.addEventListener('remove', () => about.off(property_uri, propertyModifiedHandler));
-        });
+        template.addEventListener('remove', () => about.off(property_uri, propertyModifiedHandler));
 
         renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
       })
@@ -636,7 +631,7 @@ function processTemplate (individual, container, template, mode) {
   });
 
   // Related resources & about resources
-  const rels = Array.from(template.querySelectorAll('[rel]:not(veda-control):not([rel] *):not([about] *)')).map((relContainer) => {
+  const rels = Array.from(wrapper.querySelectorAll('[rel]:not(veda-control):not([rel] *):not([about] *)')).map((relContainer) => {
     let about = relContainer.getAttribute('about');
     const rel_uri = relContainer.getAttribute('rel');
     const isEmbedded = relContainer.getAttribute('data-embedded') === 'true';
@@ -757,24 +752,18 @@ function processTemplate (individual, container, template, mode) {
       if (isEmbedded) {
         embeddedHandler(values);
         about.on(rel_uri, embeddedHandler);
-        templateChildren.forEach((node) => {
-          node.addEventListener('remove', () => about.off(rel_uri, embeddedHandler));
-        });
+        template.addEventListener('remove', () => about.off(rel_uri, embeddedHandler));
       }
 
       about.on(rel_uri, propertyModifiedHandler);
-      templateChildren.forEach((node) => {
-        node.addEventListener('remove', () => {
-          about.off(rel_uri, propertyModifiedHandler);
-        });
-      });
+      template.addEventListener('remove', () => about.off(rel_uri, propertyModifiedHandler));
 
       return propertyModifiedHandler(values, limit);
     });
   });
 
   // About resource
-  const abouts = Array.from(template.querySelectorAll('[about]:not([rel] *):not([about] *):not([rel]):not([property])')).map((aboutContainer) => {
+  const abouts = Array.from(wrapper.querySelectorAll('[about]:not([rel] *):not([about] *):not([rel]):not([property])')).map((aboutContainer) => {
     const about_template_uri = aboutContainer.getAttribute('data-template');
     const about_inline_template = aboutContainer.innerHTML.trim();
     const isEmbedded = aboutContainer.getAttribute('data-embedded') === 'true';
@@ -795,8 +784,6 @@ function processTemplate (individual, container, template, mode) {
     return about.present(aboutContainer, aboutTemplate, isEmbedded ? mode : undefined).then((rendered) => {
       if (!Array.isArray(rendered)) {
         rendered = [rendered];
-      } else {
-        rendered = rendered.flat();
       }
       if (isEmbedded) {
         rendered.forEach((node) => {
@@ -814,9 +801,7 @@ function processTemplate (individual, container, template, mode) {
 
   // Initial validation state
   const validation = {state: true};
-  templateChildren.forEach((node) => {
-    node.setAttribute('data-valid', validation.state);
-  });
+  template.setAttribute('data-valid', validation.state);
 
   /**
   * Validate template handler
@@ -833,7 +818,7 @@ function processTemplate (individual, container, template, mode) {
         const spec = specs[property_uri] ? new IndividualModel( specs[property_uri] ) : undefined;
         validation[property_uri] = validate(individual, property_uri, spec);
       });
-      templateChildren.forEach((node) => node.dispatchEvent(new Event('validate')));
+      template.dispatchEvent(new Event('validate'));
       validation.state = Object.keys(validation).reduce((acc, property_uri) => {
         if (property_uri === 'state') {
           return acc;
@@ -844,14 +829,14 @@ function processTemplate (individual, container, template, mode) {
         const embeddedValidation = embeddedTemplate.getAttribute('data-valid') === 'true';
         return acc && embeddedValidation;
       }, true);
-      templateChildren.forEach((node) => node.dispatchEvent(new CustomEvent('internal-validated', {detail: validation})));
+      template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
     }
     // "validate" event should bubble up to be handled by parent template only if current template is embedded
     if ( container.getAttribute('data-embedded') === 'true' ) {
       container.dispatchEvent(new Event('internal-validate'));
     }
   };
-  templateChildren.forEach((node) => node.addEventListener('internal-validate', validateTemplate));
+  template.addEventListener('internal-validate', validateTemplate);
 
   /**
   * Trigger 'internal-validate' event on individual property change or when mode switches to 'edit'
@@ -859,15 +844,13 @@ function processTemplate (individual, container, template, mode) {
   */
   const triggerValidation = function () {
     if (mode === 'edit') {
-      templateChildren.forEach((node) => node.dispatchEvent(new Event('internal-validate')));
+      template.dispatchEvent(new Event('internal-validate'));
     }
   };
   individual.on('propertyModified', triggerValidation);
 
-  templateChildren.forEach((node) => node.addEventListener('remove', function () {
-    individual.off('propertyModified', triggerValidation);
-  }));
-  templateChildren.forEach((node) => node.addEventListener('edit', triggerValidation));
+  template.addEventListener('remove', () => individual.off('propertyModified', triggerValidation));
+  template.addEventListener('edit', triggerValidation);
 
   /**
   * Merge validation result from custom template validation
@@ -891,16 +874,16 @@ function processTemplate (individual, container, template, mode) {
         }
         return acc && validation[property_uri].state;
       }, true);
-      templateChildren.forEach((node) => node.dispatchEvent(new CustomEvent('internal-validated', {detail: validation})));
+      template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
     }
   };
 
   // Handle validation events from template
-  templateChildren.forEach((node) => node.addEventListener('validate', (e) => e.stopPropagation()));
-  templateChildren.forEach((node) => node.addEventListener('validated', mergeValidationResult));
+  template.addEventListener('validate', (e) => e.stopPropagation());
+  template.addEventListener('validated', mergeValidationResult);
 
   // Controls
-  const controls = Array.from(template.querySelectorAll('veda-control:not([rel] *):not([about] *)')).map((el) => {
+  const controls = Array.from(wrapper.querySelectorAll('veda-control:not([rel] *):not([about] *)')).map((el) => {
     const control = $(el);
     const property_uri = control.attr('property') || control.attr('rel');
     const type = control.attr('data-type') || 'generic';
@@ -947,15 +930,15 @@ function processTemplate (individual, container, template, mode) {
       }
       e.stopPropagation();
     };
-    templateChildren.forEach((node) => node.addEventListener('internal-validated', validatedHandler));
+    template.addEventListener('internal-validated', validatedHandler);
 
     const syncControl = (e) => {
       e.stopPropagation();
       control.triggerHandler(e.type);
     };
-    templateChildren.forEach((node) => node.addEventListener('view', syncControl));
-    templateChildren.forEach((node) => node.addEventListener('edit', syncControl));
-    templateChildren.forEach((node) => node.addEventListener('search', syncControl));
+    template.addEventListener('view', syncControl);
+    template.addEventListener('edit', syncControl);
+    template.addEventListener('search', syncControl);
 
     const assignDefaultValue = function (e) {
       if ( spec && spec.hasValue('v-ui:defaultValue') && !individual.hasValue(property_uri) ) {
@@ -963,7 +946,7 @@ function processTemplate (individual, container, template, mode) {
       }
       e.stopPropagation();
     };
-    templateChildren.forEach((node) => node.addEventListener('edit', assignDefaultValue));
+    template.addEventListener('edit', assignDefaultValue);
 
     const opts = {
       individual: individual,
@@ -977,6 +960,7 @@ function processTemplate (individual, container, template, mode) {
 
   const promises = rels.concat(abouts, props);
   return Promise.all(promises).then(() => {
+    wrapper = null;
     return template;
   });
 }
@@ -1050,8 +1034,6 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
   return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then((rendered) => {
     if (!Array.isArray(rendered)) {
       rendered = [rendered];
-    } else {
-      rendered = rendered.flat();
     }
     if (isEmbedded) {
       rendered.forEach((node) => {
@@ -1106,7 +1088,7 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
           btnGroup.classList.add('block');
         }
         if (item.style.display === 'table-row' || item.tagName === 'TR') {
-          const cell = item.lastChild;
+          const cell = item.lastElementChild;
           cell.style.position = 'relative';
           cell.appendChild(btnGroup);
         } else {

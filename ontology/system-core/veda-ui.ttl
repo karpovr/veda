@@ -2792,6 +2792,7 @@ v-ui:TreeTemplate
           return;
         }
         return value.present(cont, tmpl[0].outerHTML).then(function (tmpl) {
+          tmpl = $(tmpl);
           // Pre-check children
           return getChildren([], value, false).then(function (children) {
             if (!children.length) {
