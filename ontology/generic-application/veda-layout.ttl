@@ -42,6 +42,7 @@ v-s:LayoutTemplate
         <a class="navbar-brand" href="#/"><img src="/img/veda-logo.png"></a>
       </div>
       <div class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right" style="margin-right:-30px;" about="v-s:MainMenu" data-template="v-s:MenuTemplate"></ul>
         <ul class="nav navbar-nav navbar-right">
           <li about="v-s:Favorites" data-template="v-s:FavoritesIndicatorTemplate" style="border-right:1px solid #ddd;"></li>
           <li about="v-s:Contacts">
@@ -69,10 +70,9 @@ v-s:LayoutTemplate
           <li about="v-cal:TasksCalendar" data-template="v-cal:FunctionCalendarIndicatorTemplate"></li>
           <li about="v-ft:Inbox" data-template="v-ft:FunctionTasksIndicatorTemplate"></li>
           <li id="user-info"></li>
-          <li id="menu" class="dropdown" about="v-s:MainMenu" data-template="v-s:MenuTemplate"></li>
           <li about="v-s:Logout" data-template="v-ui:ExitButtonTemplate"></li>
           <li about="v-ui:AvailableLanguage" data-template="v-ui:LanguageSwitchTemplate"></li>
-          <li style="padding-left:10px; margin-left:10px; border-left:1px solid #ddd;" about="@" data-template="v-ui:FullWidthSwitchTemplate"></li>
+          <li about="@" data-template="v-ui:FullWidthSwitchTemplate"></li>
         </ul>
       </div>
     </div>
@@ -102,7 +102,7 @@ v-s:LayoutTemplate
   userInfo.empty();
   veda.user.present(userInfo, userInfoTmpl);
 
-  
+
 </script>
   """ ;
 .
@@ -157,7 +157,7 @@ v-s:MenuItemViewTemplate
       template.find("#static").attr("href", individual["v-s:staticLink"][0]);
       break;
   }
-  
+
 </script>
 <li>
   <a id="static">
@@ -178,8 +178,10 @@ v-s:MenuTemplate
   rdfs:label "Шаблон класса Меню"@ru ;
   rdfs:label "Menu class template"@en ;
   v-ui:template """
-<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="fa fa-cog fa-lg"></span> <span class="caret"></span></a>
-<ul class="dropdown-menu" role="menu" about="@" rel="v-s:menuItem" data-template="v-s:MenuItemViewTemplate"></ul>
+<li id="menu" class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="fa fa-cog fa-lg"></span> <span class="caret"></span></a>
+  <ul class="dropdown-menu" role="menu" about="@" rel="v-s:menuItem" data-template="v-s:MenuItemViewTemplate"></ul>
+</li>
   """
 .
 v-s:PsStrings

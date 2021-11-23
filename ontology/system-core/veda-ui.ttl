@@ -459,7 +459,7 @@ v-ui:LanguageSwitchTemplate
   rdfs:label "Шаблон переключения языка"@ru ;
   rdfs:label "Language switch template"@en ;
   v-ui:template """
-<div about="@" class="btn-group" rel="rdf:value">
+<div about="@" class="btn-group margin-sm-h" rel="rdf:value">
   <button about="@" property="rdfs:label" class="lang btn btn-xs btn-default navbar-btn"></button>
 </div>
 <script>
@@ -548,7 +548,7 @@ v-ui:FullWidthSwitchTemplate
   })
 
 </script>
-<button class="btn btn-xs btn-default navbar-btn">
+<button class="btn btn-xs btn-default navbar-btn margin-sm-h">
   <span class="glyphicon glyphicon-fullscreen"></span>
   <style id="full-width-style" media="not all">
     .container {
