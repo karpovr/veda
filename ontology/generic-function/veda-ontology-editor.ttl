@@ -82,7 +82,7 @@ v-ui:ClassClassModel
       return superClasses.slice(1);
     });
   };
-  
+
   """ ;
 .
 
@@ -174,7 +174,7 @@ v-ui:PropertyClassModel
     });
     this.save();
   };
-  
+
   """ ;
 .
 
@@ -308,7 +308,7 @@ v-ui:CommonOntologyTemplate
   } else {
     $("#uri", template).remove();
   }
-  
+
 </script>
 <div style="position:relative;">
   <a style="position:absolute;top:10px;right:10px;" href="#/@//v-ui:Graph"><span class="glyphicon glyphicon-link"></span></a>
@@ -470,7 +470,7 @@ v-ui:ClassClassTemplate
     riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
   });
 
-  
+
 </script>
   """ ;
 .
@@ -514,13 +514,13 @@ v-ui:PropertyClassTemplate
 
 
 #------------------------------------------------------ Шаблон класса v-ui:PropertySpecification --
-v-s:TS_PropertySpecification 
+v-s:TS_PropertySpecification
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:PropertySpecificationTemplate;
   v-ui:forClass v-ui:PropertySpecification
 .
-v-s:CS_PropertySpecification 
+v-s:CS_PropertySpecification
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:PropertySpecification "@ru, "Class specification v-ui:PropertySpecification "@en;
   v-ui:forClass v-s:PropertySpecification ;
@@ -635,7 +635,7 @@ v-ui:PropertySpecificationTemplate
 .
 
 #------------------------------------------------ Шаблон класса v-ui:DatatypePropertySpecification --
-v-s:TS_DatatypePropertySpecification 
+v-s:TS_DatatypePropertySpecification
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:DatatypePropertySpecificationTemplate;
@@ -806,13 +806,13 @@ v-ui:DatatypePropertySpecificationTemplate
 .
 
 #-------------------------------------------------- Шаблон класса v-ui:ObjectPropertySpecification --
-v-s:TS_ObjectPropertySpecification 
+v-s:TS_ObjectPropertySpecification
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:ObjectPropertySpecificationTemplate;
   v-ui:forClass v-ui:ObjectPropertySpecification
 .
-v-s:CS_ObjectPropertySpecification 
+v-s:CS_ObjectPropertySpecification
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:ObjectPropertySpecification  "@ru, "Class specification v-s:ObjectPropertySpecification "@en;
   v-ui:forClass v-s:ObjectPropertySpecification  ;
@@ -1027,7 +1027,7 @@ v-ui:ObjectPropertySpecificationTemplate
 .
 
 #------------------------------------------------------- Шаблон класса v-ui:ClassTemplate --
-v-s:TS_ClassTemplate 
+v-s:TS_ClassTemplate
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:ClassTemplateTemplate;
@@ -1063,7 +1063,7 @@ v-ui:ClassTemplateTemplate
 .
 
 #------------------------------------------------------- Шаблон класса v-ui:ClassModel --
-v-s:TS_ClassModel 
+v-s:TS_ClassModel
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:ClassModelTemplate;
@@ -1099,7 +1099,7 @@ v-ui:ClassModelTemplate
 .
 
 #---------------------------------------------------------- Шаблон класса v-s:Event --
-v-s:TS_Event 
+v-s:TS_Event
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:EventTemplate;
@@ -1201,7 +1201,7 @@ v-ui:EventTemplate
 .
 
 #--------------------------------------------------------- Шаблон класса v-s:Module --
-v-s:TS_Module 
+v-s:TS_Module
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:ModuleTemplate;
@@ -1343,13 +1343,13 @@ v-s:MembershipRegistryBlank
   rdfs:label "Membership"@en ;
   v-fc:targetType v-s:Membership ;
 .
-v-s:TS_Membership 
+v-s:TS_Membership
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:MembershipTemplate;
   v-ui:forClass v-s:Membership
 .
-v-s:CS_Membership 
+v-s:CS_Membership
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Membership "@ru, "Class specification v-s:Membership "@en;
   v-ui:forClass v-s:Membership ;
@@ -1432,7 +1432,7 @@ v-ui:MembershipTemplate
     <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
       data-buttons="edit save cancel delete"></span>
   </div>
-  
+
 </div>
 <script>
   $("#memberOf", template).change(function () {
@@ -1531,7 +1531,7 @@ v-s:MembershipRegistryTemplate
       individual["v-s:resource"] = [];
     }
   });
-  
+
 </script>
 """ ;
 .
@@ -1618,13 +1618,13 @@ v-s:PermissionStatementRegistryBlank
   v-fc:targetType v-s:PermissionStatement ;
 .
 
-v-s:TS_PermissionStatement 
+v-s:TS_PermissionStatement
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:PermissionStatementTemplate;
   v-ui:forClass v-s:PermissionStatement
 .
-v-s:CS_PermissionStatement 
+v-s:CS_PermissionStatement
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:PermissionStatement "@ru, "Class specification v-s:PermissionStatement "@en;
   v-ui:forClass v-s:PermissionStatement ;
@@ -1779,7 +1779,7 @@ v-s:PermissionStatementRegistryTemplate
     }
   });
 
-  
+
 </script>
 """ ;
 .
@@ -1830,13 +1830,13 @@ v-s:PermissionStatementRegistryResultTemplate
 
 
 #---------------------------------------------------------- ШАБЛОНЫ/БЛАНКИ ДЛЯ КЛАССА v-s:Group --
-v-s:TS_Group 
+v-s:TS_Group
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-ui:GroupTemplate;
   v-ui:forClass v-s:Group
 .
-v-s:CS_Group 
+v-s:CS_Group
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:Group  "@ru, "Class specification v-s:Group  "@en;
   v-ui:forClass v-s:Group ;
@@ -1865,8 +1865,7 @@ v-ui:GroupTemplate
     return membershipBlank.init();
   });
 
-  return Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
-  
+  Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
 </script>
 <div class="container sheet">
   <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>

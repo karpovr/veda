@@ -627,7 +627,6 @@ v-fs:AttributiveSearchTemplate
     additionalActions.appendTo(searchActions);
   } else {
     additionalActions.remove();
-    return;
   }
 
   // Export table to 'blob' or 'xls'
@@ -949,7 +948,7 @@ v-fs:AttributiveSearchInlineTemplate
     $(".stats-top, .stats-bottom, .result-header", template).remove();
     searchResultTemplate = new veda.IndividualModel("v-fs:MinimalSearchResultTemplate");
   }
-  return searchResultTemplate.load().then(function (searchResultTemplate) {
+  searchResultTemplate.load().then(function (searchResultTemplate) {
     var file_reg = /\\.html$/;
     var templateString = searchResultTemplate["v-ui:template"][0].toString();
     if (file_reg.test(templateString)) {
@@ -965,8 +964,6 @@ v-fs:AttributiveSearchInlineTemplate
     resultContainer.empty();
     searchResultContainer.append( searchResultTemplate );
   });
-
-
 </script>
 <div>
   <style scoped>
@@ -1439,7 +1436,7 @@ v-fs:AttributiveSearchInlineTemplate
   }
 
   // Render search form
-  return Promise.resolve().then(function () {
+  Promise.resolve().then(function () {
     if ( searchBlank ) {
       return searchBlank.load().then(function(searchBlank) {
         $("#reset-button.reset-button", template).click(function () {
@@ -1514,8 +1511,6 @@ v-fs:AttributiveSearchInlineTemplate
         });
     }
   });
-
-
 </script>
   """ ;
 .
@@ -1964,7 +1959,7 @@ v-ft:SendToIntroductionOperationTemplate
   startForm["v-wf:useTransformation"] = [new veda.IndividualModel("v-df:TaskRouteStartFormToNet")];
   startForm["v-wf:StartForm_setStatus"] = [true];
   startForm["v-wf:StartForm_canEdit"] = [false];
-  return startForm.present(startFormContainer, "v-df:TaskRouteStartFormTemplate", "edit").then(function(startFormTemplate) {
+  startForm.present(startFormContainer, "v-df:TaskRouteStartFormTemplate", "edit").then(function(startFormTemplate) {
     $(".action#send", startFormTemplate).off("click").click(function(){
       var savingPromises = individual["v-s:data"].map(function(doc) {
         startForm.clone().then(function(clonedStartForm){
@@ -1993,7 +1988,6 @@ v-ft:SendToIntroductionOperationTemplate
       });
     })
   });
-
 </script>
   """ ;
 .

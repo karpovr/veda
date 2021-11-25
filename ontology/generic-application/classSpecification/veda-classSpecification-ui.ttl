@@ -166,7 +166,7 @@ v-s:ClassSpecificationTemplate
   <div about="@" class="container sheet view -edit -search" data-template="v-s:CommentsTemplate"></div>
 </div>
 <script>
-  if (mode != "search" && !individual.hasValue("v-s:shelfLife") && individual.isNew() && ) {
+  if (mode != "search" && !individual.hasValue("v-s:shelfLife") && individual.isNew()) {
     individual["v-s:shelfLife"] = [9999];
   }
   /*function shelfLifeView() {
@@ -310,7 +310,7 @@ v-s:PropertySpecificationTemplate
   <div about="@" class="container sheet view -edit -search" data-template="v-s:CommentsTemplate"></div>
 </div>
 <script>
-  if (mode != "search" && !individual.hasValue("v-s:shelfLife") && individual.isNew() && ) {
+  if (mode != "search" && !individual.hasValue("v-s:shelfLife") && individual.isNew()) {
     individual["v-s:shelfLife"] = [9999];
   }
   /*function shelfLifeView() {

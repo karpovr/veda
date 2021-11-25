@@ -535,6 +535,56 @@ v-s:LinksTreeRecursiveTemplate
   rdfs:label "Tree"@en ;
   v-ui:template """
 <script>
+  function presentTypeLink(link, typeLinksContainer) {
+    return link.load().then(function (link) {
+      if ( link.hasValue("rdf:type", "v-s:Link") ) {
+        if ( link.hasValue("v-s:from", individual) && link.hasValue("v-s:to") ) {
+          link = link["v-s:to"][0];
+        } else if ( link.hasValue("v-s:to", individual) && link.hasValue("v-s:from") ) {
+          link = link["v-s:from"][0];
+        }
+      }
+      if ( !template.closest(".link-node[resource='" + veda.Util.escape4$(link.id) + "']").length ) {
+        return link.present(typeLinksContainer, "v-s:LinksTreeRecursiveTemplate");
+      }
+    });
+  }
+
+  function getOutTypeLinks(allowedTypeUri, outPropertiesUris) {
+    var links = [];
+    outPropertiesUris.forEach(function (outPropertyUri) {
+      links = links.concat( individual[outPropertyUri] );
+    });
+    var linksPromises = links.map(function (link) {
+      return link.load();
+    });
+    return Promise.all(linksPromises).then(function (loadedLinks) {
+      return loadedLinks.filter(function (link) {
+        var linkTypeUri = link["rdf:type"][0].id;
+        return linkTypeUri === allowedTypeUri ;
+      });
+    });
+  }
+
+  function getInTypeLinks(allowedTypeUri, inPropertiesUris) {
+    var allowedTypeUriQuery = "'rdf:type'==='" + allowedTypeUri +"'";
+    var inPropertiesUrisQuery = inPropertiesUris.map(function (inPropertyUri) {
+      return "'" + inPropertyUri + "'==='" + individual.id + "'";
+    }).join("||");
+    var q = allowedTypeUriQuery + " && (" + inPropertiesUrisQuery + ")";
+    return !inPropertiesUrisQuery || allowedTypeUri === "v-s:Link" ? Promise.resolve([]) : veda.Backend.query({
+      ticket: veda.ticket,
+      query: q,
+      limit: 500,
+      async: true
+    }).then(function (queryResult) {
+      var links = queryResult.result.map(function (uri) {
+        return new veda.IndividualModel(uri);
+      });
+      return links;
+    });
+  }
+
   var type = individual["rdf:type"][0];
   var linksTree;
   if ( !type.hasValue("v-s:hasLinksTree") ) {
@@ -546,7 +596,7 @@ v-s:LinksTreeRecursiveTemplate
     linksTree = type["v-s:hasLinksTree"][0];
   }
 
-  return linksTree.load().then(function (linksTree) {
+  linksTree.load().then(function (linksTree) {
     var inPropertiesUris = linksTree["v-s:inProperty"].map(function (property) {
       return property.id;
     });
@@ -631,57 +681,6 @@ v-s:LinksTreeRecursiveTemplate
       });
     });
   });
-
-  function presentTypeLink(link, typeLinksContainer) {
-    return link.load().then(function (link) {
-      if ( link.hasValue("rdf:type", "v-s:Link") ) {
-        if ( link.hasValue("v-s:from", individual) && link.hasValue("v-s:to") ) {
-          link = link["v-s:to"][0];
-        } else if ( link.hasValue("v-s:to", individual) && link.hasValue("v-s:from") ) {
-          link = link["v-s:from"][0];
-        }
-      }
-      if ( !template.closest(".link-node[resource='" + veda.Util.escape4$(link.id) + "']").length ) {
-        return link.present(typeLinksContainer, "v-s:LinksTreeRecursiveTemplate");
-      }
-    });
-  }
-
-  function getOutTypeLinks(allowedTypeUri, outPropertiesUris) {
-    var links = [];
-    outPropertiesUris.forEach(function (outPropertyUri) {
-      links = links.concat( individual[outPropertyUri] );
-    });
-    var linksPromises = links.map(function (link) {
-      return link.load();
-    });
-    return Promise.all(linksPromises).then(function (loadedLinks) {
-      return loadedLinks.filter(function (link) {
-        var linkTypeUri = link["rdf:type"][0].id;
-        return linkTypeUri === allowedTypeUri ;
-      });
-    });
-  }
-
-  function getInTypeLinks(allowedTypeUri, inPropertiesUris) {
-    var allowedTypeUriQuery = "'rdf:type'==='" + allowedTypeUri +"'";
-    var inPropertiesUrisQuery = inPropertiesUris.map(function (inPropertyUri) {
-      return "'" + inPropertyUri + "'==='" + individual.id + "'";
-    }).join("||");
-    var q = allowedTypeUriQuery + " && (" + inPropertiesUrisQuery + ")";
-    return !inPropertiesUrisQuery || allowedTypeUri === "v-s:Link" ? Promise.resolve([]) : veda.Backend.query({
-      ticket: veda.ticket,
-      query: q,
-      limit: 500,
-      async: true
-    }).then(function (queryResult) {
-      var links = queryResult.result.map(function (uri) {
-        return new veda.IndividualModel(uri);
-      });
-      return links;
-    });
-  }
-
 
 </script>
 <ul class="link-node">

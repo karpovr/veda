@@ -77,7 +77,7 @@ function IndividualPresenter2 (container, template, mode, extra, toAppend) {
         const isClass = this.hasValue('rdf:type', 'owl:Class') || this.hasValue('rdf:type', 'rdfs:Class');
         if (this.hasValue('v-ui:hasTemplate') && !isClass) {
           const templateIndividual = this['v-ui:hasTemplate'][0];
-          if (!templateIndividual instanceof IndividualModel) {
+          if (!(templateIndividual instanceof IndividualModel)) {
             throw new TypeError('Custom template must be an individual!');
           }
           return getTemplateString(templateIndividual);
@@ -256,16 +256,12 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
 
   let pre_result;
   if (pre_render_src) {
-    pre_result = eval(
-      `(function (veda, individual, container, template, mode, extra) {
-  'use strict';
-  ${pre_render_src}
-}).call(individual, veda, individual, $(container), $(template), mode, extra);
-//# sourceURL=${window.location.origin}/_templates/${name}_pre`,
-    );
+    pre_result = (function (veda, individual, container, template, mode, extra) {
+      return eval(`'use strict';${pre_render_src}\n//# sourceURL=${window.location.origin}/templates/${name}_pre`);
+    }).call(individual, veda, individual, $(container), $(template), mode, extra);
   }
 
-  return (pre_result instanceof Promise ? pre_result : Promise.resolve(pre_result)).then(() => {
+  return Promise.resolve(pre_result).then(() => {
     return processTemplate(individual, container, wrapper, mode).then((template) => {
       if (toAppend) {
         container.appendChild(template);
@@ -274,19 +270,13 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
 
       let post_result;
       if (post_render_src) {
-        post_result = eval(
-          `(function (veda, individual, container, template, mode, extra) {
-  'use strict';
-  ${post_render_src}
-}).call(individual, veda, individual, $(container), $(template), mode, extra);
-//# sourceURL=${window.location.origin}/_templates/${name}_post`,
-        );
+        post_result = (function (veda, individual, container, template, mode, extra) {
+          return eval(`'use strict';\n${post_render_src}\n//# sourceURL=${window.location.origin}/templates/${name}_post`);
+        }).call(individual, veda, individual, $(container), $(template), mode, extra);
       }
-
       wrapper.remove();
       wrapper = null;
-      return (post_result instanceof Promise ? post_result : Promise.resolve(post_result))
-        .then(() => template);
+      return Promise.resolve(post_result).then(() => template);
     });
   });
 }
@@ -770,7 +760,7 @@ function processTemplate (individual, container, wrapper, mode) {
     let about;
     let aboutTemplate;
     if ( about_template_uri ) {
-      aboutTemplate = new IndividualModel( about_template_uri );
+      aboutTemplate = about_template_uri;
     } else if ( about_inline_template.length ) {
       aboutTemplate = about_inline_template;
     }

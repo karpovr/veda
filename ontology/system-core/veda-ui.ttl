@@ -434,7 +434,7 @@ v-ui:AdministrationIconTemplate
   rdfs:label "Administration button template"@en ;
   v-ui:template """
 <script>
-  return veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
+  veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
     if (!isSuperUser) {
       template.hide();
     } else {
@@ -446,7 +446,6 @@ v-ui:AdministrationIconTemplate
       });
     }
   });
-
 </script>
 <a href="#/v-s:AdministrationAspect" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-cog fa-lg"></span> <span class="label label-default"></span>
@@ -538,15 +537,14 @@ v-ui:FullWidthSwitchTemplate
       template.addClass("btn-default").removeClass("btn-success active");
     }
   }
-  return new veda.IndividualModel("v-s:ChangeSizeBundle").load().then(function(changeSizeBundle) {
+  new veda.IndividualModel("v-s:ChangeSizeBundle").load().then(function(changeSizeBundle) {
     template.tooltip({
       container: template,
       placement: "bottom",
       trigger: "hover",
       title: changeSizeBundle["rdfs:label"].map(veda.Util.formatValue).join(" ")
     });
-  })
-
+  });
 </script>
 <button class="btn btn-xs btn-default navbar-btn margin-sm-h">
   <span class="glyphicon glyphicon-fullscreen"></span>
@@ -903,7 +901,7 @@ v-ui:StandardButtonsTemplate
 
   // var allButtons = "send edit save cancel delete destroy journal task rights";
   var defaultButtons = "send edit save cancel delete recover journal task";
-  return individual.rights.then(function (rights) {
+  individual.rights.then(function (rights) {
     var canUpdate = rights.hasValue("v-s:canUpdate", true);
     var canDelete = rights.hasValue("v-s:canDelete", true);
     var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
@@ -914,8 +912,6 @@ v-ui:StandardButtonsTemplate
     });
     $(".rm", template).remove();
   });
-
-
 </script>
 <span>
   <button type="button" class="btn btn-success view -edit -search hidden glyphicon glyphicon-refresh" id="refresh"></button>
@@ -1059,7 +1055,7 @@ v-ui:IconButtonsTemplate
 
   // var allButtons = "edit save cancel delete";
   var defaultButtons = "edit save cancel delete";
-  return individual.rights.then(function (rights) {
+  individual.rights.then(function (rights) {
     var canUpdate = rights.hasValue("v-s:canUpdate", true);
     var canDelete = rights.hasValue("v-s:canDelete", true);
     var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
@@ -1070,8 +1066,6 @@ v-ui:IconButtonsTemplate
     });
     $(".rm", template).remove();
   });
-
-
 </script>
 <span>
   <!--<button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>-->
@@ -1249,7 +1243,7 @@ v-ui:IconPersonTemplate
   if (individual.hasValue("v-s:hasAspect")) {
     template.attr("href", "#/" + individual["v-s:hasAspect"][0].id);
   }
-  return new veda.IndividualModel("v-s:PersonalInfo").load().then(function(personalInfo) {
+  new veda.IndividualModel("v-s:PersonalInfo").load().then(function(personalInfo) {
     template.tooltip({
       container: template,
       placement: "bottom",
@@ -1294,17 +1288,15 @@ v-ui:AppointmentPopoverTemplate
   v-ui:template """
 <script>
   if (individual.hasValue("v-s:employee")) {
-    return individual["v-s:employee"][0].load().then(function(employee) {
+    individual["v-s:employee"][0].load().then(function(employee) {
       if (!employee.hasValue("v-s:hasImage")) {
         $(".media-left", template).remove();
       };
       if (!employee.hasValue("v-s:dateAbsenceTo")) {
         $(".absence-block", template).remove();
       };
-      return true;
-    })
-  };
-
+    });
+  }
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1418,7 +1410,7 @@ v-ui:PositionPopoverTemplate
   rdfs:label "Position template"@en ;
   v-ui:template """
 <script>
-  return veda.Backend.query(veda.ticket, "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + individual.id + "'").then(function(queryResult) {
+  veda.Backend.query(veda.ticket, "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + individual.id + "'").then(function(queryResult) {
     var promises = queryResult.result.map(function(uri) {
       return new veda.IndividualModel(uri).load();
     });
@@ -1436,9 +1428,8 @@ v-ui:PositionPopoverTemplate
         }
       });
       return true;
-    });0
-  })
-
+    });
+  });
 </script>
 <div class="media" style="margin-top:0px;">
   <span class="close">&nbsp;&times;</span>
@@ -1491,8 +1482,7 @@ v-ui:ResourceTemplate
       propСontainer.append(propRow);
     })
   });
-  return Promise.all(promises);
-
+  Promise.all(promises);
 </script>
 <div class="container sheet">
   <div class="clearfix">
@@ -2429,7 +2419,7 @@ v-ui:DocumentEventTemplate
   });
   if (individual.hasValue('v-wf:onProcess')) {
     var process = individual.get('v-wf:onProcess')[0];
-    return process.load().catch(function(err) {
+    process.load().catch(function(err) {
       console.log('process deleted:', process.id);
       $(".on-process", template).remove();
     });
@@ -3864,7 +3854,7 @@ v-ui:AppointmentSwitchTemplate
   </div>
 </div>
 <script>
-  return veda.Backend.query({
+  veda.Backend.query({
     ticket: veda.ticket,
     query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
   }).then(function (result) {
@@ -3898,7 +3888,6 @@ v-ui:AppointmentSwitchTemplate
       container.remove();
     }
   });
-
 </script>
   """ ;
 .
@@ -3926,7 +3915,7 @@ v-ui:AppointmentSwitchMenuTemplate
   </span>
 </a>
 <script>
-  return veda.Backend.query({
+  veda.Backend.query({
     ticket: veda.ticket,
     query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
   }).then(function (result) {
@@ -3941,7 +3930,6 @@ v-ui:AppointmentSwitchMenuTemplate
       container.remove();
     }
   });
-
 </script>
   """ ;
 .

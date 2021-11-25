@@ -24,16 +24,13 @@ v-s:InternalDocument_ComplexRouteStartForm_Template
   rdfs:label "InternalDocument complex route start form template"@en ;
   v-ui:template """
 <script>
+if (mode === "edit" && individual.hasValue("v-wf:processedDocument")) {
   var stages = ['coordination1', 'coordination2', 'coordination3', 'sign', 'approval', 'review', 'examination', 'instruction'];
   var complex = "s-wf:ComplexRouteStartForm_";
   var simple = "s-wf:SimpleRouteStartForm_";
-  if ( mode !== "edit" ) { return; }
-
-  if ( !individual.hasValue('v-wf:processedDocument') ) { return; }
-
   var doc = individual['v-wf:processedDocument'][0];
 
-  return doc.load().then(function (doc) {
+  doc.load().then(function (doc) {
 
     return Promise.all([
       doc.hasValue("v-s:initiator") ? doc["v-s:initiator"][0].getChief() : undefined,
@@ -92,8 +89,7 @@ v-s:InternalDocument_ComplexRouteStartForm_Template
       individual[complex+'instruction'][0][simple+'editable'] = [true];
     });
   });
-
-
+}
 </script>
 <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div>
 """ ;

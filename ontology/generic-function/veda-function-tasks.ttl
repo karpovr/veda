@@ -274,15 +274,14 @@ v-ft:FunctionTasksIndicatorTemplate
 <script>
   /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
   $("#counter", template).attr("about", counter_uri);*/
-  return new veda.IndividualModel("v-s:TaskBundle").load().then(function(taskBundle) {
+  new veda.IndividualModel("v-s:TaskBundle").load().then(function(taskBundle) {
     template.tooltip({
       container: template,
       placement: "bottom",
       trigger: "hover",
       title: taskBundle["rdfs:label"].map(veda.Util.formatValue).join(" ")
     });
-  })
-  
+  });
 </script>
 <a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-envelope-o fa-lg"></span>
@@ -560,7 +559,7 @@ v-ft:TaskBlankTemplate
   } else {
     $(".from", template).remove();
   }
-  
+
 </script>
 <div>
   <br>
@@ -609,7 +608,7 @@ v-ft:TaskBlankTemplate
         });
         documentHandler.apply(this);
 
-        
+
       </script>
     </div>
   </div>
@@ -656,7 +655,7 @@ v-ft:TaskBlankTemplate
     }
   });
 
-  
+
 </script>
   """ ;
 .
@@ -682,7 +681,7 @@ v-ft:ActorFilterTemplate
     individual[actor_property] = [veda.user];
   }
 
-  return veda.Backend.query({
+  veda.Backend.query({
     ticket: veda.ticket,
     query: "('rdf:type'==='v-s:Appointment' && 'v-s:employee'=='" + veda.user.id + "')"
   })
@@ -775,8 +774,6 @@ v-ft:ActorFilterTemplate
       });
     }
   }*/
-
-  
 </script>
 <ul class="nav nav-pills" role="tablist">
   <style scoped>
@@ -1235,7 +1232,7 @@ v-ft:TaskRelatedTasksTemplate
   v-ui:template """
 <script>
   var relatedTasks = new veda.IndividualModel("v-ft:RelatedTasks");
-  return relatedTasks.load().then(function (relatedTasks) {
+  relatedTasks.load().then(function (relatedTasks) {
     relatedTasks.clearValue("v-fs:searchResult");
     var taskId = individual.id;
     var docId = individual.hasValue("v-wf:onDocument") && individual["v-wf:onDocument"][0].id;
@@ -1247,7 +1244,6 @@ v-ft:TaskRelatedTasksTemplate
     ].join(" && ");
     relatedTasks["v-fs:fulltextQuery"] = [ queryStr ];
   });
-  
 </script>
 <div>
   <div about="v-ft:RelatedTasks" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
@@ -1349,7 +1345,7 @@ v-ft:MakeDecisionOperationTemplate
   common.push( new veda.IndividualModel("v-wf:DecisionRedirect") );
   this["v-ft:groupDecisionClass"] = common;
 
-  
+
 </script>
 <div class="container sheet">
   <h4 about="v-ft:groupDecisionClass" property="rdfs:label"></h4>
@@ -1411,7 +1407,7 @@ v-ft:MakeDecisionOperationTemplate
   var decision = new veda.IndividualModel();
   $(".possible-decisions input", template).first().prop("checked", "checked").change();
 
-  
+
 </script>
   """ ;
 .

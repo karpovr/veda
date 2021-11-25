@@ -135,7 +135,7 @@ v-cal:FunctionCalendarTemplate
   <div id="fullcalendar"></div>
 </div>
 <script>
-  return System.import("moment").then(function (module) {
+  System.import("moment").then(function (module) {
     var moment = module.default;
     return System.import("fullcalendar").then(function (module) {
       var fullCalendar = module.default;
@@ -210,8 +210,6 @@ v-cal:FunctionCalendarTemplate
       });
     });
   });
-
-  
 </script>
   """ ;
 .
@@ -230,7 +228,7 @@ v-cal:FunctionCalendarIndicatorTemplate
     trigger: "hover",
     title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
   });
-  
+
 </script>
 <a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
   <span class="fa fa-calendar fa-lg"></span>

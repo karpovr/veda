@@ -359,9 +359,7 @@ v-fc:BlankTemplate
 #  v-ui:forClass v-fc:Blank ;
   v-ui:template """
 <script>
-  return individual.initBlank();
-
-
+  individual.initBlank();
 </script>
 <div>
   <div id="object-container"></div>

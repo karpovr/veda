@@ -128,7 +128,7 @@ v-s:ContactsTemplate
   }
   $("#box-tabs li[data-type='"+individual["activeTab"]+"']", template).click();
 
-  
+
 </script>
 <div class="container-fluid sheet">
   <br>
@@ -191,7 +191,7 @@ v-ui:CompactCommunicationMeanTemplate
   } else {
     $("a.email-link", template).remove();
   }
-  
+
 </script>
 """
 .
@@ -205,7 +205,7 @@ v-s:ContactCardTemplate
     $("#orgLabel", template).remove();
     $("span.unit-icon", template).remove();
     $("div.logo-image", template).remove();
-    return individual.getPropertyChain("v-s:employee", "v-s:hasImage").then(function(image) {
+    individual.getPropertyChain("v-s:employee", "v-s:hasImage").then(function(image) {
       if (image.length == 0) {
         individual["v-s:employee"][0]["v-s:hasImage"] = [new veda.IndividualModel("v-s:DefaultPhoto")];
       }
@@ -223,7 +223,7 @@ v-s:ContactCardTemplate
     $("div.unit-image", template).remove();
     $("#appLabel", template).remove();
   };
-  
+
 </script>
 <tr>
   <td width="80px">
@@ -281,6 +281,11 @@ v-s:ContactCardTemplate
   </td>
 </tr>
 <script>
+  function trunc (el) {
+    var elTxt = el.text();
+    if (elTxt.length > 35) { el.text( elTxt.substr(0, 35) + "..." ); }
+  }
+
   var commMeansPromises;
   if (individual.hasValue("v-s:employee")) {
     if (individual["v-s:employee"][0].hasValue("mnd-s:hasEmployeeProfile")) {
@@ -307,7 +312,8 @@ v-s:ContactCardTemplate
         return commMean.load();
       });
     }
-  };
+  }
+
   if (commMeansPromises == undefined) {
     $(".communication-container", template).remove();
   } else {
@@ -328,7 +334,7 @@ v-s:ContactCardTemplate
       faviconIcon.toggleClass("fa-star-o fa-star");
     });
 
-    return Promise.all(commMeansPromises).then(function(commMeans) {
+    Promise.all(commMeansPromises).then(function(commMeans) {
       commMeans.forEach(function(commMean) {
         if (commMean.hasValue("v-s:hasCommunicationMeanChannel", "d:o3q2gagyvfwh430io88vvb8vel")) {
           var phones = commMean["v-s:description"][0];
@@ -354,15 +360,9 @@ v-s:ContactCardTemplate
           phones.forEach(function(phone) {
             $(".other-phone", template).append("<div><a href='tel:" + phone + "'>" + phone + "</a></div>");
           });
-          
         }
-      })
-    })
-  };
-
-  function trunc (el) {
-    var elTxt = el.text();
-    if (elTxt.length > 35) { el.text( elTxt.substr(0, 35) + "..." ); }
+      });
+    });
   }
 </script>
 """
@@ -374,7 +374,7 @@ v-s:ContactsStructureTemplate
   rdfs:label "Contacts function template"@en ;
   v-ui:template """
 <script>
-  return new veda.IndividualModel("v-s:vedaInfo").load().then(function(vedaInfo) {
+  new veda.IndividualModel("v-s:vedaInfo").load().then(function(vedaInfo) {
     if (vedaInfo.hasValue("v-s:tenant") && vedaInfo["v-s:tenant"][0].id != veda.appointment["v-s:parentOrganization"][0].id) {
       individual["v-s:managedOrganization"] = vedaInfo["v-s:tenant"];
       $("#tenant", template).click(function(){
@@ -392,7 +392,6 @@ v-s:ContactsStructureTemplate
       $("#selfOrg", template).remove();
     }
   });
-
 </script>
 <div>
   <style>
@@ -434,7 +433,7 @@ v-s:ContactsStructureTemplate
     }
 
     .section-header > span.glyphicon {
-      margin-right: 5%; 
+      margin-right: 5%;
     }
 
     div.result-info-container {
@@ -447,7 +446,7 @@ v-s:ContactsStructureTemplate
       <!-- <veda-control id="searchText" property="*" data-type="string"></veda-control> -->
       <div id="searchText" class="input-group">
         <input type="text" class="form-control"/>
-        <div class="input-group-addon btn btn-default clear" tabindex="0">✕</div>  
+        <div class="input-group-addon btn btn-default clear" tabindex="0">✕</div>
       </div>
       <div class="margin-sm">
         <button id="searchButton" class="btn btn-primary" type="button" about="v-fs:Find" property="rdfs:label"></button>
@@ -657,7 +656,7 @@ v-s:ContactsStructureTemplate
       orgContent.css("width", maxWidth - changedWidth);
     }
   });
-  
+
 
   var loadIndicator = $("#load-indicator");
   var findDeleted = false;
@@ -872,7 +871,7 @@ v-s:ContactsStructureTemplate
       queryAppointment = null;
       queryPositions = null;
     };
-    
+
     var queryStringArray = [];
     if (parent.hasValue('rdf:type', 'v-s:Department')) {
       queryStringArray = [queryDepartments, queryAppointment, queryPositions];
@@ -890,8 +889,8 @@ v-s:ContactsStructureTemplate
       if (queryString == null) return Promise.resolve({result:[]});
       return veda.Backend.query(
         {
-          ticket: veda.ticket, 
-          sql: queryString, 
+          ticket: veda.ticket,
+          sql: queryString,
           sort: sort,
           from: 0,
           limit: 10000,
@@ -1015,7 +1014,7 @@ v-s:ContactsStructureTemplate
     var resultPos = $("#resultPos", template).hide();
     $("tbody", resultPos).empty();
 
-    var searchPromise = [];    
+    var searchPromise = [];
     var queryStringArr = genQueryStringArray(searchText, findDeleted, searchOrgMode == "targetOrg");
     searchPromise.push(queryStringArr[0] == null ? Promise.resolve([]) : searchAndLoad("org", queryStringArr[0], 0));
     searchPromise.push(searchAndLoad("dep", queryStringArr[1], 0));
@@ -1025,7 +1024,7 @@ v-s:ContactsStructureTemplate
     //orgTree.empty();
     //orgContent.hide();
     //$("tbody", orgContent).empty();
-    
+
     return Promise.all(searchPromise).then(function (results) {
       var finded = results.reduce(function(acc, cur) {
         return acc + cur.length;
@@ -1058,7 +1057,7 @@ v-s:ContactsStructureTemplate
       return true;
     });
   });
-  
+
   function genQueryStringArray(searchText, findDeleted, findInParentOrg) {
     var selectPart = "SELECT target.id";
     var endingPart = " GROUP BY target.id, target.rdfs_label_str HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
@@ -1094,7 +1093,7 @@ v-s:ContactsStructureTemplate
         };
         // if (isPhoneSearch && !isPhoneChannelAdded) {
         //   basicWherePart += " AND (cm.v_s_hasCommunicationMeanChannel_str[1] in ('d:fpxx0hw2gyea8z1dcjc6mxtlg2','d:zhercrddg5yotsbbzr33cfoqfc','d:o3q2gagyvfwh430io88vvb8vel','d:m4vg7pkvcvke9e6loqtb937jhy'))";
-        // } 
+        // }
         // if (isEmailSearch && !isEmailChannelAdded) {
         //   basicWherePart += " AND cm.v_s_hasCommunicationMeanChannel_str[1] = 'd:a1iwni0b54fvcz41vuts08bxqsh'";
         // }
@@ -1239,7 +1238,7 @@ v-s:ContactsStructureTemplate
     if (self.attr("data-popovered") == "true") {
       openedPopover = undefined;
       self.popover("hide");
-      self.attr("data-popovered", false);  
+      self.attr("data-popovered", false);
     } else {
       if (openedPopover) {
         openedPopover.popover("hide");
@@ -1268,9 +1267,9 @@ v-s:ContactsStructureTemplate
         openedPopover = self;
         self.popover("show");
         self.attr("data-popovered", true);
-      }  
+      }
     };
-    
+
     //return openFromStructure(uri);
   })
 
@@ -1426,6 +1425,9 @@ v-s:ContactsStructureTemplate
       return drawCards(individual["v-s:managedOrganization"][0]);
     });
   });
+  template.one("remove", function(){
+    individual.off("v-s:managedOrganization");
+  });
 
   $("#searchText .clear", template).click(function(){
     $("#searchText input", template).val("");
@@ -1439,18 +1441,13 @@ v-s:ContactsStructureTemplate
   });
 
   if (individual.targetToCards) {
-    return openFromStructure(individual.targetToCards);
+    openFromStructure(individual.targetToCards);
   } else {
-    return initialStructure().then(function(result) {
+    initialStructure().then(function(result) {
       if (result == false) return;
       return drawCards(individual["v-s:managedOrganization"][0]);
     });
   }
-
-  template.one("remove", function(){
-    individual.off("v-s:managedOrganization");
-  });
-
 </script>
 """
 .
@@ -1535,7 +1532,7 @@ v-s:OrganizationUnitContentTemplate
   v-ui:template """
 <script>
   var blank = new veda.IndividualModel("v-s:ContactsInUnitSearchRegistryBlank");
-  return blank.load().then(function (blank) {
+  blank.load().then(function (blank) {
     blank.initBlank().then(function (blankObject) {
       if ( !blankObject.hasValue("v-s:parentUnit", individual) ) {
         blankObject["v-s:parentUnit"] = [ individual ];
@@ -1546,7 +1543,6 @@ v-s:OrganizationUnitContentTemplate
       }
     });
   });
-
 </script>
 <div>
   <h4><span about="@" property="rdfs:label"></span></h4>
@@ -1592,7 +1588,7 @@ v-s:ContactsInUnitSearchResultTemplate
       } else if ( individual.hasValue("rdf:type", "v-s:Organization") ) {
         template.children().not(".org").remove();
       }
-    
+
     </script>
     <div>
       <hr class="app dep org margin-md">
