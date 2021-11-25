@@ -35,7 +35,7 @@ function ntlmAuth (path, login, password) {
     };
     xhr.onerror = reject;
     xhr.onabort = reject;
-    login && password ? xhr.send(`username=${login}&password=${password}`) : xhr.send();
+    login && password ? xhr.send(`username=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`) : xhr.send();
   });
 }
 
