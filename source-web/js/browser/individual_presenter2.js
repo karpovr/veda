@@ -251,7 +251,7 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
   const last = wrapper.lastElementChild;
 
   if (last !== template) {
-    errorHandler(SyntaxError(`Unwrapped templates are not supported, template = ${name}, uri = ${individual.id}`));
+    throw SyntaxError(`Unwrapped templates are not supported, template = ${name}, uri = ${individual.id}`);
   }
 
   let pre_result;
