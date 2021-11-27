@@ -114,7 +114,7 @@ function getTemplateString (template) {
       const templateName = template.id;
       const templateString = template['v-ui:template'][0];
       if (reg_file.test(templateString)) {
-        return veda.Backend.loadFile('/templates/' + templateString).then((data) => ({
+        return Backend.loadFile('/templates/' + templateString).then((data) => ({
           name: templateName,
           template: data,
         }));
@@ -251,7 +251,7 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
   const last = wrapper.lastElementChild;
 
   if (last !== template) {
-    throw SyntaxError(`Unwrapped templates are not supported, template = ${name}, uri = ${individual.id}`);
+    throw new SyntaxError(`Unwrapped templates are not supported, template = ${name}, uri = ${individual.id}`);
   }
 
   let pre_result;
@@ -405,7 +405,7 @@ function processTemplate (individual, container, wrapper, mode) {
       return acc;
     }
     const uris = Util.unique(acc);
-    return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).reset(true)), Promise.resolve())
+    return uris.reduce((p, item) => p.then(() => new IndividualModel(item).reset(true)), Promise.resolve())
       .then(switchToView)
       .catch(errorHandler);
   }
@@ -430,22 +430,22 @@ function processTemplate (individual, container, wrapper, mode) {
     individual.isSync(false);
     const uris = Util.unique(acc);
     const individuals_properties = uris.map((item) => {
-      const individual = new veda.IndividualModel(item);
+      const individual = new IndividualModel(item);
       if (!individual.isSync()) {
         return individual.properties;
       }
     }).filter(Boolean);
-    return Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('beforeSave')))
+    return Promise.all(individuals_properties.map((props) => new IndividualModel(props['@']).trigger('beforeSave')))
       .then(() => Backend.put_individuals(veda.ticket, individuals_properties))
       .then(() => {
         individuals_properties.forEach((props) => {
-          const individual = new veda.IndividualModel(props['@']);
+          const individual = new IndividualModel(props['@']);
           individual.isNew(false);
           individual.isSync(true);
           individual.isLoaded(true);
         });
       })
-      .then(() => Promise.all(individuals_properties.map((props) => new veda.IndividualModel(props['@']).trigger('afterSave'))))
+      .then(() => Promise.all(individuals_properties.map((props) => new IndividualModel(props['@']).trigger('afterSave'))))
       .then(switchToView)
       .then(successHandler)
       .catch(errorHandler);
@@ -491,7 +491,7 @@ function processTemplate (individual, container, wrapper, mode) {
       return acc;
     }
     const uris = Util.unique(acc);
-    return uris.reduce((p, item) => p.then(() => new veda.IndividualModel(item).remove()), Promise.resolve())
+    return uris.reduce((p, item) => p.then(() => new IndividualModel(item).remove()), Promise.resolve())
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then((removedAlert) => {
