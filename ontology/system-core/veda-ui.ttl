@@ -434,7 +434,7 @@ v-ui:AdministrationIconTemplate
   rdfs:label "Administration button template"@en ;
   v-ui:template """
 <script>
-  veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
+  return veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
     if (!isSuperUser) {
       template.hide();
     } else {
@@ -537,7 +537,7 @@ v-ui:FullWidthSwitchTemplate
       template.addClass("btn-default").removeClass("btn-success active");
     }
   }
-  new veda.IndividualModel("v-s:ChangeSizeBundle").load().then(function(changeSizeBundle) {
+  return new veda.IndividualModel("v-s:ChangeSizeBundle").load().then(function(changeSizeBundle) {
     template.tooltip({
       container: template,
       placement: "bottom",
@@ -901,7 +901,7 @@ v-ui:StandardButtonsTemplate
 
   // var allButtons = "send edit save cancel delete destroy journal task rights";
   var defaultButtons = "send edit save cancel delete recover journal task";
-  individual.rights.then(function (rights) {
+  return individual.rights.then(function (rights) {
     var canUpdate = rights.hasValue("v-s:canUpdate", true);
     var canDelete = rights.hasValue("v-s:canDelete", true);
     var enabledButtons = (container.data("buttons") || defaultButtons).trim().split(/\\s+/g);
@@ -1055,7 +1055,7 @@ v-ui:IconButtonsTemplate
 
   // var allButtons = "edit save cancel delete";
   var defaultButtons = "edit save cancel delete";
-  individual.rights.then(function (rights) {
+  return individual.rights.then(function (rights) {
     var canUpdate = rights.hasValue("v-s:canUpdate", true);
     var canDelete = rights.hasValue("v-s:canDelete", true);
     var enabledButtons = (container.data("buttons") || defaultButtons).split(" ");
@@ -1243,7 +1243,7 @@ v-ui:IconPersonTemplate
   if (individual.hasValue("v-s:hasAspect")) {
     template.attr("href", "#/" + individual["v-s:hasAspect"][0].id);
   }
-  new veda.IndividualModel("v-s:PersonalInfo").load().then(function(personalInfo) {
+  return new veda.IndividualModel("v-s:PersonalInfo").load().then(function(personalInfo) {
     template.tooltip({
       container: template,
       placement: "bottom",
@@ -1288,7 +1288,7 @@ v-ui:AppointmentPopoverTemplate
   v-ui:template """
 <script>
   if (individual.hasValue("v-s:employee")) {
-    individual["v-s:employee"][0].load().then(function(employee) {
+    return individual["v-s:employee"][0].load().then(function(employee) {
       if (!employee.hasValue("v-s:hasImage")) {
         $(".media-left", template).remove();
       };
@@ -1410,7 +1410,7 @@ v-ui:PositionPopoverTemplate
   rdfs:label "Position template"@en ;
   v-ui:template """
 <script>
-  veda.Backend.query(veda.ticket, "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + individual.id + "'").then(function(queryResult) {
+  return veda.Backend.query(veda.ticket, "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + individual.id + "'").then(function(queryResult) {
     var promises = queryResult.result.map(function(uri) {
       return new veda.IndividualModel(uri).load();
     });
@@ -1482,7 +1482,7 @@ v-ui:ResourceTemplate
       propСontainer.append(propRow);
     })
   });
-  Promise.all(promises);
+  return Promise.all(promises);
 </script>
 <div class="container sheet">
   <div class="clearfix">
@@ -2419,7 +2419,7 @@ v-ui:DocumentEventTemplate
   });
   if (individual.hasValue('v-wf:onProcess')) {
     var process = individual.get('v-wf:onProcess')[0];
-    process.load().catch(function(err) {
+    return process.load().catch(function(err) {
       console.log('process deleted:', process.id);
       $(".on-process", template).remove();
     });
@@ -3854,7 +3854,7 @@ v-ui:AppointmentSwitchTemplate
   </div>
 </div>
 <script>
-  veda.Backend.query({
+  return veda.Backend.query({
     ticket: veda.ticket,
     query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
   }).then(function (result) {
@@ -3915,7 +3915,7 @@ v-ui:AppointmentSwitchMenuTemplate
   </span>
 </a>
 <script>
-  veda.Backend.query({
+  return veda.Backend.query({
     ticket: veda.ticket,
     query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
   }).then(function (result) {

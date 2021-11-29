@@ -205,7 +205,7 @@ v-s:ContactCardTemplate
     $("#orgLabel", template).remove();
     $("span.unit-icon", template).remove();
     $("div.logo-image", template).remove();
-    individual.getPropertyChain("v-s:employee", "v-s:hasImage").then(function(image) {
+    return individual.getPropertyChain("v-s:employee", "v-s:hasImage").then(function(image) {
       if (image.length == 0) {
         individual["v-s:employee"][0]["v-s:hasImage"] = [new veda.IndividualModel("v-s:DefaultPhoto")];
       }
@@ -334,7 +334,7 @@ v-s:ContactCardTemplate
       faviconIcon.toggleClass("fa-star-o fa-star");
     });
 
-    Promise.all(commMeansPromises).then(function(commMeans) {
+    return Promise.all(commMeansPromises).then(function(commMeans) {
       commMeans.forEach(function(commMean) {
         if (commMean.hasValue("v-s:hasCommunicationMeanChannel", "d:o3q2gagyvfwh430io88vvb8vel")) {
           var phones = commMean["v-s:description"][0];
@@ -374,7 +374,7 @@ v-s:ContactsStructureTemplate
   rdfs:label "Contacts function template"@en ;
   v-ui:template """
 <script>
-  new veda.IndividualModel("v-s:vedaInfo").load().then(function(vedaInfo) {
+  return new veda.IndividualModel("v-s:vedaInfo").load().then(function(vedaInfo) {
     if (vedaInfo.hasValue("v-s:tenant") && vedaInfo["v-s:tenant"][0].id != veda.appointment["v-s:parentOrganization"][0].id) {
       individual["v-s:managedOrganization"] = vedaInfo["v-s:tenant"];
       $("#tenant", template).click(function(){
@@ -1441,9 +1441,9 @@ v-s:ContactsStructureTemplate
   });
 
   if (individual.targetToCards) {
-    openFromStructure(individual.targetToCards);
+    return openFromStructure(individual.targetToCards);
   } else {
-    initialStructure().then(function(result) {
+    return initialStructure().then(function(result) {
       if (result == false) return;
       return drawCards(individual["v-s:managedOrganization"][0]);
     });
@@ -1532,7 +1532,7 @@ v-s:OrganizationUnitContentTemplate
   v-ui:template """
 <script>
   var blank = new veda.IndividualModel("v-s:ContactsInUnitSearchRegistryBlank");
-  blank.load().then(function (blank) {
+  return blank.load().then(function (blank) {
     blank.initBlank().then(function (blankObject) {
       if ( !blankObject.hasValue("v-s:parentUnit", individual) ) {
         blankObject["v-s:parentUnit"] = [ individual ];

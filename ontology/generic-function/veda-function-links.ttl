@@ -596,7 +596,7 @@ v-s:LinksTreeRecursiveTemplate
     linksTree = type["v-s:hasLinksTree"][0];
   }
 
-  linksTree.load().then(function (linksTree) {
+  return linksTree.load().then(function (linksTree) {
     var inPropertiesUris = linksTree["v-s:inProperty"].map(function (property) {
       return property.id;
     });

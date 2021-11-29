@@ -30,7 +30,7 @@ if (mode === "edit" && individual.hasValue("v-wf:processedDocument")) {
   var simple = "s-wf:SimpleRouteStartForm_";
   var doc = individual['v-wf:processedDocument'][0];
 
-  doc.load().then(function (doc) {
+  return doc.load().then(function (doc) {
 
     return Promise.all([
       doc.hasValue("v-s:initiator") ? doc["v-s:initiator"][0].getChief() : undefined,

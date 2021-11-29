@@ -948,7 +948,7 @@ v-fs:AttributiveSearchInlineTemplate
     $(".stats-top, .stats-bottom, .result-header", template).remove();
     searchResultTemplate = new veda.IndividualModel("v-fs:MinimalSearchResultTemplate");
   }
-  searchResultTemplate.load().then(function (searchResultTemplate) {
+  return searchResultTemplate.load().then(function (searchResultTemplate) {
     var file_reg = /\\.html$/;
     var templateString = searchResultTemplate["v-ui:template"][0].toString();
     if (file_reg.test(templateString)) {
@@ -1436,7 +1436,7 @@ v-fs:AttributiveSearchInlineTemplate
   }
 
   // Render search form
-  Promise.resolve().then(function () {
+  return Promise.resolve().then(function () {
     if ( searchBlank ) {
       return searchBlank.load().then(function(searchBlank) {
         $("#reset-button.reset-button", template).click(function () {
@@ -1959,7 +1959,7 @@ v-ft:SendToIntroductionOperationTemplate
   startForm["v-wf:useTransformation"] = [new veda.IndividualModel("v-df:TaskRouteStartFormToNet")];
   startForm["v-wf:StartForm_setStatus"] = [true];
   startForm["v-wf:StartForm_canEdit"] = [false];
-  startForm.present(startFormContainer, "v-df:TaskRouteStartFormTemplate", "edit").then(function(startFormTemplate) {
+  return startForm.present(startFormContainer, "v-df:TaskRouteStartFormTemplate", "edit").then(function(startFormTemplate) {
     $(".action#send", startFormTemplate).off("click").click(function(){
       var savingPromises = individual["v-s:data"].map(function(doc) {
         startForm.clone().then(function(clonedStartForm){

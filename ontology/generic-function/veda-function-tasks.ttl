@@ -274,7 +274,7 @@ v-ft:FunctionTasksIndicatorTemplate
 <script>
   /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
   $("#counter", template).attr("about", counter_uri);*/
-  new veda.IndividualModel("v-s:TaskBundle").load().then(function(taskBundle) {
+  return new veda.IndividualModel("v-s:TaskBundle").load().then(function(taskBundle) {
     template.tooltip({
       container: template,
       placement: "bottom",
@@ -559,7 +559,6 @@ v-ft:TaskBlankTemplate
   } else {
     $(".from", template).remove();
   }
-
 </script>
 <div>
   <br>
@@ -607,8 +606,6 @@ v-ft:TaskBlankTemplate
           individual.off('propertyModified', documentHandler);
         });
         documentHandler.apply(this);
-
-
       </script>
     </div>
   </div>
@@ -654,8 +651,6 @@ v-ft:TaskBlankTemplate
       $(".advanced-search", template).addClass("hidden");
     }
   });
-
-
 </script>
   """ ;
 .
@@ -681,7 +676,7 @@ v-ft:ActorFilterTemplate
     individual[actor_property] = [veda.user];
   }
 
-  veda.Backend.query({
+  return veda.Backend.query({
     ticket: veda.ticket,
     query: "('rdf:type'==='v-s:Appointment' && 'v-s:employee'=='" + veda.user.id + "')"
   })
@@ -1232,7 +1227,7 @@ v-ft:TaskRelatedTasksTemplate
   v-ui:template """
 <script>
   var relatedTasks = new veda.IndividualModel("v-ft:RelatedTasks");
-  relatedTasks.load().then(function (relatedTasks) {
+  return relatedTasks.load().then(function (relatedTasks) {
     relatedTasks.clearValue("v-fs:searchResult");
     var taskId = individual.id;
     var docId = individual.hasValue("v-wf:onDocument") && individual["v-wf:onDocument"][0].id;
@@ -1344,8 +1339,6 @@ v-ft:MakeDecisionOperationTemplate
   });
   common.push( new veda.IndividualModel("v-wf:DecisionRedirect") );
   this["v-ft:groupDecisionClass"] = common;
-
-
 </script>
 <div class="container sheet">
   <h4 about="v-ft:groupDecisionClass" property="rdfs:label"></h4>
@@ -1406,8 +1399,6 @@ v-ft:MakeDecisionOperationTemplate
   });
   var decision = new veda.IndividualModel();
   $(".possible-decisions input", template).first().prop("checked", "checked").change();
-
-
 </script>
   """ ;
 .

@@ -79,7 +79,7 @@ v-s:NewsTemplate
   var scriptBlock = $(".script", template);
   var audience = $(".audience", template);
 
-  veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
+  return veda.user.isMemberOf("cfg:SuperUser").then(function (isSuperUser) {
     if ( !isSuperUser ) {
       actions.remove();
       scriptBlock.remove();

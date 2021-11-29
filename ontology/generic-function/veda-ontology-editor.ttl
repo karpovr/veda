@@ -82,7 +82,6 @@ v-ui:ClassClassModel
       return superClasses.slice(1);
     });
   };
-
   """ ;
 .
 
@@ -174,7 +173,6 @@ v-ui:PropertyClassModel
     });
     this.save();
   };
-
   """ ;
 .
 
@@ -308,7 +306,6 @@ v-ui:CommonOntologyTemplate
   } else {
     $("#uri", template).remove();
   }
-
 </script>
 <div style="position:relative;">
   <a style="position:absolute;top:10px;right:10px;" href="#/@//v-ui:Graph"><span class="glyphicon glyphicon-link"></span></a>
@@ -469,8 +466,6 @@ v-ui:ClassClassTemplate
     classTemplate["v-ui:forClass"] = [ individual ];
     riot.route( ["#", classTemplate.id, "#main", undefined, "edit"].join("/") );
   });
-
-
 </script>
   """ ;
 .
@@ -1432,7 +1427,6 @@ v-ui:MembershipTemplate
     <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true"
       data-buttons="edit save cancel delete"></span>
   </div>
-
 </div>
 <script>
   $("#memberOf", template).change(function () {
@@ -1531,7 +1525,6 @@ v-s:MembershipRegistryTemplate
       individual["v-s:resource"] = [];
     }
   });
-
 </script>
 """ ;
 .
@@ -1778,8 +1771,6 @@ v-s:PermissionStatementRegistryTemplate
       individual["v-s:permissionSubject"] = [];
     }
   });
-
-
 </script>
 """ ;
 .
@@ -1865,7 +1856,7 @@ v-ui:GroupTemplate
     return membershipBlank.init();
   });
 
-  Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
+  return Promise.all([membershipRegistryBlankPromise, membershipBlankPromise]);
 </script>
 <div class="container sheet">
   <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
