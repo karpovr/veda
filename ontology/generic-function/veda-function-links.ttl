@@ -292,8 +292,6 @@ v-s:LinksTemplate
   individual.activeTab = individual.activeTab || "#links-list";
   $("#links-tabs a[href='" + individual.activeTab + "']", template).parent().addClass("active");
   $("#links-tabs-content " + individual.activeTab, template).addClass("active");
-
-
 </script>
 <div>
   <br>
@@ -318,12 +316,6 @@ v-s:LinksTemplate
 </div>
 """ ;
 .
-
-
-
-
-
-
 
 v-s:LinksListTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -397,12 +389,6 @@ v-s:LinksListTemplate
   template.one("remove", function () {
     individual.off("beforeSave", cl);
   });
-
-
-
-
-
-
 </script>
 <div>
   <table class="hidden links-table table table-condensed table-striped table-sortable">
@@ -416,83 +402,86 @@ v-s:LinksListTemplate
         <th width="9%"></th>
       </tr>
     </thead>
-    <tbody about="@" rel="v-s:hasLink" data-embedded="true" data-limit="5" data-more="true">
-      <script>
-        var displayedDoc = container.closest("[resource]").attr("resource");
-        if ( this.hasValue("v-s:from", displayedDoc) ) {
-          $(".link-from", template).remove();
-        } else if ( this.hasValue("v-s:to", displayedDoc) ) {
-          $(".link-to", template).remove();
-        }
-
-        template.on("validate", function () {
-          var result = {};
-          if(!individual.hasValue('v-s:to')){
-            result["v-s:type"] = {
-              state: individual.hasValue("v-s:type"),
-              cause: ["v-ui:minCardinality"]
-            };
-          }
-
-          template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
-        });
-
-        function documentHandler() {
-          if(this.isNew()){
-            if (this.hasValue('v-s:to')) {
-              this["v-s:type"] = [];
-              $('veda-control[rel="v-s:type"]', template).addClass("hidden");
-            }
-            else{
-              $('veda-control[rel="v-s:type"]', template).removeClass("hidden");
-            }
-          }
-        }
-        this.on('v-s:to', documentHandler);
-        this.on('v-s:type', documentHandler);
-        template.one('remove', function () {
-          this.off('v-s:to', documentHandler);
-          this.off('v-s:type', documentHandler);
-        });
-        documentHandler.apply(this);
-
-      </script>
-      <tr>
-        <td><a href="#/@" class="glyphicon glyphicon-search view -edit -search" ></a></td>
-
-        <td>
-          <div class="col-md-5">
-            <veda-control rel="v-s:type" data-type="link" class="fulltext -view edit -search" data-single="true"
-            data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
-          </div>
-          <div class="col-md-7">
-            <veda-control data-type="link" rel="v-s:to" class="-view edit search fulltext disabled" data-query-prefix="'rdf:type'=='{@.v-s:type.id}'"></veda-control>
-          </div>
-          <div class="col-md-12">
-            <span class="link-from" about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
-            <span class="link-to view -edit -search" about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
-          </div>
-        </td>
-        <td>
-          <span class="link-from" about="@" rel="v-s:from"><span about="@" property="v-s:created"></span></span>
-          <span class="link-to" about="@" rel="v-s:to"><span about="@" property="v-s:created"></span></span>
-        </td>
-        <td>
-          <div class="view -edit -search" about="@" property="rdfs:comment"></div>
-          <veda-control data-type="string" property="rdfs:comment" class="-view edit search"></veda-control>
-        </td>
-        <td>
-          <i><small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> <small about="@" property="v-s:created"></small></i>
-        </td>
-        <td><div class="pull-right" about="@" data-template="v-ui:IconButtonsTemplate" data-embedded="true"></div></td>
-      </tr>
-    </tbody>
+    <tbody about="@" rel="v-s:hasLink" data-embedded="true" data-limit="5" data-more="true" data-template="v-s:LinksListTemplate_inline"></tbody>
   </table>
   <button class="margin-sm btn btn-success" id="add-link" about="v-s:AddLink" property="rdfs:label"></button>
 </div>
-<script>
+""" ;
+.
 
+v-s:LinksListTemplate_inline
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для управлениями произвольными связями документа"@ru ;
+  rdfs:label "Template to manage generic document links"@en ;
+  rdfs:comment "Список"@ru ;
+  rdfs:label "List"@en ;
+  v-ui:template """
+<script>
+  var displayedDoc = container.closest("[resource]").attr("resource");
+  if ( this.hasValue("v-s:from", displayedDoc) ) {
+    $(".link-from", template).remove();
+  } else if ( this.hasValue("v-s:to", displayedDoc) ) {
+    $(".link-to", template).remove();
+  }
+
+  template.on("validate", function () {
+    var result = {};
+    if(!individual.hasValue('v-s:to')){
+      result["v-s:type"] = {
+        state: individual.hasValue("v-s:type"),
+        cause: ["v-ui:minCardinality"]
+      };
+    }
+    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
+  });
+
+  function documentHandler() {
+    if(this.isNew()){
+      if (this.hasValue('v-s:to')) {
+        this["v-s:type"] = [];
+        $('veda-control[rel="v-s:type"]', template).addClass("hidden");
+      }
+      else{
+        $('veda-control[rel="v-s:type"]', template).removeClass("hidden");
+      }
+    }
+  }
+  this.on('v-s:to', documentHandler);
+  this.on('v-s:type', documentHandler);
+  template.one('remove', function () {
+    this.off('v-s:to', documentHandler);
+    this.off('v-s:type', documentHandler);
+  });
+  documentHandler.apply(this);
 </script>
+<tr>
+  <td><a href="#/@" class="glyphicon glyphicon-search view -edit -search" ></a></td>
+  <td>
+    <div class="col-md-5">
+      <veda-control rel="v-s:type" data-type="link" class="fulltext -view edit -search" data-single="true"
+      data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+    </div>
+    <div class="col-md-7">
+      <veda-control data-type="link" rel="v-s:to" class="-view edit search fulltext disabled" data-query-prefix="'rdf:type'=='{@.v-s:type.id}'"></veda-control>
+    </div>
+    <div class="col-md-12">
+      <span class="link-from" about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
+      <span class="link-to view -edit -search" about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
+    </div>
+  </td>
+  <td>
+    <span class="link-from" about="@" rel="v-s:from"><span about="@" property="v-s:created"></span></span>
+    <span class="link-to" about="@" rel="v-s:to"><span about="@" property="v-s:created"></span></span>
+  </td>
+  <td>
+    <div class="view -edit -search" about="@" property="rdfs:comment"></div>
+    <veda-control data-type="string" property="rdfs:comment" class="-view edit search"></veda-control>
+  </td>
+  <td>
+    <i><small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> <small about="@" property="v-s:created"></small></i>
+  </td>
+  <td><div class="pull-right" about="@" data-template="v-ui:IconButtonsTemplate" data-embedded="true"></div></td>
+</tr>
 """ ;
 .
 

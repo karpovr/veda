@@ -1561,18 +1561,10 @@ v-s:MembershipRegistryResultTemplate
       <td about="@" property="rdfs:comment"></td>
       <td about="@" rel="v-s:memberOf" data-template="v-ui:LabelLinkTemplate"></td>
       <td about="@" rel="v-s:resource" data-template="v-ui:LabelLinkTemplate"></td>
-      <td><strong class="rights"></strong></td>
+      <td about="@" data-template="v-s:RightsTemplate_inline"></td>
       <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
       <td about="@" property="v-s:created"></td>
     </tr>
-    <script>
-      var rights = "";
-      rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
-      rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
-      rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
-      rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
-      $(".rights", template).text(rights);
-    </script>
   </tbody>
 </table>
   """ ;
@@ -1802,18 +1794,10 @@ v-s:PermissionStatementRegistryResultTemplate
       <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
       <td about="@" rel="v-s:permissionObject" data-template="v-ui:LabelLinkTemplate"></td>
       <td about="@" rel="v-s:permissionSubject" data-template="v-ui:LabelLinkTemplate"></td>
-      <td><strong class="rights"></strong></td>
+      <td about="@" data-template="v-s:RightsTemplate_inline"></td>
       <td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></td>
       <td about="@" property="v-s:created"></td>
     </tr>
-    <script>
-      var rights = "";
-      rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
-      rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
-      rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
-      rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
-      $(".rights", template).text(rights);
-    </script>
   </tbody>
 </table>
   """ ;

@@ -393,15 +393,7 @@ v-s:PersonalInfoTemplate
   <div class="form-inline">
     <div class="form-group">
       <label about="v-s:mailbox" property="rdfs:label"></label>:
-      <span about="@" rel="v-s:hasAccount" data-embedded="true">
-        <span>
-          <a class="view -edit -search" about="@" property="v-s:mailbox"></a>
-          <veda-control property="v-s:mailbox" data-type="string" class="-view edit search"></veda-control>
-        </span>
-        <script>
-          template.find("a").attr("href", "mailto:" + individual["v-s:mailbox"][0]);
-        </script>
-      </span>
+      <span about="@" rel="v-s:hasAccount" data-embedded="true" data-template="v-s:PersonalInfoTemplate_mailbox"></span>
     </div>
   </div>
   <br/>
@@ -414,6 +406,18 @@ v-s:PersonalInfoTemplate
     </div>
   </div>
 </div>
+  """;
+.
+v-s:PersonalInfoTemplate_mailbox
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<script>
+  $("a", template).attr("href", "mailto:" + individual["v-s:mailbox"][0]);
+</script>
+<span>
+  <a class="view -edit -search" about="@" property="v-s:mailbox"></a>
+  <veda-control property="v-s:mailbox" data-type="string" class="-view edit search"></veda-control>
+</span>
   """;
 .
 v-s:PersonalPreferencesTemplate

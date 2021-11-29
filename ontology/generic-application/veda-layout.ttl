@@ -45,28 +45,8 @@ v-s:LayoutTemplate
         <ul class="nav navbar-nav navbar-right" style="margin-right:-30px;" about="v-s:MainMenu" data-template="v-s:MenuTemplate"></ul>
         <ul class="nav navbar-nav navbar-right">
           <li about="v-s:Favorites" data-template="v-s:FavoritesIndicatorTemplate" style="border-right:1px solid #ddd;"></li>
-          <li about="v-s:Contacts">
-            <script>
-              template.tooltip({
-                container: template,
-                placement: "bottom",
-                trigger: "hover",
-                title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
-              });
-            </script>
-            <a href="#/@"><span class="fa fa-lg fa-user-o"></span></a>
-          </li>
-          <li about="v-fs:MultiFunctionalSearch">
-            <script>
-              template.tooltip({
-                container: template,
-                trigger: "hover",
-                placement: "bottom",
-                title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
-              });
-            </script>
-            <a href="#/@"><span class="fa fa-lg fa-search"></span></a>
-          </li>
+          <li about="v-s:Contacts" data-template="v-s:LayoutTemplate_contacts"></li>
+          <li about="v-fs:MultiFunctionalSearch" data-template="v-s:LayoutTemplate_search"></li>
           <li about="v-cal:TasksCalendar" data-template="v-cal:FunctionCalendarIndicatorTemplate"></li>
           <li about="v-ft:Inbox" data-template="v-ft:FunctionTasksIndicatorTemplate"></li>
           <li id="user-info"></li>
@@ -101,9 +81,39 @@ v-s:LayoutTemplate
   var userInfoTmpl = "v-ui:IconPersonTemplate";
   userInfo.empty();
   veda.user.present(userInfo, userInfoTmpl);
-
-
 </script>
+  """ ;
+.
+v-s:LayoutTemplate_contacts
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон макета"@ru ;
+  rdfs:label "Layout template"@en ;
+  v-ui:template """
+<script>
+  template.tooltip({
+    container: template,
+    placement: "bottom",
+    trigger: "hover",
+    title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
+  });
+</script>
+<a href="#/@"><span class="fa fa-lg fa-user-o"></span></a>
+  """ ;
+.
+v-s:LayoutTemplate_search
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон макета"@ru ;
+  rdfs:label "Layout template"@en ;
+  v-ui:template """
+<script>
+  template.tooltip({
+    container: template,
+    trigger: "hover",
+    placement: "bottom",
+    title: individual["rdfs:label"].map(veda.Util.formatValue).join(" ")
+  });
+</script>
+<a href="#/@"><span class="fa fa-lg fa-search"></span></a>
   """ ;
 .
 

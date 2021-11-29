@@ -44,10 +44,10 @@ v-fe:FunctionExampleModel
     self.press = function () {
       alert("model extention works! self['v-fe:exampleProperty']:" + self["v-fe:exampleProperty"].join(", "));
     }
-  
+
   """
 .
-v-s:TS_FunctionExample 
+v-s:TS_FunctionExample
   rdf:type v-ui:TemplateSpecification;
   v-s:loadPriority "15"^^xsd:integer;
   v-ui:defaultTemplate v-fe:FunctionExampleTemplate;
@@ -59,17 +59,16 @@ v-fe:FunctionExampleTemplate
   rdfs:label "Function example template"@en ;
   v-ui:forClass v-fe:FunctionExample ;
   v-ui:template """
-    <div class="container sheet">
-      <h2>Example function instance</h2>
-      <span about="v-fe:exampleProperty" property="rdfs:label"></span>
-      <div property="v-fe:exampleProperty"></div>
-      <button id="press-me" class="btn btn-success">Press me</button>
-    </div>
-    <script>
-      $("#press-me", template).click(function () {
-        individual.press();
-      });
-      
-    </script>
+<div class="container sheet">
+  <h2>Example function instance</h2>
+  <span about="v-fe:exampleProperty" property="rdfs:label"></span>
+  <div property="v-fe:exampleProperty"></div>
+  <button id="press-me" class="btn btn-success">Press me</button>
+</div>
+<script>
+  $("#press-me", template).click(function () {
+    individual.press();
+  });
+</script>
   """
 .

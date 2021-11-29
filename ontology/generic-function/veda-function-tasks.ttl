@@ -580,34 +580,7 @@ v-ft:TaskBlankTemplate
       <em about="v-wf:to" property="rdfs:label"></em>
       <veda-control property="v-wf:to" data-single="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
     </div>
-    <div class="col-md-8" about="@" rel="v-wf:onDocument">
-      <div class="row">
-        <div class="col-md-6">
-          <em about="v-ft:DocumentTypeBundle" property="rdfs:label"></em>
-          <veda-control rel="rdf:type" data-type="link" class="dropdown fulltext" data-single="true" data-placeholder=" " data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
-        </div>
-        <div class="col-md-6">
-          <em about="v-ft:DocumentBundle" property="rdfs:label"></em>
-          <veda-control property="rdfs:label" data-type="string"></veda-control>
-        </div>
-      </div>
-      <script>
-        function documentHandler() {
-          if ( this.hasValue('rdfs:label') && !this.hasValue('rdf:type') ) {
-            $('veda-control[rel="rdf:type"]', template).addClass('has-error');
-            $('.search-button, .more-results, .all-results').attr('disabled', 'disabled');
-          } else {
-            $('veda-control[rel="rdf:type"]', template).removeClass('has-error');
-            $('.search-button, .more-results, .all-results').removeAttr('disabled');
-          }
-        }
-        individual.on('propertyModified', documentHandler);
-        template.one('remove', function () {
-          individual.off('propertyModified', documentHandler);
-        });
-        documentHandler.apply(this);
-      </script>
-    </div>
+    <div class="col-md-8" about="@" rel="v-wf:onDocument" data-template="v-ft:TaskBlankTemplate_onDocument"></div>
   </div>
   <small class="advanced-toggle text-muted" about="v-fs:AdvancedSearchBundle" property="rdfs:label" style="border-bottom:1px dashed #707070; cursor:pointer;"></small>
   <div class="advanced-search hidden">
@@ -651,6 +624,37 @@ v-ft:TaskBlankTemplate
       $(".advanced-search", template).addClass("hidden");
     }
   });
+</script>
+  """ ;
+.
+v-ft:TaskBlankTemplate_onDocument
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<div class="row">
+  <div class="col-md-6">
+    <em about="v-ft:DocumentTypeBundle" property="rdfs:label"></em>
+    <veda-control rel="rdf:type" data-type="link" class="dropdown fulltext" data-single="true" data-placeholder=" " data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+  </div>
+  <div class="col-md-6">
+    <em about="v-ft:DocumentBundle" property="rdfs:label"></em>
+    <veda-control property="rdfs:label" data-type="string"></veda-control>
+  </div>
+</div>
+<script>
+  function documentHandler() {
+    if ( this.hasValue('rdfs:label') && !this.hasValue('rdf:type') ) {
+      $('veda-control[rel="rdf:type"]', template).addClass('has-error');
+      $('.search-button, .more-results, .all-results').attr('disabled', 'disabled');
+    } else {
+      $('veda-control[rel="rdf:type"]', template).removeClass('has-error');
+      $('.search-button, .more-results, .all-results').removeAttr('disabled');
+    }
+  }
+  individual.on('propertyModified', documentHandler);
+  template.one('remove', function () {
+    individual.off('propertyModified', documentHandler);
+  });
+  documentHandler.call(this);
 </script>
   """ ;
 .
@@ -791,6 +795,22 @@ v-ft:ReadUnreadBundle
   rdfs:label "Read / unread"@en ;
 .
 
+v-ft:RedirectInfo_template
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<script>
+  if ( !individual.hasValue("v-wf:to") ) {
+    template.empty();
+  }
+</script>
+<div>
+  <hr class="no-margin">
+  <strong><small about="v-s:TaskIsRedirectedFrom" property="rdfs:label"></small></strong>
+  <small about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></small>
+</div>
+""";
+.
+
 v-ft:CompletedResultTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон результата поиска ВЫПОЛНЕННЫХ задач"@ru ;
@@ -817,69 +837,62 @@ v-ft:CompletedResultTemplate
         <th width="10%"><span about="v-ft:DecisionCreatorBundle" property="rdfs:label"></span></th>
       </tr>
     </thead>
-    <tbody class="result-container">
-      <tr>
-        <td class="serial-number"></td>
-        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-        <td>
-          <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
-          <div about="@" rel="v-wf:redirect_from_task">
-            <script>
-              if ( !individual.hasValue("v-wf:to") ) {
-                template.empty();
-              }
-            </script>
-            <div>
-              <hr class="no-margin">
-              <strong><small about="v-s:TaskIsRedirectedFrom" property="rdfs:label"></small></strong>
-              <small about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></small>
-            </div>
-          </div>
-        </td>
-        <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
-        <td>
-          <span class="child-task text-muted"></span>
-        </td>
-        <td>
-          <a href="#/@" about="@" property="rdfs:label"></a><br/>
-          <i about="@" property="v-s:description"></i>
-        </td>
-        <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
-        <td about="@" rel="v-wf:takenDecision">
-          <div property="rdfs:label"></div>
-          <i property="rdfs:comment"></i>
-        </td>
-        <td>
-          <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
-        </td>
-        <td property="v-s:created"></td>
-        <td rel="v-wf:takenDecision">
-          <div property="v-s:created"></div>
-        </td>
-        <td rel="v-wf:takenDecision">
-          <div rel="v-s:creator" data-template="v-ui:LabelTemplate"></div>
-        </td>
-      </tr>
-      <script>
-        $(".to-journal", template).click(function(e){
-          e.stopPropagation();
-          var journalUri = individual["v-wf:onDocument"][0].id + "j";
-          riot.route("#/" + journalUri);
-        });
-        new veda.IndividualModel("v-ft:ToJournalBundle").load().then(function(bundle) {
-          $(".to-journal", template).prop("title", bundle.toString());
-        });
-
-        // Child task indicator
-        if ( individual.hasValue("v-wf:hasChildTask") ) {
-          template.find(".child-task")
-            .addClass("glyphicon glyphicon-comment")
-            .prop("title", new veda.IndividualModel("v-wf:hasChildTask").toString());
-        }
-      </script>
-    </tbody>
+    <tbody class="result-container" data-template="v-ft:CompletedResultTemplate_task"></tbody>
   </table>
 </div>
+  """ ;
+.
+v-ft:CompletedResultTemplate_task
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:template """
+<tr>
+  <td class="serial-number"></td>
+  <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+  <td>
+    <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
+    <div about="@" rel="v-wf:redirect_from_task" data-template="v-ft:RedirectInfo_template"></div>
+  </td>
+  <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
+  <td>
+    <span class="child-task text-muted"></span>
+  </td>
+  <td>
+    <a href="#/@" about="@" property="rdfs:label"></a><br/>
+    <i about="@" property="v-s:description"></i>
+  </td>
+  <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
+  <td about="@" rel="v-wf:takenDecision">
+    <div property="rdfs:label"></div>
+    <i property="rdfs:comment"></i>
+  </td>
+  <td>
+    <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
+  </td>
+  <td property="v-s:created"></td>
+  <td rel="v-wf:takenDecision">
+    <div property="v-s:created"></div>
+  </td>
+  <td rel="v-wf:takenDecision">
+    <div rel="v-s:creator" data-template="v-ui:LabelTemplate"></div>
+  </td>
+</tr>
+<script>
+  $(".to-journal", template).click(function(e){
+    e.stopPropagation();
+    var journalUri = individual["v-wf:onDocument"][0].id + "j";
+    riot.route("#/" + journalUri);
+  });
+  new veda.IndividualModel("v-ft:ToJournalBundle").load().then(function(bundle) {
+    $(".to-journal", template).prop("title", bundle.toString());
+  });
+
+  // Child task indicator
+  if ( individual.hasValue("v-wf:hasChildTask") ) {
+    template.find(".child-task")
+      .addClass("glyphicon glyphicon-comment")
+      .prop("title", new veda.IndividualModel("v-wf:hasChildTask").toString());
+  }
+</script>
   """ ;
 .
 
@@ -905,143 +918,138 @@ v-ft:TaskResultTemplate
         <th width="10%" class="orderby" data-orderby="v-wf:dateGiven"><span about="v-wf:dateGiven" property="rdfs:label"></span></th>
       </tr>
     </thead>
-    <tbody class="result-container">
-      <tr>
-        <td class="serial-number"></td>
-        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-        <td>
-          <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
-          <div about="@" rel="v-wf:redirect_from_task">
-            <script>
-              if ( !individual.hasValue("v-wf:to") ) {
-                template.empty();
-              }
-            </script>
-            <div>
-              <hr class="no-margin">
-              <strong><small about="v-s:TaskIsRedirectedFrom" property="rdfs:label"></small></strong>
-              <small about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></small>
-            </div>
-          </div>
-        </td>
-        <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
-        <td>
-          <span class="toggle-read glyphicon glyphicon-exclamation-sign"></span>
-          <span class="child-task text-muted"></span>
-        </td>
-        <td>
-          <a href="#/@" about="@" property="rdfs:label"></a><br/>
-          <i about="@" property="v-s:description"></i>
-        </td>
-        <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
-        <td>
-          <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
-        </td>
-        <td about="@" property="v-s:created"></td>
-        <td about="@" property="v-wf:dateGiven" class="date-given"></td>
-      </tr>
-      <script>
-        // Remove completed tasks from inbox & outbox
-        var folder = decodeURIComponent(location.hash).substr(2).split("/")[0];
-        var remove = (folder !== "v-ft:Completed");
-        removeCompleted.call(this);
-        function removeCompleted() {
-          if (remove && this.hasValue("v-wf:isCompleted", true)) {
-            template.remove();
-          }
-        }
-        individual.on("v-wf:isCompleted", removeCompleted);
-        template.one("remove", function () {
-          individual.off("v-wf:isCompleted", removeCompleted);
-        });
-
-        $(".to-journal", template).click(function(e){
-          e.stopPropagation();
-          var journalUri = individual["v-wf:onDocument"][0].id + "j";
-          riot.route("#/" + journalUri);
-        });
-        new veda.IndividualModel("v-ft:ToJournalBundle").load().then(function(bundle) {
-          $(".to-journal", template).prop("title", bundle.toString());
-        });
-
-        // Toggle read/unread
-        var toggler = $(".toggle-read", template);
-        toggler.prop("title", new veda.IndividualModel("v-ft:ReadUnreadBundle").toString());
-        if (folder === "v-ft:Inbox") {
-          toggler.addClass("pointer").click(toggleReadClickHandler);
-        }
-        function toggleReadClickHandler(e) {
-          e.stopPropagation();
-          var isRead = individual.hasValue("v-wf:read", true);
-          toggleRead(!isRead);
-          veda.Backend.set_in_individual({
-            ticket: veda.ticket,
-            individual: {
-              "@": individual.id,
-              "v-wf:read": [{
-                data: !isRead,
-                type: "Boolean"
-              }]
-            },
-            async: true
-          });
-        }
-        function readHandler () {
-          var isRead = individual.hasValue("v-wf:read", true);
-          toggleRead(isRead);
-        }
-        function toggleRead (isRead) {
-          if ( isRead ) {
-            template.css("font-weight", "normal");
-            toggler.removeClass("text-primary").addClass("text-muted");
-          } else {
-            template.css("font-weight", "bold");
-            toggler.removeClass("text-muted").addClass("text-primary");
-          }
-        };
-        readHandler();
-        individual.on("v-wf:read", readHandler);
-        template.one("remove", function () {
-          individual.off("v-wf:read", readHandler);
-        });
-
-        // Child task indicator
-        if ( individual.hasValue("v-wf:hasChildTask") ) {
-          template.find(".child-task")
-            .addClass("glyphicon glyphicon-comment")
-            .prop("title", new veda.IndividualModel("v-wf:hasChildTask").toString());
-        }
-
-        // Due date indicator
-        var dateGivenCell = $(".date-given", template);
-        var now = new Date();
-        var yesterday = new Date().setHours(0,0,0,1);
-        var tomorrow = new Date().setHours(23,59,59,999);
-        var dateGiven = individual["v-wf:dateGiven"][0];
-        var dateGivenYesterday = new Date(dateGiven).setHours(0,0,0,1);
-        var dateGivenTomorrow = new Date(dateGiven).setHours(23,59,59,999);
-        var dateDone = individual.hasValue("v-wf:takenDecision") && individual["v-wf:takenDecision"][0]["v-s:created"][0];
-        if ( individual.hasValue("v-wf:isCompleted", false) ) {
-          if (dateGiven < yesterday) {
-            dateGivenCell.toggleClass("bg-danger");
-          } else if (yesterday < dateGiven && dateGiven <= tomorrow) {
-            dateGivenCell.toggleClass("bg-warning");
-          } else if (tomorrow < dateGiven) {
-            dateGivenCell.toggleClass("bg-success");
-          }
-        } else {
-          if (dateGivenYesterday < dateDone && dateDone <= dateGivenTomorrow) {
-            dateGivenCell.toggleClass("bg-warning");
-          } else if (dateDone < dateGiven) {
-            dateGivenCell.toggleClass("bg-success");
-          } else if (dateGiven < dateDone ) {
-            dateGivenCell.toggleClass("bg-danger");
-          }
-        }
-      </script>
-    </tbody>
+    <tbody class="result-container" data-template="v-ft:TaskResultTemplate_task"></tbody>
   </table>
 </div>
+  """ ;
+.
+v-ft:TaskResultTemplate_task
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результата поиска задач"@ru ;
+  rdfs:label "Tasks search results template"@en ;
+  v-ui:template """
+<tr>
+  <td class="serial-number"></td>
+  <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+  <td>
+    <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
+    <div about="@" rel="v-wf:redirect_from_task" data-template="v-ft:RedirectInfo_template"></div>
+  </td>
+  <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
+  <td>
+    <span class="toggle-read glyphicon glyphicon-exclamation-sign"></span>
+    <span class="child-task text-muted"></span>
+  </td>
+  <td>
+    <a href="#/@" about="@" property="rdfs:label"></a><br/>
+    <i about="@" property="v-s:description"></i>
+  </td>
+  <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
+  <td>
+    <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
+  </td>
+  <td about="@" property="v-s:created"></td>
+  <td about="@" property="v-wf:dateGiven" class="date-given"></td>
+</tr>
+<script>
+  // Remove completed tasks from inbox & outbox
+  var folder = decodeURIComponent(location.hash).substr(2).split("/")[0];
+  var remove = (folder !== "v-ft:Completed");
+  removeCompleted.call(this);
+  function removeCompleted() {
+    if (remove && this.hasValue("v-wf:isCompleted", true)) {
+      template.remove();
+    }
+  }
+  individual.on("v-wf:isCompleted", removeCompleted);
+  template.one("remove", function () {
+    individual.off("v-wf:isCompleted", removeCompleted);
+  });
+
+  $(".to-journal", template).click(function(e){
+    e.stopPropagation();
+    var journalUri = individual["v-wf:onDocument"][0].id + "j";
+    riot.route("#/" + journalUri);
+  });
+  new veda.IndividualModel("v-ft:ToJournalBundle").load().then(function(bundle) {
+    $(".to-journal", template).prop("title", bundle.toString());
+  });
+
+  // Toggle read/unread
+  var toggler = $(".toggle-read", template);
+  toggler.prop("title", new veda.IndividualModel("v-ft:ReadUnreadBundle").toString());
+  if (folder === "v-ft:Inbox") {
+    toggler.addClass("pointer").click(toggleReadClickHandler);
+  }
+  function toggleReadClickHandler(e) {
+    e.stopPropagation();
+    var isRead = individual.hasValue("v-wf:read", true);
+    toggleRead(!isRead);
+    veda.Backend.set_in_individual({
+      ticket: veda.ticket,
+      individual: {
+        "@": individual.id,
+        "v-wf:read": [{
+          data: !isRead,
+          type: "Boolean"
+        }]
+      },
+      async: true
+    });
+  }
+  function readHandler () {
+    var isRead = individual.hasValue("v-wf:read", true);
+    toggleRead(isRead);
+  }
+  function toggleRead (isRead) {
+    if ( isRead ) {
+      template.css("font-weight", "normal");
+      toggler.removeClass("text-primary").addClass("text-muted");
+    } else {
+      template.css("font-weight", "bold");
+      toggler.removeClass("text-muted").addClass("text-primary");
+    }
+  };
+  readHandler();
+  individual.on("v-wf:read", readHandler);
+  template.one("remove", function () {
+    individual.off("v-wf:read", readHandler);
+  });
+
+  // Child task indicator
+  if ( individual.hasValue("v-wf:hasChildTask") ) {
+    template.find(".child-task")
+      .addClass("glyphicon glyphicon-comment")
+      .prop("title", new veda.IndividualModel("v-wf:hasChildTask").toString());
+  }
+
+  // Due date indicator
+  var dateGivenCell = $(".date-given", template);
+  var now = new Date();
+  var yesterday = new Date().setHours(0,0,0,1);
+  var tomorrow = new Date().setHours(23,59,59,999);
+  var dateGiven = individual["v-wf:dateGiven"][0];
+  var dateGivenYesterday = new Date(dateGiven).setHours(0,0,0,1);
+  var dateGivenTomorrow = new Date(dateGiven).setHours(23,59,59,999);
+  var dateDone = individual.hasValue("v-wf:takenDecision") && individual["v-wf:takenDecision"][0]["v-s:created"][0];
+  if ( individual.hasValue("v-wf:isCompleted", false) ) {
+    if (dateGiven < yesterday) {
+      dateGivenCell.toggleClass("bg-danger");
+    } else if (yesterday < dateGiven && dateGiven <= tomorrow) {
+      dateGivenCell.toggleClass("bg-warning");
+    } else if (tomorrow < dateGiven) {
+      dateGivenCell.toggleClass("bg-success");
+    }
+  } else {
+    if (dateGivenYesterday < dateDone && dateDone <= dateGivenTomorrow) {
+      dateGivenCell.toggleClass("bg-warning");
+    } else if (dateDone < dateGiven) {
+      dateGivenCell.toggleClass("bg-success");
+    } else if (dateGiven < dateDone ) {
+      dateGivenCell.toggleClass("bg-danger");
+    }
+  }
+</script>
   """ ;
 .
 
@@ -1068,144 +1076,139 @@ v-ft:InboxResultTemplate
         <th width="10%" class="orderby" data-orderby="v-wf:dateGiven"><span about="v-wf:dateGiven" property="rdfs:label"></span></th>
       </tr>
     </thead>
-    <tbody class="result-container">
-      <tr>
-        <td width="1%"><input type="checkbox" class="toggle-select"></td>
-        <td class="serial-number"></td>
-        <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
-        <td>
-          <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
-          <div about="@" rel="v-wf:redirect_from_task">
-            <script>
-              if ( !individual.hasValue("v-wf:to") ) {
-                template.empty();
-              }
-            </script>
-            <div>
-              <hr class="no-margin">
-              <strong><small about="v-s:TaskIsRedirectedFrom" property="rdfs:label"></small></strong>
-              <small about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></small>
-            </div>
-          </div>
-        </td>
-        <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
-        <td>
-          <span class="toggle-read glyphicon glyphicon-exclamation-sign"></span>
-          <span class="child-task text-muted"></span>
-        </td>
-        <td>
-          <a href="#/@" about="@" property="rdfs:label"></a><br/>
-          <i about="@" property="v-s:description"></i>
-        </td>
-        <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
-        <td>
-          <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
-        </td>
-        <td about="@" property="v-s:created"></td>
-        <td about="@" property="v-wf:dateGiven" class="date-given"></td>
-      </tr>
-      <script>
-        // Remove completed tasks from inbox & outbox
-        var folder = decodeURIComponent(location.hash).substr(2).split("/")[0];
-        var remove = (folder !== "v-ft:Completed");
-        removeCompleted.call(this);
-        function removeCompleted() {
-          if (remove && this.hasValue("v-wf:isCompleted", true)) {
-            template.remove();
-          }
-        }
-        individual.on("v-wf:isCompleted", removeCompleted);
-        template.one("remove", function () {
-          individual.off("v-wf:isCompleted", removeCompleted);
-        });
-
-        $(".to-journal", template).click(function(e){
-          e.stopPropagation();
-          var journalUri = individual["v-wf:onDocument"][0].id + "j";
-          riot.route("#/" + journalUri);
-        });
-        new veda.IndividualModel("v-ft:ToJournalBundle").load().then(function(bundle) {
-          $(".to-journal", template).prop("title", bundle.toString());
-        });
-
-        // Toggle read/unread
-        var toggler = $(".toggle-read", template);
-        toggler.prop("title", new veda.IndividualModel("v-ft:ReadUnreadBundle").toString());
-        if (folder === "v-ft:Inbox") {
-          toggler.addClass("pointer").click(toggleReadClickHandler);
-        }
-        function toggleReadClickHandler(e) {
-          e.stopPropagation();
-          var isRead = individual.hasValue("v-wf:read", true);
-          toggleRead(!isRead);
-          veda.Backend.set_in_individual({
-            ticket: veda.ticket,
-            individual: {
-              "@": individual.id,
-              "v-wf:read": [{
-                data: !isRead,
-                type: "Boolean"
-              }]
-            },
-            async: true
-          });
-        }
-        function readHandler () {
-          var isRead = individual.hasValue("v-wf:read", true);
-          toggleRead(isRead);
-        }
-        function toggleRead (isRead) {
-          if ( isRead ) {
-            template.css("font-weight", "normal");
-            toggler.removeClass("text-primary").addClass("text-muted");
-          } else {
-            template.css("font-weight", "bold");
-            toggler.removeClass("text-muted").addClass("text-primary");
-          }
-        };
-        readHandler();
-        individual.on("v-wf:read", readHandler);
-        template.one("remove", function () {
-          individual.off("v-wf:read", readHandler);
-        });
-
-        // Child task indicator
-        if ( individual.hasValue("v-wf:hasChildTask") ) {
-          template.find(".child-task")
-            .addClass("glyphicon glyphicon-comment")
-            .prop("title", new veda.IndividualModel("v-wf:hasChildTask").toString());
-        }
-
-        // Due date indicator
-        var dateGivenCell = $(".date-given", template);
-        var now = new Date();
-        var yesterday = new Date().setHours(0,0,0,1);
-        var tomorrow = new Date().setHours(23,59,59,999);
-        var dateGiven = individual["v-wf:dateGiven"][0];
-        var dateGivenYesterday = new Date(dateGiven).setHours(0,0,0,1);
-        var dateGivenTomorrow = new Date(dateGiven).setHours(23,59,59,999);
-        var dateDone = individual.hasValue("v-wf:takenDecision") && individual["v-wf:takenDecision"][0]["v-s:created"][0];
-        if ( individual.hasValue("v-wf:isCompleted", false) ) {
-          if (dateGiven < yesterday) {
-            dateGivenCell.toggleClass("bg-danger");
-          } else if (yesterday < dateGiven && dateGiven <= tomorrow) {
-            dateGivenCell.toggleClass("bg-warning");
-          } else if (tomorrow < dateGiven) {
-            dateGivenCell.toggleClass("bg-success");
-          }
-        } else {
-          if (dateGivenYesterday < dateDone && dateDone <= dateGivenTomorrow) {
-            dateGivenCell.toggleClass("bg-warning");
-          } else if (dateDone < dateGiven) {
-            dateGivenCell.toggleClass("bg-success");
-          } else if (dateGiven < dateDone ) {
-            dateGivenCell.toggleClass("bg-danger");
-          }
-        }
-      </script>
-    </tbody>
+    <tbody class="result-container" data-template="v-ft:InboxResultTemplate_task"></tbody>
   </table>
 </div>
+  """ ;
+.
+v-ft:InboxResultTemplate_task
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон результата поиска задач"@ru ;
+  rdfs:label "Tasks search results template"@en ;
+  v-ui:template """
+<tr>
+  <td width="1%"><input type="checkbox" class="toggle-select"></td>
+  <td class="serial-number"></td>
+  <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>
+  <td>
+    <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
+    <div about="@" rel="v-wf:redirect_from_task" data-template="v-ft:RedirectInfo_template"></div>
+  </td>
+  <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
+  <td>
+    <span class="toggle-read glyphicon glyphicon-exclamation-sign"></span>
+    <span class="child-task text-muted"></span>
+  </td>
+  <td>
+    <a href="#/@" about="@" property="rdfs:label"></a><br/>
+    <i about="@" property="v-s:description"></i>
+  </td>
+  <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
+  <td>
+    <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
+  </td>
+  <td about="@" property="v-s:created"></td>
+  <td about="@" property="v-wf:dateGiven" class="date-given"></td>
+</tr>
+<script>
+  // Remove completed tasks from inbox & outbox
+  var folder = decodeURIComponent(location.hash).substr(2).split("/")[0];
+  var remove = (folder !== "v-ft:Completed");
+  removeCompleted.call(this);
+  function removeCompleted() {
+    if (remove && this.hasValue("v-wf:isCompleted", true)) {
+      template.remove();
+    }
+  }
+  individual.on("v-wf:isCompleted", removeCompleted);
+  template.one("remove", function () {
+    individual.off("v-wf:isCompleted", removeCompleted);
+  });
+
+  $(".to-journal", template).click(function(e){
+    e.stopPropagation();
+    var journalUri = individual["v-wf:onDocument"][0].id + "j";
+    riot.route("#/" + journalUri);
+  });
+  new veda.IndividualModel("v-ft:ToJournalBundle").load().then(function(bundle) {
+    $(".to-journal", template).prop("title", bundle.toString());
+  });
+
+  // Toggle read/unread
+  var toggler = $(".toggle-read", template);
+  toggler.prop("title", new veda.IndividualModel("v-ft:ReadUnreadBundle").toString());
+  if (folder === "v-ft:Inbox") {
+    toggler.addClass("pointer").click(toggleReadClickHandler);
+  }
+  function toggleReadClickHandler(e) {
+    e.stopPropagation();
+    var isRead = individual.hasValue("v-wf:read", true);
+    toggleRead(!isRead);
+    veda.Backend.set_in_individual({
+      ticket: veda.ticket,
+      individual: {
+        "@": individual.id,
+        "v-wf:read": [{
+          data: !isRead,
+          type: "Boolean"
+        }]
+      },
+      async: true
+    });
+  }
+  function readHandler () {
+    var isRead = individual.hasValue("v-wf:read", true);
+    toggleRead(isRead);
+  }
+  function toggleRead (isRead) {
+    if ( isRead ) {
+      template.css("font-weight", "normal");
+      toggler.removeClass("text-primary").addClass("text-muted");
+    } else {
+      template.css("font-weight", "bold");
+      toggler.removeClass("text-muted").addClass("text-primary");
+    }
+  };
+  readHandler();
+  individual.on("v-wf:read", readHandler);
+  template.one("remove", function () {
+    individual.off("v-wf:read", readHandler);
+  });
+
+  // Child task indicator
+  if ( individual.hasValue("v-wf:hasChildTask") ) {
+    template.find(".child-task")
+      .addClass("glyphicon glyphicon-comment")
+      .prop("title", new veda.IndividualModel("v-wf:hasChildTask").toString());
+  }
+
+  // Due date indicator
+  var dateGivenCell = $(".date-given", template);
+  var now = new Date();
+  var yesterday = new Date().setHours(0,0,0,1);
+  var tomorrow = new Date().setHours(23,59,59,999);
+  var dateGiven = individual["v-wf:dateGiven"][0];
+  var dateGivenYesterday = new Date(dateGiven).setHours(0,0,0,1);
+  var dateGivenTomorrow = new Date(dateGiven).setHours(23,59,59,999);
+  var dateDone = individual.hasValue("v-wf:takenDecision") && individual["v-wf:takenDecision"][0]["v-s:created"][0];
+  if ( individual.hasValue("v-wf:isCompleted", false) ) {
+    if (dateGiven < yesterday) {
+      dateGivenCell.toggleClass("bg-danger");
+    } else if (yesterday < dateGiven && dateGiven <= tomorrow) {
+      dateGivenCell.toggleClass("bg-warning");
+    } else if (tomorrow < dateGiven) {
+      dateGivenCell.toggleClass("bg-success");
+    }
+  } else {
+    if (dateGivenYesterday < dateDone && dateDone <= dateGivenTomorrow) {
+      dateGivenCell.toggleClass("bg-warning");
+    } else if (dateDone < dateGiven) {
+      dateGivenCell.toggleClass("bg-success");
+    } else if (dateGiven < dateDone ) {
+      dateGivenCell.toggleClass("bg-danger");
+    }
+  }
+</script>
   """ ;
 .
 

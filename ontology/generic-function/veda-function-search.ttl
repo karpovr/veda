@@ -959,10 +959,29 @@ v-fs:AttributiveSearchInlineTemplate
   }).then(function (templateString) {
     var searchResultTemplate = $( templateString );
     var resultContainer = $(".result-container", searchResultTemplate);
-    var resultTemplate = resultContainer.html();
-    individual.resultTemplate = resultTemplate;
-    resultContainer.empty();
-    searchResultContainer.append( searchResultTemplate );
+    if (resultContainer.attr("data-template")) {
+      var resultTemplateIndividual = new veda.IndividualModel(resultContainer.attr("data-template"));
+      resultContainer.empty();
+      return resultTemplateIndividual.load()
+        .then(function(resultTemplateIndividual) {
+          var file_reg = /\\.html$/;
+          var resultTemplate = resultTemplateIndividual["v-ui:template"][0].toString();
+          if (file_reg.test(resultTemplate)) {
+            return veda.Backend.loadFile('/templates/' + resultTemplate);
+          } else {
+            return resultTemplate;
+          }
+        })
+        .then(function(resultTemplate) {
+          individual.resultTemplate = resultTemplate;
+          searchResultContainer.append( searchResultTemplate );
+        });
+    } else {
+      var resultTemplate = resultContainer.html();
+      resultContainer.empty();
+      individual.resultTemplate = resultTemplate;
+      searchResultContainer.append( searchResultTemplate );
+    }
   });
 </script>
 <div>
