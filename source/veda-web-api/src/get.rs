@@ -2,12 +2,19 @@ use crate::common::{extract_addr, get_module_name, GetOperationStateRequest, Tic
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
+use chrono::Utc;
 use futures::lock::Mutex;
 use std::io;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
+use v_common::onto::individual::Individual;
 use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
+use v_common::v_queue::consumer::Consumer;
+
+const QUEUE_STATE_PREFIX: &str = "srv:queue-state-";
+const MAIN_QUEUE_NAME: &str = "individuals-flow";
+const MAIN_QUEUE_PATH: &str = "./data/queue";
 
 #[get("/get_operation_state")]
 pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequest>) -> io::Result<HttpResponse> {
@@ -51,6 +58,28 @@ pub(crate) async fn get_individual(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
+    if params.uri.contains(QUEUE_STATE_PREFIX) {
+        if let Some(consumer_name) = &params.uri.strip_prefix(QUEUE_STATE_PREFIX) {
+            if let Ok(mut queue_consumer) = Consumer::new(MAIN_QUEUE_PATH, consumer_name, MAIN_QUEUE_NAME) {
+                if queue_consumer.get_info() {
+                    let now = Utc::now().naive_utc().timestamp();
+
+                    let mut individual = Individual::default();
+                    individual.set_id(&params.uri);
+                    individual.add_uri("rdf:type", "v-s:AppInfo");
+                    individual.add_datetime("v-s:created", now);
+                    individual.add_uri("srv:queue", &format!("srv:{}-{}", QUEUE_STATE_PREFIX, consumer_name));
+                    individual.add_integer("srv:total_count", queue_consumer.queue.count_pushed as i64);
+                    individual.add_integer("srv:current_count", queue_consumer.count_popped as i64);
+
+                    return Ok(HttpResponse::Ok().json(individual.get_obj().as_json()));
+                }
+            }
+        }
+
+        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+    }
+
     let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
