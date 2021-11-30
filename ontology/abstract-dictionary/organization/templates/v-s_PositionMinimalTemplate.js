@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import Backend from '/js/common/backend.js';
+import veda from '/js/common/veda.js';
 
 export const pre = function (individual, template, container) {
   template = $(template);
