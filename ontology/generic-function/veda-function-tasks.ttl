@@ -691,33 +691,36 @@ v-ft:ActorFilterTemplate
     return veda.Backend.get_individuals(veda.ticket, appointments_uris);
   })
   .then(function (appointments) {
-
-    var actors_uris = [ {uri:"v-ft:MyBundle", official: true} ];
-
-    appointments.forEach(function (appointment) {
+    var filtered = appointments.reduce(function(acc, appointment) {
       if ( veda.appointment && veda.appointment.id && appointment["@"] === veda.appointment.id ) {
-        return;
-      } else if ( appointment["v-s:occupation"] && appointment["v-s:occupation"].length ) {
+        return acc;
+      }
+      if ( appointment["v-s:occupation"] && appointment["v-s:occupation"].length ) {
+        var positionUri = appointment["v-s:occupation"][0].data;
         var delegationPurpose = (appointment["v-s:hasDelegationPurpose"] && appointment["v-s:hasDelegationPurpose"].length) ?
             appointment["v-s:hasDelegationPurpose"][0].data : "";
-
         var isControlAppointment = delegationPurpose === "d:delegate_Control";
-        actors_uris.push( {uri: appointment["v-s:occupation"][0].data, official: !isControlAppointment} );
+        // official is not control
+        if (acc[positionUri] == undefined) {
+          acc[positionUri] = !isControlAppointment;
+        }
+        acc[positionUri] = acc[positionUri] || !isControlAppointment;
       }
-    });
-
-    actors_uris.map(function (actor_data) {
-      //var counter_uri = "d:taskCounter_" + actor_uri.split(":").join("_");
-      var notOfficialInject = actor_data.official === false ? " class='not-official'" : "";
+      return acc;
+    }, {"v-ft:MyBundle": true});
+    console.log(filtered);
+    for (var actorUri in filtered) {
+      var isOfficial = filtered[actorUri];
+      var notOfficialInject = isOfficial === false ? " class='not-official'" : "";
       var actor_template =
         "<li>" +
           "<a href='#'" + notOfficialInject + ">" +
-            "<span class='actor' about='" + actor_data.uri + "' property='rdfs:label'></span> " +
+            "<span class='actor' about='" + actorUri + "' property='rdfs:label'></span> " +
             //"<span id='counter' about='" + counter_uri + "' class='badge' property='" + counter_prop + "'></span>" +
           "</a>" +
         "</li>";
       actor_template = $(actor_template);
-      if (actor_data.official === false) {
+      if (isOfficial === false) {
         actor_template.popover({
           placement: "top",
           trigger: "hover",
@@ -725,7 +728,40 @@ v-ft:ActorFilterTemplate
         });
       }
       template.append(actor_template);
-    });
+    }
+    // var actors_uris = [ {uri:"v-ft:MyBundle", official: true} ];
+    // appointments.forEach(function (appointment) {
+    //   if ( veda.appointment && veda.appointment.id && appointment["@"] === veda.appointment.id ) {
+    //     return;
+    //   } else if ( appointment["v-s:occupation"] && appointment["v-s:occupation"].length ) {
+    //     var delegationPurpose = (appointment["v-s:hasDelegationPurpose"] && appointment["v-s:hasDelegationPurpose"].length) ?
+    //         appointment["v-s:hasDelegationPurpose"][0].data : "";
+
+    //     var isControlAppointment = delegationPurpose === "d:delegate_Control";
+    //     actors_uris.push( {uri: appointment["v-s:occupation"][0].data, official: !isControlAppointment} );
+    //   }
+    // });
+
+    // actors_uris.map(function (actor_data) {
+    //   //var counter_uri = "d:taskCounter_" + actor_uri.split(":").join("_");
+    //   var notOfficialInject = actor_data.official === false ? " class='not-official'" : "";
+    //   var actor_template =
+    //     "<li>" +
+    //       "<a href='#'" + notOfficialInject + ">" +
+    //         "<span class='actor' about='" + actor_data.uri + "' property='rdfs:label'></span> " +
+    //         //"<span id='counter' about='" + counter_uri + "' class='badge' property='" + counter_prop + "'></span>" +
+    //       "</a>" +
+    //     "</li>";
+    //   actor_template = $(actor_template);
+    //   if (actor_data.official === false) {
+    //     actor_template.popover({
+    //       placement: "top",
+    //       trigger: "hover",
+    //       content: "Не официальное назначение. Только просмотр"
+    //     });
+    //   }
+    //   template.append(actor_template);
+    // });
 
     if ( !individual.actor ) {
       individual.actor = "v-ft:MyBundle";
