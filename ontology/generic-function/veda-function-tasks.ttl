@@ -621,6 +621,7 @@ v-s:TS_MakeDecisionOperation
   v-ui:defaultTemplate v-ft:MakeDecisionOperationTemplate;
   v-ui:forClass v-ft:MakeDecisionOperation
 .
+
 v-ft:MakeDecisionOperationTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса mnd-s:OperationChangeSupportSpecialist"@ru ;
