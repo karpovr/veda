@@ -379,7 +379,7 @@ if (!allDelegated) {
 allDelegated["rdf:value"] = allDelegated["rdf:value"] || [];
 
 position_uris.map(function (position_uri) {
-  var uri = "d:" + veda.Util.Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri].join("_").split(":").join("_") ).substring(40);
+  var uri = "d:" + veda.Util.Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri, request_uri].join("_").split(":").join("_") ).substring(40);
   var appointment = get_individual(ticket, uri);
 
   if ( !appointment ) {
