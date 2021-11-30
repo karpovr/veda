@@ -72,7 +72,7 @@ function IndividualPresenter2 (container, template, mode, extra, toAppend) {
   return this.load()
     .then(() => {
       if (template) {
-        return getTemplateString(template);
+        return getTemplate(template);
       } else {
         const isClass = this.hasValue('rdf:type', 'owl:Class') || this.hasValue('rdf:type', 'rdfs:Class');
         if (this.hasValue('v-ui:hasTemplate') && !isClass) {
@@ -80,10 +80,10 @@ function IndividualPresenter2 (container, template, mode, extra, toAppend) {
           if (!(templateIndividual instanceof IndividualModel)) {
             throw new TypeError('Custom template must be an individual!');
           }
-          return getTemplateString(templateIndividual);
+          return getTemplate(templateIndividual);
         } else {
           const ontology = veda.ontology;
-          const templates = this['rdf:type'].map((type) => ontology.getClassTemplate(type.id)).map(getTemplateString);
+          const templates = this['rdf:type'].map((type) => ontology.getClassTemplate(type.id)).map(getTemplate);
           return Promise.all(templates);
         }
       }
@@ -103,9 +103,8 @@ function IndividualPresenter2 (container, template, mode, extra, toAppend) {
  * @param {IndividualModel|string|HTMLElement} template
  * @return {Promise<{name, template}>}
  */
-function getTemplateString (template) {
+function getTemplate (template) {
   const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
-  const reg_file = /\.html$/;
   if (template instanceof IndividualModel) {
     return template.load().then((templateIndividual) => {
       if (!templateIndividual.hasValue('rdf:type', 'v-ui:ClassTemplate')) {
@@ -113,12 +112,6 @@ function getTemplateString (template) {
       }
       const templateName = template.id;
       const templateString = template['v-ui:template'][0];
-      if (reg_file.test(templateString)) {
-        return Backend.loadFile('/templates/' + templateString).then((data) => ({
-          name: templateName,
-          template: data,
-        }));
-      }
       return {
         name: templateName,
         template: templateString,
@@ -126,7 +119,7 @@ function getTemplateString (template) {
     });
   } else if (typeof template === 'string' && reg_uri.test(template)) {
     const templateIndividual = new IndividualModel(template);
-    return getTemplateString(templateIndividual);
+    return getTemplate(templateIndividual);
   } else if (typeof template === 'string') {
     return {
       name: String(template.length),
@@ -139,7 +132,7 @@ function getTemplateString (template) {
     };
   }
   const generic = new IndividualModel('v-ui:generic');
-  return getTemplateString(generic);
+  return getTemplate(generic);
 }
 
 /**
@@ -219,6 +212,33 @@ function errorPrinter (error, container) {
 }
 
 /**
+ * Wrap template
+ * @param {String} html
+ * @return {HTMLElement}
+ */
+function wrap (html) {
+  if (html.startsWith('<script') || html.endsWith('/script>')) {
+    throw new SyntaxError('Scripts for inline templates are not supported, template = ' + html);
+  }
+  let tagName;
+  if (html.startsWith('<tr')) {
+    tagName = 'tbody';
+  } else if (html.startsWith('<td')) {
+    tagName = 'tr';
+  } else {
+    tagName = 'div';
+  }
+  const wrapper = document.createElement(tagName);
+  wrapper.innerHTML = html;
+  const template = wrapper.firstElementChild;
+  const last = wrapper.lastElementChild;
+  if (last !== template) {
+    throw new SyntaxError('Unwrapped templates are not supported, template = ' + html);
+  }
+  return wrapper;
+}
+
+/**
  * Render template
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
@@ -230,55 +250,36 @@ function errorPrinter (error, container) {
  * @return {Promise}
  */
 function renderTemplate (individual, container, templateStr, name, mode, extra, toAppend) {
-  // Extract pre script, template and post script
-  const match = templateStr.trim().match(/^(?:<script[^>]*>([\s\S]*?)<\/script>)?([\s\S]*?)(?:<script[^>]*>(?![\s\S]*<script[^>]*>)([\s\S]*)<\/script>)?$/i);
-  const pre_render_src = match[1] && match[1].trim();
-  const post_render_src = match[3] && match[3].trim();
-
-  const html = match[2] && match[2].trim();
-  let tagName;
-  if (html.startsWith('<tr')) {
-    tagName = 'tbody';
-  } else if (html.startsWith('<td')) {
-    tagName = 'tr';
+  const reg_file = /\.js$/;
+  if (reg_file.test(templateStr)) {
+    return import(`/templates/${templateStr}`)
+      .then((templateModule) => {
+        const pre = templateModule.pre;
+        const post = templateModule.post;
+        const wrapper = wrap(templateModule.html);
+        const template = wrapper.firstElementChild;
+        const pre_result = pre ? pre.call(individual, individual, template, container) : undefined;
+        return Promise.resolve(pre_result)
+          .then(() => processTemplate(individual, container, wrapper, mode))
+          .then((template) => {
+            if (toAppend) {
+              container.appendChild(template);
+            }
+            template.dispatchEvent(new Event(mode));
+            const post_result = post ? post.call(individual, individual, template, container) : undefined;
+            return Promise.resolve(post_result).then(() => template);
+          });
+      });
   } else {
-    tagName = 'div';
-  }
-  let wrapper = document.createElement(tagName);
-  wrapper.innerHTML = html;
-
-  const template = wrapper.firstElementChild;
-  const last = wrapper.lastElementChild;
-
-  if (last !== template) {
-    throw new SyntaxError(`Unwrapped templates are not supported, template = ${name}, uri = ${individual.id}`);
-  }
-
-  let pre_result;
-  if (pre_render_src) {
-    pre_result = (function (veda, individual, container, template, mode, extra) {
-      return eval(`'use strict';${pre_render_src}\n//# sourceURL=${window.location.origin}/templates/${name}_pre`);
-    }).call(individual, veda, individual, $(container), $(template), mode, extra);
-  }
-
-  return Promise.resolve(pre_result).then(() => {
+    const wrapper = wrap(templateStr);
     return processTemplate(individual, container, wrapper, mode).then((template) => {
       if (toAppend) {
         container.appendChild(template);
       }
       template.dispatchEvent(new Event(mode));
-
-      let post_result;
-      if (post_render_src) {
-        post_result = (function (veda, individual, container, template, mode, extra) {
-          return eval(`'use strict';\n${post_render_src}\n//# sourceURL=${window.location.origin}/templates/${name}_post`);
-        }).call(individual, veda, individual, $(container), $(template), mode, extra);
-      }
-      wrapper.remove();
-      wrapper = null;
-      return Promise.resolve(post_result).then(() => template);
+      return template;
     });
-  });
+  }
 }
 
 /**
