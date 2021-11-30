@@ -591,10 +591,13 @@ if (!scriptInfo) {
     'v-s:lastDateOfExecuting':  veda.Util.newDate(yesterday)
   };
 }
+
 //print('scritInfo=', veda.Util.toJson(scriptInfo));
 var lastDate = scriptInfo['v-s:lastDateOfExecuting'][0].data;
 var today = new Date();
+//что бы напоминания за час для времени, условно, в 11.15 выдавались в 10.00 а не в 11.00
 today.setHours(today.getHours()+1);
+today.setMinutes(59);
 //today.setHours(23,59,59,0);
 var queryString = "( 'rdf:type'==='v-s:ScheduledAction' && 'v-s:scriptHandlered'=='false' )";
 var result = query(ticket, queryString).result;
