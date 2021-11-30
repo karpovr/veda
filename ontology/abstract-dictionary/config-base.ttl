@@ -251,10 +251,12 @@ var doc_uri = document["@"],
 
 if (!person_uri || !position_uri) return;
 
-var membership_uri = "d:membership_" + person_uri.split(":").join("_") + "_" + position_uri.split(":").join("_");
+var membership_uri = "d:membership_" + doc_uri.split(":").join("_");
+var old_membership_uri = "d:membership_" + person_uri.split(":").join("_") + "_" + position_uri.split(":").join("_");
 
 if (deleted) {
   remove_individual(ticket, membership_uri);
+  remove_individual(ticket, old_membership_uri);
 } else {
   var membership = {
     "@" : membership_uri,
@@ -1116,14 +1118,15 @@ for (var i = 0; i < result.length; i++) {
   print("***********spec: ", result[i]);
   if (result[i]) {
     var spec = get_individual(veda.ticket, result[i]);
-    if (veda.Util.hasValue(spec, "v-s:shelfLife", { data: 9999, type: "Integer" })) {
-      print("Skip " + result[i] + ": shelfLife == 9999");
-      continue;
-    }
+    
     if (!veda.Util.hasValue(spec, "v-s:shelfLife")) {
       print("Skip " + result[i] + ": empty shelfLife");
       continue; 
     };
+    if (veda.Util.hasValue(spec, "v-s:shelfLife", { data: 9999, type: "Integer" })) {
+      print("Skip " + result[i] + ": shelfLife == 9999");
+      continue;
+    }
     if (!veda.Util.hasValue(spec, "v-ui:forClass")) {
       print("Skip " + result[i] + ": empty hasClass");
       continue; 
@@ -1215,4 +1218,63 @@ put_individual(ticket, scriptInfo, _event_id);
 
 print("[cfg:Event_Document_Archiving] ************************** END **************************");
   """ ;
+.
+
+cfg:Event_EstimatedExternalAccount_Delete
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystemAppointment ;
+  rdfs:label "Удаление просроченной учетной записи." ;
+  v-s:triggerByUid cfg:daily ;
+  v-s:runAt "V8.LowPriority";
+  v-s:script """
+print("[cfg:Event_EstimatedExternalAccount_Delete] ************************** START **************************");
+
+var scriptInfo = get_individual(ticket, 'cfg:Event_EstimatedExternalAccount_Delete_Info');
+if (!scriptInfo) {
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  scriptInfo = {
+    '@': 'cfg:Event_EstimatedExternalAccount_Delete_Info',
+    'rdf:type': veda.Util.newUri('v-s:CronScriptsInfo'),
+    'v-s:lastDateOfExecuting':  veda.Util.newDate(yesterday)
+  };
+}
+var lastDate = new Date(scriptInfo['v-s:lastDateOfExecuting'][0].data);
+var today = new Date();
+var msInDay = 86400000;
+var datePeriod = [new Date(+lastDate-msInDay), new Date(+today-msInDay)];
+var queryString = "'rdf:type'=='v-s:Account' && 'v-s:origin'=='ExternalUser'";
+// && 'v-s:dateTo'==["+ datePeriod[0].toISOString() +","+ datePeriod[1].toISOString() +"]
+
+//print(queryString);
+var result = query(ticket, queryString).result;
+
+for (var i=0; i<result.length; i++){
+  try {
+    var account = get_individual(ticket, result[i]);
+    if (veda.Util.hasValue(account, "v-s:dateTo")) {
+      var dateTo = new Date(account["v-s:dateTo"][0].data);
+      if (today - dateTo < 0) {
+        print("Skip ", result[i], ": today < dateTo");
+        continue;  
+      }
+    } else {
+      print("Skip ", result[i], ": empty dateTo");
+      continue;
+    }
+    var setToAccount = {
+      '@': result[i],
+      'v-s:deleted': veda.Util.newBool(true)
+    };
+    set_in_individual(ticket, setToAccount, _event_id);
+  } catch (err) {
+    print(result[i], err);
+    continue;
+  };
+}
+scriptInfo['v-s:lastDateOfExecuting'] = veda.Util.newDate(new Date());
+put_individual(ticket, scriptInfo, _event_id);
+
+print("[cfg:Event_EstimatedExternalAccount_Delete] ************************** END **************************");
+""" ;
 .
