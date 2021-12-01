@@ -4,7 +4,7 @@ import riot from 'riot';
 import IndividualModel from '/js/common/individual_model.js';
 import Backend from '/js/common/backend.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

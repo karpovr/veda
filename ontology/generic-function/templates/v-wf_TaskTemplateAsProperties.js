@@ -1,13 +1,13 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
-import Util from '/js/common/util.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   function joinSplitHandler() {
-    var $state = $('#' + Util.escape4$(individual.id));
+    var $state = $('#' + BrowserUtil.escape4$(individual.id));
     $state.removeClass('split-and').removeClass('split-or').removeClass('split-xor');
     $state.removeClass('join-and').removeClass('join-or').removeClass('join-xor');
     $state.addClass(veda.net.getSplitJoinType('join', individual));
@@ -15,7 +15,7 @@ export const post = function (individual, template, container) {
     veda.net.updateSVGBackground($state);
   }
   function labelHandler(values) {
-    var $state = $('#' + Util.escape4$(individual.id));
+    var $state = $('#' + BrowserUtil.escape4$(individual.id));
     $('.state-name', $state).html(values);
   }
   individual.on("v-wf:join", joinSplitHandler);

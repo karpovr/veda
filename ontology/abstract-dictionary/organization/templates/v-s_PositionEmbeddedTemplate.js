@@ -2,7 +2,7 @@ import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import Backend from '/js/common/backend.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

@@ -1,7 +1,7 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -12,7 +12,7 @@ export const pre = function (individual, template, container) {
     lbl.attr({"about": labelUri, "property": "rdfs:label"});
   }
   template.click(function () {
-    Util.showModal(individual, modalTemplate);
+    BrowserUtil.showModal(individual, modalTemplate);
   });
 };
 

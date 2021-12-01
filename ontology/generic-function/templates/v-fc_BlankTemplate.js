@@ -1,14 +1,14 @@
 import $ from 'jquery';
 import riot from 'riot';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   return individual.initBlank();
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

@@ -1,10 +1,10 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import Backend from '/js/common/backend.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -18,7 +18,7 @@ export const post = function (individual, template, container) {
         const app = new IndividualModel(id);
         const checked = (id === veda.appointment.id);
         return app.getPropertyChain('v-s:occupation', 'rdfs:label').then(function (label) {
-          label = label.map(Util.formatValue).join(' ');
+          label = label.map(CommonUtil.formatValue).join(' ');
           return `<div class="radio">
                     <label>
                       <input type="radio" name="appointments" value="${ id }" ${ checked ? 'checked' : '' }>

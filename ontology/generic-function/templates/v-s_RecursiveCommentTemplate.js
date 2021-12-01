@@ -1,8 +1,8 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -18,7 +18,7 @@ export const pre = function (individual, template, container) {
     var actionId = this.id;
     var warning = new IndividualModel("v-s:AreYouSure");
     warning.load().then(function (warning) {
-      warning = warning["rdfs:label"].map(Util.formatValue).join(" ");
+      warning = warning["rdfs:label"].map(CommonUtil.formatValue).join(" ");
       if ( actionId === "delete" && !confirm(warning) ) { return; }
       template[0].dispatchEvent(new Event(actionId));
     });

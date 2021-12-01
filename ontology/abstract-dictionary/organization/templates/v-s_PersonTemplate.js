@@ -1,10 +1,10 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import Backend from '/js/common/backend.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -92,7 +92,7 @@ export const pre = function (individual, template, container) {
   //$('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -134,7 +134,7 @@ export const post = function (individual, template, container) {
     NewAccount["v-s:backwardTarget"] = [individual];
     NewAccount["v-s:backwardProperty"] = [new IndividualModel("v-s:hasAccount")];
     NewAccount["v-s:owner"] = [individual];
-    var modal = Util.showModal(NewAccount, tmpl, "edit");
+    var modal = BrowserUtil.showModal(NewAccount, tmpl, "edit");
     NewAccount.one("afterSave", function () {
       individual.save();
       modal.modal("hide").remove();
@@ -151,7 +151,7 @@ export const post = function (individual, template, container) {
     else {NewAppointment['v-s:parentUnit'] = individual['v-s:parentOrganization'] ;}
     NewAppointment['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
     NewAppointment['v-s:employee'] = [individual];
-    var modal = Util.showModal(NewAppointment, tmpl, "edit");
+    var modal = BrowserUtil.showModal(NewAppointment, tmpl, "edit");
     NewAppointment.one("afterSave", function () {
       individual.save();
       modal.modal("hide").remove();

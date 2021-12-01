@@ -1,9 +1,9 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -22,7 +22,7 @@ export const pre = function (individual, template, container) {
   }
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -58,7 +58,7 @@ export const post = function (individual, template, container) {
               var self = this;
               var warn = new IndividualModel("v-s:AreYouSure");
               warn.load().then(function (warn) {
-                warn = warn["rdfs:label"].map(Util.formatValue).join(" ");
+                warn = warn["rdfs:label"].map(CommonUtil.formatValue).join(" ");
                 if ( confirm(warn) ) {
                   process['v-wf:isStopped'] = [ true ];
                   $(self).remove();

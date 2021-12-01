@@ -1,11 +1,12 @@
+import BrowserUtil from '/js/browser/util.js';
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 import Backend from '/js/common/backend.js';
 import riot from 'riot';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -29,7 +30,7 @@ export const pre = function (individual, template, container) {
   });
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -97,7 +98,7 @@ export const post = function (individual, template, container) {
   template.on("click", ".img-thumbnail", function(e){
     e.preventDefault();
     var uri = $(this).attr("resource");
-    var modal = Util.showSmallModal(new IndividualModel(uri), "v-ui:ImageTemplate");
+    var modal = BrowserUtil.showSmallModal(new IndividualModel(uri), "v-ui:ImageTemplate");
     modal.find(".modal-dialog").removeClass("modal-lg").addClass("modal-sm");
   });
 
@@ -316,7 +317,7 @@ export const post = function (individual, template, container) {
         if (i+2 < queryResults.length) parent.treeChildrens+=queryResult.count;
         childrenUris = childrenUris.concat(queryResult.result);
       });
-      childrenUris = Util.unique(childrenUris);
+      childrenUris = CommonUtil.unique(childrenUris);
       parent.allChildren = childrenUris;
       loadIndicator.hide();
       return childrenUris;
@@ -405,7 +406,7 @@ export const post = function (individual, template, container) {
     });
   }
   var searchTextBundle = new IndividualModel("v-s:SearchTextBundle").load().then(function(bundle) {
-    $("#searchText input", template).attr("placeholder", bundle["rdfs:label"].map(Util.formatValue).join(" "));
+    $("#searchText input", template).attr("placeholder", bundle["rdfs:label"].map(CommonUtil.formatValue).join(" "));
   });
 
   $("#searchButton", template).click(function(){
@@ -791,7 +792,7 @@ export const post = function (individual, template, container) {
       tmpl = undefined;
     }
     //riot.route( ["#", obj.id, "#main", tmpl].join("/") );
-    Util.showModal(obj, tmpl);
+    BrowserUtil.showModal(obj, tmpl);
     return false;
   });
 

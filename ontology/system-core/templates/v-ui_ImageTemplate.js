@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

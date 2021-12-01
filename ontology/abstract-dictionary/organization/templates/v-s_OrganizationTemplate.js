@@ -1,10 +1,10 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
 import Backend from '/js/common/backend.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -87,12 +87,12 @@ export const pre = function (individual, template, container) {
   });
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   //Генерация Uri
-  Util.registerHandler(individual, template, "beforeSave", function () {
+  BrowserUtil.registerHandler(individual, template, "beforeSave", function () {
     var shortLabel = individual["v-s:hasClassifierCountry"][0]["v-s:shortLabel"];
     var taxId = individual["v-s:taxId"] ;
     if ( individual.hasValue("v-s:hasClassifierCountry", "d:Country_RUS") && individual.isNew() ){

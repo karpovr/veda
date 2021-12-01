@@ -4,7 +4,7 @@ import Sha256 from 'sha256';
 import IndividualModel from '/js/common/individual_model.js';
 import riot from 'riot';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

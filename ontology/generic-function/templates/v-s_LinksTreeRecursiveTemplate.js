@@ -1,10 +1,10 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
-import Util from '/js/common/util.js';
 import Backend from '/js/common/backend.js';
 import IndividualModel from '/js/common/individual_model.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -17,7 +17,7 @@ export const pre = function (individual, template, container) {
           link = link["v-s:from"][0];
         }
       }
-      if ( !template.closest(".link-node[resource='" + Util.escape4$(link.id) + "']").length ) {
+      if ( !template.closest(".link-node[resource='" + BrowserUtil.escape4$(link.id) + "']").length ) {
         return link.present(typeLinksContainer, "v-s:LinksTreeRecursiveTemplate");
       }
     });

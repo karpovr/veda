@@ -1,10 +1,11 @@
+import BrowserUtil from '/js/browser/util.js';
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 import Backend from '/js/common/backend.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -65,7 +66,7 @@ export const post = function (individual, template, container) {
               addNode(value).then(function () {
                 var from = individual.id;
                 var to = value.id;
-                var label = new IndividualModel(property_uri)["rdfs:label"].map(Util.formatValue).join(" ");
+                var label = new IndividualModel(property_uri)["rdfs:label"].map(CommonUtil.formatValue).join(" ");
                 var options = {
                   filter: function (item) {
                     return  item.from == from &&
@@ -102,7 +103,7 @@ export const post = function (individual, template, container) {
               Object.getOwnPropertyNames(res.properties).map(function (property_uri) {
                 if (property_uri === "@") { return; }
                 if ( res.hasValue(property_uri, id) ) {
-                  var label = new IndividualModel(property_uri)["rdfs:label"].map(Util.formatValue).join(" ");
+                  var label = new IndividualModel(property_uri)["rdfs:label"].map(CommonUtil.formatValue).join(" ");
                   var options = {
                     filter: function (item) {
                       return  item.from === from &&
@@ -356,7 +357,7 @@ export const post = function (individual, template, container) {
       // Buttons
       var exportBtn = $("#export-ttl", template).click(function () {
         var list = nodes.get().map(function (item) { return item.individual; });
-        Util.exportTTL(list);
+        BrowserUtil.exportTTL(list);
       });
       var freezeBtn = $("#freeze", template).click(function () {
         network.freezeSimulation = !network.freezeSimulation;

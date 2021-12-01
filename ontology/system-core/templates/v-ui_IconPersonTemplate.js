@@ -1,8 +1,8 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -14,7 +14,7 @@ export const pre = function (individual, template, container) {
       container: template,
       placement: "bottom",
       trigger: "hover",
-      title: personalInfo["rdfs:label"].map(Util.formatValue).join(" ")
+      title: personalInfo["rdfs:label"].map(CommonUtil.formatValue).join(" ")
     });
   })
 };

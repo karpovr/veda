@@ -1,8 +1,8 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -14,7 +14,7 @@ export const pre = function (individual, template, container) {
   $("#on-document", template).attr("about", doc_uri);
 
   $('.createReport0', template).on('click', function () {
-    Util.createReport('v-s:Journal_printBlank', doc);
+    BrowserUtil.createReport('v-s:Journal_printBlank', doc);
   });
 };
 

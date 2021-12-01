@@ -258,7 +258,7 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
         const post = templateModule.post;
         const wrapper = wrap(templateModule.html);
         const template = wrapper.firstElementChild;
-        const pre_result = pre ? pre.call(individual, individual, template, container) : undefined;
+        const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
         return Promise.resolve(pre_result)
           .then(() => processTemplate(individual, container, wrapper, mode))
           .then((template) => {
@@ -266,7 +266,7 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
               container.appendChild(template);
             }
             template.dispatchEvent(new Event(mode));
-            const post_result = post ? post.call(individual, individual, template, container) : undefined;
+            const post_result = post ? post.call(individual, individual, template, container, mode, extra) : undefined;
             return Promise.resolve(post_result).then(() => template);
           });
       });

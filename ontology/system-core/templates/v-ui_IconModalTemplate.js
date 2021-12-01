@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import riot from 'riot';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

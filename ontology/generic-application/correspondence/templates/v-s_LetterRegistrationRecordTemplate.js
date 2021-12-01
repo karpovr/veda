@@ -1,8 +1,8 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -36,12 +36,12 @@ export const post = function (individual, template, container) {
       if (isEnumerated ) {
         var autoBundle = new IndividualModel("v-s:AutomaticallyBundle");
         autoBundle.load().then(function (autoBundle) {
-          $("input, textarea", template).attr("placeholder", autoBundle["rdfs:label"].map(Util.formatValue).join(" "));
+          $("input, textarea", template).attr("placeholder", autoBundle["rdfs:label"].map(CommonUtil.formatValue).join(" "));
         });
       } else {
         var manualBundle = new IndividualModel("v-s:ManuallyBundle");
         manualBundle.load().then(function (manualBundle) {
-          $("input, textarea", template).attr("placeholder", manualBundle["rdfs:label"].map(Util.formatValue).join(" "));
+          $("input, textarea", template).attr("placeholder", manualBundle["rdfs:label"].map(CommonUtil.formatValue).join(" "));
         });
       }
     });

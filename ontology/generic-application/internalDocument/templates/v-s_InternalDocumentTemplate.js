@@ -1,10 +1,10 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
 import riot from 'riot';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -15,7 +15,7 @@ export const pre = function (individual, template, container) {
   }
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -38,7 +38,7 @@ export const post = function (individual, template, container) {
   });
 
   $("#print-blank", template).click(function () {
-    Util.createReport('v-s:InternalDocument_printBlank', individual);
+    BrowserUtil.createReport('v-s:InternalDocument_printBlank', individual);
   });
 
   function processHandler() {
@@ -49,7 +49,7 @@ export const post = function (individual, template, container) {
       } else if ( individual.isNew() || canUpdate ) {
         $('#send.action', template).off("click");
         $('#send.action', template).on('click', function () {
-          Util.send(individual, template, 's-wf:complexRouteTransform', undefined, 'v-s:InternalDocument_ComplexRouteStartForm_Template');
+          BrowserUtil.send(individual, template, 's-wf:complexRouteTransform', undefined, 'v-s:InternalDocument_ComplexRouteStartForm_Template');
         });
       } else {
         $('#send.action', template).remove();

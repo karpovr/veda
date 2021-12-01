@@ -1,10 +1,10 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 import riot from 'riot';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -30,7 +30,7 @@ export const pre = function (individual, template, container) {
   }
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -39,19 +39,19 @@ export const post = function (individual, template, container) {
     $("#outgoing-print-blank", template).remove();
     $('#incoming-print-blank', template).on('click', function (e) {
       e.preventDefault();
-      Util.createReport('v-s:IncomingLetterPrintBlank', individual);
+      BrowserUtil.createReport('v-s:IncomingLetterPrintBlank', individual);
     });
   } else {
     $("#incoming-print-blank", template).remove();
     $('#createReport', template).off('click');
     $('#createReport', template).on('click', function (e) {
       e.preventDefault();
-      Util.createReport('v-s:OutgoingLetterPrintBlank_pdf', individual);
+      BrowserUtil.createReport('v-s:OutgoingLetterPrintBlank_pdf', individual);
     });
     $('#createReport1', template).off('click');
     $('#createReport1', template).on('click', function (e) {
       e.preventDefault();
-      Util.createReport('v-s:OutgoingLetterPrintBlank_rtf', individual);
+      BrowserUtil.createReport('v-s:OutgoingLetterPrintBlank_rtf', individual);
     });
   }
 
@@ -70,7 +70,7 @@ export const post = function (individual, template, container) {
         }
         $('#send.action', template).off("click");
         $('#send.action', template).on('click', function () {
-          Util.send(individual, template, 's-wf:complexRouteTransform', undefined, complexTemplateUri);
+          BrowserUtil.send(individual, template, 's-wf:complexRouteTransform', undefined, complexTemplateUri);
         });
       } else {
         $('#delete.action', template).remove();

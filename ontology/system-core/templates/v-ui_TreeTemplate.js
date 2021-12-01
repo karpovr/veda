@@ -1,10 +1,11 @@
+import BrowserUtil from '/js/browser/util.js';
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 import Backend from '/js/common/backend.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -75,7 +76,7 @@ export const pre = function (individual, template, container) {
   var literals = ["rdfs:Literal", "xsd:string", "xsd:boolean", "xsd:integer", "xsd:nonNegativeInteger", "xsd:decimal", "xsd:dateTime"];
 
   displayedProperty.forEach( function (property, index) {
-    headTmpl += "<th>" + property["rdfs:label"].map(Util.formatValue).join(" ") + "</th>";
+    headTmpl += "<th>" + property["rdfs:label"].map(CommonUtil.formatValue).join(" ") + "</th>";
     var isLiteral = (literals.indexOf(property["rdfs:range"][0].id) >= 0);
     var isFile = property.hasValue('rdfs:range', 'v-s:File');
     if ( index === 0 ) {
@@ -350,7 +351,7 @@ export const pre = function (individual, template, container) {
       sort: order,
       async: true
     }).then(function(queryResult) {
-      unique = Util.unique( queryResult.result );
+      unique = CommonUtil.unique( queryResult.result );
       if (withDeleted) {
         q = q + " && ( 'v-s:deleted'== true )";
         return Backend.query({
@@ -375,7 +376,7 @@ export const pre = function (individual, template, container) {
       var newItem = new IndividualModel();
       newItem["rdf:type"] = [new IndividualModel(type)];
       newItem["v-s:hasParentLink"] = [new IndividualModel(currentUri)];
-      var modal = Util.showModal(newItem, undefined, "edit");
+      var modal = BrowserUtil.showModal(newItem, undefined, "edit");
       newItem.one("afterReset", function () {
         modal.modal("hide").remove();
       });

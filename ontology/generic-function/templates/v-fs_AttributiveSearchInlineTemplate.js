@@ -1,9 +1,9 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 import riot from 'riot';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -122,7 +122,7 @@ export const pre = function (individual, template, container) {
   });
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -292,7 +292,7 @@ export const post = function (individual, template, container) {
 
   // All results button
   allResults.click(function () {
-    var warn = new IndividualModel("v-s:AreYouSure")["rdfs:label"].map(Util.formatValue).join(" ");
+    var warn = new IndividualModel("v-s:AreYouSure")["rdfs:label"].map(CommonUtil.formatValue).join(" ");
     if ( self["v-fs:estimated"][0] - self["v-fs:cursor"][0] < 100 || confirm(warn) ) {
       loadAll();
     }
@@ -449,7 +449,7 @@ export const post = function (individual, template, container) {
                 html: true,
                 placement: "top"
               }).tooltip({
-                title: new IndividualModel("v-fs:ClickToViewContent")["rdfs:label"].map(Util.formatValue).join(" "),
+                title: new IndividualModel("v-fs:ClickToViewContent")["rdfs:label"].map(CommonUtil.formatValue).join(" "),
                 placement: "bottom",
                 delay: { show: 750, hide: 0 }
               });

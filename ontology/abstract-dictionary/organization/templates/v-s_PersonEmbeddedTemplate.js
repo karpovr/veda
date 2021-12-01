@@ -3,7 +3,7 @@ import Backend from '/js/common/backend.js';
 import IndividualModel from '/js/common/individual_model.js';
 import veda from '/js/common/veda.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -70,7 +70,7 @@ export const pre = function (individual, template, container) {
   //$('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

@@ -1,9 +1,9 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -31,7 +31,7 @@ export const pre = function (individual, template, container) {
   };
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -47,7 +47,7 @@ export const post = function (individual, template, container) {
       $(".profileIcon", template).removeClass("hidden");
       $(".profileIcon", template).click(function(e) {
         e.preventDefault();
-        Util.showModal(profile);
+        BrowserUtil.showModal(profile);
       });
     }
     var isAppHasComm = individual["v-s:employee"][0].hasValue("v-s:hasCommunicationMean");

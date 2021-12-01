@@ -1,12 +1,12 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
-import Util from '/js/common/util.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   function handler (values) {
-    var $state = $('#' + Util.escape4$(individual.id));
+    var $state = $('#' + BrowserUtil.escape4$(individual.id));
     $('.state-name', $state).html(values);
   }
   individual.on("rdfs:label", handler);

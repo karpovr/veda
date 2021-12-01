@@ -1,7 +1,7 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
-import Util from '/js/common/util.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -13,7 +13,7 @@ export const post = function (individual, template, container) {
 
   function render () {
     var list = [individual];
-    Util.toTTL(list, function (error, ttl) {
+    BrowserUtil.toTTL(list, function (error, ttl) {
       var pre = $("pre", template),
           sanitized = sanitize(ttl),
           anchored = sanitized.replace(/([a-zA-Z][\w-]*:[\w-]*)(\,|\s|\;|\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");

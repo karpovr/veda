@@ -1,10 +1,10 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import Backend from '/js/common/backend.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -73,7 +73,7 @@ export const pre = function (individual, template, container) {
     operation["rdf:type"] = [ operationClass ];
     //operation["v-s:dataQuery"] = self["v-fs:query"];
     operation["v-s:data"] = self["v-fs:selected"].slice();
-    var modal = Util.showSmallModal(operation);
+    var modal = BrowserUtil.showSmallModal(operation);
     modal.on("click", ".action#start", function () {
       self["v-fs:operation"] = [ operation ];
       modal.on("hidden.bs.modal", function () {

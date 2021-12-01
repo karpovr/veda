@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Notify from '/js/browser/notify.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

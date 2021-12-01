@@ -1,12 +1,13 @@
+import CommonUtil from '/js/common/util.js';
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 import Backend from '/js/common/backend.js';
 import riot from 'riot';
 import Notify from '/js/browser/notify.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -44,7 +45,7 @@ export const pre = function (individual, template, container) {
     if (action === "destroy") {
       var warning = new IndividualModel("v-s:AreYouSure");
       warning.load().then(function (warning) {
-        if ( confirm( warning["rdfs:label"].map(Util.formatValue).join(" ") ) ) {
+        if ( confirm( warning["rdfs:label"].map(CommonUtil.formatValue).join(" ") ) ) {
           template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
         }
       });
@@ -56,7 +57,7 @@ export const pre = function (individual, template, container) {
         if (tmp.length == 0) {
           var warning = new IndividualModel("v-s:AreYouSure");
           warning.load().then(function (warning) {
-            if ( confirm( warning["rdfs:label"].map(Util.formatValue).join(" ") ) ) {
+            if ( confirm( warning["rdfs:label"].map(CommonUtil.formatValue).join(" ") ) ) {
               template.parent().closest("[resource]")[0].dispatchEvent(new Event(action));
             }
           });
@@ -88,7 +89,7 @@ export const pre = function (individual, template, container) {
     });
   });
   $("#send", template).on("click", function (e) {
-    Util.send(individual, template.parent().closest("[resource]"));
+    BrowserUtil.send(individual, template.parent().closest("[resource]"));
   });
   $("#edit", template).on("click", function (e) {
     if (toRefresh) {
@@ -96,7 +97,7 @@ export const pre = function (individual, template, container) {
     }
   });
   $("#rights", template).on("click", function () {
-    Util.showRights(individual);
+    BrowserUtil.showRights(individual);
   });
   $("#files", template).click(function (e) {
     var btn = $(this);
@@ -135,7 +136,7 @@ export const pre = function (individual, template, container) {
           }
           file.name = name;
           unique[file.name] = true;
-          $("[href=" + Util.escape4$(file.url) + "]", docTemplate).attr("href", "/files/" + file.name).text(file.name);
+          $("[href=" + BrowserUtil.escape4$(file.url) + "]", docTemplate).attr("href", "/files/" + file.name).text(file.name);
           folder.file(file.name, file);
         });
         zip.generateAsync({type:"blob"}).then(function(content) {
@@ -179,7 +180,7 @@ export const pre = function (individual, template, container) {
   template.on("click", "ul#standard-task a", function (e) {
     e.preventDefault();
     var startFormTransform = $(this).attr("about");
-    Util.send(individual, template, startFormTransform, true);
+    BrowserUtil.send(individual, template, startFormTransform, true);
   });
 
   // Standard process
@@ -187,7 +188,7 @@ export const pre = function (individual, template, container) {
     e.preventDefault();
     var processDefinitionId = e.target.getAttribute("about");
     var processDefinition = new IndividualModel(processDefinitionId);
-    Util.startProcess(processDefinition, individual);
+    BrowserUtil.startProcess(processDefinition, individual);
   });
 
   // var allButtons = "send edit save cancel delete destroy journal task rights";
@@ -205,7 +206,7 @@ export const pre = function (individual, template, container) {
   });
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

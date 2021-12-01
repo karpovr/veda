@@ -1,12 +1,12 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
-import Util from '/js/common/util.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   $('#createReport', template).on('click', function () {
-    Util.createReport('v-s:CompletedTasksCount_Report', individual);
+    BrowserUtil.createReport('v-s:CompletedTasksCount_Report', individual);
   });
 };
 

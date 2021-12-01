@@ -1,8 +1,8 @@
+import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -15,7 +15,7 @@ export const pre = function (individual, template, container) {
   })
 };
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -35,7 +35,7 @@ export const post = function (individual, template, container) {
     var current_occupation = individual['v-s:occupation'][0].id;
     var Occupation = new IndividualModel(current_occupation);
     var tmpl = new IndividualModel('v-s:PositionMinimalTemplate');
-    var modal = Util.showModal(Occupation, tmpl, "edit");
+    var modal = BrowserUtil.showModal(Occupation, tmpl, "edit");
     Occupation.one("afterSave", function () {
       individual.save();
       modal.modal("hide").remove();

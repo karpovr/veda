@@ -2,7 +2,7 @@ import $ from 'jquery';
 import riot from 'riot';
 import IndividualModel from '/js/common/individual_model.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 

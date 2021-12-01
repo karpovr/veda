@@ -1,8 +1,9 @@
+import BrowserUtil from '/js/browser/util.js';
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
-import Util from '/js/common/util.js';
 import Notify from '/js/browser/notify.js';
 
-export const post = function (individual, template, container) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -51,7 +52,7 @@ export const post = function (individual, template, container) {
     var resultTable = $(".search-result table").clone();
     resultTable.find(".hidden").remove();
     resultTable = resultTable.get(0);
-    exportTable(resultTable, individual["rdfs:label"].map(Util.formatValue).join(" "), "xls");
+    exportTable(resultTable, individual["rdfs:label"].map(CommonUtil.formatValue).join(" "), "xls");
   });
 
   $(".files", template).click(function (e) {
@@ -92,10 +93,10 @@ export const post = function (individual, template, container) {
           }
           file.name = name;
           unique[file.name] = true;
-          $("[href=" + Util.escape4$(file.url) + "]", resultTable).attr("href", "/files/" + file.name).text(file.name);
+          $("[href=" + BrowserUtil.escape4$(file.url) + "]", resultTable).attr("href", "/files/" + file.name).text(file.name);
           folder.file(file.name, file);
         });
-        var registry = exportTable(resultTable.get(0), individual["rdfs:label"].map(Util.formatValue).join(" "), "blob");
+        var registry = exportTable(resultTable.get(0), individual["rdfs:label"].map(CommonUtil.formatValue).join(" "), "blob");
         zip.file("registry.html", registry);
         zip.generateAsync({type:"blob"}).then(function(content) {
           System.import("filesaver").then(function (module) {

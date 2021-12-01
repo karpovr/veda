@@ -1,7 +1,7 @@
+import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
-import Util from '/js/common/util.js';
 
-export const pre = function (individual, template, container) {
+export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -9,7 +9,7 @@ export const pre = function (individual, template, container) {
     container: template,
     placement: "bottom",
     trigger: "hover",
-    title: individual["rdfs:label"].map(Util.formatValue).join(" ")
+    title: individual["rdfs:label"].map(CommonUtil.formatValue).join(" ")
   });
   template.click(function(e) {
     e.preventDefault();
