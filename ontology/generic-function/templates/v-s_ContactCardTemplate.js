@@ -137,9 +137,11 @@ export const html = `
     <div id="orgLabel" about="@" property="rdfs:label"></div>
     <div id="appLabel" style="white-space: nowrap;overflow-x: hidden;text-overflow: ellipsis;width:320px">
       <div about="@" rel="v-s:employee">
-        <span about="@" property="v-s:lastName"></span>
-        <span about="@" property="v-s:firstName"></span>
-        <span about="@" property="v-s:middleName"></span>
+        <div>
+          <span about="@" property="v-s:lastName"></span>
+          <span about="@" property="v-s:firstName"></span>
+          <span about="@" property="v-s:middleName"></span>
+        </div>
       </div>
       <div class="for-trunc" about="@" rel="v-s:occupation" data-template="v-ui:LabelTemplate">
       </div>
