@@ -68,10 +68,11 @@
     "vis-network": "^8.5.2"
   },
   "scripts": {
-    "build": "npm run clean && gulp && npm run build-browser-scripts && npm run update-version && npm run build-server-scripts",
+    "build": "npm run clean && npm run clear-templates && npm run copy-templates && npm run build-browser-scripts && npm run clear-templates && npm run update-version && npm run build-server-scripts",
     "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel . --out-dir ../public --source-maps --copy-files --ignore 'node_modules'",
-    "copy-templates": "mkdir -p ../public/templates && find -L ../ontology -name '*.html' -exec cp -pri '{}' '../public/templates/' ';'",
+    "copy-templates": "mkdir -p ./templates && find -L ../ontology -name '*.js' -exec cp -pri '{}' './templates/' ';'",
+    "clear-templates": "rm -Rf ./templates",
     "update-version": "chmod +x ./update-version.sh && ./update-version.sh",
     "build-server-scripts": "rm -Rf ../public/js/server && rollup -c && cat js/server/lib/*.js ../public/js/server/*.js > .tmp-build && rm -f ../public/js/server/*.js && mv .tmp-build ../public/js/server/server.bundle.js",
     "watch": "npm run watch-browser & npm run watch-common & npm run live-server",
