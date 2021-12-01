@@ -143,12 +143,17 @@ export const html = `
           <span about="@" property="v-s:middleName"></span>
         </div>
       </div>
-      <div class="for-trunc" about="@" rel="v-s:occupation" data-template="v-ui:LabelTemplate">
-      </div>
+      <div class="for-trunc" about="@" rel="v-s:occupation" data-template="v-ui:LabelTemplate"></div>
       <div class="absenceBlock" about="@" rel="v-s:employee">
-        <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span><span about="@" property="v-s:dateAbsenceTo"></span>
-        <div about="@" rel="v-s:delegate">
-          <span about="v-s:delegate" property="rdfs:label"></span><span property="rdfs:label"></span>
+        <div>
+          <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
+          <span about="@" property="v-s:dateAbsenceTo"></span>
+          <div about="@" rel="v-s:delegate">
+            <span>
+              <span about="v-s:delegate" property="rdfs:label"></span>
+              <span property="rdfs:label"></span>
+            </span>
+          </div>
         </div>
       </div>
     </div>

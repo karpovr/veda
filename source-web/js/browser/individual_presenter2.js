@@ -217,6 +217,7 @@ function errorPrinter (error, container) {
  * @return {HTMLElement}
  */
 function wrap (html) {
+  html = html.trim();
   if (html.startsWith('<script') || html.endsWith('/script>')) {
     throw new SyntaxError('Scripts for inline templates are not supported, template = ' + html);
   }
