@@ -211,7 +211,7 @@ v-s:PropertySpecificationTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-ui:PropertySpecification;
   v-ui:forClass v-ui:ObjectPropertySpecification;
-  v-ui:forClass v-ui:PropertySpecification;
+  v-ui:forClass v-ui:DatatypePropertySpecification;
   rdfs:label "Шаблон для класса v-ui:PropertySpecification"@ru ;
   rdfs:label "Template for v-ui:PropertySpecification class"@en ;
   v-ui:template """

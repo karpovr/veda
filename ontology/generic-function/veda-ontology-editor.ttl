@@ -520,10 +520,10 @@ v-s:TS_PropertySpecification
   v-ui:defaultTemplate v-ui:PropertySpecificationTemplate;
   v-ui:forClass v-ui:PropertySpecification
 .
-v-s:CS_PropertySpecification 
+v-ui:CS_PropertySpecification 
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-ui:PropertySpecification "@ru, "Class specification v-ui:PropertySpecification "@en;
-  v-ui:forClass v-s:PropertySpecification ;
+  v-ui:forClass v-ui:PropertySpecification ;
   v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:PropertySpecificationTemplate;
   v-s:loadPriority 15 ;
@@ -812,10 +812,10 @@ v-s:TS_ObjectPropertySpecification
   v-ui:defaultTemplate v-ui:ObjectPropertySpecificationTemplate;
   v-ui:forClass v-ui:ObjectPropertySpecification
 .
-v-s:CS_ObjectPropertySpecification 
+v-ui:CS_ObjectPropertySpecification 
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:ObjectPropertySpecification  "@ru, "Class specification v-s:ObjectPropertySpecification "@en;
-  v-ui:forClass v-s:ObjectPropertySpecification  ;
+  v-ui:forClass v-ui:ObjectPropertySpecification  ;
   v-s:shelfLife 9999;
   v-ui:defaultTemplate v-ui:ObjectPropertySpecificationTemplate;
   v-s:loadPriority 15 ;
