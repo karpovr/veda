@@ -158,7 +158,7 @@ async fn main() -> std::io::Result<()> {
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
         let (prefixes_cache_read, prefixes_cache_write) = evmap::new();
 
-        let json_cfg = web::JsonConfig::default().limit(5*1024*1024);
+        let json_cfg = web::JsonConfig::default().limit(5 * 1024 * 1024);
 
         App::new()
             .wrap(middleware::Compress::default())

@@ -37,7 +37,7 @@ pub(crate) struct GetTicketTrustedRequest {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub(crate) struct TicketRequest {
-    pub ticket: String,
+    pub ticket: Option<String>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
