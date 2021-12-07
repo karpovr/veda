@@ -194,7 +194,7 @@ pub(crate) async fn get_rights_origin(
         let mut indv = Individual::default();
         indv.set_id("_");
         indv.add_uri("rdf:type", "v-s:PermissionStatement");
-        indv.add_uri("v-s:permissionObject", "?");
+        indv.add_uri("v-s:permissionSubject", "?");
         indv.add_string("v-s:comment", acl_trace.info, Lang::NONE);
         res.push(indv.get_obj().as_json());
 

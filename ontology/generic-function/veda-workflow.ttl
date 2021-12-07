@@ -697,7 +697,7 @@ v-wf:TS_Flow
 v-wf:CS_Flow
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-wf:Flow "@ru, "Class specification v-wf:Flow"@en;
-  v-ui:forClass v-s:PropertySpecification ;
+  v-ui:forClass v-wf:Flow ;
   v-s:shelfLife 9999;
   v-ui:defaultTemplate v-wf:FlowTemplateAsProperties;
   v-s:loadPriority 15 ;
