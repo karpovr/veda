@@ -37,7 +37,7 @@ function listenChanges () {
   };
 
   events.onerror = function (event) {
-    console.error(new Date().toISOString(), `Failed to listen to resources changes, reconnect in ${Math.floor(changesTimeout / 1000)} sec`);
+    console.log(new Date().toISOString(), `Failed to listen to resources changes, reconnect in ${Math.floor(changesTimeout / 1000)} sec`);
     event.target.close();
     setTimeout(listenChanges, 60 * 1000);
   };
