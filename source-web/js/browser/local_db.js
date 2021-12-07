@@ -25,7 +25,7 @@ export default LocalDB;
 function LocalDB () {
   this.veda_version = veda.manifest.veda_version;
   this.db_name = veda.manifest.short_name;
-  this.store_name = 'store';
+  this.store_name = 'individuals';
 
   // Singleton pattern
   if (LocalDB.prototype[this.db_name + this.store_name]) {
@@ -48,7 +48,7 @@ proto.initDB = function () {
     openReq.onsuccess = (event) => {
       const db = event.target.result;
       this.db = db;
-      console.log(`DB open success, veda_version = ${this.veda_version}`);
+      console.log(`DB open success: ${this.db_name}, version = ${this.veda_version}`);
       resolve(this);
     };
 
@@ -68,7 +68,7 @@ proto.initDB = function () {
         console.log(`DB store deleted: ${this.store_name}`);
       }
       db.createObjectStore(this.store_name);
-      console.log(`DB create success: ${this.store_name}, veda_version = ${this.veda_version}`);
+      console.log(`DB store created: ${this.store_name}, version = ${this.veda_version}`);
     };
   }).catch((error) => {
     console.log('IndexedDB error, using in-memory fallback.', error);

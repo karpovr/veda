@@ -33,14 +33,14 @@ if ('serviceWorker' in navigator) {
     })
     .catch((error) => console.log(`Registration failed with ${error}`));
 
-  // Receive and log server worker `veda_version` value
+  // Receive and log server worker message
   navigator.serviceWorker.addEventListener('message', (event) => {
-    console.log(`Service worker veda_version = ${event.data}`);
+    console.log('Service worker:', event.data);
   });
 
   // Ask server worker the value of its veda_version
   navigator.serviceWorker.ready.then((registration) => {
-    registration.active.postMessage('veda_version');
+    registration.active.postMessage('version');
   });
 
   // Install application prompt

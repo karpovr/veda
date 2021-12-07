@@ -60,13 +60,16 @@ const minify_options = {
 };
 
 exports.default = function () {
-  return src('../ontology/**/*.js', {follow: true})
-    .pipe(rename((path) => {
-      path.dirname = '';
+  return src('../ontology/LNG/**/*.js', {follow: true})
+    //.pipe(rename((path) => {
+      //path.dirname = '';
       //path.extname = '.js';
-    }))
-    //.pipe(through2.obj(transform_to_es6))
-    //.pipe(through2.obj(transform_to_module))
+    //}))
+    .pipe(through2.obj(transform_to_es6))
+    .pipe(through2.obj(transform_to_module))
+
+    //.pipe(through2.obj(pre_post))
+
     // .pipe(sourcemaps.init())
     //  .pipe(sourcemaps.mapSources(function(sourcePath, file) {
     //    console.log('sourcePath', sourcePath);
@@ -74,10 +77,10 @@ exports.default = function () {
     //  }))
     //  .pipe(babel(babel_options))
     //.pipe(sourcemaps.write('.'))*/
-    .pipe(dest('templates'));
+    .pipe(dest('output'));
 };
 
-mkdirp.sync('templates');
+//mkdirp.sync('templates');
 
 const import_other = {
   'veda.Backend': '/js/common/backend.js',
@@ -85,7 +88,7 @@ const import_other = {
   'veda.Codelet': '/js/server/codelets.js',
   'veda.IndividualModel': '/js/common/individual_model.js',
   'veda.Notify': '/js/browser/notify.js',
-  'veda.Util': '/js/common/util.js',
+  'veda.Util': '/js/browser/util.js',
   'Sha256': 'sha256',
   'riot': 'riot',
 };
@@ -113,7 +116,7 @@ const transform_to_es6 = (file, _, cb) => {
             return stemmed;
           });
         }
-        pre = `export const pre = function (individual, template, container) {\n  ${patch}\n\n  ${pre}\n};`;
+        pre = `export const pre = function (individual, template, container, mode, extra) {\n  ${patch}\n\n  ${pre}\n};`;
       }
       if (post) {
         if (re_import_other.test(post)) {
@@ -123,7 +126,7 @@ const transform_to_es6 = (file, _, cb) => {
             return stemmed;
           });
         }
-        post = `export const post = function (individual, template, container) {\n  ${patch}\n\n  ${post}\n};`;
+        post = `export const post = function (individual, template, container, mode, extra) {\n  ${patch}\n\n  ${post}\n};`;
       }
       let head = Object.keys(to_import).map((imported) => `import ${imported} from '${to_import[imported]}';`).join('\n');
 
@@ -156,3 +159,12 @@ const transform_to_module = (file, _, cb) => {
   cb(null, file);
 };
 
+const pre_post = (file, _, cb) => {
+  if (file.isBuffer()) {
+    let content = file.contents.toString();
+    content = content.split("export const pre = function (individual, template, container) {").join("export const pre = function (individual, template, container, mode, extra) {");
+    content = content.split("export const post = function (individual, template, container) {").join("export const post = function (individual, template, container, mode, extra) {");
+    file.contents = Buffer.from(content);
+  }
+  cb(null, file);
+};

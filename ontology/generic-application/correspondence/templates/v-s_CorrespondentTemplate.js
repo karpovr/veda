@@ -23,16 +23,14 @@ export const post = function (individual, template, container, mode, extra) {
       var isOwn = isOwnOrganization || self.hasValue("v-s:correspondentOrganization", userOrganization);
       var parentRel = template.parent().attr("rel");
       if ( isOwn ) {
-        self
-          .clearValue("v-s:correspondentDepartmentDescription")
-          .clearValue("v-s:correspondentPersonDescription");
+        self.clearValue("v-s:correspondentDepartmentDescription");
+        self.clearValue("v-s:correspondentPersonDescription");
         $(".user-organization", template).show();
         $(".other-organization", template).hide();
         template.trigger(parentRel + ":own");
       } else {
-        self
-          .clearValue("v-s:correspondentDepartment")
-          .clearValue("v-s:correspondentPerson");
+        self.clearValue("v-s:correspondentDepartment");
+        self.clearValue("v-s:correspondentPerson");
         $(".user-organization", template).hide();
         $(".other-organization", template).show();
         template.trigger(parentRel + ":foreign");
