@@ -50,7 +50,7 @@ pub(crate) async fn is_ticket_valid(
     tt: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &extract_addr(&req), &tt).await?;
+    let (res, _) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await?;
     Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
 }
 

@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{extract_addr, get_module_name, get_ticket, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -35,7 +35,9 @@ pub(crate) async fn get_individuals(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &extract_addr(&req), &db).await?;
+    let ticket = get_ticket(&req, &params.ticket);
+
+    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -58,6 +60,8 @@ pub(crate) async fn get_individual(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
+    let ticket = get_ticket(&req, &params.ticket);
+
     if params.uri.contains(QUEUE_STATE_PREFIX) {
         if let Some(consumer_name) = &params.uri.strip_prefix(QUEUE_STATE_PREFIX) {
             if let Ok(mut queue_consumer) = Consumer::new(MAIN_QUEUE_PATH, consumer_name, MAIN_QUEUE_NAME) {
@@ -80,7 +84,7 @@ pub(crate) async fn get_individual(
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
     }
 
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
+    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
