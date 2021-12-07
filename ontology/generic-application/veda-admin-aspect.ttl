@@ -40,7 +40,6 @@ v-s:OrganizationStructureApplication
   rdf:type v-s:Application;
   rdfs:label "Управление оргструктурой"@ru, "Organization structure"@en;
   v-s:hasCreate v-s:AppointmentCreate, v-s:OccupationCreate, v-s:EmployeeCreate, v-s:DepartmentCreate;
-  v-s:hasIcon v-s:OrganizationStructureIcon;
   v-s:hasRegistry v-s:AppointmentSearch, v-s:OccupationSearch, v-s:EmployeeSearch, v-s:DepartmentSearch;
   v-ui:hasTemplate v-s:ApplicationTemplate;
 .
