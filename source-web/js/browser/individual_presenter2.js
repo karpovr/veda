@@ -657,9 +657,9 @@ function processTemplate (individual, container, wrapper, mode) {
       let sort_required = false;
 
       const propertyModifiedHandler = function (values, limit_param) {
+        curr_rendered = {};
         if (!values.length) {
           prev_rendered = {};
-          curr_rendered = {};
           sort_required = false;
           relContainer.innerHTML = '';
           return;
@@ -695,7 +695,7 @@ function processTemplate (individual, container, wrapper, mode) {
             relContainer.querySelectorAll(selector).forEach((node) => node.remove());
           }
           if (sort_required) {
-            const list = Array.from(relContainer.children).map((node) => node.remove());
+            const list = Array.from(relContainer.children).map((node) => relContainer.removeChild(node));
             list.sort((a, b) => {
               return curr_rendered[a.getAttribute('resource')] - curr_rendered[b.getAttribute('resource')];
             });
