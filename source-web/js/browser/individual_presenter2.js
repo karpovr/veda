@@ -29,8 +29,6 @@ import Util from '../common/util.js';
 
 import '../browser/util.js';
 
-import riot from '../common/lib/riot.js';
-
 import Notify from '../browser/notify.js';
 
 import '../browser/controls/veda_controls.js';
@@ -875,7 +873,7 @@ function processTemplate (individual, container, wrapper, mode) {
   template.addEventListener('validated', mergeValidationResult);
 
   // Controls
-  const controls = Array.from(wrapper.querySelectorAll('veda-control:not([rel] *):not([about] *)')).map((el) => {
+  Array.from(wrapper.querySelectorAll('veda-control:not([rel] *):not([about] *)')).map((el) => {
     const control = $(el);
     const property_uri = control.attr('property') || control.attr('rel');
     const type = control.attr('data-type') || 'generic';
