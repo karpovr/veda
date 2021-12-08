@@ -32,34 +32,32 @@ const API = [
 function listenChanges () {
   const events = new EventSource('/changes');
 
-  events.onopen = function (event) {
+  events.onopen = () => {
     console.log(new Date().toISOString(), 'Listening to resources changes');
   };
 
-  events.onerror = function (event) {
+  events.onerror = (event) => {
     console.log(new Date().toISOString(), `Failed to listen to resources changes, reconnect in ${Math.floor(changesTimeout / 1000)} sec`);
     event.target.close();
     setTimeout(listenChanges, 60 * 1000);
   };
 
-  events.onmessage = function (event) {
+  events.onmessage = (event) => {
     const change = JSON.parse(event.data);
-    for (let path in change) {
-      path = (path === '/index.html' ? '/' : path);
-      caches.match(path).then(function (response) {
+    Object.keys(change).forEach((_path) => {
+      const path = (_path === '/index.html' ? '/' : _path);
+      caches.match(path).then((response) => {
         if (response && response.ok) {
           const cache_modified = response.headers.get('last-modified');
           const event_modified = change[path];
           if (cache_modified !== event_modified) {
-            caches.open(STATIC).then(function (cache) {
-              return cache.delete(path);
-            }).then(function () {
+            caches.open(STATIC).then((cache) => cache.delete(path)).then(() => {
               console.log(new Date().toISOString(), 'Cached resource deleted: ', path);
             });
           }
         }
       });
-    }
+    });
   };
 }
 listenChanges();
@@ -67,33 +65,42 @@ listenChanges();
 /**
  * Listen to messages from client
  */
-addEventListener('message', function (event) {
+this.addEventListener('message', (event) => {
   if (event.data === 'version') {
-    event.source.postMessage({version: veda_version});
+    event.source.postMessage({ version: veda_version });
   }
 });
 
 /**
  * Clear cached resources
- * @param {Event} event
- * @return {void}
  */
-function clearCache (event) {
-  self.skipWaiting();
+this.addEventListener('install', (event) => {
+  this.skipWaiting();
   console.log(`Service worker updated, veda_version = ${veda_version}, clear cache`);
   event.waitUntil(
-    caches.keys().then(function (keyList) {
-      return Promise.all(keyList.map(function (key) {
-        return caches.delete(key);
-      }));
-    }),
+    caches.keys().then((keyList) => Promise.all(keyList.map((key) => caches.delete(key)))),
   );
-}
-self.addEventListener('install', clearCache);
+});
 
-self.addEventListener('fetch', function (event) {
+/**
+ * Fetch event handler
+ */
+function handleFetch (event, CACHE) {
+  const path = new URL(event.request.url).pathname;
+  return caches.match(path).then((cached) => cached || fetch(event.request).then((fetched) => {
+    if (fetched.ok) {
+      return caches.open(CACHE).then((cache) => {
+        cache.put(path, fetched.clone());
+        return fetched;
+      });
+    }
+    return fetched;
+  }));
+}
+
+this.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  const pathname = url.pathname;
+  const { pathname } = url;
   const isAPI = API.indexOf(pathname) >= 0;
   const isFILES = pathname.indexOf('/files') === 0;
   const isNTLM = pathname.indexOf('/ntlm') === 0;
@@ -106,24 +113,3 @@ self.addEventListener('fetch', function (event) {
     }
   }
 });
-
-/**
- * Fetch event handler
- * @param {Event} event
- * @param {string} CACHE
- * @return {Promise<Response>}
- */
-function handleFetch (event, CACHE) {
-  const path = new URL(event.request.url).pathname;
-  return caches.match(path).then(function (response) {
-    return response || fetch(event.request).then(function (response) {
-      if (response.ok) {
-        return caches.open( CACHE ).then(function (cache) {
-          cache.put(path, response.clone());
-          return response;
-        });
-      }
-      return response;
-    });
-  });
-}
