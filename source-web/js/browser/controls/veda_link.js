@@ -454,14 +454,15 @@ $.fn.veda_link = function ( options ) {
         fulltext.val('');
       }
       selected = selected.filter((item) => individual.hasValue(rel_uri, item));
-      suggestions.children().each(function () {
-        const item = $(this);
-        item.removeClass('selected');
-        const resource = item.attr('resource');
-        if (individual.hasValue(rel_uri, resource)) {
-          item.addClass('selected');
-        }
-      });
+      suggestions.children()
+        .removeClass('selected')
+        .each(function () {
+          const item = $(this);
+          const resource = item.attr('resource');
+          if (individual.hasValue(rel_uri, resource)) {
+            item.addClass('selected');
+          }
+        });
     };
 
     individual.on(rel_uri, propertyModifiedHandler);
