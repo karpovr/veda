@@ -41,8 +41,10 @@ export const html = `
   </td>
   <td about="@" rel="v-wf:onDocument" data-template="v-ui:ClassNameLabelTemplate"></td>
   <td about="@" rel="v-wf:takenDecision">
-    <div property="rdfs:label"></div>
-    <i property="rdfs:comment"></i>
+    <div>
+      <div property="rdfs:label"></div>
+      <i property="rdfs:comment"></i>
+    </div>
   </td>
   <td>
     <span class="to-journal pointer text-primary glyphicon glyphicon-list"></span>
