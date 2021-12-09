@@ -625,7 +625,7 @@ function processTemplate (individual, container, wrapper, mode) {
     let about = relContainer.getAttribute('about');
     const rel_uri = relContainer.getAttribute('rel');
     const isEmbedded = relContainer.getAttribute('data-embedded') === 'true';
-    // const spec = specs[rel_uri] ? new IndividualModel( specs[rel_uri] ) : undefined;
+    const spec = specs[rel_uri] ? new IndividualModel( specs[rel_uri] ) : undefined;
     const rel_inline_template = relContainer.innerHTML.trim();
     const rel_template_uri = relContainer.getAttribute('data-template');
     let limit = relContainer.getAttribute('data-limit') || Infinity;
@@ -648,6 +648,27 @@ function processTemplate (individual, container, wrapper, mode) {
       relTemplate = rel_inline_template;
     }
     relContainer.innerHTML = '';
+
+    // TODO: refactor this!
+    template.addEventListener('edit', function (e) {
+      const property = new IndividualModel(rel_uri);
+      if ( isEmbedded &&
+          spec &&
+          spec['v-ui:minCardinality'][0] >= 1 &&
+          !individual.hasValue(rel_uri) &&
+          !(property.hasValue('rdfs:range') && property['rdfs:range'][0].id === 'v-s:File')
+      ) {
+        const valueType = spec && spec.hasValue('v-ui:rangeRestriction') ?
+          spec['v-ui:rangeRestriction'] : property.hasValue('rdfs:range') ?
+            property['rdfs:range'] : [];
+        const emptyValue = new IndividualModel();
+        if ( valueType.length ) {
+          emptyValue['rdf:type'] = valueType;
+        }
+        individual.set(rel_uri, [emptyValue]);
+      }
+      e.stopPropagation();
+    });
 
     return about.load().then((about) => {
       let prev_rendered = {};
