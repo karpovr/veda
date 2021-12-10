@@ -150,41 +150,41 @@ $.fn.veda_file = function ( options ) {
     fileInput.attr('accept', accept);
   }
   const clipboardButton = control.find('.paste-btn');
-  const clipboardGroup = control.find("div.input-group");
-  const clipboardInput = clipboardGroup.find("input[type='text']");
-  const clipboardClose = clipboardGroup.find("span");
+  const clipboardGroup = control.find('div.input-group');
+  const clipboardInput = clipboardGroup.find('input[type=\'text\']');
+  const clipboardClose = clipboardGroup.find('span');
   clipboardButton.tooltip({
     container: control,
-    placement: "top",
-    trigger: "hover",
-    title: "Приложить файл из буфера обмена"
+    placement: 'top',
+    trigger: 'hover',
+    title: 'Приложить файл из буфера обмена',
   });
   clipboardInput.tooltip({
     container: control,
-    placement: "top",
-    trigger: "hover",
-    title: "Выполните вставку"
+    placement: 'top',
+    trigger: 'hover',
+    title: 'Выполните вставку',
   });
 
-  clipboardButton.click(function(){
+  clipboardButton.click(function () {
     clipboardButton.hide();
     clipboardGroup.show();
     clipboardInput.focus();
   });
 
-  clipboardClose.click(function(){
+  clipboardClose.click(function () {
     clipboardButton.show();
     clipboardGroup.hide();
   });
 
-  function pasteListener(event) {
+  function pasteListener (event) {
     if (event.clipboardData != undefined && event.clipboardData.files.length > 0) {
       fileInput[0].files = event.clipboardData.files;
       fileInput.change();
     }
     event.preventDefault();
   }
-  clipboardInput[0].addEventListener("paste", pasteListener);
+  clipboardInput[0].addEventListener('paste', pasteListener);
 
   const progress = function (progressEvent) {
     if (progressEvent.lengthComputable) {
@@ -216,7 +216,7 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:canUpdate'] = [true];
     fileIndividual['v-s:canDelete'] = [true];
     if (isThumbnail) {
-      fileIndividual['v-s:backwardProperty'] = ["v-s:thumbnail"];
+      fileIndividual['v-s:backwardProperty'] = ['v-s:thumbnail'];
     } else {
       fileIndividual['v-s:backwardProperty'] = [rel_uri];
     }

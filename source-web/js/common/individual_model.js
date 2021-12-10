@@ -806,6 +806,7 @@ proto.is = function (_class) {
 
 /**
  * Initialize individual with class specific domain properties and methods
+ * @param {boolean} forced
  * @return {Promise<IndividualModel>}
  */
 proto.init = function (forced) {

@@ -13,9 +13,9 @@ Workflow.prepare_decision_form = function (ticket, document, prev_state) {
   try {
     const decision_form = document;
 
-    //if (decision_form['sys:source']) {
+    // if (decision_form['sys:source']) {
     //  return;
-    //}
+    // }
 
     const prev_state_decision_form = prev_state;
     let f_prev_takenDecision = null;

@@ -67,7 +67,7 @@ listenChanges();
  */
 this.addEventListener('message', (event) => {
   if (event.data === 'version') {
-    event.source.postMessage({ version: veda_version });
+    event.source.postMessage({version: veda_version});
   }
 });
 
@@ -100,7 +100,7 @@ function handleFetch (event, CACHE) {
 
 this.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  const { pathname } = url;
+  const {pathname} = url;
   const isAPI = API.indexOf(pathname) >= 0;
   const isFILES = pathname.indexOf('/files') === 0;
   const isNTLM = pathname.indexOf('/ntlm') === 0;
