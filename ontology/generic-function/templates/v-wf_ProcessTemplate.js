@@ -1,31 +1,29 @@
 import $ from 'jquery';
+import jsWorkflow from 'jsworkflow';
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  System.import("jsworkflow").then(function (module) {
-    var jsWorkflow = module.default;
-    var wrapper = $(".workflow-canvas-wrapper", template),
-      height = ( $("#copyright").offset().top - wrapper.offset().top - 15 ) + "px",
-      fullWidth = $("#full-width", template),
-      icon = $("span", fullWidth),
-      propsCol = $("#props-col", template),
-      schema = $("#schema", template);
-    wrapper.css("height", height);
-    propsCol.css("height", height);
-    fullWidth.click(function () {
-      propsCol.toggle();
-      icon.toggleClass("glyphicon-resize-full glyphicon-resize-small");
-      schema.toggleClass("col-md-8 col-md-12");
-    });
-    jsWorkflow.ready(function () {
-        // Create a new workflow instance as workflow
-        var workflow = new jsWorkflow.Instance();
+  const wrapper = $(".workflow-canvas-wrapper", template);
+  const height = ( $("#copyright").offset().top - wrapper.offset().top - 15 ) + "px";
+  const fullWidth = $("#full-width", template);
+  const icon = $("span", fullWidth);
+  const propsCol = $("#props-col", template);
+  const schema = $("#schema", template);
+  wrapper.css("height", height);
+  propsCol.css("height", height);
+  fullWidth.click(function () {
+    propsCol.toggle();
+    icon.toggleClass("glyphicon-resize-full glyphicon-resize-small");
+    schema.toggleClass("col-md-8 col-md-12");
+  });
+  jsWorkflow.ready(function () {
+    // Create a new workflow instance as workflow
+    const workflow = new jsWorkflow.Instance();
 
-        // Initialize workflow with workflow container id
-        var net = workflow.init('workflow-canvas', veda, individual, template, container);
-    });
+    // Initialize workflow with workflow container id
+    const net = workflow.init('workflow-canvas', veda, individual, template, container);
   });
 };
 

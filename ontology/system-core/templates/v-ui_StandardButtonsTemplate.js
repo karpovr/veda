@@ -101,7 +101,6 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   $("#files", template).click(function (e) {
     var btn = $(this);
-    //toggleSpin(btn);
     e.preventDefault();
     var docTemplate = template.parent().closest("[resource]");
 
@@ -121,7 +120,7 @@ export const pre = function (individual, template, container, mode, extra) {
     }
 
     Promise.all(filesPromises).then(function (files) {
-      System.import("jszip").then(function (module) {
+      import("jszip").then(function (module) {
         var JSZip = module.default;
         var zip = new JSZip();
         var folder = zip.folder("files");
@@ -140,7 +139,7 @@ export const pre = function (individual, template, container, mode, extra) {
           folder.file(file.name, file);
         });
         zip.generateAsync({type:"blob"}).then(function(content) {
-          System.import("filesaver").then(function (module) {
+          import("filesaver").then(function (module) {
             var saveAs = module.default;
             saveAs(content, "registry.zip");
           });
@@ -150,8 +149,6 @@ export const pre = function (individual, template, container, mode, extra) {
       console.log(error, error.stack);
       var notify = new Notify();
       notify("danger", { message: "Ошибка выгрузки реестра. Обратитесь в поддержку." });
-    }).then(function () {
-      //toggleSpin(btn);
     });
   });
 

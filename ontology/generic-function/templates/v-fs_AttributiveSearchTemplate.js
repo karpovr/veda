@@ -39,7 +39,7 @@ export const post = function (individual, template, container, mode, extra) {
       if ( exportAs === "blob" ) {
         return blob;
       } else if ( exportAs === "xls" ) {
-        System.import("filesaver").then(function (module) {
+        import("filesaver").then(function (module) {
           var saveAs = module.default;
           saveAs(blob, name + ".xls");
         });
@@ -78,7 +78,7 @@ export const post = function (individual, template, container, mode, extra) {
     }
 
     Promise.all(filesPromises).then(function (files) {
-      System.import("jszip").then(function (module) {
+      import("jszip").then(function (module) {
         var JSZip = module.default;
         var zip = new JSZip();
         var folder = zip.folder("files");
@@ -99,7 +99,7 @@ export const post = function (individual, template, container, mode, extra) {
         var registry = exportTable(resultTable.get(0), individual["rdfs:label"].map(CommonUtil.formatValue).join(" "), "blob");
         zip.file("registry.html", registry);
         zip.generateAsync({type:"blob"}).then(function(content) {
-          System.import("filesaver").then(function (module) {
+          import("filesaver").then(function (module) {
             var saveAs = module.default;
             saveAs(content, "registry.zip");
           });

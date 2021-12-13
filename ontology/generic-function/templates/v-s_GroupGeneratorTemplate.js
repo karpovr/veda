@@ -6,46 +6,41 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  System.import("sha256").then(function (module) {
-    var Sha256 = module.default;
-
-    $("#authClass", template).change(function() {
-      var uri = $(this).val();
-      if (uri) {
-        individual["v-s:authClass"] = [new IndividualModel(uri)];
-      } else {
-        individual["v-s:authClass"] = [];
-      }
-    });
-
-    $("#authProperty", template).change(function() {
-      var uri = $(this).val();
-      if (uri) {
-        individual["v-s:authProperty"] = [new IndividualModel(uri)];
-      } else {
-        individual["v-s:authProperty"] = [];
-      }
-    });
-
-    individual.on("propertyModified", handler);
-    template.one("remove", function () {
-      individual.off("propertyModified", handler);
-    });
-    handler();
-
-    function handler() {
-      var $groupUri = $(".group-uri", template);
-      if ( individual.hasValue("v-s:authValue") ) {
-        var group_concat_uri = individual.id + " " + individual["v-s:authValue"][0].toString();
-        var hash = Sha256.hash(group_concat_uri).substring(32);
-        var group_uri = "d:grp-" + hash;
-        $groupUri.text(group_uri);
-      } else {
-        $groupUri.text("");
-      }
+  $("#authClass", template).change(function() {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:authClass"] = [new IndividualModel(uri)];
+    } else {
+      individual["v-s:authClass"] = [];
     }
-
   });
+
+  $("#authProperty", template).change(function() {
+    var uri = $(this).val();
+    if (uri) {
+      individual["v-s:authProperty"] = [new IndividualModel(uri)];
+    } else {
+      individual["v-s:authProperty"] = [];
+    }
+  });
+
+  individual.on("propertyModified", handler);
+  template.one("remove", function () {
+    individual.off("propertyModified", handler);
+  });
+  handler();
+
+  function handler() {
+    var $groupUri = $(".group-uri", template);
+    if ( individual.hasValue("v-s:authValue") ) {
+      var group_concat_uri = individual.id + " " + individual["v-s:authValue"][0].toString();
+      var hash = Sha256.hash(group_concat_uri).substring(32);
+      var group_uri = "d:grp-" + hash;
+      $groupUri.text(group_uri);
+    } else {
+      $groupUri.text("");
+    }
+  }
 };
 
 export const html = `

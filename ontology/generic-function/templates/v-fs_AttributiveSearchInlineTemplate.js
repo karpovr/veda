@@ -2,6 +2,7 @@ import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
 import riot from 'riot';
+import touchswipe from 'touchswipe';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -21,58 +22,52 @@ export const pre = function (individual, template, container, mode, extra) {
     $(".no-more-results", template).remove();
   }
 
-  System.import("touchswipe")
-  .then(function () {
-    // Enable swipe for result table
-    $("body").keydown(enableSwipe).keyup(disableSwipe);
-    template.one("remove", function () {
-      $("body").off("keydown", enableSwipe).off("keyup", disableSwipe);
-    });
-    function disableSwipe (e) {
-      if (e.which === 17) {
-        $(".search-result", template).addClass("noSwipe").removeClass("swipe");
-      }
+  // Enable swipe for result table
+  $("body").keydown(enableSwipe).keyup(disableSwipe);
+  template.one("remove", function () {
+    $("body").off("keydown", enableSwipe).off("keyup", disableSwipe);
+  });
+  function disableSwipe (e) {
+    if (e.which === 17) {
+      $(".search-result", template).addClass("noSwipe").removeClass("swipe");
     }
-    function enableSwipe (e) {
-      if (e.ctrlKey) {
-        $(".search-result", template).addClass("swipe").removeClass("noSwipe");
-      }
+  }
+  function enableSwipe (e) {
+    if (e.ctrlKey) {
+      $(".search-result", template).addClass("swipe").removeClass("noSwipe");
     }
+  }
 
-    var prevDistance = 0, delta = 0;
+  var prevDistance = 0, delta = 0;
 
-    $(".search-result", template).swipe({
-      swipeStatus: function (event, phase, direction, distance, duration) {
-        if (phase === "move" && event.ctrlKey === true) {
-          this.css("cursor", "move");
-          if (direction === "left") {
-            delta = distance - prevDistance;
-            prevDistance = distance;
-            this.scrollLeft( this.scrollLeft() + delta );
-          } else if (direction === "right") {
-            delta = distance - prevDistance;
-            prevDistance = distance;
-            this.scrollLeft( this.scrollLeft() - delta );
-          } else if (direction === "up") {
-            window.scrollBy(0, distance);
-          } else if (direction === "down") {
-            window.scrollBy(0, -distance);
-          }
-        } else {
-          prevDistance = 0;
-          delta = 0;
-          this.css("cursor", "");
+  $(".search-result", template).swipe({
+    swipeStatus: function (event, phase, direction, distance, duration) {
+      if (phase === "move" && event.ctrlKey === true) {
+        this.css("cursor", "move");
+        if (direction === "left") {
+          delta = distance - prevDistance;
+          prevDistance = distance;
+          this.scrollLeft( this.scrollLeft() + delta );
+        } else if (direction === "right") {
+          delta = distance - prevDistance;
+          prevDistance = distance;
+          this.scrollLeft( this.scrollLeft() - delta );
+        } else if (direction === "up") {
+          window.scrollBy(0, distance);
+        } else if (direction === "down") {
+          window.scrollBy(0, -distance);
         }
+      } else {
+        prevDistance = 0;
+        delta = 0;
+        this.css("cursor", "");
       }
-    });
-    template.one("remove", function () {
-      prevDistance = null;
-      delta = null;
-      $(".search-result", template).swipe("destroy");
-    });
-  })
-  .catch(function (err) {
-    console.log("Touch swipe error:", err);
+    }
+  });
+  template.one("remove", function () {
+    prevDistance = null;
+    delta = null;
+    $(".search-result", template).swipe("destroy");
   });
 
   if ( !searchResultTemplate ) {
