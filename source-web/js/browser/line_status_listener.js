@@ -4,22 +4,28 @@ import veda from '../common/veda.js';
 
 const styles = `
   #line-status {
-    font-size: 0.7em;
-    margin: 0.7em 0 -2em;
+    position: absolute;
+    top: 0.7em;
+    right: 0.7em;
+    z-index: 1;
+    height: 0.7em;
+    width: 0.7em;
+    background-color: lightgrey;
+    border-radius: 50%;
   }
-  #line-status.online > *:not(.online),
-  #line-status.offline > *:not(.offline),
-  #line-status.limited > *:not(.limited) {
-    display: none;
+  #line-status.online {
+    background-color: forestgreen;
+  }
+  #line-status.offline {
+    background-color: crimson;
+  }
+  #line-status.limited {
+    background-color: darkorange;
   }
 `;
 
 const HTML = `
-  <div class="container-fluid text-right online" id="line-status" style="display:none;">
-    <span class="online"><span class="text-success glyphicon glyphicon-ok-sign"></span> ONLINE</span>
-    <span class="limited"><span class="text-warning glyphicon glyphicon-exclamation-sign"></span> LIMITED</span>
-    <span class="offline"><span class="text-danger glyphicon glyphicon-remove-sign"></span> OFFLINE</span>
-  </div>
+  <div id="line-status"></div>
 `;
 
 const wrapper = document.createElement('div');
@@ -42,5 +48,6 @@ function statusHandler (status) {
   lineStatus.style.display = 'block';
   lineStatus.classList.remove('online', 'limited', 'offline');
   lineStatus.classList.add(status);
+  lineStatus.setAttribute('title', status);
 }
 veda.on('status', statusHandler);
