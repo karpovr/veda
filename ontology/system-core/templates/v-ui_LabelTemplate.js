@@ -37,7 +37,7 @@ export const post = function (individual, template, container, mode, extra) {
       template.popover({
         trigger: "hover click",
         delay: { "show": 750, "hide": 100 },
-        placement: "auto top",
+        placement: "auto bottom",
         html: true,
         container: 'body',
         content: cntr

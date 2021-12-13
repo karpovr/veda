@@ -23,9 +23,11 @@ export const html = `
   </div>
   <div class="media-body" style="width:auto">
     <strong class="media-heading">
-      <span about="@" property="v-s:lastName"></span>
-      <span about="@" property="v-s:firstName"></span>
-      <span about="@" property="v-s:middleName"></span>
+      <span>
+        <span about="@" property="v-s:lastName"></span>
+        <span about="@" property="v-s:firstName"></span>
+        <span about="@" property="v-s:middleName"></span>
+      </span>
     </strong>
     <hr class="no-margin">
     <div about="@" rel="v-s:hasAppointment">

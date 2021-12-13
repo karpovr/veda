@@ -24,16 +24,17 @@ export const html = `
   </div>
   <div class="media-body" style="width:auto;">
     <strong class="media-heading" about="@" rel="v-s:employee">
-      <span about="@" property="v-s:lastName"></span>
-      <span about="@" property="v-s:firstName"></span>
-      <span about="@" property="v-s:middleName"></span>
+      <span>
+        <span about="@" property="v-s:lastName"></span>
+        <span about="@" property="v-s:firstName"></span>
+        <span about="@" property="v-s:middleName"></span>
+      </span>
     </strong>
     <hr class="no-margin">
     <div about="@" rel="v-s:occupation">
       <div>
-        <small about="@" property="v-s:title"></small>
-      </div>
-      <div>
+        <small about="@" property="rdfs:label"></small>
+        <br>
         <small about="@" rel="v-s:parentUnit" data-template="v-ui:LabelTemplate"></small>
       </div>
     </div>
@@ -59,7 +60,6 @@ export const html = `
         </div>
       </div>
     </div>
-
   </div>
 </div>
 `;
