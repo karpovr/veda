@@ -75,16 +75,11 @@ export const pre = function (individual, template, container, mode, extra) {
     searchResultTemplate = new IndividualModel("v-fs:MinimalSearchResultTemplate");
   }
   return searchResultTemplate.load().then(function (searchResultTemplate) {
-    var file_reg = /\.js$/;
     var templateString = searchResultTemplate["v-ui:template"][0].toString();
-    if (file_reg.test(templateString)) {
-      return import('/templates/' + templateString)
-        .then(function (templateModule) {
-          return templateModule.html;
-        });
-    } else {
-      return templateString;
-    }
+    return import('/templates/' + templateString)
+      .then(function (templateModule) {
+        return templateModule.html;
+      });
   }).then(function (templateString) {
     var searchResultTemplate = $( templateString );
     var resultContainer = $(".result-container", searchResultTemplate);
@@ -93,18 +88,7 @@ export const pre = function (individual, template, container, mode, extra) {
       resultContainer.empty();
       return resultTemplateIndividual.load()
         .then(function(resultTemplateIndividual) {
-          var file_reg = /\.js$/;
           var resultTemplate = resultTemplateIndividual["v-ui:template"][0].toString();
-          if (file_reg.test(resultTemplate)) {
-            return import('/templates/' + resultTemplate)
-              .then(function (resultTemplateModule) {
-                return resultTemplateModule.html;
-              });
-          } else {
-            return resultTemplate;
-          }
-        })
-        .then(function(resultTemplate) {
           individual.resultTemplate = resultTemplate;
           searchResultContainer.append( searchResultTemplate );
         });
@@ -175,50 +159,50 @@ export const post = function (individual, template, container, mode, extra) {
       statsTop = $(".stats-top", template);
 
   // Set columns
-  individual.hiddenColumns = individual.hiddenColumns || {};
-  var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
-    e.stopPropagation();
-  });
-  var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
-  if (checkTmpl.length) {
-    checkTmpl = checkTmpl.get(0).outerHTML;
-    $(".search-result table > thead > tr:last > th", template).each(function (index) {
-      var th = $(this);
-      var check = $(checkTmpl);
-      var checkbox = $("input", check);
-      var columnName = $(this).find("span").clone();
-      if ( columnName.length ) {
-        $(".column-name", check).html( columnName );
-      } else {
-        $(".column-name", check).text( th.text() );
-      }
-      if (index in individual.hiddenColumns) {
-        checkbox.prop("checked", false);
-      } else {
-        checkbox.prop("checked", true);
-      }
-      checkbox.change(checkHandler);
-      checkHandler.call( checkbox.get(0) );
-      checksContainer.append(check);
-
-      // Show/hide result table columns & update resultTemplate accordingly
-      function checkHandler() {
-        individual.resultTemplate = $(individual.resultTemplate);
-        if ( $(this).is(":checked") ) {
-          th.removeClass("hidden");
-          $("tr td:nth-child(" + (index + 1) + ")", resultContainer).removeClass("hidden");
-          individual.resultTemplate.not("script").children().eq(index).removeClass("hidden");
-          delete individual.hiddenColumns[index];
-        } else {
-          th.addClass("hidden");
-          $("tr td:nth-child(" + (index + 1) + ")", resultContainer).addClass("hidden");
-          individual.resultTemplate.not("script").children().eq(index).addClass("hidden");
-          individual.hiddenColumns[index] = true;
-        }
-        individual.resultTemplate = individual.resultTemplate.map(function () { return this.outerHTML; }).get().join("");
-      }
-    });
-  }
+  //individual.hiddenColumns = individual.hiddenColumns || {};
+  //var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
+  //  e.stopPropagation();
+  //});
+  //var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
+  //if (checkTmpl.length) {
+  //  checkTmpl = checkTmpl.get(0).outerHTML;
+  //  $(".search-result table > thead > tr:last > th", template).each(function (index) {
+  //    var th = $(this);
+  //    var check = $(checkTmpl);
+  //    var checkbox = $("input", check);
+  //    var columnName = $(this).find("span").clone();
+  //    if ( columnName.length ) {
+  //      $(".column-name", check).html( columnName );
+  //    } else {
+  //      $(".column-name", check).text( th.text() );
+  //    }
+  //    if (index in individual.hiddenColumns) {
+  //      checkbox.prop("checked", false);
+  //    } else {
+  //      checkbox.prop("checked", true);
+  //    }
+  //    checkbox.change(checkHandler);
+  //    checkHandler.call( checkbox.get(0) );
+  //    checksContainer.append(check);
+  //
+  //    // Show/hide result table columns & update resultTemplate accordingly
+  //    function checkHandler() {
+  //      individual.resultTemplate = $(individual.resultTemplate);
+  //      if ( $(this).is(":checked") ) {
+  //        th.removeClass("hidden");
+  //        $("tr td:nth-child(" + (index + 1) + ")", resultContainer).removeClass("hidden");
+  //        individual.resultTemplate.not("script").children().eq(index).removeClass("hidden");
+  //        delete individual.hiddenColumns[index];
+  //      } else {
+  //        th.addClass("hidden");
+  //        $("tr td:nth-child(" + (index + 1) + ")", resultContainer).addClass("hidden");
+  //        individual.resultTemplate.not("script").children().eq(index).addClass("hidden");
+  //        individual.hiddenColumns[index] = true;
+  //      }
+  //      individual.resultTemplate = individual.resultTemplate.map(function () { return this.outerHTML; }).get().join("");
+  //    }
+  //  });
+  //}
 
   // Remember scroll position
   template.one("remove", function () {
@@ -626,7 +610,7 @@ export const html = `
         <button class="more-results btn btn-primary hidden" about="v-fs:MoreResults" property="rdfs:label"></button>
         <button class="all-results btn btn-warning hidden" about="v-fs:AllResults" property="rdfs:label"></button>
       </span>
-      <div class="pull-right btn-group dropup set-columns-wrapper" style="margin-left:3px;">
+      <!--div class="pull-right btn-group dropup set-columns-wrapper" style="margin-left:3px;">
         <button type="button" class="btn btn-info dropdown-toggle set-columns" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span about="v-fs:SetColumns" property="rdfs:label"></span>
           <span class="caret"></span>
@@ -638,7 +622,7 @@ export const html = `
             </label>
           </div>
         </div>
-      </div>
+      </div-->
     </div>
     <br>
   </div>
