@@ -45,9 +45,9 @@ function resizeImage (image, maxWidth) {
       resolve(image);
     } else {
       const temp = $('<div></div>').append(image);
-      System.import('cropper/cropper.min.js').then((module) => {
+      import('cropper/cropper.min.js').then((module) => {
         const Cropper = module.default;
-        System.import('cropper/cropper.min.css').then((module) => {
+        import('cropper/cropper.min.css').then((module) => {
           const styleSheet = module.default;
           document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
 
@@ -88,9 +88,9 @@ function cropImage (imageForCrop, ratio, maxWidth) {
   container.append(temp);
 
   return new Promise((resolve, reject) => {
-    System.import('cropper/cropper.min.js').then((module) => {
+    import('cropper/cropper.min.js').then((module) => {
       const Cropper = module.default;
-      System.import('cropper/cropper.min.css').then((module) => {
+      import('cropper/cropper.min.css').then((module) => {
         const styleSheet = module.default;
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
 

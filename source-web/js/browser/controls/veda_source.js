@@ -28,7 +28,7 @@ $.fn.veda_source = function (options) {
     };
   };
 
-  System.import('ace').then((module) => {
+  import('ace').then((module) => {
     const ace = module.default;
 
     const editor = ace.edit(editorEl, {

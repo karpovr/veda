@@ -112,7 +112,7 @@ Util.toTTL = function (individualList, callback) {
 };
 
 Util.exportTTL = function (individualList) {
-  System.import('filesaver').then((module) => {
+  import('filesaver').then((module) => {
     const saveAs = module.default;
     Util.toTTL(individualList, function (error, result) {
       const blob = new Blob([result], {type: 'text/plain;charset=utf-8'});

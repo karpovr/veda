@@ -18,8 +18,8 @@ import 'regenerator-runtime/runtime';
 export default veda;
 
 (async () => {
-  await System.import('jquery');
-  await System.import('bootstrap');
+  await import('jquery');
+  await import('bootstrap');
   const response = await fetch('./manifest');
   const manifest = await response.json();
   appModel.call(veda, manifest);
