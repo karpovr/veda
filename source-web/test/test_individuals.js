@@ -2623,7 +2623,7 @@ for (i = 0; i < 1; i++) {
             'v-s:test_field': newStr(test_data, 'NONE'),
             'v-s:test_fieldA': newUri('BBB' + test_data_uid),
             'v-s:test_fieldB': newUri('CCC' + test_data_uid),
-    	    'v-s:created': newDate(new Date())
+          'v-s:created': newDate(new Date())
         };
 
         var new_test_doc1_uri_2 = "test21_2:" + guid();
@@ -2632,7 +2632,7 @@ for (i = 0; i < 1; i++) {
             'rdf:type': newUri('rdfs:Resource'),
             'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
             'v-s:test_field': newUri(test_data),
-    	    'v-s:created': newDate(new Date())
+          'v-s:created': newDate(new Date())
         };
 
         var new_test_doc1_uri_3 = "test21_3:" + guid();
@@ -2642,9 +2642,10 @@ for (i = 0; i < 1; i++) {
             'v-s:author': newUri('td:ValeriyBushenev-Programmer1'),
             'v-s:test_field': newUri(test_data),
             'v-s:test_fieldA': newUri('BBB' + test_data_uid),
-    	    'v-s:created': newDate(new Date())
+          'v-s:created': newDate(new Date())
         };
         var res = Backend.put_individuals(ticket_user1.id, [new_test_doc1, new_test_doc2, new_test_doc3], false);
+        Backend.wait_module(m_acl, res.op_id);
         var read_individual1 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_1);
         var read_individual2 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_2);
         var read_individual3 = Backend.get_individual(ticket_user1.id, new_test_doc1_uri_3);
@@ -3140,11 +3141,11 @@ for (i = 0; i < 1; i++) {
             var doc_group = 'g:doc_resource_group';
             var doc = create_test_document3(ticket_admin);
             var res;
-       
-            // #1 
+
+            // #1
             test_success_read(assert, ticket_admin, doc['@'], doc);
 
-            // #2 
+            // #2
             test_fail_read(assert, ticket_user, doc['@'], doc);
 
             // doc добавляем в doc_gr с RUD
@@ -3154,7 +3155,7 @@ for (i = 0; i < 1; i++) {
             var op_id = res[1].op_id;
             Backend.wait_module(m_acl, res[1].op_id);
 
-            // #3 
+            // #3
             check_rights_success(assert, ticket_user.id, doc_group, [can_read, can_update, can_delete]);
 
             // #4
@@ -3171,8 +3172,8 @@ for (i = 0; i < 1; i++) {
                 'v-s:canDeleted': newBool(true),
                 'v-s:deleted': newBool(true),
             };
-    	    res = Backend.put_individual(ticket_admin.id, test_memb1_dropCount);
-    	    Backend.wait_module(m_acl, res.op_id);
+          res = Backend.put_individual(ticket_admin.id, test_memb1_dropCount);
+          Backend.wait_module(m_acl, res.op_id);
 
             // #5 У User есть RUD на doc_group
             check_rights_success(assert, ticket_user.id, doc_group, [can_read, can_update, can_delete]);
@@ -3192,8 +3193,8 @@ for (i = 0; i < 1; i++) {
                 'v-s:resource': newUri(doc['@']),
                 'v-s:memberOf': newUri(doc_group)
             };
-    	    res = Backend.put_individual(ticket_admin.id, test_memb2_dropCount);
-    	    Backend.wait_module(m_acl, res.op_id);
+          res = Backend.put_individual(ticket_admin.id, test_memb2_dropCount);
+          Backend.wait_module(m_acl, res.op_id);
 
             // #8 У User есть RUD на doc
             check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
@@ -3208,8 +3209,8 @@ for (i = 0; i < 1; i++) {
                 'v-s:memberOf': newUri(doc_group),
                 'v-s:deleted': newBool(true)
             };
-    	    res = Backend.put_individual(ticket_admin.id, test_memb3_dropCount);
-    	    Backend.wait_module(m_acl, res.op_id);
+          res = Backend.put_individual(ticket_admin.id, test_memb3_dropCount);
+          Backend.wait_module(m_acl, res.op_id);
 
             // #9 У User нет RUD на doc
             check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
@@ -3224,9 +3225,9 @@ for (i = 0; i < 1; i++) {
                 'v-s:memberOf': newUri(doc_group),
             };
             res = Backend.put_individual(ticket_admin.id, test_memb4_dropCount);
-    	    Backend.wait_module(m_acl, res.op_id);
+          Backend.wait_module(m_acl, res.op_id);
 
-            // #10 
+            // #10
             check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
 
             // В предыдущий membership добавляем v-s:deleted, пытаемся забрать права. Не должно срабатывать
@@ -3239,7 +3240,7 @@ for (i = 0; i < 1; i++) {
                 'v-s:deleted': newBool(true)
             };
             res = Backend.put_individual(ticket_admin.id, test_memb4_dropCount);
-    	    Backend.wait_module(m_acl, res.op_id);
+          Backend.wait_module(m_acl, res.op_id);
 
             // #11 Права остались RUD
             check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
@@ -3258,11 +3259,11 @@ for (i = 0; i < 1; i++) {
                 'v-s:deleted': newBool(true)
             };
             res = Backend.put_individual(ticket_admin.id, test_memb5_dropCount);
-    	    Backend.wait_module(m_acl, res.op_id);
+          Backend.wait_module(m_acl, res.op_id);
 
             // #12 Прав нет
             check_rights_fail(assert, ticket_user.id, doc['@'], [can_read, can_update, can_delete]);
-            
+
         });
 
     QUnit.test("#057 Test PermissionStatement dropCount",
@@ -3273,7 +3274,7 @@ for (i = 0; i < 1; i++) {
             var doc = create_test_document1(ticket_admin);
             var res;
 
-        // R - 3, U - 2, D - 2 
+        // R - 3, U - 2, D - 2
         res = addRight(ticket_admin.id, [can_read, can_update, can_delete], user, doc['@']);
         var right1 = res[0];
         assert.ok(res[1].result == 200);
@@ -3319,11 +3320,11 @@ for (i = 0; i < 1; i++) {
             'v-s:permissionObject': newUri(doc['@']),
             'v-s:permissionSubject': newUri(user),
             'v-s:canUpdate': newBool(true),
-        };    
+        };
         res = Backend.put_individual(ticket_admin.id, test_perm2_dropCount);
         Backend.wait_module(m_acl, res.op_id);
 
-        // #5 
+        // #5
         check_rights_success(assert, ticket_user.id, doc['@'], [can_read, can_update]);
 
 
@@ -3352,18 +3353,18 @@ for (i = 0; i < 1; i++) {
             'v-s:canUpdate': newBool(true),
             'v-s:canDelete': newBool(true),
             'v-s:deleted': newBool(true)
-        }; 
+        };
         res = Backend.put_individual(ticket_admin.id, test_perm2_dropCount);
         Backend.wait_module(m_acl, res.op_id);
 
          // #9 (права на R должны остаться)
         check_rights_success(assert, ticket_user.id, doc['@'], [can_read]);
 
-        // #10 
+        // #10
         check_rights_fail(assert, ticket_user.id, doc['@'], [can_update, can_delete]);
 
-        
-        // 2R0U0 ->    
+
+        // 2R0U0 ->
         var test_perm3_dropCount_uri = genUri();
         var test_perm3_dropCount = {
             '@': test_perm3_dropCount_uri,
