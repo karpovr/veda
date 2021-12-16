@@ -30,6 +30,9 @@ const API = [
  * Listen to cached resources changes
  */
 function listenChanges () {
+
+  if (typeof EventSource === 'undefined') return;
+
   const events = new EventSource('/changes');
 
   events.onopen = () => {
@@ -39,7 +42,7 @@ function listenChanges () {
   events.onerror = (event) => {
     console.log(new Date().toISOString(), `Failed to listen to resources changes, reconnect in ${Math.floor(changesTimeout / 1000)} sec`);
     event.target.close();
-    setTimeout(listenChanges, 60 * 1000);
+    setTimeout(listenChanges, changesTimeout);
   };
 
   events.onmessage = (event) => {
