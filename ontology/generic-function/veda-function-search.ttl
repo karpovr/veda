@@ -34,6 +34,13 @@ v-fs:sortOrder
   rdfs:domain v-fs:AttributiveSearch ;
   rdfs:range xsd:string ;
 .
+v-fs:hasVisibleColumns
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Видимые столбцы"@ru ;
+  rdfs:label "Visible columns"@en ;
+  rdfs:domain v-fs:PersonalSearch ;
+  rdfs:range rdfs:Resource ;
+.
 v-fs:EnterQuery
   rdf:type v-s:Bundle ;
   rdfs:label "Введите запрос"@ru ;
@@ -493,6 +500,24 @@ v-fs:AttributiveSearchManagementTemplate
         personalRegistry["v-s:created"] = [];
         personalRegistry["rdfs:isDefinedBy"] = [];
         personalRegistry["rdfs:label"] = [ personalLabel ];
+
+        var columns = $(".set-columns-wrapper .dropdown-menu .checkbox", template);
+        var visibleColumns = [];
+        columns.each(function(i) {
+          var elem = $(this);
+          var input = $("input", elem);
+          if (input.is(":checked")) {
+            visibleColumns.push(elem);
+          }
+        });
+        if (visibleColumns.length > 0) {
+          personalRegistry["v-fs:hasVisibleColumns"] = visibleColumns.map(function(c) {
+            var uri = $("span.column-name span", c).attr("about");
+            console.log(uri);
+            return new veda.IndividualModel(uri);
+          });
+        }
+        
         var searchBlank = individual.hasValue("v-fs:searchBlank") ? individual["v-fs:searchBlank"][0] : undefined;
         if (searchBlank && searchBlank.object) {
           return searchBlank.clone()
@@ -1108,9 +1133,11 @@ v-fs:AttributiveSearchInlineTemplate
 
   // Set columns
   individual.hiddenColumns = individual.hiddenColumns || {};
+ 
   var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
     e.stopPropagation();
   });
+  var isHasVisibleColumns = individual.hasValue("v-fs:hasVisibleColumns");
   var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
   if (checkTmpl.length) {
     checkTmpl = checkTmpl.get(0).outerHTML;
@@ -1124,6 +1151,14 @@ v-fs:AttributiveSearchInlineTemplate
       } else {
         $(".column-name", check).text( th.text() );
       }
+      var aboutAttr = columnName.attr("about");
+      if (aboutAttr != undefined && isHasVisibleColumns) {
+        var isVisible = individual["v-fs:hasVisibleColumns"].some(function(col) {
+          return col.id == aboutAttr;
+        })
+        if (!isVisible) individual.hiddenColumns[index] = true;
+      }
+
       if (index in individual.hiddenColumns) {
         checkbox.prop("checked", false);
       } else {
@@ -1132,7 +1167,6 @@ v-fs:AttributiveSearchInlineTemplate
       checkbox.change(checkHandler);
       checkHandler.call( checkbox.get(0) );
       checksContainer.append(check);
-
       // Show/hide result table columns & update resultTemplate accordingly
       function checkHandler() {
         individual.resultTemplate = $(individual.resultTemplate);
