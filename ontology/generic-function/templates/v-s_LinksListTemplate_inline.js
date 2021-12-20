@@ -46,11 +46,8 @@ export const html = `
 <tr>
   <td><a href="#/@" class="glyphicon glyphicon-search view -edit -search" ></a></td>
   <td>
-    <div class="col-md-5">
-      <veda-control rel="v-s:type" data-type="link" class="fulltext -view edit -search" data-single="true"
-      data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
-    </div>
-    <div class="col-md-7">
+    <div class="col-md-12">
+      <veda-control rel="v-s:type" data-single="true" data-type="link" class="fulltext dropdown -view edit -search"  data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
       <veda-control data-type="link" rel="v-s:to" class="-view edit search fulltext disabled" data-query-prefix="'rdf:type'=='{@.v-s:type.id}'"></veda-control>
     </div>
     <div class="col-md-12">
