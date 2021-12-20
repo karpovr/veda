@@ -40,6 +40,7 @@ v-s:PSmanagedOrganization
   v-ui:queryPrefix "('rdf:type' == 'v-s:Organization')"^^xsd:string ;
   v-ui:placeholder "Выберите организацию"@ru ;
   v-ui:placeholder "Choose organization"@en ;
+  v-ui:sort "'rdfs:label' asc" ;
 .
 
 v-s:Contacts
@@ -72,6 +73,17 @@ v-s:ContactsBundle
   rdf:type v-s:Bundle;
   rdfs:label "Контакты"@ru ;
   rdfs:label "Contacts"@en ;
+.
+v-s:SpecialCallsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Спец"@ru ;
+  rdfs:label "Special"@en ;
+.
+
+v-s:AllContactsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Все"@ru ;
+  rdfs:label "All"@en ;
 .
 
 v-s:SearchTextBundle
@@ -119,6 +131,13 @@ v-s:ContactsTemplate
           loadIndicator.hide();
         });
     }
+    else if (individual["activeTab"] == "spec") {
+      return veda.user.aspect
+        .present($(".tabContainer", template), "v-s:SpecialCallsContactTemplate")
+        .then(function () {
+          loadIndicator.hide();
+        });
+    }
     var targetIndidivUri = self.find("a").attr("about");
     var targetIndidiv = new veda.IndividualModel(targetIndidivUri);
   });
@@ -135,11 +154,15 @@ v-s:ContactsTemplate
   <ul id="box-tabs" class="nav nav-tabs nav-right" role="tablist">
     <li class="pull-left"><h2 id="currentTab" class="no-margin" about="@" property="rdfs:label"></h2></li>
     <li data-type="my" role="presentation"><a href="#" about="v-ft:MyBundle" property="rdfs:label"></a></li>
-    <li data-type="search" role="presentation" class="active"><a href="#" about="v-s:ContactsBundle" property="rdfs:label"></a></li>
+    <li id="forAdmin" class='hidden' data-type="spec" role="presentation"><a href="#" about="v-s:SpecialCallsBundle" property="rdfs:label"></a></li>
+    <li data-type="search" role="presentation" class="active"><a href="#" about="v-s:AllContactsBundle" property="rdfs:label"></a></li>
   </ul>
   <br>
   <div class="tabContainer"></div>
 </div>
+<script>
+  if(veda.appointment.id === "cfg:AdministratorAppointment") $("#forAdmin", template).removeClass("hidden");
+      </script>
 """
 .
 
@@ -165,6 +188,47 @@ v-s:FavoriteContactTemplate
   </table>
 </div>
 <script>
+</script>
+"""
+.
+
+v-s:SpecialCallsContactTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон избранных контактов"@ru ;
+  rdfs:label "Favorite contacts template"@en ;
+  v-ui:template """
+<div>
+   <table class="table table-hover">
+    <thead>
+      <th><span class="glyphicon glyphicon-chevron-down"></span></th>
+      <th><span about="rdfs:label" property="rdfs:label"></span></th>
+      <th><span about="v-s:ContactsBundle" property="rdfs:label"></th>
+      <th></th>
+      <th></th>
+    </thead>
+    <tbody class="contacts">
+      <script>
+        $(".open-structure").remove();
+      </script>
+    </tbody>
+  </table>
+ </div>
+<script>
+
+var queryString = "SELECT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 ORDER BY `rdfs_label_str`[1]";
+return veda.Backend.query({
+    ticket: veda.ticket,
+    sql: queryString,
+    from: 0,
+    top: 10,
+    limit: 200,
+    async: true
+}).then(function (contacts) {
+    return contacts.result.forEach(function (contact) {
+        var obj_spec = new veda.IndividualModel(contact);
+        return obj_spec.present($(".contacts", template), "v-s:ContactCardTemplate");
+    })
+});
 
 </script>
 """
@@ -281,6 +345,9 @@ v-s:ContactCardTemplate
   </td>
 </tr>
 <script>
+  $("#create-customer",template).addClass("alert-warning");
+
+
   var commMeansPromises;
   if (individual.hasValue("v-s:employee")) {
     if (individual["v-s:employee"][0].hasValue("mnd-s:hasEmployeeProfile")) {
@@ -455,7 +522,7 @@ v-s:ContactsStructureTemplate
       </div>
     </div>
     <div class="col-md-4">
-      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext" data-query-prefix="('rdf:type' === 'v-s:Organization')"></veda-control>
+      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext dropdown" data-query-prefix="('rdf:type' === 'v-s:Organization' && 'v-s:actualContacts'=='true')"></veda-control>
       <span class="text-muted padding-md" about="v-s:FastInputBundle" property="rdfs:label"></span>
       <button id="selfOrg" class="btn btn-xs btn-primary margin-sm">
         +<span></span>
@@ -1063,13 +1130,15 @@ v-s:ContactsStructureTemplate
     var selectPart = "SELECT target.id";
     var endingPart = " GROUP BY target.id, target.rdfs_label_str HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
     var basicWherePart = findDeleted? " WHERE target.v_s_deleted_int=[1]" : " WHERE target.v_s_deleted_int=[0]";
+    var orgJoinPart = " LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentUnit_str`[1]";
+    var conditionForOrg = " and org.`v_s_actualContacts_int`[1]=1";
     if (findInParentOrg) {
-      basicWherePart+= " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']"
+      basicWherePart+= " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']";
     }
-    var organizationQuery = selectPart + " FROM veda_tt.`v-s:Organization` AS target";
-    var departmentQuery = selectPart + " FROM veda_tt.`v-s:Department` AS target";
-    var appointmentQuery = selectPart + " FROM veda_tt.`v-s:Appointment` as target INNER JOIN veda_tt.`v-s:Person` as per ON target.v_s_employee_str[1] = per.id";
-    var specialPositionQuery = selectPart + " FROM veda_tt.`v-s:Position` AS target";
+    var organizationQuery = selectPart + " FROM veda_tt.`v-s:Organization` AS target" ;
+    var departmentQuery = selectPart + " FROM veda_tt.`v-s:Department` AS target" + orgJoinPart;
+    var appointmentQuery = selectPart + " FROM veda_tt.`v-s:Appointment` as target INNER JOIN veda_tt.`v-s:Person` as per ON target.v_s_employee_str[1] = per.id"  + orgJoinPart;
+    var specialPositionQuery = selectPart + " FROM veda_tt.`v-s:Position` AS target"  + orgJoinPart;
 
     var isCommMeanJoinAdded = false;
     // var isPhoneChannelAdded = false;
@@ -1105,14 +1174,14 @@ v-s:ContactsStructureTemplate
         qParts[0] += " AND lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%"+sText+"%'";
         qParts[1] += " AND lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%"+sText+"%'";
         qParts[2] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,per.v_s_middleName_str), ' ')) LIKE '%"+sText+"%'";
-        qParts[3] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,target.rdfs_comment_str), ' ')) LIKE '%"+sText+"%'";
+        qParts[3] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,target.rdfs_comment_str), ' ')) LIKE '%"+sText+"%'" ;
       };
       return qParts;
     }, ["", "", "", ""]);
-    organizationQuery = findInParentOrg? null : organizationQuery+basicWherePart+queryParts[0] + " AND v_s_hasCommunicationMean_str[1]!=''" + endingPart;
-    departmentQuery += basicWherePart + queryParts[1] + endingPart;
-    appointmentQuery += basicWherePart + queryParts[2] + " AND target.v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(target.v_s_origin_str, '')) LIKE '%group%')" + endingPart;
-    specialPositionQuery += basicWherePart + queryParts[3] + " AND lowerUTF8(arrayStringConcat(target.v_s_origin_str, ' ')) LIKE '%group%'" + endingPart;
+    organizationQuery = findInParentOrg? null : organizationQuery+basicWherePart+queryParts[0] + " AND v_s_hasCommunicationMean_str[1]!=''" + conditionForOrg + endingPart;
+    departmentQuery += basicWherePart + queryParts[1] + conditionForOrg + endingPart;
+    appointmentQuery += basicWherePart + queryParts[2] + " AND target.v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(target.v_s_origin_str, '')) LIKE '%group%')" + conditionForOrg + endingPart;
+    specialPositionQuery += basicWherePart + queryParts[3] + " AND lowerUTF8(arrayStringConcat(target.v_s_origin_str, ' ')) LIKE '%group%'" + conditionForOrg+ endingPart;
     return [organizationQuery, departmentQuery, appointmentQuery, specialPositionQuery];
   }
 
