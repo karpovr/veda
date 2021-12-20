@@ -118,6 +118,13 @@ v-ui:tooltip
   rdfs:label "Tooltip"@en ;
   rdfs:range xsd:string ;
 .
+v-ui:info
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-ui:PropertySpecification ;
+  rdfs:label "Расширенная подсказка "@ru ;
+  rdfs:label "Help info"@en ;
+  rdfs:range xsd:string ;
+.
 v-ui:alternativeName
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-ui:PropertySpecification ;
@@ -1586,6 +1593,12 @@ v-ui:LabelTemplate
           e.stopPropagation();
           template.click();
         });
+        document.addEventListener("click", function(e) {
+          var jTarget = $(e.target);
+          if (jTarget.closest(".popover").length == 0 && jTarget[0] != template[0]) {
+            template.click();
+          }
+        })
       });
     }
 
@@ -1690,6 +1703,24 @@ v-ui:IconModalTemplate
     });
   });
 
+</script>
+  """ ;
+.
+
+v-ui:InfoPopoverTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для всплывающей информации"@ru ;
+  rdfs:label "Template for info popover"@en ;
+  v-ui:template """
+<span tabindex="0" role="button" class="glyphicon glyphicon-info-sign text-primary"></span>
+<script>
+  template.popover({
+    content: individual["v-ui:info"].map(Util.formatValue).join(' '),
+    container: template.parent(),
+    trigger: 'focus',
+    placement: 'top',
+    animation: false,
+  });
 </script>
   """ ;
 .
@@ -1802,7 +1833,7 @@ v-ui:RabbitHole
         travel( prop,text).then(function(rText){
           $("small", wrapper).append(rText);
           template.append(wrapper);
-        });
+        })
       })
       break;
     }
@@ -1824,7 +1855,12 @@ v-ui:RabbitHole
         }
       }
       return text;
-    })
+    }).catch(function(error) {
+      const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
+      return errorIndividual.load().then(function(errorIndividual) {
+        return `<span>${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}</span> / ${text}`;
+      });
+    });
   }
   function mkName(individual) {
     var label = individual["rdf:type"][0].toString() + ": " + individual.toString();
