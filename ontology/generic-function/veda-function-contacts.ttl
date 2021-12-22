@@ -77,7 +77,17 @@ v-s:ContactsBundle
 v-s:SpecialCallsBundle
   rdf:type v-s:Bundle;
   rdfs:label "Спец"@ru ;
+  rdfs:label "Spec"@en ;
+.
+v-s:SpecialBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Специальные"@ru ;
   rdfs:label "Special"@en ;
+.
+v-s:GroupBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Групповые"@ru ;
+  rdfs:label "Group"@en ;
 .
 
 v-s:AllContactsBundle
@@ -198,37 +208,72 @@ v-s:SpecialCallsContactTemplate
   rdfs:label "Favorite contacts template"@en ;
   v-ui:template """
 <div>
-   <table class="table table-hover">
-    <thead>
-      <th><span class="glyphicon glyphicon-chevron-down"></span></th>
-      <th><span about="rdfs:label" property="rdfs:label"></span></th>
-      <th><span about="v-s:ContactsBundle" property="rdfs:label"></th>
-      <th></th>
-      <th></th>
-    </thead>
-    <tbody class="contacts">
-      <script>
-        $(".open-structure").remove();
-      </script>
-    </tbody>
-  </table>
+  <section id="spec">
+    <h5 class="section-header">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+      <label about="v-s:SpecialBundle" property="rdfs:label"></label>
+    </h5>
+    <div class="section-content">
+      <table class="table result-table">
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+  <section id="group">
+    <h5 class="section-header">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+      <label about="v-s:GroupBundle" property="rdfs:label"></label>
+    </h5>
+    <div class="section-content">
+      <table class="table result-table">
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
  </div>
 <script>
 
-var queryString = "SELECT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 ORDER BY `rdfs_label_str`[1]";
-return veda.Backend.query({
+$("section .section-header", template).click(function(){
+    var self = $(this);
+    $("span.glyphicon", self).toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
+    self.siblings().toggle();
+  });
+
+function presentSearchResult(objType, container, items) {
+    var promises = items.map(function(item) {
+      var item2 = new veda.IndividualModel(item);
+      return item2.present($("<div></div>"), "v-s:ContactCardTemplate");
+    });
+    return Promise.all(promises).then(function(templates){
+      templates.forEach(function(tmpl) {
+        $("tbody", container).append(tmpl);
+      });
+    });
+  }
+
+var promise_spec = veda.Backend.query({
     ticket: veda.ticket,
-    sql: queryString,
+    sql: "SELECT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 ORDER BY `rdfs_label_str`[1]",
     from: 0,
-    top: 10,
+    top: 100,
     limit: 200,
     async: true
-}).then(function (contacts) {
-    return contacts.result.forEach(function (contact) {
-        var obj_spec = new veda.IndividualModel(contact);
-        return obj_spec.present($(".contacts", template), "v-s:ContactCardTemplate");
-    })
-});
+})
+
+var promise_group = veda.Backend.query({
+    ticket: veda.ticket,
+    sql: "SELECT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%group%' and lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) not LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 and id!='d:GLAV_DISP_position' and id!='d:SYK-SKDG_position' and id!='d:RU1121003135_pos_OptiF1C' ORDER BY `rdfs_label_str`[1]",
+    from: 0,
+    top: 100,
+    limit: 200,
+    async: true
+})
+
+return Promise.all([promise_spec, promise_group]).then(function (result) {
+    presentSearchResult("pos", spec, result[0].result);
+    presentSearchResult("pos", group, result[1].result);
+
+})
 
 </script>
 """
@@ -1130,7 +1175,7 @@ v-s:ContactsStructureTemplate
     var selectPart = "SELECT target.id";
     var endingPart = " GROUP BY target.id, target.rdfs_label_str HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
     var basicWherePart = findDeleted? " WHERE target.v_s_deleted_int=[1]" : " WHERE target.v_s_deleted_int=[0]";
-    var orgJoinPart = " LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentUnit_str`[1]";
+    var orgJoinPart = " LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]";
     var conditionForOrg = " and org.`v_s_actualContacts_int`[1]=1";
     if (findInParentOrg) {
       basicWherePart+= " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']";
