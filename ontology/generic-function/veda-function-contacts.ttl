@@ -164,14 +164,14 @@ v-s:ContactsTemplate
   <ul id="box-tabs" class="nav nav-tabs nav-right" role="tablist">
     <li class="pull-left"><h2 id="currentTab" class="no-margin" about="@" property="rdfs:label"></h2></li>
     <li data-type="my" role="presentation"><a href="#" about="v-ft:MyBundle" property="rdfs:label"></a></li>
-    <li id="forAdmin" class='hidden' data-type="spec" role="presentation"><a href="#" about="v-s:SpecialCallsBundle" property="rdfs:label"></a></li>
+    <li data-type="spec" role="presentation"><a href="#" about="v-s:SpecialCallsBundle" property="rdfs:label"></a></li>
     <li data-type="search" role="presentation" class="active"><a href="#" about="v-s:AllContactsBundle" property="rdfs:label"></a></li>
   </ul>
   <br>
   <div class="tabContainer"></div>
 </div>
 <script>
-  if(veda.appointment.id === "cfg:AdministratorAppointment") $("#forAdmin", template).removeClass("hidden");
+  
       </script>
 """
 .
@@ -262,10 +262,10 @@ var promise_spec = veda.Backend.query({
 
 var promise_group = veda.Backend.query({
     ticket: veda.ticket,
-    sql: "SELECT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%group%' and lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) not LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 and id!='d:GLAV_DISP_position' and id!='d:SYK-SKDG_position' and id!='d:RU1121003135_pos_OptiF1C' ORDER BY `rdfs_label_str`[1]",
+    sql: "SELECT DISTINCT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%group%' and lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) not LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 and id!='d:GLAV_DISP_position' and id!='d:SYK-SKDG_position' and id!='d:RU1121003135_pos_OptiF1C' and id!='d:SYK-RTISI_position' ORDER BY `rdfs_label_str`[1]",
     from: 0,
-    top: 100,
-    limit: 200,
+    top: 400,
+    limit: 400,
     async: true
 })
 
@@ -1223,7 +1223,7 @@ v-s:ContactsStructureTemplate
       };
       return qParts;
     }, ["", "", "", ""]);
-    organizationQuery = findInParentOrg? null : organizationQuery+basicWherePart+queryParts[0] + " AND v_s_hasCommunicationMean_str[1]!=''" + conditionForOrg + endingPart;
+    organizationQuery = findInParentOrg? null : organizationQuery+basicWherePart+queryParts[0] + " AND v_s_hasCommunicationMean_str[1]!=''" + " and target.`v_s_actualContacts_int`[1]=1" + endingPart;
     departmentQuery += basicWherePart + queryParts[1] + conditionForOrg + endingPart;
     appointmentQuery += basicWherePart + queryParts[2] + " AND target.v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(target.v_s_origin_str, '')) LIKE '%group%')" + conditionForOrg + endingPart;
     specialPositionQuery += basicWherePart + queryParts[3] + " AND lowerUTF8(arrayStringConcat(target.v_s_origin_str, ' ')) LIKE '%group%'" + conditionForOrg+ endingPart;
