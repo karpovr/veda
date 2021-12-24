@@ -75,7 +75,7 @@
     </div>
 
     <!-- Login form -->
-    <form style="display:none; max-width: 400px; margin: 10% auto; padding: 2em;" id="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
+    <form style="display:none; max-width: 400px; margin: 10% auto; padding: 2em;" id="login-form" name="login-form" role="form" target="autocomplete-frame" method="post" action="about:invalid">
       <h3>Войдите / Sign in</h3>
       <div id="network-error" style="display:none;" class="alert alert-danger">
         <p><strong>Ошибка!</strong> Отсутствует сетевое соединение с системой.</p>
@@ -172,7 +172,7 @@
 
     <!-- Autocomplete feature -->
     <iframe name="autocomplete-frame" style="display:none" src="about:blank"></iframe>
-    <form target="autocomplete-frame" method="post" action="about:invalid" autocomplete="on" onkeypress="return (event.keyCode !== 13 || event.target.tagName === 'TEXTAREA')">
+    <form name="autocomplete-form" target="autocomplete-frame" method="post" action="about:invalid" autocomplete="on" onkeypress="return (event.keyCode !== 13 || event.target.tagName === 'TEXTAREA')">
       <!-- Application container -->
       <div id="app"></div>
     </form>

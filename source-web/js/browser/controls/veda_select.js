@@ -42,10 +42,6 @@ $.fn.veda_select = function (params) {
     control.attr('tabindex', tabindex);
   }
 
-  control.on('mousedown', function (e) {
-    populate();
-  });
-
   control.change((e) => {
     const value = $('option:selected', control).data('value');
     if (isSingle) {
