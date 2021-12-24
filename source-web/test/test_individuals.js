@@ -2303,7 +2303,7 @@ for (i = 0; i < 1; i++) {
         });
 
     QUnit.test(
-        "#050 Bad requests",
+        "#032 Bad requests",
         function (assert) {
             var ticket = get_user1_ticket();
 
@@ -2537,7 +2537,7 @@ for (i = 0; i < 1; i++) {
             assert.ok(ticket.id.length > 0);
         });
 
-    QUnit.test("#51 Test membership isExclusive & ignoreExclusive",
+    QUnit.test("#033 Test membership isExclusive & ignoreExclusive",
         function (assert) {
             var ticket1 = get_user1_ticket();
             var doc_group = 'g:doc_resource_group';
@@ -2604,7 +2604,7 @@ for (i = 0; i < 1; i++) {
     */
 
 
-    QUnit.test("#041 test Backend.put_individuals (user1 stores three individuals)", function(assert)
+    QUnit.test("#034 test Backend.put_individuals (user1 stores three individuals)", function(assert)
     {
         var ticket_user1 = get_user1_ticket();
 
@@ -2675,7 +2675,7 @@ for (i = 0; i < 1; i++) {
         }
     });
 
-    QUnit.test("#051 test restrictions in subject groups", function (assert) {
+    QUnit.test("#035 test restrictions in subject groups", function (assert) {
         var ticket_admin = get_admin_ticket();
 
         var ticket1 = get_user1_ticket();
@@ -2732,7 +2732,7 @@ for (i = 0; i < 1; i++) {
         check_rights_success(assert, ticket2.id, doc1, [can_delete]);
     });
 
-    QUnit.test("#052 test rights counter", function (assert) {
+    QUnit.test("#036 test rights counter", function (assert) {
         var ticket_admin = get_admin_ticket();
 
         var ticket1 = get_user1_ticket();
@@ -2885,7 +2885,7 @@ for (i = 0; i < 1; i++) {
 
     });
 
-    QUnit.test("#053 test rights delete & restore", function (assert) {
+    QUnit.test("#037 test rights delete & restore", function (assert) {
 
         var ticket_admin = get_admin_ticket();
 
@@ -2973,7 +2973,7 @@ for (i = 0; i < 1; i++) {
 
     });
 
-    QUnit.test("#054 single right permissions delete & restore", function (assert) {
+    QUnit.test("#038 single right permissions delete & restore", function (assert) {
 
         var ticket_admin = get_admin_ticket();
 
@@ -3091,7 +3091,7 @@ for (i = 0; i < 1; i++) {
 
     });
 
-    QUnit.test("#055 Individual store user1 and remove user2", function (assert) {
+    QUnit.test("#039 Individual store user1 and remove user2", function (assert) {
         var ticket_user1 = get_user1_ticket();
 
         var ticket_user2 = get_user2_ticket();
@@ -3134,7 +3134,7 @@ for (i = 0; i < 1; i++) {
         assert.ok(compare(new_test_doc1, read_individual2));
     });
 
-    QUnit.test("#056 Test Membership dropCount",
+    QUnit.test("#040 Test Membership dropCount",
         function (assert) {
             var ticket_admin = get_admin_ticket();
             var ticket_user = get_user1_ticket();
@@ -3266,7 +3266,7 @@ for (i = 0; i < 1; i++) {
 
         });
 
-    QUnit.test("#057 Test PermissionStatement dropCount",
+    QUnit.test("#041 Test PermissionStatement dropCount",
         function (assert) {
             var ticket_user = get_user1_ticket();
             var user = ticket_user.user_uri;
