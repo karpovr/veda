@@ -93,6 +93,7 @@ $.fn.veda_link = function ( options ) {
               modal.modal('hide').remove();
             });
             newVal.present(cntr, undefined, 'edit').then((tmpl) => {
+              tmpl = $(tmpl);
               $('.action', tmpl).remove();
               const validation = tmpl.data('validation');
               if ( validation && validation.state ) {
@@ -114,7 +115,6 @@ $.fn.veda_link = function ( options ) {
         });
       }
     });
-
 
     // Hide create button for single value relations if value exists
     if (isSingle) {
