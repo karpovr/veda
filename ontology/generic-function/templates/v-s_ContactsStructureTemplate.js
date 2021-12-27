@@ -474,13 +474,15 @@ export const post = function (individual, template, container, mode, extra) {
     var selectPart = "SELECT target.id";
     var endingPart = " GROUP BY target.id, target.rdfs_label_str HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
     var basicWherePart = findDeleted? " WHERE target.v_s_deleted_int=[1]" : " WHERE target.v_s_deleted_int=[0]";
+    var orgJoinPart = " LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]";
+    var conditionForOrg = " and org.`v_s_actualContacts_int`[1]=1";
     if (findInParentOrg) {
-      basicWherePart+= " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']"
+      basicWherePart+= " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']";
     }
     var organizationQuery = selectPart + " FROM veda_tt.`v-s:Organization` AS target";
-    var departmentQuery = selectPart + " FROM veda_tt.`v-s:Department` AS target";
-    var appointmentQuery = selectPart + " FROM veda_tt.`v-s:Appointment` as target INNER JOIN veda_tt.`v-s:Person` as per ON target.v_s_employee_str[1] = per.id";
-    var specialPositionQuery = selectPart + " FROM veda_tt.`v-s:Position` AS target";
+    var departmentQuery = selectPart + " FROM veda_tt.`v-s:Department` AS target" + orgJoinPart;
+    var appointmentQuery = selectPart + " FROM veda_tt.`v-s:Appointment` as target INNER JOIN veda_tt.`v-s:Person` as per ON target.v_s_employee_str[1] = per.id"  + orgJoinPart;
+    var specialPositionQuery = selectPart + " FROM veda_tt.`v-s:Position` AS target"  + orgJoinPart;
 
     var isCommMeanJoinAdded = false;
     // var isPhoneChannelAdded = false;
@@ -520,10 +522,10 @@ export const post = function (individual, template, container, mode, extra) {
       };
       return qParts;
     }, ["", "", "", ""]);
-    organizationQuery = findInParentOrg? null : organizationQuery+basicWherePart+queryParts[0] + " AND v_s_hasCommunicationMean_str[1]!=''" + endingPart;
-    departmentQuery += basicWherePart + queryParts[1] + endingPart;
-    appointmentQuery += basicWherePart + queryParts[2] + " AND target.v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(target.v_s_origin_str, '')) LIKE '%group%')" + endingPart;
-    specialPositionQuery += basicWherePart + queryParts[3] + " AND lowerUTF8(arrayStringConcat(target.v_s_origin_str, ' ')) LIKE '%group%'" + endingPart;
+    organizationQuery = findInParentOrg? null : organizationQuery+basicWherePart+queryParts[0] + " AND v_s_hasCommunicationMean_str[1]!=''" + " and target.`v_s_actualContacts_int`[1]=1" + endingPart;
+    departmentQuery += basicWherePart + queryParts[1] + conditionForOrg + endingPart;
+    appointmentQuery += basicWherePart + queryParts[2] + " AND target.v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(target.v_s_origin_str, '')) LIKE '%group%')" + conditionForOrg + endingPart;
+    specialPositionQuery += basicWherePart + queryParts[3] + " AND lowerUTF8(arrayStringConcat(target.v_s_origin_str, ' ')) LIKE '%group%'" + conditionForOrg+ endingPart;
     return [organizationQuery, departmentQuery, appointmentQuery, specialPositionQuery];
   }
 
@@ -924,7 +926,7 @@ export const html = `
       </div>
     </div>
     <div class="col-md-4">
-      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext" data-query-prefix="('rdf:type' === 'v-s:Organization')"></veda-control>
+      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext dropdown" data-query-prefix="('rdf:type' === 'v-s:Organization' && 'v-s:actualContacts'=='true')"></veda-control>
       <span class="text-muted padding-md" about="v-s:FastInputBundle" property="rdfs:label"></span>
       <button id="selfOrg" class="btn btn-xs btn-primary margin-sm">
         +<span></span>

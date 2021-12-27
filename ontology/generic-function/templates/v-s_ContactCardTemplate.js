@@ -40,6 +40,8 @@ export const post = function (individual, template, container, mode, extra) {
     if (elTxt.length > 35) { el.text( elTxt.substr(0, 35) + "..." ); }
   }
 
+  $("#create-customer", template).addClass("alert-warning");
+
   var commMeansPromises;
   if (individual.hasValue("v-s:employee")) {
     if (individual["v-s:employee"][0].hasValue("mnd-s:hasEmployeeProfile")) {

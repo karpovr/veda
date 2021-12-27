@@ -160,9 +160,11 @@ export const post = function (individual, template, container, mode, extra) {
 
   // Set columns
   //individual.hiddenColumns = individual.hiddenColumns || {};
+  //
   //var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
   //  e.stopPropagation();
   //});
+  //var isHasVisibleColumns = individual.hasValue("v-fs:hasVisibleColumns");
   //var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
   //if (checkTmpl.length) {
   //  checkTmpl = checkTmpl.get(0).outerHTML;
@@ -176,6 +178,14 @@ export const post = function (individual, template, container, mode, extra) {
   //    } else {
   //      $(".column-name", check).text( th.text() );
   //    }
+  //    var aboutAttr = columnName.attr("about");
+  //    if (aboutAttr != undefined && isHasVisibleColumns) {
+  //      var isVisible = individual["v-fs:hasVisibleColumns"].some(function(col) {
+  //        return col.id == aboutAttr;
+  //      })
+  //      if (!isVisible) individual.hiddenColumns[index] = true;
+  //    }
+  //
   //    if (index in individual.hiddenColumns) {
   //      checkbox.prop("checked", false);
   //    } else {

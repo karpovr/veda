@@ -97,6 +97,12 @@ v-s:FavoriteContactTemplate
   rdfs:label "Favorite contacts template"@en ;
   v-ui:template "v-s_FavoriteContactTemplate.js"
 .
+v-s:SpecialCallsContactTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон избранных контактов"@ru ;
+  rdfs:label "Favorite contacts template"@en ;
+  v-ui:template "v-s_SpecialCallsContactTemplate.js";
+.
 v-ui:CompactCommunicationMeanTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "CompactCommunicationMeanTemplate"@ru ;

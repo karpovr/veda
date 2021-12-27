@@ -28,6 +28,24 @@ export const pre = function (individual, template, container, mode, extra) {
         personalRegistry["v-s:created"] = [];
         personalRegistry["rdfs:isDefinedBy"] = [];
         personalRegistry["rdfs:label"] = [ personalLabel ];
+
+        var columns = $(".set-columns-wrapper .dropdown-menu .checkbox", template);
+        var visibleColumns = [];
+        columns.each(function(i) {
+          var elem = $(this);
+          var input = $("input", elem);
+          if (input.is(":checked")) {
+            visibleColumns.push(elem);
+          }
+        });
+        if (visibleColumns.length > 0) {
+          personalRegistry["v-fs:hasVisibleColumns"] = visibleColumns.map(function(c) {
+            var uri = $("span.column-name span", c).attr("about");
+            console.log(uri);
+            return new veda.IndividualModel(uri);
+          });
+        }
+
         var searchBlank = individual.hasValue("v-fs:searchBlank") ? individual["v-fs:searchBlank"][0] : undefined;
         if (searchBlank && searchBlank.object) {
           return searchBlank.clone()

@@ -594,6 +594,12 @@ v-ui:IconModalTemplate
   rdfs:label "Template with label & link"@en ;
   v-ui:template "v-ui_IconModalTemplate.js" ;
 .
+v-ui:InfoPopoverTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для всплывающей информации"@ru ;
+  rdfs:label "Template for info popover"@en ;
+  v-ui:template "v-ui_InfoPopoverTemplate.js" ;
+.
 v-ui:GenericModalTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон отображения в модальном окне"@ru ;
