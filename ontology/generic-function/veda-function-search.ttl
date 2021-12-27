@@ -34,6 +34,13 @@ v-fs:sortOrder
   rdfs:domain v-fs:AttributiveSearch ;
   rdfs:range xsd:string ;
 .
+v-fs:hasVisibleColumns
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Видимые столбцы"@ru ;
+  rdfs:label "Visible columns"@en ;
+  rdfs:domain v-fs:PersonalSearch ;
+  rdfs:range rdfs:Resource ;
+.
 v-fs:EnterQuery
   rdf:type v-s:Bundle ;
   rdfs:label "Введите запрос"@ru ;

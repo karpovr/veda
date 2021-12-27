@@ -329,6 +329,13 @@ v-s:valid
   rdfs:label "Valid"@en ;
   rdfs:range xsd:boolean ;
 .
+v-s:actualContacts
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Thing ;
+  rdfs:label "Контакты актуальны"@ru ;
+  rdfs:label "Actual contacts"@en ;
+  rdfs:range xsd:boolean ;
+.
 v-s:archived
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-s:Thing ;

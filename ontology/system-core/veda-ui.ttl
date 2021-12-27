@@ -118,6 +118,13 @@ v-ui:tooltip
   rdfs:label "Tooltip"@en ;
   rdfs:range xsd:string ;
 .
+v-ui:info
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-ui:PropertySpecification ;
+  rdfs:label "Расширенная подсказка "@ru ;
+  rdfs:label "Help info"@en ;
+  rdfs:range xsd:string ;
+.
 v-ui:alternativeName
   rdf:type owl:DatatypeProperty ;
   rdfs:domain v-ui:PropertySpecification ;

@@ -40,6 +40,7 @@ v-s:PSmanagedOrganization
   v-ui:queryPrefix "('rdf:type' == 'v-s:Organization')"^^xsd:string ;
   v-ui:placeholder "Выберите организацию"@ru ;
   v-ui:placeholder "Choose organization"@en ;
+  v-ui:sort "'rdfs:label' asc" ;
 .
 
 v-s:Contacts
@@ -72,6 +73,27 @@ v-s:ContactsBundle
   rdf:type v-s:Bundle;
   rdfs:label "Контакты"@ru ;
   rdfs:label "Contacts"@en ;
+.
+v-s:SpecialCallsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Спец"@ru ;
+  rdfs:label "Spec"@en ;
+.
+v-s:SpecialBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Специальные"@ru ;
+  rdfs:label "Special"@en ;
+.
+v-s:GroupBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Групповые"@ru ;
+  rdfs:label "Group"@en ;
+.
+
+v-s:AllContactsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Все"@ru ;
+  rdfs:label "All"@en ;
 .
 
 v-s:SearchTextBundle
