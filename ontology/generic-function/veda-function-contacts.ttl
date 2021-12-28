@@ -636,6 +636,33 @@ v-s:ContactsStructureTemplate
       </div>
     </div>
   </section>
+        <section id="resultPos" style="display: none">
+          <h5 class="section-header">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+            <label about="v-s:PositionsBundle" property="rdfs:label"></label>
+            <small class="margin-md-h" style="color:black; font-weight: normal">
+              <span about="v-fs:cursor" property="rdfs:label"></span>
+              <span class="badge"></span>&nbsp;&nbsp;
+              <span about="v-fs:estimated" property="rdfs:label"></span>
+              <span class="badge"></span>
+            </small>
+          </h5>
+          <div class="section-content">
+            <table class="table result-table">
+              <tbody></tbody>
+            </table>
+            <div class="result-info-container">
+              <button class="btn btn-primary more-results" data-search-type="pos" about="v-fs:MoreResults" property="rdfs:label"></button>
+              <button class="btn btn-warning all-results" data-search-type="pos" about="v-fs:AllResults" property="rdfs:label"></button>
+              <small class="margin-sm-h" style="color:black">
+                <span about="v-fs:cursor" property="rdfs:label"></span>
+                <span class="badge"></span>&nbsp;&nbsp;
+                <span about="v-fs:estimated" property="rdfs:label"></span>
+                <span class="badge"></span>
+              </small>
+            </div>
+          </div>
+        </section>
   <section id="resultApp" style="display: none">
     <h5 class="section-header">
       <span class="glyphicon glyphicon-chevron-down"></span>
@@ -663,33 +690,7 @@ v-s:ContactsStructureTemplate
       </div>
     </div>
   </section>
-  <section id="resultPos" style="display: none">
-    <h5 class="section-header">
-      <span class="glyphicon glyphicon-chevron-right"></span>
-      <label about="v-s:PositionsBundle" property="rdfs:label"></label>
-      <small class="margin-md-h" style="color:black; font-weight: normal">
-        <span about="v-fs:cursor" property="rdfs:label"></span>
-        <span class="badge"></span>&nbsp;&nbsp;
-        <span about="v-fs:estimated" property="rdfs:label"></span>
-        <span class="badge"></span>
-      </small>
-    </h5>
-    <div class="section-content">
-      <table class="table result-table">
-        <tbody></tbody>
-      </table>
-      <div class="result-info-container">
-        <button class="btn btn-primary more-results" data-search-type="pos" about="v-fs:MoreResults" property="rdfs:label"></button>
-        <button class="btn btn-warning all-results" data-search-type="pos" about="v-fs:AllResults" property="rdfs:label"></button>
-        <small class="margin-sm-h" style="color:black">
-          <span about="v-fs:cursor" property="rdfs:label"></span>
-          <span class="badge"></span>&nbsp;&nbsp;
-          <span about="v-fs:estimated" property="rdfs:label"></span>
-          <span class="badge"></span>
-        </small>
-      </div>
-    </div>
-  </section>
+  
   <section id="OrgStructure" style="display: none;">
     <h5 class="section-header">
       <span class="glyphicon glyphicon-chevron-down"></span>
@@ -994,7 +995,7 @@ v-s:ContactsStructureTemplate
     } else if (parent.hasValue('rdf:type', 'v-s:Organization')) {
       var queryOrgGroup = selectPart + "FROM veda_tt.`v-s:OrgGroup` " + wherePart + endingPart;
       var querySubsidiary = selectPart + "FROM veda_tt.`v-s:Subsidiary` WHERE v_s_parent_str=['" + parentUri + "'] AND v_s_deleted_int=[0]" + endingPart;
-      queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup, queryAppointment, queryPositions];
+      queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup,queryPositions, queryAppointment, ];
     }
 
     var sort = "'rdfs:label_ru' asc";
@@ -1007,7 +1008,7 @@ v-s:ContactsStructureTemplate
           sort: sort,
           from: 0,
           limit: 10000,
-          top: 100
+          top: 300
         }
       );
     });
