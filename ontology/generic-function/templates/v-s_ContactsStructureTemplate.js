@@ -285,15 +285,15 @@ export const post = function (individual, template, container, mode, extra) {
     };
 
     var queryStringArray = [];
-    if (parent.hasValue('rdf:type', 'v-s:Department')) {
-      queryStringArray = [queryDepartments, queryAppointment, queryPositions];
+    if (parent.hasValue('rdf:type', 'v-s:Department') || parent.hasValue('rdf:type', 'v-s:Subsidiary')) {
+      queryStringArray = [queryDepartments, queryPositions, queryAppointment];
     } else if (parent.hasValue('rdf:type', 'v-s:OrgGroup')) {
       var queryOrgGroup = selectPart + "FROM veda_tt.`v-s:OrgGroup` " + wherePart + endingPart;
-      queryStringArray = [queryOrgGroup, queryAppointment, queryPositions];
+      queryStringArray = [queryOrgGroup, queryPositions, queryAppointment];
     } else if (parent.hasValue('rdf:type', 'v-s:Organization')) {
       var queryOrgGroup = selectPart + "FROM veda_tt.`v-s:OrgGroup` " + wherePart + endingPart;
       var querySubsidiary = selectPart + "FROM veda_tt.`v-s:Subsidiary` WHERE v_s_parent_str=['" + parentUri + "'] AND v_s_deleted_int=[0]" + endingPart;
-      queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup, queryPositions, queryAppointment];
+      queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup,queryPositions, queryAppointment, ];
     }
 
     var sort = "'rdfs:label_ru' asc";
@@ -925,7 +925,7 @@ export const html = `
       </div>
     </div>
     <div class="col-md-4">
-      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext dropdown" data-query-prefix="('rdf:type' === 'v-s:Organization' && 'v-s:actualContacts'=='true')"></veda-control>
+      <veda-control data-type="link" rel="v-s:managedOrganization" data-template="{@.rdfs:label}, {@.v-s:taxId}" class="fulltext dropdown" data-query-prefix="('rdf:type' === 'v-s:Organization' || 'rdf:type'==='v-s:Subsidiary') && 'v-s:actualContacts'=='true'"></veda-control>
       <span class="text-muted padding-md" about="v-s:FastInputBundle" property="rdfs:label"></span>
       <button id="selfOrg" class="btn btn-xs btn-primary margin-sm">
         +<span></span>
