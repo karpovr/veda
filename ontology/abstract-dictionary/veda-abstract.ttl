@@ -1421,6 +1421,13 @@ v-s:hasProjectStage
   rdfs:range v-s:ProjectStage ;
   rdfs:domain v-s:Projectable ;
 .
+v-s:hasVotingResult
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Результаты голосования"@ru ;
+  rdfs:label "Voting Result"@en ;
+  rdfs:range v-s:VotingResult ;
+  rdfs:domain v-s:Projectable ;
+.
 
 #--------------------------------------------------------------- Доставляемая сущность --
 v-s:Deliverable2
