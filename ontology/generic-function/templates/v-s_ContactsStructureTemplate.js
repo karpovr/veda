@@ -293,7 +293,7 @@ export const post = function (individual, template, container, mode, extra) {
     } else if (parent.hasValue('rdf:type', 'v-s:Organization')) {
       var queryOrgGroup = selectPart + "FROM veda_tt.`v-s:OrgGroup` " + wherePart + endingPart;
       var querySubsidiary = selectPart + "FROM veda_tt.`v-s:Subsidiary` WHERE v_s_parent_str=['" + parentUri + "'] AND v_s_deleted_int=[0]" + endingPart;
-      queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup, queryAppointment, queryPositions];
+      queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup, queryPositions, queryAppointment];
     }
 
     var sort = "'rdfs:label_ru' asc";
@@ -306,7 +306,7 @@ export const post = function (individual, template, container, mode, extra) {
           sort: sort,
           from: 0,
           limit: 10000,
-          top: 100
+          top: 300
         }
       );
     });
@@ -911,7 +911,6 @@ export const html = `
     div.result-info-container {
       margin-top: -20px;
     }
-
   </style>
   <div class="row  margin-md">
     <div class="col-md-3">
@@ -995,33 +994,6 @@ export const html = `
       </div>
     </div>
   </section>
-  <section id="resultApp" style="display: none">
-    <h5 class="section-header">
-      <span class="glyphicon glyphicon-chevron-down"></span>
-      <label about="v-s:AppointmentsBundle" property="rdfs:label"></label>
-      <small class="margin-md-h" style="color:black; font-weight: normal">
-        <span about="v-fs:cursor" property="rdfs:label"></span>
-        <span class="badge"></span>&nbsp;&nbsp;
-        <span about="v-fs:estimated" property="rdfs:label"></span>
-        <span class="badge"></span>
-      </small>
-    </h5>
-    <div class="section-content">
-      <table class="table result-table">
-        <tbody></tbody>
-      </table>
-      <div class="result-info-container">
-        <button class="btn btn-primary more-results" data-search-type="app" about="v-fs:MoreResults" property="rdfs:label"></button>
-        <button class="btn btn-warning all-results" data-search-type="app" about="v-fs:AllResults" property="rdfs:label"></button>
-        <small class="margin-sm-h" style="color:black">
-          <span about="v-fs:cursor" property="rdfs:label"></span>
-          <span class="badge"></span>&nbsp;&nbsp;
-          <span about="v-fs:estimated" property="rdfs:label"></span>
-          <span class="badge"></span>
-        </small>
-      </div>
-    </div>
-  </section>
   <section id="resultPos" style="display: none">
     <h5 class="section-header">
       <span class="glyphicon glyphicon-chevron-right"></span>
@@ -1040,6 +1012,33 @@ export const html = `
       <div class="result-info-container">
         <button class="btn btn-primary more-results" data-search-type="pos" about="v-fs:MoreResults" property="rdfs:label"></button>
         <button class="btn btn-warning all-results" data-search-type="pos" about="v-fs:AllResults" property="rdfs:label"></button>
+        <small class="margin-sm-h" style="color:black">
+          <span about="v-fs:cursor" property="rdfs:label"></span>
+          <span class="badge"></span>&nbsp;&nbsp;
+          <span about="v-fs:estimated" property="rdfs:label"></span>
+          <span class="badge"></span>
+        </small>
+      </div>
+    </div>
+  </section>
+  <section id="resultApp" style="display: none">
+    <h5 class="section-header">
+      <span class="glyphicon glyphicon-chevron-down"></span>
+      <label about="v-s:AppointmentsBundle" property="rdfs:label"></label>
+      <small class="margin-md-h" style="color:black; font-weight: normal">
+        <span about="v-fs:cursor" property="rdfs:label"></span>
+        <span class="badge"></span>&nbsp;&nbsp;
+        <span about="v-fs:estimated" property="rdfs:label"></span>
+        <span class="badge"></span>
+      </small>
+    </h5>
+    <div class="section-content">
+      <table class="table result-table">
+        <tbody></tbody>
+      </table>
+      <div class="result-info-container">
+        <button class="btn btn-primary more-results" data-search-type="app" about="v-fs:MoreResults" property="rdfs:label"></button>
+        <button class="btn btn-warning all-results" data-search-type="app" about="v-fs:AllResults" property="rdfs:label"></button>
         <small class="margin-sm-h" style="color:black">
           <span about="v-fs:cursor" property="rdfs:label"></span>
           <span class="badge"></span>&nbsp;&nbsp;
@@ -1089,7 +1088,7 @@ export const html = `
             </small>
           </div>
         </div>
-        </div>
+      </div>
     </div>
   </section>
 </div>
