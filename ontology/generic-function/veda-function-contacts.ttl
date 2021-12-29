@@ -37,7 +37,7 @@ v-s:PSmanagedOrganization
   v-ui:forProperty v-s:managedOrganization ;
   v-ui:minCardinality 0 ;
   v-ui:maxCardinality 1 ;
-  v-ui:queryPrefix "('rdf:type' == 'v-s:Organization')"^^xsd:string ;
+  v-ui:queryPrefix "('rdf:type' == 'v-s:Organization' || 'rdf:type'=='v-s:Subsidiary')"^^xsd:string ;
   v-ui:placeholder "Выберите организацию"@ru ;
   v-ui:placeholder "Choose organization"@en ;
   v-ui:sort "'rdfs:label' asc" ;
