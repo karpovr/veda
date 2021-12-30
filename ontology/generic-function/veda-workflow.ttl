@@ -1766,6 +1766,7 @@ v-s:CS_DecisionForm
   rdfs:label "Спецификация класса v-wf:DecisionForm "@ru, "Class specification v-wf:DecisionForm "@en;
   v-ui:forClass v-wf:DecisionForm ;
   v-s:shelfLife 9999;
+  v-s:hasDeletedProperties v-wf:takenDecision ;
   v-ui:defaultTemplate v-wf:DecisionFormTemplate;
   v-s:loadPriority 15 ;
 .
