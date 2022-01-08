@@ -11,74 +11,74 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function addNode (individual) {
+  function addNode(individual) {
     return individual.load().then(function (individual) {
-      if ( nodes.get(individual.id) === null ) {
+      if (nodes.get(individual.id) === null) {
         var node = {
           id: individual.id,
-          label: individual["rdf:type"][0].toString() + "\n" + individual.toString(),
-          individual: individual
+          label: individual['rdf:type'][0].toString() + '\n' + individual.toString(),
+          individual: individual,
         };
-        if (individual["rdf:type"][0]) {
-          switch ( individual["rdf:type"][0].id ) {
-            case "rdfs:Class" :
-            case "owl:Class" :
-              node.group = "_class";
+        if (individual['rdf:type'][0]) {
+          switch (individual['rdf:type'][0].id) {
+            case 'rdfs:Class':
+            case 'owl:Class':
+              node.group = '_class';
               break;
-            case "rdf:Property" :
-            case "owl:ObjectProperty" :
-              node.group = "objectProperty";
+            case 'rdf:Property':
+            case 'owl:ObjectProperty':
+              node.group = 'objectProperty';
               break;
-            case "owl:DatatypeProperty" :
-            case "owl:OntologyProperty" :
-            case "owl:AnnotationProperty" :
-              node.group = "datatypeProperty";
+            case 'owl:DatatypeProperty':
+            case 'owl:OntologyProperty':
+            case 'owl:AnnotationProperty':
+              node.group = 'datatypeProperty';
               break;
-            case "v-ui:ClassTemplate" :
-              node.group = "template";
+            case 'v-ui:ClassTemplate':
+              node.group = 'template';
               break;
-            case "v-ui:PropertySpecification" :
-            case "v-ui:DatatypePropertySpecification" :
-            case "v-ui:ObjectPropertySpecification" :
-              node.group = "specification";
+            case 'v-ui:PropertySpecification':
+            case 'v-ui:DatatypePropertySpecification':
+            case 'v-ui:ObjectPropertySpecification':
+              node.group = 'specification';
               break;
-            case "owl:Ontology" :
-              node.group = "ontology";
+            case 'owl:Ontology':
+              node.group = 'ontology';
               break;
-            default :
-              node.group = "individual";
+            default:
+              node.group = 'individual';
               break;
           }
         }
-        nodes.add ([ node ]);
+        nodes.add([node]);
       }
     });
   }
 
-  function addOutLinks (id) {
+  function addOutLinks(id) {
     var individual = nodes.get(id).individual;
     Object.getOwnPropertyNames(individual.properties).map(function (property_uri) {
-      if (property_uri === "@") { return; }
+      if (property_uri === '@') {
+        return;
+      }
       individual[property_uri].forEach(function (value) {
         if (value instanceof IndividualModel && value !== individual) {
           addNode(value).then(function () {
             var from = individual.id;
             var to = value.id;
-            var label = new IndividualModel(property_uri)["rdfs:label"].map(CommonUtil.formatValue).join(" ");
+            var label = new IndividualModel(property_uri)['rdfs:label'].map(CommonUtil.formatValue).join(' ');
             var options = {
               filter: function (item) {
-                return  item.from == from &&
-                    item.to == to &&
-                    item.label.toString() == label;
-              }
+                return item.from == from && item.to == to && item.label.toString() == label;
+              },
             };
-            if ( !edges.get(options).length ) {
-              edges.add ([
+            if (!edges.get(options).length) {
+              edges.add([
                 {
                   from: from,
                   to: to,
-                  label: label
-                }
+                  label: label,
+                },
               ]);
             }
           });
@@ -87,9 +87,9 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  function addInLinks (id, queryStr) {
+  function addInLinks(id, queryStr) {
     var q = queryStr || "'*'=='{id}'";
-    q = q.replace("{id}", id);
+    q = q.replace('{id}', id);
     return Backend.query(veda.ticket, q).then(function (queryResult) {
       var uris = queryResult.result;
       return Backend.get_individuals(veda.ticket, uris).then(function (individualsJSONs) {
@@ -99,18 +99,18 @@ export const post = function (individual, template, container, mode, extra) {
           var to = id;
           var from = res.id;
           Object.getOwnPropertyNames(res.properties).map(function (property_uri) {
-            if (property_uri === "@") { return; }
-            if ( res.hasValue(property_uri, id) ) {
-              var label = new IndividualModel(property_uri)["rdfs:label"].map(CommonUtil.formatValue).join(" ");
+            if (property_uri === '@') {
+              return;
+            }
+            if (res.hasValue(property_uri, id)) {
+              var label = new IndividualModel(property_uri)['rdfs:label'].map(CommonUtil.formatValue).join(' ');
               var options = {
                 filter: function (item) {
-                  return  item.from === from &&
-                    item.to === to &&
-                    item.label.toString() === label;
-                }
+                  return item.from === from && item.to === to && item.label.toString() === label;
+                },
               };
-              if ( !edges.get(options).length ) {
-                edges.add([{from: from, to: to, label: label}]);
+              if (!edges.get(options).length) {
+                edges.add([{ from: from, to: to, label: label }]);
               }
             }
           });
@@ -119,7 +119,7 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  function deleteWithOutLinks (id) {
+  function deleteWithOutLinks(id) {
     nodes.remove(id);
     var nodesToRemove = [];
     var edgesToRemove = edges.get({
@@ -127,14 +127,14 @@ export const post = function (individual, template, container, mode, extra) {
         if (item.from == id) {
           nodesToRemove.push(item.to);
         }
-        return (item.from == id || item.to == id);
-      }
+        return item.from == id || item.to == id;
+      },
     });
     edges.remove(edgesToRemove);
     nodes.remove(nodesToRemove);
   }
 
-  function deleteWithInLinks (id) {
+  function deleteWithInLinks(id) {
     nodes.remove(id);
     var nodesToRemove = [];
     var edgesToRemove = edges.get({
@@ -142,18 +142,18 @@ export const post = function (individual, template, container, mode, extra) {
         if (item.to == id) {
           nodesToRemove.push(item.from);
         }
-        return (item.from == id || item.to == id);
-      }
+        return item.from == id || item.to == id;
+      },
     });
     edges.remove(edgesToRemove);
     nodes.remove(nodesToRemove);
   }
 
   // Event handlers
-  function onSelect (selected) {
+  function onSelect(selected) {
     select = selected;
-    body.off("keydown", selectedKeydownHandler);
-    body.one("keydown", selected, selectedKeydownHandler);
+    body.off('keydown', selectedKeydownHandler);
+    body.one('keydown', selected, selectedKeydownHandler);
   }
   function selectedKeydownHandler(e) {
     if (e.which == 46) {
@@ -168,86 +168,116 @@ export const post = function (individual, template, container, mode, extra) {
     }
   }
 
-  function onDoubleClick (selected) {
+  function onDoubleClick(selected) {
     if (!selected.nodes.length) return;
     var individual_uri = selected.nodes[0];
-    var modalTmpl = $("#individual-modal-template").html();
+    var modalTmpl = $('#individual-modal-template').html();
     var modal = $(modalTmpl);
-    var modalBody = $(".modal-body", modal);
+    var modalBody = $('.modal-body', modal);
     var individual = new IndividualModel(individual_uri);
     individual.present(modalBody);
-    modal.one("remove", function (e) {
-      modal.modal("hide");
+    modal.one('remove', function (e) {
+      modal.modal('hide');
     });
     modal.modal();
-    $("#main").append(modal);
+    $('#main').append(modal);
   }
 
-  var graph = $("#graph", template);
+  var graph = $('#graph', template);
 
   // Context menu for selected node
   graph.contextmenu({
-    target: $("#individual-context-menu", template),
+    target: $('#individual-context-menu', template),
     before: function (e, element) {
       if (!select.nodes.length) return false;
       var id = select.nodes[0];
       var node = nodes.get(id);
       switch (node.group) {
-        case "_class": this.target = $("#class-context-menu", template); break;
-        case "ontology": this.target = $("#ontology-context-menu", template); break;
-        case "datatypeProperty":
-        case "objectProperty":
-          this.target = $("#property-context-menu", template); break;
-        case "template": this.target = $("#template-context-menu", template); break;
-        case "specification": this.target = $("#specification-context-menu", template); break;
-        default: this.target = $("#individual-context-menu", template); break;
+        case '_class':
+          this.target = $('#class-context-menu', template);
+          break;
+        case 'ontology':
+          this.target = $('#ontology-context-menu', template);
+          break;
+        case 'datatypeProperty':
+        case 'objectProperty':
+          this.target = $('#property-context-menu', template);
+          break;
+        case 'template':
+          this.target = $('#template-context-menu', template);
+          break;
+        case 'specification':
+          this.target = $('#specification-context-menu', template);
+          break;
+        default:
+          this.target = $('#individual-context-menu', template);
+          break;
       }
       return true;
     },
     onItem: function (context, e) {
       var id = select.nodes[0];
       switch (e.target.id) {
-        case "out-links" : addOutLinks( id ); break;
-        case "in-links" : addInLinks( id ); break;
-        case "delete" :
+        case 'out-links':
+          addOutLinks(id);
+          break;
+        case 'in-links':
+          addInLinks(id);
+          break;
+        case 'delete':
           nodes.remove(select.nodes);
           edges.remove(select.edges);
           select.nodes = select.edges = [];
           break;
-        case "delete-with-out" :
-          deleteWithOutLinks (id);
+        case 'delete-with-out':
+          deleteWithOutLinks(id);
           select.nodes = select.edges = [];
           break;
-        case "delete-with-in" :
-          deleteWithInLinks (id);
+        case 'delete-with-in':
+          deleteWithInLinks(id);
           select.nodes = select.edges = [];
           break;
-        case "class-individuals" : addInLinks( id, "'rdf:type'==='{id}'" ); break;
-        case "class-subclasses" : addInLinks( id, "('rdf:type'==='owl:Class'||'rdf:type'==='rdfs:Class')&&'rdfs:subClassOf'==='{id}'" ); break;
-        case "class-properties" : addInLinks( id, "'rdfs:domain'==='{id}'"); break;
-        case "class-templates" : addInLinks( id, "'rdf:type'==='v-ui:ClassTemplate'&&'v-ui:forClass'==='{id}'" ); break;
-        case "class-specifications" :
-          addInLinks( id, "('rdf:type'==='v-ui:PropertySpecification' || " +
-                  "'rdf:type'==='v-ui:DatatypePropertySpecification' || " +
-                  "'rdf:type'==='v-ui:ObjectPropertySpecification'" +
-                  ")&&'v-ui:forClass'==='{id}'" );
-        break;
-        case "property-specifications" :
-          addInLinks( id, "('rdf:type'==='v-ui:PropertySpecification' || " +
-                  "'rdf:type'==='v-ui:DatatypePropertySpecification' || " +
-                  "'rdf:type'==='v-ui:ObjectPropertySpecification'" +
-                  ")&&'v-ui:forProperty'=='{id}'" );
-        break;
+        case 'class-individuals':
+          addInLinks(id, "'rdf:type'==='{id}'");
+          break;
+        case 'class-subclasses':
+          addInLinks(id, "('rdf:type'==='owl:Class'||'rdf:type'==='rdfs:Class')&&'rdfs:subClassOf'==='{id}'");
+          break;
+        case 'class-properties':
+          addInLinks(id, "'rdfs:domain'==='{id}'");
+          break;
+        case 'class-templates':
+          addInLinks(id, "'rdf:type'==='v-ui:ClassTemplate'&&'v-ui:forClass'==='{id}'");
+          break;
+        case 'class-specifications':
+          addInLinks(
+            id,
+            "('rdf:type'==='v-ui:PropertySpecification' || " +
+              "'rdf:type'==='v-ui:DatatypePropertySpecification' || " +
+              "'rdf:type'==='v-ui:ObjectPropertySpecification'" +
+              ")&&'v-ui:forClass'==='{id}'",
+          );
+          break;
+        case 'property-specifications':
+          addInLinks(
+            id,
+            "('rdf:type'==='v-ui:PropertySpecification' || " +
+              "'rdf:type'==='v-ui:DatatypePropertySpecification' || " +
+              "'rdf:type'==='v-ui:ObjectPropertySpecification'" +
+              ")&&'v-ui:forProperty'=='{id}'",
+          );
+          break;
       }
-    }
+    },
   });
 
   // Create a network
 
   var root = individual;
-  var nodes = new vis.DataSet(), edges = new vis.DataSet();
-  var body = $("body");
-  var select = {nodes: [], edges: []};
+  var nodes = new vis.DataSet(),
+    edges = new vis.DataSet();
+  var body = $('body');
+  var select = { nodes: [], edges: [] };
   var data = {
     nodes: nodes,
     edges: edges,
@@ -258,15 +288,15 @@ export const post = function (individual, template, container, mode, extra) {
     addInLinks(root.id);
   });
 
-  var height = ( $("#copyright").offset().top - graph.offset().top - 50 ) + "px";
+  var height = $('#copyright').offset().top - graph.offset().top - 50 + 'px';
   var options = {
-    width: "100%",
+    width: '100%',
     height: height,
     nodes: {
-      shape: "box"
+      shape: 'box',
     },
     edges: {
-      arrows: "to"
+      arrows: 'to',
     },
     groups: {
       _class: {
@@ -275,9 +305,9 @@ export const post = function (individual, template, container, mode, extra) {
           background: 'lightgreen',
           highlight: {
             border: 'green',
-            background: 'lightgreen'
-          }
-        }
+            background: 'lightgreen',
+          },
+        },
       },
       datatypeProperty: {
         color: {
@@ -285,9 +315,9 @@ export const post = function (individual, template, container, mode, extra) {
           background: 'gold',
           highlight: {
             border: 'goldenrod',
-            background: 'gold'
-          }
-        }
+            background: 'gold',
+          },
+        },
       },
       objectProperty: {
         color: {
@@ -295,9 +325,9 @@ export const post = function (individual, template, container, mode, extra) {
           background: 'orange',
           highlight: {
             border: 'darkorange',
-            background: 'orange'
-          }
-        }
+            background: 'orange',
+          },
+        },
       },
       template: {
         color: {
@@ -305,9 +335,9 @@ export const post = function (individual, template, container, mode, extra) {
           background: 'violet',
           highlight: {
             border: 'darkviolet',
-            background: 'violet'
-          }
-        }
+            background: 'violet',
+          },
+        },
       },
       specification: {
         color: {
@@ -315,9 +345,9 @@ export const post = function (individual, template, container, mode, extra) {
           background: 'lightpink',
           highlight: {
             border: 'hotpink',
-            background: 'lightpink'
-          }
-        }
+            background: 'lightpink',
+          },
+        },
       },
       ontology: {
         color: {
@@ -325,12 +355,11 @@ export const post = function (individual, template, container, mode, extra) {
           background: 'green',
           highlight: {
             border: 'darkgreen',
-            background: 'green'
-          }
+            background: 'green',
+          },
         },
-        fontColor: "white"
+        fontColor: 'white',
       },
-
     },
     physics: {
       enabled: true,
@@ -339,7 +368,7 @@ export const post = function (individual, template, container, mode, extra) {
         centralGravity: 0.1,
         springLength: 200,
         springConstant: 0.04,
-        damping: 0.09
+        damping: 0.09,
       },
     },
   };
@@ -348,106 +377,109 @@ export const post = function (individual, template, container, mode, extra) {
 
   setTimeout(function () {
     network = new vis.Network(graph.get(0), data, options);
-    network.on("doubleClick", onDoubleClick);
-    network.on("select", onSelect);
+    network.on('doubleClick', onDoubleClick);
+    network.on('select', onSelect);
   });
 
   // Buttons
-  var exportBtn = $("#export-ttl", template).click(function () {
-    var list = nodes.get().map(function (item) { return item.individual; });
+  var exportBtn = $('#export-ttl', template).click(function () {
+    var list = nodes.get().map(function (item) {
+      return item.individual;
+    });
     BrowserUtil.exportTTL(list);
   });
-  var freezeBtn = $("#freeze", template).click(function () {
+  var freezeBtn = $('#freeze', template).click(function () {
     network.freezeSimulation = !network.freezeSimulation;
-    $("i", this).toggleClass("glyphicon-pause glyphicon-play");
+    $('i', this).toggleClass('glyphicon-pause glyphicon-play');
   });
-
 };
 
 export const html = `
-<div class="container-fluid sheet">
-  <button type="button" id="freeze" class="btn btn-success"><i class="glyphicon glyphicon-pause"></i></button>
-  <button type="button" id="export-ttl" class="btn btn-primary"><i class="glyphicon glyphicon-export"></i> <span about="v-ui:ExportToTTL" property="rdfs:label"></span></button>
+  <div class="container-fluid sheet">
+    <button type="button" id="freeze" class="btn btn-success"><i class="glyphicon glyphicon-pause"></i></button>
+    <button type="button" id="export-ttl" class="btn btn-primary">
+      <i class="glyphicon glyphicon-export"></i> <span about="v-ui:ExportToTTL" property="rdfs:label"></span>
+    </button>
 
-  <div id="graph"></div>
+    <div id="graph"></div>
 
-  <div id="individual-context-menu">
-    <ul class="dropdown-menu" role="menu">
-      <li role="presentation" class="dropdown-header">Индивид</li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
-      <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="delete">Удалить</a></li>
-      <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
-      <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
-    </ul>
+    <div id="individual-context-menu">
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header">Индивид</li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
+        <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="delete">Удалить</a></li>
+        <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
+        <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
+      </ul>
+    </div>
+    <div id="class-context-menu">
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header">Класс</li>
+        <li><a tabindex="-1" id="class-individuals">Все индивиды</a></li>
+        <li><a tabindex="-1" id="class-subclasses">Все подклассы</a></li>
+        <li><a tabindex="-1" id="class-properties">Свойства класса</a></li>
+        <li><a tabindex="-1" id="class-templates">Шаблоны класса</a></li>
+        <li><a tabindex="-1" id="class-specifications">Спецификации класса</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
+        <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="delete">Удалить</a></li>
+        <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
+        <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
+      </ul>
+    </div>
+    <div id="property-context-menu">
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header">Свойство</li>
+        <li><a tabindex="-1" id="property-specifications">Спецификации свойства</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
+        <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="delete">Удалить</a></li>
+        <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
+        <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
+      </ul>
+    </div>
+    <div id="ontology-context-menu">
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header">Онтология</li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
+        <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="delete">Удалить</a></li>
+        <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
+        <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
+      </ul>
+    </div>
+    <div id="template-context-menu">
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header">Шаблон</li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
+        <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="delete">Удалить</a></li>
+        <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
+        <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
+      </ul>
+    </div>
+    <div id="specification-context-menu">
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header">Спецификация</li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
+        <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
+        <li role="presentation" class="divider"></li>
+        <li><a tabindex="-1" id="delete">Удалить</a></li>
+        <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
+        <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
+      </ul>
+    </div>
   </div>
-  <div id="class-context-menu">
-    <ul class="dropdown-menu" role="menu">
-      <li role="presentation" class="dropdown-header">Класс</li>
-      <li><a tabindex="-1" id="class-individuals">Все индивиды</a></li>
-      <li><a tabindex="-1" id="class-subclasses">Все подклассы</a></li>
-      <li><a tabindex="-1" id="class-properties">Свойства класса</a></li>
-      <li><a tabindex="-1" id="class-templates">Шаблоны класса</a></li>
-      <li><a tabindex="-1" id="class-specifications">Спецификации класса</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
-      <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="delete">Удалить</a></li>
-      <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
-      <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
-    </ul>
-  </div>
-  <div id="property-context-menu">
-    <ul class="dropdown-menu" role="menu">
-      <li role="presentation" class="dropdown-header">Свойство</li>
-      <li><a tabindex="-1" id="property-specifications">Спецификации свойства</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
-      <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="delete">Удалить</a></li>
-      <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
-      <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
-    </ul>
-  </div>
-  <div id="ontology-context-menu">
-    <ul class="dropdown-menu" role="menu">
-      <li role="presentation" class="dropdown-header">Онтология</li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
-      <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="delete">Удалить</a></li>
-      <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
-      <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
-    </ul>
-  </div>
-  <div id="template-context-menu">
-    <ul class="dropdown-menu" role="menu">
-      <li role="presentation" class="dropdown-header">Шаблон</li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
-      <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="delete">Удалить</a></li>
-      <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
-      <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
-    </ul>
-  </div>
-  <div id="specification-context-menu">
-    <ul class="dropdown-menu" role="menu">
-      <li role="presentation" class="dropdown-header">Спецификация</li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="out-links">Все исходящие ссылки</a></li>
-      <li><a tabindex="-1" id="in-links">Все входящие ссылки</a></li>
-      <li role="presentation" class="divider"></li>
-      <li><a tabindex="-1" id="delete">Удалить</a></li>
-      <li><a tabindex="-1" id="delete-with-out">Удалить с исходящими</a></li>
-      <li><a tabindex="-1" id="delete-with-in">Удалить с входящими</a></li>
-    </ul>
-  </div>
-</div>
 `;

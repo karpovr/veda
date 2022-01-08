@@ -14,19 +14,21 @@ export const post = function (individual, template, container, mode, extra) {
   }).then(function (result) {
     var apps = result.result;
     if (apps.length > 1) {
-      return Promise.all(apps.map(function (id) {
-        const app = new IndividualModel(id);
-        const checked = (id === veda.appointment.id);
-        return app.getPropertyChain('v-s:occupation', 'rdfs:label').then(function (label) {
-          label = label.map(CommonUtil.formatValue).join(' ');
-          return `<div class="radio">
+      return Promise.all(
+        apps.map(function (id) {
+          const app = new IndividualModel(id);
+          const checked = id === veda.appointment.id;
+          return app.getPropertyChain('v-s:occupation', 'rdfs:label').then(function (label) {
+            label = label.map(CommonUtil.formatValue).join(' ');
+            return `<div class="radio">
                     <label>
-                      <input type="radio" name="appointments" value="${ id }" ${ checked ? 'checked' : '' }>
-                      ${ label }
+                      <input type="radio" name="appointments" value="${id}" ${checked ? 'checked' : ''}>
+                      ${label}
                     </label>
                   </div>`;
-        });
-      })).then(function (radios) {
+          });
+        }),
+      ).then(function (radios) {
         const form = $('#appointments-form', template);
         form.append(radios);
         form.on('change', function () {
@@ -45,20 +47,19 @@ export const post = function (individual, template, container, mode, extra) {
 };
 
 export const html = `
-<div class="modal switch-appointment" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" about="v-ui:AppointmentSwitchInfo" property="rdfs:label"></h4>
-      </div>
-      <div class="modal-body">
-        <form id="appointments-form">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary pull-left" data-dismiss="modal">Ok</button>
+  <div class="modal switch-appointment" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" about="v-ui:AppointmentSwitchInfo" property="rdfs:label"></h4>
+        </div>
+        <div class="modal-body">
+          <form id="appointments-form"></form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary pull-left" data-dismiss="modal">Ok</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 `;

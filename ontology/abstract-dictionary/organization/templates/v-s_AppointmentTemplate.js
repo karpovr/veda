@@ -7,45 +7,45 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  template.on('validate', function() {
+  template.on('validate', function () {
     var result = {};
-    result["v-s:employee"] = {
+    result['v-s:employee'] = {
       state: individual.hasValue('v-s:employee'),
-      cause: ["v-ui:minCardinality"]
+      cause: ['v-ui:minCardinality'],
     };
-    result["v-s:occupation"] = {
+    result['v-s:occupation'] = {
       state: individual.hasValue('v-s:occupation'),
-      cause: ["v-ui:minCardinality"]
+      cause: ['v-ui:minCardinality'],
     };
     if (!individual.hasValue('v-s:parentOrganization')) {
-      result["v-s:parentOrganization"] = {
+      result['v-s:parentOrganization'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
     if (!individual.hasValue('v-s:parentUnit')) {
-      result["v-s:parentUnit"] = {
+      result['v-s:parentUnit'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
     if (!individual.hasValue('v-s:origin')) {
-      result["v-s:origin"] = {
+      result['v-s:origin'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
-    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
+    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
   });
-  template.on("special-validate", function (e, validStates) {
-    setTimeout(function(){
+  template.on('special-validate', function (e, validStates) {
+    setTimeout(function () {
       // console.log($('div.validating-block:not(.hide) veda-control.has-error', template));
       if ($('div.validating-block:not(.hide) .has-error', template).length == 0) {
         $('.action#save', template).removeAttr('disabled');
       } else {
         $('.action#save', template).attr('disabled', 'disabled');
       }
-    },500);
+    }, 500);
   });
 };
 
@@ -53,33 +53,32 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  if (template.data("mode") === "view" && veda.appointment.id != 'cfg:AdministratorAppointment'){
+  if (template.data('mode') === 'view' && veda.appointment.id != 'cfg:AdministratorAppointment') {
     $('#edit.action', template).remove();
   }
-  if(veda.appointment.id != 'cfg:AdministratorAppointment'){
+  if (veda.appointment.id != 'cfg:AdministratorAppointment') {
     $('.notEditForUsers').addClass('hide');
   }
   //проставляет признаки по умолчанию для Назначения
-  if(mode === "edit" && individual.isNew()) {
-    individual["v-s:official"]=[true];
-    individual["v-s:dateFrom"]=[new Date()];
+  if (mode === 'edit' && individual.isNew()) {
+    individual['v-s:official'] = [true];
+    individual['v-s:dateFrom'] = [new Date()];
   }
 
   //Отображает Персону и Должность после выбора ОрганизTeации
-  function hidePosAndEmp(){
-    if (individual.hasValue("v-s:parentOrganization"))
-    {
-      $("#Employee").removeClass('hide');
-      $("#Position").removeClass('hide');
+  function hidePosAndEmp() {
+    if (individual.hasValue('v-s:parentOrganization')) {
+      $('#Employee').removeClass('hide');
+      $('#Position').removeClass('hide');
+    } else {
+      $('#Employee').addClass('hide');
+      $('#Position').addClass('hide');
+      individual['v-s:parentUnit'] = [];
     }
-    else {
-      $("#Employee").addClass('hide');
-      $("#Position").addClass('hide');
-      individual["v-s:parentUnit"] = [];}
   }
-  individual.on("v-s:parentOrganization", hidePosAndEmp);
-  template.one("remove", function () {
-    individual.off("v-s:parentOrganization", hidePosAndEmp);
+  individual.on('v-s:parentOrganization', hidePosAndEmp);
+  template.one('remove', function () {
+    individual.off('v-s:parentOrganization', hidePosAndEmp);
   });
   hidePosAndEmp();
 
@@ -89,7 +88,7 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('click', '#radioBlock input[type="radio"]', function () {
     defaultAppointment = $(this).attr('value');
   });
-  template.on("special-validate", function (e, validStates) {
+  template.on('special-validate', function (e, validStates) {
     setTimeout(function () {
       if ($('div.validating-block:not(.hide) .has-error', template).length == 0) {
         $('.action#save', template).removeAttr('disabled');
@@ -100,7 +99,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   function toogleButtons(currentBtn) {
-    currentBtn.siblings().removeClass('btn-primary').addClass('btn-default')
+    currentBtn.siblings().removeClass('btn-primary').addClass('btn-default');
     currentBtn.removeClass('btn-default').addClass('btn-primary');
     template.trigger('special-validate');
   }
@@ -118,8 +117,8 @@ export const post = function (individual, template, container, mode, extra) {
       NewPerson = new IndividualModel();
       NewPerson['rdf:type'] = [new IndividualModel('v-s:Person')];
       NewPerson['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
-      NewPerson.present($("<div>"), 'v-s:PersonEmbeddedTemplate', 'edit').then(function (tmpl) {
-        tmpl.on("validate", function () {
+      NewPerson.present($('<div>'), 'v-s:PersonEmbeddedTemplate', 'edit').then(function (tmpl) {
+        tmpl.on('validate', function () {
           template.trigger('special-validate');
         });
         $('#fill-Person').append(tmpl);
@@ -130,7 +129,9 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('#selectPersonBtn').click(function () {
     var self = $(this);
-    if (self.hasClass('btn-primary')) { return false; }
+    if (self.hasClass('btn-primary')) {
+      return false;
+    }
     toogleButtons(self);
     defaultAppointment = undefined;
     $('#select-Person').removeClass('hide');
@@ -139,9 +140,11 @@ export const post = function (individual, template, container, mode, extra) {
     //individual.on('v-s:employee', setDefaultAppointment);
   });
 
- $('#createOccupationBtn', template).click(function () {
+  $('#createOccupationBtn', template).click(function () {
     var self = $(this);
-    if (self.hasClass('btn-primary')) { return true; }
+    if (self.hasClass('btn-primary')) {
+      return true;
+    }
     toogleButtons(self);
     //individual.off('v-s:employee', setDefaultAppointment);
     $('#select-Occupation').addClass('hide');
@@ -153,8 +156,8 @@ export const post = function (individual, template, container, mode, extra) {
       NewOccupation['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
       NewOccupation['v-s:parentUnit'] = individual['v-s:parentUnit'];
       NewOccupation['v-s:origin'] = individual['v-s:origin'];
-      NewOccupation.present($("<div>"), 'v-s:PositionEmbeddedTemplate', 'edit').then(function (tmpl) {
-        tmpl.on("validate", function () {
+      NewOccupation.present($('<div>'), 'v-s:PositionEmbeddedTemplate', 'edit').then(function (tmpl) {
+        tmpl.on('validate', function () {
           template.trigger('special-validate');
         });
         $('#fill-Occupation').append(tmpl);
@@ -165,7 +168,9 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('#selectOccupationBtn').click(function () {
     var self = $(this);
-    if (self.hasClass('btn-primary')) { return true; }
+    if (self.hasClass('btn-primary')) {
+      return true;
+    }
     toogleButtons(self);
     $('#select-Occupation').removeClass('hide');
     $('#fill-Occupation').addClass('hide');
@@ -175,20 +180,29 @@ export const post = function (individual, template, container, mode, extra) {
     var radioCont = $('.radio', template).empty();
     if (individual.hasValue('v-s:employee')) {
       var employeeId = individual['v-s:employee'][0].id;
-      var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'=='" + employeeId + "' && 'v-s:parentOrganization'=='" + individual['v-s:parentOrganization'][0].id + "' && '@'!='"+individual.id+"'";
-      Backend.query({ticket: veda.ticket, query: queryString}).then(function (queryResult) {
+      var queryString =
+        "'rdf:type'==='v-s:Appointment' && 'v-s:employee'=='" +
+        employeeId +
+        "' && 'v-s:parentOrganization'=='" +
+        individual['v-s:parentOrganization'][0].id +
+        "' && '@'!='" +
+        individual.id +
+        "'";
+      Backend.query({ ticket: veda.ticket, query: queryString }).then(function (queryResult) {
         var appointmentsUris = queryResult.result;
         if (appointmentsUris.length > 0) {
           Backend.get_individuals(veda.ticket, appointmentsUris).then(function (appointmentsJSONs) {
             appointmentsJSONs.forEach(function (appointmentJSON) {
               var label = $('<label></label>');
-              var radio = $('<input type="radio" name="defaultAppointment"/>').attr('value', appointmentJSON["@"]);
+              var radio = $('<input type="radio" name="defaultAppointment"/>').attr('value', appointmentJSON['@']);
               label.append(radio);
-              label.append( (new IndividualModel(appointmentJSON))['rdfs:label'][0] );
+              label.append(new IndividualModel(appointmentJSON)['rdfs:label'][0]);
               radioCont.append($('<div class="radio"></div>').append(label));
             });
             var newAppointLabel = individual['v-s:employee'][0]['rdfs:label'][0];
-            radioCont.append('<div class="radio"><label><input type="radio" checked name="defaultAppointment"/>Текущее для ' + newAppointLabel + '</label></div>');
+            radioCont.append(
+              '<div class="radio"><label><input type="radio" checked name="defaultAppointment"/>Текущее для ' + newAppointLabel + '</label></div>',
+            );
             $('#radioBlock').removeClass('hide');
             return;
           });
@@ -203,64 +217,74 @@ export const post = function (individual, template, container, mode, extra) {
     individual.off('v-s:employee', setDefaultAppointment);
   });
 
-  $(".actions #save").off("click");
-  $(".actions #save").on("click", function() {
+  $('.actions #save').off('click');
+  $('.actions #save').on('click', function () {
     var tempEmployee = individual['v-s:employee'][0];
     var tempOccupation = individual['v-s:occupation'][0];
     var tempCommunicationMean = individual['v-s:employee'][0]['v-s:hasCommunicationMean'];
     var tempAccount = individual['v-s:employee'][0]['v-s:hasAccount'][0];
 
-
     //новый id персоны
-    var promises_emp = individual.getPropertyChain("v-s:employee").then(function(emp) {
-      return emp[0].load();
-    }).then(function(emp) {
-        if(tempCommunicationMean && emp.isNew()){
-          tempCommunicationMean.map(function(CommunicationMean) {//Средства связи
-            CommunicationMean["v-s:parent"] = [emp.id];
+    var promises_emp = individual
+      .getPropertyChain('v-s:employee')
+      .then(function (emp) {
+        return emp[0].load();
+      })
+      .then(function (emp) {
+        if (tempCommunicationMean && emp.isNew()) {
+          tempCommunicationMean.map(function (CommunicationMean) {
+            //Средства связи
+            CommunicationMean['v-s:parent'] = [emp.id];
             return CommunicationMean.save();
-        });}
-        if(tempAccount && emp.isNew()){ //Аккаунт
-          tempAccount["v-s:owner"] = [emp];
-          tempAccount["v-s:parent"] = [emp];
-          tempAccount.id = emp.id + "_account";
-          tempAccount["v-s:origin"] = individual['v-s:origin'];
-          return tempAccount.save();}
-        else return undefined;
-      return Promise.all();
-    }).then(function() { //Должность
-      if (tempOccupation.isNew()) {
-        tempOccupation['v-s:parentUnit'] = individual['v-s:parentUnit'];
-        tempOccupation['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
-        tempOccupation["v-s:origin"] = individual['v-s:origin'];
-        return tempOccupation.save();
-      }
-      else return undefined;
-    }).then(function(savedOccupation){ //Персона
-      if (tempEmployee.isNew()) {
+          });
+        }
+        if (tempAccount && emp.isNew()) {
+          //Аккаунт
+          tempAccount['v-s:owner'] = [emp];
+          tempAccount['v-s:parent'] = [emp];
+          tempAccount.id = emp.id + '_account';
+          tempAccount['v-s:origin'] = individual['v-s:origin'];
+          return tempAccount.save();
+        } else return undefined;
+        return Promise.all();
+      })
+      .then(function () {
+        //Должность
+        if (tempOccupation.isNew()) {
+          tempOccupation['v-s:parentUnit'] = individual['v-s:parentUnit'];
+          tempOccupation['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
+          tempOccupation['v-s:origin'] = individual['v-s:origin'];
+          return tempOccupation.save();
+        } else return undefined;
+      })
+      .then(function (savedOccupation) {
+        //Персона
+        if (tempEmployee.isNew()) {
           tempEmployee['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
           tempEmployee['v-s:owner'] = [tempEmployee];
           tempEmployee['v-s:origin'] = individual['v-s:origin'];
-          tempEmployee['v-s:hasAccount'] = [ tempAccount];
-          if(tempAccount) tempEmployee['v-s:hasAccount'] = [ tempAccount];
+          tempEmployee['v-s:hasAccount'] = [tempAccount];
+          if (tempAccount) tempEmployee['v-s:hasAccount'] = [tempAccount];
         }
 
-      if (savedOccupation) {
-        individual['v-s:occupation'] = [savedOccupation];
-      }
-      if (defaultAppointment){
-        tempEmployee['v-s:defaultAppointment'] = [ new IndividualModel(defaultAppointment) ];
-      } else {
-        tempEmployee['v-s:defaultAppointment'] = [individual];
-      }
-      tempEmployee['v-s:hasAppointment'] = tempEmployee['v-s:hasAppointment'].concat(individual);
-      return tempEmployee.save();
-    }).then(function(savedEmployee) { //Назначение
-      if (savedEmployee) {
-        individual['v-s:employee'] = [ tempEmployee ];
-      }
-      individual.save();
-    });
+        if (savedOccupation) {
+          individual['v-s:occupation'] = [savedOccupation];
+        }
+        if (defaultAppointment) {
+          tempEmployee['v-s:defaultAppointment'] = [new IndividualModel(defaultAppointment)];
+        } else {
+          tempEmployee['v-s:defaultAppointment'] = [individual];
+        }
+        tempEmployee['v-s:hasAppointment'] = tempEmployee['v-s:hasAppointment'].concat(individual);
+        return tempEmployee.save();
+      })
+      .then(function (savedEmployee) {
+        //Назначение
+        if (savedEmployee) {
+          individual['v-s:employee'] = [tempEmployee];
+        }
+        individual.save();
+      });
     return true;
   });
 };

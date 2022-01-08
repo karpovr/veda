@@ -9,19 +9,19 @@ export const pre = function (individual, template, container, mode, extra) {
 
   /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
   $("#counter", template).attr("about", counter_uri);*/
-  return new IndividualModel("v-s:TaskBundle").load().then(function(taskBundle) {
+  return new IndividualModel('v-s:TaskBundle').load().then(function (taskBundle) {
     template.tooltip({
       container: template,
-      placement: "bottom",
-      trigger: "hover",
-      title: taskBundle["rdfs:label"].map(CommonUtil.formatValue).join(" ")
+      placement: 'bottom',
+      trigger: 'hover',
+      title: taskBundle['rdfs:label'].map(CommonUtil.formatValue).join(' '),
     });
   });
 };
 
 export const html = `
-<a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
-  <span class="fa fa-envelope-o fa-lg"></span>
-  <!--span id="counter" class="label label-danger" property="v-ft:inboxCount"></span-->
-</a>
+  <a href="#/@" data-toggle="tooltip" data-trigger="hover" data-placement="bottom">
+    <span class="fa fa-envelope-o fa-lg"></span>
+    <!--span id="counter" class="label label-danger" property="v-ft:inboxCount"></span-->
+  </a>
 `;

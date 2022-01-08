@@ -18,13 +18,13 @@ export const post = function (individual, template, container, mode, extra) {
     var $state = $('#' + BrowserUtil.escape4$(individual.id));
     $('.state-name', $state).html(values);
   }
-  individual.on("v-wf:join", joinSplitHandler);
-  individual.on("v-wf:split", joinSplitHandler);
-  individual.on("rdfs:label", labelHandler);
-  template.one("remove", function () {
-    individual.off("v-wf:join", joinSplitHandler);
-    individual.off("v-wf:split", joinSplitHandler);
-    individual.off("rdfs:label", labelHandler);
+  individual.on('v-wf:join', joinSplitHandler);
+  individual.on('v-wf:split', joinSplitHandler);
+  individual.on('rdfs:label', labelHandler);
+  template.one('remove', function () {
+    individual.off('v-wf:join', joinSplitHandler);
+    individual.off('v-wf:split', joinSplitHandler);
+    individual.off('rdfs:label', labelHandler);
   });
 
   $('#taskTemplateProperties > tbody > tr > td > span[about]').each(function () {

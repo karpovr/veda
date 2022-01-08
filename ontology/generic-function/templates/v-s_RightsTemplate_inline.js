@@ -4,14 +4,12 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var rights = "";
-  rights += (this.hasValue("v-s:canCreate", true) ? "C" : "");
-  rights += (this.hasValue("v-s:canRead",   true) ? "R" : "");
-  rights += (this.hasValue("v-s:canUpdate", true) ? "U" : "");
-  rights += (this.hasValue("v-s:canDelete", true) ? "D" : "");
+  var rights = '';
+  rights += this.hasValue('v-s:canCreate', true) ? 'C' : '';
+  rights += this.hasValue('v-s:canRead', true) ? 'R' : '';
+  rights += this.hasValue('v-s:canUpdate', true) ? 'U' : '';
+  rights += this.hasValue('v-s:canDelete', true) ? 'D' : '';
   $(template).text(rights);
 };
 
-export const html = `
-<span></span>
-`;
+export const html = ` <span></span> `;

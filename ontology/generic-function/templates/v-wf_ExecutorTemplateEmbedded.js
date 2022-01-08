@@ -5,19 +5,19 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('.CodeMirror', template).each(function (idx) {
-  $(this).height(40);
+    $(this).height(40);
   });
-  $('#executordefinition', template).on('click', function() {
+  $('#executordefinition', template).on('click', function () {
     $('.executordefinition', template).show();
     $('.codelet', template).hide();
     $('.appointment', template).hide();
   });
-  $('#codelet', template).on('click', function() {
+  $('#codelet', template).on('click', function () {
     $('.executordefinition', template).hide();
     $('.codelet', template).show();
     $('.appointment', template).hide();
   });
-  $('#appointment', template).on('click', function() {
+  $('#appointment', template).on('click', function () {
     $('.executordefinition', template).hide();
     $('.codelet', template).hide();
     $('.appointment', template).show();

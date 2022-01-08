@@ -24,13 +24,11 @@ export const post = function (individual, template, container, mode, extra) {
 };
 
 export const html = `
-<a href="#" about="@">
-  <span href="#" about="@" rel="v-s:defaultAppointment">
-    <span href="#" about="@" rel="v-s:occupation">
-      <span class="no-margin" style="width:150px; text-overflow: ellipsis; white-space: nowrap;">
-        <span property="rdfs:label"></span> &udarr;
+  <a href="#" about="@">
+    <span href="#" about="@" rel="v-s:defaultAppointment">
+      <span href="#" about="@" rel="v-s:occupation">
+        <span class="no-margin" style="width:150px; text-overflow: ellipsis; white-space: nowrap;"> <span property="rdfs:label"></span> &udarr; </span>
       </span>
     </span>
-  </span>
-</a>
+  </a>
 `;

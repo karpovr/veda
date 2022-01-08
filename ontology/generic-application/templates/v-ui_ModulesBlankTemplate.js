@@ -4,9 +4,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  container.siblings(".search-button.pull-right").remove();
+  container.siblings('.search-button.pull-right').remove();
 };
 
-export const html = `
-<div></div>
-`;
+export const html = ` <div></div> `;

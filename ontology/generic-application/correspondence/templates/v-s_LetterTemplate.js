@@ -8,24 +8,24 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  if ( mode === "edit" || template.data("mode") === "edit" ) {
+  if (mode === 'edit' || template.data('mode') === 'edit') {
     var userOrganization = veda.appointment.getOrganization();
-    var enumerated = new IndividualModel("v-s:LetterRegistrationRecordEnumerated");
+    var enumerated = new IndividualModel('v-s:LetterRegistrationRecordEnumerated');
 
     // These events are triggered in v-s:CorrespondentTemplate
-    template.on("v-s:sender:own v-s:sender:foreign v-s:recipient:own v-s:recipient:foreign", function (e) {
+    template.on('v-s:sender:own v-s:sender:foreign v-s:recipient:own v-s:recipient:foreign', function (e) {
       e.stopPropagation();
-      var keyWord = e.type.split(":")[1];
+      var keyWord = e.type.split(':')[1];
       keyWord = keyWord.charAt(0).toUpperCase() + keyWord.slice(1);
-      var isOwn = "own" === e.type.split(":")[2];
+      var isOwn = 'own' === e.type.split(':')[2];
       var regRecord;
-      if ( individual.hasValue("v-s:hasLetterRegistrationRecord" + keyWord) ) {
-        regRecord = individual["v-s:hasLetterRegistrationRecord" + keyWord][0];
+      if (individual.hasValue('v-s:hasLetterRegistrationRecord' + keyWord)) {
+        regRecord = individual['v-s:hasLetterRegistrationRecord' + keyWord][0];
       } else {
         regRecord = new IndividualModel();
-        individual["v-s:hasLetterRegistrationRecord" + keyWord] = [ regRecord ];
+        individual['v-s:hasLetterRegistrationRecord' + keyWord] = [regRecord];
       }
-      regRecord["rdf:type"] = [ new IndividualModel("v-s:LetterRegistrationRecord" + keyWord), isOwn ? enumerated : null ];
+      regRecord['rdf:type'] = [new IndividualModel('v-s:LetterRegistrationRecord' + keyWord), isOwn ? enumerated : null];
     });
   }
 };
@@ -35,14 +35,14 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   // Печатные бланки
-  if( this.hasValue("rdf:type", "v-s:IncomingLetter") ) {
-    $("#outgoing-print-blank", template).remove();
+  if (this.hasValue('rdf:type', 'v-s:IncomingLetter')) {
+    $('#outgoing-print-blank', template).remove();
     $('#incoming-print-blank', template).on('click', function (e) {
       e.preventDefault();
       BrowserUtil.createReport('v-s:IncomingLetterPrintBlank', individual);
     });
   } else {
-    $("#incoming-print-blank", template).remove();
+    $('#incoming-print-blank', template).remove();
     $('#createReport', template).off('click');
     $('#createReport', template).on('click', function (e) {
       e.preventDefault();
@@ -58,17 +58,17 @@ export const post = function (individual, template, container, mode, extra) {
   // Процессная часть
   function processHandler() {
     individual.canUpdate().then(function (canUpdate) {
-      if ( individual.hasValue("v-wf:isProcess") ) {
+      if (individual.hasValue('v-wf:isProcess')) {
         $('#delete.action', template).remove();
       } else if (individual.isNew() || canUpdate) {
         var complexTemplateUri;
-        if ( individual.hasValue("rdf:type", "v-s:IncomingLetter") ) {
+        if (individual.hasValue('rdf:type', 'v-s:IncomingLetter')) {
           complexTemplateUri = 'v-s:IncomingLetter_ComplexRouteStartForm_Template';
         }
-        if ( individual.hasValue("rdf:type", "v-s:OutgoingLetter") ) {
+        if (individual.hasValue('rdf:type', 'v-s:OutgoingLetter')) {
           complexTemplateUri = 'v-s:OutgoingLetter_ComplexRouteStartForm_Template';
         }
-        $('#send.action', template).off("click");
+        $('#send.action', template).off('click');
         $('#send.action', template).on('click', function () {
           BrowserUtil.send(individual, template, 's-wf:complexRouteTransform', undefined, complexTemplateUri);
         });
@@ -77,67 +77,67 @@ export const post = function (individual, template, container, mode, extra) {
       }
     });
   }
-  individual.on("afterUpdate", processHandler);
+  individual.on('afterUpdate', processHandler);
   processHandler();
-  template.one("remove", function () {
-    individual.off("afterUpdate", processHandler);
+  template.one('remove', function () {
+    individual.off('afterUpdate', processHandler);
   });
 
-  $("#add-OutgoingLetter", template).click(function () {
-    var _class = new IndividualModel("v-s:OutgoingLetter"),
-        OutcomingLetter = new IndividualModel(),
-        tmpl = "v-s:LetterTemplate";
-    OutcomingLetter["rdf:type"] = [_class];
+  $('#add-OutgoingLetter', template).click(function () {
+    var _class = new IndividualModel('v-s:OutgoingLetter'),
+      OutcomingLetter = new IndividualModel(),
+      tmpl = 'v-s:LetterTemplate';
+    OutcomingLetter['rdf:type'] = [_class];
     var Sender = new IndividualModel();
-    Sender["rdf:type"] = [ new IndividualModel("v-s:Correspondent") ];
-    Sender["v-s:correspondentOrganization"] =  individual["v-s:sender"][0]["v-s:correspondentOrganization"];
-    Sender["v-s:correspondentDepartmentDescription"] =  individual["v-s:sender"][0]["v-s:correspondentDepartmentDescription"];
-    Sender["v-s:correspondentPersonDescription"] =  individual["v-s:sender"][0]["v-s:correspondentPersonDescription"];
-    OutcomingLetter["v-s:recipient"]= [ Sender ];
+    Sender['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
+    Sender['v-s:correspondentOrganization'] = individual['v-s:sender'][0]['v-s:correspondentOrganization'];
+    Sender['v-s:correspondentDepartmentDescription'] = individual['v-s:sender'][0]['v-s:correspondentDepartmentDescription'];
+    Sender['v-s:correspondentPersonDescription'] = individual['v-s:sender'][0]['v-s:correspondentPersonDescription'];
+    OutcomingLetter['v-s:recipient'] = [Sender];
     var Recipient = new IndividualModel();
-    Recipient["rdf:type"] = [ new IndividualModel("v-s:Correspondent") ];
-    Recipient["v-s:correspondentOrganization"] =  individual["v-s:recipient"][0]["v-s:correspondentOrganization"];
-    Recipient["v-s:correspondentDepartment"] =  individual["v-s:recipient"][0]["v-s:correspondentDepartment"];
-    Recipient["v-s:correspondentPerson"] =  individual["v-s:recipient"][0]["v-s:correspondentPerson"];
-    OutcomingLetter["v-s:sender"]= [ Recipient ];
+    Recipient['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
+    Recipient['v-s:correspondentOrganization'] = individual['v-s:recipient'][0]['v-s:correspondentOrganization'];
+    Recipient['v-s:correspondentDepartment'] = individual['v-s:recipient'][0]['v-s:correspondentDepartment'];
+    Recipient['v-s:correspondentPerson'] = individual['v-s:recipient'][0]['v-s:correspondentPerson'];
+    OutcomingLetter['v-s:sender'] = [Recipient];
     var Link = new IndividualModel();
-    Link["rdf:type"] = [ new IndividualModel("v-s:Link") ];
-    Link["v-s:from"] = [ OutcomingLetter ];
-    Link["v-s:to"] = [ individual ];
-    OutcomingLetter["v-s:hasLink"]= [ Link ];
-    OutcomingLetter["v-s:description"] = individual ["v-s:description"];
-    riot.route( ["#", OutcomingLetter.id, "#main", tmpl, "edit"].join("/") );
+    Link['rdf:type'] = [new IndividualModel('v-s:Link')];
+    Link['v-s:from'] = [OutcomingLetter];
+    Link['v-s:to'] = [individual];
+    OutcomingLetter['v-s:hasLink'] = [Link];
+    OutcomingLetter['v-s:description'] = individual['v-s:description'];
+    riot.route(['#', OutcomingLetter.id, '#main', tmpl, 'edit'].join('/'));
   });
 
-  $("#add-IncomingLetter", template).click(function () {
-    var _class = new IndividualModel("v-s:IncomingLetter"),
-        IncomingLetter = new IndividualModel(),
-        tmpl = "v-s:LetterTemplate";
-    IncomingLetter["rdf:type"] = [_class];
+  $('#add-IncomingLetter', template).click(function () {
+    var _class = new IndividualModel('v-s:IncomingLetter'),
+      IncomingLetter = new IndividualModel(),
+      tmpl = 'v-s:LetterTemplate';
+    IncomingLetter['rdf:type'] = [_class];
     var Sender = new IndividualModel();
-    Sender["rdf:type"] = [ new IndividualModel("v-s:Correspondent") ];
-    Sender["v-s:correspondentOrganization"] =  individual["v-s:sender"][0]["v-s:correspondentOrganization"];
-    Sender["v-s:correspondentDepartmentDescription"] =  individual["v-s:sender"][0]["v-s:correspondentDepartmentDescription"];
-    Sender["v-s:correspondentPersonDescription"] =  individual["v-s:sender"][0]["v-s:correspondentPersonDescription"];
-    IncomingLetter["v-s:recipient"]= [ Sender ];
+    Sender['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
+    Sender['v-s:correspondentOrganization'] = individual['v-s:sender'][0]['v-s:correspondentOrganization'];
+    Sender['v-s:correspondentDepartmentDescription'] = individual['v-s:sender'][0]['v-s:correspondentDepartmentDescription'];
+    Sender['v-s:correspondentPersonDescription'] = individual['v-s:sender'][0]['v-s:correspondentPersonDescription'];
+    IncomingLetter['v-s:recipient'] = [Sender];
     var Recipient = new IndividualModel();
-    Recipient["rdf:type"] = [ new IndividualModel("v-s:Correspondent") ];
-    Recipient["v-s:correspondentOrganization"] =  individual["v-s:recipient"][0]["v-s:correspondentOrganization"];
-    Recipient["v-s:correspondentDepartment"] =  individual["v-s:recipient"][0]["v-s:correspondentDepartment"];
-    Recipient["v-s:correspondentPerson"] =  individual["v-s:recipient"][0]["v-s:correspondentPerson"];
-    IncomingLetter["v-s:sender"]= [ Recipient ];
+    Recipient['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
+    Recipient['v-s:correspondentOrganization'] = individual['v-s:recipient'][0]['v-s:correspondentOrganization'];
+    Recipient['v-s:correspondentDepartment'] = individual['v-s:recipient'][0]['v-s:correspondentDepartment'];
+    Recipient['v-s:correspondentPerson'] = individual['v-s:recipient'][0]['v-s:correspondentPerson'];
+    IncomingLetter['v-s:sender'] = [Recipient];
     var Link = new IndividualModel();
-    Link["rdf:type"] = [ new IndividualModel("v-s:Link") ];
-    Link["v-s:from"] = [ IncomingLetter ];
-    Link["v-s:to"] = [ individual ];
-    IncomingLetter["v-s:hasLink"]= [ Link ];
-    IncomingLetter["v-s:description"] = individual ["v-s:description"];
-    riot.route( ["#", IncomingLetter.id, "#main", tmpl, "edit"].join("/") );
+    Link['rdf:type'] = [new IndividualModel('v-s:Link')];
+    Link['v-s:from'] = [IncomingLetter];
+    Link['v-s:to'] = [individual];
+    IncomingLetter['v-s:hasLink'] = [Link];
+    IncomingLetter['v-s:description'] = individual['v-s:description'];
+    riot.route(['#', IncomingLetter.id, '#main', tmpl, 'edit'].join('/'));
   });
-  if( individual.hasValue("rdf:type", "v-s:IncomingLetter") ) {
-    $("#add-IncomingLetter", template).remove();
-  } else if( individual.hasValue("rdf:type", "v-s:OutgoingLetter") ) {
-    $("#add-OutgoingLetter", template).remove();
+  if (individual.hasValue('rdf:type', 'v-s:IncomingLetter')) {
+    $('#add-IncomingLetter', template).remove();
+  } else if (individual.hasValue('rdf:type', 'v-s:OutgoingLetter')) {
+    $('#add-OutgoingLetter', template).remove();
   }
 };
 

@@ -7,34 +7,41 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  template.on("validate", function () {
+  template.on('validate', function () {
     var result = {};
     if (!individual.hasValue('v-s:lastName')) {
-      result["v-s:lastName"] = {
+      result['v-s:lastName'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
     if (!individual.hasValue('v-s:firstName')) {
-      result["v-s:firstName"] = {
+      result['v-s:firstName'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
     if (!individual.hasValue('v-s:tabNumber')) {
-      result["v-s:tabNumber"] = {
+      result['v-s:tabNumber'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
     if (!individual.hasValue('v-s:parentOrganization')) {
-      result["v-s:parentOrganization"] = {
+      result['v-s:parentOrganization'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
+        cause: ['v-ui:minCardinality'],
       };
     }
-    if ( individual.hasValue('v-s:lastName') && individual.hasValue('v-s:firstName') && individual.hasValue('v-s:parentOrganization') && individual.isNew()) {
-      var queryString = "'rdf:type'==='v-s:Person' && 'v-s:parentOrganization'=='" + individual['v-s:parentOrganization'][0].id + "' && 'v-s:lastName'=='" + individual['v-s:lastName'][0] + "' && 'v-s:firstName'=='" + individual['v-s:firstName'][0] + "'";
+    if (individual.hasValue('v-s:lastName') && individual.hasValue('v-s:firstName') && individual.hasValue('v-s:parentOrganization') && individual.isNew()) {
+      var queryString =
+        "'rdf:type'==='v-s:Person' && 'v-s:parentOrganization'=='" +
+        individual['v-s:parentOrganization'][0].id +
+        "' && 'v-s:lastName'=='" +
+        individual['v-s:lastName'][0] +
+        "' && 'v-s:firstName'=='" +
+        individual['v-s:firstName'][0] +
+        "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
         var tmp = queryResult.result;
         if (tmp.length == 0) {
@@ -44,8 +51,9 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }
-    if ( individual.hasValue('v-s:tabNumber') && individual.isNew()) {
-      var queryString = "'v-s:parentOrganization'=='" + individual['v-s:parentOrganization'][0].id +"' && 'v-s:tabNumber'=='" + individual['v-s:tabNumber'][0] + "'";
+    if (individual.hasValue('v-s:tabNumber') && individual.isNew()) {
+      var queryString =
+        "'v-s:parentOrganization'=='" + individual['v-s:parentOrganization'][0].id + "' && 'v-s:tabNumber'=='" + individual['v-s:tabNumber'][0] + "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
         var tmp = queryResult.result;
         if (tmp.length == 0) {
@@ -55,18 +63,18 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }
-    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
+    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
   });
 
-  var canCreateSubsidiary = (new IndividualModel("v-s:Subsidiary")).canCreate();
-  Promise.all([canCreateSubsidiary]).then(function(results) {
-    if ( !results[0] || !results[1]) {
-      $("#add-subsidiary", template).remove();
+  var canCreateSubsidiary = new IndividualModel('v-s:Subsidiary').canCreate();
+  Promise.all([canCreateSubsidiary]).then(function (results) {
+    if (!results[0] || !results[1]) {
+      $('#add-subsidiary', template).remove();
     }
   });
 
-  var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='"+individual.id+"'";
-  $("veda-control[rel='v-s:defaultAppointment']", template).attr("data-query-prefix", queryString);
+  var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='" + individual.id + "'";
+  $("veda-control[rel='v-s:defaultAppointment']", template).attr('data-query-prefix', queryString);
   //$('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 };
 
@@ -74,8 +82,8 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  if ( individual.hasValue('rdfs:isDefinedBy') ) {
-    $(".actions #edit", template).attr('disabled', 'disabled');
+  if (individual.hasValue('rdfs:isDefinedBy')) {
+    $('.actions #edit', template).attr('disabled', 'disabled');
   }
   if (!individual.hasValue('v-s:birthday')) {
     $('span[property="v-s:birthday"]').text('Не указано');

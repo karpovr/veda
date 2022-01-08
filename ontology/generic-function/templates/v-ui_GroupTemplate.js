@@ -5,17 +5,17 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var membershipRegistryBlank = new IndividualModel("v-s:MembershipRegistryBlank");
+  var membershipRegistryBlank = new IndividualModel('v-s:MembershipRegistryBlank');
   var membershipRegistryBlankPromise = membershipRegistryBlank.load().then(function (membershipRegistryBlank) {
     delete membershipRegistryBlank.object;
-    membershipRegistryBlank["v-s:memberOf"] = [ individual ];
+    membershipRegistryBlank['v-s:memberOf'] = [individual];
     return membershipRegistryBlank.init();
   });
 
-  var membershipBlank = new IndividualModel("v-s:MembershipBlank");
+  var membershipBlank = new IndividualModel('v-s:MembershipBlank');
   var membershipBlankPromise = membershipBlank.load().then(function (membershipBlank) {
     delete membershipBlank.object;
-    membershipBlank["v-s:memberOf"] = [ individual ];
+    membershipBlank['v-s:memberOf'] = [individual];
     return membershipBlank.init();
   });
 
@@ -23,16 +23,19 @@ export const pre = function (individual, template, container, mode, extra) {
 };
 
 export const html = `
-<div class="container sheet">
-  <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
-  <div class="panel panel-default">
-    <div class="panel-heading"><span about="v-s:MembershipRegistry" property="rdfs:label"></span><a href="#/v-s:MembershipBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a></div>
-    <div class="panel-body" about="v-s:MembershipRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
+  <div class="container sheet">
+    <div about="@" data-embedded="true" data-template="v-ui:CommonOntologyTemplate"></div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <span about="v-s:MembershipRegistry" property="rdfs:label"></span
+        ><a href="#/v-s:MembershipBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
+      </div>
+      <div class="panel-body" about="v-s:MembershipRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
+    </div>
+    <br />
+    <br />
+    <div class="actions">
+      <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
+    </div>
   </div>
-  <br>
-  <br>
-  <div class="actions">
-    <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete destroy"></span>
-  </div>
-</div>
 `;

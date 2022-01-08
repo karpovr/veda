@@ -1,5 +1,5 @@
 export const html = `
-<table class="table table-bordered">
+  <table class="table table-bordered">
     <thead class="result-header">
       <tr>
         <th colspan="8" about="v-s:Department" property="rdfs:label"></th>
@@ -10,7 +10,9 @@ export const html = `
         <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
         <th><span about="rdfs:label" property="rdfs:label"></span></th>
         <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
+      </tr>
     </thead>
+
     <tbody class="result-container">
       <tr>
         <td><a href="#/@" class="glyphicon glyphicon-search"></a></td>

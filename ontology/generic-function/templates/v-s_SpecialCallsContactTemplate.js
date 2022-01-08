@@ -6,27 +6,27 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  $(".open-structure").remove();
+  $('.open-structure').remove();
 };
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-$("section .section-header", template).click(function(){
+  $('section .section-header', template).click(function () {
     var self = $(this);
-    $("span.glyphicon", self).toggleClass("glyphicon-chevron-right glyphicon-chevron-down");
+    $('span.glyphicon', self).toggleClass('glyphicon-chevron-right glyphicon-chevron-down');
     self.siblings().toggle();
   });
 
   function presentSearchResult(objType, container, items) {
-    var promises = items.map(function(item) {
+    var promises = items.map(function (item) {
       var item2 = new veda.IndividualModel(item);
-      return item2.present($("<div></div>"), "v-s:ContactCardTemplate");
+      return item2.present($('<div></div>'), 'v-s:ContactCardTemplate');
     });
-    return Promise.all(promises).then(function(templates){
-      templates.forEach(function(tmpl) {
-        $("tbody", container).append(tmpl);
+    return Promise.all(promises).then(function (templates) {
+      templates.forEach(function (tmpl) {
+        $('tbody', container).append(tmpl);
       });
     });
   }
@@ -50,34 +50,34 @@ $("section .section-header", template).click(function(){
   });
 
   return Promise.all([promise_spec, promise_group]).then(function (result) {
-    presentSearchResult("pos", spec, result[0].result);
-    presentSearchResult("pos", group, result[1].result);
+    presentSearchResult('pos', spec, result[0].result);
+    presentSearchResult('pos', group, result[1].result);
   });
 };
 
 export const html = `
-<div>
-  <section id="spec">
-    <h5 class="section-header">
-      <span class="glyphicon glyphicon-chevron-right"></span>
-      <label about="v-s:SpecialBundle" property="rdfs:label"></label>
-    </h5>
-    <div class="section-content">
-      <table class="table result-table">
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-  <section id="group">
-    <h5 class="section-header">
-      <span class="glyphicon glyphicon-chevron-right"></span>
-      <label about="v-s:GroupBundle" property="rdfs:label"></label>
-    </h5>
-    <div class="section-content">
-      <table class="table result-table">
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-</div>
+  <div>
+    <section id="spec">
+      <h5 class="section-header">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <label about="v-s:SpecialBundle" property="rdfs:label"></label>
+      </h5>
+      <div class="section-content">
+        <table class="table result-table">
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section id="group">
+      <h5 class="section-header">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <label about="v-s:GroupBundle" property="rdfs:label"></label>
+      </h5>
+      <div class="section-content">
+        <table class="table result-table">
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 `;

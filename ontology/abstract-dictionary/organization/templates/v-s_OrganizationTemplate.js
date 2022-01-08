@@ -8,82 +8,90 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var _class = new IndividualModel("v-s:Subsidiary");
+  var _class = new IndividualModel('v-s:Subsidiary');
 
-  Promise.all([_class.rights, individual.rights]).then(function (rights) {
-    var class_rights = rights[0],
+  Promise.all([_class.rights, individual.rights])
+    .then(function (rights) {
+      var class_rights = rights[0],
         individual_rights = rights[1];
-    if ( !class_rights.hasValue("v-s:canCreate", true) || !individual_rights.hasValue("v-s:canUpdate", true) ) {
-      $("#add-subsidiary", template).remove();
-    }
-  }).catch(function (error) {
-    console.log(error);
-  });
+      if (!class_rights.hasValue('v-s:canCreate', true) || !individual_rights.hasValue('v-s:canUpdate', true)) {
+        $('#add-subsidiary', template).remove();
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
 
-  var prevTaxId = individual.hasValue("v-s:taxId") && individual["v-s:taxId"][0].toString();
+  var prevTaxId = individual.hasValue('v-s:taxId') && individual['v-s:taxId'][0].toString();
 
   // Validation
-  template.on("validate", function () {
-    var result = {state: true},
-        regexp;
-    if ( individual.hasValue("v-s:hasClassifierCountry", "d:Country_RUS") && individual.hasValue("v-s:hasClassifierLegalForm", "d:OKOPF_50102") ) {
+  template.on('validate', function () {
+    var result = { state: true },
+      regexp;
+    if (individual.hasValue('v-s:hasClassifierCountry', 'd:Country_RUS') && individual.hasValue('v-s:hasClassifierLegalForm', 'd:OKOPF_50102')) {
       regexp = /^([0-9]{12})$/gi;
-    } else if ( individual.hasValue("v-s:hasClassifierCountry", "d:Country_RUS") ) {
+    } else if (individual.hasValue('v-s:hasClassifierCountry', 'd:Country_RUS')) {
       regexp = /^([0-9]{10})$/gi;
-    } else if ( individual.hasValue("v-s:hasClassifierCountry", "d:Country_NLD") ) {
+    } else if (individual.hasValue('v-s:hasClassifierCountry', 'd:Country_NLD')) {
       regexp = /^[A-Z]{1,3}[0-9]{9}[B]{1}[0-9]{2}$/gi;
-    } else if ( individual.hasValue("v-s:hasClassifierCountry") ) {
+    } else if (individual.hasValue('v-s:hasClassifierCountry')) {
       regexp = /^[A-Z]{1,3}[0-9]{4,}$/gi;
     }
-    if ( !individual.hasValue("v-s:taxId") ) {
-      result["v-s:taxId"] = {
+    if (!individual.hasValue('v-s:taxId')) {
+      result['v-s:taxId'] = {
         state: false,
-        cause: ["v-ui:minCardinality"]
-      }
+        cause: ['v-ui:minCardinality'],
+      };
     } else {
       // Check regexp
-      var taxId = individual["v-s:taxId"][0].toString();
-      if(taxId != '0000000000' && taxId != '000000000000') {
-        result["v-s:taxId"] = {
-          state: regexp.test( taxId ),
-          cause: ["v-ui:regexp"]
-        }
+      var taxId = individual['v-s:taxId'][0].toString();
+      if (taxId != '0000000000' && taxId != '000000000000') {
+        result['v-s:taxId'] = {
+          state: regexp.test(taxId),
+          cause: ['v-ui:regexp'],
+        };
       } else {
-        result["v-s:taxId"] = {
-        state: false,
-        cause: ["v-s:ForSafeTaxId"]
-        }
+        result['v-s:taxId'] = {
+          state: false,
+          cause: ['v-s:ForSafeTaxId'],
+        };
       }
 
       // Check unique
-      var newTaxId = individual.hasValue("v-s:taxId") && individual["v-s:taxId"][0].toString();
-      if ( prevTaxId !== newTaxId ) { prevTaxId = newTaxId; }
-      if ( result["v-s:taxId"].state ) {
+      var newTaxId = individual.hasValue('v-s:taxId') && individual['v-s:taxId'][0].toString();
+      if (prevTaxId !== newTaxId) {
+        prevTaxId = newTaxId;
+      }
+      if (result['v-s:taxId'].state) {
         Backend.query(veda.ticket, "'rdf:type'==='v-s:Organization' && 'v-s:taxId'=='" + taxId + "'").then(function (queryResult) {
           var queryResult = queryResult.result;
-          result["v-s:taxId"] = {
-            state: (!queryResult.length || queryResult[0] === individual.id),
-            cause: ["v-s:NonUniqueTaxId"]
-          }
-          template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
+          result['v-s:taxId'] = {
+            state: !queryResult.length || queryResult[0] === individual.id,
+            cause: ['v-s:NonUniqueTaxId'],
+          };
+          template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
         });
       }
     }
     // Если значение поля v-s:hasClassifierCountry=d:Country_RUS то поле v-s:hasClassifierLegalForm Обязательное
-    if (individual.hasValue("v-s:hasClassifierCountry", "d:Country_RUS") ) {
-      result["v-s:hasClassifierLegalForm"] = {
-        state: individual.hasValue("v-s:hasClassifierLegalForm"),
-        cause: ["v-ui:minCardinality"]
-      }
+    if (individual.hasValue('v-s:hasClassifierCountry', 'd:Country_RUS')) {
+      result['v-s:hasClassifierLegalForm'] = {
+        state: individual.hasValue('v-s:hasClassifierLegalForm'),
+        cause: ['v-ui:minCardinality'],
+      };
     }
     // Если значение поля v-s:hasClassifierCountry=d:Country_RUS и поле v-s:hasClassifierLegalForm=d:OKOPF_50102 то поле v-s:taxRegistrationCause должно быть обязательным.
-    if (individual.hasValue("v-s:hasClassifierCountry", "d:Country_RUS") && !individual.hasValue("v-s:hasClassifierLegalForm", "d:OKOPF_50102") && !individual.hasValue("v-s:hasClassifierLegalForm", "d:OKOPF_50000") ) {
-      result["v-s:taxRegistrationCause"] = {
-        state: /^[0-9]{9}$/.test(individual["v-s:taxRegistrationCause"][0]),
-        cause: ["v-ui:regexp"]
-      }
+    if (
+      individual.hasValue('v-s:hasClassifierCountry', 'd:Country_RUS') &&
+      !individual.hasValue('v-s:hasClassifierLegalForm', 'd:OKOPF_50102') &&
+      !individual.hasValue('v-s:hasClassifierLegalForm', 'd:OKOPF_50000')
+    ) {
+      result['v-s:taxRegistrationCause'] = {
+        state: /^[0-9]{9}$/.test(individual['v-s:taxRegistrationCause'][0]),
+        cause: ['v-ui:regexp'],
+      };
     }
-    template[0].dispatchEvent(new CustomEvent("validated", {detail: result}));
+    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
   });
 };
 
@@ -92,39 +100,39 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   //Генерация Uri
-  BrowserUtil.registerHandler(individual, template, "beforeSave", function () {
-    var shortLabel = individual["v-s:hasClassifierCountry"][0]["v-s:shortLabel"];
-    var taxId = individual["v-s:taxId"] ;
-    if ( individual.hasValue("v-s:hasClassifierCountry", "d:Country_RUS") && individual.isNew() ){
-      individual.id = "d:org_"+ shortLabel + taxId ;
-    } else if ( individual.isNew() ) {
-      individual.id = "d:org_"+ taxId ;
+  BrowserUtil.registerHandler(individual, template, 'beforeSave', function () {
+    var shortLabel = individual['v-s:hasClassifierCountry'][0]['v-s:shortLabel'];
+    var taxId = individual['v-s:taxId'];
+    if (individual.hasValue('v-s:hasClassifierCountry', 'd:Country_RUS') && individual.isNew()) {
+      individual.id = 'd:org_' + shortLabel + taxId;
+    } else if (individual.isNew()) {
+      individual.id = 'd:org_' + taxId;
     }
   });
 
-  $("#add-subsidiary", template).click(function () {
-    var modal = $("#notification-modal-template").html();
+  $('#add-subsidiary', template).click(function () {
+    var modal = $('#notification-modal-template').html();
     modal = $(modal);
-    modal.modal({"show": false});
-    $("body").append(modal);
-    modal.modal("show");
-    template.one("remove", function () {
-      modal.modal("hide").remove();
+    modal.modal({ show: false });
+    $('body').append(modal);
+    modal.modal('show');
+    template.one('remove', function () {
+      modal.modal('hide').remove();
     });
-    var cntr = $(".modal-body", modal),
-        _class = new IndividualModel("v-s:Subsidiary"),
-        subsidiary = new IndividualModel(),
-        tmpl = new IndividualModel("v-s:SubsidiaryTemplate");
-    subsidiary["rdf:type"] = [_class];
-    subsidiary["v-s:backwardTarget"] = [individual];
-    subsidiary["v-s:backwardProperty"] = [new IndividualModel("v-s:hasSubsidiary")];
-    subsidiary["v-s:canRead"] = [ true ];
-    subsidiary.present(cntr, tmpl, "edit");
-    subsidiary.one("beforeReset", function () {
-      modal.modal("hide").remove();
+    var cntr = $('.modal-body', modal),
+      _class = new IndividualModel('v-s:Subsidiary'),
+      subsidiary = new IndividualModel(),
+      tmpl = new IndividualModel('v-s:SubsidiaryTemplate');
+    subsidiary['rdf:type'] = [_class];
+    subsidiary['v-s:backwardTarget'] = [individual];
+    subsidiary['v-s:backwardProperty'] = [new IndividualModel('v-s:hasSubsidiary')];
+    subsidiary['v-s:canRead'] = [true];
+    subsidiary.present(cntr, tmpl, 'edit');
+    subsidiary.one('beforeReset', function () {
+      modal.modal('hide').remove();
     });
-    subsidiary.one("afterSave", function () {
-      modal.modal("hide").remove();
+    subsidiary.one('afterSave', function () {
+      modal.modal('hide').remove();
     });
   });
 };

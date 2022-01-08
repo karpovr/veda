@@ -5,7 +5,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#taskTemplateProperties [rel="v-wf:inputVariable"] [typeof="v-wf:VarDefine"]').draggable({
-    revert:true
+    revert: true,
   });
 };
 
