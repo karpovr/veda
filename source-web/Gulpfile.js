@@ -5,6 +5,7 @@ const mkdirp = require('mkdirp');
 const minify = require('html-minifier').minify;
 const sourcemaps = require('gulp-sourcemaps');
 const babel = require('gulp-babel');
+const prettier = require('gulp-prettier');
 
 const babel_options = {
   plugins: [
@@ -59,28 +60,53 @@ const minify_options = {
   removeComments: true,
 };
 
+const prettier_options = {
+  'arrowParens': 'always',
+  'bracketSameLine': true,
+  'bracketSpacing': true,
+  'embeddedLanguageFormatting': 'auto',
+  'htmlWhitespaceSensitivity': 'css',
+  'insertPragma': false,
+  'jsxSingleQuote': false,
+  'printWidth': 160,
+  'proseWrap': 'preserve',
+  'quoteProps': 'as-needed',
+  'requirePragma': false,
+  'semi': true,
+  'singleQuote': true,
+  'tabWidth': 2,
+  'trailingComma': 'all',
+  'useTabs': false,
+  'vueIndentScriptAndStyle': false,
+};
+
 exports.default = function () {
-  return src('../ontology/LNG/**/*.js', {follow: true})
-    //.pipe(rename((path) => {
-      //path.dirname = '';
-      //path.extname = '.js';
-    //}))
-    .pipe(through2.obj(transform_to_es6))
-    .pipe(through2.obj(transform_to_module))
+  return src('../ontology/**/*.js', {follow: true})
+  // .pipe(rename((path) => {
+  // path.dirname = '';
+  // path.extname = '.js';
+  // }))
+  // .pipe(through2.obj(transform_to_es6))
+  // .pipe(through2.obj(transform_to_module))
 
-    //.pipe(through2.obj(pre_post))
+  // .pipe(through2.obj(pre_post))
 
-    // .pipe(sourcemaps.init())
-    //  .pipe(sourcemaps.mapSources(function(sourcePath, file) {
-    //    console.log('sourcePath', sourcePath);
-    //    return '/templates/' + sourcePath;
-    //  }))
-    //  .pipe(babel(babel_options))
-    //.pipe(sourcemaps.write('.'))*/
+  // .pipe(sourcemaps.init())
+  //  .pipe(sourcemaps.mapSources(function(sourcePath, file) {
+  //    console.log('sourcePath', sourcePath);
+  //    return '/templates/' + sourcePath;
+  //  }))
+  //  .pipe(babel(babel_options))
+  // .pipe(sourcemaps.write('.'))*/
+
+    .pipe(through2.obj(setHtmlTag))
+    .pipe(prettier(prettier_options))
+    .pipe(through2.obj(unsetHtmlTag))
+
     .pipe(dest('output'));
 };
 
-//mkdirp.sync('templates');
+// mkdirp.sync('templates');
 
 const import_other = {
   'veda.Backend': '/js/common/backend.js',
@@ -162,8 +188,26 @@ const transform_to_module = (file, _, cb) => {
 const pre_post = (file, _, cb) => {
   if (file.isBuffer()) {
     let content = file.contents.toString();
-    content = content.split("export const pre = function (individual, template, container) {").join("export const pre = function (individual, template, container, mode, extra) {");
-    content = content.split("export const post = function (individual, template, container) {").join("export const post = function (individual, template, container, mode, extra) {");
+    content = content.split('export const pre = function (individual, template, container) {').join('export const pre = function (individual, template, container, mode, extra) {');
+    content = content.split('export const post = function (individual, template, container) {').join('export const post = function (individual, template, container, mode, extra) {');
+    file.contents = Buffer.from(content);
+  }
+  cb(null, file);
+};
+
+const setHtmlTag = (file, _, cb) => {
+  if (file.isBuffer()) {
+    let content = file.contents.toString();
+    content = content.split('export const html = `').join('export const html = html`');
+    file.contents = Buffer.from(content);
+  }
+  cb(null, file);
+};
+
+const unsetHtmlTag = (file, _, cb) => {
+  if (file.isBuffer()) {
+    let content = file.contents.toString();
+    content = content.split('export const html = html`').join('export const html = `');
     file.contents = Buffer.from(content);
   }
   cb(null, file);
