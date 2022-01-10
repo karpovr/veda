@@ -20,9 +20,9 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#make-copy', template).click(function () {
-    var _class = new IndividualModel('v-s:InternalDocument'),
-      InternalDocument = new IndividualModel(),
-      tmpl = 'v-s:InternalDocumentTemplate';
+    const _class = new IndividualModel('v-s:InternalDocument');
+    const InternalDocument = new IndividualModel();
+    const tmpl = 'v-s:InternalDocumentTemplate';
     InternalDocument['rdf:type'] = [_class];
     InternalDocument['v-s:responsibleDepartment'] = individual['v-s:responsibleDepartment'];
     InternalDocument['v-s:hasDocumentKind'] = individual['v-s:hasDocumentKind'];
@@ -41,7 +41,7 @@ export const post = function (individual, template, container, mode, extra) {
     BrowserUtil.createReport('v-s:InternalDocument_printBlank', individual);
   });
 
-  function processHandler() {
+  function processHandler () {
     individual.canUpdate().then(function (canUpdate) {
       if (individual.hasValue('v-wf:isProcess')) {
         $('#send.action', template).remove();

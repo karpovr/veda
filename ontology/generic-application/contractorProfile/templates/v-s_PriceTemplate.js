@@ -12,9 +12,9 @@ export const post = function (individual, template, container, mode, extra) {
     individual.off('propertyModified', handler);
   });
 
-  function handler(property_uri) {
+  function handler (property_uri) {
     if ((property_uri === 'v-s:sum' || property_uri === 'v-s:hasCurrency') && individual.hasValue('v-s:sum') && individual.hasValue('v-s:hasCurrency')) {
-      var CER_uri = Backend.query({
+      Backend.query({
         ticket: veda.ticket,
         query:
           "'rdf:type'==='v-s:CurrencyExchangeRate' && 'v-s:hasCurrencySource'=='" +
@@ -25,7 +25,7 @@ export const post = function (individual, template, container, mode, extra) {
         async: true,
       })
         .then(function (queryResult) {
-          var CER_uri = queryResult.result[0];
+          const CER_uri = queryResult.result[0];
           if (CER_uri) {
             return new IndividualModel(CER_uri).load();
           } else {
@@ -34,7 +34,7 @@ export const post = function (individual, template, container, mode, extra) {
         })
         .then(function (CER) {
           if (CER) {
-            var rate = CER['v-s:rate'][0];
+            const rate = CER['v-s:rate'][0];
             individual['v-s:sumRuble'] = [individual['v-s:sum'][0] * rate];
             individual['v-s:date'] = [new Date()];
           } else {

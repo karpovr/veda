@@ -13,4 +13,4 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = ` <a href="#/@"><span class="fa fa-lg fa-user-o"></span></a> `;
+export const html = ' <a href="#/@"><span class="fa fa-lg fa-user-o"></span></a> ';

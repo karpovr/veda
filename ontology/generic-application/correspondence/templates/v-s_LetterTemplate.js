@@ -1,6 +1,5 @@
 import BrowserUtil from '/js/browser/util.js';
 import $ from 'jquery';
-import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
 import riot from 'riot';
 
@@ -9,16 +8,15 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (mode === 'edit' || template.data('mode') === 'edit') {
-    var userOrganization = veda.appointment.getOrganization();
-    var enumerated = new IndividualModel('v-s:LetterRegistrationRecordEnumerated');
+    const enumerated = new IndividualModel('v-s:LetterRegistrationRecordEnumerated');
 
     // These events are triggered in v-s:CorrespondentTemplate
     template.on('v-s:sender:own v-s:sender:foreign v-s:recipient:own v-s:recipient:foreign', function (e) {
       e.stopPropagation();
-      var keyWord = e.type.split(':')[1];
+      let keyWord = e.type.split(':')[1];
       keyWord = keyWord.charAt(0).toUpperCase() + keyWord.slice(1);
-      var isOwn = 'own' === e.type.split(':')[2];
-      var regRecord;
+      const isOwn = 'own' === e.type.split(':')[2];
+      let regRecord;
       if (individual.hasValue('v-s:hasLetterRegistrationRecord' + keyWord)) {
         regRecord = individual['v-s:hasLetterRegistrationRecord' + keyWord][0];
       } else {
@@ -56,12 +54,12 @@ export const post = function (individual, template, container, mode, extra) {
   }
 
   // Процессная часть
-  function processHandler() {
+  function processHandler () {
     individual.canUpdate().then(function (canUpdate) {
       if (individual.hasValue('v-wf:isProcess')) {
         $('#delete.action', template).remove();
       } else if (individual.isNew() || canUpdate) {
-        var complexTemplateUri;
+        let complexTemplateUri;
         if (individual.hasValue('rdf:type', 'v-s:IncomingLetter')) {
           complexTemplateUri = 'v-s:IncomingLetter_ComplexRouteStartForm_Template';
         }
@@ -84,23 +82,23 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#add-OutgoingLetter', template).click(function () {
-    var _class = new IndividualModel('v-s:OutgoingLetter'),
-      OutcomingLetter = new IndividualModel(),
-      tmpl = 'v-s:LetterTemplate';
+    const _class = new IndividualModel('v-s:OutgoingLetter');
+    const OutcomingLetter = new IndividualModel();
+    const tmpl = 'v-s:LetterTemplate';
     OutcomingLetter['rdf:type'] = [_class];
-    var Sender = new IndividualModel();
+    const Sender = new IndividualModel();
     Sender['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
     Sender['v-s:correspondentOrganization'] = individual['v-s:sender'][0]['v-s:correspondentOrganization'];
     Sender['v-s:correspondentDepartmentDescription'] = individual['v-s:sender'][0]['v-s:correspondentDepartmentDescription'];
     Sender['v-s:correspondentPersonDescription'] = individual['v-s:sender'][0]['v-s:correspondentPersonDescription'];
     OutcomingLetter['v-s:recipient'] = [Sender];
-    var Recipient = new IndividualModel();
+    const Recipient = new IndividualModel();
     Recipient['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
     Recipient['v-s:correspondentOrganization'] = individual['v-s:recipient'][0]['v-s:correspondentOrganization'];
     Recipient['v-s:correspondentDepartment'] = individual['v-s:recipient'][0]['v-s:correspondentDepartment'];
     Recipient['v-s:correspondentPerson'] = individual['v-s:recipient'][0]['v-s:correspondentPerson'];
     OutcomingLetter['v-s:sender'] = [Recipient];
-    var Link = new IndividualModel();
+    const Link = new IndividualModel();
     Link['rdf:type'] = [new IndividualModel('v-s:Link')];
     Link['v-s:from'] = [OutcomingLetter];
     Link['v-s:to'] = [individual];
@@ -110,23 +108,23 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#add-IncomingLetter', template).click(function () {
-    var _class = new IndividualModel('v-s:IncomingLetter'),
-      IncomingLetter = new IndividualModel(),
-      tmpl = 'v-s:LetterTemplate';
+    const _class = new IndividualModel('v-s:IncomingLetter');
+    const IncomingLetter = new IndividualModel();
+    const tmpl = 'v-s:LetterTemplate';
     IncomingLetter['rdf:type'] = [_class];
-    var Sender = new IndividualModel();
+    const Sender = new IndividualModel();
     Sender['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
     Sender['v-s:correspondentOrganization'] = individual['v-s:sender'][0]['v-s:correspondentOrganization'];
     Sender['v-s:correspondentDepartmentDescription'] = individual['v-s:sender'][0]['v-s:correspondentDepartmentDescription'];
     Sender['v-s:correspondentPersonDescription'] = individual['v-s:sender'][0]['v-s:correspondentPersonDescription'];
     IncomingLetter['v-s:recipient'] = [Sender];
-    var Recipient = new IndividualModel();
+    const Recipient = new IndividualModel();
     Recipient['rdf:type'] = [new IndividualModel('v-s:Correspondent')];
     Recipient['v-s:correspondentOrganization'] = individual['v-s:recipient'][0]['v-s:correspondentOrganization'];
     Recipient['v-s:correspondentDepartment'] = individual['v-s:recipient'][0]['v-s:correspondentDepartment'];
     Recipient['v-s:correspondentPerson'] = individual['v-s:recipient'][0]['v-s:correspondentPerson'];
     IncomingLetter['v-s:sender'] = [Recipient];
-    var Link = new IndividualModel();
+    const Link = new IndividualModel();
     Link['rdf:type'] = [new IndividualModel('v-s:Link')];
     Link['v-s:from'] = [IncomingLetter];
     Link['v-s:to'] = [individual];

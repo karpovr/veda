@@ -7,7 +7,7 @@ export const post = function (individual, template, container, mode, extra) {
   if (mode != 'search' && !individual.hasValue('v-s:shelfLife') && individual.isNew()) {
     individual['v-s:shelfLife'] = [9999];
   }
-  /*function shelfLifeView() {
+  /* function shelfLifeView() {
     if (individual.hasValue("v-s:isShelfLifeAlways",false)) {
       $(".shelfLife", template).removeClass("hidden");
     }

@@ -10,9 +10,9 @@ export const post = function (individual, template, container, mode, extra) {
     $('.trusted-ticket', template).remove();
   }
   $('#install-Module').click(function () {
-    let url = $('#moduleUrl', template).val();
+    const url = $('#moduleUrl', template).val();
     if (url) {
-      var Module = new IndividualModel();
+      const Module = new IndividualModel();
       Module['rdf:type'] = [new IndividualModel('v-s:RequestToModulesManager')];
       Module['v-s:moduleUrl'] = [url];
       Module.save();

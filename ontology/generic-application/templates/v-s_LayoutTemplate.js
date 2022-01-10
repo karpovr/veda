@@ -6,14 +6,14 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var vedaInfo = new IndividualModel('v-s:vedaInfo');
+  const vedaInfo = new IndividualModel('v-s:vedaInfo');
   vedaInfo.load().then(function (vedaInfo) {
     document.title = vedaInfo.toString();
   });
 
   // Render user
-  var userInfo = $('#user-info', template);
-  var userInfoTmpl = 'v-ui:IconPersonTemplate';
+  const userInfo = $('#user-info', template);
+  const userInfoTmpl = 'v-ui:IconPersonTemplate';
   userInfo.empty();
   veda.user.present(userInfo, userInfoTmpl);
 };

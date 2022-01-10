@@ -5,10 +5,10 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (mode === 'edit' && individual.hasValue('v-wf:processedDocument')) {
-    var stages = ['coordination1', 'coordination2', 'sign'];
-    var complex = 's-wf:ComplexRouteStartForm_';
-    var simple = 's-wf:SimpleRouteStartForm_';
-    var doc = individual['v-wf:processedDocument'][0];
+    const stages = ['coordination1', 'coordination2', 'sign'];
+    const complex = 's-wf:ComplexRouteStartForm_';
+    const simple = 's-wf:SimpleRouteStartForm_';
+    const doc = individual['v-wf:processedDocument'][0];
 
     return doc.getPropertyChain('v-s:sender', 'v-s:correspondentPerson').then(function (correspondentPerson) {
       individual.addSimpleStartForm(stages, complex);
@@ -26,4 +26,4 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = ` <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div> `;
+export const html = ' <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div> ';

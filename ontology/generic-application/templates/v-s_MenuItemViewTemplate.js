@@ -4,30 +4,30 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var type =
-    individual.id === 'v-s:Divider'
-      ? 'divider'
-      : individual.hasValue('v-s:menuItem')
-      ? 'submenu'
-      : individual.hasValue('v-s:objectLink')
-      ? 'object'
-      : individual.hasValue('v-s:staticLink')
-      ? 'static'
-      : undefined;
+  const type =
+    individual.id === 'v-s:Divider' ?
+      'divider' :
+      individual.hasValue('v-s:menuItem') ?
+        'submenu' :
+        individual.hasValue('v-s:objectLink') ?
+          'object' :
+          individual.hasValue('v-s:staticLink') ?
+            'static' :
+            undefined;
   switch (type) {
-    case 'divider':
-      template.empty().addClass('divider');
-      break;
-    case 'submenu':
-      template.addClass('dropdown').find('#static, #object').remove();
-      break;
-    case 'object':
-      template.attr('rel', 'v-s:objectLink').find('#static, #submenu, #submenu-ul').remove();
-      break;
-    case 'static':
-      template.find('#object, #submenu, #submenu-ul').remove();
-      template.find('#static').attr('href', individual['v-s:staticLink'][0]);
-      break;
+  case 'divider':
+    template.empty().addClass('divider');
+    break;
+  case 'submenu':
+    template.addClass('dropdown').find('#static, #object').remove();
+    break;
+  case 'object':
+    template.attr('rel', 'v-s:objectLink').find('#static, #submenu, #submenu-ul').remove();
+    break;
+  case 'static':
+    template.find('#object, #submenu, #submenu-ul').remove();
+    template.find('#static').attr('href', individual['v-s:staticLink'][0]);
+    break;
   }
 };
 

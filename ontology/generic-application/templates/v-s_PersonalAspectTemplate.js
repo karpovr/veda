@@ -4,12 +4,12 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var subscriptions = individual['v-s:hasFavorite'];
-  var subscribeDiff = [];
-  function favoriteHandler() {
+  let subscriptions = individual['v-s:hasFavorite'];
+  const subscribeDiff = [];
+  function favoriteHandler () {
     if (individual['v-s:hasFavorite'].length < subscriptions.length) {
       subscriptions.forEach(function (subscribe) {
-        var isExist = individual['v-s:hasFavorite'].some(function (f) {
+        const isExist = individual['v-s:hasFavorite'].some(function (f) {
           return f.id == subscribe.id;
         });
         if (!isExist) subscribeDiff.push(subscribe);
@@ -18,7 +18,7 @@ export const post = function (individual, template, container, mode, extra) {
     subscriptions = individual['v-s:hasFavorite'];
   }
 
-  function saveHandler() {
+  function saveHandler () {
     if (subscribeDiff.length > 0) {
       subscribeDiff.forEach(function (subscribe) {
         subscribe.remove();

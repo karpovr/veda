@@ -8,26 +8,26 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   individual.rights.then(function (rights) {
-    var actions = $('#edit-ScheduledAction, #delete', template);
+    const actions = $('#edit-ScheduledAction, #delete', template);
     if (!rights.hasValue('v-s:canUpdate', true)) {
       actions.remove();
     } else {
-      individual.on('v-s:hasScheduledAction', ScheduledActionHandler);
+      individual.on('v-s:hasScheduledAction', scheduledActionHandler);
       template.one('remove', function () {
-        individual.off('v-s:hasComment', ScheduledActionHandler);
+        individual.off('v-s:hasComment', scheduledActionHandler);
       });
-      ScheduledActionHandler(individual['v-s:hasScheduledAction']);
+      scheduledActionHandler(individual['v-s:hasScheduledAction']);
     }
-    function ScheduledActionHandler(values) {
+    function scheduledActionHandler (values) {
       values.length ? actions.hide() : actions.show();
     }
   });
 
   $('.action', template).click(function (e) {
     e.preventDefault();
-    var that = this;
+    const that = this;
     if (that.id === 'delete') {
-      var warning = new IndividualModel('v-s:AreYouSure');
+      const warning = new IndividualModel('v-s:AreYouSure');
       warning.load().then(function (warning) {
         warning = warning['rdfs:label'].map(CommonUtil.formatValue).join(' ');
         if (confirm(warning)) {
@@ -46,13 +46,13 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('#journal', template).on('click', function (e) {
     e.preventDefault();
-    var journal_uri = individual.id + 'j',
-      journal = new IndividualModel(journal_uri);
+    const journal_uri = individual.id + 'j';
+    const journal = new IndividualModel(journal_uri);
     journal.load().then(function (journal) {
       if (!journal.hasValue('rdf:type', 'rdfs:Resource')) {
         riot.route('#/' + journal_uri);
       } else {
-        var journalEmpty = new IndividualModel('v-s:JournalEmpty');
+        const journalEmpty = new IndividualModel('v-s:JournalEmpty');
         journalEmpty.load().then(function (journalEmpty) {
           journalEmpty = journalEmpty.toString();
           alert(journalEmpty);

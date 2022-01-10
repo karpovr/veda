@@ -5,10 +5,10 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (mode === 'edit' && individual.hasValue('v-wf:processedDocument')) {
-    var stages = ['coordination1', 'coordination2', 'coordination3', 'sign', 'approval', 'review', 'examination', 'instruction'];
-    var complex = 's-wf:ComplexRouteStartForm_';
-    var simple = 's-wf:SimpleRouteStartForm_';
-    var doc = individual['v-wf:processedDocument'][0];
+    const stages = ['coordination1', 'coordination2', 'coordination3', 'sign', 'approval', 'review', 'examination', 'instruction'];
+    const complex = 's-wf:ComplexRouteStartForm_';
+    const simple = 's-wf:SimpleRouteStartForm_';
+    const doc = individual['v-wf:processedDocument'][0];
 
     return doc.load().then(function (doc) {
       return Promise.all([
@@ -16,9 +16,9 @@ export const pre = function (individual, template, container, mode, extra) {
         doc.hasValue('v-s:creator') ? doc['v-s:creator'][0].getChief() : undefined,
         doc.hasValue('v-s:responsibleDepartment') ? doc['v-s:responsibleDepartment'][0].getChief() : undefined,
       ]).then(function (chiefs) {
-        var initiatorChief = chiefs[0];
-        var creatorChief = chiefs[1];
-        var responsibleDepartmentChief = chiefs[2];
+        const initiatorChief = chiefs[0];
+        const creatorChief = chiefs[1];
+        const responsibleDepartmentChief = chiefs[2];
 
         individual.addSimpleStartForm(stages, complex);
 
@@ -52,9 +52,9 @@ export const pre = function (individual, template, container, mode, extra) {
         individual[complex + 'review'][0][simple + 'editable'] = [true];
         individual[complex + 'review'][0][simple + 'deadlineDays'] = [3];
 
-        //Ознакомление
+        // Ознакомление
         if (doc.hasValue('v-s:copyTo')) {
-          var copy = doc['v-s:copyTo'];
+          const copy = doc['v-s:copyTo'];
           individual[complex + 'examination'][0][simple + 'visible'] = [true];
           individual[complex + 'examination'][0][simple + 'editable'] = [true];
           individual[complex + 'examination'][0][simple + 'participant'] = copy;
@@ -63,7 +63,7 @@ export const pre = function (individual, template, container, mode, extra) {
           individual[complex + 'examination'][0][simple + 'editable'] = [true];
         }
 
-        //Поручение
+        // Поручение
         individual[complex + 'instruction'][0][simple + 'visible'] = [true];
         individual[complex + 'instruction'][0][simple + 'editable'] = [true];
       });
@@ -71,4 +71,4 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = ` <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div> `;
+export const html = ' <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div> ';

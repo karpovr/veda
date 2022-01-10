@@ -5,18 +5,18 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
-    //if (individual.hasValue("v-s:isShelfLifeAlways",false)) {
+    const result = {};
+    // if (individual.hasValue("v-s:isShelfLifeAlways",false)) {
     result['v-s:shelfLife'] = {
       state: individual.hasValue('v-s:shelfLife'),
       cause: ['v-ui:minCardinality'],
     };
-    //}
+    // }
     result['v-ui:forClass'] = {
       state: individual.hasValue('v-ui:forClass'),
       cause: ['v-ui:minCardinality'],
     };
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 };
 
@@ -27,7 +27,7 @@ export const post = function (individual, template, container, mode, extra) {
   if (mode != 'search' && !individual.hasValue('v-s:shelfLife') && individual.isNew()) {
     individual['v-s:shelfLife'] = [9999];
   }
-  /*function shelfLifeView() {
+  /* function shelfLifeView() {
     if (individual.hasValue("v-s:isShelfLifeAlways",false)) {
       $(".shelfLife", template).removeClass("hidden");
     }

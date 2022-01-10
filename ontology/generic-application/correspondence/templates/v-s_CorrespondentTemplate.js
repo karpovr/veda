@@ -6,21 +6,21 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var self = this;
+  const self = this;
   correspondentOrganizationHandler.call(this);
   this.on('v-s:correspondentOrganization', correspondentOrganizationHandler);
   template.one('remove', function () {
     self.off('v-s:correspondentOrganization', correspondentOrganizationHandler);
   });
-  function correspondentOrganizationHandler() {
+  function correspondentOrganizationHandler () {
     Promise.all([self.getPropertyChain('v-s:correspondentOrganization', 'v-s:isOwnOrganization'), veda.appointment.getOrganization()]).then(function (
       resolved,
     ) {
-      var isOwnOrganization = resolved[0][0];
-      var userOrganization = resolved[1];
+      const isOwnOrganization = resolved[0][0];
+      const userOrganization = resolved[1];
 
-      var isOwn = isOwnOrganization || self.hasValue('v-s:correspondentOrganization', userOrganization);
-      var parentRel = template.parent().attr('rel');
+      const isOwn = isOwnOrganization || self.hasValue('v-s:correspondentOrganization', userOrganization);
+      const parentRel = template.parent().attr('rel');
       if (isOwn) {
         self.clearValue('v-s:correspondentDepartmentDescription');
         self.clearValue('v-s:correspondentPersonDescription');
@@ -50,18 +50,18 @@ export const post = function (individual, template, container, mode, extra) {
   $('.create .create', template).click(function (e) {
     e.preventDefault();
     e.stopPropagation();
-    var modal = $('#notification-modal-template').html();
+    let modal = $('#notification-modal-template').html();
     modal = $(modal);
-    modal.modal({ show: false });
+    modal.modal({show: false});
     $('body').append(modal);
     modal.modal('show');
     template.one('remove', function () {
       modal.modal('hide').remove();
     });
 
-    var cntr = $('.modal-body', modal),
-      _class = new IndividualModel('v-s:Organization'),
-      Organization = new IndividualModel();
+    const cntr = $('.modal-body', modal);
+    const _class = new IndividualModel('v-s:Organization');
+    const Organization = new IndividualModel();
     Organization['rdf:type'] = [_class];
 
     Organization.present(cntr, undefined, 'edit');

@@ -6,10 +6,10 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var self = this;
-  function setRegistrationDate() {
+  const self = this;
+  function setRegistrationDate () {
     if (this.hasValue('rdf:type', 'v-s:LetterRegistrationRecordEnumerated') && !this.hasValue('v-s:registrationNumber')) {
-      var today = new Date();
+      const today = new Date();
       const d = today.getDate();
       const m = today.getMonth();
       const y = today.getFullYear();
@@ -31,15 +31,15 @@ export const post = function (individual, template, container, mode, extra) {
     typeHandler.call(this);
   }
 
-  function typeHandler() {
+  function typeHandler () {
     this.is('v-s:LetterRegistrationRecordEnumerated').then(function (isEnumerated) {
       if (isEnumerated) {
-        var autoBundle = new IndividualModel('v-s:AutomaticallyBundle');
+        const autoBundle = new IndividualModel('v-s:AutomaticallyBundle');
         autoBundle.load().then(function (autoBundle) {
           $('input, textarea', template).attr('placeholder', autoBundle['rdfs:label'].map(CommonUtil.formatValue).join(' '));
         });
       } else {
-        var manualBundle = new IndividualModel('v-s:ManuallyBundle');
+        const manualBundle = new IndividualModel('v-s:ManuallyBundle');
         manualBundle.load().then(function (manualBundle) {
           $('input, textarea', template).attr('placeholder', manualBundle['rdfs:label'].map(CommonUtil.formatValue).join(' '));
         });
