@@ -19,4 +19,6 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = '<a href="#/@" about="@" property="rdfs:label"></a>';
+export const html = `
+  <a href="#/@" about="@" property="rdfs:label"></a>
+`;

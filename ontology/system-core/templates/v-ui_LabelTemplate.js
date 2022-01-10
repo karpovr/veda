@@ -64,4 +64,6 @@ export const post = function (individual, template, container, mode, extra) {
   };
 };
 
-export const html = '<span class="label-template" about="@" property="rdfs:label"></span>';
+export const html = `
+  <span class="label-template" about="@" property="rdfs:label"></span>
+`;

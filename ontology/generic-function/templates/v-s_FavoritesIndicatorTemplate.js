@@ -108,4 +108,6 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = '<a href="#" class="fa fa-lg" style="display:none;"></a>';
+export const html = `
+  <a href="#" class="fa fa-lg" style="display:none;"></a>
+`;

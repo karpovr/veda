@@ -12,4 +12,6 @@ export const pre = function (individual, template, container, mode, extra) {
   $(template).text(rights);
 };
 
-export const html = '<span></span>';
+export const html = `
+  <span></span>
+`;

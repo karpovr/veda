@@ -12,4 +12,6 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = '<div class="container sheet" about="@" data-template="v-fs:AttributiveSearchTemplate"></div>';
+export const html = `
+  <div class="container sheet" about="@" data-template="v-fs:AttributiveSearchTemplate"></div>
+`;

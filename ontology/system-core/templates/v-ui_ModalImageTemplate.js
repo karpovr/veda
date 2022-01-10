@@ -19,4 +19,6 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = '<a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a>';
+export const html = `
+  <a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a>
+`;

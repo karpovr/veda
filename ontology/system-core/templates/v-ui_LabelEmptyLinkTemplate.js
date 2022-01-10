@@ -9,4 +9,6 @@ export const post = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = '<a href="#" property="rdfs:label"></a>';
+export const html = `
+  <a href="#" property="rdfs:label"></a>
+`;

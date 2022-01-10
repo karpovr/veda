@@ -9,4 +9,6 @@ export const post = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = '<a class="label-template" href="#/@"><span about="@" property="rdfs:label"></span></a>';
+export const html = `
+  <a class="label-template" href="#/@"><span about="@" property="rdfs:label"></span></a>
+`;

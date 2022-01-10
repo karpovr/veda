@@ -11,4 +11,6 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = '<div><img width="100%" /></div>';
+export const html = `
+  <div><img width="100%" /></div>
+`;
