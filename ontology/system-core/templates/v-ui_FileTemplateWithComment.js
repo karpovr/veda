@@ -4,11 +4,11 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var fn = individual['v-s:fileName'][0];
-  var img = 'jpg|jpeg|gif|png|bmp|svg';
+  const fn = individual['v-s:fileName'][0];
+  const img = 'jpg|jpeg|gif|png|bmp|svg';
   if (typeof fn === 'string' || fn instanceof String) {
-    var idx = fn.lastIndexOf('.'),
-      ext = fn.substr(idx + 1);
+    const idx = fn.lastIndexOf('.');
+    const ext = fn.substr(idx + 1);
     $('span.icon', template).text(ext);
     if (img.indexOf(ext.toLowerCase()) < 0) {
       $('.thumbnail', template).remove();

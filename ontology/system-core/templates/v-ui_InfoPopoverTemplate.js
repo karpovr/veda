@@ -13,4 +13,4 @@ export const post = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = ` <span tabindex="0" role="button" class="glyphicon glyphicon-info-sign text-primary"></span> `;
+export const html = ' <span tabindex="0" role="button" class="glyphicon glyphicon-info-sign text-primary"></span> ';

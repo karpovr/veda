@@ -11,18 +11,18 @@ export const post = function (individual, template, container, mode, extra) {
   });
   render();
 
-  function render() {
-    var list = [individual];
+  function render () {
+    const list = [individual];
     BrowserUtil.toTTL(list, function (error, ttl) {
-      var pre = $('pre', template),
-        sanitized = sanitize(ttl),
-        anchored = sanitized.replace(/([a-zA-Z][\w-]*:[\w-]*)(\,|\s|\;|\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
+      const pre = $('pre', template);
+      const sanitized = sanitize(ttl);
+      const anchored = sanitized.replace(/([a-zA-Z][\w-]*:[\w-]*)(\,|\s|\;|\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
       pre.html(anchored);
     });
   }
 
-  function sanitize(string) {
-    var map = {
+  function sanitize (string) {
+    const map = {
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
@@ -30,7 +30,7 @@ export const post = function (individual, template, container, mode, extra) {
       "'": '&#x27;',
       '/': '&#x2F;',
     };
-    var reg = /[&<>"'/]/gi;
+    const reg = /[&<>"'/]/gi;
     return string.replace(reg, function (match) {
       return map[match];
     });

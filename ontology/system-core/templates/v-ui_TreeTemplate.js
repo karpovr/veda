@@ -9,24 +9,24 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var root = this.hasValue('v-ui:treeRoot') ? this['v-ui:treeRoot'] : undefined,
-    expandLevel = this.hasValue('v-ui:treeExpandLevel') ? this['v-ui:treeExpandLevel'][0] : undefined,
-    inProperty = this.hasValue('v-ui:treeInProperty') ? this['v-ui:treeInProperty'] : undefined,
-    outProperty = this.hasValue('v-ui:treeOutProperty') ? this['v-ui:treeOutProperty'] : undefined,
-    allowedClass = this.hasValue('v-ui:treeAllowedClass') ? this['v-ui:treeAllowedClass'] : undefined,
-    allowedFilter = this.hasValue('v-ui:treeAllowedFilter') ? this['v-ui:treeAllowedFilter'] : undefined,
-    selectableClass = this.hasValue('v-ui:treeSelectableClass') ? this['v-ui:treeSelectableClass'] : undefined,
-    selectableFilter = this.hasValue('v-ui:treeSelectableFilter') ? this['v-ui:treeSelectableFilter'] : undefined,
-    displayedProperty = this.hasValue('v-ui:treeDisplayedProperty') ? this['v-ui:treeDisplayedProperty'] : [new IndividualModel('rdfs:label')],
-    target = extra && extra.target,
-    rel_uri = extra && extra.target_rel_uri,
-    isSingle = extra && extra.isSingle,
-    withDeleted = extra && extra.withDeleted,
-    sort = extra && extra.sort,
-    tbody = $('.tbody', template),
-    thead = $('.thead', template),
-    headTmpl = '',
-    rowTmpl = '';
+  const root = this.hasValue('v-ui:treeRoot') ? this['v-ui:treeRoot'] : undefined;
+  const expandLevel = this.hasValue('v-ui:treeExpandLevel') ? this['v-ui:treeExpandLevel'][0] : undefined;
+  const inProperty = this.hasValue('v-ui:treeInProperty') ? this['v-ui:treeInProperty'] : undefined;
+  const outProperty = this.hasValue('v-ui:treeOutProperty') ? this['v-ui:treeOutProperty'] : undefined;
+  const allowedClass = this.hasValue('v-ui:treeAllowedClass') ? this['v-ui:treeAllowedClass'] : undefined;
+  const allowedFilter = this.hasValue('v-ui:treeAllowedFilter') ? this['v-ui:treeAllowedFilter'] : undefined;
+  const selectableClass = this.hasValue('v-ui:treeSelectableClass') ? this['v-ui:treeSelectableClass'] : undefined;
+  const selectableFilter = this.hasValue('v-ui:treeSelectableFilter') ? this['v-ui:treeSelectableFilter'] : undefined;
+  const displayedProperty = this.hasValue('v-ui:treeDisplayedProperty') ? this['v-ui:treeDisplayedProperty'] : [new IndividualModel('rdfs:label')];
+  const target = extra && extra.target;
+  const rel_uri = extra && extra.target_rel_uri;
+  const isSingle = extra && extra.isSingle;
+  const withDeleted = extra && extra.withDeleted;
+  const sort = extra && extra.sort;
+  const tbody = $('.tbody', template);
+  const thead = $('.thead', template);
+  let headTmpl = '';
+  let rowTmpl = '';
 
   if (target && rel_uri) {
     if (isSingle) {
@@ -42,12 +42,12 @@ export const pre = function (individual, template, container, mode, extra) {
     rowTmpl += "<td about='@' data-template='v-ui:IconModalTemplate'></td>";
   }
 
-  var allowedFilterFn = (function () {
+  const allowedFilterFn = (function () {
     if (allowedFilter) {
       return new Function(allowedFilter[0].toString());
     } else if (allowedClass) {
       return function () {
-        var that = this;
+        const that = this;
         return allowedClass.reduce(function (acc, allowed) {
           return acc || that.hasValue('rdf:type', allowed);
         }, false);
@@ -59,12 +59,12 @@ export const pre = function (individual, template, container, mode, extra) {
     }
   })();
 
-  var selectableFilterFn = (function () {
+  const selectableFilterFn = (function () {
     if (selectableFilter) {
       return new Function(selectableFilter[0].toString());
     } else if (selectableClass) {
       return function () {
-        var that = this;
+        const that = this;
         return selectableClass.reduce(function (acc, selectable) {
           return acc || that.hasValue('rdf:type', selectable);
         }, false);
@@ -76,12 +76,12 @@ export const pre = function (individual, template, container, mode, extra) {
     }
   })();
 
-  var literals = ['rdfs:Literal', 'xsd:string', 'xsd:boolean', 'xsd:integer', 'xsd:nonNegativeInteger', 'xsd:decimal', 'xsd:dateTime'];
+  const literals = ['rdfs:Literal', 'xsd:string', 'xsd:boolean', 'xsd:integer', 'xsd:nonNegativeInteger', 'xsd:decimal', 'xsd:dateTime'];
 
   displayedProperty.forEach(function (property, index) {
     headTmpl += '<th>' + property['rdfs:label'].map(CommonUtil.formatValue).join(' ') + '</th>';
-    var isLiteral = literals.indexOf(property['rdfs:range'][0].id) >= 0;
-    var isFile = property.hasValue('rdfs:range', 'v-s:File');
+    const isLiteral = literals.indexOf(property['rdfs:range'][0].id) >= 0;
+    const isFile = property.hasValue('rdfs:range', 'v-s:File');
     if (index === 0) {
       if (isLiteral) {
         rowTmpl +=
@@ -115,23 +115,23 @@ export const pre = function (individual, template, container, mode, extra) {
 
   template.on('click', 'a.expand', expandRow);
 
-  function expandRow(e, expandLevel) {
+  function expandRow (e, expandLevel) {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
     }
-    var that = $(this),
-      thatRow = that.closest('tr'),
-      thatLvl = parseInt(thatRow.attr('data-level')),
-      uri = thatRow.attr('resource'),
-      value = new IndividualModel(uri);
+    const that = $(this);
+    const thatRow = that.closest('tr');
+    const thatLvl = parseInt(thatRow.attr('data-level'));
+    const uri = thatRow.attr('resource');
+    const value = new IndividualModel(uri);
 
     that.toggleClass('expanded glyphicon-chevron-right glyphicon-chevron-down');
 
     if (that.hasClass('expanded')) {
       getChildren([], value, false).then(function (children) {
         return renderRows(children, thatRow, expandLevel).then(function () {
-          var nextLvl = parseInt(thatRow.next().attr('data-level'));
+          const nextLvl = parseInt(thatRow.next().attr('data-level'));
           if (isNaN(nextLvl) || nextLvl <= thatLvl) {
             that.prev().css('width', 16 * (thatLvl + 1) - 2);
             that.remove();
@@ -140,9 +140,9 @@ export const pre = function (individual, template, container, mode, extra) {
         });
       });
     } else {
-      var rowsToRemove = $();
+      let rowsToRemove = $();
       thatRow.nextAll().each(function () {
-        var row = $(this);
+        const row = $(this);
         if (row.data('level') > thatLvl) {
           rowsToRemove = rowsToRemove.add(row);
         } else {
@@ -153,16 +153,16 @@ export const pre = function (individual, template, container, mode, extra) {
     }
   }
 
-  function renderRows(values_uris, parentRow, expandLevel) {
-    var cont = $('<div>');
-    var parentLvl = parentRow ? parseInt(parentRow.attr('data-level')) : -1,
-      tmpl = $("<tr class='value-row'>")
-        .attr('data-level', parentLvl + 1)
-        .append(rowTmpl);
-    $('.spacer', tmpl).css({ 'margin-left': 16 * (parentLvl + 1) + 'px', display: 'inline-block' });
+  function renderRows (values_uris, parentRow, expandLevel) {
+    const cont = $('<div>');
+    const parentLvl = parentRow ? parseInt(parentRow.attr('data-level')) : -1;
+    const tmpl = $("<tr class='value-row'>")
+      .attr('data-level', parentLvl + 1)
+      .append(rowTmpl);
+    $('.spacer', tmpl).css({'margin-left': 16 * (parentLvl + 1) + 'px', 'display': 'inline-block'});
     return Promise.all(
       values_uris.map(function (valueUri, index) {
-        var value = new IndividualModel(valueUri);
+        const value = new IndividualModel(valueUri);
         return value.load().then(function (value) {
           if (!allowedFilterFn.call(value)) {
             return;
@@ -181,8 +181,8 @@ export const pre = function (individual, template, container, mode, extra) {
               })
               .then(function () {
                 if (target && rel_uri) {
-                  var selectRow = $('.select-row', tmpl);
-                  var selectDeep = $('.select-deep', tmpl);
+                  const selectRow = $('.select-row', tmpl);
+                  const selectDeep = $('.select-deep', tmpl);
                   selectRow.prop('checked', target.hasValue(rel_uri, value));
 
                   if (value.deepSelected) {
@@ -210,24 +210,24 @@ export const pre = function (individual, template, container, mode, extra) {
       return rendered;
     });
   }
-  var previousSelected;
+
   if (target && rel_uri) {
     template.on('click', 'td', function (e) {
       e.stopPropagation();
-      var row = $(this).parent();
+      const row = $(this).parent();
       $('.select-row', row).click();
     });
 
     template.on('click', '.select-row', function (e) {
       e.stopPropagation();
-      var $this = $(this);
-      var row = $this.closest('tr'),
-        uri = row.attr('resource'),
-        value = new IndividualModel(uri);
+      const $this = $(this);
+      const row = $this.closest('tr');
+      const uri = row.attr('resource');
+      const value = new IndividualModel(uri);
 
       $('#create-NewItem', template).remove();
       if ($('.modal').length == 0) {
-        var addButton = drawAddButton(row);
+        const addButton = drawAddButton(row);
         row.children().last().append(addButton);
       }
 
@@ -241,15 +241,15 @@ export const pre = function (individual, template, container, mode, extra) {
     template.on('click', '.select-deep', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      var $this = $(this);
-      var row = $this.closest('tr'),
-        uri = row.attr('resource'),
-        value = new IndividualModel(uri);
+      const $this = $(this);
+      const row = $this.closest('tr');
+      const uri = row.attr('resource');
+      const value = new IndividualModel(uri);
 
       getChildren([], value).then(function (branchUris) {
         value.deepSelected = !value.deepSelected;
-        var branch = branchUris.map(function (branchUri) {
-          var item = new IndividualModel(branchUri);
+        const branch = branchUris.map(function (branchUri) {
+          const item = new IndividualModel(branchUri);
           item.deepSelected = value.deepSelected;
           return allowedFilterFn.call(item) && selectableFilterFn.call(item) ? item : undefined;
         });
@@ -269,26 +269,26 @@ export const pre = function (individual, template, container, mode, extra) {
     });
   }
 
-  function redrawBranch(branchRow) {
-    var thatLvl = parseInt(branchRow.attr('data-level'));
+  function redrawBranch (branchRow) {
+    const thatLvl = parseInt(branchRow.attr('data-level'));
     branchRow.nextUntil('[data-level=' + thatLvl + ']').remove();
 
-    var value = new IndividualModel(branchRow.attr('resource'));
+    const value = new IndividualModel(branchRow.attr('resource'));
     if (value && value.children) delete value.children;
     getChildren([], value, false).then(function (children) {
       return renderRows(children, branchRow).then(function () {
-        var nextLvl = parseInt(branchRow.next().attr('data-level'));
+        const nextLvl = parseInt(branchRow.next().attr('data-level'));
         if (isNaN(nextLvl) || nextLvl <= thatLvl) {
           console.log('unexpected!!!!!!');
         }
       });
     });
   }
-  function propertyModifiedHandler(values) {
+  function propertyModifiedHandler (values) {
     $('.value-row', template).each(function () {
-      var $this = $(this),
-        uri = $this.attr('resource'),
-        value = new IndividualModel(uri);
+      const $this = $(this);
+      const uri = $this.attr('resource');
+      const value = new IndividualModel(uri);
       if (values.indexOf(value) >= 0) {
         $this.find('.select-row').prop('checked', true);
       } else {
@@ -307,12 +307,12 @@ export const pre = function (individual, template, container, mode, extra) {
     renderRows([root.id], undefined, typeof expandLevel !== 'undefined' ? expandLevel : roots.length === 1 ? 1 : 0);
   });
 
-  function getChildren(acc, root, goDeeper) {
+  function getChildren (acc, root, goDeeper) {
     return new Promise(function (resolve, reject) {
       if (root.children) {
         resolve(root.children);
       } else {
-        var outs = getOut(root);
+        const outs = getOut(root);
         getIn(root).then(function (ins) {
           root.children = outs.concat(ins);
           resolve(root.children);
@@ -324,7 +324,7 @@ export const pre = function (individual, template, container, mode, extra) {
           children.map(function (childUri) {
             acc.push(childUri);
             if (goDeeper !== false) {
-              var child = new IndividualModel(childUri);
+              const child = new IndividualModel(childUri);
               return getChildren(acc, child, goDeeper);
             }
           }),
@@ -335,8 +335,8 @@ export const pre = function (individual, template, container, mode, extra) {
       });
   }
 
-  function getOut(root) {
-    var res = [];
+  function getOut (root) {
+    const res = [];
     if (outProperty) {
       outProperty.map(function (property) {
         if (root.hasValue(property.id)) {
@@ -349,25 +349,25 @@ export const pre = function (individual, template, container, mode, extra) {
     return res;
   }
 
-  function getIn(root) {
+  function getIn (root) {
     if (!inProperty) {
       return Promise.resolve([]);
     }
-    var q = inProperty
+    let q = inProperty
       .map(function (property) {
         return "'" + property.id + "'=='" + root.id + "'";
       })
       .join(' || ');
     if (allowedClass) {
-      var allowed = allowedClass
+      const allowed = allowedClass
         .map(function (allowedClass) {
           return "'rdf:type'=='" + allowedClass.id + "'";
         })
         .join(' || ');
       q = '( ' + q + ' ) && ( ' + allowed + ' )';
     }
-    var order = sort || "'rdfs:label_ru' asc, 'rdfs:label_en' asc, 'rdfs:label' asc";
-    var unique;
+    const order = sort || "'rdfs:label_ru' asc, 'rdfs:label_en' asc, 'rdfs:label' asc";
+    let unique;
     return Backend.query({
       ticket: veda.ticket,
       query: q,
@@ -391,15 +391,15 @@ export const pre = function (individual, template, container, mode, extra) {
     });
   }
 
-  function drawAddButton(currentRow) {
-    var addButton = $("<div id='create-NewItem'><button class='btn btn-xs btn-primary margin-sm'>Добавить элемент</button></div>");
+  function drawAddButton (currentRow) {
+    const addButton = $("<div id='create-NewItem'><button class='btn btn-xs btn-primary margin-sm'>Добавить элемент</button></div>");
     addButton.click(function () {
-      var currentUri = currentRow.attr('resource');
-      var type = $(this).closest('tr').attr('typeof');
-      var newItem = new IndividualModel();
+      const currentUri = currentRow.attr('resource');
+      const type = $(this).closest('tr').attr('typeof');
+      const newItem = new IndividualModel();
       newItem['rdf:type'] = [new IndividualModel(type)];
       newItem['v-s:hasParentLink'] = [new IndividualModel(currentUri)];
-      var modal = BrowserUtil.showModal(newItem, undefined, 'edit');
+      const modal = BrowserUtil.showModal(newItem, undefined, 'edit');
       newItem.one('afterReset', function () {
         modal.modal('hide').remove();
       });

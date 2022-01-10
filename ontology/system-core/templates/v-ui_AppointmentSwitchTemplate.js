@@ -12,7 +12,7 @@ export const post = function (individual, template, container, mode, extra) {
     ticket: veda.ticket,
     query: "'rdf:type'==='v-s:Appointment' && 'v-s:official'==true && 'v-s:employee'==='" + individual.id + "'",
   }).then(function (result) {
-    var apps = result.result;
+    const apps = result.result;
     if (apps.length > 1) {
       return Promise.all(
         apps.map(function (id) {

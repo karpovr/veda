@@ -16,7 +16,7 @@ export const pre = function (individual, template, container, mode, extra) {
     $(this).children(':first').toggleClass('glyphicon-chevron-down glyphicon-chevron-right');
   });
   if (individual.hasValue('v-wf:onProcess')) {
-    var process = individual.get('v-wf:onProcess')[0];
+    const process = individual.get('v-wf:onProcess')[0];
     return process.load().catch(function (err) {
       console.log('process deleted:', process.id);
       $('.on-process', template).remove();
@@ -31,7 +31,7 @@ export const post = function (individual, template, container, mode, extra) {
   if (individual.hasValue('rdf:type', 'v-s:ProcessStarted')) {
     $('.start-process', template).show();
     $('.non-start-process', template).hide();
-    var process = individual.get('v-wf:onProcess')[0];
+    const process = individual.get('v-wf:onProcess')[0];
     process.load().then(function (process) {
       if (process.hasValue('v-wf:isStopped', true)) {
         $('.process-id', template).addClass('text-danger');
@@ -42,12 +42,12 @@ export const post = function (individual, template, container, mode, extra) {
         (!process.hasValue('v-wf:isStopped') || process.hasValue('v-wf:isStopped', false)) &&
         (!process.hasValue('v-wf:isCompleted') || process.hasValue('v-wf:isCompleted', false))
       ) {
-        var actor = individual['v-s:actor'][0];
-        var doc = individual['v-s:onDocument'][0];
-        var isMemberPromise = veda.user.isMemberOf('v-s:FunctionProcessBreak_Group');
+        const actor = individual['v-s:actor'][0];
+        const doc = individual['v-s:onDocument'][0];
+        const isMemberPromise = veda.user.isMemberOf('v-s:FunctionProcessBreak_Group');
         return Promise.all([doc.canDelete(), isMemberPromise]).then(function (results) {
-          var canDelete = results[0];
-          var isProcessBreakMember = results[1];
+          const canDelete = results[0];
+          const isProcessBreakMember = results[1];
           if (!actor) {
             console.log("Unexpected behavior: can't read v-s:actor from individual");
             return false;
@@ -56,8 +56,8 @@ export const post = function (individual, template, container, mode, extra) {
             $('.stop-process', template).show();
             $('.stop-process', template).on('click', function (e) {
               e.preventDefault();
-              var self = this;
-              var warn = new IndividualModel('v-s:AreYouSure');
+              const self = this;
+              const warn = new IndividualModel('v-s:AreYouSure');
               warn.load().then(function (warn) {
                 warn = warn['rdfs:label'].map(CommonUtil.formatValue).join(' ');
                 if (confirm(warn)) {

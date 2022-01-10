@@ -5,12 +5,12 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   setTimeout(function () {
-    var renderedTemplates = $("[resource$='" + individual.id.substring(2) + "']");
+    const renderedTemplates = $("[resource$='" + individual.id.substring(2) + "']");
     renderedTemplates.each(function () {
-      var renderedTemplate = $(this);
+      const renderedTemplate = $(this);
       renderedTemplate.find('a, button').addClass('disabled').attr('disabled', 'disabled');
       if (renderedTemplate.parent().prop('id') === 'main') {
-        var sheet = renderedTemplate.children('.sheet').first();
+        const sheet = renderedTemplate.children('.sheet').first();
         template.removeClass('hidden').prependTo(sheet.length ? sheet : renderedTemplate);
       }
     });

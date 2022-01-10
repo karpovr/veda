@@ -14,12 +14,12 @@ export const pre = function (individual, template, container, mode, extra) {
     $('.docflow-buttons', template).remove();
   } else {
     veda.user.isMemberOf('cfg:SuperUser').then(function (isMemberSuperUser) {
-      var currentEmployee = veda.appointment['v-s:employee'][0];
-      var currentOcuppation = veda.appointment['v-s:occupation'][0];
-      var targetEmployee = individual['v-wf:from'][0];
-      var targetOccupation = individual['v-wf:from'][1];
-      var canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
-      var isDirectTask = individual.hasValue('v-wf:isDirectTask', true);
+      const currentEmployee = veda.appointment['v-s:employee'][0];
+      const currentOcuppation = veda.appointment['v-s:occupation'][0];
+      const targetEmployee = individual['v-wf:from'][0];
+      const targetOccupation = individual['v-wf:from'][1];
+      const canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
+      const isDirectTask = individual.hasValue('v-wf:isDirectTask', true);
       if (isDirectTask) {
         if (canRevoke || isMemberSuperUser) {
           $('.docflow-buttons', template).show();
@@ -34,15 +34,15 @@ export const pre = function (individual, template, container, mode, extra) {
     });
   }
 
-  function takeDecision(takenDecision, label) {
-    var decisionClass = new IndividualModel(takenDecision);
-    var decision = new IndividualModel();
+  function takeDecision (takenDecision, label) {
+    const decisionClass = new IndividualModel(takenDecision);
+    const decision = new IndividualModel();
     decision['rdf:type'] = [decisionClass];
     decision['v-s:backwardTarget'] = [individual];
     decision['rdfs:label'] = [label];
     decision['v-s:backwardProperty'] = [new IndividualModel('v-wf:takenDecision')];
     decision['v-s:canRead'] = [true];
-    var modal = BrowserUtil.showModal(decision, undefined, 'edit');
+    const modal = BrowserUtil.showModal(decision, undefined, 'edit');
 
     decision.one('afterReset', function () {
       modal.modal('hide').remove();

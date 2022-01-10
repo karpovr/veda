@@ -4,8 +4,8 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var actual = individual.hasValue('v-s:actualVersion') ? individual['v-s:actualVersion'][0] : individual;
-  var tmpl =
+  const actual = individual.hasValue('v-s:actualVersion') ? individual['v-s:actualVersion'][0] : individual;
+  const tmpl =
     '' +
     '<tr>' +
     '<td>#</td>' +
@@ -13,8 +13,8 @@ export const post = function (individual, template, container, mode, extra) {
     '<td about="@" property="v-s:created" class="view edit -search"></td>' +
     '<td about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate" class="view edit -search"></td>' +
     '</tr>';
-  var tbody = $('#versions', template);
-  var btn = $('button', template).click(function () {
+  const tbody = $('#versions', template);
+  const btn = $('button', template).click(function () {
     tbody.empty();
     renderVersion(actual, 1, -1);
   });
@@ -24,12 +24,12 @@ export const post = function (individual, template, container, mode, extra) {
   template.one('remove', function () {
     individual.off('v-s:previousVersion', versionHandler);
   });
-  function versionHandler() {
+  function versionHandler () {
     tbody.empty();
     renderVersion(actual, 1, 5);
   }
 
-  function renderVersion(current, counter, limit) {
+  function renderVersion (current, counter, limit) {
     if (!current) {
       return btn.remove();
     }
@@ -37,8 +37,8 @@ export const post = function (individual, template, container, mode, extra) {
       return;
     }
     return current.load().then(function (current) {
-      var previous = current['v-s:previousVersion'][0];
-      var row = tmpl.replace('#', counter);
+      const previous = current['v-s:previousVersion'][0];
+      let row = tmpl.replace('#', counter);
       if (current.id === actual.id) {
         row = row.replace('<tr>', "<tr class='info'>");
       }

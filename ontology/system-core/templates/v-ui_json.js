@@ -5,35 +5,35 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var pre = $('pre', template),
-    textarea = $('textarea', template),
-    json = individual.properties;
-  var formatted = format(json);
-  var anchorized = anchorize(formatted);
-  var height = $('#copyright').offset().top - container.offset().top - 120;
+  const pre = $('pre', template);
+  const textarea = $('textarea', template);
+  let json = individual.properties;
+  let formatted = format(json);
+  let anchorized = anchorize(formatted);
+  const height = $('#copyright').offset().top - container.offset().top - 120;
   pre.css('height', height);
   pre.html(anchorized);
   textarea.val(formatted);
   textarea.css('min-height', height);
-  var notify = Notify ? new Notify() : function () {};
-  var original = individual.properties;
-  var validationState = true;
+  const notify = Notify ? new Notify() : function () {};
+  const original = individual.properties;
+  let validationState = true;
   textarea.on('keyup', function () {
     try {
       formatted = textarea.val();
       json = JSON.parse(formatted);
       if (validationState === false) {
-        notify('success', { name: 'JSON ok' });
+        notify('success', {name: 'JSON ok'});
       }
-      template[0].dispatchEvent(new CustomEvent('internal-validated', { detail: { state: true } }));
+      template[0].dispatchEvent(new CustomEvent('internal-validated', {detail: {state: true}}));
       validationState = true;
     } catch (error) {
       formatted = format(original);
       json = JSON.parse(formatted);
       if (validationState === true) {
-        notify('danger', { name: 'JSON error' });
+        notify('danger', {name: 'JSON error'});
       }
-      template[0].dispatchEvent(new CustomEvent('internal-validated', { detail: { state: false } }));
+      template[0].dispatchEvent(new CustomEvent('internal-validated', {detail: {state: false}}));
       validationState = false;
     }
     anchorized = anchorize(formatted);
@@ -51,15 +51,15 @@ export const post = function (individual, template, container, mode, extra) {
   template.one('remove', function () {
     individual.off('afterReset', resetView);
   });
-  function resetView() {
-    var formatted = format(individual.properties);
-    var anchorized = anchorize(formatted);
+  function resetView () {
+    const formatted = format(individual.properties);
+    const anchorized = anchorize(formatted);
     pre.html(anchorized);
     textarea.val(formatted);
   }
 
-  function format(json) {
-    var ordered = {};
+  function format (json) {
+    const ordered = {};
     Object.keys(json)
       .sort()
       .forEach(function (key) {
@@ -68,8 +68,8 @@ export const post = function (individual, template, container, mode, extra) {
     return JSON.stringify(ordered, null, 2);
   }
 
-  function sanitize(string) {
-    var map = {
+  function sanitize (string) {
+    const map = {
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
@@ -77,15 +77,15 @@ export const post = function (individual, template, container, mode, extra) {
       "'": '&#x27;',
       '/': '&#x2F;',
     };
-    var reg = /[&<>"'/]/gi;
+    const reg = /[&<>"'/]/gi;
     return string.replace(reg, function (match) {
       return map[match];
     });
   }
 
-  function anchorize(string) {
-    var sanitized = sanitize(string);
-    var anchorized = sanitized.replace(/(&quot;)([a-zA-Z][\w-]*:[\w-]*)(&quot;)/gi, "$1<a class='text-black' href='#/$2//v-ui:json'>$2</a>$3");
+  function anchorize (string) {
+    const sanitized = sanitize(string);
+    const anchorized = sanitized.replace(/(&quot;)([a-zA-Z][\w-]*:[\w-]*)(&quot;)/gi, "$1<a class='text-black' href='#/$2//v-ui:json'>$2</a>$3");
     return anchorized;
   }
 };

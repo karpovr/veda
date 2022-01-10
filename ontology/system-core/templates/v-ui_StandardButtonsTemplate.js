@@ -13,15 +13,15 @@ export const pre = function (individual, template, container, mode, extra) {
 
   $('#refresh', template).on('click', refresh);
 
-  function refresh() {
+  function refresh () {
     template
       .parent()
       .closest('[resource]')
       .find('[resource]')
       .addBack('[resource]')
       .each(function () {
-        var uri = $(this).attr('resource');
-        var resource = new IndividualModel(uri);
+        const uri = $(this).attr('resource');
+        const resource = new IndividualModel(uri);
         resource.is('v-s:UserThing').then(function (isUserThing) {
           if (isUserThing) {
             resource.reset();
@@ -30,9 +30,9 @@ export const pre = function (individual, template, container, mode, extra) {
       });
   }
 
-  var toRefresh;
+  let toRefresh;
 
-  function statusHandler(status) {
+  function statusHandler (status) {
     if (status === 'online' || status === 'offline') {
       toRefresh = false;
       $('#refresh', template).addClass('hidden');
@@ -48,20 +48,20 @@ export const pre = function (individual, template, container, mode, extra) {
 
   template.on('click', '#edit, #save, #cancel, #delete, #recover, #destroy', function (e) {
     e.preventDefault();
-    var action = this.id;
+    const action = this.id;
     if (action === 'destroy') {
-      var warning = new IndividualModel('v-s:AreYouSure');
+      const warning = new IndividualModel('v-s:AreYouSure');
       warning.load().then(function (warning) {
         if (confirm(warning['rdfs:label'].map(CommonUtil.formatValue).join(' '))) {
           template.parent().closest('[resource]')[0].dispatchEvent(new Event(action));
         }
       });
     } else if (action === 'delete') {
-      var queryString = "'rdf:type'==='v-wf:DecisionForm' && 'v-wf:onDocument'=='" + individual.id + "' && 'v-wf:isCompleted'==false";
+      const queryString = "'rdf:type'==='v-wf:DecisionForm' && 'v-wf:onDocument'=='" + individual.id + "' && 'v-wf:isCompleted'==false";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
-          var warning = new IndividualModel('v-s:AreYouSure');
+          const warning = new IndividualModel('v-s:AreYouSure');
           warning.load().then(function (warning) {
             if (confirm(warning['rdfs:label'].map(CommonUtil.formatValue).join(' '))) {
               template.parent().closest('[resource]')[0].dispatchEvent(new Event(action));
@@ -80,13 +80,14 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   $('#journal', template).on('click', function (e) {
     e.preventDefault();
-    var journal_uri = individual.id + 'j',
-      journal = new IndividualModel(journal_uri);
+    const journal_uri = individual.id + 'j';
+    const journal = new IndividualModel(journal_uri);
     journal.load().then(function (journal) {
       if (!journal.isNew()) {
         riot.route('#/' + journal_uri);
       } else {
-        var journalEmpty = new IndividualModel('v-s:JournalEmpty').load().then(function (journalEmpty) {
+        const journalEmpty = new IndividualModel('v-s:JournalEmpty');
+        journalEmpty.load().then(function (journalEmpty) {
           alert(journalEmpty.toString());
         });
       }
@@ -104,19 +105,18 @@ export const pre = function (individual, template, container, mode, extra) {
     BrowserUtil.showRights(individual);
   });
   $('#files', template).click(function (e) {
-    var btn = $(this);
     e.preventDefault();
-    var docTemplate = template.parent().closest('[resource]');
+    const docTemplate = template.parent().closest('[resource]');
 
-    var fileLinks = $("a:has(>span[property='v-s:fileName'])", docTemplate);
+    const fileLinks = $("a:has(>span[property='v-s:fileName'])", docTemplate);
 
-    var filesPromises;
+    let filesPromises;
 
     if (fileLinks.length) {
       filesPromises = fileLinks.map(function () {
-        var link = $(this);
-        var fileName = link.text().trim();
-        var fileUrl = link.attr('href');
+        const link = $(this);
+        const fileName = link.text().trim();
+        const fileUrl = link.attr('href');
         return filePromise(fileUrl, fileName);
       });
     } else {
@@ -126,13 +126,13 @@ export const pre = function (individual, template, container, mode, extra) {
     Promise.all(filesPromises)
       .then(function (files) {
         import('jszip').then(function (module) {
-          var JSZip = module.default;
-          var zip = new JSZip();
-          var folder = zip.folder('files');
-          var unique = {};
+          const JSZip = module.default;
+          const zip = new JSZip();
+          const folder = zip.folder('files');
+          const unique = {};
           files.forEach(function (file) {
-            var name = file.name;
-            var i = 1;
+            let name = file.name;
+            let i = 1;
             while (unique[name]) {
               name = file.name.replace(/(.*?).([^.]*)$/, '$1 (' + i + ').$2');
               if (name === file.name) {
@@ -147,9 +147,9 @@ export const pre = function (individual, template, container, mode, extra) {
               .text(file.name);
             folder.file(file.name, file);
           });
-          zip.generateAsync({ type: 'blob' }).then(function (content) {
+          zip.generateAsync({type: 'blob'}).then(function (content) {
             import('filesaver').then(function (module) {
-              var saveAs = module.default;
+              const saveAs = module.default;
               saveAs(content, 'registry.zip');
             });
           });
@@ -157,19 +157,19 @@ export const pre = function (individual, template, container, mode, extra) {
       })
       .catch(function (error) {
         console.log(error, error.stack);
-        var notify = new Notify();
-        notify('danger', { message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.' });
+        const notify = new Notify();
+        notify('danger', {message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.'});
       });
   });
 
-  function filePromise(url, name) {
+  function filePromise (url, name) {
     return new Promise(function (resolve, reject) {
-      var xhr = new XMLHttpRequest();
+      const xhr = new XMLHttpRequest();
       xhr.open('GET', url + '?' + Math.random(), true);
       xhr.responseType = 'blob';
       xhr.onload = function (e) {
         if (this.status == 200) {
-          var file = new Blob([this.response], { type: 'application/octet-stream' });
+          const file = new Blob([this.response], {type: 'application/octet-stream'});
           file.name = name;
           file.url = url;
           resolve(file);
@@ -186,24 +186,24 @@ export const pre = function (individual, template, container, mode, extra) {
   // Standard task
   template.on('click', 'ul#standard-task a', function (e) {
     e.preventDefault();
-    var startFormTransform = $(this).attr('about');
+    const startFormTransform = $(this).attr('about');
     BrowserUtil.send(individual, template, startFormTransform, true);
   });
 
   // Standard process
   template.on('click', 'ul#standard-process a', function (e) {
     e.preventDefault();
-    var processDefinitionId = e.target.getAttribute('about');
-    var processDefinition = new IndividualModel(processDefinitionId);
+    const processDefinitionId = e.target.getAttribute('about');
+    const processDefinition = new IndividualModel(processDefinitionId);
     BrowserUtil.startProcess(processDefinition, individual);
   });
 
   // var allButtons = "send edit save cancel delete destroy journal task rights";
-  var defaultButtons = 'send edit save cancel delete recover journal task';
+  const defaultButtons = 'send edit save cancel delete recover journal task';
   return individual.rights.then(function (rights) {
-    var canUpdate = rights.hasValue('v-s:canUpdate', true);
-    var canDelete = rights.hasValue('v-s:canDelete', true);
-    var enabledButtons = (container.data('buttons') || defaultButtons).trim().split(/\s+/);
+    const canUpdate = rights.hasValue('v-s:canUpdate', true);
+    const canDelete = rights.hasValue('v-s:canDelete', true);
+    const enabledButtons = (container.data('buttons') || defaultButtons).trim().split(/\s+/);
     enabledButtons.forEach(function (id) {
       if (!canUpdate && (id === 'save' || id === 'edit' || id === 'cancel' || id === 'recover')) {
         return;
@@ -221,7 +221,7 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function hideButtonsForDeleted() {
+  function hideButtonsForDeleted () {
     if (individual.hasValue('v-s:deleted', true)) {
       template.find(':not(#delete, #recover, #refresh, #toggle-actions)').addClass('hidden');
       $('#delete', template).addClass('hidden');
@@ -244,15 +244,15 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   // Make position fixed for buttons bar that doesn't fit the window
-  function checkOffset(main, actions, placeholder) {
-    var mainTop = main.offset().top;
-    var mainHeight = main.height();
-    var windowHeight = window.innerHeight;
-    var windowTop = window.scrollY || window.pageYOffset;
-    var actionsStaticTop = placeholder.offset().top;
-    var actionsStaticHeight = actions.height();
-    var actions_inside_viewport = windowTop <= actionsStaticTop && actionsStaticTop + actions.height() < windowTop + windowHeight;
-    var main_inside_viewport = windowTop <= mainTop + mainHeight - actionsStaticHeight && mainTop + actionsStaticHeight < windowTop + windowHeight;
+  function checkOffset (main, actions, placeholder) {
+    const mainTop = main.offset().top;
+    const mainHeight = main.height();
+    const windowHeight = window.innerHeight;
+    const windowTop = window.scrollY || window.pageYOffset;
+    const actionsStaticTop = placeholder.offset().top;
+    const actionsStaticHeight = actions.height();
+    const actions_inside_viewport = windowTop <= actionsStaticTop && actionsStaticTop + actions.height() < windowTop + windowHeight;
+    const main_inside_viewport = windowTop <= mainTop + mainHeight - actionsStaticHeight && mainTop + actionsStaticHeight < windowTop + windowHeight;
     if (!actions_inside_viewport && main_inside_viewport) {
       if (!actions.hasClass('actions-fixed')) {
         placeholder.css('height', actionsStaticHeight);
@@ -266,13 +266,11 @@ export const post = function (individual, template, container, mode, extra) {
     }
   }
 
-  function scrollHandler() {
-    checkOffset(main, actions, placeholder);
-  }
-  var main = template.parent().closest('[resource]');
-  var actions = template.closest('.actions');
+  const main = template.parent().closest('[resource]');
+  const actions = template.closest('.actions');
+  let placeholder;
   if (actions.length) {
-    var placeholder = $('<div></div>').insertBefore(actions);
+    placeholder = $('<div></div>').insertBefore(actions);
     $(window).on('scroll', scrollHandler);
     template.one('remove', function () {
       $(window).off('scroll', scrollHandler);
@@ -280,11 +278,14 @@ export const post = function (individual, template, container, mode, extra) {
     $('#toggle-actions', template).detach().appendTo(actions).removeClass('hidden');
     setTimeout(checkOffset, 0, main, actions, placeholder);
   }
+  function scrollHandler () {
+    checkOffset(main, actions, placeholder);
+  }
 
   // Respect validation state of parent template
-  var closest = template.parent().closest('[resource]');
+  const closest = template.parent().closest('[resource]');
   closest.on('internal-validated', function (e) {
-    var validation = e.detail;
+    const validation = e.detail;
     if (validation.state) {
       $('.action#save', template).removeAttr('disabled');
       $('.action#send', template).removeAttr('disabled');

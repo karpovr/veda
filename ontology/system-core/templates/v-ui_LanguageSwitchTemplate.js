@@ -6,21 +6,21 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var switchBehavior = container.attr('data-switch-behavior') || 'checkbox';
-  var switches = $('.btn', template);
+  const switchBehavior = container.attr('data-switch-behavior') || 'checkbox';
+  const switches = $('.btn', template);
   veda.user.preferences.on('v-ui:preferredLanguage', langHandler);
   template.one('remove', function () {
     veda.user.preferences.off('v-ui:preferredLanguage', langHandler);
   });
   langHandler();
   template.on('click', 'button.lang', toggleLanguage);
-  function langHandler() {
-    var preferredLanguage = veda.user.preferences['v-ui:preferredLanguage'].map(function (language) {
+  function langHandler () {
+    const preferredLanguage = veda.user.preferences['v-ui:preferredLanguage'].map(function (language) {
       return language.id;
     });
     switches.each(function () {
-      var $this = $(this);
-      var lang_uri = $this.attr('resource');
+      const $this = $(this);
+      const lang_uri = $this.attr('resource');
       if (preferredLanguage.indexOf(lang_uri) > -1) {
         $this.addClass('active btn-success').removeClass('btn-default');
       } else {
@@ -28,14 +28,13 @@ export const post = function (individual, template, container, mode, extra) {
       }
     });
   }
-  function toggleLanguage(e) {
+  function toggleLanguage (e) {
     e.stopPropagation();
-    var target = $(e.target);
-    var lang_uri = target.attr('resource');
-    var lang = new IndividualModel(lang_uri);
-    var lang_name = lang['rdf:value'][0].toString();
-    var hasLanguage = veda.user.preferences.hasValue('v-ui:preferredLanguage', lang);
-    var languageCount = veda.user.preferences['v-ui:preferredLanguage'].length;
+    const target = $(e.target);
+    const lang_uri = target.attr('resource');
+    const lang = new IndividualModel(lang_uri);
+    const hasLanguage = veda.user.preferences.hasValue('v-ui:preferredLanguage', lang);
+    const languageCount = veda.user.preferences['v-ui:preferredLanguage'].length;
     if (!hasLanguage) {
       if (switchBehavior === 'checkbox') {
         veda.user.preferences.addValue('v-ui:preferredLanguage', lang);

@@ -7,8 +7,8 @@ export const post = function (individual, template, container, mode, extra) {
 
   template.on('click', function (e) {
     e.preventDefault();
-    var newMode = container.data('mode');
-    var parentTmpl = template.parent().closest('[resource]');
+    let newMode = container.data('mode');
+    const parentTmpl = template.parent().closest('[resource]');
     if (!newMode && parentTmpl.attr('resource') === individual.id) {
       newMode = parentTmpl.data('mode');
     }
@@ -17,8 +17,8 @@ export const post = function (individual, template, container, mode, extra) {
       $('.modal').modal('hide').remove();
     }
 
-    var modal = $('#notification-modal-template').html();
-    modal = $(modal).modal({ show: false });
+    let modal = $('#notification-modal-template').html();
+    modal = $(modal).modal({show: false});
     $('body').append(modal);
     modal.modal('show');
 
@@ -26,9 +26,9 @@ export const post = function (individual, template, container, mode, extra) {
       modal.find('#follow').remove();
     } else {
       modal.find('#follow').click(function () {
-        var resourceTemplate = modal.find('[resource]').first();
-        var uri = resourceTemplate.attr('resource');
-        var mode = resourceTemplate.data('mode');
+        const resourceTemplate = modal.find('[resource]').first();
+        const uri = resourceTemplate.attr('resource');
+        const mode = resourceTemplate.data('mode');
         modal.modal('hide');
         riot.route(['#', uri, '#main', undefined, mode].join('/'));
       });
@@ -37,8 +37,8 @@ export const post = function (individual, template, container, mode, extra) {
     template.one('remove', function () {
       modal.modal('hide').remove();
     });
-    var cntr = $('.modal-body', modal);
-    var ok = $('#ok', modal);
+    const cntr = $('.modal-body', modal);
+    const ok = $('#ok', modal);
     cntr.on('valid', function () {
       ok.removeAttr('disabled');
     });
@@ -66,4 +66,4 @@ export const post = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = ` <a href="#" class="glyphicon glyphicon-zoom-in" tabindex="-1"></a> `;
+export const html = ' <a href="#" class="glyphicon glyphicon-zoom-in" tabindex="-1"></a> ';

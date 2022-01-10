@@ -9,8 +9,8 @@ export const pre = function (individual, template, container, mode, extra) {
   }
   template.click(function (e) {
     e.preventDefault();
-    var modal = $($('#minimal-modal-template').html()).modal({ keyboard: true, show: false }).appendTo('body');
-    var modalBody = modal.find('.modal-body');
+    const modal = $($('#minimal-modal-template').html()).modal({keyboard: true, show: false}).appendTo('body');
+    const modalBody = modal.find('.modal-body');
     individual.present(modalBody, 'v-ui:ImageTemplate');
     modal.modal('show');
     template.one('remove', function () {
@@ -19,4 +19,4 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = ` <a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a> `;
+export const html = ' <a class="show-modal" href="#" about="@" rel="v-s:thumbnail" data-template="v-ui:ImageTemplate"></a> ';

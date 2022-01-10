@@ -8,9 +8,9 @@ export const pre = function (individual, template, container, mode, extra) {
 
   template.on('click', '#edit, #save, #cancel, #delete', function (e) {
     e.preventDefault();
-    var action = this.id;
+    const action = this.id;
     if (action === 'delete') {
-      var warning = new IndividualModel('v-s:AreYouSure');
+      const warning = new IndividualModel('v-s:AreYouSure');
       warning.load().then(function (warning) {
         if (confirm(warning['rdfs:label'].map(CommonUtil.formatValue).join(' '))) {
           template.parent().closest('[resource]')[0].dispatchEvent(new Event(action));
@@ -22,11 +22,11 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 
   // var allButtons = "edit save cancel delete";
-  var defaultButtons = 'edit save cancel delete';
+  const defaultButtons = 'edit save cancel delete';
   return individual.rights.then(function (rights) {
-    var canUpdate = rights.hasValue('v-s:canUpdate', true);
-    var canDelete = rights.hasValue('v-s:canDelete', true);
-    var enabledButtons = (container.data('buttons') || defaultButtons).split(' ');
+    const canUpdate = rights.hasValue('v-s:canUpdate', true);
+    const canDelete = rights.hasValue('v-s:canDelete', true);
+    const enabledButtons = (container.data('buttons') || defaultButtons).split(' ');
     enabledButtons.forEach(function (id) {
       if (!canUpdate && (id === 'save' || id === 'edit' || id === 'cancel')) {
         return;
@@ -45,9 +45,9 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   // Respect validation state of parent template
-  var closest = template.parent().closest('[resource]');
+  const closest = template.parent().closest('[resource]');
   closest.on('internal-validated', function (e) {
-    var validation = e.detail;
+    const validation = e.detail;
     if (validation.state) {
       $('.action#save', template).removeAttr('disabled');
     } else {

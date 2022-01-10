@@ -9,17 +9,17 @@ export const pre = function (individual, template, container, mode, extra) {
 
   return Backend.query(veda.ticket, "'rdf:type'==='v-s:Appointment' && 'v-s:occupation'=='" + individual.id + "'")
     .then(function (queryResult) {
-      var promises = queryResult.result.map(function (uri) {
+      const promises = queryResult.result.map(function (uri) {
         return new IndividualModel(uri).load();
       });
       return Promise.all(promises);
     })
     .then(function (appointments) {
-      var personsPromises = appointments.map(function (appointment) {
+      const personsPromises = appointments.map(function (appointment) {
         return appointment['v-s:employee'].length > 0 ? appointment['v-s:employee'][0].load() : Promise.resolve(false);
       });
       return Promise.all(personsPromises).then(function (persons) {
-        var mBody = $('div.media-body', template);
+        const mBody = $('div.media-body', template);
         mBody.append('<hr class="no-margin">');
         appointments.forEach(function (appointment, i) {
           if (persons[i] && !persons[i].hasValue('v-s:deleted', true)) {

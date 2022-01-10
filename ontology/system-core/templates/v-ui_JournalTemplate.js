@@ -6,10 +6,10 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  //individual.prefetch(50, "v-s:onDocument", "v-wf:onProcess", "v-s:childRecord", "v-s:processJournal", "v-s:subJournal", "v-wf:takenDecision", "v-s:actor", "v-s:creator", "v-wf:executor");
+  // individual.prefetch(50, "v-s:onDocument", "v-wf:onProcess", "v-s:childRecord", "v-s:processJournal", "v-s:subJournal", "v-wf:takenDecision", "v-s:actor", "v-s:creator", "v-wf:executor");
 
-  var doc_uri = this.id.replace(/.$/, '');
-  var doc = new IndividualModel(doc_uri);
+  const doc_uri = this.id.replace(/.$/, '');
+  const doc = new IndividualModel(doc_uri);
 
   $('#on-document', template).attr('about', doc_uri);
 

@@ -8,24 +8,24 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var renderedCount = 0;
-  var tbody = $('#tbody', template);
-  var task_template = 'v-ui:SimplifiedJournalTemplate_task';
-  var doc_uri = this.id.replace(/.$/, '');
-  var doc = new IndividualModel(doc_uri);
+  let renderedCount = 0;
+  const tbody = $('#tbody', template);
+  const task_template = 'v-ui:SimplifiedJournalTemplate_task';
+  const doc_uri = this.id.replace(/.$/, '');
+  const doc = new IndividualModel(doc_uri);
   $('#refresh', template).click(buildJournal);
   buildJournal();
 
-  function buildJournal() {
+  function buildJournal () {
     renderedCount = 0;
     tbody.empty();
-    var tasks = Backend.query({
+    Backend.query({
       ticket: veda.ticket,
       query: "'rdf:type'=='v-wf:DecisionForm' && 'v-wf:onDocument'=='" + doc_uri + "'",
       sort: "'v-s:created' desc",
     })
       .then(function (query_res) {
-        var tasks_uris = query_res.result;
+        const tasks_uris = query_res.result;
         if (tasks_uris.length) {
           return Backend.get_individuals({
             ticket: veda.ticket,
@@ -36,12 +36,12 @@ export const pre = function (individual, template, container, mode, extra) {
       .then(renderTasks);
   }
 
-  function renderTasks(tasksJSONs) {
+  function renderTasks (tasksJSONs) {
     if (!tasksJSONs || !tasksJSONs.length) {
       return;
     }
-    var taskJSON = tasksJSONs.pop();
-    var task = new IndividualModel(taskJSON);
+    const taskJSON = tasksJSONs.pop();
+    const task = new IndividualModel(taskJSON);
     task
       .present(tbody, task_template)
       .then(function (renderedTemplate) {

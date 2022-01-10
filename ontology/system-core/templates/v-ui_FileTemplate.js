@@ -4,9 +4,9 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var fn = individual['v-s:fileName'][0],
-    idx = fn.lastIndexOf('.'),
-    ext = fn.substr(idx + 1);
+  const fn = individual['v-s:fileName'][0];
+  const idx = fn.lastIndexOf('.');
+  const ext = fn.substr(idx + 1);
   $('span#icon', template).text(ext);
 };
 

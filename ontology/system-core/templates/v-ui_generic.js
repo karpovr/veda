@@ -7,15 +7,14 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   // Construct generic template
-  var props = $('#properties', template);
-  var propTmpl = props.html();
+  const props = $('#properties', template);
+  const propTmpl = props.html();
   props.empty();
 
-  var ontology = veda.ontology;
+  const ontology = veda.ontology;
 
-  var properties = [].concat.apply(
-    [],
-    individual['rdf:type'].map(function (_class) {
+  const properties = [].concat(
+    ...individual['rdf:type'].map(function (_class) {
       return ontology.getClassProperties(_class.id);
     }),
   );
@@ -26,64 +25,64 @@ export const pre = function (individual, template, container, mode, extra) {
         return;
       }
 
-      var property = new IndividualModel(property_uri);
+      const property = new IndividualModel(property_uri);
 
-      var result = $('<div></div>').append(propTmpl);
-      $('.name', result).append($('<strong></strong>', { about: property_uri, property: 'rdfs:label' }).addClass('text-muted'));
+      const result = $('<div></div>').append(propTmpl);
+      $('.name', result).append($('<strong></strong>', {about: property_uri, property: 'rdfs:label'}).addClass('text-muted'));
 
-      var range = property.hasValue('rdfs:range') ? property['rdfs:range'][0].id : 'rdfs:Resource';
+      const range = property.hasValue('rdfs:range') ? property['rdfs:range'][0].id : 'rdfs:Resource';
 
       switch (range) {
-        case 'rdfs:Literal':
-        case 'xsd:string':
-          if (property_uri === 'v-s:script' || property_uri === 'v-ui:template') {
-            $('.value', result).append("<veda-control property='" + property_uri + "' data-type='source'></veda-control>");
-          } else {
-            $('.value', result).append(
-              "<div property='" +
+      case 'rdfs:Literal':
+      case 'xsd:string':
+        if (property_uri === 'v-s:script' || property_uri === 'v-ui:template') {
+          $('.value', result).append("<veda-control property='" + property_uri + "' data-type='source'></veda-control>");
+        } else {
+          $('.value', result).append(
+            "<div property='" +
                 property_uri +
                 "' class='view -edit -search'></div>" +
                 "<veda-control property='" +
                 property_uri +
                 "' data-type='multilingualText' class='-view edit search'></veda-control>",
-            );
-          }
-          break;
-        case 'xsd:integer':
-        case 'xsd:nonNegativeInteger':
-          $('.value', result).append(
-            "<div property='" +
+          );
+        }
+        break;
+      case 'xsd:integer':
+      case 'xsd:nonNegativeInteger':
+        $('.value', result).append(
+          "<div property='" +
               property_uri +
               "'></div>" +
               "<veda-control property='" +
               property_uri +
               "' data-type='integer' class='-view edit search'></veda-control>",
-          );
-          break;
-        case 'xsd:decimal':
-          $('.value', result).append(
-            "<div property='" +
+        );
+        break;
+      case 'xsd:decimal':
+        $('.value', result).append(
+          "<div property='" +
               property_uri +
               "'></div>" +
               "<veda-control property='" +
               property_uri +
               "' data-type='decimal' class='-view edit search'></veda-control>",
-          );
-          break;
-        case 'xsd:dateTime':
-          $('.value', result).append(
-            "<div property='" +
+        );
+        break;
+      case 'xsd:dateTime':
+        $('.value', result).append(
+          "<div property='" +
               property_uri +
               "'></div>" +
               "<veda-control property='" +
               property_uri +
               "' data-type='dateTime' class='-view edit search'></veda-control>",
-          );
-          break;
-        case 'xsd:boolean':
-          $('.name', result).empty();
-          $('.value', result).append(
-            "<div class='checkbox'>" +
+        );
+        break;
+      case 'xsd:boolean':
+        $('.name', result).empty();
+        $('.value', result).append(
+          "<div class='checkbox'>" +
               '<label>' +
               "<veda-control property='" +
               property_uri +
@@ -93,39 +92,39 @@ export const pre = function (individual, template, container, mode, extra) {
               "' property='rdfs:label' class='text-muted'></em>" +
               '</label>' +
               '</div>',
-          );
-          break;
-        case 'rdfs:Resource':
-          $('.value', result).append(
-            "<div property='" +
+        );
+        break;
+      case 'rdfs:Resource':
+        $('.value', result).append(
+          "<div property='" +
               property_uri +
               "'></div>" +
               "<veda-control property='" +
               property_uri +
               "' data-type='generic' class='-view edit search'></veda-control>",
-          );
-          break;
-        default:
-          if (property_uri === 'v-s:attachment') {
-            $('.value', result).append(
-              "<div rel='" +
+        );
+        break;
+      default:
+        if (property_uri === 'v-s:attachment') {
+          $('.value', result).append(
+            "<div rel='" +
                 property_uri +
                 "' data-template='v-ui:FileTemplateWithComment' data-embedded='true'></div>" +
                 "<veda-control rel='" +
                 property_uri +
                 "' data-type='file' class='-view edit -search'></veda-control>",
-            );
-          } else {
-            $('.value', result).append(
-              "<div rel='" +
+          );
+        } else {
+          $('.value', result).append(
+            "<div rel='" +
                 property_uri +
                 "' data-template='v-ui:ClassNameLabelLinkTemplate'></div>" +
                 "<veda-control rel='" +
                 property_uri +
                 "' data-type='link' class='-view edit search fulltext dropdown'></veda-control>",
-            );
-          }
-          break;
+          );
+        }
+        break;
       }
       if (index < array.length - 1) result.append($('<hr/>').attr('style', 'margin: 10px 0px'));
 

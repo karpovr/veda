@@ -5,27 +5,27 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var propСontainer = $('.properties-container', template);
-  var tmpl = propСontainer.html();
+  const propСontainer = $('.properties-container', template);
+  const tmpl = propСontainer.html();
   propСontainer.empty();
-  var promises = Object.keys(this.properties).map(function (property_uri) {
+  const promises = Object.keys(this.properties).map(function (property_uri) {
     if (property_uri === '@' || property_uri === 'rdf:type' || property_uri === 'rdfs:label') {
       return;
     }
-    var propRow = $(tmpl);
+    const propRow = $(tmpl);
     propRow.find('.prop-name').attr({
       about: property_uri,
       property: 'rdfs:label',
     });
-    var property = new IndividualModel(property_uri);
+    const property = new IndividualModel(property_uri);
     return property.load().then(function (property) {
-      var literalAttrs = {
+      const literalAttrs = {
         about: '@',
         property: property_uri,
       };
-      var objectAttrs = {
-        about: '@',
-        rel: property_uri,
+      const objectAttrs = {
+        'about': '@',
+        'rel': property_uri,
         'data-template': 'v-ui:LabelLinkTemplate',
       };
       if (property.hasValue('rdfs:range')) {

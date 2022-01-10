@@ -8,7 +8,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template.one('remove', function () {
     individual.off('v-s:archived', archivedHandler);
   });
-  function archivedHandler() {
+  function archivedHandler () {
     this['v-s:deleted'] = this['v-s:archived'];
   }
 };

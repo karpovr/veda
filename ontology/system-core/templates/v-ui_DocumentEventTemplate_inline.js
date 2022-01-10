@@ -5,20 +5,20 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (individual.hasValue('v-wf:hasStartForm')) {
-    var startForm = individual['v-wf:hasStartForm'][0];
+    const startForm = individual['v-wf:hasStartForm'][0];
     $("[about='start-form']", template).attr('about', startForm.id);
   } else {
     // Проверим наличие переменной стартовой формы
-    var inVars = individual['v-wf:inVars'].map(function (inVar) {
+    const inVars = individual['v-wf:inVars'].map(function (inVar) {
       return inVar.load();
     });
     if (inVars.length) {
       return Promise.all(inVars)
         .then(function (inVars) {
-          var startFormVar = inVars.filter(function (inVar) {
+          const startFormVar = inVars.filter(function (inVar) {
             return inVar.hasValue('v-wf:variableName', 'startForm_id');
           });
-          var startForm = startFormVar[0]['v-wf:variableValue'][0];
+          const startForm = startFormVar[0]['v-wf:variableValue'][0];
           $("[about='start-form']", template).attr('about', startForm.id);
         })
         .catch(function () {

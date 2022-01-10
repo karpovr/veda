@@ -4,19 +4,19 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var rightsContainer = $('.rights', template);
-  var rightsTemplate = rightsContainer.html();
+  const rightsContainer = $('.rights', template);
+  const rightsTemplate = rightsContainer.html();
   rightsContainer.empty();
   individual.rights.then(function (rights) {
     rights.present(rightsContainer, rightsTemplate);
   });
 
-  var descriptionContainer = $('#description', template);
-  var descriptionTemplate = descriptionContainer.html();
+  const descriptionContainer = $('#description', template);
+  const descriptionTemplate = descriptionContainer.html();
   descriptionContainer.empty();
 
-  var rightsOriginContainer = $('.rightsOrigin', template);
-  var rightsOriginTemplate = rightsOriginContainer.html();
+  const rightsOriginContainer = $('.rightsOrigin', template);
+  const rightsOriginTemplate = rightsOriginContainer.html();
   rightsOriginContainer.empty();
   individual.rightsOrigin.then(function (rightsOrigin) {
     rightsOrigin.forEach(function (origin) {

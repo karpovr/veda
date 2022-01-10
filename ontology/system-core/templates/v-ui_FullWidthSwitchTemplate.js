@@ -9,7 +9,7 @@ export const pre = function (individual, template, container, mode, extra) {
 
   template.click(function () {
     try {
-      var value = veda.user.preferences['v-ui:fullWidth'][0];
+      const value = veda.user.preferences['v-ui:fullWidth'][0];
       veda.user.preferences['v-ui:fullWidth'] = [!value];
       veda.user.preferences.save();
     } catch (error) {
@@ -21,8 +21,8 @@ export const pre = function (individual, template, container, mode, extra) {
     veda.user.preferences.off('v-ui:fullWidth', widthHandler);
   });
   widthHandler();
-  function widthHandler() {
-    var style = $('#full-width-style', template);
+  function widthHandler () {
+    const style = $('#full-width-style', template);
     if (veda.user.preferences.hasValue('v-ui:fullWidth', true)) {
       style.attr('media', 'all');
       template.removeClass('btn-default').addClass('btn-success active');

@@ -7,9 +7,9 @@ export const post = function (individual, template, container, mode, extra) {
   if (!individual.hasValue('rdfs:label')) {
     template.text(individual.id);
   }
-  var done;
-  var initPopoverTimeout;
-  var type = individual.hasValue('rdf:type') && individual['rdf:type'][0].id;
+  let done;
+  let initPopoverTimeout;
+  const type = individual.hasValue('rdf:type') && individual['rdf:type'][0].id;
   if (type === 'v-s:Appointment' || type === 'v-s:Person' || type === 'v-s:Position' || type === 'v-s:Organization') {
     template
       .mouseenter(function () {
@@ -25,9 +25,10 @@ export const post = function (individual, template, container, mode, extra) {
         template.popover('destroy');
       });
   }
-  var initPopover = function () {
-    var cntr = $('<div></div>');
-    var tmpl;
+
+  function initPopover () {
+    const cntr = $('<div></div>');
+    let tmpl;
     if (type === 'v-s:Appointment') {
       tmpl = 'v-ui:AppointmentPopoverTemplate';
     } else if (type === 'v-s:Person') {
@@ -42,7 +43,7 @@ export const post = function (individual, template, container, mode, extra) {
       template
         .popover({
           trigger: 'hover click',
-          delay: { show: 750, hide: 100 },
+          delay: {show: 750, hide: 100},
           placement: 'auto bottom',
           html: true,
           container: 'body',
@@ -54,7 +55,7 @@ export const post = function (individual, template, container, mode, extra) {
         template.click();
       });
       document.addEventListener('click', function (e) {
-        var jTarget = $(e.target);
+        const jTarget = $(e.target);
         if (jTarget.closest('.popover').length == 0 && jTarget[0] != template[0]) {
           template.click();
         }
@@ -63,4 +64,4 @@ export const post = function (individual, template, container, mode, extra) {
   };
 };
 
-export const html = ` <span class="label-template" about="@" property="rdfs:label"></span> `;
+export const html = ' <span class="label-template" about="@" property="rdfs:label"></span> ';
