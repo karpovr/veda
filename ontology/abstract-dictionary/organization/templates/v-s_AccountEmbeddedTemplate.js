@@ -7,7 +7,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!individual.hasValue('v-s:login')) {
       result['v-s:login'] = {
         state: false,
@@ -34,9 +34,9 @@ export const pre = function (individual, template, container, mode, extra) {
     }
 
     if (individual.hasValue('v-s:login')) {
-      var queryString = "'rdf:type'=='v-s:Account' && 'v-s:login'=='" + individual['v-s:login'][0] + "'";
+      const queryString = "'rdf:type'=='v-s:Account' && 'v-s:login'=='" + individual['v-s:login'][0] + "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningAccount').addClass('hide');
         } else {
@@ -44,7 +44,7 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 };
 

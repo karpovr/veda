@@ -7,7 +7,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!individual.hasValue('v-s:subjectCode')) {
       result['v-s:subjectCode'] = {
         state: false,
@@ -39,10 +39,10 @@ export const pre = function (individual, template, container, mode, extra) {
       };
     }
     if (individual.hasValue('rdfs:label') && individual.hasValue('v-s:parentOrganization') && individual.isNew()) {
-      var queryString =
+      const queryString =
         "'rdf:type'==='v-s:Position' && 'v-s:parentUnit'=='" + individual['v-s:parentUnit'][0].id + "' && 'rdfs:label'=='" + individual['rdfs:label'][0] + "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningOccupationName').addClass('hide');
         } else {
@@ -51,14 +51,14 @@ export const pre = function (individual, template, container, mode, extra) {
       });
     }
     if (individual.hasValue('v-s:subjectCode') && individual.hasValue('v-s:parentOrganization') && individual.isNew()) {
-      var queryString =
+      const queryString =
         "'rdf:type'==='v-s:Position' && 'v-s:parentOrganization'=='" +
         individual['v-s:parentOrganization'][0].id +
         "' && 'v-s:subjectCode'=='" +
         individual['v-s:subjectCode'][0] +
         "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningOccupationSubCode').addClass('hide');
         } else {
@@ -66,7 +66,7 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 };
 

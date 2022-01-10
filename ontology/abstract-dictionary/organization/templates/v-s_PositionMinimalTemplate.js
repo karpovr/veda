@@ -1,13 +1,13 @@
 import $ from 'jquery';
-import Backend from '/js/common/backend.js';
-import veda from '/js/common/veda.js';
+// import Backend from '/js/common/backend.js';
+// import veda from '/js/common/veda.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!individual.hasValue('rdfs:label')) {
       result['rdfs:label'] = {
         state: false,
@@ -26,7 +26,7 @@ export const pre = function (individual, template, container, mode, extra) {
         cause: ['v-ui:minCardinality'],
       };
     }
-    /*if( individual.hasValue('rdfs:label') && individual.hasValue('v-s:parentOrganization') && individual.isNew())  {
+    /* if( individual.hasValue('rdfs:label') && individual.hasValue('v-s:parentOrganization') && individual.isNew())  {
       var queryString = "'rdf:type'==='v-s:Position' && 'v-s:parentUnit'=='" + individual['v-s:parentUnit'][0].id + "' && 'rdfs:label'=='" + individual['rdfs:label'][0] + "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
         var tmp = queryResult.result;
@@ -48,7 +48,7 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }*/
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 };
 

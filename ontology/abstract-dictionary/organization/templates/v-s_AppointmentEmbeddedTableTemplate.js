@@ -6,7 +6,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var canUpdateAppointment = individual.canUpdate();
+  const canUpdateAppointment = individual.canUpdate();
   Promise.all([canUpdateAppointment]).then(function (results) {
     if (!results[0]) {
       $('#deleteAppointment', template).remove();
@@ -19,7 +19,7 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  //нельзя удалить назначение по умолчанию
+  // нельзя удалить назначение по умолчанию
   individual.getPropertyChain('v-s:employee', 'v-s:defaultAppointment').then(function (defaultAppointment) {
     if (individual == defaultAppointment[0]) $('#deleteAppointment', template).attr('disabled', 'disabled');
   });
@@ -31,10 +31,10 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#moveToAnotherDepartment', template).click(function () {
-    var current_occupation = individual['v-s:occupation'][0].id;
-    var Occupation = new IndividualModel(current_occupation);
-    var tmpl = new IndividualModel('v-s:PositionMinimalTemplate');
-    var modal = BrowserUtil.showModal(Occupation, tmpl, 'edit');
+    const current_occupation = individual['v-s:occupation'][0].id;
+    const Occupation = new IndividualModel(current_occupation);
+    const tmpl = new IndividualModel('v-s:PositionMinimalTemplate');
+    const modal = BrowserUtil.showModal(Occupation, tmpl, 'edit');
     Occupation.one('afterSave', function () {
       individual.save();
       modal.modal('hide').remove();

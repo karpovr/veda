@@ -1,1 +1,1 @@
-export const html = ` <div></div> `;
+export const html = ' <div></div> ';

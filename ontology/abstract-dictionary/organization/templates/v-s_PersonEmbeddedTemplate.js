@@ -8,7 +8,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!individual.hasValue('v-s:lastName')) {
       result['v-s:lastName'] = {
         state: false,
@@ -34,7 +34,7 @@ export const pre = function (individual, template, container, mode, extra) {
       };
     }
     if (individual.hasValue('v-s:lastName') && individual.hasValue('v-s:firstName') && individual.hasValue('v-s:parentOrganization') && individual.isNew()) {
-      var queryString =
+      const queryString =
         "'rdf:type'==='v-s:Person' && 'v-s:parentOrganization'=='" +
         individual['v-s:parentOrganization'][0].id +
         "' && 'v-s:lastName'=='" +
@@ -43,7 +43,7 @@ export const pre = function (individual, template, container, mode, extra) {
         individual['v-s:firstName'][0] +
         "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningPersonFIO').addClass('hidden');
         } else {
@@ -52,10 +52,10 @@ export const pre = function (individual, template, container, mode, extra) {
       });
     }
     if (individual.hasValue('v-s:tabNumber') && individual.isNew()) {
-      var queryString =
+      const queryString =
         "'v-s:parentOrganization'=='" + individual['v-s:parentOrganization'][0].id + "' && 'v-s:tabNumber'=='" + individual['v-s:tabNumber'][0] + "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningTN').addClass('hidden');
         } else {
@@ -63,19 +63,19 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
-  var canCreateSubsidiary = new IndividualModel('v-s:Subsidiary').canCreate();
+  const canCreateSubsidiary = new IndividualModel('v-s:Subsidiary').canCreate();
   Promise.all([canCreateSubsidiary]).then(function (results) {
     if (!results[0] || !results[1]) {
       $('#add-subsidiary', template).remove();
     }
   });
 
-  var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='" + individual.id + "'";
+  const queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='" + individual.id + "'";
   $("veda-control[rel='v-s:defaultAppointment']", template).attr('data-query-prefix', queryString);
-  //$('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
+  // $('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 };
 
 export const post = function (individual, template, container, mode, extra) {

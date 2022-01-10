@@ -9,7 +9,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!individual.hasValue('v-s:lastName')) {
       result['v-s:lastName'] = {
         state: false,
@@ -35,7 +35,7 @@ export const pre = function (individual, template, container, mode, extra) {
       };
     }
     if (individual.hasValue('v-s:lastName') && individual.hasValue('v-s:firstName') && individual.hasValue('v-s:parentOrganization') && individual.isNew()) {
-      var queryString =
+      const queryString =
         "'rdf:type'==='v-s:Person' && 'v-s:parentOrganization'=='" +
         individual['v-s:parentOrganization'][0].id +
         "' && 'v-s:lastName'=='" +
@@ -44,7 +44,7 @@ export const pre = function (individual, template, container, mode, extra) {
         individual['v-s:firstName'][0] +
         "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningPersonFIO').addClass('hide');
         } else {
@@ -53,14 +53,14 @@ export const pre = function (individual, template, container, mode, extra) {
       });
     }
     if (individual.hasValue('v-s:tabNumber') && individual.isNew()) {
-      var queryString =
+      const queryString =
         "'rdf:type'==='v-s:Person' && 'v-s:parentOrganization'=='" +
         individual['v-s:parentOrganization'][0].id +
         "' && 'v-s:tabNumber'=='" +
         individual['v-s:tabNumber'][0] +
         "'";
       Backend.query(veda.ticket, queryString).then(function (queryResult) {
-        var tmp = queryResult.result;
+        const tmp = queryResult.result;
         if (tmp.length == 0) {
           $('#warningPersonTabNum').addClass('hide');
         } else {
@@ -68,50 +68,50 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       });
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
   if (veda.appointment.id != 'cfg:AdministratorAppointment') {
     $('#add-Account', template).attr('disabled', 'disabled');
   }
-  var canCreateSubsidiary = new IndividualModel('v-s:Subsidiary').canCreate();
+  const canUpdatePromise = individual.canUpdate();
+  const canCreateSubsidiary = new IndividualModel('v-s:Subsidiary').canCreate();
   Promise.all([canCreateSubsidiary, canUpdatePromise]).then(function (results) {
     if (!results[0] || !results[1]) {
       $('#add-subsidiary', template).remove();
     }
   });
-  var canUpdatePromise = individual.canUpdate();
-  var canCreatePerson = new IndividualModel('v-s:Person').canCreate();
-  var canCreatePosition = new IndividualModel('v-s:Position').canCreate();
-  var canCreateAppointment = new IndividualModel('v-s:Appointment').canCreate();
+  const canCreatePerson = new IndividualModel('v-s:Person').canCreate();
+  const canCreatePosition = new IndividualModel('v-s:Position').canCreate();
+  const canCreateAppointment = new IndividualModel('v-s:Appointment').canCreate();
   Promise.all([canUpdatePromise, canCreatePerson, canCreatePosition, canCreateAppointment]).then(function (results) {
     if (!results[0] || !results[1] || !results[2] || !results[3]) {
       $('#deleteAppointment', template).remove();
     }
   });
 
-  var canDeletePerson = individual.canDelete();
+  const canDeletePerson = individual.canDelete();
   Promise.all([canDeletePerson]).then(function (results) {
     if (!results[0]) {
       $('#dismissEmployee', template).remove();
     }
   });
 
-  var queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='" + individual.id + "'";
+  const queryString = "'rdf:type'==='v-s:Appointment' && 'v-s:employee'==='" + individual.id + "'";
   $("veda-control[rel='v-s:defaultAppointment']", template).attr('data-query-prefix', queryString);
-  //$('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
+  // $('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 };
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  //нельзя редактировать пользователей ttl
+  // нельзя редактировать пользователей ttl
   if (individual.hasValue('rdfs:isDefinedBy')) $('.actions #edit', template).attr('disabled', 'disabled');
 
   if (!individual.hasValue('v-s:birthday')) $('span[property="v-s:birthday"]').text('Не указано');
 
-  //Блок только для админа
+  // Блок только для админа
   if (!individual.isNew() && veda.appointment.id != 'cfg:AdministratorAppointment') {
     $('.notEditForUsers').addClass('hide');
     $('#notNewBundle').removeClass('hide');
@@ -119,38 +119,39 @@ export const post = function (individual, template, container, mode, extra) {
   }
 
   $('.actions #save').on('click', function () {
-    var tempCommunicationMean = individual['v-s:hasCommunicationMean'];
+    const tempCommunicationMean = individual['v-s:hasCommunicationMean'];
 
     individual['v-s:owner'] = [individual];
-    if (tempCommunicationMean)
+    if (tempCommunicationMean) {
       tempCommunicationMean.map(function (CommunicationMean) {
         CommunicationMean['v-s:parent'] = [individual];
         return CommunicationMean.save();
       });
+    }
     individual.save();
   });
 
-  //добавить аккаунт
+  // добавить аккаунт
   $('#add-Account', template).click(function () {
-    var NewAccount = new IndividualModel();
-    var _class = new IndividualModel('v-s:Account');
-    var tmpl = new IndividualModel('v-s:AccountTemplate');
+    const NewAccount = new IndividualModel();
+    const _class = new IndividualModel('v-s:Account');
+    const tmpl = new IndividualModel('v-s:AccountTemplate');
     NewAccount['rdf:type'] = [_class];
     NewAccount['v-s:backwardTarget'] = [individual];
     NewAccount['v-s:backwardProperty'] = [new IndividualModel('v-s:hasAccount')];
     NewAccount['v-s:owner'] = [individual];
-    var modal = BrowserUtil.showModal(NewAccount, tmpl, 'edit');
+    const modal = BrowserUtil.showModal(NewAccount, tmpl, 'edit');
     NewAccount.one('afterSave', function () {
       individual.save();
       modal.modal('hide').remove();
     });
   });
 
-  //добавить назначение
+  // добавить назначение
   $('#add-Appointment', template).click(function () {
-    var NewAppointment = new IndividualModel();
-    var _class = new IndividualModel('v-s:Appointment');
-    var tmpl = new IndividualModel('v-s:AppointmentTemplate');
+    const NewAppointment = new IndividualModel();
+    const _class = new IndividualModel('v-s:Appointment');
+    const tmpl = new IndividualModel('v-s:AppointmentTemplate');
     NewAppointment['rdf:type'] = [_class];
     if (individual.hasValue('v-s:hasAppointment')) NewAppointment['v-s:parentUnit'] = individual['v-s:hasAppointment'][0]['v-s:parentUnit'];
     else {
@@ -158,38 +159,39 @@ export const post = function (individual, template, container, mode, extra) {
     }
     NewAppointment['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
     NewAppointment['v-s:employee'] = [individual];
-    var modal = BrowserUtil.showModal(NewAppointment, tmpl, 'edit');
+    const modal = BrowserUtil.showModal(NewAppointment, tmpl, 'edit');
     NewAppointment.one('afterSave', function () {
       individual.save();
       modal.modal('hide').remove();
     });
   });
 
-  //уволить сотрудника
+  // уволить сотрудника
   $('#dismissEmployee', template).click(function () {
     individual['v-s:deleted'] = [true];
     individual.save();
   });
 
-  function handlerAccount() {
+  function handlerAccount () {
     if (individual.hasValue('v-s:hasAccount')) {
       $('#add-Account', template).remove();
     }
   }
   handlerAccount();
 
-  function deletedHandler() {
+  function deletedHandler () {
     if (individual.hasValue('v-s:deleted', true)) {
-      if (individual.hasValue('v-s:hasAppointment'))
+      if (individual.hasValue('v-s:hasAppointment')) {
         individual['v-s:hasAppointment'].forEach(function (appointment) {
           appointment.delete();
         });
+      }
     }
   }
 
   individual.on('v-s:deleted', deletedHandler);
   individual.on('v-s:hasAccount', handlerAccount);
-  /*individual.on("add-Account", handler);*/
+  /* individual.on("add-Account", handler);*/
   template.one('remove', function () {
     individual.off('v-s:hasAccount', handlerAccount);
     individual.off('v-s:deleted', deletedHandler);

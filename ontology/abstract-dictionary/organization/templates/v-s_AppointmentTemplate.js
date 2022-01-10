@@ -8,7 +8,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     result['v-s:employee'] = {
       state: individual.hasValue('v-s:employee'),
       cause: ['v-ui:minCardinality'],
@@ -35,7 +35,7 @@ export const pre = function (individual, template, container, mode, extra) {
         cause: ['v-ui:minCardinality'],
       };
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
   template.on('special-validate', function (e, validStates) {
     setTimeout(function () {
@@ -59,14 +59,14 @@ export const post = function (individual, template, container, mode, extra) {
   if (veda.appointment.id != 'cfg:AdministratorAppointment') {
     $('.notEditForUsers').addClass('hide');
   }
-  //проставляет признаки по умолчанию для Назначения
+  // проставляет признаки по умолчанию для Назначения
   if (mode === 'edit' && individual.isNew()) {
     individual['v-s:official'] = [true];
     individual['v-s:dateFrom'] = [new Date()];
   }
 
-  //Отображает Персону и Должность после выбора ОрганизTeации
-  function hidePosAndEmp() {
+  // Отображает Персону и Должность после выбора ОрганизTeации
+  function hidePosAndEmp () {
     if (individual.hasValue('v-s:parentOrganization')) {
       $('#Employee').removeClass('hide');
       $('#Position').removeClass('hide');
@@ -82,9 +82,9 @@ export const post = function (individual, template, container, mode, extra) {
   });
   hidePosAndEmp();
 
-  var NewPerson;
-  var NewOccupation;
-  var defaultAppointment;
+  let NewPerson;
+  let NewOccupation;
+  let defaultAppointment;
   template.on('click', '#radioBlock input[type="radio"]', function () {
     defaultAppointment = $(this).attr('value');
   });
@@ -98,14 +98,14 @@ export const post = function (individual, template, container, mode, extra) {
     }, 500);
   });
 
-  function toogleButtons(currentBtn) {
+  function toogleButtons (currentBtn) {
     currentBtn.siblings().removeClass('btn-primary').addClass('btn-default');
     currentBtn.removeClass('btn-default').addClass('btn-primary');
     template.trigger('special-validate');
   }
 
   $('#createPersonBtn', template).click(function () {
-    var self = $(this);
+    const self = $(this);
     if (self.hasClass('btn-primary')) return false;
     toogleButtons(self);
     $('#radioBlock').addClass('hide');
@@ -128,7 +128,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#selectPersonBtn').click(function () {
-    var self = $(this);
+    const self = $(this);
     if (self.hasClass('btn-primary')) {
       return false;
     }
@@ -137,16 +137,16 @@ export const post = function (individual, template, container, mode, extra) {
     $('#select-Person').removeClass('hide');
     $('#fill-Person').addClass('hide');
     individual['v-s:employee'] = [];
-    //individual.on('v-s:employee', setDefaultAppointment);
+    // individual.on('v-s:employee', setDefaultAppointment);
   });
 
   $('#createOccupationBtn', template).click(function () {
-    var self = $(this);
+    const self = $(this);
     if (self.hasClass('btn-primary')) {
       return true;
     }
     toogleButtons(self);
-    //individual.off('v-s:employee', setDefaultAppointment);
+    // individual.off('v-s:employee', setDefaultAppointment);
     $('#select-Occupation').addClass('hide');
     if (NewOccupation) {
       $('#fill-Occupation').removeClass('hide');
@@ -167,7 +167,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#selectOccupationBtn').click(function () {
-    var self = $(this);
+    const self = $(this);
     if (self.hasClass('btn-primary')) {
       return true;
     }
@@ -176,11 +176,11 @@ export const post = function (individual, template, container, mode, extra) {
     $('#fill-Occupation').addClass('hide');
     individual['v-s:occupation'] = [];
   });
-  function setDefaultAppointment() {
-    var radioCont = $('.radio', template).empty();
+  function setDefaultAppointment () {
+    const radioCont = $('.radio', template).empty();
     if (individual.hasValue('v-s:employee')) {
-      var employeeId = individual['v-s:employee'][0].id;
-      var queryString =
+      const employeeId = individual['v-s:employee'][0].id;
+      const queryString =
         "'rdf:type'==='v-s:Appointment' && 'v-s:employee'=='" +
         employeeId +
         "' && 'v-s:parentOrganization'=='" +
@@ -188,18 +188,18 @@ export const post = function (individual, template, container, mode, extra) {
         "' && '@'!='" +
         individual.id +
         "'";
-      Backend.query({ ticket: veda.ticket, query: queryString }).then(function (queryResult) {
-        var appointmentsUris = queryResult.result;
+      Backend.query({ticket: veda.ticket, query: queryString}).then(function (queryResult) {
+        const appointmentsUris = queryResult.result;
         if (appointmentsUris.length > 0) {
           Backend.get_individuals(veda.ticket, appointmentsUris).then(function (appointmentsJSONs) {
             appointmentsJSONs.forEach(function (appointmentJSON) {
-              var label = $('<label></label>');
-              var radio = $('<input type="radio" name="defaultAppointment"/>').attr('value', appointmentJSON['@']);
+              const label = $('<label></label>');
+              const radio = $('<input type="radio" name="defaultAppointment"/>').attr('value', appointmentJSON['@']);
               label.append(radio);
               label.append(new IndividualModel(appointmentJSON)['rdfs:label'][0]);
               radioCont.append($('<div class="radio"></div>').append(label));
             });
-            var newAppointLabel = individual['v-s:employee'][0]['rdfs:label'][0];
+            const newAppointLabel = individual['v-s:employee'][0]['rdfs:label'][0];
             radioCont.append(
               '<div class="radio"><label><input type="radio" checked name="defaultAppointment"/>Текущее для ' + newAppointLabel + '</label></div>',
             );
@@ -219,13 +219,13 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('.actions #save').off('click');
   $('.actions #save').on('click', function () {
-    var tempEmployee = individual['v-s:employee'][0];
-    var tempOccupation = individual['v-s:occupation'][0];
-    var tempCommunicationMean = individual['v-s:employee'][0]['v-s:hasCommunicationMean'];
-    var tempAccount = individual['v-s:employee'][0]['v-s:hasAccount'][0];
+    const tempEmployee = individual['v-s:employee'][0];
+    const tempOccupation = individual['v-s:occupation'][0];
+    const tempCommunicationMean = individual['v-s:employee'][0]['v-s:hasCommunicationMean'];
+    const tempAccount = individual['v-s:employee'][0]['v-s:hasAccount'][0];
 
-    //новый id персоны
-    var promises_emp = individual
+    // новый id персоны
+    individual
       .getPropertyChain('v-s:employee')
       .then(function (emp) {
         return emp[0].load();
@@ -233,13 +233,13 @@ export const post = function (individual, template, container, mode, extra) {
       .then(function (emp) {
         if (tempCommunicationMean && emp.isNew()) {
           tempCommunicationMean.map(function (CommunicationMean) {
-            //Средства связи
+            // Средства связи
             CommunicationMean['v-s:parent'] = [emp.id];
             return CommunicationMean.save();
           });
         }
         if (tempAccount && emp.isNew()) {
-          //Аккаунт
+          // Аккаунт
           tempAccount['v-s:owner'] = [emp];
           tempAccount['v-s:parent'] = [emp];
           tempAccount.id = emp.id + '_account';
@@ -249,7 +249,7 @@ export const post = function (individual, template, container, mode, extra) {
         return Promise.all();
       })
       .then(function () {
-        //Должность
+        // Должность
         if (tempOccupation.isNew()) {
           tempOccupation['v-s:parentUnit'] = individual['v-s:parentUnit'];
           tempOccupation['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
@@ -258,7 +258,7 @@ export const post = function (individual, template, container, mode, extra) {
         } else return undefined;
       })
       .then(function (savedOccupation) {
-        //Персона
+        // Персона
         if (tempEmployee.isNew()) {
           tempEmployee['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
           tempEmployee['v-s:owner'] = [tempEmployee];
@@ -279,7 +279,7 @@ export const post = function (individual, template, container, mode, extra) {
         return tempEmployee.save();
       })
       .then(function (savedEmployee) {
-        //Назначение
+        // Назначение
         if (savedEmployee) {
           individual['v-s:employee'] = [tempEmployee];
         }

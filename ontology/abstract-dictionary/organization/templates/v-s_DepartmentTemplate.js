@@ -5,8 +5,8 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (individual.hasValue('v-s:parentOrganization')) {
-    var parentOrganization = individual['v-s:parentOrganization'][0];
-    var departmentQueryPrefix =
+    const parentOrganization = individual['v-s:parentOrganization'][0];
+    const departmentQueryPrefix =
       "('rdf:type'=='v-s:Department' && 'v-s:parentOrganization'=='" +
       parentOrganization.id +
       "') || ('rdf:type'=='v-s:Organization' && '@'=='" +
@@ -14,21 +14,21 @@ export const pre = function (individual, template, container, mode, extra) {
       "')";
     $('veda-control[rel="v-s:parentUnit"]', template).attr('data-query-prefix', departmentQueryPrefix);
 
-    var appointmentQueryPrefix = "'rdf:type'=='v-s:Appointment' && 'v-s:parentOrganization'=='" + parentOrganization.id + "'";
+    const appointmentQueryPrefix = "'rdf:type'=='v-s:Appointment' && 'v-s:parentOrganization'=='" + parentOrganization.id + "'";
     $('veda-control[rel="v-s:hasChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
     $('veda-control[rel="v-s:hasFieldChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
     $('veda-control[rel="v-s:hasFunctionalChief"]', template).attr('data-query-prefix', appointmentQueryPrefix);
   }
   template.on('validate', function () {
-    var result = {};
-    var subjectCode = individual.hasValue('v-s:subjectCode') && individual['v-s:subjectCode'][0].toString();
+    const result = {};
+    const subjectCode = individual.hasValue('v-s:subjectCode') && individual['v-s:subjectCode'][0].toString();
     if (!subjectCode) {
       result['v-s:subjectCode'] = {
         state: false,
         cause: ['v-ui:minCardinality'],
       };
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 };
 

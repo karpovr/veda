@@ -6,18 +6,18 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function forAdmin() {
+  function forAdmin () {
     if (veda.appointment.id == 'cfg:AdministratorAppointment' && individual.id != 'd:org_RU1121003135') $('#rigthsForAdmin').removeClass('hide');
   }
   forAdmin();
 
   $('#add-OrgVedaAccount', template).click(function () {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new IndividualModel(individual + '_group');
+    const org = individual.id;
+    const org1 = org.slice(6);
+    const org_gr = new IndividualModel(individual + '_group');
 
-    var _class = new IndividualModel('v-s:Membership'),
-      OrgWithVedaAccount = new IndividualModel();
+    const _class = new IndividualModel('v-s:Membership');
+    const OrgWithVedaAccount = new IndividualModel();
     OrgWithVedaAccount['rdf:type'] = [_class];
     OrgWithVedaAccount['v-s:memberOf'] = [new IndividualModel('v-s:OrganizationsWithVedaAccount')];
     OrgWithVedaAccount['v-s:resource'] = [org_gr];
@@ -25,12 +25,12 @@ export const post = function (individual, template, container, mode, extra) {
     OrgWithVedaAccount.save();
   });
   $('#add-OrgADAccount', template).click(function () {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new IndividualModel(individual + '_group');
+    const org = individual.id;
+    const org1 = org.slice(6);
+    const org_gr = new IndividualModel(individual + '_group');
 
-    var _class = new IndividualModel('v-s:Membership'),
-      OrgWithADAccount = new IndividualModel();
+    const _class = new IndividualModel('v-s:Membership');
+    const OrgWithADAccount = new IndividualModel();
     OrgWithADAccount['rdf:type'] = [_class];
     OrgWithADAccount['v-s:memberOf'] = [new IndividualModel('v-s:OrganizationsWithADAccount')];
     OrgWithADAccount['v-s:resource'] = [org_gr];
@@ -38,12 +38,12 @@ export const post = function (individual, template, container, mode, extra) {
     OrgWithADAccount.save();
   });
   $('#add-OrgWithLimited', template).click(function () {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new IndividualModel(individual + '_group');
+    const org = individual.id;
+    const org1 = org.slice(6);
+    const org_gr = new IndividualModel(individual + '_group');
 
-    var _class = new IndividualModel('v-s:Membership'),
-      OrgWithLimited = new IndividualModel();
+    const _class = new IndividualModel('v-s:Membership');
+    const OrgWithLimited = new IndividualModel();
     OrgWithLimited['rdf:type'] = [_class];
     OrgWithLimited['v-s:memberOf'] = [new IndividualModel('v-s:OrganizationsWithLimitedClassTypes')];
     OrgWithLimited['v-s:resource'] = [org_gr];
@@ -51,12 +51,12 @@ export const post = function (individual, template, container, mode, extra) {
     OrgWithLimited.save();
   });
   $('#add-OrgWithoutLimited', template).click(function () {
-    var org = individual.id;
-    var org1 = org.slice(6);
-    var org_gr = new IndividualModel(individual + '_group');
+    const org = individual.id;
+    const org1 = org.slice(6);
+    const org_gr = new IndividualModel(individual + '_group');
 
-    var _class = new IndividualModel('v-s:Membership'),
-      OrgWithoutLimited = new IndividualModel();
+    const _class = new IndividualModel('v-s:Membership');
+    const OrgWithoutLimited = new IndividualModel();
     OrgWithoutLimited['rdf:type'] = [_class];
     OrgWithoutLimited['v-s:memberOf'] = [new IndividualModel('v-s:OrganizationsWithoutLimitedClassTypes')];
     OrgWithoutLimited['v-s:resource'] = [org_gr];
@@ -64,13 +64,13 @@ export const post = function (individual, template, container, mode, extra) {
     OrgWithoutLimited.save();
   });
 
-  var membershipRegistry = new IndividualModel('v-s:OrganizationMembershipRegistry', false);
-  var orgUri = individual.id;
-  var membershipContainer = $('.memberships', template);
+  const membershipRegistry = new IndividualModel('v-s:OrganizationMembershipRegistry', false);
+  const orgUri = individual.id;
+  const membershipContainer = $('.memberships', template);
   membershipRegistry.load().then(function (loaded) {
     loaded['v-fs:top'] = [10];
     loaded['v-fs:fulltextQuery'] = ["'rdf:type' == 'v-s:Membership' && 'v-s:resource' == '" + orgUri + "_group'"];
-    //loaded["v-fs:fulltextQuery"] = ["'rdf:type'=='v-s:Membership'"];
+    // loaded["v-fs:fulltextQuery"] = ["'rdf:type'=='v-s:Membership'"];
     loaded.present(membershipContainer, 'v-fs:AttributiveSearchInlineTemplate');
   });
 };
