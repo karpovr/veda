@@ -4,7 +4,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var folder = decodeURIComponent(location.hash).substr(2).split('/')[0];
+  const folder = decodeURIComponent(location.hash).substr(2).split('/')[0];
   $('#folder', template).attr('about', folder);
   $('#box-tabs', template)
     .find('a')

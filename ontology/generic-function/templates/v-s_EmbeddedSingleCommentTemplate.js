@@ -10,7 +10,7 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!(individual.hasValue('rdfs:label') || individual.hasValue('v-s:attachment') || individual.hasValue('v-s:linkedObject'))) {
       result['rdfs:label'] = {
         state: false,
@@ -25,7 +25,7 @@ export const pre = function (individual, template, container, mode, extra) {
         cause: ['v-ui:minCardinality'],
       };
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 };
 

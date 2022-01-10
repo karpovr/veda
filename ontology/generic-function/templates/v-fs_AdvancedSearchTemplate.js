@@ -4,9 +4,9 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var find = container.siblings('.search-actions').find('#search-button.search-button');
+  const find = container.siblings('.search-actions').find('#search-button.search-button');
 
-  function typeHandler() {
+  function typeHandler () {
     if (!individual.hasValue('rdf:type')) {
       find.attr('disabled', 'disabled');
       find.addClass('disabled');

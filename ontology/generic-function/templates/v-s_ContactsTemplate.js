@@ -6,14 +6,14 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var loadIndicator = $('#load-indicator');
+  const loadIndicator = $('#load-indicator');
 
-  var tabs = $('#box-tabs li[data-type]', template);
+  const tabs = $('#box-tabs li[data-type]', template);
   tabs.click(function (e) {
     e.preventDefault();
     loadIndicator.show();
 
-    var self = $(this);
+    const self = $(this);
     tabs.removeClass('active');
     self.addClass('active');
     individual['activeTab'] = self.data('type');
@@ -32,8 +32,6 @@ export const pre = function (individual, template, container, mode, extra) {
         loadIndicator.hide();
       });
     }
-    var targetIndidivUri = self.find('a').attr('about');
-    var targetIndidiv = new IndividualModel(targetIndidivUri);
   });
 
   if (!individual['activeTab']) {

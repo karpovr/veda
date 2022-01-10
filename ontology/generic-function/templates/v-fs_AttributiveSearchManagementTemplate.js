@@ -7,11 +7,11 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var notify = new Notify();
+  const notify = new Notify();
 
   if (!individual.hasValue('v-s:creator', veda.appointment || veda.user)) {
     $('.action.save-registry', template).click(function () {
-      var personalLabel = prompt(new IndividualModel('v-fs:EnterLabel').toString(), individual.toString());
+      const personalLabel = prompt(new IndividualModel('v-fs:EnterLabel').toString(), individual.toString());
       if (!personalLabel) {
         return;
       }
@@ -32,24 +32,24 @@ export const pre = function (individual, template, container, mode, extra) {
           personalRegistry['rdfs:isDefinedBy'] = [];
           personalRegistry['rdfs:label'] = [personalLabel];
 
-          var columns = $('.set-columns-wrapper .dropdown-menu .checkbox', template);
-          var visibleColumns = [];
+          const columns = $('.set-columns-wrapper .dropdown-menu .checkbox', template);
+          const visibleColumns = [];
           columns.each(function (i) {
-            var elem = $(this);
-            var input = $('input', elem);
+            const elem = $(this);
+            const input = $('input', elem);
             if (input.is(':checked')) {
               visibleColumns.push(elem);
             }
           });
           if (visibleColumns.length > 0) {
             personalRegistry['v-fs:hasVisibleColumns'] = visibleColumns.map(function (c) {
-              var uri = $('span.column-name span', c).attr('about');
+              const uri = $('span.column-name span', c).attr('about');
               console.log(uri);
               return new veda.IndividualModel(uri);
             });
           }
 
-          var searchBlank = individual.hasValue('v-fs:searchBlank') ? individual['v-fs:searchBlank'][0] : undefined;
+          const searchBlank = individual.hasValue('v-fs:searchBlank') ? individual['v-fs:searchBlank'][0] : undefined;
           if (searchBlank && searchBlank.object) {
             return searchBlank
               .clone()
@@ -76,10 +76,10 @@ export const pre = function (individual, template, container, mode, extra) {
           return new IndividualModel('v-fs:RegistrySuccessfullySaved').load();
         })
         .then(function (message) {
-          notify('success', { message: message });
+          notify('success', {message: message});
         })
         .catch(function (error) {
-          notify('danger', { message: error });
+          notify('danger', {message: error});
         });
     });
   } else {
@@ -90,7 +90,7 @@ export const pre = function (individual, template, container, mode, extra) {
     if (rights.hasValue('v-s:canUpdate', true)) {
       $('.action.update-registry', template).click(function () {
         individual['v-fs:searchResult'] = [];
-        var searchBlank = individual.hasValue('v-fs:searchBlank') ? individual['v-fs:searchBlank'][0] : undefined;
+        const searchBlank = individual.hasValue('v-fs:searchBlank') ? individual['v-fs:searchBlank'][0] : undefined;
         if (searchBlank && searchBlank.object) {
           searchBlank
             .updateBlank()
@@ -98,10 +98,10 @@ export const pre = function (individual, template, container, mode, extra) {
               return new IndividualModel('v-fs:RegistrySuccessfullyUpdated').load();
             })
             .then(function (message) {
-              notify('success', { message: message.toString() });
+              notify('success', {message: message.toString()});
             })
             .catch(function (error) {
-              notify('danger', { message: error });
+              notify('danger', {message: error});
             });
         }
       });
@@ -124,10 +124,10 @@ export const pre = function (individual, template, container, mode, extra) {
             return new IndividualModel('v-fs:RegistrySuccessfullyDeleted').load();
           })
           .then(function (message) {
-            return notify('success', { message: message });
+            return notify('success', {message: message});
           })
           .catch(function (error) {
-            notify('danger', { message: error });
+            notify('danger', {message: error});
           });
       });
     } else {

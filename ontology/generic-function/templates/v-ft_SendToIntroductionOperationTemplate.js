@@ -6,10 +6,10 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var startFormContainer = $('.groupStartForm', template);
+  const startFormContainer = $('.groupStartForm', template);
   startFormContainer.empty();
 
-  var startForm = new IndividualModel();
+  const startForm = new IndividualModel();
   startForm['rdf:type'] = [new IndividualModel('v-df:TaskRouteStartForm')];
   startForm['v-wf:forNet'] = [new IndividualModel('s-wf:WrapUniversalNet')];
   startForm['v-wf:useTransformation'] = [new IndividualModel('v-df:TaskRouteStartFormToNet')];
@@ -19,7 +19,7 @@ export const post = function (individual, template, container, mode, extra) {
     $('.action#send', startFormTemplate)
       .off('click')
       .click(function () {
-        var savingPromises = individual['v-s:data'].map(function (doc) {
+        const savingPromises = individual['v-s:data'].map(function (doc) {
           startForm.clone().then(function (clonedStartForm) {
             clonedStartForm['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
             clonedStartForm['v-wf:processedDocument'] = [doc];
@@ -28,23 +28,23 @@ export const post = function (individual, template, container, mode, extra) {
         });
         return Promise.all(savingPromises)
           .then(function () {
-            var successMsg = new IndividualModel('v-s:SuccessBundle').load();
+            const successMsg = new IndividualModel('v-s:SuccessBundle').load();
             return successMsg.then(function (successMsg) {
-              var notify = Notify ? new Notify() : function () {};
-              notify('success', { name: successMsg });
+              const notify = Notify ? new Notify() : function () {};
+              notify('success', {name: successMsg});
             });
           })
           .catch(function (error) {
             console.log(error);
-            var errorMsg = new IndividualModel('v-s:ErrorBundle').load();
+            const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
             return errorMsg.then(function (errorMsg) {
-              var notify = Notify ? new Notify() : function () {};
-              notify('danger', { name: errorMsg });
+              const notify = Notify ? new Notify() : function () {};
+              notify('danger', {name: errorMsg});
             });
           })
           .then(function () {
             startFormContainer.closest('.modal').modal('hide');
-            var documentsSearch = new IndividualModel('v-s:DocumentsSearch');
+            const documentsSearch = new IndividualModel('v-s:DocumentsSearch');
             documentsSearch.clearValue('v-fs:selected');
           });
       });

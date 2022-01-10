@@ -23,7 +23,7 @@ export const post = function (individual, template, container, mode, extra) {
     const workflow = new jsWorkflow.Instance();
 
     // Initialize workflow with workflow container id
-    const net = workflow.init('workflow-canvas', veda, individual, template, container);
+    workflow.init('workflow-canvas', veda, individual, template, container);
   });
 };
 

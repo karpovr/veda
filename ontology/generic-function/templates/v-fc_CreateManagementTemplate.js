@@ -7,13 +7,13 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var notify = new Notify();
+  const notify = new Notify();
 
   if (!individual.hasValue('v-s:creator', veda.appointment || veda.user)) {
     $('.action.save-create', template).click(function () {
-      var enterLabel = new IndividualModel('v-s:EnterLabel');
+      const enterLabel = new IndividualModel('v-s:EnterLabel');
       enterLabel.load().then(function (enterLabel) {
-        var personalLabel = prompt(enterLabel.toString(), individual.toString());
+        const personalLabel = prompt(enterLabel.toString(), individual.toString());
         if (!personalLabel) {
           return;
         }
@@ -25,7 +25,7 @@ export const pre = function (individual, template, container, mode, extra) {
             personalCreate['v-s:created'] = [];
             personalCreate['rdfs:isDefinedBy'] = [];
             personalCreate['rdfs:label'] = [personalLabel];
-            var createBlank = individual.hasValue('v-fc:hasBlank') ? individual['v-fc:hasBlank'][0] : undefined;
+            const createBlank = individual.hasValue('v-fc:hasBlank') ? individual['v-fc:hasBlank'][0] : undefined;
             if (createBlank && createBlank.object) {
               return createBlank
                 .clone()
@@ -51,10 +51,10 @@ export const pre = function (individual, template, container, mode, extra) {
             return new IndividualModel('v-fc:BlankSuccessfullySaved').load();
           })
           .then(function (message) {
-            notify('success', { message: message });
+            notify('success', {message: message});
           })
           .catch(function (error) {
-            notify('danger', { message: error });
+            notify('danger', {message: error});
           });
       });
     });
@@ -65,7 +65,7 @@ export const pre = function (individual, template, container, mode, extra) {
   individual.rights.then(function (rights) {
     if (rights.hasValue('v-s:canUpdate', true)) {
       $('.action.update-create', template).click(function () {
-        var createBlank = individual.hasValue('v-fc:hasBlank') ? individual['v-fc:hasBlank'][0] : undefined;
+        const createBlank = individual.hasValue('v-fc:hasBlank') ? individual['v-fc:hasBlank'][0] : undefined;
         if (createBlank && createBlank.object) {
           createBlank
             .updateBlank()
@@ -73,10 +73,10 @@ export const pre = function (individual, template, container, mode, extra) {
               return new IndividualModel('v-fc:BlankSuccessfullyUpdated').load();
             })
             .then(function (message) {
-              notify('success', { message: message });
+              notify('success', {message: message});
             })
             .catch(function (error) {
-              notify('danger', { message: error });
+              notify('danger', {message: error});
             });
         }
       });
@@ -98,10 +98,10 @@ export const pre = function (individual, template, container, mode, extra) {
             return new IndividualModel('v-fc:BlankSuccessfullyDeleted').load();
           })
           .then(function (message) {
-            notify('success', { message: message });
+            notify('success', {message: message});
           })
           .catch(function (error) {
-            notify('danger', { message: error });
+            notify('danger', {message: error});
           });
       });
     } else {

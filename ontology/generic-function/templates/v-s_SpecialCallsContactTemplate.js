@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
+import Backend from '/js/common/backend.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -14,14 +15,14 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('section .section-header', template).click(function () {
-    var self = $(this);
+    const self = $(this);
     $('span.glyphicon', self).toggleClass('glyphicon-chevron-right glyphicon-chevron-down');
     self.siblings().toggle();
   });
 
-  function presentSearchResult(objType, container, items) {
-    var promises = items.map(function (item) {
-      var item2 = new veda.IndividualModel(item);
+  function presentSearchResult (objType, container, items) {
+    const promises = items.map(function (item) {
+      const item2 = new IndividualModel(item);
       return item2.present($('<div></div>'), 'v-s:ContactCardTemplate');
     });
     return Promise.all(promises).then(function (templates) {
@@ -31,7 +32,7 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  var promise_spec = veda.Backend.query({
+  const promise_spec = Backend.query({
     ticket: veda.ticket,
     sql: "SELECT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 ORDER BY `rdfs_label_str`[1]",
     from: 0,
@@ -40,7 +41,7 @@ export const post = function (individual, template, container, mode, extra) {
     async: true,
   });
 
-  var promise_group = veda.Backend.query({
+  const promise_group = Backend.query({
     ticket: veda.ticket,
     sql: "SELECT DISTINCT id FROM veda_tt.`v-s:Position` FINAL WHERE lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%group%' and lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) not LIKE '%spec%' and `v_s_hasCommunicationMean_str`[1]!='' and `v_s_deleted_int`[1]!=1 and id!='d:GLAV_DISP_position' and id!='d:SYK-SKDG_position' and id!='d:RU1121003135_pos_OptiF1C' and id!='d:SYK-RTISI_position' ORDER BY `rdfs_label_str`[1]",
     from: 0,

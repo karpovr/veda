@@ -6,12 +6,12 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var wrapper = $('.workflow-canvas-wrapper', template),
-    height = $('#copyright').offset().top - wrapper.offset().top - 25 + 'px',
-    fullWidth = $('#full-width', template),
-    icon = $('span', fullWidth),
-    propsCol = $('#props-col', template),
-    schema = $('#schema', template);
+  const wrapper = $('.workflow-canvas-wrapper', template);
+  const height = $('#copyright').offset().top - wrapper.offset().top - 25 + 'px';
+  const fullWidth = $('#full-width', template);
+  const icon = $('span', fullWidth);
+  const propsCol = $('#props-col', template);
+  const schema = $('#schema', template);
   wrapper.css('height', height);
   propsCol.css('height', height);
   fullWidth.click(function () {
@@ -21,10 +21,10 @@ export const post = function (individual, template, container, mode, extra) {
   });
   jsWorkflow.ready(function () {
     // Create a new workflow instance as workflow
-    var workflow = new jsWorkflow.Instance();
+    const workflow = new jsWorkflow.Instance();
 
     // Initialize workflow with workflow container id
-    var net = workflow.init('workflow-canvas', veda, individual, template, container);
+    const net = workflow.init('workflow-canvas', veda, individual, template, container);
 
     veda.net = net;
 

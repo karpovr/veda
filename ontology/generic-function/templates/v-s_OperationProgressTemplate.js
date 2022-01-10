@@ -13,24 +13,24 @@ export const pre = function (individual, template, container, mode, extra) {
     individual.off('v-s:hasStatus', statusHandler);
   });
 
-  function progressHandler() {
-    var progress = (individual.hasValue('v-s:progress') && individual['v-s:progress'][0]) || 0;
-    $('.progress-bar', template).css({ width: progress + '%' });
+  function progressHandler () {
+    const progress = (individual.hasValue('v-s:progress') && individual['v-s:progress'][0]) || 0;
+    $('.progress-bar', template).css({width: progress + '%'});
   }
-  function statusHandler() {
-    var progressBar = $('.progress-bar', template),
-      status = individual.hasValue('v-s:hasStatus') ? individual['v-s:hasStatus'][0].id : undefined;
+  function statusHandler () {
+    const progressBar = $('.progress-bar', template);
+    const status = individual.hasValue('v-s:hasStatus') ? individual['v-s:hasStatus'][0].id : undefined;
     switch (status) {
-      case 'v-s:StatusStarted':
-      case 'v-s:StatusExecution':
-        progressBar.addClass('progress-bar-success active').removeClass('progress-bar-danger');
-        break;
-      case 'v-s:StatusExecuted':
-        progressBar.addClass('progress-bar-success').removeClass('progress-bar-danger active');
-        break;
-      default:
-        progressBar.addClass('progress-bar-danger').removeClass('progress-bar-success active');
-        break;
+    case 'v-s:StatusStarted':
+    case 'v-s:StatusExecution':
+      progressBar.addClass('progress-bar-success active').removeClass('progress-bar-danger');
+      break;
+    case 'v-s:StatusExecuted':
+      progressBar.addClass('progress-bar-success').removeClass('progress-bar-danger active');
+      break;
+    default:
+      progressBar.addClass('progress-bar-danger').removeClass('progress-bar-success active');
+      break;
     }
   }
 };

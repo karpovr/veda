@@ -4,8 +4,8 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var re = new RegExp('.*?:');
-  var label = template.text();
+  const re = new RegExp('.*?:');
+  let label = template.text();
   template.attr('title', label);
   if (label.length > 70) {
     label = label.replace(re, function (typeName) {

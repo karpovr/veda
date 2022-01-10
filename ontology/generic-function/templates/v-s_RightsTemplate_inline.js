@@ -4,7 +4,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var rights = '';
+  let rights = '';
   rights += this.hasValue('v-s:canCreate', true) ? 'C' : '';
   rights += this.hasValue('v-s:canRead', true) ? 'R' : '';
   rights += this.hasValue('v-s:canUpdate', true) ? 'U' : '';
@@ -12,4 +12,4 @@ export const pre = function (individual, template, container, mode, extra) {
   $(template).text(rights);
 };
 
-export const html = ` <span></span> `;
+export const html = ' <span></span> ';

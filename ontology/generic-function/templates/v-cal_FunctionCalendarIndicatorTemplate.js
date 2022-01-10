@@ -1,12 +1,12 @@
 import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
-import veda from '/js/common/veda.js';
+// import veda from '/js/common/veda.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  /*var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
+  /* var counter_uri = "d:taskCounter_" + veda.user.id.split(":").join("_");
   $(".label", template).attr("about", counter_uri);*/
   template.tooltip({
     container: template,

@@ -7,21 +7,20 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var folder = decodeURIComponent(location.hash).substr(2).split('/')[0];
+  const folder = decodeURIComponent(location.hash).substr(2).split('/')[0];
 
-  var actor_property =
-    folder === 'v-ft:Outbox'
-      ? 'v-wf:from'
-      : folder === 'v-ft:OutboxCompleted'
-      ? 'v-wf:from'
-      : folder === 'v-ft:Inbox'
-      ? 'v-wf:to'
-      : folder === 'v-ft:Completed'
-      ? 'v-wf:to'
-      : '';
+  const actor_property =
+    folder === 'v-ft:Outbox' ?
+      'v-wf:from' :
+      folder === 'v-ft:OutboxCompleted' ?
+        'v-wf:from' :
+        folder === 'v-ft:Inbox' ?
+          'v-wf:to' :
+          folder === 'v-ft:Completed' ?
+            'v-wf:to' :
+            '';
 
-  var counter_prop =
-    folder === 'v-ft:Inbox' ? 'v-ft:inboxCount' : folder === 'v-ft:Outbox' ? 'v-ft:outboxCount' : folder === 'v-ft:Completed' ? 'v-ft:completedCount' : '';
+  // const counter_prop = folder === 'v-ft:Inbox' ? 'v-ft:inboxCount' : folder === 'v-ft:Outbox' ? 'v-ft:outboxCount' : folder === 'v-ft:Completed' ? 'v-ft:completedCount' : '';
 
   if (!individual.hasValue(actor_property)) {
     individual[actor_property] = [veda.user];
@@ -32,20 +31,20 @@ export const pre = function (individual, template, container, mode, extra) {
     query: "('rdf:type'==='v-s:Appointment' && 'v-s:employee'=='" + veda.user.id + "')",
   })
     .then(function (queryResult) {
-      var appointments_uris = queryResult.result;
+      const appointments_uris = queryResult.result;
       return Backend.get_individuals(veda.ticket, appointments_uris);
     })
     .then(function (appointments) {
-      var filtered = appointments.reduce(
+      const filtered = appointments.reduce(
         function (acc, appointment) {
           if (veda.appointment && veda.appointment.id && appointment['@'] === veda.appointment.id) {
             return acc;
           }
           if (appointment['v-s:occupation'] && appointment['v-s:occupation'].length) {
-            var positionUri = appointment['v-s:occupation'][0].data;
-            var delegationPurpose =
+            const positionUri = appointment['v-s:occupation'][0].data;
+            const delegationPurpose =
               appointment['v-s:hasDelegationPurpose'] && appointment['v-s:hasDelegationPurpose'].length ? appointment['v-s:hasDelegationPurpose'][0].data : '';
-            var isControlAppointment = delegationPurpose === 'd:delegate_Control';
+            const isControlAppointment = delegationPurpose === 'd:delegate_Control';
             // official is not control
             if (acc[positionUri] == undefined) {
               acc[positionUri] = !isControlAppointment;
@@ -54,32 +53,34 @@ export const pre = function (individual, template, container, mode, extra) {
           }
           return acc;
         },
-        { 'v-ft:MyBundle': true },
+        {'v-ft:MyBundle': true},
       );
       console.log(filtered);
-      for (var actorUri in filtered) {
-        var isOfficial = filtered[actorUri];
-        var notOfficialInject = isOfficial === false ? " class='not-official'" : '';
-        var actor_template =
-          '<li>' +
-          "<a href='#'" +
-          notOfficialInject +
-          '>' +
-          "<span class='actor' about='" +
-          actorUri +
-          "' property='rdfs:label'></span> " +
-          //"<span id='counter' about='" + counter_uri + "' class='badge' property='" + counter_prop + "'></span>" +
-          '</a>' +
-          '</li>';
-        actor_template = $(actor_template);
-        if (isOfficial === false) {
-          actor_template.popover({
-            placement: 'top',
-            trigger: 'hover',
-            content: 'Не официальное назначение. Только просмотр',
-          });
+      for (const actorUri in filtered) {
+        if (filtered.hasOwnProperty(actorUri)) {
+          const isOfficial = filtered[actorUri];
+          const notOfficialInject = isOfficial === false ? " class='not-official'" : '';
+          let actor_template =
+            '<li>' +
+            "<a href='#'" +
+            notOfficialInject +
+            '>' +
+            "<span class='actor' about='" +
+            actorUri +
+            "' property='rdfs:label'></span> " +
+            // "<span id='counter' about='" + counter_uri + "' class='badge' property='" + counter_prop + "'></span>" +
+            '</a>' +
+            '</li>';
+          actor_template = $(actor_template);
+          if (isOfficial === false) {
+            actor_template.popover({
+              placement: 'top',
+              trigger: 'hover',
+              content: 'Не официальное назначение. Только просмотр',
+            });
+          }
+          template.append(actor_template);
         }
-        template.append(actor_template);
       }
       // var actors_uris = [ {uri:"v-ft:MyBundle", official: true} ];
       // appointments.forEach(function (appointment) {
@@ -134,9 +135,9 @@ export const pre = function (individual, template, container, mode, extra) {
       template.on('click', 'li a', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $this = $(this);
+        const $this = $(this);
         $this.parent().addClass('active').siblings().removeClass('active');
-        var actor_uri = $this.children('.actor').attr('about');
+        const actor_uri = $this.children('.actor').attr('about');
         individual.actor = actor_uri;
         if (actor_uri === 'v-ft:MyBundle') {
           individual[actor_property] = [
@@ -151,7 +152,7 @@ export const pre = function (individual, template, container, mode, extra) {
     });
 
   // Update counter if counter & results count do not match
-  /*individual.on("search:complete", checkCounter);
+  /* individual.on("search:complete", checkCounter);
   template.one("remove", function () {
     individual.off(checkCounter);
   });

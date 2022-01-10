@@ -5,22 +5,23 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   template.on('validate', function () {
-    var result = {};
-    var promises = individual['v-s:attachment'].map(function (attach) {
+    const result = {};
+    const promises = individual['v-s:attachment'].map(function (attach) {
       return attach.getPropertyChain('v-s:fileSize');
     });
     return Promise.all(promises).then(function (fileSizeArr) {
-      var fileSizeSUM = 0;
+      let fileSizeSUM = 0;
       fileSizeArr.forEach(function (fileSize) {
         fileSizeSUM += +fileSize;
       });
-      console.log(fileSizeSUM > 15728640); //15 мб
-      if (fileSizeSUM > 15728640)
+      console.log(fileSizeSUM > 15728640); // 15 мб
+      if (fileSizeSUM > 15728640) {
         result['v-s:attachment'] = {
           state: false,
           cause: ['v-s:attachmentEmailBundle'],
         };
-      template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+      }
+      template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
     });
   });
 };

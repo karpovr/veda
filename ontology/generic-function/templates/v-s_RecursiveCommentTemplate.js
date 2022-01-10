@@ -6,7 +6,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var actions = $('#edit-comment, #delete', template);
+  const actions = $('#edit-comment, #delete', template);
   individual.rights.then(function (rights) {
     if (!rights.hasValue('v-s:canUpdate', true)) {
       actions.remove();
@@ -15,8 +15,8 @@ export const pre = function (individual, template, container, mode, extra) {
 
   $('.action', template).click(function (e) {
     e.preventDefault();
-    var actionId = this.id;
-    var warning = new IndividualModel('v-s:AreYouSure');
+    const actionId = this.id;
+    const warning = new IndividualModel('v-s:AreYouSure');
     warning.load().then(function (warning) {
       warning = warning['rdfs:label'].map(CommonUtil.formatValue).join(' ');
       if (actionId === 'delete' && !confirm(warning)) {
@@ -35,10 +35,10 @@ export const pre = function (individual, template, container, mode, extra) {
   commentHandler(individual['v-s:hasComment']);
   linkedHandler(individual['v-s:linkedObject']);
 
-  function commentHandler(values) {
+  function commentHandler (values) {
     values.length ? actions.hide() : actions.show();
   }
-  function linkedHandler(values) {
+  function linkedHandler (values) {
     values.length ? $('.linked-object', template).show() : $('.linked-object', template).hide();
   }
 };

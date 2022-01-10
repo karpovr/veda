@@ -7,9 +7,9 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (!individual.hasValue('v-fw:variableScope')) $('#variableScope', template).remove();
-  var valHolder = $('#values', template);
+  const valHolder = $('#values', template);
   individual['v-wf:variableValue'].map(function (value) {
-    var el = $('<li>');
+    const el = $('<li>');
     if (value instanceof IndividualModel) {
       value.present(el, new IndividualModel('v-ui:ClassNameLabelLinkTemplate'));
     } else {

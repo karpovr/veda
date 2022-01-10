@@ -6,11 +6,11 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#add-comment', template).click(function () {
-    var addComment = $(this).hide();
-    var _class = new IndividualModel('v-s:Comment'),
-      comment = new IndividualModel(),
-      cntr = $('#new-comment', template).empty(),
-      tmpl = 'v-s:SingleCommentTemplate';
+    const addComment = $(this).hide();
+    const _class = new IndividualModel('v-s:Comment');
+    const comment = new IndividualModel();
+    const cntr = $('#new-comment', template).empty();
+    const tmpl = 'v-s:SingleCommentTemplate';
     comment['rdf:type'] = [_class];
     comment['v-s:backwardTarget'] = [individual];
     comment['v-s:backwardProperty'] = [new IndividualModel('v-s:hasComment')];
@@ -24,11 +24,11 @@ export const post = function (individual, template, container, mode, extra) {
 
   template.on('click', '#reply.action', function (e) {
     e.preventDefault();
-    var commentTemplate = $(this).closest('[resource]'),
-      targetComment = new IndividualModel(commentTemplate.attr('resource')),
-      cntr = $('#new-reply', commentTemplate).first().empty(),
-      tmpl = 'v-s:SingleCommentTemplate',
-      reply = new IndividualModel();
+    const commentTemplate = $(this).closest('[resource]');
+    const targetComment = new IndividualModel(commentTemplate.attr('resource'));
+    const cntr = $('#new-reply', commentTemplate).first().empty();
+    const tmpl = 'v-s:SingleCommentTemplate';
+    const reply = new IndividualModel();
     reply['rdf:type'] = 'v-s:Comment';
     reply['v-s:backwardTarget'] = targetComment;
     reply['v-s:backwardProperty'] = 'v-s:hasComment';
@@ -41,11 +41,11 @@ export const post = function (individual, template, container, mode, extra) {
 
   template.on('click', '#edit-comment.action', function (e) {
     e.preventDefault();
-    var tmpl = 'v-s:SingleCommentTemplate',
-      commentTemplate = $(this).closest('[resource]'),
-      comment = new IndividualModel(commentTemplate.attr('resource')),
-      cntr = $('#new-reply', commentTemplate).first().empty(),
-      commentContent = $('#comment-content', commentTemplate).hide();
+    const tmpl = 'v-s:SingleCommentTemplate';
+    const commentTemplate = $(this).closest('[resource]');
+    const comment = new IndividualModel(commentTemplate.attr('resource'));
+    const cntr = $('#new-reply', commentTemplate).first().empty();
+    const commentContent = $('#comment-content', commentTemplate).hide();
     comment.present(cntr, tmpl, 'edit');
     comment.one('afterSave beforeReset', function () {
       commentContent.show();

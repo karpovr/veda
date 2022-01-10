@@ -7,7 +7,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#authClass', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:authClass'] = [new IndividualModel(uri)];
     } else {
@@ -16,7 +16,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#authProperty', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:authProperty'] = [new IndividualModel(uri)];
     } else {
@@ -30,12 +30,12 @@ export const post = function (individual, template, container, mode, extra) {
   });
   handler();
 
-  function handler() {
-    var $groupUri = $('.group-uri', template);
+  function handler () {
+    const $groupUri = $('.group-uri', template);
     if (individual.hasValue('v-s:authValue')) {
-      var group_concat_uri = individual.id + ' ' + individual['v-s:authValue'][0].toString();
-      var hash = Sha256.hash(group_concat_uri).substring(32);
-      var group_uri = 'd:grp-' + hash;
+      const group_concat_uri = individual.id + ' ' + individual['v-s:authValue'][0].toString();
+      const hash = Sha256.hash(group_concat_uri).substring(32);
+      const group_uri = 'd:grp-' + hash;
       $groupUri.text(group_uri);
     } else {
       $groupUri.text('');

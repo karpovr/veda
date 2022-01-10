@@ -4,7 +4,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var displayedDoc = container.closest('[resource]').attr('resource');
+  const displayedDoc = container.closest('[resource]').attr('resource');
   if (this.hasValue('v-s:from', displayedDoc)) {
     $('.link-from', template).remove();
   } else if (this.hasValue('v-s:to', displayedDoc)) {
@@ -12,17 +12,17 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 
   template.on('validate', function () {
-    var result = {};
+    const result = {};
     if (!individual.hasValue('v-s:to')) {
       result['v-s:type'] = {
         state: individual.hasValue('v-s:type'),
         cause: ['v-ui:minCardinality'],
       };
     }
-    template[0].dispatchEvent(new CustomEvent('validated', { detail: result }));
+    template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
-  function documentHandler() {
+  function documentHandler () {
     if (this.isNew()) {
       if (this.hasValue('v-s:to')) {
         this['v-s:type'] = [];

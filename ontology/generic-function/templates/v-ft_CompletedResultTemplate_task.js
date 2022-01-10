@@ -8,7 +8,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('.to-journal', template).click(function (e) {
     e.stopPropagation();
-    var journalUri = individual['v-wf:onDocument'][0].id + 'j';
+    const journalUri = individual['v-wf:onDocument'][0].id + 'j';
     riot.route('#/' + journalUri);
   });
   new IndividualModel('v-ft:ToJournalBundle').load().then(function (bundle) {

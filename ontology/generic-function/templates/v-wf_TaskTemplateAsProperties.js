@@ -6,16 +6,16 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function joinSplitHandler() {
-    var $state = $('#' + BrowserUtil.escape4$(individual.id));
+  function joinSplitHandler () {
+    const $state = $('#' + BrowserUtil.escape4$(individual.id));
     $state.removeClass('split-and').removeClass('split-or').removeClass('split-xor');
     $state.removeClass('join-and').removeClass('join-or').removeClass('join-xor');
     $state.addClass(veda.net.getSplitJoinType('join', individual));
     $state.addClass(veda.net.getSplitJoinType('split', individual));
     veda.net.updateSVGBackground($state);
   }
-  function labelHandler(values) {
-    var $state = $('#' + BrowserUtil.escape4$(individual.id));
+  function labelHandler (values) {
+    const $state = $('#' + BrowserUtil.escape4$(individual.id));
     $('.state-name', $state).html(values);
   }
   individual.on('v-wf:join', joinSplitHandler);

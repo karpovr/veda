@@ -37,29 +37,29 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   individual.on('v-s:hasStatus', statusHandler);
 
-  function statusHandler() {
-    var start = $('#start', template),
-      stop = $('#stop', template),
-      restart = $('#restart', template),
-      status = individual.hasValue('v-s:hasStatus') ? individual['v-s:hasStatus'][0].id : undefined;
+  function statusHandler () {
+    const start = $('#start', template);
+    const stop = $('#stop', template);
+    const restart = $('#restart', template);
+    const status = individual.hasValue('v-s:hasStatus') ? individual['v-s:hasStatus'][0].id : undefined;
 
     switch (status) {
-      case 'v-s:StatusStarted':
-      case 'v-s:StatusExecution':
-        start.hide();
-        stop.show();
-        restart.hide();
-        break;
-      case 'v-s:StatusExecuted':
-        start.hide();
-        stop.hide();
-        restart.show();
-        break;
-      default:
-        start.show();
-        stop.hide();
-        restart.hide();
-        break;
+    case 'v-s:StatusStarted':
+    case 'v-s:StatusExecution':
+      start.hide();
+      stop.show();
+      restart.hide();
+      break;
+    case 'v-s:StatusExecuted':
+      start.hide();
+      stop.hide();
+      restart.show();
+      break;
+    default:
+      start.show();
+      stop.hide();
+      restart.hide();
+      break;
     }
   }
 

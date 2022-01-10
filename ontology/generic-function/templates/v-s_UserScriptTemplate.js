@@ -9,17 +9,17 @@ export const post = function (individual, template, container, mode, extra) {
   template.one('remove', function () {
     individual.off('beforeSave', clearOutput);
   });
-  function clearOutput() {
+  function clearOutput () {
     this['v-s:output'] = [];
   }
 
-  var nativeConsole = window.console;
-  var nativePrint = window.print;
-  var _print = function () {
-    var output = individual['v-s:output'][0] || '';
-    for (var i = 0; i < arguments.length; i++) {
-      var arg = arguments[i];
-      var argString = typeof arg !== 'undefined' ? arg.toString() : 'undefined';
+  const nativeConsole = window.console;
+  const nativePrint = window.print;
+  const _print = function (...args) {
+    let output = individual['v-s:output'][0] || '';
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      const argString = typeof arg !== 'undefined' ? arg.toString() : 'undefined';
       if (i === 0) {
         output += argString;
       } else {
@@ -29,7 +29,7 @@ export const post = function (individual, template, container, mode, extra) {
     output += String.fromCharCode(13, 10);
     individual['v-s:output'] = [output];
   };
-  var _console = {
+  const _console = {
     log: _print,
     error: _print,
     info: _print,
@@ -37,7 +37,7 @@ export const post = function (individual, template, container, mode, extra) {
       this[timer] = new Date();
     },
     timeEnd: function (timer) {
-      var delta = new Date() - this[timer];
+      const delta = new Date() - this[timer];
       this.log(timer, delta, 'msec');
     },
   };
@@ -56,7 +56,7 @@ export const post = function (individual, template, container, mode, extra) {
     } else {
       individual['v-s:lastRun'] = [new Date()];
       individual['v-s:output'] = [];
-      var script = new Function('veda', individual['v-s:script'][0] || 'return;');
+      const script = new Function('veda', individual['v-s:script'][0] || 'return;');
       try {
         script(veda);
       } catch (err) {

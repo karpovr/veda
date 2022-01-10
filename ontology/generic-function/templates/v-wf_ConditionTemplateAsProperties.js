@@ -5,8 +5,8 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function handler(values) {
-    var $state = $('#' + BrowserUtil.escape4$(individual.id));
+  function handler (values) {
+    const $state = $('#' + BrowserUtil.escape4$(individual.id));
     $('.state-name', $state).html(values);
   }
   individual.on('rdfs:label', handler);

@@ -8,7 +8,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function presentTypeLink(link, typeLinksContainer) {
+  function presentTypeLink (link, typeLinksContainer) {
     return link.load().then(function (link) {
       if (link.hasValue('rdf:type', 'v-s:Link')) {
         if (link.hasValue('v-s:from', individual) && link.hasValue('v-s:to')) {
@@ -23,47 +23,47 @@ export const pre = function (individual, template, container, mode, extra) {
     });
   }
 
-  function getOutTypeLinks(allowedTypeUri, outPropertiesUris) {
-    var links = [];
+  function getOutTypeLinks (allowedTypeUri, outPropertiesUris) {
+    let links = [];
     outPropertiesUris.forEach(function (outPropertyUri) {
       links = links.concat(individual[outPropertyUri]);
     });
-    var linksPromises = links.map(function (link) {
+    const linksPromises = links.map(function (link) {
       return link.load();
     });
     return Promise.all(linksPromises).then(function (loadedLinks) {
       return loadedLinks.filter(function (link) {
-        var linkTypeUri = link['rdf:type'][0].id;
+        const linkTypeUri = link['rdf:type'][0].id;
         return linkTypeUri === allowedTypeUri;
       });
     });
   }
 
-  function getInTypeLinks(allowedTypeUri, inPropertiesUris) {
-    var allowedTypeUriQuery = "'rdf:type'==='" + allowedTypeUri + "'";
-    var inPropertiesUrisQuery = inPropertiesUris
+  function getInTypeLinks (allowedTypeUri, inPropertiesUris) {
+    const allowedTypeUriQuery = "'rdf:type'==='" + allowedTypeUri + "'";
+    const inPropertiesUrisQuery = inPropertiesUris
       .map(function (inPropertyUri) {
         return "'" + inPropertyUri + "'==='" + individual.id + "'";
       })
       .join('||');
-    var q = allowedTypeUriQuery + ' && (' + inPropertiesUrisQuery + ')';
-    return !inPropertiesUrisQuery || allowedTypeUri === 'v-s:Link'
-      ? Promise.resolve([])
-      : Backend.query({
-          ticket: veda.ticket,
-          query: q,
-          limit: 500,
-          async: true,
-        }).then(function (queryResult) {
-          var links = queryResult.result.map(function (uri) {
-            return new IndividualModel(uri);
-          });
-          return links;
+    const q = allowedTypeUriQuery + ' && (' + inPropertiesUrisQuery + ')';
+    return !inPropertiesUrisQuery || allowedTypeUri === 'v-s:Link' ?
+      Promise.resolve([]) :
+      Backend.query({
+        ticket: veda.ticket,
+        query: q,
+        limit: 500,
+        async: true,
+      }).then(function (queryResult) {
+        const links = queryResult.result.map(function (uri) {
+          return new IndividualModel(uri);
         });
+        return links;
+      });
   }
 
-  var type = individual['rdf:type'][0];
-  var linksTree;
+  const type = individual['rdf:type'][0];
+  let linksTree;
   if (!type.hasValue('v-s:hasLinksTree')) {
     linksTree = new IndividualModel();
     linksTree['rdf:type'] = [new IndividualModel('v-s:LinksTree')];
@@ -74,27 +74,27 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 
   return linksTree.load().then(function (linksTree) {
-    var inPropertiesUris = linksTree['v-s:inProperty'].map(function (property) {
+    const inPropertiesUris = linksTree['v-s:inProperty'].map(function (property) {
       return property.id;
     });
-    var outPropertiesUris = linksTree['v-s:outProperty'].map(function (property) {
+    const outPropertiesUris = linksTree['v-s:outProperty'].map(function (property) {
       return property.id;
     });
     if (outPropertiesUris.indexOf('v-s:hasLink') < 0) {
       outPropertiesUris.push('v-s:hasLink');
     }
-    var allowedTypesUris = linksTree['v-s:allowedType'].map(function (allowedType) {
+    const allowedTypesUris = linksTree['v-s:allowedType'].map(function (allowedType) {
       return allowedType.id;
     });
     if (allowedTypesUris.indexOf('v-s:Link') < 0) {
       allowedTypesUris.push('v-s:Link');
     }
 
-    var allowedTypesContainer = $('.allowed-types', template);
-    var allowedTypesTemplate = allowedTypesContainer.html();
+    const allowedTypesContainer = $('.allowed-types', template);
+    const allowedTypesTemplate = allowedTypesContainer.html();
     allowedTypesContainer.empty();
-    var allowedTypesPromises = allowedTypesUris.map(function (allowedTypeUri) {
-      var allowedType = new IndividualModel(allowedTypeUri);
+    const allowedTypesPromises = allowedTypesUris.map(function (allowedTypeUri) {
+      const allowedType = new IndividualModel(allowedTypeUri);
       return allowedType.present(allowedTypesContainer, allowedTypesTemplate);
     });
 
@@ -102,7 +102,7 @@ export const pre = function (individual, template, container, mode, extra) {
       $('.glyphicon.expand', template).click(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $this = $(this);
+        const $this = $(this);
 
         if ($this.hasClass('glyphicon-chevron-right')) {
           $this.addClass('glyphicon-chevron-down').removeClass('glyphicon-chevron-right');
@@ -116,14 +116,14 @@ export const pre = function (individual, template, container, mode, extra) {
       $('.glyphicon.expand-type', template).click(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $this = $(this);
-        var typeLinksContainer = $this.siblings('.type-links');
+        const $this = $(this);
+        const typeLinksContainer = $this.siblings('.type-links');
         if ($this.hasClass('glyphicon-chevron-right')) {
           $this.addClass('glyphicon-chevron-down').removeClass('glyphicon-chevron-right');
           typeLinksContainer.removeClass('hidden');
           $this.addClass('fa fa-spinner fa-pulse fa-lg fa-fw');
           if (!typeLinksContainer.children().length) {
-            var allowedTypeUri = $this.parent().attr('resource');
+            const allowedTypeUri = $this.parent().attr('resource');
             getOutTypeLinks(allowedTypeUri, outPropertiesUris)
               .then(function (outLinks) {
                 return Promise.all(
@@ -136,7 +136,7 @@ export const pre = function (individual, template, container, mode, extra) {
                 return getInTypeLinks(allowedTypeUri, inPropertiesUris);
               })
               .then(function (inLinks) {
-                var inLinksPromises = inLinks.map(function (link) {
+                const inLinksPromises = inLinks.map(function (link) {
                   return presentTypeLink(link, typeLinksContainer);
                 });
                 return Promise.all(inLinksPromises);

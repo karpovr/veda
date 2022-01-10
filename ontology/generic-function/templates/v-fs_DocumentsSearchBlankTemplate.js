@@ -4,24 +4,24 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function searchHandler() {
-    var queryString = null;
+  function searchHandler () {
+    let queryString = null;
     if (individual.hasValue('rdfs:label')) {
       queryString = "('*'=='" + individual['rdfs:label'][0] + "')";
     }
     if (individual.hasValue('v-s:created')) {
-      var dates = individual['v-s:created'];
-      var start = new Date(dates[0]);
-      var end = new Date(dates[dates.length - 1]);
+      const dates = individual['v-s:created'];
+      const start = new Date(dates[0]);
+      const end = new Date(dates[dates.length - 1]);
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
-      var createdPart = "('v-s:created'==[" + start.toISOString() + ',' + end.toISOString() + '])';
+      const createdPart = "('v-s:created'==[" + start.toISOString() + ',' + end.toISOString() + '])';
 
       queryString = queryString == null ? createdPart : queryString + ' && ' + createdPart;
     }
 
     if (individual.hasValue('v-fs:requiredClass')) {
-      var typePart = individual['v-fs:requiredClass']
+      let typePart = individual['v-fs:requiredClass']
         .map(function (type) {
           return "('rdf:type'==='" + type.id + "')";
         })

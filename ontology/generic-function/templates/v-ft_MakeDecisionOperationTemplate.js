@@ -6,14 +6,14 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function intersect(arr1, arr2) {
+  function intersect (arr1, arr2) {
     arr1.sort(sorter);
     arr2.sort(sorter);
-    var i = 0,
-      j = 0,
-      res = [],
-      el1,
-      el2;
+    let i = 0;
+    let j = 0;
+    const res = [];
+    let el1;
+    let el2;
     while ((el1 = arr1[i]) && (el2 = arr2[j])) {
       if (el2 < el1) {
         j++;
@@ -27,14 +27,14 @@ export const pre = function (individual, template, container, mode, extra) {
     }
     return res;
 
-    function sorter(a, b) {
+    function sorter (a, b) {
       return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
     }
   }
-  var possible = this['v-s:data'].map(function (task) {
+  const possible = this['v-s:data'].map(function (task) {
     return task['v-wf:possibleDecisionClass'];
   });
-  var common = possible.reduce(function (common, possible) {
+  const common = possible.reduce(function (common, possible) {
     return common ? intersect(common, possible) : possible;
   });
   common.push(new IndividualModel('v-wf:DecisionRedirect'));
@@ -45,14 +45,15 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
+  const decision = new IndividualModel();
   $('.possible-decisions input', template).on('change', function (e) {
-    var input = $(this);
-    var decisionContainer = $('.new-decision', template);
-    var decisionClassId = input.closest('[resource]').attr('resource');
-    var decisionClass = new IndividualModel(decisionClassId);
+    const input = $(this);
+    const decisionContainer = $('.new-decision', template);
+    const decisionClassId = input.closest('[resource]').attr('resource');
+    const decisionClass = new IndividualModel(decisionClassId);
     decision['rdf:type'] = [decisionClass];
     decision.properties['rdfs:label'] = decisionClass.properties['rdfs:label'];
-    var prevComment = $("veda-control[property='rdfs:comment'] textarea", decisionContainer).val();
+    const prevComment = $("veda-control[property='rdfs:comment'] textarea", decisionContainer).val();
     if (prevComment) {
       decision['rdfs:comment'] = [prevComment];
     }
@@ -73,29 +74,28 @@ export const post = function (individual, template, container, mode, extra) {
             }),
           )
             .then(function () {
-              var successMsg = new IndividualModel('v-s:SuccessBundle').load();
+              const successMsg = new IndividualModel('v-s:SuccessBundle').load();
               return successMsg.then(function (successMsg) {
-                var notify = Notify ? new Notify() : function () {};
-                notify('success', { name: successMsg });
+                const notify = Notify ? new Notify() : function () {};
+                notify('success', {name: successMsg});
               });
             })
             .catch(function (error) {
               console.log(error);
-              var errorMsg = new IndividualModel('v-s:ErrorBundle').load();
+              const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
               return errorMsg.then(function (errorMsg) {
-                var notify = Notify ? new Notify() : function () {};
-                notify('danger', { name: errorMsg });
+                const notify = Notify ? new Notify() : function () {};
+                notify('danger', {name: errorMsg});
               });
             })
             .then(function () {
               decisionTemplate.closest('.modal').modal('hide');
-              var inbox = new IndividualModel('v-ft:Inbox');
+              const inbox = new IndividualModel('v-ft:Inbox');
               inbox.clearValue('v-fs:selected');
             });
         });
     });
   });
-  var decision = new IndividualModel();
   $('.possible-decisions input', template).first().prop('checked', 'checked').change();
 };
 

@@ -4,7 +4,7 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function documentHandler() {
+  function documentHandler () {
     if (this.hasValue('rdfs:label') && !this.hasValue('rdf:type')) {
       $('veda-control[rel="rdf:type"]', template).addClass('has-error');
       $('.search-button, .more-results, .all-results').attr('disabled', 'disabled');

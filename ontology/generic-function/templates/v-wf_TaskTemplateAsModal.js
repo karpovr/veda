@@ -5,7 +5,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#cancel, #save', template).click(function () {
-    var modal = template.closest('.modal');
+    const modal = template.closest('.modal');
     if (modal.length) {
       modal.modal('hide');
     } else {

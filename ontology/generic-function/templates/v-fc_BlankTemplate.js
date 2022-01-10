@@ -12,15 +12,15 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var self = individual,
-    objectContainer = $('#object-container', template),
-    object = self.object;
+  const self = individual;
+  const objectContainer = $('#object-container', template);
+  const object = self.object;
 
-  var _class = object['rdf:type'][0];
+  const _class = object['rdf:type'][0];
 
   _class.rights.then(function (rights) {
     if (rights.hasValue('v-s:canCreate', true)) {
-      var object_template = self.get('v-fc:targetTemplate')[0];
+      const object_template = self.get('v-fc:targetTemplate')[0];
       object.present(objectContainer, object_template, 'edit').then(function (objectTemplate) {
         objectTemplate = $(objectTemplate);
         objectTemplate.one('cancel', cancelHandler);
@@ -33,11 +33,11 @@ export const post = function (individual, template, container, mode, extra) {
       $('#no-rights', template).removeClass('hidden');
     }
 
-    function cancelHandler() {
+    function cancelHandler () {
       delete self.object;
       window.history.back();
     }
-    function saveHandler() {
+    function saveHandler () {
       delete self.object;
       riot.route('#/' + object.id);
     }

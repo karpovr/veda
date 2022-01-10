@@ -1,16 +1,12 @@
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
-import IndividualModel from '/js/common/individual_model.js';
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
   Promise.all([import('moment'), import('fullcalendar'), import('fullcalendar-locale'), import('fullcalendar-style')]).then((resolved) => {
-    const moment = resolved.shift().default;
-    const fullcalendar = resolved.shift().default;
-    const locale = resolved.shift().default;
-    const rules = resolved.shift().default;
+    const rules = resolved[3].default;
     const list = rules.cssRules || rules.rules;
     const len = list.length;
     let rulesTxt = '';

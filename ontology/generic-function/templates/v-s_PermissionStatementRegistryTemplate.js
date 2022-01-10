@@ -6,7 +6,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#object', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:permissionObject'] = [new IndividualModel(uri)];
     } else {
@@ -15,7 +15,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#subject', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:permissionSubject'] = [new IndividualModel(uri)];
     } else {

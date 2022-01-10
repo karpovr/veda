@@ -36,29 +36,29 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   individual.on('v-s:hasStatus', statusHandler);
 
-  function statusHandler() {
-    var start = $('.action#start', template),
-      stop = $('.action#stop', template),
-      restart = $('.action#restart', template),
-      status = individual.hasValue('v-s:hasStatus') ? individual['v-s:hasStatus'][0].id : undefined;
+  function statusHandler () {
+    const start = $('.action#start', template);
+    const stop = $('.action#stop', template);
+    const restart = $('.action#restart', template);
+    const status = individual.hasValue('v-s:hasStatus') ? individual['v-s:hasStatus'][0].id : undefined;
 
     switch (status) {
-      case 'v-s:StatusStarted':
-      case 'v-s:StatusExecution':
-        start.addClass('hidden');
-        stop.removeClass('hidden');
-        restart.addClass('hidden');
-        break;
-      case 'v-s:StatusExecuted':
-        start.addClass('hidden');
-        stop.addClass('hidden');
-        restart.removeClass('hidden');
-        break;
-      default:
-        start.removeClass('hidden');
-        stop.addClass('hidden');
-        restart.addClass('hidden');
-        break;
+    case 'v-s:StatusStarted':
+    case 'v-s:StatusExecution':
+      start.addClass('hidden');
+      stop.removeClass('hidden');
+      restart.addClass('hidden');
+      break;
+    case 'v-s:StatusExecuted':
+      start.addClass('hidden');
+      stop.addClass('hidden');
+      restart.removeClass('hidden');
+      break;
+    default:
+      start.removeClass('hidden');
+      stop.addClass('hidden');
+      restart.addClass('hidden');
+      break;
     }
   }
 };

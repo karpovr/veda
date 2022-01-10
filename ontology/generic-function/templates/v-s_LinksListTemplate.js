@@ -5,14 +5,14 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var isMutual = container.attr('data-mutual') === 'true';
-  var rowTmpl = $('tbody', template).html();
+  const isMutual = container.attr('data-mutual') === 'true';
+  const rowTmpl = $('tbody', template).html();
 
   $('#add-link', template).click(function () {
     $('.links-table', template).removeClass('hidden');
-    var cntr = $("[rel='v-s:hasLink']", template),
-      _class = new IndividualModel('v-s:Link'),
-      Link = new IndividualModel();
+    const cntr = $("[rel='v-s:hasLink']", template);
+    const _class = new IndividualModel('v-s:Link');
+    const Link = new IndividualModel();
     Link['rdf:type'] = [_class];
     Link['v-s:from'] = [individual];
 
@@ -38,12 +38,12 @@ export const pre = function (individual, template, container, mode, extra) {
   template.one('remove', function () {
     individual.off('afterSave', saveHandler);
   });
-  function saveHandler() {
-    var children = $("[rel='v-s:hasLink']", template).children();
+  function saveHandler () {
+    const children = $("[rel='v-s:hasLink']", template).children();
     children.each(function () {
-      var link_template = $(this);
-      var link_uri = link_template.attr('resource');
-      var link = new IndividualModel(link_uri);
+      const link_template = $(this);
+      const link_uri = link_template.attr('resource');
+      const link = new IndividualModel(link_uri);
       this['v-s:type'] = [];
       link.save();
       link_template[0].dispatchEvent(new Event('view'));
@@ -54,14 +54,14 @@ export const pre = function (individual, template, container, mode, extra) {
     individual.off('v-s:hasLink', linksHandler);
   });
   linksHandler();
-  function linksHandler() {
+  function linksHandler () {
     if (individual.hasValue('v-s:hasLink')) {
       $('.links-table', template).removeClass('hidden');
     } else {
       $('.links-table', template).addClass('hidden');
     }
   }
-  function cl() {
+  function cl () {
     console.log(this);
   }
   individual.on('beforeSave', cl);

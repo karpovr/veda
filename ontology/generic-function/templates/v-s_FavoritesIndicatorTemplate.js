@@ -14,12 +14,12 @@ export const pre = function (individual, template, container, mode, extra) {
       placement: 'bottom',
       trigger: 'hover',
       title: (function () {
-        var titleStr;
+        let titleStr;
         return function () {
           getCurrent().then(function (current) {
-            var title = veda.user.aspect.hasValue('v-s:hasFavorite', current)
-              ? new IndividualModel('v-s:RemoveFromFavorites')
-              : new IndividualModel('v-s:AddToFavorites');
+            const title = veda.user.aspect.hasValue('v-s:hasFavorite', current) ?
+              new IndividualModel('v-s:RemoveFromFavorites') :
+              new IndividualModel('v-s:AddToFavorites');
             title.load().then(function (title) {
               titleStr = title.toString();
               template.find('.tooltip-inner').text(titleStr);
@@ -36,13 +36,13 @@ export const pre = function (individual, template, container, mode, extra) {
           if (!current) {
             return;
           }
-          var subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
+          const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
           if (veda.user.aspect.hasValue('v-s:hasFavorite', subscriptionId)) {
             veda.user.aspect.removeValue('v-s:hasFavorite', new IndividualModel(subscriptionId));
             indicateFavorite(current);
             return new IndividualModel(subscriptionId).remove();
           } else {
-            var subscription = new IndividualModel();
+            const subscription = new IndividualModel();
             subscription.id = subscriptionId;
             subscription['rdf:type'] = [new IndividualModel('v-s:Subscription')];
             subscription['v-s:onDocument'] = [current];
@@ -64,7 +64,7 @@ export const pre = function (individual, template, container, mode, extra) {
     getCurrent(hash).then(indicateFavorite);
   });
 
-  function indicateFavorite(current) {
+  function indicateFavorite (current) {
     current &&
       current
         .load()
@@ -73,7 +73,7 @@ export const pre = function (individual, template, container, mode, extra) {
         })
         .then(function (isJournaling) {
           if (isJournaling) {
-            var subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
+            const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
             template.show();
             if (veda.user.aspect.hasValue('v-s:hasFavorite', subscriptionId)) {
               template.addClass('fa-star').removeClass('fa-star-o');
@@ -86,10 +86,10 @@ export const pre = function (individual, template, container, mode, extra) {
         });
   }
 
-  function getCurrent(hash) {
+  function getCurrent (hash) {
     return new Promise(function (resolve, reject) {
-      var current_uri = hash ? decodeURI(hash).slice(2).split('/')[0] : '';
-      var re = new RegExp('^(' + String.fromCharCode(92) + 'w|-)+:.*?$');
+      const current_uri = hash ? decodeURI(hash).slice(2).split('/')[0] : '';
+      const re = new RegExp('^(' + String.fromCharCode(92) + 'w|-)+:.*?$');
       if (re.test(current_uri)) {
         resolve(new IndividualModel(current_uri).load());
       } else {
@@ -99,7 +99,7 @@ export const pre = function (individual, template, container, mode, extra) {
       if (!current) {
         return;
       }
-      var isTask = current.hasValue('rdf:type', 'v-wf:DecisionForm');
+      const isTask = current.hasValue('rdf:type', 'v-wf:DecisionForm');
       if (isTask) {
         current = current['v-wf:onDocument'][0];
       }
@@ -108,4 +108,4 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = ` <a href="#" class="fa fa-lg" style="display:none;"></a> `;
+export const html = ' <a href="#" class="fa fa-lg" style="display:none;"></a> ';

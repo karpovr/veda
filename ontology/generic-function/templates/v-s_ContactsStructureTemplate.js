@@ -4,7 +4,6 @@ import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
 import Backend from '/js/common/backend.js';
-import riot from 'riot';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -25,7 +24,7 @@ export const pre = function (individual, template, container, mode, extra) {
     })
     .then(function () {
       if (veda.user && veda.user.hasValue('v-s:parentOrganization')) {
-        var selfOrg = veda.user['v-s:parentOrganization'][0];
+        const selfOrg = veda.user['v-s:parentOrganization'][0];
         return selfOrg.present($('#selfOrg span', template), 'v-ui:LabelTemplate');
       } else {
         $('#selfOrg', template).remove();
@@ -37,15 +36,16 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var basePos;
-  var baseWidth;
-  var baseWidthStructure;
-  var maxWidth;
+  const orgTree = $('#orgTree', template);
+  const orgContent = $('#orgContent', template);
+
+  let basePos;
+  let baseWidth;
+  let maxWidth;
   $('#resizeLine', template).on('mousedown', function (e) {
     e.preventDefault();
     basePos = e.clientX;
     baseWidth = orgTree.width();
-    baseWidthStructure = orgContent.width() + 60;
     maxWidth = orgTree.parent().width();
   });
 
@@ -57,7 +57,7 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('mousemove', function (e) {
     if (basePos == undefined) return;
     e.preventDefault();
-    var changedWidth = baseWidth + (e.clientX - basePos);
+    const changedWidth = baseWidth + (e.clientX - basePos);
     if (changedWidth < 200) {
       orgTree.css('width', 200);
       orgContent.css('width', maxWidth - 200);
@@ -70,11 +70,11 @@ export const post = function (individual, template, container, mode, extra) {
     }
   });
 
-  var loadIndicator = $('#load-indicator');
-  var findDeleted = false;
-  var searchOrgMode = individual.hasValue('v-s:managedOrganization') ? 'targetOrg' : 'allOrg';
-  var isContactManager = false;
-  var userDisplayedElements;
+  const loadIndicator = $('#load-indicator');
+  const findDeleted = false;
+  let searchOrgMode = individual.hasValue('v-s:managedOrganization') ? 'targetOrg' : 'allOrg';
+  let isContactManager = false;
+  let userDisplayedElements;
   if (veda.user.preferences.hasValue('v-ui:displayedElements')) {
     userDisplayedElements = veda.user.preferences['v-ui:displayedElements'][0];
   } else {
@@ -90,27 +90,19 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('section .section-header', template).click(function () {
-    var self = $(this);
+    const self = $(this);
     $('span.glyphicon', self).toggleClass('glyphicon-chevron-right glyphicon-chevron-down');
     self.siblings().toggle();
   });
 
   template.on('click', '.img-thumbnail', function (e) {
     e.preventDefault();
-    var uri = $(this).attr('resource');
-    var modal = BrowserUtil.showSmallModal(new IndividualModel(uri), 'v-ui:ImageTemplate');
+    const uri = $(this).attr('resource');
+    const modal = BrowserUtil.showSmallModal(new IndividualModel(uri), 'v-ui:ImageTemplate');
     modal.find('.modal-dialog').removeClass('modal-lg').addClass('modal-sm');
   });
 
-  // $("#deleted-checkbox", template).click(function(){
-  //   var checkbox = $("#deleted-checkbox input", template);
-  //   findDeleted = checkbox.is(':checked');
-  // });
-
-  var orgTree = $('#orgTree', template);
-  var orgContent = $('#orgContent', template);
-
-  var parentContainerTmpl =
+  const parentContainerTmpl =
     '<div class="row">' +
     '<div class="col-md-5">' +
     '<div class="margin-sm-h"><strong about="@" property="rdfs:label"></strong></div>' +
@@ -133,9 +125,9 @@ export const post = function (individual, template, container, mode, extra) {
     '</div>' +
     '</div>';
 
-  function drawCards(parent, from, limit) {
+  function drawCards (parent, from, limit) {
     loadIndicator.show();
-    var isNeedBtnMore = false;
+    let isNeedBtnMore = false;
     if (limit == undefined) limit = userDisplayedElements;
     if (from == undefined) {
       $('tbody', orgContent).empty();
@@ -144,12 +136,12 @@ export const post = function (individual, template, container, mode, extra) {
     }
     $('#parentContainer', orgContent).empty();
 
-    //parent already has list of all children
+    // parent already has list of all children
     return parent
       .present($('#parentContainer', orgContent), parentContainerTmpl)
       .then(function (tmpl) {
         if (parent.hasValue('v-s:hasCommunicationMean')) {
-          var faviconIcon = $('span.faviconIcon', tmpl);
+          const faviconIcon = $('span.faviconIcon', tmpl);
           faviconIcon.removeClass('hidden');
           if (veda.user.aspect.hasValue('v-s:hasFavoriteContact', parent)) {
             faviconIcon.toggleClass('fa-star-o fa-star');
@@ -168,10 +160,10 @@ export const post = function (individual, template, container, mode, extra) {
         return getChildren(parent);
       })
       .then(function (childrenUris) {
-        var endIndex = childrenUris.length > from + limit ? from + limit : childrenUris.length;
-        var promises = [];
-        for (var i = from; i < endIndex; i++) {
-          var uri = childrenUris[i];
+        const endIndex = childrenUris.length > from + limit ? from + limit : childrenUris.length;
+        const promises = [];
+        for (let i = from; i < endIndex; i++) {
+          const uri = childrenUris[i];
           promises.push(new IndividualModel(uri).present($('<div></div>'), 'v-s:ContactCardTemplate'));
         }
         if (endIndex != childrenUris.length) {
@@ -193,13 +185,13 @@ export const post = function (individual, template, container, mode, extra) {
         $('span.badge:nth-child(4)', orgContent).text(childrenUris.length);
         $('span.badge:nth-child(2)', orgContent).text(endIndex);
         if (promises.length == 0) {
-          var emptyIndivid = new IndividualModel('v-fs:Empty');
+          const emptyIndivid = new IndividualModel('v-fs:Empty');
           promises.push(emptyIndivid.present($('<div></div>'), 'v-s:ContactCardTemplate'));
         }
         return Promise.all(promises);
       })
       .then(function (templates) {
-        for (var i = 0; i < templates.length; i++) {
+        for (let i = 0; i < templates.length; i++) {
           $('.hideInStructure', templates[i]).siblings().removeClass('col-md-8');
           $('.hideInStructure', templates[i]).remove();
           $('tbody', orgContent).append(templates[i]);
@@ -211,7 +203,7 @@ export const post = function (individual, template, container, mode, extra) {
       });
   }
 
-  function initialStructure(org) {
+  function initialStructure (org) {
     orgTree.empty();
     orgContent.hide();
     if (org == undefined) {
@@ -224,9 +216,9 @@ export const post = function (individual, template, container, mode, extra) {
           return org.present(orgTree, tmpl);
         })
         .then(function (rendered) {
-          var row = $('#orgTree div.value-row', template);
+          const row = $('#orgTree div.value-row', template);
           return openRow(row).then(function () {
-            //drawCards(org);
+            // drawCards(org);
 
             return rendered;
           });
@@ -237,9 +229,9 @@ export const post = function (individual, template, container, mode, extra) {
     }
   }
 
-  function getRowTemplate(value) {
+  function getRowTemplate (value) {
     return value.load().then(function (value) {
-      var rowTmpl =
+      const rowTmpl =
         "<div class='value-row'>" +
         "<div class='item'>" +
         "<a href='#' class='expand glyphicon glyphicon-chevron-right'></a>" +
@@ -247,7 +239,7 @@ export const post = function (individual, template, container, mode, extra) {
         "<span about='@' data-template='v-ui:LabelTemplate'></span>" +
         '</div>' +
         '</div>';
-      var icon = '';
+      let icon = '';
       if (value.hasValue('rdf:type', 'v-s:Appointment') || value.hasValue('rdf:type', 'v-s:Position')) {
         return null;
       }
@@ -269,29 +261,29 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  function getChildren(parent, refresh, mode) {
+  function getChildren (parent, refresh, mode) {
     if (parent.allChildren && !refresh) {
       return Promise.resolve(parent.allChildren);
     }
-    var childrenUris = [];
+    let childrenUris = [];
     if (parent.hasValue('rdf:type', 'v-s:Appointment')) {
       return Promise.resolve([]);
     }
     loadIndicator.show();
-    var parentUri = parent.id;
+    const parentUri = parent.id;
 
-    var selectPart = 'SELECT id ';
-    var wherePart = "WHERE v_s_parentUnit_str=['" + parentUri + "'] AND v_s_deleted_int=[0]";
-    var endingPart = " group by id, rdfs_label_str having sum(sign) > 0 order by arraySort(x -> endsWith(x, '@en'), rdfs_label_str) asc";
-    var queryDepartments = selectPart + 'FROM veda_tt.`v-s:Department` ' + wherePart + endingPart;
-    var queryAppointment =
+    const selectPart = 'SELECT id ';
+    const wherePart = "WHERE v_s_parentUnit_str=['" + parentUri + "'] AND v_s_deleted_int=[0]";
+    const endingPart = " group by id, rdfs_label_str having sum(sign) > 0 order by arraySort(x -> endsWith(x, '@en'), rdfs_label_str) asc";
+    const queryDepartments = selectPart + 'FROM veda_tt.`v-s:Department` ' + wherePart + endingPart;
+    let queryAppointment =
       selectPart +
       'FROM veda_tt.`v-s:Appointment` ' +
       "WHERE v_s_parentUnit_str=['" +
       parentUri +
       "'] AND v_s_deleted_int=[0] AND v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(v_s_origin_str, '')) LIKE '%group%')" +
       endingPart;
-    var queryPositions =
+    let queryPositions =
       selectPart +
       'FROM veda_tt.`v-s:Position` ' +
       "WHERE v_s_parentUnit_str=['" +
@@ -303,21 +295,21 @@ export const post = function (individual, template, container, mode, extra) {
       queryPositions = null;
     }
 
-    var queryStringArray = [];
+    let queryStringArray = [];
     if (parent.hasValue('rdf:type', 'v-s:Department') || parent.hasValue('rdf:type', 'v-s:Subsidiary')) {
       queryStringArray = [queryDepartments, queryPositions, queryAppointment];
     } else if (parent.hasValue('rdf:type', 'v-s:OrgGroup')) {
-      var queryOrgGroup = selectPart + 'FROM veda_tt.`v-s:OrgGroup` ' + wherePart + endingPart;
+      const queryOrgGroup = selectPart + 'FROM veda_tt.`v-s:OrgGroup` ' + wherePart + endingPart;
       queryStringArray = [queryOrgGroup, queryPositions, queryAppointment];
     } else if (parent.hasValue('rdf:type', 'v-s:Organization')) {
-      var queryOrgGroup = selectPart + 'FROM veda_tt.`v-s:OrgGroup` ' + wherePart + endingPart;
-      var querySubsidiary = selectPart + "FROM veda_tt.`v-s:Subsidiary` WHERE v_s_parent_str=['" + parentUri + "'] AND v_s_deleted_int=[0]" + endingPart;
+      const queryOrgGroup = selectPart + 'FROM veda_tt.`v-s:OrgGroup` ' + wherePart + endingPart;
+      const querySubsidiary = selectPart + "FROM veda_tt.`v-s:Subsidiary` WHERE v_s_parent_str=['" + parentUri + "'] AND v_s_deleted_int=[0]" + endingPart;
       queryStringArray = [querySubsidiary, queryDepartments, queryOrgGroup, queryPositions, queryAppointment];
     }
 
-    var sort = "'rdfs:label_ru' asc";
-    var queries = queryStringArray.map(function (queryString) {
-      if (queryString == null) return Promise.resolve({ result: [] });
+    const sort = "'rdfs:label_ru' asc";
+    const queries = queryStringArray.map(function (queryString) {
+      if (queryString == null) return Promise.resolve({result: []});
       return Backend.query({
         ticket: veda.ticket,
         sql: queryString,
@@ -330,7 +322,7 @@ export const post = function (individual, template, container, mode, extra) {
     return Promise.all(queries).then(function (queryResults) {
       parent.treeChildrens = 0;
       queryResults.forEach(function (queryResult, i) {
-        //2 last items not counting in childrens (appointments, positions)
+        // 2 last items not counting in childrens (appointments, positions)
         if (i + 2 < queryResults.length) parent.treeChildrens += queryResult.count;
         childrenUris = childrenUris.concat(queryResult.result);
       });
@@ -341,8 +333,8 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  function drawChildren(parentUri, rootElement) {
-    var childrenContainer = rootElement.children('.children');
+  function drawChildren (parentUri, rootElement) {
+    const childrenContainer = rootElement.children('.children');
     if (childrenContainer.length) {
       childrenContainer.removeClass('hidden');
       return Promise.resolve(childrenContainer.length);
@@ -351,8 +343,8 @@ export const post = function (individual, template, container, mode, extra) {
       loadIndicator.show();
       return getChildren(new IndividualModel(parentUri), true)
         .then(function (childrenUris) {
-          var promises = childrenUris.map(function (childUri) {
-            var child = new IndividualModel(childUri);
+          const promises = childrenUris.map(function (childUri) {
+            const child = new IndividualModel(childUri);
             return getRowTemplate(child).then(function (tmpl) {
               if (tmpl == null) {
                 return Promise.resolve(null);
@@ -372,40 +364,38 @@ export const post = function (individual, template, container, mode, extra) {
     }
   }
 
-  function openFromStructure(targetUri) {
-    var targetToCards;
-    var isInRoot = false;
-    var targetIndivid = new IndividualModel(targetUri);
+  function openFromStructure (targetUri) {
+    const isInRoot = false;
+    const targetIndivid = new IndividualModel(targetUri);
     if ($('section#OrgStructure .section-header .glyphicon', template).hasClass('glyphicon-chevron-right')) {
       $('section#OrgStructure .section-header').click();
     }
     return getParentUnitChain(targetIndivid)
       .then(function (chain) {
-        var rootOrg;
+        let rootOrg;
         if (chain.length == 0) {
-          //isInRoot = true;
+          // isInRoot = true;
           rootOrg = targetIndivid;
         } else {
           rootOrg = chain.pop();
           chain.unshift(targetIndivid);
         }
-        targetToCards = targetIndivid;
         return initialStructure(rootOrg).then(function (tmpl) {
           return chain.reduceRight(function (pr, cur) {
             return pr.then(function () {
-              var row = $("div.value-row[resource='" + cur.id + "']", tmpl);
+              const row = $("div.value-row[resource='" + cur.id + "']", tmpl);
               return openRow(row);
             });
           }, Promise.resolve());
         });
       })
       .then(function () {
-        var targetRow = $("div.value-row[resource='" + targetUri + "'] > .item", template);
+        const targetRow = $("div.value-row[resource='" + targetUri + "'] > .item", template);
         targetRow.addClass('warning');
         return isInRoot ? true : drawCards(new IndividualModel(targetUri));
       })
       .then(function () {
-        var position = orgContent.offset().top;
+        const position = orgContent.offset().top;
         if (position > 0) {
           $('html, body').animate({
             scrollTop: position,
@@ -415,11 +405,11 @@ export const post = function (individual, template, container, mode, extra) {
       });
   }
 
-  function getParentUnitChain(target, acc) {
+  function getParentUnitChain (target, acc) {
     if (acc == undefined) acc = [];
     return target.load().then(function () {
       if (target.hasValue('v-s:parentUnit')) {
-        var parentUnit = target['v-s:parentUnit'][0];
+        const parentUnit = target['v-s:parentUnit'][0];
         acc.push(parentUnit);
         return getParentUnitChain(parentUnit, acc);
       } else {
@@ -427,41 +417,65 @@ export const post = function (individual, template, container, mode, extra) {
       }
     });
   }
-  var searchTextBundle = new IndividualModel('v-s:SearchTextBundle').load().then(function (bundle) {
+
+  new IndividualModel('v-s:SearchTextBundle').load().then(function (bundle) {
     $('#searchText input', template).attr('placeholder', bundle['rdfs:label'].map(CommonUtil.formatValue).join(' '));
   });
 
+  let searchHelperObj = {};
+  function setSearchHelperObjToDefault () {
+    searchHelperObj = {
+      org: {
+        handlered: 0,
+      },
+      dep: {
+        handlered: 0,
+      },
+      app: {
+        handlered: 0,
+      },
+      phone: {
+        handlered: 0,
+      },
+      email: {
+        handlered: 0,
+      },
+      pos: {
+        handlered: 0,
+      },
+    };
+  }
+
   $('#searchButton', template).click(function () {
-    var searchText = $('#searchText input', template).val();
+    let searchText = $('#searchText input', template).val();
     if (!searchText) return;
     searchText = searchText.trim();
     setSearchHelperObjToDefault();
     loadIndicator.show();
 
-    var queryString;
-    var resultOrg = $('#resultOrg', template).hide();
+    const resultOrg = $('#resultOrg', template).hide();
     $('tbody', resultOrg).empty();
-    var resultDep = $('#resultDep', template).hide();
+    const resultDep = $('#resultDep', template).hide();
     $('tbody', resultDep).empty();
-    var resultApp = $('#resultApp', template).hide();
+    const resultApp = $('#resultApp', template).hide();
     $('tbody', resultApp).empty();
-    var resultPos = $('#resultPos', template).hide();
+    const resultPos = $('#resultPos', template).hide();
     $('tbody', resultPos).empty();
 
-    var searchPromise = [];
-    var queryStringArr = genQueryStringArray(searchText, findDeleted, searchOrgMode == 'targetOrg');
+    const searchPromise = [];
+    const queryStringArr = genQueryStringArray(searchText, findDeleted, searchOrgMode == 'targetOrg');
     searchPromise.push(queryStringArr[0] == null ? Promise.resolve([]) : searchAndLoad('org', queryStringArr[0], 0));
     searchPromise.push(searchAndLoad('dep', queryStringArr[1], 0));
     searchPromise.push(searchAndLoad('app', queryStringArr[2], 0));
     searchPromise.push(searchAndLoad('pos', queryStringArr[3], 0));
 
-    //orgTree.empty();
-    //orgContent.hide();
-    //$("tbody", orgContent).empty();
+    // orgTree.empty();
+    // orgContent.hide();
+    // $("tbody", orgContent).empty();
 
     return Promise.all(searchPromise)
       .then(function (results) {
-        var finded = results.reduce(function (acc, cur) {
+        const finded = results.reduce(function (acc, cur) {
           return acc + cur.length;
         }, 0);
         if (finded == 0) {
@@ -469,11 +483,11 @@ export const post = function (individual, template, container, mode, extra) {
         } else {
           $('.not-found', template).addClass('hidden');
         }
-        var presentPromises = [];
-        var orgObj = results[0];
-        var depObj = results[1];
-        var appObj = results[2];
-        var posObj = results[3];
+        const presentPromises = [];
+        const orgObj = results[0];
+        const depObj = results[1];
+        const appObj = results[2];
+        const posObj = results[3];
         if (orgObj.length > 0) resultOrg.show();
         if (depObj.length > 0) resultDep.show();
         if (appObj.length > 0) resultApp.show();
@@ -494,32 +508,31 @@ export const post = function (individual, template, container, mode, extra) {
       });
   });
 
-  function genQueryStringArray(searchText, findDeleted, findInParentOrg) {
-    var selectPart = 'SELECT target.id';
-    var endingPart =
+  function genQueryStringArray (searchText, findDeleted, findInParentOrg) {
+    const selectPart = 'SELECT target.id';
+    const endingPart =
       " GROUP BY target.id, target.rdfs_label_str HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
-    var basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0]';
-    var orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]';
-    var conditionForOrg = ' and org.`v_s_actualContacts_int`[1]=1';
+    let basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0]';
+    const orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]';
+    const conditionForOrg = ' and org.`v_s_actualContacts_int`[1]=1';
     if (findInParentOrg) {
       basicWherePart += " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']";
     }
-    var organizationQuery = selectPart + ' FROM veda_tt.`v-s:Organization` AS target';
-    var departmentQuery = selectPart + ' FROM veda_tt.`v-s:Department` AS target' + orgJoinPart;
-    var appointmentQuery =
+    let organizationQuery = selectPart + ' FROM veda_tt.`v-s:Organization` AS target';
+    let departmentQuery = selectPart + ' FROM veda_tt.`v-s:Department` AS target' + orgJoinPart;
+    let appointmentQuery =
       selectPart + ' FROM veda_tt.`v-s:Appointment` as target INNER JOIN veda_tt.`v-s:Person` as per ON target.v_s_employee_str[1] = per.id' + orgJoinPart;
-    var specialPositionQuery = selectPart + ' FROM veda_tt.`v-s:Position` AS target' + orgJoinPart;
+    let specialPositionQuery = selectPart + ' FROM veda_tt.`v-s:Position` AS target' + orgJoinPart;
 
-    var isCommMeanJoinAdded = false;
+    let isCommMeanJoinAdded = false;
     // var isPhoneChannelAdded = false;
     // var isEmailChannelAdded = false;
-    var queryParts = searchText.split(' ').reduce(
+    const queryParts = searchText.split(' ').reduce(
       function (qParts, sText) {
         sText = sText.toLowerCase();
-        var specialWherePart = '';
 
-        var isPhoneSearch = sText.match('^' + String.fromCharCode(92) + '+?[' + String.fromCharCode(92) + 'd-' + String.fromCharCode(92) + 's]*$') != null;
-        var isEmailSearch = sText.match('^.*@{1}') != null;
+        const isPhoneSearch = sText.match('^' + String.fromCharCode(92) + '+?[' + String.fromCharCode(92) + 'd-' + String.fromCharCode(92) + 's]*$') != null;
+        const isEmailSearch = sText.match('^.*@{1}') != null;
         if (isPhoneSearch || isEmailSearch) {
           if (!isCommMeanJoinAdded) {
             isCommMeanJoinAdded = true;
@@ -551,9 +564,9 @@ export const post = function (individual, template, container, mode, extra) {
       },
       ['', '', '', ''],
     );
-    organizationQuery = findInParentOrg
-      ? null
-      : organizationQuery +
+    organizationQuery = findInParentOrg ?
+      null :
+      organizationQuery +
         basicWherePart +
         queryParts[0] +
         " AND v_s_hasCommunicationMean_str[1]!=''" +
@@ -571,8 +584,8 @@ export const post = function (individual, template, container, mode, extra) {
     return [organizationQuery, departmentQuery, appointmentQuery, specialPositionQuery];
   }
 
-  function presentSearchResult(objType, container, items) {
-    var promises = items.map(function (item) {
+  function presentSearchResult (objType, container, items) {
+    const promises = items.map(function (item) {
       return item.present($('<div></div>'), 'v-s:ContactCardTemplate');
     });
     return Promise.all(promises).then(function (templates) {
@@ -593,42 +606,17 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  var searchHelperObj = {};
-
-  function setSearchHelperObjToDefault() {
-    searchHelperObj = {
-      org: {
-        handlered: 0,
-      },
-      dep: {
-        handlered: 0,
-      },
-      app: {
-        handlered: 0,
-      },
-      phone: {
-        handlered: 0,
-      },
-      email: {
-        handlered: 0,
-      },
-      pos: {
-        handlered: 0,
-      },
-    };
-  }
-
-  function searchAndLoad(objType, queryString, from, top) {
-    var sort;
+  function searchAndLoad (objType, queryString, from, top) {
+    let sort;
     if (objType == 'app') {
       sort = "'rdfs:label_ru' asc";
     } else {
       sort = "'rdfs:label' asc";
     }
     if (!top) top = userDisplayedElements;
-    //TODO если в консоли не появляется то удалить
+    // TODO если в консоли не появляется то удалить
     if (objType == 'phone' || objType == 'email') console.log('This is search ', objType);
-    var searchObj = {
+    const searchObj = {
       ticket: veda.ticket,
       sql: queryString,
       sort: sort,
@@ -642,7 +630,7 @@ export const post = function (individual, template, container, mode, extra) {
       .then(function (searchResult) {
         searchHelperObj[objType].estimated = searchResult.estimated;
         searchHelperObj[objType].handlered = searchHelperObj[objType].handlered + searchResult.count;
-        var loadPromises = [];
+        let loadPromises = [];
         loadPromises = searchResult.result.map(function (uri) {
           return new IndividualModel(uri).load();
         });
@@ -654,10 +642,10 @@ export const post = function (individual, template, container, mode, extra) {
       });
   }
 
-  function openRow(row) {
-    var uri = row.attr('resource');
+  function openRow (row) {
+    const uri = row.attr('resource');
     return drawChildren(uri, row).then(function (childrenCount) {
-      var chevron = row.children('.item').find('a');
+      const chevron = row.children('.item').find('a');
       if (childrenCount == 0) {
         chevron.removeClass('glyphicon-chevron-right glyphicon-chevron-down');
       } else {
@@ -668,12 +656,12 @@ export const post = function (individual, template, container, mode, extra) {
     });
   }
 
-  function initPopover(target) {
-    var uri = target.closest('[resource]').attr('resource');
-    var tmpl = "<div><a tabindex='0' role='button' class='to-structure' about='@' property='rdfs:label'/></div>";
+  function initPopover (target) {
+    const uri = target.closest('[resource]').attr('resource');
+    const tmpl = "<div><a tabindex='0' role='button' class='to-structure' about='@' property='rdfs:label'/></div>";
     return getParentUnitChain(new IndividualModel(uri))
       .then(function (chain) {
-        var presentPromises = chain.map(function (parent) {
+        const presentPromises = chain.map(function (parent) {
           return parent.present($('<div></div>'), tmpl);
         });
         if (presentPromises.length == 0) {
@@ -682,7 +670,7 @@ export const post = function (individual, template, container, mode, extra) {
         return Promise.all(presentPromises);
       })
       .then(function (templates) {
-        var cntr = templates.reduceRight(function (acc, curTmpl, i) {
+        const cntr = templates.reduceRight(function (acc, curTmpl, i) {
           curTmpl.css('margin-left', 15 * (templates.length - (i + 1)));
           return acc.append(curTmpl);
         }, $("<div><span class='close'>&nbsp;&times;</span></div>"));
@@ -690,11 +678,11 @@ export const post = function (individual, template, container, mode, extra) {
       });
   }
 
-  var openedPopover;
+  let openedPopover;
   template.on('click', 'span.open-structure', function (e) {
     e.stopPropagation();
     e.preventDefault();
-    var self = $(this);
+    const self = $(this);
     if (self.attr('data-popovered') == 'true') {
       openedPopover = undefined;
       self.popover('hide');
@@ -730,7 +718,7 @@ export const post = function (individual, template, container, mode, extra) {
       }
     }
 
-    //return openFromStructure(uri);
+    // return openFromStructure(uri);
   });
 
   template.on('click', 'a.to-structure', function (e) {
@@ -739,8 +727,8 @@ export const post = function (individual, template, container, mode, extra) {
     openedPopover.popover('hide');
     openedPopover.attr('data-popovered', false);
     openedPopover = undefined;
-    var uri = $(this).attr('about');
-    var section = $(this).closest('section');
+    const uri = $(this).attr('about');
+    const section = $(this).closest('section');
     $('.section-header', section).click();
     return openFromStructure(uri);
   });
@@ -748,16 +736,16 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('click', 'a.expand.glyphicon-chevron-right', function (e) {
     e.stopPropagation();
     e.preventDefault();
-    var row = $(this).closest('div.value-row');
+    const row = $(this).closest('div.value-row');
     return openRow(row);
   });
 
   template.on('click', 'a.expanded.glyphicon-chevron-down', function (e) {
     e.stopPropagation();
     e.preventDefault();
-    var self = $(this);
+    const self = $(this);
     self.toggleClass('expanded glyphicon-chevron-right glyphicon-chevron-down');
-    var row = self.closest('div.value-row');
+    const row = self.closest('div.value-row');
     row.children('div.children').addClass('hidden');
     return false;
   });
@@ -765,19 +753,19 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('click', 'div.value-row', function (e) {
     e.stopPropagation();
     e.preventDefault();
-    var self = $(this);
+    const self = $(this);
 
-    var item = self.children('.item');
+    const item = self.children('.item');
     if (!item.hasClass('warning')) {
       $('.item.warning', template).removeClass('warning');
       item.addClass('warning');
     }
-    var uri = self.attr('resource');
+    const uri = self.attr('resource');
     return drawCards(new IndividualModel(uri));
   });
 
   template.on('dblclick', '#orgContent tbody tr', function (e) {
-    var uri = $(this).attr('resource');
+    const uri = $(this).attr('resource');
     if (uri == undefined) {
       console.log('Unexpected behavior: empty attr[resource]');
       return false;
@@ -788,9 +776,9 @@ export const post = function (individual, template, container, mode, extra) {
       }
       return Promise.resolve()
         .then(function () {
-          var rowInTree = $("#orgTree .children:not(.hidden)>div.value-row[resource='" + uri + "']", template);
+          const rowInTree = $("#orgTree .children:not(.hidden)>div.value-row[resource='" + uri + "']", template);
           if (rowInTree.length == 0) {
-            var parent = $('#orgTree div.item.warning', template).parent();
+            const parent = $('#orgTree div.item.warning', template).parent();
             return openRow(parent).then(function () {
               return $("div.value-row[resource='" + uri + "']", parent);
             });
@@ -805,23 +793,23 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   template.on('click', '.result-info-container .more-results', function (e) {
-    var self = $(this);
-    var type = self.data('search-type');
-    var query = searchHelperObj[type].query;
-    var from = searchHelperObj[type].handlered;
+    const self = $(this);
+    const type = self.data('search-type');
+    const query = searchHelperObj[type].query;
+    const from = searchHelperObj[type].handlered;
     return searchAndLoad(type, query, from).then(function (result) {
-      var container = self.closest('section');
+      const container = self.closest('section');
       return presentSearchResult(type, container, result);
     });
   });
 
   template.on('click', '.result-info-container .all-results', function (e) {
-    var self = $(this);
-    var type = self.data('search-type');
-    var query = searchHelperObj[type].query;
-    var from = searchHelperObj[type].handlered;
+    const self = $(this);
+    const type = self.data('search-type');
+    const query = searchHelperObj[type].query;
+    const from = searchHelperObj[type].handlered;
     return searchAndLoad(type, query, from, 200).then(function (result) {
-      var container = self.closest('section');
+      const container = self.closest('section');
       return presentSearchResult(type, container, result);
     });
   });
@@ -829,10 +817,10 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('click', 'a.glyphicon-zoom-in', function (e) {
     e.stopPropagation();
     e.preventDefault();
-    var self = $(this);
-    var uri = self.closest('[resource]').attr('resource');
-    var obj = new IndividualModel(uri);
-    var tmpl;
+    const self = $(this);
+    const uri = self.closest('[resource]').attr('resource');
+    let obj = new IndividualModel(uri);
+    let tmpl;
     if (obj.hasValue('rdf:type', 'v-s:Appointment')) {
       obj = obj['v-s:employee'][0];
       tmpl = undefined;
@@ -841,13 +829,12 @@ export const post = function (individual, template, container, mode, extra) {
     } else if (obj.hasValue('rdf:type', 'v-s:Organization')) {
       tmpl = undefined;
     }
-    //riot.route( ["#", obj.id, "#main", tmpl].join("/") );
     BrowserUtil.showModal(obj, tmpl);
     return false;
   });
 
   // Ctrl + Enter triggers search
-  function ctrlEnterHandler(e) {
+  function ctrlEnterHandler (e) {
     // if (e.ctrlKey && e.keyCode === 13) {
     //   $("#searchButton", template).click();
     // }
@@ -860,14 +847,14 @@ export const post = function (individual, template, container, mode, extra) {
     $(window).off('keyup', ctrlEnterHandler);
   });
 
-  function dropResultTables() {
-    var resultOrg = $('#resultOrg', template).hide();
+  function dropResultTables () {
+    const resultOrg = $('#resultOrg', template).hide();
     $('tbody', resultOrg).empty();
-    var resultDep = $('#resultDep', template).hide();
+    const resultDep = $('#resultDep', template).hide();
     $('tbody', resultDep).empty();
-    var resultApp = $('#resultApp', template).hide();
+    const resultApp = $('#resultApp', template).hide();
     $('tbody', resultApp).empty();
-    var resultPos = $('#resultPos', template).hide();
+    const resultPos = $('#resultPos', template).hide();
     $('tbody', resultPos).empty();
   }
 
@@ -875,7 +862,7 @@ export const post = function (individual, template, container, mode, extra) {
     searchOrgMode = individual.hasValue('v-s:managedOrganization') ? 'targetOrg' : 'allOrg';
     dropResultTables();
 
-    var searchText = $('#searchText input', template).val();
+    const searchText = $('#searchText input', template).val();
     if (searchText != '') {
       $('#searchButton', template).click();
     }

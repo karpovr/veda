@@ -4,10 +4,10 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var pre = $('pre', template),
-    txt = pre.text(),
-    re = new RegExp('"([w-]+:[w-]+)"', 'g'),
-    txt2 = txt.replace(re, "<a href='#/$1'>'$1'</a>");
+  const pre = $('pre', template);
+  const txt = pre.text();
+  const re = new RegExp('"([w-]+:[w-]+)"', 'g');
+  const txt2 = txt.replace(re, "<a href='#/$1'>'$1'</a>");
   pre.html(txt2);
 };
 

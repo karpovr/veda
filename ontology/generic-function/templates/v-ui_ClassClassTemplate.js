@@ -7,22 +7,21 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var propsContainer = $('#props', template);
-  var specsContainer = $('#specs', template);
-  var tmplContainer = $('#tmpl', template);
-  var modal = $($('#notification-modal-template').html());
-  var objContainer = $('.holder', modal);
-  var labelTemplate = new IndividualModel('v-ui:LabelLinkTemplate');
+  const propsContainer = $('#props', template);
+  const specsContainer = $('#specs', template);
+  const modal = $($('#notification-modal-template').html());
+  const objContainer = $('.holder', modal);
+  const labelTemplate = new IndividualModel('v-ui:LabelLinkTemplate');
 
-  var props = veda.ontology.getClassProperties(this.id);
+  const props = veda.ontology.getClassProperties(this.id);
   props.map(function (property_uri) {
-    var prop = new IndividualModel(property_uri);
-    var li = $('<li></li>').appendTo(propsContainer);
+    const prop = new IndividualModel(property_uri);
+    const li = $('<li></li>').appendTo(propsContainer);
     prop.present(li, labelTemplate).then(function (li) {
       if (!prop.hasValue('rdfs:domain', individual)) {
-        var small = $("<small class='text-muted'></small>").appendTo(li);
+        const small = $("<small class='text-muted'></small>").appendTo(li);
         individual.getSuperClasses().then(function (superClasses) {
-          var origin = prop['rdfs:domain'].filter(function (item) {
+          const origin = prop['rdfs:domain'].filter(function (item) {
             return superClasses.indexOf(item) >= 0;
           })[0];
           small.text(origin.id);
@@ -31,29 +30,31 @@ export const post = function (individual, template, container, mode, extra) {
     });
   });
 
-  var specs = veda.ontology.getClassSpecifications(this.id);
-  for (var property_uri in specs) {
-    var spec_uri = specs[property_uri];
-    var spec = new IndividualModel(spec_uri);
-    var li = $('<li>').appendTo(specsContainer);
-    spec.present(li, labelTemplate).then(function (li) {
-      if (!spec.hasValue('v-ui:forClass', individual)) {
-        var small = $("<small class='text-muted'></small>").appendTo(li);
-        individual.getSuperClasses().then(function (superClasses) {
-          var origin = spec['v-ui:forClass'].filter(function (item) {
-            return superClasses.indexOf(item) >= 0;
-          })[0];
-          small.text(origin.id);
-        });
-      }
-    });
+  const specs = veda.ontology.getClassSpecifications(this.id);
+  for (const property_uri in specs) {
+    if (specs.hasOwnProperty(property_uri)) {
+      const spec_uri = specs[property_uri];
+      const spec = new IndividualModel(spec_uri);
+      const li = $('<li>').appendTo(specsContainer);
+      spec.present(li, labelTemplate).then(function (li) {
+        if (!spec.hasValue('v-ui:forClass', individual)) {
+          const small = $("<small class='text-muted'></small>").appendTo(li);
+          individual.getSuperClasses().then(function (superClasses) {
+            const origin = spec['v-ui:forClass'].filter(function (item) {
+              return superClasses.indexOf(item) >= 0;
+            })[0];
+            small.text(origin.id);
+          });
+        }
+      });
+    }
   }
 
   template.on('click', 'a[href][resource]', function (e) {
     e.preventDefault();
-    var target = $(this);
-    var uri = target.attr('href').split('/').pop();
-    var object = new IndividualModel(uri);
+    const target = $(this);
+    const uri = target.attr('href').split('/').pop();
+    const object = new IndividualModel(uri);
     objContainer.empty();
     object.present(objContainer);
     modal.modal('show');
@@ -61,32 +62,32 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#add-template', template).click(function () {
-    var _class = new IndividualModel('v-ui:ClassTemplate'),
-      classTemplate = new IndividualModel();
+    const _class = new IndividualModel('v-ui:ClassTemplate');
+    const classTemplate = new IndividualModel();
     classTemplate['rdf:type'] = [_class];
     classTemplate['v-ui:forClass'] = [individual];
     riot.route(['#', classTemplate.id, '#main', undefined, 'edit'].join('/'));
   });
 
   $('#add-model', template).click(function () {
-    var _class = new IndividualModel('v-ui:ClassModel'),
-      classTemplate = new IndividualModel();
+    const _class = new IndividualModel('v-ui:ClassModel');
+    const classTemplate = new IndividualModel();
     classTemplate['rdf:type'] = [_class];
     classTemplate['v-ui:forClass'] = [individual];
     riot.route(['#', classTemplate.id, '#main', undefined, 'edit'].join('/'));
   });
 
   $('#add-property', template).click(function () {
-    var _class = new IndividualModel('rdf:Property'),
-      classTemplate = new IndividualModel();
+    const _class = new IndividualModel('rdf:Property');
+    const classTemplate = new IndividualModel();
     classTemplate['rdf:type'] = [_class];
     classTemplate['rdfs:domain'] = [individual];
     riot.route(['#', classTemplate.id, '#main', undefined, 'edit'].join('/'));
   });
 
   $('#add-specification', template).click(function () {
-    var _class = new IndividualModel('v-ui:PropertySpecification'),
-      classTemplate = new IndividualModel();
+    const _class = new IndividualModel('v-ui:PropertySpecification');
+    const classTemplate = new IndividualModel();
     classTemplate['rdf:type'] = [_class];
     classTemplate['v-ui:forClass'] = [individual];
     riot.route(['#', classTemplate.id, '#main', undefined, 'edit'].join('/'));

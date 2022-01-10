@@ -7,9 +7,9 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var actions = $('.actions', template);
-  var scriptBlock = $('.script', template);
-  var audience = $('.audience', template);
+  const actions = $('.actions', template);
+  const scriptBlock = $('.script', template);
+  const audience = $('.audience', template);
 
   return veda.user.isMemberOf('cfg:SuperUser').then(function (isSuperUser) {
     if (!isSuperUser) {
@@ -17,8 +17,8 @@ export const pre = function (individual, template, container, mode, extra) {
       scriptBlock.remove();
       audience.remove();
     } else {
-      var notify = $('.notify', template);
-      var clientNotification = new IndividualModel('cfg:ClientNotification');
+      const notify = $('.notify', template);
+      const clientNotification = new IndividualModel('cfg:ClientNotification');
       clientNotification.load().then(function (clientNotification) {
         if (clientNotification.hasValue('rdf:value', individual)) {
           notify.addClass('disabled').attr('disabled', 'disabled');
@@ -27,14 +27,14 @@ export const pre = function (individual, template, container, mode, extra) {
         }
         notify.click(function () {
           try {
-            var newsLinks = clientNotification['rdf:value'];
+            const newsLinks = clientNotification['rdf:value'];
             newsLinks.unshift(individual);
             clientNotification['rdf:value'] = newsLinks.slice(0, 5);
             clientNotification.save();
             notify.addClass('disabled').attr('disabled', 'disabled');
           } catch (error) {
-            var notification = new Notify();
-            notification('danger', { name: error });
+            const notification = new Notify();
+            notification('danger', {name: error});
           }
         });
       });

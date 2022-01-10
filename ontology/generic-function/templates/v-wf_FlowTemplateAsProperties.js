@@ -5,13 +5,13 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function handler(values) {
+  function handler (values) {
     if (veda.net) {
       $.each(veda.net.getAllConnections(), function (idx, connection) {
         if (connection.id === individual.id) {
-          var value = typeof values[0] === 'undefined' ? '' : values[0];
+          const value = typeof values[0] === 'undefined' ? '' : values[0];
           if (connection.getOverlay('flowLabel') == undefined) {
-            connection.addOverlay(['Label', { label: value, location: 0.5, id: 'flowLabel' }]);
+            connection.addOverlay(['Label', {label: value, location: 0.5, id: 'flowLabel'}]);
           } else {
             connection.getOverlay('flowLabel').setLabel(value);
           }

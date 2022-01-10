@@ -2,16 +2,16 @@ import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
 import riot from 'riot';
-import touchswipe from 'touchswipe';
+import 'touchswipe';
 
-export const pre = function (individual, template, container, mode, extra) {
+export const pre = function (individual, template, container, mode) {
   template = $(template);
   container = $(container);
 
-  var self = individual,
-    searchBlankTemplate = self.hasValue('v-fs:searchBlankTemplate') ? self['v-fs:searchBlankTemplate'][0] : undefined,
-    searchResultTemplate = self.hasValue('v-fs:searchResultTemplate') ? self['v-fs:searchResultTemplate'][0] : undefined,
-    searchResultContainer = $('.search-result', template);
+  const self = individual;
+  const searchBlankTemplate = self.hasValue('v-fs:searchBlankTemplate') ? self['v-fs:searchBlankTemplate'][0] : undefined;
+  let searchResultTemplate = self.hasValue('v-fs:searchResultTemplate') ? self['v-fs:searchResultTemplate'][0] : undefined;
+  const searchResultContainer = $('.search-result', template);
 
   if (!searchBlankTemplate) {
     $('.results-load-buttons', template).detach().appendTo(template);
@@ -27,19 +27,19 @@ export const pre = function (individual, template, container, mode, extra) {
   template.one('remove', function () {
     $('body').off('keydown', enableSwipe).off('keyup', disableSwipe);
   });
-  function disableSwipe(e) {
+  function disableSwipe (e) {
     if (e.which === 17) {
       $('.search-result', template).addClass('noSwipe').removeClass('swipe');
     }
   }
-  function enableSwipe(e) {
+  function enableSwipe (e) {
     if (e.ctrlKey) {
       $('.search-result', template).addClass('swipe').removeClass('noSwipe');
     }
   }
 
-  var prevDistance = 0,
-    delta = 0;
+  let prevDistance = 0;
+  let delta = 0;
 
   $('.search-result', template).swipe({
     swipeStatus: function (event, phase, direction, distance, duration) {
@@ -78,24 +78,24 @@ export const pre = function (individual, template, container, mode, extra) {
   return searchResultTemplate
     .load()
     .then(function (searchResultTemplate) {
-      var templateString = searchResultTemplate['v-ui:template'][0].toString();
+      const templateString = searchResultTemplate['v-ui:template'][0].toString();
       return import('/templates/' + templateString).then(function (templateModule) {
         return templateModule.html;
       });
     })
     .then(function (templateString) {
-      var searchResultTemplate = $(templateString);
-      var resultContainer = $('.result-container', searchResultTemplate);
+      const searchResultTemplate = $(templateString);
+      const resultContainer = $('.result-container', searchResultTemplate);
       if (resultContainer.attr('data-template')) {
-        var resultTemplateIndividual = new IndividualModel(resultContainer.attr('data-template'));
+        const resultTemplateIndividual = new IndividualModel(resultContainer.attr('data-template'));
         resultContainer.empty();
         return resultTemplateIndividual.load().then(function (resultTemplateIndividual) {
-          var resultTemplate = resultTemplateIndividual['v-ui:template'][0].toString();
+          const resultTemplate = resultTemplateIndividual['v-ui:template'][0].toString();
           individual.resultTemplate = resultTemplate;
           searchResultContainer.append(searchResultTemplate);
         });
       } else {
-        var resultTemplate = resultContainer.html();
+        const resultTemplate = resultContainer.html();
         resultContainer.empty();
         individual.resultTemplate = resultTemplate;
         searchResultContainer.append(searchResultTemplate);
@@ -103,19 +103,19 @@ export const pre = function (individual, template, container, mode, extra) {
     });
 };
 
-export const post = function (individual, template, container, mode, extra) {
+export const post = function (individual, template, container, mode) {
   template = $(template);
   container = $(container);
 
   // Make position fixed for buttons bar that doesn't fit the window
-  function checkOffset(main, actions, actionsStaticHeight, placeholder) {
-    var mainTop = main.offset().top;
-    var mainHeight = main.height();
-    var windowHeight = window.innerHeight;
-    var windowTop = window.scrollY || window.pageYOffset;
-    var actionsStaticTop = placeholder.offset().top;
-    var actions_inside_viewport = windowTop <= actionsStaticTop && actionsStaticTop < windowTop + windowHeight;
-    var main_inside_viewport = windowTop <= mainTop + mainHeight - actionsStaticHeight && mainTop + actionsStaticHeight < windowTop + windowHeight;
+  function checkOffset (main, actions, actionsStaticHeight, placeholder) {
+    const mainTop = main.offset().top;
+    const mainHeight = main.height();
+    const windowHeight = window.innerHeight;
+    const windowTop = window.scrollY || window.pageYOffset;
+    const actionsStaticTop = placeholder.offset().top;
+    const actions_inside_viewport = windowTop <= actionsStaticTop && actionsStaticTop < windowTop + windowHeight;
+    const main_inside_viewport = windowTop <= mainTop + mainHeight - actionsStaticHeight && mainTop + actionsStaticHeight < windowTop + windowHeight;
     if (!actions_inside_viewport && main_inside_viewport) {
       if (!actions.hasClass('actions-fixed')) {
         placeholder.css('height', actionsStaticHeight);
@@ -131,46 +131,45 @@ export const post = function (individual, template, container, mode, extra) {
     }
   }
   setTimeout(function () {
-    var main = template;
-    var actions = $('.search-actions', template);
+    const main = template;
+    const actions = $('.search-actions', template);
     if (!actions.length) {
       return;
     }
-    var actionsStaticHeight = actions.height();
-    var placeholder = $('<div></div>').insertBefore(actions);
+    const actionsStaticHeight = actions.height();
+    const placeholder = $('<div></div>').insertBefore(actions);
     checkOffset(main, actions, actionsStaticHeight, placeholder);
     $(window).on('scroll', scrollHandler);
     template.one('remove', function () {
       $(window).off('scroll', scrollHandler);
     });
-    function scrollHandler() {
+    function scrollHandler () {
       checkOffset(main, actions, actionsStaticHeight, placeholder);
     }
   }, 500);
 
-  var self = individual,
-    searchBlankContainer = $('.search-form', template),
-    searchResultContainer = $('.search-result', template),
-    searchButton = $('#search-button.search-button', template),
-    moreResults = $('.more-results', template),
-    allResults = $('.all-results', template),
-    noMoreResults = $('.no-more-results', template),
-    searchError = $('.search-error', template),
-    searchBlank = self.hasValue('v-fs:searchBlank') ? self['v-fs:searchBlank'][0] : undefined,
-    searchBlankTemplate = self.hasValue('v-fs:searchBlankTemplate') ? self['v-fs:searchBlankTemplate'][0] : undefined,
-    resultContainer = $('.result-container', template),
-    notFound = $('.not-found', template),
-    statsTop = $('.stats-top', template);
+  const self = individual;
+  const searchBlankContainer = $('.search-form', template);
+  const searchResultContainer = $('.search-result', template);
+  const searchButton = $('#search-button.search-button', template);
+  const moreResults = $('.more-results', template);
+  const allResults = $('.all-results', template);
+  const noMoreResults = $('.no-more-results', template);
+  const searchError = $('.search-error', template);
+  const searchBlank = self.hasValue('v-fs:searchBlank') ? self['v-fs:searchBlank'][0] : undefined;
+  const searchBlankTemplate = self.hasValue('v-fs:searchBlankTemplate') ? self['v-fs:searchBlankTemplate'][0] : undefined;
+  const resultContainer = $('.result-container', template);
+  const notFound = $('.not-found', template);
 
   // Set columns
-  //individual.hiddenColumns = individual.hiddenColumns || {};
+  // individual.hiddenColumns = individual.hiddenColumns || {};
   //
-  //var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
+  // var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
   //  e.stopPropagation();
-  //});
-  //var isHasVisibleColumns = individual.hasValue("v-fs:hasVisibleColumns");
-  //var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
-  //if (checkTmpl.length) {
+  // });
+  // var isHasVisibleColumns = individual.hasValue("v-fs:hasVisibleColumns");
+  // var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
+  // if (checkTmpl.length) {
   //  checkTmpl = checkTmpl.get(0).outerHTML;
   //  $(".search-result table > thead > tr:last > th", template).each(function (index) {
   //    var th = $(this);
@@ -216,7 +215,7 @@ export const post = function (individual, template, container, mode, extra) {
   //      individual.resultTemplate = individual.resultTemplate.map(function () { return this.outerHTML; }).get().join("");
   //    }
   //  });
-  //}
+  // }
 
   // Remember scroll position
   template.one('remove', function () {
@@ -224,7 +223,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   // Scroll to position
-  function scrollTo(position) {
+  function scrollTo (position) {
     if (position > 0) {
       $('html, body').animate({
         scrollTop: position,
@@ -233,8 +232,8 @@ export const post = function (individual, template, container, mode, extra) {
   }
 
   // Search handler
-  function searchHandler() {
-    var searchButtons = $('.search-button', template);
+  function searchHandler () {
+    const searchButtons = $('.search-button', template);
     searchError.addClass('hidden');
     toggleSpin(searchButtons);
     self
@@ -242,7 +241,7 @@ export const post = function (individual, template, container, mode, extra) {
       .then(renderResult)
       .then(clearSelected)
       .then(function () {
-        var position = self.scroll || $('.results', template).offset().top;
+        const position = self.scroll || $('.results', template).offset().top;
         scrollTo(position);
         delete self.scroll;
         toggleSpin(searchButtons);
@@ -262,7 +261,7 @@ export const post = function (individual, template, container, mode, extra) {
   searchButton.click(searchHandler);
 
   // Ctrl + Enter triggers search
-  function ctrlEnterHandler(e) {
+  function ctrlEnterHandler (e) {
     if (e.ctrlKey && e.keyCode === 13) {
       searchHandler();
     }
@@ -273,7 +272,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   // More results handler
-  function moreResultsHandler() {
+  function moreResultsHandler () {
     return self
       .search(self['v-fs:cursor'][0])
       .then(renderResult)
@@ -287,12 +286,12 @@ export const post = function (individual, template, container, mode, extra) {
 
   // All results button
   allResults.click(function () {
-    var warn = new IndividualModel('v-s:AreYouSure')['rdfs:label'].map(CommonUtil.formatValue).join(' ');
+    const warn = new IndividualModel('v-s:AreYouSure')['rdfs:label'].map(CommonUtil.formatValue).join(' ');
     if (self['v-fs:estimated'][0] - self['v-fs:cursor'][0] < 100 || confirm(warn)) {
       loadAll();
     }
   });
-  function loadAll() {
+  function loadAll () {
     if (self['v-fs:cursor'][0] < self['v-fs:estimated'][0] && template.is(':visible')) {
       moreResultsHandler().then(loadAll);
     }
@@ -300,27 +299,27 @@ export const post = function (individual, template, container, mode, extra) {
 
   // Double click on result table row routes to search result
   $('.search-result', template).on('dblclick', '.result-container > [resource]', function () {
-    var uri = $(this).attr('resource');
+    const uri = $(this).attr('resource');
     riot.route('#/' + uri);
   });
   // Mark clicked row
   $('.search-result', template).on('click', '.result-container > [resource]', function () {
-    var that = $(this);
+    const that = $(this);
     that.addClass('marked').siblings('.marked').removeClass('marked');
     self.marked = that.attr('resource');
   });
 
   // Manage sort
-  var sortBy = '',
-    dir = '';
-  var tmp = self['v-fs:sortOrder'][0].split(' ');
+  let sortBy = '';
+  let dir = '';
+  const tmp = self['v-fs:sortOrder'][0].split(' ');
   sortBy = tmp[0];
   dir = tmp[1];
   $('.orderby', template).each(function () {
-    var header = $(this);
-    var a = $("<a href='#' class='text-muted glyphicon glyphicon-sort-by-attributes'></a>");
+    const header = $(this);
+    const a = $("<a href='#' class='text-muted glyphicon glyphicon-sort-by-attributes'></a>");
     header.prepend(a, ' ');
-    var property_uri = header.attr('data-orderby');
+    const property_uri = header.attr('data-orderby');
     if (sortBy.indexOf(property_uri) >= 0) {
       a.removeClass('text-muted');
       if (dir === 'desc') {
@@ -330,9 +329,9 @@ export const post = function (individual, template, container, mode, extra) {
     a.click(function (e) {
       e.preventDefault();
       e.stopPropagation();
-      var $this = $(this);
+      const $this = $(this);
       $('.orderby a', template).addClass('text-muted');
-      var dir = $this.hasClass('glyphicon-sort-by-attributes-alt') ? 'asc' : 'desc';
+      const dir = $this.hasClass('glyphicon-sort-by-attributes-alt') ? 'asc' : 'desc';
       $this.removeClass('text-muted').toggleClass('glyphicon-sort-by-attributes glyphicon-sort-by-attributes-alt');
       self['v-fs:sortOrder'] = ["'" + property_uri + "' " + dir];
       searchHandler.call(this);
@@ -340,12 +339,12 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   // Select results
-  var toggleSelectAll = searchResultContainer.find('.toggle-select-all');
+  const toggleSelectAll = searchResultContainer.find('.toggle-select-all');
   searchResultContainer.on('click', '.toggle-select', toggleSelect);
 
   toggleSelectAll.click(function () {
-    var selectedL = self['v-fs:selected'].length;
-    var resultsL = resultContainer.children().length;
+    const selectedL = self['v-fs:selected'].length;
+    const resultsL = resultContainer.children().length;
     if (resultsL !== 0 && selectedL !== 0) {
       clearSelected();
     } else if (resultsL !== 0 && selectedL === 0) {
@@ -353,9 +352,9 @@ export const post = function (individual, template, container, mode, extra) {
     }
     setToggleSelectAll();
   });
-  function setToggleSelectAll() {
-    var selectedL = self['v-fs:selected'].length;
-    var resultsL = resultContainer.children().length;
+  function setToggleSelectAll () {
+    const selectedL = self['v-fs:selected'].length;
+    const resultsL = resultContainer.children().length;
     if (resultsL !== 0 && resultsL === selectedL) {
       toggleSelectAll.prop('checked', true);
       toggleSelectAll.prop('indeterminate', false);
@@ -366,24 +365,24 @@ export const post = function (individual, template, container, mode, extra) {
       toggleSelectAll.prop('checked', false);
     }
   }
-  function clearSelected() {
+  function clearSelected () {
     self.clearValue('v-fs:selected');
     searchResultContainer.find('.toggle-select:checked').prop('checked', false);
   }
-  function selectAll() {
+  function selectAll () {
     self.clearValue('v-fs:selected');
     searchResultContainer
       .find('.toggle-select')
       .prop('checked', true)
       .each(function () {
-        var result_uri = $(this).closest('[resource]').attr('resource');
+        const result_uri = $(this).closest('[resource]').attr('resource');
         self.addValue('v-fs:selected', new IndividualModel(result_uri));
       });
   }
-  function toggleSelect() {
-    var $this = $(this);
-    var result_uri = $this.closest('[resource]').attr('resource');
-    var result = new IndividualModel(result_uri);
+  function toggleSelect () {
+    const $this = $(this);
+    const result_uri = $this.closest('[resource]').attr('resource');
+    const result = new IndividualModel(result_uri);
     if ($this.is(':checked')) {
       self.addValue('v-fs:selected', result);
     } else {
@@ -396,7 +395,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   // Render result
-  function renderResult(resultDelta) {
+  function renderResult (resultDelta) {
     $('.results', template).removeClass('hidden');
 
     // Toggle "more results" button & "no more results" alert
@@ -418,8 +417,8 @@ export const post = function (individual, template, container, mode, extra) {
     }
 
     // Render each result
-    var total = self['v-fs:authorized'][0];
-    var delta = resultDelta.length;
+    const total = self['v-fs:authorized'][0];
+    const delta = resultDelta.length;
 
     // New search triggered
     if (total === delta) {
@@ -438,11 +437,11 @@ export const post = function (individual, template, container, mode, extra) {
             tmpl.find('.toggle-select').prop('checked', self.hasValue('v-fs:selected', result));
 
             $('td', tmpl).each(function () {
-              var text = this.innerText || this.textContent;
+              const text = this.innerText || this.textContent;
               if (text && text.length > 100) {
-                var $this = $(this);
-                var contents = $this.contents();
-                var wrapper = $("<div class='td-wrapper'></div>").append(contents);
+                const $this = $(this);
+                const contents = $this.contents();
+                const wrapper = $("<div class='td-wrapper'></div>").append(contents);
                 $this.empty().append(wrapper);
                 wrapper
                   .popover({
@@ -453,7 +452,7 @@ export const post = function (individual, template, container, mode, extra) {
                   .tooltip({
                     title: new IndividualModel('v-fs:ClickToViewContent')['rdfs:label'].map(CommonUtil.formatValue).join(' '),
                     placement: 'bottom',
-                    delay: { show: 750, hide: 0 },
+                    delay: {show: 750, hide: 0},
                   });
               }
             });
@@ -467,9 +466,9 @@ export const post = function (individual, template, container, mode, extra) {
   }
 
   // Spinner
-  function toggleSpin(el) {
-    var $el = $(el);
-    var hasSpinner = $el.children('.fa-spinner');
+  function toggleSpin (el) {
+    const $el = $(el);
+    const hasSpinner = $el.children('.fa-spinner');
     if (hasSpinner.length) {
       $el.removeClass('disabled');
       hasSpinner.remove();
@@ -480,16 +479,16 @@ export const post = function (individual, template, container, mode, extra) {
   }
 
   // Read extra parameters from URL
-  var hash = window.location.hash;
-  var tokens = decodeURI(hash).slice(2).split('/'),
-    uri = tokens[0],
-    extra = tokens[4];
+  const hash = window.location.hash;
+  const tokens = decodeURI(hash).slice(2).split('/');
+  const uri = tokens[0];
+  let extra = tokens[4];
   if (uri === self.id) {
     if (extra) {
       extra = extra.split('&').reduce(function (acc, pair) {
-        var split = pair.split('='),
-          property_uri = split[0] || '',
-          values = split[1].split('|') || '';
+        const split = pair.split('=');
+        const property_uri = split[0] || '';
+        const values = split[1].split('|') || '';
         acc[property_uri] = acc[property_uri] || [];
         values.forEach(function (value) {
           acc[property_uri].push(parse(property_uri, value));
@@ -498,26 +497,26 @@ export const post = function (individual, template, container, mode, extra) {
       }, {});
     }
   }
-  function parse(property_uri, value) {
-    var property = new IndividualModel(property_uri);
-    var range = property.hasValue('rdfs:range') ? property['rdfs:range'][0].id : 'rdfs:Resource';
-    var parsed;
+  function parse (property_uri, value) {
+    const property = new IndividualModel(property_uri);
+    const range = property.hasValue('rdfs:range') ? property['rdfs:range'][0].id : 'rdfs:Resource';
+    let parsed;
     switch (range) {
-      case 'xsd:string':
-        parsed = value;
-        break;
-      case 'xsd:integer':
-      case 'xsd:decimal':
-        parsed = parseFloat(value.split(' ').join('').split(',').join('.'));
-        break;
-      case 'xsd:boolean':
-        parsed = value === 'true';
-        break;
-      case 'xsd:dateTime':
-        parsed = new Date(value);
-        break;
-      default:
-        parsed = new IndividualModel(value);
+    case 'xsd:string':
+      parsed = value;
+      break;
+    case 'xsd:integer':
+    case 'xsd:decimal':
+      parsed = parseFloat(value.split(' ').join('').split(',').join('.'));
+      break;
+    case 'xsd:boolean':
+      parsed = value === 'true';
+      break;
+    case 'xsd:dateTime':
+      parsed = new Date(value);
+      break;
+    default:
+      parsed = new IndividualModel(value);
     }
     return parsed;
   }
@@ -539,7 +538,7 @@ export const post = function (individual, template, container, mode, extra) {
         $('.params', template).remove();
         $('#reset-button.reset-button', template).remove();
       }
-      function setupBlank() {
+      function setupBlank () {
         return searchBlank.initBlank().then(function (blankObject) {
           blankObject.on('propertyModified', hideResults);
           template.one('remove', function () {
@@ -547,8 +546,10 @@ export const post = function (individual, template, container, mode, extra) {
           });
           // Populate blank with extra parameters from URL
           if (extra) {
-            for (var property_uri in extra) {
-              blankObject[property_uri] = extra[property_uri];
+            for (const property_uri in extra) {
+              if (extra.hasOwnProperty(property_uri)) {
+                blankObject[property_uri] = extra[property_uri];
+              }
             }
           }
           if (searchBlankTemplate && searchBlankContainer.length) {
@@ -557,7 +558,7 @@ export const post = function (individual, template, container, mode, extra) {
           }
         });
       }
-      function resetBlank() {
+      function resetBlank () {
         return searchBlank.resetBlank().then(function (blankObject) {
           blankObject.on('propertyModified', hideResults);
           template.one('remove', function () {
@@ -565,8 +566,10 @@ export const post = function (individual, template, container, mode, extra) {
           });
           // Populate blank with extra parameters from URL
           if (extra) {
-            for (var property_uri in extra) {
-              blankObject[property_uri] = extra[property_uri];
+            for (const property_uri in extra) {
+              if (extra.hasOwnProperty(property_uri)) {
+                blankObject[property_uri] = extra[property_uri];
+              }
             }
           }
           if (searchBlankTemplate && searchBlankContainer.length) {
@@ -575,7 +578,7 @@ export const post = function (individual, template, container, mode, extra) {
           }
         });
       }
-      function hideResults() {
+      function hideResults () {
         $('.results', template).addClass('hidden');
       }
     })

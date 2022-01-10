@@ -5,7 +5,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#copy-log', template).click((e) => {
-    let temp = $('<textarea>');
+    const temp = $('<textarea>');
     $('.modal').append(temp);
     temp.val(individual['rdfs:comment'][0]).select();
     document.execCommand('copy');
@@ -18,9 +18,9 @@ export const post = function (individual, template, container, mode, extra) {
     $(e.target).siblings().slideToggle();
   });
 
-  var dd = individual['rdfs:comment'][0];
-  var pre = $('pre', template);
-  var anchored = dd.replace(/([a-z0-9_-]+:[a-z0-9_-]*)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>");
+  const dd = individual['rdfs:comment'][0];
+  const pre = $('pre', template);
+  const anchored = dd.replace(/([a-z0-9_-]+:[a-z0-9_-]*)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>");
   pre.html(anchored);
 };
 

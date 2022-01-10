@@ -6,7 +6,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#subject', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:permissionSubject'] = [new IndividualModel(uri)];
     } else {
@@ -15,7 +15,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#subjectGroup', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:subjectGroupGenerator'] = [new IndividualModel(uri)];
     } else {
@@ -24,7 +24,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#object', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:permissionObject'] = [new IndividualModel(uri)];
     } else {
@@ -33,7 +33,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#objectGroup', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:objectGroupGenerator'] = [new IndividualModel(uri)];
     } else {

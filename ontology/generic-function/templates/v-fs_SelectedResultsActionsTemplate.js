@@ -8,30 +8,30 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var self = this;
+  const self = this;
   self.on('v-fs:selected', populateOps);
   template.one('remove', function () {
     self.off('v-fs:selected', populateOps);
   });
-  var populated;
+  let populated;
   if (self.hasValue('v-fs:selected')) {
     populateOps();
   }
   $('.dropdown-menu', template).on('click', '[resource]', createOp);
   $('.single-operation', template).on('click', createOp);
 
-  function populateOps() {
+  function populateOps () {
     template.toggleClass('hidden', !self.hasValue('v-fs:selected'));
     if (populated) {
       return;
     }
     populated = true;
-    var multi = $('.multi-operation', template);
-    var list = $('.dropdown-menu', template);
-    var listTemplate = "<li><a about='@' href='#' property='rdfs:label'></a></li>";
-    var single = $('.single-operation', template);
-    var singleTemplate = "<span about='@' href='#' property='rdfs:label'></span>";
-    var applicableOps = self['v-fs:applicableOperation'];
+    const multi = $('.multi-operation', template);
+    const list = $('.dropdown-menu', template);
+    const listTemplate = "<li><a about='@' href='#' property='rdfs:label'></a></li>";
+    const single = $('.single-operation', template);
+    const singleTemplate = "<span about='@' href='#' property='rdfs:label'></span>";
+    let applicableOps = self['v-fs:applicableOperation'];
     return Backend.query({
       ticket: veda.ticket,
       query: "'rdf:type' === 'owl:Class' && 'rdfs:subClassOf' === 'v-s:GenericOperation'",
@@ -66,20 +66,20 @@ export const pre = function (individual, template, container, mode, extra) {
       });
   }
 
-  function createOp(e) {
+  function createOp (e) {
     e.preventDefault();
-    var $this = $(this);
+    const $this = $(this);
     if ($this.hasClass('disabled')) {
       return;
     }
-    var operationClassUri = $this.attr('resource') || $this.children().first().attr('resource'),
-      operationClass = new IndividualModel(operationClassUri),
-      operation = new IndividualModel(),
-      operationContainer = $('.operation-container', template).empty();
+    const operationClassUri = $this.attr('resource') || $this.children().first().attr('resource');
+    const operationClass = new IndividualModel(operationClassUri);
+    const operation = new IndividualModel();
+    $('.operation-container', template).empty();
     operation['rdf:type'] = [operationClass];
-    //operation["v-s:dataQuery"] = self["v-fs:query"];
+    // operation["v-s:dataQuery"] = self["v-fs:query"];
     operation['v-s:data'] = self['v-fs:selected'].slice();
-    var modal = BrowserUtil.showSmallModal(operation);
+    const modal = BrowserUtil.showSmallModal(operation);
     modal.on('click', '.action#start', function () {
       self['v-fs:operation'] = [operation];
       modal.on('hidden.bs.modal', function () {

@@ -4,20 +4,20 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var find = container.siblings('.search-actions').find('#search-button.search-button');
-  var customFind = $('#custom-search-button.search-button', template);
+  const find = container.siblings('.search-actions').find('#search-button.search-button');
+  const customFind = $('#custom-search-button.search-button', template);
   customFind.click(function () {
     find.click();
   });
 
   $('input', template).keydown(function (e) {
     if (e.which === 13 && this.value) {
-      var value = this.value;
+      const value = this.value;
       individual.set('*', [value]);
       find.click();
     }
   });
-  function propertyModifiedHandler() {
+  function propertyModifiedHandler () {
     if (individual.hasValue('*')) {
       customFind.removeAttr('disabled', 'disabled');
       find.removeAttr('disabled', 'disabled');

@@ -5,12 +5,12 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var blank = new IndividualModel('v-s:ContactsInUnitSearchRegistryBlank');
+  const blank = new IndividualModel('v-s:ContactsInUnitSearchRegistryBlank');
   return blank.load().then(function (blank) {
     blank.initBlank().then(function (blankObject) {
       if (!blankObject.hasValue('v-s:parentUnit', individual)) {
         blankObject['v-s:parentUnit'] = [individual];
-        var search = new IndividualModel('v-s:ContactsInUnitSearch');
+        const search = new IndividualModel('v-s:ContactsInUnitSearch');
         return search.load().then(function (search) {
           search['v-fs:searchResult'] = [];
         });

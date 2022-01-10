@@ -4,10 +4,10 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  //email
+  // email
   if (individual.hasValue('v-s:hasCommunicationMeanChannel', 'd:a1iwni0b54fvcz41vuts08bxqsh')) {
     $('.simple-text', template).remove();
-    var mailto = individual['v-s:description'][0];
+    const mailto = individual['v-s:description'][0];
     $('a.email-link', template).attr('href', 'mailto:' + mailto);
   } else {
     $('a.email-link', template).remove();

@@ -5,15 +5,15 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var membershipRegistryBlank = new IndividualModel('v-s:MembershipRegistryBlank');
-  var membershipRegistryBlankPromise = membershipRegistryBlank.load().then(function (membershipRegistryBlank) {
+  const membershipRegistryBlank = new IndividualModel('v-s:MembershipRegistryBlank');
+  const membershipRegistryBlankPromise = membershipRegistryBlank.load().then(function (membershipRegistryBlank) {
     delete membershipRegistryBlank.object;
     membershipRegistryBlank['v-s:memberOf'] = [individual];
     return membershipRegistryBlank.init();
   });
 
-  var membershipBlank = new IndividualModel('v-s:MembershipBlank');
-  var membershipBlankPromise = membershipBlank.load().then(function (membershipBlank) {
+  const membershipBlank = new IndividualModel('v-s:MembershipBlank');
+  const membershipBlankPromise = membershipBlank.load().then(function (membershipBlank) {
     delete membershipBlank.object;
     membershipBlank['v-s:memberOf'] = [individual];
     return membershipBlank.init();

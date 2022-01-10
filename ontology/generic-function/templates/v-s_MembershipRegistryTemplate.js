@@ -6,7 +6,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   $('#memberOf', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:memberOf'] = [new IndividualModel(uri)];
     } else {
@@ -15,7 +15,7 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#resource', template).change(function () {
-    var uri = $(this).val();
+    const uri = $(this).val();
     if (uri) {
       individual['v-s:resource'] = [new IndividualModel(uri)];
     } else {

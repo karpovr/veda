@@ -34,12 +34,12 @@ export const post = function (individual, template, container, mode, extra) {
   });
   delegatedPositionHandler(individual['v-s:delegatedPosition']);
 
-  var positionTemplate = $('#positions', template).html();
+  const positionTemplate = $('#positions', template).html();
   $('#positions', template)
     .empty()
     .on('click', 'input', function (e) {
-      var id = $(this).prop('id');
-      var position = new IndividualModel(id);
+      const id = $(this).prop('id');
+      const position = new IndividualModel(id);
       if ($(this).is(':checked')) {
         individual['v-s:delegatedPosition'] = individual['v-s:delegatedPosition'].concat(position);
       } else {
@@ -49,31 +49,31 @@ export const post = function (individual, template, container, mode, extra) {
       }
     });
 
-  function delegatedPositionHandler(values) {
+  function delegatedPositionHandler (values) {
     if (values.length) {
       $('#positions', template).removeClass('has-error');
     } else {
       $('#positions', template).addClass('has-error');
     }
   }
-  function extractEmployee(property_uri, values) {
+  function extractEmployee (property_uri, values) {
     if (values.length && values[0].hasValue('rdf:type', 'v-s:Appointment')) {
       individual[property_uri] = values[0]['v-s:employee'];
     }
   }
-  function delegatorHandler(values) {
+  function delegatorHandler (values) {
     $('#positions', template).empty();
     if (values.length) {
-      var delegator = values[0];
-      var queryStr = "( 'rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "' )";
-      var delegatedPositions = [];
+      const delegator = values[0];
+      const queryStr = "( 'rdf:type' === 'v-s:Appointment' && 'v-s:employee' == '" + delegator.id + "' )";
+      const delegatedPositions = [];
       Backend.query(veda.ticket, queryStr)
         .then(function (queryResult) {
           return Backend.get_individuals(veda.ticket, queryResult.result);
         })
         .then(function (appointments) {
-          var positions_ids = appointments.map(function (appointment_json) {
-            var appointment = new IndividualModel(appointment_json);
+          const positions_ids = appointments.map(function (appointment_json) {
+            const appointment = new IndividualModel(appointment_json);
             if (appointment.hasValue('v-s:dateFrom')) {
               delegatedPositions.push(appointment['v-s:occupation'][0].id);
             }
@@ -86,10 +86,10 @@ export const post = function (individual, template, container, mode, extra) {
         })
         .then(function (positions) {
           positions.map(function (position_json) {
-            var position = new IndividualModel(position_json);
-            var tmpl = $(positionTemplate);
-            var input = tmpl.find('.input');
-            var label = tmpl.find('.position-label');
+            const position = new IndividualModel(position_json);
+            const tmpl = $(positionTemplate);
+            const input = tmpl.find('.input');
+            const label = tmpl.find('.position-label');
             if (individual.hasValue('v-s:delegatedPosition', position)) {
               input.prop('checked', 'checked');
             }

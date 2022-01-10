@@ -6,7 +6,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('input', template).keydown(function (e) {
     if (e.which === 13) {
-      var value = this.value;
+      const value = this.value;
       individual.set('*', [value]);
       container.siblings('.search-button').click();
     }

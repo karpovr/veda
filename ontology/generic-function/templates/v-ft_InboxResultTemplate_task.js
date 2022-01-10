@@ -9,10 +9,10 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   // Remove completed tasks from inbox & outbox
-  var folder = decodeURIComponent(location.hash).substr(2).split('/')[0];
-  var remove = folder !== 'v-ft:Completed';
+  const folder = decodeURIComponent(location.hash).substr(2).split('/')[0];
+  const remove = folder !== 'v-ft:Completed';
   removeCompleted.call(this);
-  function removeCompleted() {
+  function removeCompleted () {
     if (remove && this.hasValue('v-wf:isCompleted', true)) {
       template.remove();
     }
@@ -24,7 +24,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('.to-journal', template).click(function (e) {
     e.stopPropagation();
-    var journalUri = individual['v-wf:onDocument'][0].id + 'j';
+    const journalUri = individual['v-wf:onDocument'][0].id + 'j';
     riot.route('#/' + journalUri);
   });
   new IndividualModel('v-ft:ToJournalBundle').load().then(function (bundle) {
@@ -32,14 +32,14 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   // Toggle read/unread
-  var toggler = $('.toggle-read', template);
+  const toggler = $('.toggle-read', template);
   toggler.prop('title', new IndividualModel('v-ft:ReadUnreadBundle').toString());
   if (folder === 'v-ft:Inbox') {
     toggler.addClass('pointer').click(toggleReadClickHandler);
   }
-  function toggleReadClickHandler(e) {
+  function toggleReadClickHandler (e) {
     e.stopPropagation();
-    var isRead = individual.hasValue('v-wf:read', true);
+    const isRead = individual.hasValue('v-wf:read', true);
     toggleRead(!isRead);
     Backend.set_in_individual({
       ticket: veda.ticket,
@@ -55,11 +55,11 @@ export const post = function (individual, template, container, mode, extra) {
       async: true,
     });
   }
-  function readHandler() {
-    var isRead = individual.hasValue('v-wf:read', true);
+  function readHandler () {
+    const isRead = individual.hasValue('v-wf:read', true);
     toggleRead(isRead);
   }
-  function toggleRead(isRead) {
+  function toggleRead (isRead) {
     if (isRead) {
       template.css('font-weight', 'normal');
       toggler.removeClass('text-primary').addClass('text-muted');
@@ -80,14 +80,13 @@ export const post = function (individual, template, container, mode, extra) {
   }
 
   // Due date indicator
-  var dateGivenCell = $('.date-given', template);
-  var now = new Date();
-  var yesterday = new Date().setHours(0, 0, 0, 1);
-  var tomorrow = new Date().setHours(23, 59, 59, 999);
-  var dateGiven = individual['v-wf:dateGiven'][0];
-  var dateGivenYesterday = new Date(dateGiven).setHours(0, 0, 0, 1);
-  var dateGivenTomorrow = new Date(dateGiven).setHours(23, 59, 59, 999);
-  var dateDone = individual.hasValue('v-wf:takenDecision') && individual['v-wf:takenDecision'][0]['v-s:created'][0];
+  const dateGivenCell = $('.date-given', template);
+  const yesterday = new Date().setHours(0, 0, 0, 1);
+  const tomorrow = new Date().setHours(23, 59, 59, 999);
+  const dateGiven = individual['v-wf:dateGiven'][0];
+  const dateGivenYesterday = new Date(dateGiven).setHours(0, 0, 0, 1);
+  const dateGivenTomorrow = new Date(dateGiven).setHours(23, 59, 59, 999);
+  const dateDone = individual.hasValue('v-wf:takenDecision') && individual['v-wf:takenDecision'][0]['v-s:created'][0];
   if (individual.hasValue('v-wf:isCompleted', false)) {
     if (dateGiven < yesterday) {
       dateGivenCell.toggleClass('bg-danger');

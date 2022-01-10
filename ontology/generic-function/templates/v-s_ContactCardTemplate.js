@@ -18,7 +18,7 @@ export const pre = function (individual, template, container, mode, extra) {
       return true;
     });
   } else {
-    var icon = 'fa fa-lg';
+    let icon = 'fa fa-lg';
     if (individual.hasValue('rdf:type', 'v-s:Organization')) {
       $('span.unit-icon', template).remove();
     } else if (individual.hasValue('rdf:type', 'v-s:Department') || individual.hasValue('rdf:type', 'v-s:OrgGroup')) {
@@ -35,8 +35,8 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function trunc(el) {
-    var elTxt = el.text();
+  function trunc (el) {
+    const elTxt = el.text();
     if (elTxt.length > 35) {
       el.text(elTxt.substr(0, 35) + '...');
     }
@@ -44,17 +44,17 @@ export const post = function (individual, template, container, mode, extra) {
 
   $('#create-customer', template).addClass('alert-warning');
 
-  var commMeansPromises;
+  let commMeansPromises;
   if (individual.hasValue('v-s:employee')) {
     if (individual['v-s:employee'][0].hasValue('mnd-s:hasEmployeeProfile')) {
-      var profile = individual['v-s:employee'][0]['mnd-s:hasEmployeeProfile'][0];
+      const profile = individual['v-s:employee'][0]['mnd-s:hasEmployeeProfile'][0];
       $('.profileIcon', template).removeClass('hidden');
       $('.profileIcon', template).click(function (e) {
         e.preventDefault();
         BrowserUtil.showModal(profile);
       });
     }
-    var isAppHasComm = individual['v-s:employee'][0].hasValue('v-s:hasCommunicationMean');
+    const isAppHasComm = individual['v-s:employee'][0].hasValue('v-s:hasCommunicationMean');
     if (isAppHasComm) {
       commMeansPromises = individual['v-s:employee'][0]['v-s:hasCommunicationMean'].map(function (commMean) {
         return commMean.load();
@@ -75,9 +75,9 @@ export const post = function (individual, template, container, mode, extra) {
   if (commMeansPromises == undefined) {
     $('.communication-container', template).remove();
   } else {
-    var faviconIcon = $('span.faviconIcon', template);
+    const faviconIcon = $('span.faviconIcon', template);
     faviconIcon.removeClass('hidden');
-    var contactHolder = faviconIcon.closest('tr').attr('resource');
+    const contactHolder = faviconIcon.closest('tr').attr('resource');
     if (veda.user.aspect.hasValue('v-s:hasFavoriteContact', contactHolder)) {
       faviconIcon.toggleClass('fa-star-o fa-star');
     }
@@ -95,7 +95,7 @@ export const post = function (individual, template, container, mode, extra) {
     return Promise.all(commMeansPromises).then(function (commMeans) {
       commMeans.forEach(function (commMean) {
         if (commMean.hasValue('v-s:hasCommunicationMeanChannel', 'd:o3q2gagyvfwh430io88vvb8vel')) {
-          var phones = commMean['v-s:description'][0];
+          const phones = commMean['v-s:description'][0];
           if (phones.indexOf(',') > 0) {
             phones = phones.split(', ');
           } else {
@@ -105,13 +105,13 @@ export const post = function (individual, template, container, mode, extra) {
             $('.work-phone', template).append("<div><a href='tel:" + phone + "'>" + phone + '</a></div>');
           });
         } else if (commMean.hasValue('v-s:hasCommunicationMeanChannel', 'd:a1iwni0b54fvcz41vuts08bxqsh')) {
-          var aDiv = $("<div><a class='email-link' style='cursor: pointer;'></a></div>");
+          const aDiv = $("<div><a class='email-link' style='cursor: pointer;'></a></div>");
           $('a', aDiv)
             .attr('href', 'mailto:' + commMean['v-s:description'][0])
             .text(commMean['v-s:description'][0]);
           $('.email', template).append(aDiv);
         } else {
-          var phones = commMean['v-s:description'][0];
+          const phones = commMean['v-s:description'][0];
           if (phones.indexOf(' ') > 0) {
             phones = phones.split(' ');
           } else {

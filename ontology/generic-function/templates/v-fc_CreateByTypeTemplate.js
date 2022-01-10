@@ -5,11 +5,11 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  var self = individual;
-  function typeHandler(values) {
-    var holder = $('#holder', template).empty();
+  const self = individual;
+  function typeHandler (values) {
+    const holder = $('#holder', template).empty();
     if (values.length) {
-      var blank = new IndividualModel();
+      const blank = new IndividualModel();
       blank['v-fc:targetType'] = values;
       blank['rdf:type'] = [new IndividualModel('v-fc:Blank')];
       blank.present(holder, 'v-fc:BlankTemplate');
