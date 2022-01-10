@@ -71,4 +71,4 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 };
 
-export const html = ' <div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div> ';
+export const html = '<div about="@" data-embedded="true" data-template="s-wf:ComplexRouteStartForm_Common_Template" class="view edit"></div>';

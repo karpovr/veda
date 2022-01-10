@@ -66,4 +66,4 @@ export const post = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = ' <a href="#" class="glyphicon glyphicon-zoom-in" tabindex="-1"></a> ';
+export const html = '<a href="#" class="glyphicon glyphicon-zoom-in" tabindex="-1"></a>';
