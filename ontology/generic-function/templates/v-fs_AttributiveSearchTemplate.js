@@ -60,30 +60,9 @@ export const post = function (individual, template, container, mode, extra) {
       };
       if (exportAs === 'xls') {
         // Tags
-        const tags = new RegExp('<' + String.fromCharCode(92) + '/?(a|span|p|div|button) ?.*?>', 'gi');
+        const tags = /<\/?(a|span|p|div|button) ?.*?>/gi;
         // Numbers with decimal point
-        const decimal = new RegExp(
-          '([^' +
-            String.fromCharCode(92) +
-            'd' +
-            String.fromCharCode(92) +
-            '.' +
-            String.fromCharCode(92) +
-            ':]+' +
-            String.fromCharCode(92) +
-            'd+)' +
-            String.fromCharCode(92) +
-            '.(' +
-            String.fromCharCode(92) +
-            'd+[^' +
-            String.fromCharCode(92) +
-            'd' +
-            String.fromCharCode(92) +
-            '.' +
-            String.fromCharCode(92) +
-            ':]+)',
-          'gi',
-        );
+        const decimal = /([^\d\.\:]+\d+)\.(\d+[^\d\.\:]+)/gi;
         ctx.table = ctx.table.replace(tags, ' ').replace(decimal, '$1,$2');
       }
       const formatted = format(template, ctx);
@@ -176,7 +155,7 @@ export const post = function (individual, template, container, mode, extra) {
   function filePromise (url, name) {
     return new Promise(function (resolve, reject) {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', url + '?' + Math.random(), true);
+      xhr.open('GET', url + '?' + Date.now(), true);
       xhr.responseType = 'blob';
       xhr.onload = function (e) {
         if (this.status == 200) {

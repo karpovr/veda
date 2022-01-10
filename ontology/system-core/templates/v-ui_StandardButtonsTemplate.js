@@ -165,7 +165,7 @@ export const pre = function (individual, template, container, mode, extra) {
   function filePromise (url, name) {
     return new Promise(function (resolve, reject) {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', url + '?' + Math.random(), true);
+      xhr.open('GET', url + '?' + Date.now(), true);
       xhr.responseType = 'blob';
       xhr.onload = function (e) {
         if (this.status == 200) {

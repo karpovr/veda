@@ -52,7 +52,7 @@ export const pre = function (individual, template, container, mode, extra) {
             return subscription.save();
           }
         })
-        .then(function (result) {
+        .then(function () {
           veda.user.aspect.save();
         })
         .catch(function (e) {
@@ -87,9 +87,9 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 
   function getCurrent (hash) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       const current_uri = hash ? decodeURI(hash).slice(2).split('/')[0] : '';
-      const re = new RegExp('^(' + String.fromCharCode(92) + 'w|-)+:.*?$');
+      const re = /^(\w|-)+:.*?$/;
       if (re.test(current_uri)) {
         resolve(new IndividualModel(current_uri).load());
       } else {
