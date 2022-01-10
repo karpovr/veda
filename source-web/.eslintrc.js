@@ -19,5 +19,8 @@ module.exports = {
     'no-restricted-globals': ['error'],
     'indent': ['error', 2],
     'no-new-wrappers': ['warn'],
+    'require-jsdoc': ['off'],
+    'no-invalid-this': ['off'],
+    'quotes': ['error', 'single', {'avoidEscape': true}],
   },
 };
