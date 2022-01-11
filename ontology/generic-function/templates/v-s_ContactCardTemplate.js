@@ -95,7 +95,7 @@ export const post = function (individual, template, container, mode, extra) {
     return Promise.all(commMeansPromises).then(function (commMeans) {
       commMeans.forEach(function (commMean) {
         if (commMean.hasValue('v-s:hasCommunicationMeanChannel', 'd:o3q2gagyvfwh430io88vvb8vel')) {
-          const phones = commMean['v-s:description'][0];
+          let phones = commMean['v-s:description'][0];
           if (phones.indexOf(',') > 0) {
             phones = phones.split(', ');
           } else {
@@ -111,7 +111,7 @@ export const post = function (individual, template, container, mode, extra) {
             .text(commMean['v-s:description'][0]);
           $('.email', template).append(aDiv);
         } else {
-          const phones = commMean['v-s:description'][0];
+          let phones = commMean['v-s:description'][0];
           if (phones.indexOf(' ') > 0) {
             phones = phones.split(' ');
           } else {
