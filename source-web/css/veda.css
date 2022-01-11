@@ -521,11 +521,12 @@ textarea {
 }
 .deleted *:not(#recover) {
   text-decoration: none!important;
-  color: #aaa!important;
+  color: #999!important;
 }
 .invalid * {
   text-decoration: none!important;
-  color: #a94442!important;
+  color: #999!important;
+  /*color: #a94442!important;*/
 }
 dl {
   margin-top: 0;

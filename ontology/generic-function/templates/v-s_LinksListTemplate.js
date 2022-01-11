@@ -6,7 +6,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   const isMutual = container.attr('data-mutual') === 'true';
-  const rowTmpl = $('tbody', template).html();
+  const rowTmpl = 'v-s:LinksListTemplate_inline';
 
   $('#add-link', template).click(function () {
     $('.links-table', template).removeClass('hidden');

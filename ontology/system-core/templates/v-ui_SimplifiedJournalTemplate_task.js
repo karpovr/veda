@@ -34,6 +34,11 @@ export const pre = function (individual, template, container, mode, extra) {
     });
   }
 
+  // TODO: refactor this
+  if (!individual.hasValue('v-wf:redirect_from_task') || individual.hasValue('v-wf:redirect_from_task', 's-wf:EmptyTask')) {
+    $('.is-redirected', template).remove();
+  }
+
   function takeDecision (takenDecision, label) {
     const decisionClass = new IndividualModel(takenDecision);
     const decision = new IndividualModel();
@@ -59,7 +64,7 @@ export const html = `
     <td class="sequence-number"></td>
     <td>
       <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate"></div>
-      <div about="@" rel="v-wf:redirect_from_task">
+      <div about="@" rel="v-wf:redirect_from_task" class="is-redirected">
         <div>
           <strong><small about="v-s:TaskIsRedirectedFrom" property="rdfs:label"></small></strong>
           <small about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></small>

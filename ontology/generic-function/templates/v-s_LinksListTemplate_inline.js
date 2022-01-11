@@ -5,9 +5,9 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   const displayedDoc = container.closest('[resource]').attr('resource');
-  if (this.hasValue('v-s:from', displayedDoc)) {
+  if (individual.hasValue('v-s:from', displayedDoc)) {
     $('.link-from', template).remove();
-  } else if (this.hasValue('v-s:to', displayedDoc)) {
+  } else if (individual.hasValue('v-s:to', displayedDoc)) {
     $('.link-to', template).remove();
   }
 
@@ -23,22 +23,22 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 
   function documentHandler () {
-    if (this.isNew()) {
-      if (this.hasValue('v-s:to')) {
-        this['v-s:type'] = [];
+    if (individual.isNew()) {
+      if (individual.hasValue('v-s:to')) {
+        individual['v-s:type'] = [];
         $('veda-control[rel="v-s:type"]', template).addClass('hidden');
       } else {
         $('veda-control[rel="v-s:type"]', template).removeClass('hidden');
       }
     }
   }
-  this.on('v-s:to', documentHandler);
-  this.on('v-s:type', documentHandler);
+  individual.on('v-s:to', documentHandler);
+  individual.on('v-s:type', documentHandler);
   template.one('remove', function () {
-    this.off('v-s:to', documentHandler);
-    this.off('v-s:type', documentHandler);
+    individual.off('v-s:to', documentHandler);
+    individual.off('v-s:type', documentHandler);
   });
-  documentHandler.apply(this);
+  documentHandler.apply(individual);
 };
 
 export const html = `
