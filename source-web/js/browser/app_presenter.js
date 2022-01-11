@@ -1,6 +1,6 @@
 // Application presenter
 
-import './check_browser.js';
+import '../browser/check_browser.js';
 
 import '../browser/notification_listener.js';
 
