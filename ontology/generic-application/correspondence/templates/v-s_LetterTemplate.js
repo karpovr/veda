@@ -7,7 +7,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  if (mode === 'edit' || template.data('mode') === 'edit') {
+  if (mode === 'edit' || template.attr('data-mode') === 'edit') {
     const enumerated = new IndividualModel('v-s:LetterRegistrationRecordEnumerated');
 
     // These events are triggered in v-s:CorrespondentTemplate

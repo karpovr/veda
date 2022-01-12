@@ -101,7 +101,8 @@ $.fn.veda_link = function ( options ) {
               } else {
                 ok.attr('disabled', 'disabled');
               }
-              tmpl.on('internal-validated', function (e, validation) {
+              tmpl.on('internal-validated', function (e) {
+                const validation = e.detail;
                 if (validation.state) {
                   ok.removeAttr('disabled');
                 } else {

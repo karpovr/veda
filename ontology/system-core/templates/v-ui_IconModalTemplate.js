@@ -7,10 +7,10 @@ export const post = function (individual, template, container, mode, extra) {
 
   template.on('click', function (e) {
     e.preventDefault();
-    let newMode = container.data('mode');
+    let newMode = container.attr('data-mode');
     const parentTmpl = template.parent().closest('[resource]');
     if (!newMode && parentTmpl.attr('resource') === individual.id) {
-      newMode = parentTmpl.data('mode');
+      newMode = parentTmpl.attr('data-mode');
     }
 
     if ($('body').hasClass('modal-open')) {
@@ -28,7 +28,7 @@ export const post = function (individual, template, container, mode, extra) {
       modal.find('#follow').click(function () {
         const resourceTemplate = modal.find('[resource]').first();
         const uri = resourceTemplate.attr('resource');
-        const mode = resourceTemplate.data('mode');
+        const mode = resourceTemplate.attr('data-mode');
         modal.modal('hide');
         riot.route(['#', uri, '#main', undefined, mode].join('/'));
       });
@@ -50,7 +50,8 @@ export const post = function (individual, template, container, mode, extra) {
       if (newMode === 'edit') {
         tmpl = $(tmpl);
         ok.parent().removeClass('hide');
-        tmpl.on('internal-validated', function (e, validation) {
+        tmpl.on('internal-validated', function (e) {
+          const validation = e.detail;
           if (validation.state) {
             ok.removeAttr('disabled');
           } else {

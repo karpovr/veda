@@ -23,7 +23,7 @@ export const post = function (individual, template, container, mode, extra) {
     self.off('beforeSave', setRegistrationDate);
   });
 
-  if (mode === 'edit' || template.data('mode') === 'edit') {
+  if (mode === 'edit' || template.attr('data-mode') === 'edit') {
     individual.on('rdf:type', typeHandler);
     template.one('remove', function () {
       individual.off('rdf:type', typeHandler);

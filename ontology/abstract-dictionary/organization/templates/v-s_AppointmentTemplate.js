@@ -53,7 +53,7 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  if (template.data('mode') === 'view' && veda.appointment.id != 'cfg:AdministratorAppointment') {
+  if (template.attr('data-mode') === 'view' && veda.appointment.id != 'cfg:AdministratorAppointment') {
     $('#edit.action', template).remove();
   }
   if (veda.appointment.id != 'cfg:AdministratorAppointment') {

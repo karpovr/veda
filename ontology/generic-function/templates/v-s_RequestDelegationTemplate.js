@@ -111,7 +111,7 @@ export const post = function (individual, template, container, mode, extra) {
     }
   }
 
-  if (individual.isNew() && !individual.hasValue('v-s:delegator') && template.data('mode') != 'search') {
+  if (individual.isNew() && !individual.hasValue('v-s:delegator') && template.attr('data-mode') != 'search') {
     individual['v-s:delegator'] = [veda.user];
   } else if (individual.isNew() && individual.hasValue('v-s:delegator')) {
     delegatorHandler(individual['v-s:delegator']);
