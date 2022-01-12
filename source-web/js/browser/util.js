@@ -199,7 +199,7 @@ Util.showModal = function (individual, template, mode) {
   modal.find('#follow').click(() => {
     const resourceTemplate = modal.find('[resource]').first();
     const uri = resourceTemplate.attr('resource');
-    const mode = resourceTemplate.data('mode');
+    const mode = resourceTemplate.attr('data-mode');
     modal.modal('hide');
     riot.route( ['#', uri, '#main', undefined, mode].join('/') );
   });
@@ -286,7 +286,7 @@ Util.startProcess = function (processDefinition, document) {
  */
 Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
-    (template.data('mode') === 'edit' ? individual.isSync(false) || template[0].veda.save() : Promise.resolve())
+    (template.attr('data-mode') === 'edit' ? individual.isSync(false) || template[0].veda.save() : Promise.resolve())
       .then(() => {
         const transform = new IndividualModel(transformId);
         return transform.load().then((transform) => {
