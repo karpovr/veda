@@ -493,7 +493,9 @@ function processTemplate (individual, container, wrapper, mode) {
    */
   const deletedHandler = function () {
     if ( this.hasValue('v-s:deleted', true) ) {
-      template.classList.add('deleted');
+      if (mode === 'view') {
+        template.classList.add('deleted');
+      }
       if (container && container.id === 'main') {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
