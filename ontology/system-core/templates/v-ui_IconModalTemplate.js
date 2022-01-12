@@ -48,6 +48,7 @@ export const post = function (individual, template, container, mode, extra) {
 
     individual.present(cntr, undefined, newMode).then(function (tmpl) {
       if (newMode === 'edit') {
+        tmpl = $(tmpl);
         ok.parent().removeClass('hide');
         tmpl.on('internal-validated', function (e, validation) {
           if (validation.state) {
