@@ -836,6 +836,20 @@ cfg:Event_16
       isDeleted = veda.Util.hasValue(document, "v-s:deleted", { data: true, type: "Boolean" }),
       forceUpdate = veda.Util.hasValue(document, "v-s:backwardForceUpdate", { data: true, type: "Boolean" });
 
+  var prevBackwardTargetUris = prev_state == undefined ? [] : veda.Util.getUris(prev_state["v-s:backwardTarget"]);
+  if (prevBackwardTargetUris.length >= backwardTargetUris.length) {
+    var changedTargetUris = prevBackwardTargetUris.filter(function(targetUri) {
+      return backwardTargetUris.indexOf(targetUri) < 0;
+    });
+    for (var i = 0; i < changedTargetUris.length; i++) {
+      var changedTarget = get_individual(ticket, changedTargetUris[i]);
+      var remove_from_backward = {
+        "@" : changedTarget["@"]
+      };
+      remove_from_backward[backwardPropertyUri] = veda.Util.newUri(backwardLinkUri);
+      remove_from_individual(ticket, remove_from_backward, _event_id);
+    }
+  }
   //expected equal backwardPropery and backwardReplaceUris for all backwardTargets
   for (var i = 0; i < backwardTargetUris.length; i++) {
     var backwardTargetUri = backwardTargetUris[i],
