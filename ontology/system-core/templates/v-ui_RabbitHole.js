@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import CommonUtil from '/js/common/util.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -46,7 +47,7 @@ export const pre = function (individual, template, container, mode, extra) {
       .catch(function (error) {
         const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
         return errorIndividual.load().then(function (errorIndividual) {
-          return `<span>${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}</span> / ${text}`;
+          return `<span>${errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' ')}</span> / ${text}`;
         });
       });
   }
