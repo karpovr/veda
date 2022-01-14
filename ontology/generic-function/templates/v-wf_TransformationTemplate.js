@@ -18,8 +18,7 @@ export const html = `
     </div>
   </div>
   <div rel="v-wf:transformRule" data-template="v-wf:RuleTemplate" data-embedded="true"></div>
-    <veda-control data-type="link" rel="v-wf:transformRule" class="view edit search create"></veda-control>
-  </div>
+  <veda-control data-type="link" rel="v-wf:transformRule" class="view edit search create"></veda-control>
   <hr style="margin: 10px 0px">
   <div class="actions view edit -search">
     <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
