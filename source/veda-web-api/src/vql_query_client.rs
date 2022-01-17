@@ -28,10 +28,10 @@ impl VQLHttpClient {
             match response.json::<QueryResult>().await {
                 Ok(j) => {
                     qres = j;
-                }
+                },
                 Err(e) => {
                     error!("{:?}", e);
-                }
+                },
             }
         }
         qres

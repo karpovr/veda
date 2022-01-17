@@ -125,6 +125,13 @@ async fn query(
             ft_req.query = "'*' == '".to_owned() + &ft_req.query + "'";
         }
 
+        ft_req.query = ft_req.query.replace('\n', " ");
+
+        info!(
+            "ticket = {}, user = {}, query = {}, sort = {}, db = {}, top = {}, limit = {}, from = {}",
+            ft_req.ticket, ft_req.user, ft_req.query, ft_req.sort, ft_req.databases, ft_req.top, ft_req.limit, ft_req.from
+        );
+
         let mut vc = vql_client.lock().await;
 
         match vc.query_type {
@@ -143,20 +150,21 @@ async fn query(
                     res = xr.query_use_collect_fn(&ft_req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
                     res.result = res_out_list;
                 }
-            }
+            },
             VQLClientConnectType::Http => {
                 if let Some(n) = vc.http_client.as_mut() {
                     res = n.query(ticket, &addr, ft_req).await;
                 }
-            }
+            },
             VQLClientConnectType::Nng => {
                 if let Some(n) = vc.nng_client.as_mut() {
                     res = n.query(ft_req);
                 }
-            }
-            VQLClientConnectType::Unknown => {}
+            },
+            VQLClientConnectType::Unknown => {},
         }
     }
 
+    info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
     Ok(HttpResponse::Ok().json(res))
 }

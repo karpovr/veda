@@ -81,7 +81,7 @@ pub(crate) async fn update(
                 } else {
                     Ok(HttpResponse::new(StatusCode::from_u16(r.result as u16).unwrap()))
                 }
-            }
+            },
             Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
         };
     }

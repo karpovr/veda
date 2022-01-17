@@ -92,11 +92,11 @@ async fn main() -> std::io::Result<()> {
                 let pass = url.password().unwrap_or("123");
                 info!("Trying to connect to Tarantool, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
                 tt_config = Some(ClientConfig::new(format!("{}:{}", host, port), user, pass).set_timeout_time_ms(2000).set_reconnect_time_ms(2000));
-            }
+            },
             Err(e) => {
                 error!("fail parse {}, err={}", p, e);
                 return Ok(());
-            }
+            },
         }
     }
 

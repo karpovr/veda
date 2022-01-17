@@ -64,10 +64,10 @@ impl SparqlClient {
                         }
                     }
                     qres.processed = qres.result.len() as i64;
-                }
+                },
                 Err(e) => {
                     error!("{:?}", e);
-                }
+                },
             }
         }
 

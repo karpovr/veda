@@ -110,10 +110,10 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                 match name {
                     "path" => {
                         path = std::str::from_utf8(&chunk?)?.to_owned();
-                    }
+                    },
                     "uri" => {
                         uri = std::str::from_utf8(&chunk?)?.to_owned();
-                    }
+                    },
                     "file" => {
                         let cur_chunk = &chunk?;
                         check_and_create_file(&tmp_path, Some(&upload_prefix), &uri, &mut tmp_file).await?;
@@ -121,7 +121,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                         if let Some(ff) = tmp_file.get_mut(0) {
                             AsyncWriteExt::write_all(ff, cur_chunk).await?;
                         }
-                    }
+                    },
                     "content" => {
                         is_encoded_file = true;
                         let cur_chunk = &chunk?;
@@ -147,10 +147,10 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                                 AsyncWriteExt::write_all(ff, cur_chunk).await?;
                             }
                         }
-                    }
+                    },
                     _ => {
                         error!("unknown param [{}]", name);
-                    }
+                    },
                 }
             }
         }
