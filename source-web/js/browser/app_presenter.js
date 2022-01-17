@@ -1,6 +1,6 @@
 // Application presenter
 
-import './check_browser.js';
+import '../browser/check_browser.js';
 
 import '../browser/notification_listener.js';
 
@@ -18,7 +18,7 @@ import Notify from './notify.js';
 
 import Util from '../common/util.js';
 
-import {delegateHandler} from '../browser/dom_helpers.js';
+import {delegateHandler, clear} from '../browser/dom_helpers.js';
 
 /**
  * Application presenter
@@ -86,15 +86,17 @@ export default function AppPresenter () {
         if (hash_index >= 0) {
           hash = hash.substring(hash_index);
         } else {
-          $('#main').empty();
-          return main.present('#main').then(() => {
+          const mainContainer = document.getElementById('main');
+          clear(mainContainer);
+          return main.present(mainContainer).then(() => {
             clearTimeout(loadIndicatorTimer);
             loadIndicator.style.display = 'none';
           });
         }
       } else {
-        $('#main').empty();
-        return main.present('#main').then(() => {
+        const mainContainer = document.getElementById('main');
+        clear(mainContainer);
+        return main.present(mainContainer).then(() => {
           clearTimeout(loadIndicatorTimer);
           loadIndicator.style.display = 'none';
         });
@@ -118,8 +120,9 @@ export default function AppPresenter () {
 
       if (uri) {
         const individual = new IndividualModel(uri);
-        $(container).empty();
-        individual.present(container, template, mode, extra).then(() => {
+        const containerEl = document.querySelector(container);
+        clear(containerEl);
+        individual.present(containerEl, template, mode, extra).then(() => {
           clearTimeout(loadIndicatorTimer);
           loadIndicator.style.display = 'none';
           if (!individual.scroll) {
@@ -127,8 +130,9 @@ export default function AppPresenter () {
           }
         });
       } else {
-        $('#main').empty();
-        main.present('#main').then(() => {
+        const mainContainer = document.getElementById('main');
+        clear(mainContainer);
+        main.present(mainContainer).then(() => {
           clearTimeout(loadIndicatorTimer);
           loadIndicator.style.display = 'none';
         });
@@ -173,10 +177,11 @@ export default function AppPresenter () {
     const layout_uri = veda.manifest.veda_layout;
     const main_uri = veda.manifest.veda_main;
     const {start_url} = veda.manifest;
-    $('#app').empty();
+    const appContainer = document.getElementById('app');
+    clear(appContainer);
     if (layout_uri && main_uri && start_url) {
       const layout = new IndividualModel(layout_uri);
-      layout.present('#app')
+      layout.present(appContainer)
         .then(() => new IndividualModel(main_uri).load())
         .then(installRouter)
         .catch((error) => {
@@ -193,7 +198,7 @@ export default function AppPresenter () {
       const main_param = new IndividualModel(main_param_uri);
       layout_param.load()
         .then((layout_param) => layout_param['rdf:value'][0].load())
-        .then((layout) => layout.present('#app'))
+        .then((layout) => layout.present(appContainer))
         .then(() => main_param.load())
         .then((main_param) => main_param['rdf:value'][0].load())
         .then(installRouter)

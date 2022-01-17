@@ -93,6 +93,7 @@ $.fn.veda_link = function ( options ) {
               modal.modal('hide').remove();
             });
             newVal.present(cntr, undefined, 'edit').then((tmpl) => {
+              tmpl = $(tmpl);
               $('.action', tmpl).remove();
               const validation = tmpl.data('validation');
               if ( validation && validation.state ) {
@@ -100,7 +101,8 @@ $.fn.veda_link = function ( options ) {
               } else {
                 ok.attr('disabled', 'disabled');
               }
-              tmpl.on('internal-validated', function (e, validation) {
+              tmpl.on('internal-validated', function (e) {
+                const validation = e.detail;
                 if (validation.state) {
                   ok.removeAttr('disabled');
                 } else {
@@ -114,7 +116,6 @@ $.fn.veda_link = function ( options ) {
         });
       }
     });
-
 
     // Hide create button for single value relations if value exists
     if (isSingle) {
@@ -453,6 +454,16 @@ $.fn.veda_link = function ( options ) {
       } else {
         fulltext.val('');
       }
+      selected = selected.filter((item) => individual.hasValue(rel_uri, item));
+      suggestions.children()
+        .removeClass('selected')
+        .each(function () {
+          const item = $(this);
+          const resource = item.attr('resource');
+          if (individual.hasValue(rel_uri, resource)) {
+            item.addClass('selected');
+          }
+        });
     };
 
     individual.on(rel_uri, propertyModifiedHandler);

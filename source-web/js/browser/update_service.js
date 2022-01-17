@@ -21,8 +21,8 @@ function UpdateService () {
   }
 
   this.list = {};
-  const reconnectDelayInitial = 2500 + Math.round(Math.random() * 2500); // 2.5 - 5 sec
-  const reconnectDelayFactor = 1.1;
+  const reconnectDelayInitial = 10000 + Math.floor(Math.random() * 50000); // 10 - 60 sec
+  const reconnectDelayFactor = 1.25;
   const reconnectDelayLimit = 5 * 60 * 1000; // 5 min
   const pingTimeout = 10000;
 

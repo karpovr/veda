@@ -28,4 +28,23 @@ function delegateHandler (el, event, delegateSelector, handler, useCapture) {
   }
 }
 
-export {delegateHandler};
+/**
+ * Clear container
+ * @param {HTMLElement} container
+ * @return {HTMLElement}
+ */
+function clear (container) {
+  const childrenTemplates = container.querySelectorAll('.template');
+  const childrenControls = container.querySelectorAll('veda-control');
+  const event = new Event('remove');
+  childrenTemplates.forEach((template) => {
+    template.dispatchEvent(event);
+  });
+  childrenControls.forEach((control) => {
+    control.dispatchEvent(event);
+  });
+  container.innerHTML = '';
+  return container;
+}
+
+export {delegateHandler, clear};

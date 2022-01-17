@@ -1,0 +1,6 @@
+{
+  "host": "127.0.0.1",
+  "port": 8089,
+  "root": "/repo/veda/public/",
+  "ignored": "**/node_modules/**"
+}

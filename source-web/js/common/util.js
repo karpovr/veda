@@ -294,7 +294,10 @@ function formatDate (date) {
  * @return {string}
  */
 function formatNumber (n) {
-  return (n+'').replace(/.(?=(?:[0-9]{3})+\b)/g, '$& ');
+  return Number(n).toLocaleString('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 20,
+  }).replace(/\s/g, ' ');
 };
 
 Util.forSubIndividual = function (net, property, id, func) {

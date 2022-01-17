@@ -27,7 +27,7 @@ $.fn.veda_integer = function ( options ) {
 const defaults = {
   template: `<input type="text" class="form-control" placeholder="#" />`,
   parser: function (input) {
-    const int = parseInt( input.split(' ').join('').split(',').join('.'), 10 );
+    const int = parseInt( input.replace(/\s/g, ''), 10 );
     return !isNaN(int) ? int : null;
   },
 };

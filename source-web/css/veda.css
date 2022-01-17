@@ -519,13 +519,14 @@ textarea {
   border: none;
   box-shadow: none;
 }
-.deleted, .deleted *:not(#deleted-alert-msg):not(#deleted-alert-recover) {
+.deleted *:not(#recover) {
   text-decoration: none!important;
-  color: #aaa!important;
+  color: #999!important;
 }
-a.invalid, span.invalid, tr.invalid {
+.invalid * {
   text-decoration: none!important;
-  color: #a94442!important;
+  color: #999!important;
+  /*color: #a94442!important;*/
 }
 dl {
   margin-top: 0;

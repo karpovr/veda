@@ -2,6 +2,8 @@
 
 import $ from 'jquery';
 
+import Util from '../../common/util.js';
+
 import veda_literal from './veda_literal.js';
 
 $.fn.veda_decimal = function ( options ) {
@@ -27,7 +29,8 @@ $.fn.veda_decimal = function ( options ) {
 const defaults = {
   template: `<input type="text" class="form-control" placeholder="#.#" />`,
   parser: function (input) {
-    const float = parseFloat( input.split(' ').join('').split(',').join('.') );
-    return !isNaN(float) ? float : null;
+    const float = parseFloat( input.replace(/\s/g, '').replace(/\.|,/g, '.') );
+    if (isNaN(float)) return null;
+    return Util.isInteger(float) ? float + '.0' : float;
   },
 };

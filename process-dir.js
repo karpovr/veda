@@ -95,7 +95,7 @@ async function templateExtractor(dir, file) {
       const templatesDir = [dir, 'templates'].join('/');
       const templatesDirExists = fs.existsSync(templatesDir);
       content = content.replace(templateRE, function (match, templateUri, otherProps, templateContent) {
-        const templateFileName = templateUri.replace(':', '_') + '.html';
+        const templateFileName = templateUri.replace(':', '_') + '.js';
         if (!counter && !templatesDirExists) {
           try {
             fs.mkdirSync(templatesDir);
@@ -148,24 +148,24 @@ async function templateRemover(dir, file) {
 
 /**
  * Template uri to filename replacer function
- * Checks all individual uris in TTL and HTML files
+ * Checks all individual uris in TTL and JS files
  * if corresponding filename exists in public/templates directory
  * replaces it with template file name
  */
 async function uriToFile(dir, file) {
   const filePath = [dir, file].join('/');
   const filterTTL = /\.ttl$/i;
-  const filterHTML = /\.html$/i;
+  const filterJS = /\.js$/i;
   const isTTL = filterTTL.test(filePath);
-  const isHTML = filterHTML.test(filePath);
+  const isJS = filterJS.test(filePath);
   const templateRE = /\b([a-z][a-z-0-9]*:[a-zA-Z0-9-_]*)\b/g;
-  if ( isTTL || isHTML ) {
+  if ( isTTL || isJS ) {
     console.log('Replacing templates URIs to filenames in file:', filePath);
     let counter = 0;
     try {
       let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
       content = content.replace(templateRE, function (match) {
-        const templateFileName = match.replace(':', '_') + '.html';
+        const templateFileName = match.replace(':', '_') + '.js';
         const templateFilePath = process.env.PWD + '/public/templates/' + templateFileName;
         const templateFileExists = fs.existsSync(templateFilePath);
         console.log(templateFileName, templateFilePath, templateFileExists);
@@ -204,7 +204,7 @@ async function fixSourceURL(dir, file) {
     try {
       let content = await fsAsync.readFile(filePath, {encoding: 'utf8', flag: 'rs+'});
       content = content.replace(templateRE, function (match, beg, template, suffix) {
-        const templateFileName = template.replace(':', '_') + '.html';
+        const templateFileName = template.replace(':', '_') + '.js';
         const templateFilePath = process.env.PWD + '/public/templates/' + templateFileName;
         const templateFileExists = fs.existsSync(templateFilePath);
         console.log(templateFileName, templateFilePath, templateFileExists);

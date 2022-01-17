@@ -307,10 +307,7 @@ $.fn.veda_actor = function ( options ) {
         } else {
           tmpl = '<span about=\'@\' property=\'rdfs:label\'></span>';
         }
-        return result.present(cont, tmpl)
-          .then(() => {
-            return cont;
-          });
+        return result.present(cont, tmpl).then(() => cont);
       });
       Promise.all(renderedPromises).then((rendered) => {
         rendered = rendered.sort((a, b) => {

@@ -36,7 +36,7 @@ test('testAttachment', async t => {
         .typeText('veda-control.fulltext.dropdown', 'Отчет')
         .click('.suggestion[about="v-s:Report"]')
         .typeText('input.form-control[lang="RU"]', 'Мероприятие')
-        //.click('button.btn.btn-link.view.edit.-search.toggle-actions')
+        //.click('button#toggle-actions')
         //.click('veda-control[rel="v-s:attachment"]')
         .setFilesToUpload('veda-control[rel="v-s:attachment"] input[type="file"]', [
             './road.jpg',

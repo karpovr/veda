@@ -74,8 +74,8 @@ function veda_dateTime (options) {
     input.on('focusout change', () => this.tooltip('hide'));
   }
 
-  System.import('datetimepicker/js/bootstrap-datetimepicker.min.js').then(() => {
-    System.import('datetimepicker/css/bootstrap-datetimepicker.min.css').then((module) => {
+  import('datetimepicker/js/bootstrap-datetimepicker.min.js').then(() => {
+    import('datetimepicker/css/bootstrap-datetimepicker.min.css').then((module) => {
       const styleSheet = module.default;
       document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
     });
