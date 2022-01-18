@@ -825,7 +825,7 @@ function processTemplate (individual, container, wrapper, mode) {
       template.setAttribute('data-valid', validation.state);
       template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
     }
-    // 'internal-validate' event should bubble and trigger parent template validation if current template is embedded
+    // 'internal-validate' event should trigger parent template validation if current template is embedded
     if ( container.getAttribute('data-embedded') === 'true' ) {
       container.dispatchEvent(new Event('internal-validate', {bubbles: true}));
     }
