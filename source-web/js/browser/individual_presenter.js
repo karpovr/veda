@@ -847,7 +847,7 @@ function processTemplate (individual, container, wrapper, mode) {
   // template.addEventListener('edit', triggerValidation);
 
   individual.on('propertyModified', validateTemplate);
-  template.addEventListener('remove', () => individual.off('propertyModified', triggerValidation));
+  template.addEventListener('remove', () => individual.off('propertyModified', validateTemplate));
   template.addEventListener('edit', validateTemplate);
 
   /**
