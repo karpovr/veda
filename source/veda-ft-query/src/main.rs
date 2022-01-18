@@ -114,6 +114,8 @@ fn req_prepare(backend: &mut Backend, s: &str, xr: &mut XapianReader) -> Message
             query = "'*' == '".to_owned() + &query + "'";
         }
 
+        query = query.replace('\n', " ");
+
         let sort = a.get(SORT).unwrap().as_str().unwrap_or_default().to_string();
         let databases = a.get(DATABASES).unwrap().as_str().unwrap_or_default().to_string();
 
