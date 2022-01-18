@@ -14,17 +14,13 @@ import '../browser/util.js';
 
 import Notify from '../browser/notify.js';
 
-import '../browser/controls/veda_controls.js';
-
-import $ from 'jquery';
-
-import 'jquery-ui';
-
-import 'tablesortable';
-
 import validate from '../browser/validate.js';
 
 import {clear} from '../browser/dom_helpers.js';
+
+import $ from 'jquery';
+
+import '../browser/controls/veda_controls.js';
 
 IndividualModel.prototype.present = IndividualPresenter;
 
@@ -199,8 +195,9 @@ function errorPrinter (error, container) {
  */
 function wrap (html) {
   html = html.trim();
-  if (html.startsWith('<script') || html.endsWith('/script>')) {
-    throw new SyntaxError('Scripts for inline templates are not supported, template = ' + html);
+  if (html.startsWith('<script') || html.endsWith('script>')) {
+    console.log(`Scripts for inline templates are not supported, template = ${html}`);
+    throw new SyntaxError('Scripts for inline templates are not supported');
   }
   let tagName;
   if (html.startsWith('<tr')) {
@@ -215,7 +212,8 @@ function wrap (html) {
   const template = wrapper.firstElementChild;
   const last = wrapper.lastElementChild;
   if (last !== template) {
-    throw new SyntaxError('Unwrapped templates are not supported, template = ' + html);
+    console.log(`Unwrapped templates are not supported, template = ${html}`);
+    throw new SyntaxError('Unwrapped templates are not supported');
   }
   return wrapper;
 }
@@ -782,13 +780,13 @@ function processTemplate (individual, container, wrapper, mode) {
         rendered = [rendered];
       }
       if (isEmbedded) {
+        embedded.push(...rendered);
         rendered.forEach((node) => {
           node.setAttribute('data-embedded', 'true');
           if (mode === 'edit') {
             node.dispatchEvent(new Event('internal-validate'));
           }
         });
-        embedded.push(...rendered);
       }
     });
   });
@@ -805,7 +803,6 @@ function processTemplate (individual, container, wrapper, mode) {
   * @return {void}
   */
   const validateTemplate = function (event) {
-    event.stopPropagation();
     if (mode === 'edit') {
       Object.keys(validation).map((property_uri) => {
         if (property_uri === 'state') {
@@ -825,11 +822,12 @@ function processTemplate (individual, container, wrapper, mode) {
         const embeddedValidation = embeddedTemplate.getAttribute('data-valid') === 'true';
         return acc && embeddedValidation;
       }, true);
+      template.setAttribute('data-valid', validation.state);
       template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
     }
-    // "validate" event should bubble up to be handled by parent template only if current template is embedded
+    // 'internal-validate' event should trigger parent template validation if current template is embedded
     if ( container.getAttribute('data-embedded') === 'true' ) {
-      container.dispatchEvent(new Event('internal-validate'));
+      container.dispatchEvent(new Event('internal-validate', {bubbles: true}));
     }
   };
   template.addEventListener('internal-validate', validateTemplate);
@@ -838,15 +836,19 @@ function processTemplate (individual, container, wrapper, mode) {
   * Trigger 'internal-validate' event on individual property change or when mode switches to 'edit'
   * @return {void}
   */
-  const triggerValidation = function () {
-    if (mode === 'edit') {
-      template.dispatchEvent(new Event('internal-validate'));
-    }
-  };
-  individual.on('propertyModified', triggerValidation);
+  // const triggerValidation = function () {
+  //   if (mode === 'edit') {
+  //     template.dispatchEvent(new Event('internal-validate'));
+  //   }
+  // };
+  // individual.on('propertyModified', triggerValidation);
+  //
+  // template.addEventListener('remove', () => individual.off('propertyModified', triggerValidation));
+  // template.addEventListener('edit', triggerValidation);
 
+  individual.on('propertyModified', validateTemplate);
   template.addEventListener('remove', () => individual.off('propertyModified', triggerValidation));
-  template.addEventListener('edit', triggerValidation);
+  template.addEventListener('edit', validateTemplate);
 
   /**
   * Merge validation result from custom template validation
@@ -870,6 +872,7 @@ function processTemplate (individual, container, wrapper, mode) {
         }
         return acc && validation[property_uri].state;
       }, true);
+      template.setAttribute('data-valid', validation.state);
       template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
     }
   };
@@ -1032,19 +1035,13 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
       rendered = [rendered];
     }
     if (isEmbedded) {
+      embedded.push(...rendered);
       rendered.forEach((node) => {
         node.setAttribute('data-embedded', 'true');
         if (mode === 'edit') {
           node.dispatchEvent(new Event('internal-validate'));
         }
-        node.addEventListener('remove', () => {
-          if (embedded.length) {
-            const index = embedded.indexOf(node);
-            if ( index >= 0 ) embedded.splice(index, 1);
-          }
-        });
       });
-      embedded.push(...rendered);
     }
     if (!isAbout) {
       const btnGroup = document.createElement('div');
@@ -1072,6 +1069,12 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
         e.preventDefault();
         e.stopPropagation();
         about.removeValue(rel_uri, value);
+        rendered.forEach((node) => {
+          if (embedded.length) {
+            const index = embedded.indexOf(node);
+            if ( index >= 0 ) embedded.splice(index, 1);
+          }
+        });
         if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) ) {
           value.delete();
         }

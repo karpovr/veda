@@ -4,7 +4,7 @@ module.exports = {
     'es2021': true,
   },
   'plugins': [
-    'security-node'
+    'security-node',
   ],
   'extends': [
     'google',

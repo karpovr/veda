@@ -18,6 +18,8 @@ export default veda;
 
 (async () => {
   await import('jquery');
+  await import('jquery-ui');
+  await import('tablesortable');
   await import('bootstrap');
   const response = await fetch('./manifest');
   const manifest = await response.json();
