@@ -67,8 +67,10 @@ export const html = `
         </td>
         <!--Получатель //v-s:recipient-->
         <td rel="v-s:hasLetterRegistrationRecordRecipient">
-          <span property="v-s:registrationNumber"></span>
-          <span property="v-s:registrationDate"></span>
+          <div>
+            <span property="v-s:registrationNumber"></span>
+            <span property="v-s:registrationDate"></span>
+          </div>
         </td>
         <td rel="v-s:recipient">
           <span rel="v-s:correspondentOrganization" data-template="v-ui:LabelTemplate"></span>
