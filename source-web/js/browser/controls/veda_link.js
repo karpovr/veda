@@ -590,12 +590,12 @@ const defaults = {
   </div>
   <div class="fulltext-menu">
     <div class="header clearfix">
-      <small class="actions pull-left">
+      <small class="link-actions pull-left">
         <span class="select-all"></span>
         <span class="cancel-selection"></span>
         <span class="invert-selection"></span>
       </small>
-      <small class="actions pull-right">
+      <small class="link-actions pull-right">
         <span class="close-menu"></span>
       </small>
     </div>

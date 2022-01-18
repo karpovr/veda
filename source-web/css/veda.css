@@ -602,12 +602,12 @@ ol.no-marks, ul.no-marks {
 .link-control .footer {
   border-top: 1px solid #ccc;
 }
-.link-control .header > .actions > * {
+.link-control .header > .link-actions > * {
   cursor:pointer;
   border-bottom: 1px dashed #707070;
   margin-right: 10px;
 }
-.link-control .header > .actions > *:last-child {
+.link-control .header > .link-actions > *:last-child {
   margin-right: 0px;
 }
 .link-control .suggestions {
