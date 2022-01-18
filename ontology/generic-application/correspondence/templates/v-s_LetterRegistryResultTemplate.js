@@ -52,8 +52,10 @@ export const html = `
         <td property="v-s:created"></td>
         <!--Отправитель //v-s:sender -->
         <td rel="v-s:hasLetterRegistrationRecordSender">
-          <span property="v-s:registrationNumber"></span>
-          <span property="v-s:registrationDate"></span>
+          <div>
+            <span property="v-s:registrationNumber"></span>
+            <span property="v-s:registrationDate"></span>
+          </div>
         </td>
         <td rel="v-s:sender">
           <span rel="v-s:correspondentOrganization" data-template="v-ui:LabelTemplate"></span>
