@@ -783,9 +783,6 @@ function processTemplate (individual, container, wrapper, mode) {
         embedded.push(...rendered);
         rendered.forEach((node) => {
           node.setAttribute('data-embedded', 'true');
-          if (mode === 'edit') {
-            node.dispatchEvent(new Event('internal-validate'));
-          }
         });
       }
     });
@@ -803,51 +800,40 @@ function processTemplate (individual, container, wrapper, mode) {
   * @return {void}
   */
   const validateTemplate = function (event) {
-    if (mode === 'edit') {
-      Object.keys(validation).map((property_uri) => {
-        if (property_uri === 'state') {
-          return;
-        }
-        const spec = specs[property_uri] ? new IndividualModel( specs[property_uri] ) : undefined;
-        validation[property_uri] = validate(individual, property_uri, spec);
-      });
-      template.dispatchEvent(new Event('validate'));
-      validation.state = Object.keys(validation).reduce((acc, property_uri) => {
-        if (property_uri === 'state') {
-          return acc;
-        }
-        return acc && validation[property_uri].state;
-      }, true);
-      validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
-        const embeddedValidation = embeddedTemplate.getAttribute('data-valid') === 'true';
-        return acc && embeddedValidation;
-      }, true);
-      template.setAttribute('data-valid', validation.state);
-      template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
+    if (event instanceof Event) {
+      event.stopPropagation();
     }
+    if (mode !== 'edit') return;
+
+    Object.keys(validation).map((property_uri) => {
+      if (property_uri === 'state') {
+        return;
+      }
+      const spec = specs[property_uri] ? new IndividualModel( specs[property_uri] ) : undefined;
+      validation[property_uri] = validate(individual, property_uri, spec);
+    });
+    template.dispatchEvent(new Event('validate'));
+    validation.state = Object.keys(validation).reduce((acc, property_uri) => {
+      if (property_uri === 'state') {
+        return acc;
+      }
+      return acc && validation[property_uri].state;
+    }, true);
+    validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
+      const embeddedValidation = embeddedTemplate.getAttribute('data-valid') === 'true';
+      return acc && embeddedValidation;
+    }, true);
+    template.setAttribute('data-valid', validation.state);
+    template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
+
     // 'internal-validate' event should bubble and trigger parent template validation if current template is embedded
     if ( container.getAttribute('data-embedded') === 'true' ) {
       container.dispatchEvent(new Event('internal-validate', {bubbles: true}));
     }
   };
-  template.addEventListener('internal-validate', validateTemplate);
-
-  /**
-  * Trigger 'internal-validate' event on individual property change or when mode switches to 'edit'
-  * @return {void}
-  */
-  // const triggerValidation = function () {
-  //   if (mode === 'edit') {
-  //     template.dispatchEvent(new Event('internal-validate'));
-  //   }
-  // };
-  // individual.on('propertyModified', triggerValidation);
-  //
-  // template.addEventListener('remove', () => individual.off('propertyModified', triggerValidation));
-  // template.addEventListener('edit', triggerValidation);
-
   individual.on('propertyModified', validateTemplate);
   template.addEventListener('remove', () => individual.off('propertyModified', validateTemplate));
+  template.addEventListener('internal-validate', validateTemplate);
   template.addEventListener('edit', validateTemplate);
 
   /**
@@ -866,7 +852,7 @@ function processTemplate (individual, container, wrapper, mode) {
         }
         validation[property_uri] = validationResult[property_uri];
       });
-      validation.state = Object.keys(validation).reduce((acc, property_uri) => {
+      validation.state = validation.state && Object.keys(validation).reduce((acc, property_uri) => {
         if (property_uri === 'state') {
           return acc;
         }
@@ -874,6 +860,11 @@ function processTemplate (individual, container, wrapper, mode) {
       }, true);
       template.setAttribute('data-valid', validation.state);
       template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
+
+      // 'internal-validate' event should bubble and trigger parent template validation if current template is embedded
+      if ( container.getAttribute('data-embedded') === 'true' ) {
+        container.dispatchEvent(new Event('internal-validate', {bubbles: true}));
+      }
     }
   };
 
@@ -1038,9 +1029,6 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
       embedded.push(...rendered);
       rendered.forEach((node) => {
         node.setAttribute('data-embedded', 'true');
-        if (mode === 'edit') {
-          node.dispatchEvent(new Event('internal-validate'));
-        }
       });
     }
     if (!isAbout) {
