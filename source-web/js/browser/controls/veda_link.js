@@ -95,8 +95,8 @@ $.fn.veda_link = function ( options ) {
             newVal.present(cntr, undefined, 'edit').then((tmpl) => {
               tmpl = $(tmpl);
               $('.action', tmpl).remove();
-              const validation = tmpl.data('validation');
-              if ( validation && validation.state ) {
+              const isValid = tmpl.attr('data-valid');
+              if ( isValid === 'true' ) {
                 ok.removeAttr('disabled');
               } else {
                 ok.attr('disabled', 'disabled');
