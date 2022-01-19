@@ -12,6 +12,6 @@ sysinfo = "0.16.4"
 parse_duration = "2.1.0"
 nix = "0.20.0"
 
-v_common = { package = "v-common", version = "0.1.98" }
+v_common = { package = "v-common", version = "0.1.99" }
 #v_common = { package = "v-common", path = "../../../v-common" }
 
