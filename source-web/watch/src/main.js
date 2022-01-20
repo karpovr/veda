@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 let clients = [];
 
-const changesHandler = (request, response, next) => {
+const watchHandler = (request, response, next) => {
   const headers = {
     'Content-Type': 'text/event-stream',
     'Connection': 'keep-alive',
@@ -35,12 +35,11 @@ const changesHandler = (request, response, next) => {
   };
 
   clients.push(newClient);
-
-  console.log(`${clientId} connection opened`);
+  console.log(new Date().toISOString(), `${clientId} connection opened, total clients connected: ${clients.length}`);
 
   request.on('close', () => {
-    console.log(`${clientId} connection closed`);
     clients = clients.filter((client) => client.id !== clientId);
+    console.log(new Date().toISOString(), `${clientId} connection closed, total clients connected: ${clients.length}`);
   });
 };
 
@@ -50,8 +49,7 @@ const propagateChange = (change) => {
 }
 files.watchChanges(propagateChange);
 
-app.get('/clients', (request, response) => response.json({clients: clients.length}));
-app.get('/changes', changesHandler);
+app.get('/watch', watchHandler);
 
 app.listen(
   OPTIONS.port,

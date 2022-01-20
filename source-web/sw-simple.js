@@ -1,7 +1,7 @@
 // This is the "Simple offline" service worker
 
 const veda_version = 20210416202615;
-const changesTimeout = 60 * 1000;
+const watchTimeout = 60 * 1000;
 const FILES = 'files';
 const STATIC = 'static';
 const API = [
@@ -23,26 +23,26 @@ const API = [
   '/set_in_individual',
   '/remove_from_individual',
   '/put_individuals',
-  '/changes',
+  '/watch',
 ];
 
 /**
- * Listen to cached resources changes
+ * Watch cached resources changes
  */
-function listenChanges () {
+function watchChanges () {
 
   if (typeof EventSource === 'undefined') return;
 
-  const events = new EventSource('/changes');
+  const events = new EventSource('/watch');
 
   events.onopen = () => {
-    console.log(new Date().toISOString(), 'Listening to resources changes');
+    console.log(new Date().toISOString(), 'Watching resources changes');
   };
 
   events.onerror = (event) => {
-    console.log(new Date().toISOString(), `Failed to listen to resources changes, reconnect in ${Math.floor(changesTimeout / 1000)} sec`);
+    console.log(new Date().toISOString(), `Failed to watch resources changes, reconnect in ${Math.floor(watchTimeout / 1000)} sec`);
     event.target.close();
-    setTimeout(listenChanges, changesTimeout);
+    setTimeout(watchChanges, watchTimeout);
   };
 
   events.onmessage = (event) => {
@@ -63,7 +63,7 @@ function listenChanges () {
     });
   };
 }
-listenChanges();
+watchChanges();
 
 /**
  * Listen to messages from client
