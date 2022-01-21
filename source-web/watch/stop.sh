@@ -1,3 +1,3 @@
 #!/bin/bash
 
-start-stop-daemon -Kp $PWD/.pid && rm .pid && rm *.log
+start-stop-daemon -Kp $PWD/.pid && rm *.log .pid
