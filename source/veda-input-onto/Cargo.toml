@@ -19,6 +19,6 @@ crossbeam-channel = "0.5.1"
 rio_turtle = {git="https://github.com/semantic-machines/rio.git", rev="a3e887c58980b1e4b3519750da168ccf1c6f0fab"}
 rio_api = {git="https://github.com/semantic-machines/rio.git", rev="a3e887c58980b1e4b3519750da168ccf1c6f0fab"}
 
-v_common = { package = "v-common", version = "0.1.99" }
+v_common = { package = "v-common", version = "0.1.100" }
 #v_common = { package = "v-common", path = "../../../v-common" }
 
