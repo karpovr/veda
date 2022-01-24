@@ -495,13 +495,24 @@ function processTemplate (individual, container, wrapper, mode) {
         template.classList.add('deleted');
       }
       if (container && container.id === 'main') {
+        console.log(template.innerHTML);
         const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
         msg.load().then((msg) => {
-          notify('warning', {name: msg['rdfs:label'].map(Util.formatValue).join(' ')});
+          const msgStr = msg['rdfs:label'].map(Util.formatValue).join(' ');
+          notify('warning', {name: msgStr});
+          const deletedHeader = document.createElement('h3');
+          deletedHeader.classList.add('deleted-header');
+          deletedHeader.textContent = msgStr;
+          deletedHeader.style.textAlign = 'center';
+          template.prepend(deletedHeader);
         }).catch(console.log);
       }
     } else {
+      if (container && container.id === 'main') {
+        const header = template.querySelector('.deleted-header');
+        if (header) header.remove();
+      }
       template.classList.remove('deleted');
     }
   };
@@ -515,21 +526,27 @@ function processTemplate (individual, container, wrapper, mode) {
    * @return {void}
    */
   const validHandler = function () {
-    if ( this.hasValue('v-s:valid', false) && !this.hasValue('v-s:deleted', true) ) {
+    if ( this.hasValue('v-s:valid', false) ) {
       template.classList.add('invalid');
       if (container && container.id === 'main') {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:InvalidAlert');
         msg.load().then((msg) => {
-          notify('warning', {name: msg['rdfs:label'].map(Util.formatValue).join(' ')});
+          const msgStr = msg['rdfs:label'].map(Util.formatValue).join(' ');
+          notify('warning', {name: msgStr});
+          const invalidHeader = document.createElement('h3');
+          invalidHeader.classList.add('invalid-header');
+          invalidHeader.textContent = msgStr;
+          invalidHeader.style.textAlign = 'center';
+          template.prepend(invalidHeader);
         }).catch(console.log);
       }
     } else {
       template.classList.remove('invalid');
     }
   };
-  individual.on('v-s:valid v-s:deleted', validHandler);
-  template.addEventListener('remove', () => individual.off('v-s:valid v-s:deleted', validHandler));
+  individual.on('v-s:valid', validHandler);
+  template.addEventListener('remove', () => individual.off('v-s:valid', validHandler));
   validHandler.call(individual);
 
   // Process RDFa compliant template
