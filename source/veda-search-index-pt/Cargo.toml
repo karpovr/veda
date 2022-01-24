@@ -14,5 +14,5 @@ url = "2.1.1"
 serde = "1.0"
 bincode = "1.2.1"
 
-v_common = { package = "v-common", version = "0.1.100" }
+v_common = { package = "v-common", version = "=0.1.101" }
 #v_common = { package = "v-common", path = "../../../v-common" }
