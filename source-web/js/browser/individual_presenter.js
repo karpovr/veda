@@ -499,7 +499,7 @@ function processTemplate (individual, container, wrapper, mode) {
    */
   const deletedHandler = function () {
     if ( this.hasValue('v-s:deleted', true) ) {
-      if (mode === 'view') {
+      if (mode === 'view' && container && container.id !== 'main') {
         template.classList.add('deleted');
       }
       if (container && container.id === 'main') {
@@ -508,7 +508,7 @@ function processTemplate (individual, container, wrapper, mode) {
         msg.load().then((msg) => {
           const msgStr = msg['rdfs:label'].map(Util.formatValue).join(' ');
           notify('warning', {name: msgStr});
-          const deletedHeader = document.createElement('h3');
+          const deletedHeader = document.createElement('h4');
           deletedHeader.classList.add('deleted-header');
           deletedHeader.textContent = msgStr;
           deletedHeader.style.textAlign = 'center';
@@ -543,7 +543,7 @@ function processTemplate (individual, container, wrapper, mode) {
         msg.load().then((msg) => {
           const msgStr = msg['rdfs:label'].map(Util.formatValue).join(' ');
           notify('warning', {name: msgStr});
-          const invalidHeader = document.createElement('h3');
+          const invalidHeader = document.createElement('h4');
           invalidHeader.classList.add('invalid-header');
           invalidHeader.textContent = msgStr;
           invalidHeader.style.textAlign = 'center';
