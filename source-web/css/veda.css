@@ -523,23 +523,11 @@ textarea {
   text-decoration: none!important;
   color: #999!important;
 }
-.deleted-header {
-  color: #8a6d3b;
-  background-color: #fcf8e3;
-  border: 1px solid #faebcc;
-  padding: 0.75em 1em;
-  display: inline-block;
-  margin-bottom: 1em;
-  margin-left: 50%;
-  transform: translateX(-50%);
-  border-radius: 8px;
-  box-shadow: 1px 1px 4px #e0e0e0;
-}
 .invalid *:not(.invalid-header):not(.invalid-header ~ * *) {
   text-decoration: none!important;
   color: #700000!important;
 }
-.invalid-header {
+.deleted-header, .invalid-header {
   color: #8a6d3b;
   background-color: #fcf8e3;
   border: 1px solid #faebcc;
