@@ -236,6 +236,14 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
       .then((templateModule) => {
         const pre = templateModule.pre;
         const post = templateModule.post;
+        const html = templateModule.html;
+        if (!html) {
+          const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
+          return Promise.resolve(pre_result).then(() => {
+            const post_result = post ? post.call(individual, individual, template, container, mode, extra) : undefined;
+            return Promise.resolve(post_result).then(() => undefined);
+          });
+        }
         const wrapper = wrap(templateModule.html);
         const template = wrapper.firstElementChild;
         const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
@@ -495,7 +503,6 @@ function processTemplate (individual, container, wrapper, mode) {
         template.classList.add('deleted');
       }
       if (container && container.id === 'main') {
-        console.log(template.innerHTML);
         const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
         msg.load().then((msg) => {
@@ -527,7 +534,9 @@ function processTemplate (individual, container, wrapper, mode) {
    */
   const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) ) {
-      template.classList.add('invalid');
+      if (mode === 'view' && container && container.id !== 'main') {
+        template.classList.add('invalid');
+      }
       if (container && container.id === 'main') {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:InvalidAlert');
@@ -542,6 +551,10 @@ function processTemplate (individual, container, wrapper, mode) {
         }).catch(console.log);
       }
     } else {
+      if (container && container.id === 'main') {
+        const header = template.querySelector('.invalid-header');
+        if (header) header.remove();
+      }
       template.classList.remove('invalid');
     }
   };

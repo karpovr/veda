@@ -24,6 +24,4 @@ export const post = function (individual, template, container, mode, extra) {
   });
 };
 
-export const html = `
-  <div class="hidden"></div>
-`;
+export const html = ``;
