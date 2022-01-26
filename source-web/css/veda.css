@@ -519,11 +519,11 @@ textarea {
   border: none;
   box-shadow: none;
 }
-.deleted *:not(#recover):not(.deleted-header):not(.deleted-header ~ * *) {
+.deleted:not(.deleted-header ~ * *) {
   text-decoration: none!important;
   color: #999!important;
 }
-.invalid *:not(.invalid-header):not(.invalid-header ~ * *) {
+.invalid:not(.invalid-header ~ * *) {
   text-decoration: none!important;
   color: #700000!important;
 }
