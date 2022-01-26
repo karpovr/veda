@@ -19,13 +19,16 @@ $.fn.veda_link = function ( options ) {
   const rel_uri = opts.property_uri;
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : new IndividualModel(rel_uri)['rdfs:range'];
-  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : range.map((item) => {
+  let queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
+  const isDynamicQueryPrefix = this.attr('data-dynamic-query-prefix') == 'true';
   const source = this.attr('data-source') || undefined;
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   let withDeleted = false || this.attr('data-deleted');
+
+  if (isSingle == "false") isSingle = false;
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -252,6 +255,9 @@ $.fn.veda_link = function ( options ) {
             console.log('Source error', source);
           });
       } else {
+        if (isDynamicQueryPrefix) {
+          queryPrefix = self.attr('data-query-prefix');
+        }
         interpolate(queryPrefix, individual).then((queryPrefix) => {
           ftQuery(queryPrefix, value, sort, withDeleted)
             .then(renderResults)
@@ -481,19 +487,21 @@ $.fn.veda_link = function ( options ) {
         }
         e.preventDefault();
         e.stopPropagation();
-        const suggestions = $('.suggestions', control);
-        if ( suggestions.is(':empty') ) {
-          performSearch();
-        } else if ( fulltextMenu.is(':visible') ) {
+        if ( fulltextMenu.is(':visible')) {
           fulltextMenu.hide();
           $(document).off('click', clickOutsideMenuHandler);
           $(document).off('keydown', arrowHandler);
         } else {
-          $(document).off('click', clickOutsideMenuHandler);
-          $(document).off('keydown', arrowHandler);
-          fulltextMenu.show();
-          $(document).on('click', clickOutsideMenuHandler);
-          $(document).on('keydown', arrowHandler);
+          const suggestions = $('.suggestions', control);
+          if ( suggestions.is(':empty') || isDynamicQueryPrefix ) {
+            performSearch();
+          } else {
+            $(document).off('click', clickOutsideMenuHandler);
+            $(document).off('keydown', arrowHandler);
+            fulltextMenu.show();
+            $(document).on('click', clickOutsideMenuHandler);
+            $(document).on('keydown', arrowHandler);  
+          }
         }
       });
       const downHandler = function (e) {
