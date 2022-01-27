@@ -107,13 +107,28 @@ proto.get = function (property_uri) {
 };
 
 proto.set = function (property_uri, values, silently) {
-  this.isSync(false);
   if ( !Array.isArray(values) ) {
     values = [values];
   }
   const serialized = values.map(serializer).filter(Boolean);
   const uniq = unique(serialized);
-  if ( JSON.stringify(uniq) !== JSON.stringify(this.properties[property_uri] || []) ) {
+  const prevValues = this.properties[property_uri] == undefined ? [] : this.properties[property_uri];
+  let isChanged = false;
+  if (uniq.length != prevValues.length) {
+    isChanged = true;
+  } else {
+    for (let i = 0; i < uniq.length; i++) {
+      const isExist = prevValues.some(function(v) {
+        return v.data == uniq[i].data && v.type == uniq[i].type;
+      });
+      if (!isExist) {
+        isChanged = true;
+        break;
+      }
+    }
+  }
+  if (isChanged) {
+    this.isSync(false);
     if (uniq.length) {
       this.properties[property_uri] = uniq;
     } else {
