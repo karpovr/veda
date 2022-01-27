@@ -119,10 +119,10 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for WsCCUSSession {
             ws::Message::Ping(msg) => {
                 self.hb = Instant::now();
                 ctx.pong(&msg);
-            }
+            },
             ws::Message::Pong(_) => {
                 self.hb = Instant::now();
-            }
+            },
             ws::Message::Text(text) => {
                 let m = text.trim();
 
@@ -130,11 +130,11 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for WsCCUSSession {
                     id: self.id,
                     msg: m.to_owned(),
                 });
-            }
+            },
             ws::Message::Binary(_) => println!("Unexpected binary"),
             ws::Message::Close(_) => {
                 ctx.stop();
-            }
+            },
             ws::Message::Nop => (),
         }
     }

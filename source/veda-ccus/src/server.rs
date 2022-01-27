@@ -298,11 +298,11 @@ impl Actor for CCUSServer {
                 let mut indv = Individual::new_raw(raw);
 
                 if prepare_queue_el(&mut indv, &mut act.uri2sessions, &mut session2uris).is_err() {
-                    error!("failed to parse mesage, total processed = {}", act.total_prepared_count);
+                    error!("failed to parse message, total processed = {}", act.total_prepared_count);
                     break;
                 }
 
-                act.queue_consumer.commit_and_next();
+                act.queue_consumer.commit();
 
                 act.total_prepared_count += 1;
 
