@@ -499,10 +499,10 @@ function processTemplate (individual, container, wrapper, mode) {
    */
   const deletedHandler = function () {
     if ( this.hasValue('v-s:deleted', true) ) {
-      if (mode === 'view' && container && container.id !== 'main') {
+      if (mode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
         template.classList.add('deleted');
       }
-      if (container && container.id === 'main') {
+      if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
         msg.load().then((msg) => {
@@ -534,10 +534,10 @@ function processTemplate (individual, container, wrapper, mode) {
    */
   const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) ) {
-      if (mode === 'view' && container && container.id !== 'main') {
+      if (mode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
         template.classList.add('invalid');
       }
-      if (container && container.id === 'main') {
+      if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:InvalidAlert');
         msg.load().then((msg) => {
@@ -813,6 +813,9 @@ function processTemplate (individual, container, wrapper, mode) {
         embedded.push(...rendered);
         rendered.forEach((node) => {
           node.setAttribute('data-embedded', 'true');
+          if (mode === 'edit') {
+            node.dispatchEvent(new Event('internal-validate'));
+          }
         });
       }
     });
@@ -1059,6 +1062,9 @@ function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relT
       embedded.push(...rendered);
       rendered.forEach((node) => {
         node.setAttribute('data-embedded', 'true');
+        if (mode === 'edit') {
+          node.dispatchEvent(new Event('internal-validate'));
+        }
       });
     }
     if (!isAbout) {

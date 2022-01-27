@@ -519,13 +519,13 @@ textarea {
   border: none;
   box-shadow: none;
 }
-.deleted:not(.deleted-header ~ * *) {
-  text-decoration: none!important;
-  color: #999!important;
-}
-.invalid:not(.invalid-header ~ * *) {
+.invalid:not(.invalid-header ~ * *), a.invalid, tr.invalid, span.invalid {
   text-decoration: none!important;
   color: #700000!important;
+}
+.deleted:not(.deleted-header ~ * *), a.deleted, tr.deleted, span.deleted {
+  text-decoration: none!important;
+  color: #999!important;
 }
 .deleted-header, .invalid-header {
   color: #8a6d3b;
