@@ -54,12 +54,6 @@ export const post = function (individual, template, container, mode, extra) {
         e.stopPropagation();
         template.click();
       });
-      document.addEventListener('click', function (e) {
-        const jTarget = $(e.target);
-        if (jTarget.closest('.popover').length == 0 && jTarget[0] != template[0]) {
-          template.click();
-        }
-      });
     });
   };
 };
