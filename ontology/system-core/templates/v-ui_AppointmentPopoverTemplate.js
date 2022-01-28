@@ -39,24 +39,26 @@ export const html = `
         </div>
       </div>
       <div about="@" rel="v-s:employee">
-        <div about="@" rel="v-s:hasCommunicationMean">
-          <div>
-            <small about="@" property="v-s:description"></small>
+        <div>
+          <div about="@" rel="v-s:hasCommunicationMean">
+            <div>
+              <small about="@" property="v-s:description"></small>
+            </div>
           </div>
-        </div>
-        <div class="absence-block">
-          <hr class="no-margin" />
-          <div>
-            <small>
-              <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
-              <span about="@" property="v-s:dateAbsenceTo"></span>
-            </small>
-          </div>
-          <div>
-            <small>
-              <span about="v-s:delegate" property="rdfs:label"></span>
-              <span about="@" rel="v-s:delegate" data-template="v-ui:LabelTemplate"></span>
-            </small>
+          <div class="absence-block">
+            <hr class="no-margin" />
+            <div>
+              <small>
+                <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
+                <span about="@" property="v-s:dateAbsenceTo"></span>
+              </small>
+            </div>
+            <div>
+              <small>
+                <span about="v-s:delegate" property="rdfs:label"></span>
+                <span about="@" rel="v-s:delegate" data-template="v-ui:LabelTemplate"></span>
+              </small>
+            </div>
           </div>
         </div>
       </div>
