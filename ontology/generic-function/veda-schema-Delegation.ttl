@@ -380,6 +380,7 @@ allDelegated["rdf:value"] = allDelegated["rdf:value"] || [];
 
 position_uris.map(function (position_uri) {
   var uri = "d:" + veda.Util.Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri, request_uri].join("_").split(":").join("_") ).substring(40);
+  var oldTypeUri = "d:" + veda.Util.Sha256.hash( ["delegated", delegator_uri, delegate_uri, position_uri].join("_").split(":").join("_") ).substring(40);
   var appointment = get_individual(ticket, uri);
 
   if ( !appointment ) {
@@ -480,71 +481,75 @@ if (!allDelegated) {
 allDelegated["rdf:value"] = allDelegated["rdf:value"] || [];
 
 allDelegated["rdf:value"] = allDelegated["rdf:value"].filter(function (item) {
-  var appointment_uri = item.data;
-  var appointment = get_individual(ticket, appointment_uri);
+  try {
+    var appointment_uri = item.data;
+    var appointment = get_individual(ticket, appointment_uri);
 
-  if (!appointment) {
-    return false;
-  }
-
-  var isPremature = now < appointment["v-s:dateFrom"][0].data;
-  var isActual = appointment["v-s:dateFrom"][0].data <= now && now <= appointment["v-s:dateTo"][0].data;
-  var isOverdue = now > appointment["v-s:dateTo"][0].data;
-  var isDeleted = veda.Util.hasValue(appointment, "v-s:deleted", {data: true, type: "Boolean"});
-
-  //print("[cfg:Event_Delegation]", "appointment =", appointment_uri, "| isPremature =", isPremature, "| isActual =", isActual, "| isOverdue =", isOverdue, "| isDeleted =", isDeleted );
-
-  if ( isActual ) {
-
-    if ( isDeleted ) {
-      appointment["v-s:deleted"] = [];
-      put_individual(ticket, appointment, _event_id);
-      //print("[cfg:Event_Delegation] appointment became actual & restored", appointment_uri);
-      delegate_uri = veda.Util.getUri( appointment["v-s:employee"] );
-      delegate = get_individual(ticket, delegate_uri);
-      delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"] || [];
-      delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"].filter( function (item) {
-        return item.data !== appointment_uri;
-      }).concat({data: appointment_uri, type: "Uri"});
-      put_individual(ticket, delegate, _event_id);
-      //print("[cfg:Event_Delegation] delegate updated - actual appointment added", delegate_uri);
+    if (!appointment) {
+      return false;
     }
-    // Keep actual appointment in list
+
+    var isPremature = now < appointment["v-s:dateFrom"][0].data;
+    var isActual = appointment["v-s:dateFrom"][0].data <= now && now <= appointment["v-s:dateTo"][0].data;
+    var isOverdue = now > appointment["v-s:dateTo"][0].data;
+    var isDeleted = veda.Util.hasValue(appointment, "v-s:deleted", {data: true, type: "Boolean"});
+
+    print("[cfg:Event_Delegation]", "appointment =", appointment_uri, "| isPremature =", isPremature, "| isActual =", isActual, "| isOverdue =", isOverdue, "| isDeleted =", isDeleted );
+
+    if ( isActual ) {
+
+      if ( isDeleted ) {
+        appointment["v-s:deleted"] = [];
+        put_individual(ticket, appointment, _event_id);
+        //print("[cfg:Event_Delegation] appointment became actual & restored", appointment_uri);
+        delegate_uri = veda.Util.getUri( appointment["v-s:employee"] );
+        delegate = get_individual(ticket, delegate_uri);
+        delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"] || [];
+        delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"].filter( function (item) {
+          return item.data !== appointment_uri;
+        }).concat({data: appointment_uri, type: "Uri"});
+        put_individual(ticket, delegate, _event_id);
+        print("[cfg:Event_Delegation] delegate updated - actual appointment added", delegate_uri);
+      }
+      // Keep actual appointment in list
+      return true;
+
+    } else if ( isOverdue ) {
+
+      if ( !isDeleted ) {
+        delegate_uri = veda.Util.getUri( appointment["v-s:employee"] );
+        delegate = get_individual(ticket, delegate_uri);
+        delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"] || [];
+        delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"].filter( function (item) {
+          return item.data !== appointment_uri;
+        });
+        delegate["v-s:defaultAppointment"] = delegate["v-s:defaultAppointment"] || [];
+        delegate["v-s:defaultAppointment"] = delegate["v-s:defaultAppointment"].filter( function (item) {
+          return item.data !== appointment_uri;
+        });
+        appointment["v-s:deleted"] = veda.Util.newBool(true);
+        put_individual(ticket, appointment, _event_id);
+        //print("[cfg:Event_Delegation] overdue appointment deleted", appointment_uri);
+        put_individual(ticket, delegate, _event_id);
+        print("[cfg:Event_Delegation] delegate updated - overdue appointment removed", delegate_uri);
+      }
+      // Remove overdue appointment from list
+      return false;
+
+    } else if (isPremature) {
+      if ( !isDeleted ) {
+        // Mark premature appointment as deleted
+        appointment["v-s:deleted"] = veda.Util.newBool(true);
+        put_individual(ticket, appointment, _event_id);
+        print("[cfg:Event_Delegation] premature appointment deleted", appointment_uri);
+      }
+      // Keep premature appointment in list
+      return true;
+    }  
+  } catch (exp) {
+    print(veda.Util.toJson(exp));
     return true;
-
-  } else if ( isOverdue ) {
-
-    if ( !isDeleted ) {
-      delegate_uri = veda.Util.getUri( appointment["v-s:employee"] );
-      delegate = get_individual(ticket, delegate_uri);
-      delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"] || [];
-      delegate["v-s:hasAppointment"] = delegate["v-s:hasAppointment"].filter( function (item) {
-        return item.data !== appointment_uri;
-      });
-      delegate["v-s:defaultAppointment"] = delegate["v-s:defaultAppointment"] || [];
-      delegate["v-s:defaultAppointment"] = delegate["v-s:defaultAppointment"].filter( function (item) {
-        return item.data !== appointment_uri;
-      });
-      appointment["v-s:deleted"] = veda.Util.newBool(true);
-      put_individual(ticket, appointment, _event_id);
-      //print("[cfg:Event_Delegation] overdue appointment deleted", appointment_uri);
-      put_individual(ticket, delegate, _event_id);
-      //print("[cfg:Event_Delegation] delegate updated - overdue appointment removed", delegate_uri);
-    }
-    // Remove overdue appointment from list
-    return false;
-
-  } else if (isPremature) {
-    if ( !isDeleted ) {
-      // Mark premature appointment as deleted
-      appointment["v-s:deleted"] = veda.Util.newBool(true);
-      put_individual(ticket, appointment, _event_id);
-      //print("[cfg:Event_Delegation] premature appointment deleted", appointment_uri);
-    }
-    // Keep premature appointment in list
-    return true;
-  }
-
+  };
 });
 
 put_individual(ticket, allDelegated, _event_id);
