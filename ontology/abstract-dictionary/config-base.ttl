@@ -1105,7 +1105,7 @@ if (isDeletingAction == false) {
 cfg:Event_Document_Archiving
   rdf:type v-s:Event ;
   rdfs:label "Удаление-архивирование старых документов" ;
-  v-s:triggerByUid cfg:monthly ;
+  v-s:triggerByUid cfg:weekly ;
   #v-s:disabled true;
   v-s:runAt "V8.LowPriority";
   v-s:script """
