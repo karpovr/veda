@@ -1217,7 +1217,7 @@ v-s:weight
 #---------------------------------------------------------------- Единица измерения --
 v-s:UnitOfMeasure
   rdf:type owl:Class ;
-  rdfs:subClassOf rdfs:Resource ;
+  rdfs:subClassOf v-s:UserThing ;
   rdfs:label "Единица измерения"@ru ;
   rdfs:label "Unit of measure"@en ;
 .
