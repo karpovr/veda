@@ -118,6 +118,7 @@ export const post = function (individual, template, container, mode, extra) {
       NewPerson['rdf:type'] = [new IndividualModel('v-s:Person')];
       NewPerson['v-s:parentOrganization'] = individual['v-s:parentOrganization'];
       NewPerson.present($('<div>'), 'v-s:PersonEmbeddedTemplate', 'edit').then(function (tmpl) {
+        tmpl = $(tmpl);
         tmpl.on('validate', function () {
           template.trigger('special-validate');
         });
@@ -157,6 +158,7 @@ export const post = function (individual, template, container, mode, extra) {
       NewOccupation['v-s:parentUnit'] = individual['v-s:parentUnit'];
       NewOccupation['v-s:origin'] = individual['v-s:origin'];
       NewOccupation.present($('<div>'), 'v-s:PositionEmbeddedTemplate', 'edit').then(function (tmpl) {
+        tmpl = $(tmpl);
         tmpl.on('validate', function () {
           template.trigger('special-validate');
         });

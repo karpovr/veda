@@ -22,6 +22,7 @@ export const pre = function (individual, template, container, mode, extra) {
       Link['v-s:mutualMembership'] = [true];
     }
     Link.present(cntr, rowTmpl, 'edit').then(function (newRow) {
+      newRow = $(newRow);
       Link.one('beforeReset', function () {
         newRow.remove();
       });
