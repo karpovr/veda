@@ -59,6 +59,7 @@ export const post = function (individual, template, container, mode, extra) {
     }
     decisionContainer.empty();
     decision.present(decisionContainer, undefined, 'edit').then(function (decisionTemplate) {
+      decisionTemplate = $(decisionTemplate);
       decisionTemplate
         .find('.action#send')
         .off('click')
