@@ -671,7 +671,7 @@ export const post = function (individual, template, container, mode, extra) {
       })
       .then(function (templates) {
         const cntr = templates.reduceRight(function (acc, curTmpl, i) {
-          curTmpl.css('margin-left', 15 * (templates.length - (i + 1)));
+          curTmpl.style.marginLeft = 15 * (templates.length - (i + 1)) + 'px';
           return acc.append(curTmpl);
         }, $("<div><span class='close'>&nbsp;&times;</span></div>"));
         return cntr;
