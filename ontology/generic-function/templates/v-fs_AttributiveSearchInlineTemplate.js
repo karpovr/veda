@@ -79,27 +79,28 @@ export const pre = function (individual, template, container, mode) {
     .load()
     .then(function (searchResultTemplate) {
       const templateString = searchResultTemplate['v-ui:template'][0].toString();
-      return import('/templates/' + templateString).then(function (templateModule) {
-        return templateModule.html;
-      });
+      return import('/templates/' + templateString);
     })
-    .then(function (templateString) {
-      const searchResultTemplate = $(templateString);
+    .then(function(templateModule) {
+      const searchResultTemplate = $(templateModule.html);
       const resultContainer = $('.result-container', searchResultTemplate);
-      if (resultContainer.attr('data-template')) {
-        const resultTemplateIndividual = new IndividualModel(resultContainer.attr('data-template'));
-        resultContainer.empty();
-        return resultTemplateIndividual.load().then(function (resultTemplateIndividual) {
-          const resultTemplate = resultTemplateIndividual['v-ui:template'][0].toString();
+      const pre_result = templateModule.pre != undefined ? templateModule.pre.call(individual, individual, searchResultTemplate, searchResultContainer, mode) : undefined;
+      return Promise.resolve(pre_result).then(function(){
+        if (resultContainer.attr('data-template')) {
+          const resultTemplateIndividual = new IndividualModel(resultContainer.attr('data-template'));
+          resultContainer.empty();
+          return resultTemplateIndividual.load().then(function (resultTemplateIndividual) {
+            const resultTemplate = resultTemplateIndividual['v-ui:template'][0].toString();
+            individual.resultTemplate = resultTemplate;
+            searchResultContainer.append(searchResultTemplate);
+          });
+        } else {
+          const resultTemplate = resultContainer.html();
+          resultContainer.empty();
           individual.resultTemplate = resultTemplate;
           searchResultContainer.append(searchResultTemplate);
-        });
-      } else {
-        const resultTemplate = resultContainer.html();
-        resultContainer.empty();
-        individual.resultTemplate = resultTemplate;
-        searchResultContainer.append(searchResultTemplate);
-      }
+        }
+      });
     });
 };
 
