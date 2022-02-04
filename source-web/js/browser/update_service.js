@@ -4,6 +4,8 @@ import veda from '../common/veda.js';
 
 import IndividualModel from '../common/individual_model.js';
 
+import riot from '../common/lib/riot.js';
+
 import Backend from '../common/backend.js';
 
 export default UpdateService;
@@ -13,14 +15,15 @@ export default UpdateService;
  * @return {Promise} update service instance promise
  */
 function UpdateService () {
-  const self = this;
+  const self = riot.observable(this);
 
   // Singleton pattern
   if (UpdateService.prototype._singletonInstance) {
     return UpdateService.prototype._singletonInstance;
   }
 
-  this.list = {};
+  self.list = {};
+  self.onLine = false;
   const reconnectDelayInitial = 10000 + Math.floor(Math.random() * 50000); // 10 - 60 sec
   const reconnectDelayFactor = 1.25;
   const reconnectDelayLimit = 5 * 60 * 1000; // 5 min
@@ -40,7 +43,7 @@ function UpdateService () {
    * @return {Promise} instance promise
    */
   function initSocket () {
-    return Backend.reset_individual(veda.ticket, 'cfg:ClientUpdateServicePort')
+    return Backend.get_individual(veda.ticket, 'cfg:ClientUpdateServicePort', false)
       .then((ccusPortCfg) => {
         const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
         const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
@@ -146,12 +149,14 @@ function UpdateService () {
     console.log('client: websocket opened', event.target.url);
     this.sendMessage('ccus=' + veda.ticket);
     self.restore();
-    veda.trigger('ccus-online');
+    self.onLine = true;
+    self.trigger('online');
 
     pingInterval = setInterval(() => {
       if (Date.now() - lastPing > 2 * pingTimeout) {
         console.log('client: ping missed, close socket');
-        veda.trigger('ccus-offline');
+        self.onLine = false;
+        self.trigger('offline');
         clearInterval(pingInterval);
         this.close();
         return;
@@ -190,7 +195,8 @@ function UpdateService () {
     reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
     console.log('client: websocket closed', event.target.url, '| re-connect in', reconnectDelay / 1000, 'sec');
     setTimeout(initSocket, reconnectDelay);
-    veda.trigger('ccus-offline');
+    self.onLine = false;
+    self.trigger('offline');
     clearInterval(pingInterval);
   }
 };

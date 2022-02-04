@@ -76,7 +76,7 @@ export const html = `
     <br />
     <veda-control rel="v-ui:testFile" data-type="file" class="-view edit -search"></veda-control>
     <br />
-    <div class="actions">
+    <div class="actions view edit -search">
       <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="send edit save cancel delete journal task"></span>
     </div>
     <div about="@" class="container sheet view -edit -search" data-template="v-s:CommentsTemplate"></div>

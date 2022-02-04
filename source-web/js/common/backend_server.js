@@ -44,8 +44,6 @@ serverBackend.get_individual = function (ticket, uri) {
   }
 };
 
-serverBackend.reset_individual = serverBackend.get_individual;
-
 serverBackend.get_individuals = function (ticket, uris) {
   const arg = ticket;
   const isObj = typeof arg === 'object';

@@ -2,6 +2,8 @@
 
 import veda from '../common/veda.js';
 
+import UpdateService from '../browser/update_service.js';
+
 const styles = `
   #line-status {
     position: absolute;
@@ -51,3 +53,44 @@ function statusHandler (status) {
   lineStatus.setAttribute('title', status);
 }
 veda.on('status', statusHandler);
+
+// Line status sources
+(async () => {
+  if ('serviceWorker' in navigator) {
+    async function setStatus () {
+      let status;
+      if (navigator.serviceWorker.onLine && navigator.onLine && updateService.onLine) {
+        status = 'online';
+      } else if (serviceWorker.onLine && navigator.onLine && !updateService.onLine) {
+        status = 'limited';
+      } else {
+        status = 'offline';
+      }
+      veda.status = status;
+      veda.trigger('status', status);
+      if (status === 'offline') {
+        checkStatus();
+      }
+    }
+
+    async function checkStatus () {
+      const registration = await serviceWorker.ready;
+      registration.active.postMessage('status');
+    }
+
+    const serviceWorker = navigator.serviceWorker;
+    serviceWorker.addEventListener('message', (event) => {
+      if ('onLine' in event.data) {
+        serviceWorker.onLine = event.data.onLine;
+        setStatus();
+      }
+    });
+
+    const updateService = await new UpdateService();
+    updateService.on('online', setStatus);
+    updateService.on('offline', setStatus);
+
+    window.addEventListener('online', setStatus);
+    window.addEventListener('offline', setStatus);
+  }
+})();

@@ -30,7 +30,6 @@ const API = [
  * Watch cached resources changes
  */
 function watchChanges () {
-
   if (typeof EventSource === 'undefined') return;
 
   const events = new EventSource('/watch');
@@ -87,17 +86,20 @@ this.addEventListener('install', (event) => {
 
 /**
  * Fetch event handler
+ * @param {Event} event
+ * @param {string} CACHE
+ * @return {Response}
  */
 function handleFetch (event, CACHE) {
   const path = new URL(event.request.url).pathname;
-  return caches.match(path).then((cached) => cached || fetch(event.request).then((fetched) => {
-    if (fetched.ok) {
+  return caches.match(path).then((cached) => cached || fetch(event.request).then((response) => {
+    if (response.ok) {
       return caches.open(CACHE).then((cache) => {
-        cache.put(path, fetched.clone());
-        return fetched;
+        cache.put(path, response.clone());
+        return response;
       });
     }
-    return fetched;
+    return response;
   }));
 }
 

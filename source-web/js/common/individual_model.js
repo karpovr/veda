@@ -118,7 +118,7 @@ proto.set = function (property_uri, values, silently) {
     isChanged = true;
   } else {
     for (let i = 0; i < uniq.length; i++) {
-      const isExist = prevValues.some(function(v) {
+      const isExist = prevValues.some(function (v) {
         return v.data == uniq[i].data && v.type == uniq[i].type;
       });
       if (!isExist) {
@@ -373,9 +373,9 @@ proto.load = function () {
   return this.isLoading(
     this.trigger('beforeLoad')
       .then(() => {
-        if (this.isLoaded() && (Backend.status === 'online' || Backend.status === 'offline')) {
+        if (this.isLoaded() && (veda.status === 'online' || veda.status === 'offline' || !veda.status)) {
           return this;
-        } else if (this.isLoaded() && Backend.status === 'limited') {
+        } else if (this.isLoaded() && veda.status === 'limited') {
           return this.reset();
         } else {
           const uri = this._.uri;
@@ -510,7 +510,7 @@ proto.reset = function (forced) {
 
   return this.isResetting(
     this.trigger('beforeReset')
-      .then(() => !this.isNew() ? Backend.reset_individual(veda.ticket, this.id).then(mergeServerState) : null)
+      .then(() => !this.isNew() ? Backend.get_individual(veda.ticket, this.id, false).then(mergeServerState) : null)
       .then(() => this.trigger('afterReset'))
       .then(() => {
         this.isResetting(false);

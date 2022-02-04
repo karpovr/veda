@@ -9,12 +9,16 @@ import { Selector, t } from 'testcafe';
     const timeEdwin = ''+Math.round(+new Date()/1000);
     const timeFillips = ''+Math.round(+new Date()/100);
     basic.createTestUiForAttributiveSearch('Кинг', 'Стивен', timeEdwin, '21.09.1947');
+    await t
+      .click('.navbar-brand');
     basic.logout();
     basic.login('bychinat', '123');
     await t
       .wait(5000);
     basic.fullTextSearch(timeEdwin, '0');
     basic.createTestUiForAttributiveSearch('Лавкрафт', 'Говард', timeFillips, '20.08.1890');
+    await t
+      .click('.navbar-brand');
     basic.logout();
     basic.login('karpovrt', '123');
     await t

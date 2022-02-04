@@ -1,13 +1,12 @@
 // API calls caching service worker
 
 const veda_version = 7;
-
+const watchTimeout = 60 * 1000;
 const FILES = 'files';
 const STATIC = 'static';
 const API = 'api';
 
 const API_FNS = [
-  '/ping',
   '/get_rights',
   '/get_rights_origin',
   '/get_membership',
@@ -25,41 +24,124 @@ const API_FNS = [
   '/set_in_individual',
   '/remove_from_individual',
   '/put_individuals',
+  '/watch',
 ];
 const NTLM = [
   '/ntlm',
-  '/ntlm/',
-  '/no',
-  '/no/',
-  '/ad',
-  '/ad/',
 ];
 
-addEventListener('message', (event) => {
-  if (event.data === 'veda_version') {
-    event.source.postMessage(veda_version);
+// Check line
+this.onLine = false;
+function sendStatus () {
+  self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
+    clients.forEach((client) => {
+      client.postMessage({onLine: self.onLine});
+    });
+  });
+}
+
+const pingTimeout = 5000;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let pinging = false;
+
+function ping () {
+  if (pinging) return;
+  pinging = true;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), pingTimeout);
+  fetch('/ping', {signal: controller.signal})
+    .then((response) => {
+      clearTimeout(id);
+      if (response.ok) {
+        self.onLine = true;
+        sendStatus();
+        pinging = false;
+        flushQueue();
+      } else {
+        self.onLine = false;
+        sendStatus();
+        wait(pingTimeout).then(() => {
+          pinging = false;
+          ping();
+        });
+      }
+    })
+    .catch(() => {
+      clearTimeout(id);
+      self.onLine = false;
+      sendStatus();
+      wait(pingTimeout).then(() => {
+        pinging = false;
+        ping();
+      });
+    });
+}
+
+this.addEventListener('message', (event) => {
+  if (event.data === 'status') {
+    ping();
+  }
+});
+
+/**
+ * Watch cached resources changes
+ */
+function watchChanges () {
+  if (typeof EventSource === 'undefined') return;
+
+  const events = new EventSource('/watch');
+
+  events.onopen = () => {
+    console.log(new Date().toISOString(), 'Watching resources changes');
+  };
+
+  events.onerror = (event) => {
+    console.log(new Date().toISOString(), `Failed to watch resources changes, reconnect in ${Math.floor(watchTimeout / 1000)} sec`);
+    event.target.close();
+    setTimeout(watchChanges, watchTimeout);
+  };
+
+  events.onmessage = (event) => {
+    const change = JSON.parse(event.data);
+    Object.keys(change).forEach((_path) => {
+      const path = (_path === '/index.html' ? '/' : _path);
+      caches.match(path).then((response) => {
+        if (response && response.ok) {
+          const cache_modified = response.headers.get('last-modified');
+          const event_modified = change[path];
+          if (cache_modified !== event_modified) {
+            caches.open(STATIC).then((cache) => cache.delete(path)).then(() => {
+              console.log(new Date().toISOString(), 'Cached resource deleted: ', path);
+            });
+          }
+        }
+      });
+    });
+  };
+}
+watchChanges();
+
+/**
+ * Listen to messages from client
+ */
+this.addEventListener('message', (event) => {
+  if (event.data === 'version') {
+    event.source.postMessage({version: veda_version});
   }
 });
 
 /**
  * Clear cached resources
- * @param {Event} event
- * @return {void}
  */
-function clearCache (event) {
-  self.skipWaiting();
-  console.log(`Service worker updated, veda_version = ${veda_version}. Clear cache.`);
+this.addEventListener('install', (event) => {
+  this.skipWaiting();
+  console.log(`Service worker updated, veda_version = ${veda_version}, clear cache`);
   event.waitUntil(
-    caches.keys().then(function (keyList) {
-      return Promise.all(keyList.map(function (key) {
-        return caches.delete(key);
-      }));
-    }),
+    caches.keys().then((keyList) => Promise.all(keyList.map((key) => caches.delete(key)))),
   );
-}
-self.addEventListener('install', clearCache);
+});
 
-self.addEventListener('fetch', function (event) {
+this.addEventListener('fetch', function (event) {
   const url = new URL(event.request.url);
   const pathname = url.pathname;
   const isAPI = API_FNS.indexOf(pathname) >= 0;
@@ -67,8 +149,12 @@ self.addEventListener('fetch', function (event) {
   const isFILES = pathname.indexOf('/files') === 0;
   const isSTATIC = !isAPI && !isFILES && !isNTLM;
   const METHOD = event.request.method;
-  if (isAPI) {
-    event.respondWith(handleAPI(event));
+  if (isAPI && METHOD === 'GET') {
+    event.respondWith(handleAPIGet(event));
+  } else if (isAPI && METHOD === 'POST') {
+    event.respondWith(handleAPIPost(event));
+  } else if (isAPI && METHOD === 'PUT') {
+    event.respondWith(handleAPIPut(event));
   } else if (isFILES && METHOD === 'GET') {
     event.respondWith(handleFetch(event, FILES));
   } else if (isSTATIC && METHOD === 'GET') {
@@ -80,20 +166,19 @@ self.addEventListener('fetch', function (event) {
  * Fetch event handler
  * @param {Event} event
  * @param {string} CACHE
- * @return {Promise<Response>}
+ * @return {Response}
  */
 function handleFetch (event, CACHE) {
-  return caches.match(event.request).then(function (resp) {
-    return resp || fetch(event.request).then(function (response) {
-      if (response.ok) {
-        return caches.open( CACHE ).then(function (cache) {
-          cache.put(event.request, response.clone());
-          return response;
-        });
-      }
-      return response;
-    });
-  });
+  const path = new URL(event.request.url).pathname;
+  return caches.match(path).then((cached) => cached || fetch(event.request).then((response) => {
+    if (response.ok) {
+      return caches.open(CACHE).then((cache) => {
+        cache.put(path, response.clone());
+        return response;
+      });
+    }
+    return response;
+  }));
 }
 
 const OFFLINE_API_RESPONSE = {
@@ -102,9 +187,9 @@ const OFFLINE_API_RESPONSE = {
   'get_ticket_trusted': '{"end_time":' + (Date.now() + 12 * 3600 * 1000) + ',"id":"","result":200,"user_uri":""}',
   'is_ticket_valid': 'true',
   'get_rights': '{"@":"_","rdf:type":[{"data":"v-s:PermissionStatement","type":"Uri"}],"v-s:canCreate":[{"data":true,"type":"Boolean"}],"v-s:canDelete":[{"data":false,"type":"Boolean"}],"v-s:canRead":[{"data":true,"type":"Boolean"}],"v-s:canUpdate":[{"data":true,"type":"Boolean"}]}',
-  'get_rights_origin': '[{"@":"_","rdf:type":[{"data":"v-s:PermissionStatement","type":"Uri"}],"v-s:canCreate":[{"data":true,"type":"Boolean"}],"v-s:canRead":[{"data":true,"type":"Boolean"}],"v-s:canUpdate":[{"data":true,"type":"Boolean"}],"v-s:permissionObject":[{"data":"v-s:AllResourcesGroup","type":"Uri"}],"v-s:permissionSubject":[{"data":"cfg:Guest","type":"Uri"}]}]',
+  'get_rights_origin': '[]',
   'get_membership': '{"@":"_","rdf:type":[{"data":"v-s:Membership","type":"Uri"}],"v-s:memberOf":[{"data":"v-s:AllResourcesGroup","type":"Uri"}]}',
-  // 'get_individual':'{"@":"_","rdf:type":[{"type":"Uri","data": "rdfs:Resource"}],"rdfs:label": [{"type": "String", "data": "Нет связи с сервером. Этот объект сейчас недоступен.", "lang": "RU"},{"type": "String", "data": "Server disconnected. This object is not available now.", "lang": "EN"}]}',
+  'get_individual': '{"@":"_","rdf:type":[{"type":"Uri","data": "rdfs:Resource"}],"rdfs:label": [{"type": "String", "data": "Нет связи с сервером. Этот объект сейчас недоступен.", "lang": "RU"},{"type": "String", "data": "Server disconnected. This object is not available now.", "lang": "EN"}]}',
 
   // POST
   'query': '{"result":[],"count":0,"estimated":0,"processed":0,"cursor":0,"result_code":200}',
@@ -120,102 +205,159 @@ const OFFLINE_API_RESPONSE = {
 };
 
 /**
- * Common request handler
- * @param {Response} response
- * @return {Response}
- */
-function handleError (response) {
-  if (!response.ok) {
-    throw response;
-  }
-  return response;
-}
-
-/**
  * API call handler
  * @param {Event} event
  * @return {Response}
  */
-function handleAPI (event) {
-  const cloneRequest = event.request.method !== 'GET' && event.request.clone();
+function handleAPIGet (event) {
+  const url = new URL(event.request.url);
+  url.searchParams.delete('ticket');
+  const fn = url.pathname.split('/').pop();
+  switch (fn) {
+  // Fetch only
+  case 'authenticate':
+  case 'get_ticket_trusted':
+  case 'is_ticket_valid':
+    return fetch(event.request)
+      .then((response) => {
+        if (response.status === 0 || response.status === 503) {
+          ping();
+        }
+        return response;
+      })
+      .catch((error) => {
+        ping();
+        throw error;
+      });
+    break;
+  // Fetch first
+  case 'get_rights':
+  case 'get_rights_origin':
+  case 'get_membership':
+    return fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open( API ).then((cache) => {
+            cache.put(url, clone);
+          });
+        } else if (response.status === 0 || response.status === 503) {
+          ping();
+          return caches.match(url).then((cached) => cached || response);
+        }
+        return response;
+      })
+      // Network error
+      .catch((error) => {
+        return caches.match(url).then((cached) => {
+          if (cached) return cached;
+          ping();
+          throw error;
+        });
+      });
+    break;
+  // Cache first
+  case 'get_individual':
+    return caches.match(url).then((cached) => cached || fetch(event.request)
+      .then((response) => {
+        url.searchParams.delete('vsn');
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open( API ).then((cache) => cache.put(url, clone));
+        } else if (response.status === 0 || response.status === 503) {
+          ping();
+          return caches.match(url).then((cached) => cached || response);
+        }
+        return response;
+      }))
+      // Network error
+      .catch((error) => {
+        ping();
+        url.searchParams.delete('vsn');
+        return caches.match(url).then((cached) => {
+          if (cached) return cached;
+          throw error;
+        });
+      });
+    break;
+  default:
+    return fetch(event.request)
+      .then((response) => {
+        if (response.status === 0 || response.status === 503) {
+          ping();
+        }
+        return response;
+      })
+      .catch((error) => {
+        ping();
+        throw error;
+      });
+    break;
+  }
+}
+
+function handleAPIPost (event) {
   const url = new URL(event.request.url);
   const fn = url.pathname.split('/').pop();
-  if (event.request.method === 'GET') {
-    if (fn === 'ping') {
-      return fetch(event.request);
-    } else if (fn === 'reset_individual') {
-      // Fetch first
-      return fetch(event.request)
-        .then(handleError)
-        .then(function (response) {
-          const clone = response.clone();
-          caches.open( API ).then(function (cache) {
-            cache.put(event.request, clone);
-          });
-          return response;
-        });
-    } else {
-      // Cache first
-      return caches.match(event.request).then(function (resp) {
-        if (resp) {
-          return resp;
-        }
-        return fetch(event.request)
-          .then(handleError)
-          .then(function (response) {
-            const clone = response.clone();
-            caches.open( API ).then(function (cache) {
-              cache.put(event.request, clone);
-            });
-            return response;
-          })
-          .catch(function (error) {
-            if (fn === 'get_individual') {
-              return error;
-            } else {
-              return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
-            }
-          });
-      });
-    }
-  } else if (event.request.method === 'POST') {
-    // Fetch first
-    return fetch(event.request)
-      .then(handleError)
-      .then(function (response) {
+  const cloneRequest = event.request.clone();
+  // Fetch first
+  return fetch(event.request)
+    .then(function (response) {
+      if (response.ok) {
+        const responseClone = response.clone();
         const db = new LocalDB();
-        return db.then(function (db) {
-          Promise.all([serialize(cloneRequest), serialize(response)]).then(function (req_res) {
+        db.then(function (db) {
+          Promise.all([serialize(cloneRequest), serialize(responseClone)]).then(function (req_res) {
             const request = JSON.stringify(req_res[0]);
             const response = req_res[1];
             db.put(request, response);
           });
-          return response;
         });
-      })
-      .catch(function (error) {
+      } else if (response.status === 0 || response.status === 503) {
+        ping();
         return serialize(cloneRequest).then(function (request) {
           request = JSON.stringify(request);
           const db = new LocalDB();
           return db.then(function (db) {
             return db.get(request).then(deserialize);
+          }).catch((err) => {
+            return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
           });
         });
-      })
-      .catch(function (error) {
-        return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
-      });
-  } else if (event.request.method === 'PUT') {
-    // Fetch first
-    return fetch(event.request)
-      .then(handleError)
-      .catch(function (error) {
+      }
+      return response;
+    })
+    // Network error
+    .catch((err) => {
+      ping();
+      return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
+    });
+}
+
+function handleAPIPut (event) {
+  const url = new URL(event.request.url);
+  const fn = url.pathname.split('/').pop();
+  const cloneRequest = event.request.clone();
+  // Fetch first
+  return fetch(event.request)
+    .then(function (response) {
+      if (response.status === 0 || response.status === 503) {
+        ping();
         return enqueueRequest(cloneRequest).then(function (queue) {
           console.log('Offline operation added to queue, queue length = ', queue.length);
           return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
         });
+      }
+      return response;
+    })
+    // Network error
+    .catch(function (error) {
+      ping();
+      return enqueueRequest(cloneRequest).then(function (queue) {
+        console.log('Offline operation added to queue, queue length = ', queue.length);
+        return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
       });
-  }
+    });
 }
 
 /**
@@ -241,6 +383,7 @@ function enqueueRequest (request) {
  * @return {Promise<Number>}
  */
 function flushQueue () {
+  console.log('Flushing queue');
   const db = new LocalDB();
   return db.then(function (db) {
     return db.get('offline-queue').then(function (queue) {
@@ -259,16 +402,10 @@ function flushQueue () {
         return Promise.resolve(0);
       }
     });
-  });
+  })
+  .then((queue_length) => console.log('Done, queue flushed', queue_length))
+  .catch((error) => console.log('Error flushing queue', error));
 }
-self.addEventListener('message', function (event) {
-  if (event.data === 'online') {
-    console.log('Window said \'online\', flushing queue');
-    flushQueue().then(function (queue_length) {
-      console.log('Done, queue flushed', queue_length);
-    });
-  }
-});
 
 /**
  * Serialize Request / Response
@@ -303,7 +440,7 @@ function serialize (subject) {
       type: subject.type,
     };
   }
-  return subject.clone().text().then(function (body) {
+  return subject.text().then(function (body) {
     serialized.body = body;
     return serialized;
   });
@@ -339,80 +476,82 @@ const fallback = {
  * @return {Promise} database instance promise
  */
 function LocalDB () {
-  const self = this;
-  this.db_name = 'Veda-sw';
-  this.store_name = 'store';
+  this.veda_version = veda_version;
+  this.db_name = 'sw';
+  this.store_name = 'individuals';
 
   // Singleton pattern
   if (LocalDB.prototype[this.db_name + this.store_name]) {
     return Promise.resolve(LocalDB.prototype[this.db_name + this.store_name]);
   }
 
-  return LocalDB.prototype[this.db_name + this.store_name] = initDB(this.db_name, this.store_name, veda_version);
-
-  /**
-   * Initialize database instance
-   * @param {string} db_name - database name
-   * @param {string} store_name - database store name
-   * @param {integer} veda_version - database version
-   * @return {Promise} database instance promise
-   */
-  function initDB (db_name, store_name, veda_version) {
-    return new Promise(function (resolve, reject) {
-      const openReq = indexedDB.open(db_name, veda_version);
-
-      openReq.onsuccess = function (event) {
-        const db = event.target.result;
-        self.db = db;
-        console.log(`DB open success, veda_version = ${veda_version}`);
-        resolve(self);
-      };
-
-      openReq.onerror = function errorHandler (error) {
-        console.log('DB open error', error);
-        reject(error);
-      };
-
-      openReq.onupgradeneeded = function (event) {
-        const db = event.target.result;
-        if (db.objectStoreNames.contains(store_name)) {
-          db.deleteObjectStore(store_name);
-          console.log(`DB store deleted: ${store_name}`);
-        }
-        db.createObjectStore(self.store_name);
-        console.log(`DB create success: ${store_name}, veda_version = ${veda_version}`);
-      };
-    }).catch((error) => {
-      console.log('IndexedDB error, using in-memory fallback.', error);
-      return fallback;
-    });
-  }
-};
+  return LocalDB.prototype[this.db_name + this.store_name] = this.initDB();
+}
 
 const proto = LocalDB.prototype;
 
+/**
+ * Initialize database instance
+ * @return {Promise} database instance promise
+ */
+proto.initDB = function () {
+  return new Promise((resolve, reject) => {
+    const openReq = indexedDB.open(this.db_name, this.veda_version);
+
+    openReq.onsuccess = (event) => {
+      const db = event.target.result;
+      this.db = db;
+      console.log(`DB open success: ${this.db_name}, version = ${this.veda_version}`);
+      resolve(this);
+    };
+
+    openReq.onerror = (error) => {
+      console.log('DB open error', error);
+      reject(error);
+    };
+
+    openReq.onblocked = function (event) {
+      self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
+        clients.forEach((client) => {
+          client.postMessage({alert: 'Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!'});
+        });
+      });
+    };
+
+    openReq.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (db.objectStoreNames.contains(this.store_name)) {
+        db.deleteObjectStore(this.store_name);
+        console.log(`DB store deleted: ${this.store_name}`);
+      }
+      db.createObjectStore(this.store_name);
+      console.log(`DB store created: ${this.store_name}, version = ${this.veda_version}`);
+    };
+  }).catch((error) => {
+    console.log('IndexedDB error, using in-memory fallback.', error);
+    return fallback;
+  });
+};
+
 proto.get = function (key) {
-  const self = this;
-  return new Promise(function (resolve, reject) {
-    const request = self.db.transaction([self.store_name], 'readonly').objectStore(self.store_name).get(key);
+  return new Promise((resolve, reject) => {
+    const request = this.db.transaction([this.store_name], 'readonly').objectStore(this.store_name).get(key);
     request.onerror = reject;
     request.onsuccess = (event) => resolve(event.target.result);
   });
 };
 
 proto.put = function (key, value) {
-  const self = this;
-  return new Promise(function (resolve, reject) {
-    const request = self.db.transaction([self.store_name], 'readwrite').objectStore(self.store_name).put(value, key);
+  return new Promise((resolve, reject) => {
+    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).put(value, key);
     request.onerror = reject;
     request.onsuccess = () => resolve(value);
   });
 };
 
 proto.remove = function (key) {
-  const self = this;
-  return new Promise(function (resolve, reject) {
-    const request = self.db.transaction([self.store_name], 'readwrite').objectStore(self.store_name).delete(key);
+  return new Promise((resolve, reject) => {
+    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).delete(key);
     request.onerror = reject;
     request.onsuccess = (event) => resolve(event.target.result);
   });

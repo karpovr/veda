@@ -286,7 +286,7 @@ Util.startProcess = function (processDefinition, document) {
  */
 Util.send = function (individual, template, transformId, _modal, startFormTemplate) {
   if ( transformId ) {
-    (template.attr('data-mode') === 'edit' ? individual.isSync(false) || template[0].veda.save() : Promise.resolve())
+    return (!individual.isSync() ? template[0].veda.save() : Backend.get_individual(veda.ticket, individual.id).catch(() => template[0].veda.save()))
       .then(() => {
         const transform = new IndividualModel(transformId);
         return transform.load().then((transform) => {
@@ -306,7 +306,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
       });
   } else {
     individual['v-wf:hasStatusWorkflow'] = [new IndividualModel('v-wf:ToBeSent')];
-    template[0].veda.save()
+    return template[0].veda.save()
       .then(() => {
         template.closest('.modal').modal('hide').remove();
         const notify = new Notify();

@@ -18,7 +18,7 @@ if ('serviceWorker' in navigator) {
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   // Install SW
-  navigator.serviceWorker.register('/sw-simple.js', {scope: window.location.pathname})
+  navigator.serviceWorker.register('/sw.js', {scope: window.location.pathname})
     .then((registration) => {
       console.log('Service worker registered:', registration.scope);
 
@@ -35,7 +35,11 @@ if ('serviceWorker' in navigator) {
 
   // Receive and log server worker message
   navigator.serviceWorker.addEventListener('message', (event) => {
-    console.log('Service worker:', event.data);
+    if ('alert' in event.data) {
+      alert(event.data.alert);
+    } else {
+      console.log('Service worker:', event.data);
+    }
   });
 
   // Ask server worker the value of its veda_version

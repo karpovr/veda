@@ -450,7 +450,10 @@ veda.on('login:failed', function () {
     } else {
       loginForm.style.display = 'block';
     }
-  });
+  }).catch((error) => {
+    console.log(err);
+    loginForm.style.display = 'block';
+  })
 });
 
 // Initialize application if ticket is valid
@@ -526,7 +529,7 @@ export default function Auth () {
       const user_uri = storage.user_uri;
       const end_time = ( new Date() < new Date(parseInt(storage.end_time)) ) && storage.end_time;
       if (ticket && user_uri && end_time) {
-        return Backend.is_ticket_valid(ticket);
+        return Backend.is_ticket_valid(ticket).catch(() => false);
       } else {
         return false;
       }
@@ -550,6 +553,9 @@ export default function Auth () {
           } else {
             veda.trigger('login:failed');
           }
+        }).catch((error) => {
+          console.log('cfg:AuthRequired load error', error);
+          veda.trigger('login:failed');
         });
       }
     })

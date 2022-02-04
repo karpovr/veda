@@ -33,7 +33,7 @@ function LocalDB () {
   }
 
   return LocalDB.prototype[this.db_name + this.store_name] = this.initDB();
-};
+}
 
 const proto = LocalDB.prototype;
 
