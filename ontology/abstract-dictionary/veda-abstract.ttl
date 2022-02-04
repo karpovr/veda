@@ -1377,7 +1377,13 @@ v-s:hasBudgetCategory
   rdfs:label "Budget category"@en ;
   rdfs:range v-s:BudgetCategory ;
 .
-
+v-s:isNDS
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "с НДС"@ru ;
+  rdfs:label "VAT included"@en ;
+  rdfs:range xsd:boolean ;
+  rdfs:domain v-s:Thing ;
+.
 #--------------------------------------------------------------- Проектная сущность --
 v-s:Projectable
   rdf:type owl:Class ;
@@ -1597,6 +1603,8 @@ v-s:containsOsmium
   rdfs:domain v-s:containingChemicalElement ;
   rdfs:range xsd:string ;
 .
+
+
 
 #--------------------------------------------------------------------- Документ --
 v-s:Document
