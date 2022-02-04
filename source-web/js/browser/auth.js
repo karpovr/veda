@@ -50,9 +50,12 @@ delegateHandler(loginForm, 'keyup', '#login, #password', function (e) {
   }
 });
 
-delegateHandler(loginForm, 'click', '.show-password', function (e) {
+delegateHandler(loginForm, 'mousedown', '.show-password', function (e) {
   const passwords = loginForm.querySelectorAll('.password');
-  passwords.forEach((input) => input.type = input.type === 'password' ? 'text' : 'password');
+  passwords.forEach((input) => input.type = 'text');
+  document.addEventListener('mouseup', function(){
+    passwords.forEach((input) => input.type = 'password');
+  }, {once:true});
 });
 
 /**
