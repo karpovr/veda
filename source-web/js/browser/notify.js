@@ -49,7 +49,7 @@ wrapper.appendChild(container);
 /**
  * Notify function
  * @param {string} type - notification type following bootstrap contextual classes ( info | success | warning | danger )
- * @param {Object} note - note object with properties 'name', 'message'
+ * @param {Object} note - note object with properties 'code', 'name', 'message'
  * @return {void}
  */
 function notify (type = 'info', {code = '', name = '', message = ''}) {
@@ -68,8 +68,8 @@ function notify (type = 'info', {code = '', name = '', message = ''}) {
   const HTML = `
     <div class="alert alert-${type}">
       <span class="${iconClass}"></span>
-      <strong>${code}</strong>
       <strong>${name}</strong>
+      <strong>${code}</strong>
       <span>${message}</span>
     </div>
   `;

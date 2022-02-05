@@ -403,8 +403,8 @@ function flushQueue () {
       }
     });
   })
-  .then((queue_length) => console.log('Done, queue flushed', queue_length))
-  .catch((error) => console.log('Error flushing queue', error));
+    .then((queue_length) => console.log('Done, queue flushed', queue_length))
+    .catch((error) => console.log('Error flushing queue', error));
 }
 
 /**
