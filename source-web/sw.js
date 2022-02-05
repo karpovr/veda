@@ -249,9 +249,9 @@ function handleAPIGet (event) {
       })
       // Network error
       .catch((error) => {
+        ping();
         return caches.match(url).then((cached) => {
           if (cached) return cached;
-          ping();
           throw error;
         });
       });

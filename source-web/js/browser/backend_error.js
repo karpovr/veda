@@ -40,10 +40,13 @@ const errorCodes = {
  * Backend error
  * @param {Error} result
  */
-function BackendError (result) {
-  this.code = result.status;
-  this.message = typeof this.code !== 'undefined' ? `${this.code}: ${errorCodes[this.code]}` : undefined;
+function BackendError (code) {
+  this.code = code;
+  this.message = typeof this.code !== 'undefined' ? `${errorCodes[this.code]}` : undefined;
   this.stack = (new Error()).stack;
 }
 BackendError.prototype = Object.create(Error.prototype);
 BackendError.prototype.constructor = BackendError;
+BackendError.prototype.toString = function () {
+  return `BackendError ${this.code}: ${this.message}`;
+};

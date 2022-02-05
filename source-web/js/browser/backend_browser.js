@@ -18,52 +18,33 @@ const query_timeout = default_timeout * 10;
  * @return {Promise<Object>}
  */
 function call_server (params) {
-  const method = params.method;
-  const url = params.url;
-  const data = params.data;
-  const ticket = params.ticket;
-  const timeout = params.timeout || default_timeout;
-  let queryParams = [];
-  let payload = null;
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-      if (this.status == 200) {
-        resolve( JSON.parse(this.response) );
-      } else {
-        reject( new BackendError(this) );
-      }
-    };
-    xhr.onerror = function () {
-      reject( new BackendError(this) );
-    };
-    xhr.ontimeout = function () {
-      reject( new BackendError(this) );
-    };
-    if (ticket) {
-      queryParams.push('ticket=' + ticket);
+  const url = new URL(params.url, location.origin);
+  if (params.method === 'GET') {
+    params.data = params.data && Object.entries(params.data).filter(([_, value]) => typeof value !== 'undefined') || '';
+    url.search = new URLSearchParams(params.data).toString();
+  }
+  if (params.ticket) {
+    url.searchParams.append('ticket', params.ticket);
+  }
+  return fetch(url, {
+    method: params.method,
+    mode: 'same-origin',
+    cache: 'no-cache',
+    credentials: 'same-origin',
+    ...(params.method !== 'GET' && {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params.data),
+    }),
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
     }
-    if (method === 'GET') {
-      for (const name in data) {
-        if (typeof data[name] !== 'undefined') {
-          queryParams.push(name + '=' + encodeURIComponent(data[name]));
-        }
-      }
-      queryParams = queryParams.join('&');
-    }
-    xhr.open(method, url + '?' + queryParams, true);
-    xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    xhr.timeout = timeout;
-    if (method !== 'GET') {
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-      payload = JSON.stringify(data);
-    }
-    xhr.send(payload);
-  }).catch((error) => {
-    if (error.code === 470 || error.code === 471) {
+    if (response.status === 470 || response.status === 471) {
       veda.trigger('login:failed');
     }
-    throw error;
+    throw new BackendError(response.status);
   });
 }
 
@@ -218,8 +199,8 @@ browserBackend.query = function (ticket, queryStr, sort, databases, top, limit, 
       'sql': isObj ? arg.sql : sql,
     },
   };
-  return call_server(params).catch((BackendError) => {
-    if (BackendError.code === 999) {
+  return call_server(params).catch((backendError) => {
+    if (backendError.code === 999) {
       return browserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
     }
   });

@@ -52,8 +52,8 @@ wrapper.appendChild(container);
  * @param {Object} note - note object with properties 'name', 'message'
  * @return {void}
  */
-function notify (type = 'info', {name = '', message = ''}) {
-  console.log(`${new Date().toLocaleString()} [${type.toUpperCase()}] - ${name} - ${message}`);
+function notify (type = 'info', {code = '', name = '', message = ''}) {
+  console.log(`${new Date().toLocaleString()} [${type.toUpperCase()}] - ${code} - ${name} - ${message}`);
 
   let iconClass;
   switch (type) {
@@ -68,6 +68,7 @@ function notify (type = 'info', {name = '', message = ''}) {
   const HTML = `
     <div class="alert alert-${type}">
       <span class="${iconClass}"></span>
+      <strong>${code}</strong>
       <strong>${name}</strong>
       <span>${message}</span>
     </div>

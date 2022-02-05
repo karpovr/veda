@@ -137,8 +137,10 @@ function errorHandler (error) {
     const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
     errorIndividual.load().then((errorIndividual) => {
       const severity = String(errorIndividual['v-s:tag'][0]) || 'danger';
-      notify(severity, {name: errorIndividual['v-s:errorCode'][0], message: errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')});
-    }).catch(console.log);
+      notify(severity, {code: errorIndividual['v-s:errorCode'][0], message: errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')});
+    }).catch(() => {
+      notify('danger', error);
+    });
   } else {
     notify('danger', {name: error.toString()});
   }
