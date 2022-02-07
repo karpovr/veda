@@ -145,7 +145,7 @@ Util.createReport = function (report, params) {
       if ( key !== '@' && params.hasValue(key) ) {
         const hiddenField = document.createElement('input');
         hiddenField.setAttribute('type', 'hidden');
-        hiddenField.setAttribute('name', key.replace(':', '_'));
+        hiddenField.setAttribute('name', key.replace(':', '_').replace('-', '_'));
         const value = params.get(key).map((item) => {
           return item instanceof IndividualModel ? item.id :
             item instanceof Date ? item.toISOString() :
