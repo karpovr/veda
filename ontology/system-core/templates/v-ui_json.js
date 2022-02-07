@@ -10,7 +10,7 @@ export const post = function (individual, template, container, mode, extra) {
   let json = individual.properties;
   let formatted = format(json);
   let anchorized = anchorize(formatted);
-  const height = $('#copyright').offset().top - container.offset().top - 120;
+  const height = $('#copyright').offset().top - container.offset().top - 150;
   pre.css('height', height);
   pre.html(anchorized);
   textarea.val(formatted);
