@@ -8,7 +8,7 @@ const BrowserBackend = {};
 
 export default BrowserBackend;
 
-const timeout = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Common server call function
@@ -158,17 +158,20 @@ BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   return call_server(params);
 };
 
-BrowserBackend.wait_module = function (module_id, op_id) {
+BrowserBackend.wait_module = function (module_id, op_id, maxCalls = 5) {
+  if (!maxCalls) {
+    return Promise.resolve(false);
+  }
   const arg = module_id;
   const isObj = typeof arg === 'object';
   module_id = isObj ? arg.module_id : module_id;
   op_id = isObj ? arg.op_id : op_id;
   return BrowserBackend.get_operation_state(module_id, op_id)
-    .then((result) => {
-      if (result.op_id < op_id) {
-        return timeout().then(() => BrowserBackend.wait_module(module_id, op_id));
-      }
-    });
+    .then((module_op_id) =>
+      module_op_id < op_id ?
+        wait().then(() => BrowserBackend.wait_module(module_id, op_id, --maxCalls)) :
+        true,
+    );
 };
 
 BrowserBackend.query = function (ticket, queryStr, sort, databases, top, limit, from, sql) {
@@ -178,7 +181,6 @@ BrowserBackend.query = function (ticket, queryStr, sort, databases, top, limit, 
     method: 'POST',
     url: '/query',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: query_timeout,
     data: {
       'query': isObj ? arg.query : queryStr,
       'sort': isObj ? arg.sort : sort,
@@ -191,7 +193,7 @@ BrowserBackend.query = function (ticket, queryStr, sort, databases, top, limit, 
   };
   return call_server(params).catch((backendError) => {
     if (backendError.code === 999) {
-      return BrowserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
+      return wait().then(() => BrowserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql));
     }
   });
 };
