@@ -6,7 +6,48 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-import Backend from '../../common/backend.js';
+function uploadFile (params, tries) {
+  tries = typeof tries === 'number' ? tries : 5;
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      if (xhr.status === 200) {
+        resolve(params);
+      } else {
+        reject(Error('File upload error'));
+      }
+    };
+    const fail = () => {
+      reject(Error('File upload error'));
+    };
+    const file = params.file;
+    const path = params.path;
+    const uri = params.uri;
+    const progress = params.progress;
+    const url = '/files';
+    const xhr = new XMLHttpRequest();
+    const fd = new FormData();
+    xhr.open('POST', url, true);
+    xhr.timeout = 10 * 60 * 1000;
+    xhr.upload.onprogress = progress;
+    xhr.onload = done;
+    xhr.onerror = fail;
+    xhr.onabort = fail;
+    xhr.ontimeout = fail;
+    fd.append('path', path);
+    fd.append('uri', uri);
+    if (file instanceof File) {
+      fd.append('file', file);
+    } else if (file instanceof Image) {
+      fd.append('content', file.src);
+    }
+    xhr.send(fd);
+  }).catch((error) => {
+    if (tries > 0) {
+      return BrowserBackend.uploadFile(params, --tries);
+    }
+    throw error;
+  });
+};
 
 /**
  * Load image to browser
@@ -251,7 +292,7 @@ $.fn.veda_file = function ( options ) {
         resolve(fileIndividual);
       }
     }).then(() => {
-      return Backend.uploadFile({
+      return uploadFile({
         file: file,
         path: path,
         uri: uri,

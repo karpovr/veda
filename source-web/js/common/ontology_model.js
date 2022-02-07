@@ -37,17 +37,24 @@ const proto = OntologyModel.prototype;
 
 proto.init = function () {
   if (typeof window !== 'undefined') {
-    return Backend.loadFile('/ontology.json')
-      .then((ontologyJSON) => {
-        this.ontology = JSON.parse(ontologyJSON);
-        return this.processOntology();
-      })
-      .catch((error) => {
-        console.log('Ontology load error.', error.stack);
-        throw error;
-      });
+    return fetch('/ontology.json', {
+      mode: 'same-origin',
+      cache: 'no-cache',
+      credentials: 'same-origin',
+    }).then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw Error(response.status);
+    }).then((ontologyJSON) => {
+      this.ontology = ontologyJSON;
+      return this.processOntology();
+    }).catch((error) => {
+      console.log('Ontology load error.', error.stack);
+      throw error;
+    });
   } else {
-    return Backend.query(veda.ticket, '\'rdf:type\' == \'owl:Ontology\' || \'rdf:type\' == \'rdfs:Class\' || \'rdf:type\' == \'rdf:Property\' || \'rdf:type\' == \'rdfs:Datatype\' || \'rdf:type\' == \'v-ui:PropertySpecification\' || \'rdf:type\' == \'v-ui:ClassModel\'')
+    return Backend.query(veda.ticket, "'rdf:type' == 'owl:Ontology' || 'rdf:type' == 'rdfs:Class' || 'rdf:type' == 'rdf:Property' || 'rdf:type' == 'rdfs:Datatype' || 'rdf:type' == 'v-ui:PropertySpecification' || 'rdf:type' == 'v-ui:ClassModel'")
       .then((queryResult) => {
         const ontology_uris = queryResult.result;
         return Backend.get_individuals(veda.ticket, ontology_uris);

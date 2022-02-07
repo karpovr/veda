@@ -358,7 +358,7 @@ function getSync (ticket, uri) {
   if (xhr.status === 200) {
     return JSON.parse(xhr.responseText);
   } else {
-    throw Error(xhr);
+    throw Error(xhr.status);
   }
 }
 
