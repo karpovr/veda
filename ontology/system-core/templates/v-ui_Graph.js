@@ -29,7 +29,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   const graph = $('#graph', template);
 
-  const height = $('#copyright').offset().top - graph.offset().top - 50 + 'px';
+  const height = $('#copyright').offset().top - graph.offset().top - 70 + 'px';
   const options = {
     width: '100%',
     height: height,
