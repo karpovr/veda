@@ -1,12 +1,12 @@
 // Server backend
 
-const serverBackend = {};
+const ServerBackend = {};
 
-export default serverBackend;
+export default ServerBackend;
 
-serverBackend.status = 'limited';
+ServerBackend.status = 'limited';
 
-serverBackend.query = function (ticket, queryStr, sort, databases, top, limit, from) {
+ServerBackend.query = function (ticket, queryStr, sort, databases, top, limit, from) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -25,7 +25,7 @@ serverBackend.query = function (ticket, queryStr, sort, databases, top, limit, f
   }
 };
 
-serverBackend.get_individual = function (ticket, uri) {
+ServerBackend.get_individual = function (ticket, uri) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -44,7 +44,7 @@ serverBackend.get_individual = function (ticket, uri) {
   }
 };
 
-serverBackend.get_individuals = function (ticket, uris) {
+ServerBackend.get_individuals = function (ticket, uris) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -58,7 +58,7 @@ serverBackend.get_individuals = function (ticket, uris) {
   }
 };
 
-serverBackend.remove_individual = function (ticket, uri) {
+ServerBackend.remove_individual = function (ticket, uri) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -72,7 +72,7 @@ serverBackend.remove_individual = function (ticket, uri) {
   }
 };
 
-serverBackend.put_individual = function (ticket, individual) {
+ServerBackend.put_individual = function (ticket, individual) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -86,7 +86,7 @@ serverBackend.put_individual = function (ticket, individual) {
   }
 };
 
-serverBackend.add_to_individual = function (ticket, individual) {
+ServerBackend.add_to_individual = function (ticket, individual) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -100,7 +100,7 @@ serverBackend.add_to_individual = function (ticket, individual) {
   }
 };
 
-serverBackend.set_in_individual = function (ticket, individual) {
+ServerBackend.set_in_individual = function (ticket, individual) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {
@@ -114,7 +114,7 @@ serverBackend.set_in_individual = function (ticket, individual) {
   }
 };
 
-serverBackend.remove_from_individual = function (ticket, individual) {
+ServerBackend.remove_from_individual = function (ticket, individual) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   if (isObj) {

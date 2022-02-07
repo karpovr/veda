@@ -4,9 +4,9 @@ import veda from '../common/veda.js';
 
 import BackendError from '../browser/backend_error.js';
 
-const browserBackend = {};
+const BrowserBackend = {};
 
-export default browserBackend;
+export default BrowserBackend;
 
 const default_timeout = 15000;
 
@@ -48,7 +48,7 @@ function call_server (params) {
   });
 }
 
-browserBackend.get_rights = function (ticket, uri) {
+BrowserBackend.get_rights = function (ticket, uri) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -63,7 +63,7 @@ browserBackend.get_rights = function (ticket, uri) {
   return call_server(params);
 };
 
-browserBackend.get_rights_origin = function (ticket, uri) {
+BrowserBackend.get_rights_origin = function (ticket, uri) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -78,7 +78,7 @@ browserBackend.get_rights_origin = function (ticket, uri) {
   return call_server(params);
 };
 
-browserBackend.get_membership = function (ticket, uri) {
+BrowserBackend.get_membership = function (ticket, uri) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -94,7 +94,7 @@ browserBackend.get_membership = function (ticket, uri) {
 };
 
 
-browserBackend.authenticate = function (login, password, secret) {
+BrowserBackend.authenticate = function (login, password, secret) {
   const arg = login;
   const isObj = typeof arg === 'object';
   const params = {
@@ -117,7 +117,7 @@ browserBackend.authenticate = function (login, password, secret) {
     });
 };
 
-browserBackend.get_ticket_trusted = function (ticket, login) {
+BrowserBackend.get_ticket_trusted = function (ticket, login) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -139,7 +139,7 @@ browserBackend.get_ticket_trusted = function (ticket, login) {
     });
 };
 
-browserBackend.is_ticket_valid = function (ticket) {
+BrowserBackend.is_ticket_valid = function (ticket) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -152,7 +152,7 @@ browserBackend.is_ticket_valid = function (ticket) {
   return call_server(params);
 };
 
-browserBackend.get_operation_state = function (module_id, wait_op_id) {
+BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   const arg = module_id;
   const isObj = typeof arg === 'object';
   const params = {
@@ -167,11 +167,11 @@ browserBackend.get_operation_state = function (module_id, wait_op_id) {
   return call_server(params);
 };
 
-browserBackend.wait_module = function (module_id, in_op_id) {
+BrowserBackend.wait_module = function (module_id, in_op_id) {
   let timeout = 1;
   let op_id_from_module;
   for (let i = 0; i < 100; i++) {
-    op_id_from_module = browserBackend.get_operation_state(module_id, in_op_id);
+    op_id_from_module = BrowserBackend.get_operation_state(module_id, in_op_id);
     if (op_id_from_module >= in_op_id) {
       break;
     }
@@ -181,7 +181,7 @@ browserBackend.wait_module = function (module_id, in_op_id) {
   }
 };
 
-browserBackend.query = function (ticket, queryStr, sort, databases, top, limit, from, sql) {
+BrowserBackend.query = function (ticket, queryStr, sort, databases, top, limit, from, sql) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -201,12 +201,12 @@ browserBackend.query = function (ticket, queryStr, sort, databases, top, limit, 
   };
   return call_server(params).catch((backendError) => {
     if (backendError.code === 999) {
-      return browserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
+      return BrowserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql);
     }
   });
 };
 
-browserBackend.get_individual = function (ticket, uri, cache = true) {
+BrowserBackend.get_individual = function (ticket, uri, cache = true) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -222,7 +222,7 @@ browserBackend.get_individual = function (ticket, uri, cache = true) {
   return call_server(params);
 };
 
-browserBackend.get_individuals = function (ticket, uris) {
+BrowserBackend.get_individuals = function (ticket, uris) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -237,7 +237,7 @@ browserBackend.get_individuals = function (ticket, uris) {
   return call_server(params);
 };
 
-browserBackend.remove_individual = function (ticket, uri, assigned_subsystems, event_id, transaction_id) {
+BrowserBackend.remove_individual = function (ticket, uri, assigned_subsystems, event_id, transaction_id) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -256,7 +256,7 @@ browserBackend.remove_individual = function (ticket, uri, assigned_subsystems, e
   return call_server(params);
 };
 
-browserBackend.put_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+BrowserBackend.put_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -275,7 +275,7 @@ browserBackend.put_individual = function (ticket, individual, assigned_subsystem
   return call_server(params);
 };
 
-browserBackend.add_to_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+BrowserBackend.add_to_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -294,7 +294,7 @@ browserBackend.add_to_individual = function (ticket, individual, assigned_subsys
   return call_server(params);
 };
 
-browserBackend.set_in_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+BrowserBackend.set_in_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -313,7 +313,7 @@ browserBackend.set_in_individual = function (ticket, individual, assigned_subsys
   return call_server(params);
 };
 
-browserBackend.remove_from_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
+BrowserBackend.remove_from_individual = function (ticket, individual, assigned_subsystems, event_id, transaction_id) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -332,7 +332,7 @@ browserBackend.remove_from_individual = function (ticket, individual, assigned_s
   return call_server(params);
 };
 
-browserBackend.put_individuals = function (ticket, individuals, assigned_subsystems, event_id, transaction_id) {
+BrowserBackend.put_individuals = function (ticket, individuals, assigned_subsystems, event_id, transaction_id) {
   const arg = ticket;
   const isObj = typeof arg === 'object';
   const params = {
@@ -351,7 +351,7 @@ browserBackend.put_individuals = function (ticket, individuals, assigned_subsyst
   return call_server(params);
 };
 
-browserBackend.uploadFile = function (params, tries) {
+BrowserBackend.uploadFile = function (params, tries) {
   tries = typeof tries === 'number' ? tries : 5;
   return new Promise((resolve, reject) => {
     const done = () => {
@@ -388,13 +388,13 @@ browserBackend.uploadFile = function (params, tries) {
     xhr.send(fd);
   }).catch((error) => {
     if (tries > 0) {
-      return browserBackend.uploadFile(params, --tries);
+      return BrowserBackend.uploadFile(params, --tries);
     }
     throw error;
   });
 };
 
-browserBackend.loadFile = (url) => {
+BrowserBackend.loadFile = (url) => {
   return new Promise((resolve, reject) => {
     const done = () => {
       if (xhr.status === 200) {
