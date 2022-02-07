@@ -27,6 +27,8 @@ export const post = function (individual, template, container, mode, extra) {
     addInLinks(root.id);
   });
 
+  const graph = $('#graph', template);
+
   const height = $('#copyright').offset().top - graph.offset().top - 50 + 'px';
   const options = {
     width: '100%',
@@ -131,8 +133,6 @@ export const post = function (individual, template, container, mode, extra) {
     network.freezeSimulation = !network.freezeSimulation;
     $('i', this).toggleClass('glyphicon-pause glyphicon-play');
   });
-
-  const graph = $('#graph', template);
 
   // Context menu for selected node
   graph.contextmenu({
