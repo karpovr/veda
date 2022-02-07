@@ -8,9 +8,7 @@ const BrowserBackend = {};
 
 export default BrowserBackend;
 
-const default_timeout = 15000;
-
-const query_timeout = default_timeout * 10;
+const timeout = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Common server call function
@@ -55,7 +53,6 @@ BrowserBackend.get_rights = function (ticket, uri) {
     method: 'GET',
     url: '/get_rights',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'uri': isObj ? arg.uri : uri,
     },
@@ -70,7 +67,6 @@ BrowserBackend.get_rights_origin = function (ticket, uri) {
     method: 'GET',
     url: '/get_rights_origin',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'uri': isObj ? arg.uri : uri,
     },
@@ -85,7 +81,6 @@ BrowserBackend.get_membership = function (ticket, uri) {
     method: 'GET',
     url: '/get_membership',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'uri': isObj ? arg.uri : uri,
     },
@@ -100,7 +95,6 @@ BrowserBackend.authenticate = function (login, password, secret) {
   const params = {
     method: 'GET',
     url: '/authenticate',
-    timeout: default_timeout,
     data: {
       'login': isObj ? arg.login : login,
       'password': isObj ? arg.password : password,
@@ -124,7 +118,6 @@ BrowserBackend.get_ticket_trusted = function (ticket, login) {
     method: 'GET',
     url: '/get_ticket_trusted',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'login': isObj ? arg.login : login,
     },
@@ -146,7 +139,6 @@ BrowserBackend.is_ticket_valid = function (ticket) {
     method: 'GET',
     url: '/is_ticket_valid',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {},
   };
   return call_server(params);
@@ -158,7 +150,6 @@ BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   const params = {
     method: 'GET',
     url: '/get_operation_state',
-    timeout: default_timeout,
     data: {
       'module_id': isObj ? arg.module_id : module_id,
       'wait_op_id': isObj ? arg.wait_op_id : wait_op_id,
@@ -167,18 +158,17 @@ BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   return call_server(params);
 };
 
-BrowserBackend.wait_module = function (module_id, in_op_id) {
-  let timeout = 1;
-  let op_id_from_module;
-  for (let i = 0; i < 100; i++) {
-    op_id_from_module = BrowserBackend.get_operation_state(module_id, in_op_id);
-    if (op_id_from_module >= in_op_id) {
-      break;
-    }
-    const endtime = new Date().getTime() + timeout;
-    while (new Date().getTime() < endtime);
-    timeout += 2;
-  }
+BrowserBackend.wait_module = function (module_id, op_id) {
+  const arg = module_id;
+  const isObj = typeof arg === 'object';
+  module_id = isObj ? arg.module_id : module_id;
+  op_id = isObj ? arg.op_id : op_id;
+  return BrowserBackend.get_operation_state(module_id, op_id)
+    .then((result) => {
+      if (result.op_id < op_id) {
+        return timeout().then(() => BrowserBackend.wait_module(module_id, op_id));
+      }
+    });
 };
 
 BrowserBackend.query = function (ticket, queryStr, sort, databases, top, limit, from, sql) {
@@ -213,7 +203,6 @@ BrowserBackend.get_individual = function (ticket, uri, cache = true) {
     method: 'GET',
     url: '/get_individual',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'uri': isObj ? arg.uri : uri,
       ...(!cache && {'vsn': Date.now()}),
@@ -229,7 +218,6 @@ BrowserBackend.get_individuals = function (ticket, uris) {
     method: 'POST',
     url: '/get_individuals',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'uris': isObj ? arg.uris : uris,
     },
@@ -244,7 +232,6 @@ BrowserBackend.remove_individual = function (ticket, uri, assigned_subsystems, e
     method: 'PUT',
     url: '/remove_individual',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'uri': isObj ? arg.uri : uri,
       'assigned_subsystems': (isObj ? arg.assigned_subsystems : assigned_subsystems) || 0,
@@ -263,7 +250,6 @@ BrowserBackend.put_individual = function (ticket, individual, assigned_subsystem
     method: 'PUT',
     url: '/put_individual',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'individual': isObj ? arg.individual : individual,
       'assigned_subsystems': (isObj ? arg.assigned_subsystems : assigned_subsystems) || 0,
@@ -282,7 +268,6 @@ BrowserBackend.add_to_individual = function (ticket, individual, assigned_subsys
     method: 'PUT',
     url: '/add_to_individual',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'individual': isObj ? arg.individual : individual,
       'assigned_subsystems': (isObj ? arg.assigned_subsystems : assigned_subsystems) || 0,
@@ -301,7 +286,6 @@ BrowserBackend.set_in_individual = function (ticket, individual, assigned_subsys
     method: 'PUT',
     url: '/set_in_individual',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'individual': isObj ? arg.individual : individual,
       'assigned_subsystems': (isObj ? arg.assigned_subsystems : assigned_subsystems) || 0,
@@ -320,7 +304,6 @@ BrowserBackend.remove_from_individual = function (ticket, individual, assigned_s
     method: 'PUT',
     url: '/remove_from_individual',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'individual': isObj ? arg.individual : individual,
       'assigned_subsystems': (isObj ? arg.assigned_subsystems : assigned_subsystems) || 0,
@@ -339,7 +322,6 @@ BrowserBackend.put_individuals = function (ticket, individuals, assigned_subsyst
     method: 'PUT',
     url: '/put_individuals',
     ticket: isObj ? arg.ticket : ticket,
-    timeout: default_timeout,
     data: {
       'individuals': isObj ? arg.individuals : individuals,
       'assigned_subsystems': (isObj ? arg.assigned_subsystems : assigned_subsystems) || 0,
