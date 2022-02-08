@@ -43,7 +43,7 @@ export const html = `
           </div>
           <div class="col-lg-4 col-sm-6">
             <em class="no-margin" about="v-s:ManualBundle" property="rdfs:label"></em>
-            <div about="@" rel="v-s:attachment" data-template="v-ui:FileTemplate"></div>
+            <div about="@" rel="v-s:attachment" data-template="v-ui:FileTemplate" data-limit="4" data-more="true"></div>
           </div>
         </div>
         <div class="attachment-blanks">
