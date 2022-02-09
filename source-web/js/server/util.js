@@ -188,7 +188,7 @@ Util.newDecimal = function (_data) {
 
 Util.newDate = function (_data) {
   return [{
-    data: _data,
+    data: _data.toISOString(),
     type: 'Datetime',
   }];
 };
