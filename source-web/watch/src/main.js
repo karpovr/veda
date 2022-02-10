@@ -1,11 +1,11 @@
-const fs = require('fs');
-let files = require('./files.js');
+import fs from 'fs';
+import files from './files.js';
+
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const OPTIONS = JSON.parse(fs.readFileSync('./options.json'));
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
 
 const app = express();
 

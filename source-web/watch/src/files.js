@@ -1,6 +1,6 @@
-const fs = require('fs');
-const chokidar = require('chokidar');
-const anymatch = require('anymatch');
+import fs from 'fs';
+import chokidar from 'chokidar';
+import anymatch from 'anymatch';
 
 const OPTIONS = JSON.parse(fs.readFileSync('./options.json'));
 const root = OPTIONS.root;
@@ -9,7 +9,7 @@ const ignored = OPTIONS.ignored;
 const setState = (dir, state = {}, root) => {
   root = root || dir ;
   const files = fs.readdirSync(dir);
-  for (file in files) {
+  for (const file in files) {
     const name = dir + '/' + files[file];
     let stat;
     try {
@@ -51,5 +51,4 @@ chokidar.watch(root, {
   ignoreInitial: true,
 }).on('add', callHandlers).on('change', callHandlers);
 
-module.exports.getState = getState;
-module.exports.watchChanges = watchChanges;
+export default { getState, watchChanges };
