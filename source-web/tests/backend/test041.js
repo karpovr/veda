@@ -10,13 +10,13 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     // R - 3, U - 2, D - 2
     res = await Helpers.addRight(ticket_admin.ticket, user, doc['@'], ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
     const right1 = res[0];
-    Backend.wait_module(Constants.m_acl, res[1].op_id);
+    assert(await Backend.wait_module(Constants.m_acl, res[1].op_id));
 
     res = await Helpers.addRight(ticket_admin.ticket, user, doc['@'], ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
-    Backend.wait_module(Constants.m_acl, res[1].op_id);
+    assert(await Backend.wait_module(Constants.m_acl, res[1].op_id));
 
     res = await Helpers.addRight(ticket_admin.ticket, user, doc['@'], ['v-s:canRead']);
-    Backend.wait_module(Constants.m_acl, res[1].op_id);
+    assert(await Backend.wait_module(Constants.m_acl, res[1].op_id));
 
     // User RUD doc
     await Helpers.check_rights_success(ticket_user.ticket, doc['@'], ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);

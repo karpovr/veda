@@ -52,9 +52,9 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     new_test_doc3['v-s:canRead'] = Util.newBool(true);
 
     res = await Backend.put_individual(ticket.ticket, new_test_doc3);
-    Backend.wait_module(Constants.m_subject, res.op_id);
-    Backend.wait_module(Constants.m_acl, res.op_id);
-    Backend.wait_module(Constants.m_scripts, res.op_id);
+    assert(await Backend.wait_module(Constants.m_subject, res.op_id));
+    assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
 
     const server_test_doc3 = await Backend.get_individual(ticket.ticket, new_test_doc3_uri);
     assert(Helpers.compare(new_test_doc3, server_test_doc3));

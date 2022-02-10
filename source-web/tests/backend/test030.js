@@ -51,10 +51,10 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     await Backend.put_individual(ticket_user1.ticket, new_test_doc1);
     await Backend.put_individual(ticket_user1.ticket, new_test_doc2);
     await Backend.put_individual(ticket_user1.ticket, new_test_doc3);
-    const res = await Backend.put_individual(ticket_user1.ticket, new_test_doc4);
+    let res = await Backend.put_individual(ticket_user1.ticket, new_test_doc4);
 
     assert(await Backend.wait_module(Constants.m_fulltext_indexer, res.op_id));
-    assert(await Backend.wait_module(Constants.m_subject, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
 
     let data;
 
@@ -76,16 +76,24 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
 
     assert((data.result[0] == new_test_doc1_uri || data.result[1] == new_test_doc1_uri) && (data.result[0] == new_test_doc2_uri || data.result[1] == new_test_doc2_uri));
 
-    await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
+    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
+    assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
     await Helpers.test_fail_read(ticket_user1, new_test_doc1);
 
-    await Backend.remove_individual(ticket_user1.ticket, new_test_doc2['@']);
+    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc2['@']);
+    assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
     await Helpers.test_fail_read(ticket_user1, new_test_doc2);
 
-    await Backend.remove_individual(ticket_user1.ticket, new_test_doc3['@']);
+    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc3['@']);
+    assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
     await Helpers.test_fail_read(ticket_user1, new_test_doc3);
 
-    await Backend.remove_individual(ticket_user1.ticket, new_test_doc4['@']);
+    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc4['@']);
+    assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
     await Helpers.test_fail_read(ticket_user1, new_test_doc4);
   });
 };

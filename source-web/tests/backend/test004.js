@@ -77,9 +77,9 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     await Backend.put_individual(ticket_user1, new_test_doc5);
     res = await Backend.put_individual(ticket_user1, new_test_doc6);
 
-    await Backend.wait_module(2, res.op_id); // acl
-    await Backend.wait_module(4, res.op_id); // fulltext
-    await Backend.wait_module(16, res.op_id); // scripts
+    assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_fulltext_indexer, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
 
     let data;
 

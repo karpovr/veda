@@ -40,6 +40,7 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
 
     res = await Backend.put_individuals(ticket_user1.ticket, [new_test_doc1, new_test_doc2, new_test_doc3]);
     assert(await Backend.wait_module(Constants.m_acl, res.op_id));
+    assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
     const read_individual1 = await Backend.get_individual(ticket_user1.ticket, new_test_doc1_uri_1);
     const read_individual2 = await Backend.get_individual(ticket_user1.ticket, new_test_doc1_uri_2);
     const read_individual3 = await Backend.get_individual(ticket_user1.ticket, new_test_doc1_uri_3);
