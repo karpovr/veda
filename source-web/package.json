@@ -70,7 +70,7 @@
     "vis-network": "^8.5.2"
   },
   "scripts": {
-    "test": "node --experimental-specifier-resolution=node tests",
+    "test": "node ./tests/index.js",
     "build": "npm run clean && npm run build-browser-scripts && npm run build-templates && npm run build-server-scripts && npm run update-version",
     "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel --config-file ./.babelrc . --out-dir ../public --source-maps --copy-files",
