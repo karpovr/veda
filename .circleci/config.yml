@@ -17,7 +17,7 @@ jobs:
       - run:
           name: "Install Test Env"
           command: |
-           npm install -g testcafe
+           sudo npm install -g testcafe
            testcafe --version
       - run:
           name: "Install"
