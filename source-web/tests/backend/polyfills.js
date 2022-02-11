@@ -12,5 +12,5 @@ if (!globalThis.fetch) {
 }
 
 if (!globalThis.location) {
-  globalThis.location = {origin: 'http://localhost'};
+  globalThis.location = {origin: 'http://localhost:8080'};
 }
