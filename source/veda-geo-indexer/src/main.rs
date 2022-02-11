@@ -108,7 +108,7 @@ fn main() -> Result<(), i32> {
 
             prepare_queue_element(&mut Individual::new_raw(raw), &mut geo_index)?;
 
-            queue_consumer.commit_and_next();
+            queue_consumer.commit();
             total_prepared_count += 1;
 
             if total_prepared_count % 1000 == 0 {

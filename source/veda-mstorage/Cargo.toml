@@ -11,5 +11,5 @@ serde_json = "1.0"
 chrono = "0.4"
 url = "2.2.2"
 
-v_common = { package = "v-common", version = "=0.1.103" }
+v_common = { package = "v-common", version = "0.1.104" }
 #v_common = { package = "v-common", path = "../../../v-common" }

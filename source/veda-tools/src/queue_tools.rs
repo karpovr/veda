@@ -137,8 +137,6 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
                 }
             }
         }
-
-        queue_consumer.next(false);
     }
 }
 
@@ -182,8 +180,6 @@ pub fn queue_crc(queue_path: String, part_id: Option<u32>) {
             if idx % 100000 == 0 {
                 info!("queue part={}, part_count={}, total_count={}", queue_consumer.id, idx, count);
             }
-
-            queue_consumer.next(false);
         }
     }
 
@@ -255,8 +251,6 @@ pub fn queue_to_json(queue_path: String, part_id: Option<u32>) {
                 println!("new_state: {}", new_state.get_obj().as_json_str());
             }
         }
-
-        queue_consumer.next(false);
     }
     //queue_consumer.commit();
 }
