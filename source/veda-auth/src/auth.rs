@@ -80,6 +80,9 @@ impl<'a> AuthWorkPlace<'a> {
                 }
             }
         }
+        if candidate_account_ids.result_code != ResultCode::Ok {
+            error!("authenticate: query result={:?}", candidate_account_ids.result_code);
+        }
 
         error!("failed to authenticate, login = {}, password = {}, candidate users = {:?}", self.login, self.password, candidate_account_ids.result);
         ticket.result = ResultCode::AuthenticationFailed;
