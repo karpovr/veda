@@ -11,12 +11,15 @@ jobs:
       - run:
           name: "pre-install"
           command: |
+            pwd
             sudo apt-get clean
             sudo apt-get update
             sudo apt-get install dpkg
       - run:
           name: "Install test environment"
           command: |
+            pwd
+            ls /opt/*
             ./tools/ci/load-nvm.sh
             nvm install 'lts/*'
             nvm alias default 'lts/*'
