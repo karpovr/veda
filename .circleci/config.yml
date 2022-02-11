@@ -1,6 +1,8 @@
 version: 2.1
 
-# Define the jobs we want to run for this project
+orbs:
+  node: circleci/node@5.0.0
+
 jobs:
   build:
     machine:
@@ -8,6 +10,10 @@ jobs:
     resource_class: large
     steps:
       - checkout
+      - node/install:
+        node-version: '16.14'
+      - run: node --version
+      - run: npm --version
       - run:
           name: "pre-install"
           command: |
@@ -17,11 +23,6 @@ jobs:
       - run:
           name: "Install test environment"
           command: |
-            ls /opt
-            ls .
-            ./tools/ci/load-nvm.sh
-            nvm install 'lts/*'
-            nvm alias default 'lts/*'
             node -v
             npm install -g testcafe
             testcafe --version
@@ -38,14 +39,12 @@ jobs:
       - run:
           name: "Build"
           command: |
-            ./tools/ci/load-nvm.sh
             node -v
             source $HOME/.cargo/env
             ./build.sh
       - run:
           name: "test"
           command: |
-            ./tools/ci/load-nvm.sh
             node -v
             ./control-start.sh
             sleep 180
