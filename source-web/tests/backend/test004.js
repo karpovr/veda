@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#004 Should perform attributive search', async () => {
+  it(`#004 Attributive search`, async () => {
     const ticket_user1 = (await Helpers.get_user1_ticket()).ticket;
     const test_group_uid = 'test30:' + Util.guid();
 

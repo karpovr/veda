@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#035 test restrictions in subject groups', async () => {
+  it(`#035 Check restrictions in subject groups`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
 
     const ticket1 = await Helpers.get_user1_ticket();

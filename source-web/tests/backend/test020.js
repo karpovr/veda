@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#020 Search with cursor', async () => {
+  it(`#020 Search with cursor`, async () => {
     const user = await Backend.authenticate('bushenevvt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
     const admin = await Backend.authenticate('karpovrt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
 

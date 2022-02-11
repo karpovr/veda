@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#025 test cycle of group', async () => {
+  it(`#025 Check groups cycle`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
 
     const new_test_doc1 = await Helpers.create_test_document1(ticket_admin);

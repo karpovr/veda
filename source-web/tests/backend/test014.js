@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#014 Individual store, await Backend.add_to_individual, await Backend.set_in_individual test, remove_from', async () => {
+  it(`#014 Check put_individual, add_to_individual, set_in_individual, remove_from_individual, remove_individual`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
 
     const now = Util.newDate(new Date());

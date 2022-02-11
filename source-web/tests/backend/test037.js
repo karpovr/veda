@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#037 test rights delete & restore', async () => {
+  it(`#037 Check rights delete & restore`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
 
     const ticket1 = await Helpers.get_user1_ticket();

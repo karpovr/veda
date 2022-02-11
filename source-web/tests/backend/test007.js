@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#007 user1 should store individual and admin should read it', async () => {
+  it(`#007 User1 stores individual, admin should read individual`, async () => {
     const ticket_user1 = (await Helpers.get_user1_ticket()).ticket;
     const admin_ticket = (await Helpers.get_admin_ticket()).ticket;
 

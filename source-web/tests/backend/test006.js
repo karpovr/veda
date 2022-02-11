@@ -1,5 +1,8 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#006 Should store individual by user1 and add right [R] to user2, user2 should successfully read individual, next user1 adds forbidding right [!R] and user2 should fail to read individual', async () => {
+  it(
+`#006 User1 stores individual and adds right [R] for user2, user2 should successfully read individual.
+       User1 adds forbidding right [!R], user2 should fail to read individual`,
+  async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
     const ticket_user2 = await Helpers.get_user2_ticket();
 

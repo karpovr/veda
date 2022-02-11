@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#032 Bad requests', async () => {
+  it(`#032 Bad requests`, async () => {
     let ticket = await Helpers.get_user1_ticket();
 
     await Backend.query();

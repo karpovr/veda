@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#002 Should get individual \'owl:\'', async () => {
+  it(`#002 Get individual 'owl:'`, async () => {
     const ticket = await Helpers.get_user1_ticket();
     const owl = await Backend.get_individual(ticket.ticket, 'owl:');
     assert.ok(owl['@'] === 'owl:');

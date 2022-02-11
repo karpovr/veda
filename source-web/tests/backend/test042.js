@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#042 The Ultimate One!', async () => {
-    assert(true);
+  it(`#042 The Ultimate One!`, async () => {
+    assert(42);
   });
 };

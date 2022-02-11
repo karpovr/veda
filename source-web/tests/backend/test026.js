@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#026 test different group subtrees (1)', async () => {
+  it(`#026 Check different group subtrees (1)`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
     const ticket1 = await Helpers.get_user1_ticket();
 

@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#031 1) [A] store user1 and read user2. 2) store right content filter. 3) read A user 1 and dont read [A] user2', async () => {
+  it(`#031 Check rights filter`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
     const ticket_user2 = await Helpers.get_user2_ticket();
     const ticket_admin = await Helpers.get_admin_ticket();

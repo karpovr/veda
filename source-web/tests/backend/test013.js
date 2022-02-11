@@ -1,5 +1,8 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#013 user1 store 3 individuals (one of the individuals contains an invalid field [author]), the user1 finds 2 individuals, and the user2 does not find anything.', async () => {
+  it(
+`#013 User1 stores 3 individuals (one of the individuals contains an invalid field [author]).
+       User1 finds 2 individuals, and user2 should not find anything.`,
+  async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
     const ticket_user2 = await Helpers.get_user2_ticket();
 

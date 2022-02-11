@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#029 test server side script: decimal, and various format [{}], {}, [[{}]]', async () => {
+  it(`#029 Check server side script: decimal, and various attribute value formats: [{}], {}, [[{}]]`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
     const new_test_script_uri = Util.genUri();
     const new_test_script = {

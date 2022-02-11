@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#010 Should store 3 and read 3 individuals of type "v-s:NoPermissionStatement"', async () => {
+  it(`#010 Store 3 and read 3 individuals of type "v-s:NoPermissionStatement"`, async () => {
     const ticket = await Helpers.get_user1_ticket();
 
     const permissionSubject = 'test9:' + Util.guid();

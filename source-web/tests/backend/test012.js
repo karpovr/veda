@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#012 Individual of [v-s:NoMembership] store 3 and read 3 (this no membership)', async () => {
+  it(`#012 Store, read and delete 3 individuals`, async () => {
     const ticket = await Helpers.get_user1_ticket();
 
     const memberOf = 'test11:' + Util.guid();

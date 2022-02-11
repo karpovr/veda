@@ -1,5 +1,11 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#011 Individual of [v-s:Membership]', async () => {
+  it(
+`#011 User1 stores individual, user2 should fail to read individual.
+       User1 adds individual to object group, user1 adds user2 to subject group.
+       User1 adds right [R] for subject group to object group, user2 should read individual.
+       User1 removes user2 from subject group, user2 should fail to read individual.
+       User1 removes individual, user1 should fail to read individual.`,
+  async () => {
     const ticket1 = await Helpers.get_user1_ticket();
     const ticket2 = await Helpers.get_user2_ticket();
 

@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#033 Test membership isExclusive & ignoreExclusive', async () => {
+  it(`#033 Check membership isExclusive & ignoreExclusive`, async () => {
     const ticket1 = await Helpers.get_user1_ticket();
     const doc_group = 'g:doc_resource_group';
     const doc_group_another = 'g:doc_resource_another_group';

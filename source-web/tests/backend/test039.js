@@ -1,5 +1,8 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#039 Individual store user1 and remove user2', async () => {
+  it(
+`#039 User1 stores individual, user1 should read individual.
+       User2 should fail to remove individual.`,
+  async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
     const ticket_user2 = await Helpers.get_user2_ticket();
 

@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#005 Should store individual by user1, should not read individual by user2', async () => {
+  it(`#005 User1 stores individual, user2 should fail to read individual`, async () => {
     const ticket_user1 = (await Helpers.get_user1_ticket()).ticket;
     const ticket_user2 = (await Helpers.get_user2_ticket()).ticket;
 

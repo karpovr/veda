@@ -1,5 +1,5 @@
 export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it('#034 test Backend.put_individuals (user1 stores three individuals)', async () => {
+  it(`#034 Check put_individuals`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
 
     const new_test_doc1_uri_1 = 'test21_1:' + Util.guid();
