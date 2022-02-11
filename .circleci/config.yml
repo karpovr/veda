@@ -18,8 +18,8 @@ jobs:
           name: "Install test environment"
           command: |
             ./tools/ci/load-nvm.sh
-            nvm install --lts
-            nvm alias default lts/*
+            nvm install 'lts/*'
+            nvm alias default 'lts/*'
             node -v
             npm install -g testcafe
             testcafe --version
