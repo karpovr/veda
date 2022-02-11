@@ -11,9 +11,8 @@ jobs:
     steps:
       - checkout
       - node/install:
-        node-version: '16.14'
+          node-version: '16.13'
       - run: node --version
-      - run: npm --version
       - run:
           name: "pre-install"
           command: |
