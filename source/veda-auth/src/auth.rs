@@ -256,13 +256,13 @@ impl<'a> AuthWorkPlace<'a> {
                     error!("failed to read credential {}", uses_credential_uri);
                     create_new_credential(self.sys_ticket, self.backend, &mut self.credential, account);
                 }
-            }
+            },
             None => {
                 warn!("failed to find credential, create new");
                 self.stored_password = account.get_first_literal("v-s:password").unwrap_or_default();
 
                 create_new_credential(self.sys_ticket, self.backend, &mut self.credential, account);
-            }
+            },
         }
     }
 
@@ -322,7 +322,7 @@ impl<'a> AuthWorkPlace<'a> {
                     Some(mut app_info) => {
                         app_info.parse_all();
                         app_info.get_first_literal("rdfs:label").unwrap_or_else(|| "Veda".to_string())
-                    }
+                    },
                     None => "Veda".to_string(),
                 };
 

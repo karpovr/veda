@@ -103,7 +103,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
             res["end_time"] = json!(ticket.end_time);
 
             return Message::from(res.to_string().as_bytes());
-        }
+        },
         "get_ticket_trusted" => {
             let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), v["addr"].as_str(), xr, module);
 
@@ -116,10 +116,10 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
             res["end_time"] = json!(ticket.end_time);
 
             return Message::from(res.to_string().as_bytes());
-        }
+        },
         _ => {
             error!("unknown command {:?}", v["function"].as_str());
-        }
+        },
     }
 
     Message::default()

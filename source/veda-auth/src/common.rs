@@ -13,7 +13,7 @@ use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
 use v_common::search::common::{FTQuery, QueryResult};
 use v_common::v_api::api_client::IndvOp;
-use v_common::v_api::obj::ResultCode;
+use v_common::v_api::obj::{OptAuthorize, ResultCode};
 use v_common::v_authorization::common::Trace;
 
 pub const EMPTY_SHA256_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
@@ -104,7 +104,7 @@ pub(crate) fn get_ticket_trusted(
                         break;
                     }
                 }
-            }
+            },
             Err(e) => error!("failed to get authorization group, user = {}, err = {}", &tr_ticket.user_uri, e),
         }
 
@@ -161,8 +161,7 @@ pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Backend, xr
     }
 
     let query = format!("'v-s:login' == '{}'", RE.replace_all(login, " +"));
-
-    xr.query(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage)
+    xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage, OptAuthorize::NO)
 }
 
 pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, credential: &mut Individual, account: &mut Individual) -> bool {
