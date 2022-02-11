@@ -109,6 +109,10 @@ pub(crate) fn get_ticket_trusted(
         }
 
         let candidate_account_ids = get_candidate_users_of_login(login, module, xr);
+        if candidate_account_ids.result_code != ResultCode::Ok {
+            error!("get_candidate_users_of_login, query result={:?}", candidate_account_ids.result_code);
+        }
+
         if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
             for check_account_id in &candidate_account_ids.result {
                 if let Some(account) = module.get_individual(check_account_id, &mut Individual::default()) {
