@@ -166,7 +166,14 @@ pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Backend, xr
 
     let query = format!("'v-s:login' == '{}'", RE.replace_all(login, " +"));
 
-    xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage, OptAuthorize::NO, true)
+    let res = xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage, OptAuthorize::NO, true);
+
+    if res.result_code == ResultCode::Ok && res.result.len() == 0 {
+        warn!("empty query result, retry");
+        return xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage, OptAuthorize::NO, true);
+    }
+
+    res
 }
 
 pub(crate) fn create_new_credential(systicket: &str, module: &mut Backend, credential: &mut Individual, account: &mut Individual) -> bool {
