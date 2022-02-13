@@ -158,18 +158,19 @@ BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   return call_server(params);
 };
 
-BrowserBackend.wait_module = function (module_id, op_id, maxCalls = 10) {
-  if (!maxCalls) {
+BrowserBackend.wait_module = function (module_id, op_id, __maxCalls = 10) {
+  if (!__maxCalls) {
     return Promise.resolve(false);
   }
   const arg = module_id;
   const isObj = typeof arg === 'object';
   module_id = isObj ? arg.module_id : module_id;
   op_id = isObj ? arg.op_id : op_id;
-  return BrowserBackend.get_operation_state(module_id, op_id)
+  return wait(250 * (10 - __maxCalls))
+    .then(() => BrowserBackend.get_operation_state(module_id, op_id))
     .then((module_op_id) =>
       module_op_id < op_id ?
-        wait(2000 / maxCalls).then(() => BrowserBackend.wait_module(module_id, op_id, --maxCalls)) :
+        BrowserBackend.wait_module(module_id, op_id, --__maxCalls) :
         true,
     );
 };
