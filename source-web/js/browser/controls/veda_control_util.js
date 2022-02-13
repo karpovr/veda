@@ -39,55 +39,32 @@ function ftQuery (prefix, input, sort, withDeleted) {
     queryString = queryString ? '(' + prefix + ') && (' + queryString + ')' : '(' + prefix + ')';
   }
 
-  const result = [];
-
-  return incrementalSearch(0, 100, [])
+  return incrementalSearch()
     .then((results) => {
       if (withDeleted) {
         queryString = queryString + ' && (\'v-s:deleted\' == true )';
-        return incrementalSearch(0, 100, results);
+        return incrementalSearch(results);
       } else {
         return results;
       }
     })
     .then((results) => {
       results = Util.unique( results );
-      const getList = results.filter((uri, i) => {
-        const cached = veda.cache.get(uri);
-        if ( cached ) {
-          result[i] = cached.load();
-          return false;
-        } else {
-          return true;
-        }
+      return Backend.get_individuals({
+        ticket: veda.ticket,
+        uris: results,
       });
-      if (getList.length) {
-        return Backend.get_individuals({
-          ticket: veda.ticket,
-          uris: getList,
-        });
-      } else {
-        return [];
-      }
     })
-    .then((individuals) => {
-      for (let i = 0, j = 0, length = individuals.length; i < length; i++) {
-        while (result[j++]); // Fast forward to empty element
-        result[j-1] = new IndividualModel(individuals[i]).init();
-      }
-      return Promise.all(result);
-    }).then((fulfilled) => {
-      return fulfilled.filter(Boolean);
-    });
+    .then((individuals) => Promise.all(individuals.map((individual) => new IndividualModel(individual).init())));
 
   /**
    * Perform full text search query incrementally
+   * @param {Array} results
    * @param {string} cursor
    * @param {string} limit
-   * @param {Array} results
    * @return {Promise}
    */
-  function incrementalSearch (cursor, limit, results) {
+  function incrementalSearch (results = [], cursor = 0, limit = 100) {
     return Backend.query({
       ticket: veda.ticket,
       query: queryString,
@@ -102,7 +79,7 @@ function ftQuery (prefix, input, sort, withDeleted) {
       if (results.length >= limit || cursor >= estimated) {
         return results;
       } else {
-        return incrementalSearch(cursor, limit, results);
+        return incrementalSearch(results, cursor, limit);
       }
     });
   }

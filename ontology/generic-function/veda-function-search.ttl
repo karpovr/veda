@@ -382,30 +382,10 @@ v-fs:AttributiveSearchModel
       self["v-fs:estimated"] = [ results.estimated ];
       self["v-fs:cursor"] = [ results.cursor ];
       return results.result;
-    }).then(function (resultDelta) {
-      var prefetch = [];
-      resultDelta.map(function (uri) {
-        if ( !veda.cache.get(uri) ) {
-          prefetch.push( uri );
-        }
-      });
-      if (prefetch.length) {
-        return veda.Backend.get_individuals({
-          ticket: veda.ticket,
-          uris: prefetch
-        }).then(function (prefetched) {
-          prefetched.forEach(function (json) {
-            var fetched = new veda.IndividualModel(json);
-          });
-          return resultDelta;
-        });
-      } else {
-        return resultDelta;
-      }
-    }).then(function (resultDelta) {
-      self["v-fs:authorized"] = [ self["v-fs:authorized"][0] + resultDelta.length ];
-      var delta = resultDelta.map(function (uri) {
-        return new veda.IndividualModel(uri);
+    }).then(function (delta) {
+      self["v-fs:authorized"] = [ self["v-fs:authorized"][0] + delta.length ];
+      delta = delta.map(function (item) {
+        return new veda.IndividualModel(item);
       });
       self.addValue("v-fs:searchResult", delta);
       if ( self.hasValue("v-fs:loadAll", true) && self["v-fs:cursor"][0] < self["v-fs:estimated"][0] ) {
@@ -414,12 +394,10 @@ v-fs:AttributiveSearchModel
         self.trigger("search:complete", self["v-fs:searchResult"]);
         return self["v-fs:searchResult"];
       } else {
-        return delta ;
+        return delta;
       }
     });
   }
-
-
   """ ;
 .
 
