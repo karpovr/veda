@@ -6,14 +6,90 @@ import riot from '../common/lib/riot.js';
 
 import Backend from '../common/backend.js';
 
+import UpdateService from '../browser/update_service.js';
+
 import Util from '../common/util.js';
 
 export default veda.IndividualModel = IndividualModel;
 
+IndividualModel.cache = {
+  limit: 20000,
+  count: 0,
+  delta: 1000,
+  storage: {},
+  expire: {},
+  get: function (key) {
+    return this.storage[key];
+  },
+  set: function (obj, expires) {
+    let count = this.count;
+    const limit = this.limit;
+    const delta = this.delta;
+    if ( count >= limit ) {
+      const keys = Object.keys(this.expire);
+      // First key is for ontology objects
+      for (let i = 1, key; (key = keys[i]) && (limit - count < delta); i++) {
+        this.expire[key] = this.expire[key].filter((obj) => {
+          if (limit - count >= delta) {
+            return true;
+          }
+          delete this.storage[obj.id];
+          count--;
+          return false;
+        });
+        if (this.expire[key].length === 0) {
+          delete this.expire[key];
+        }
+      }
+      this.count = count;
+      console.log('Cache limit (' + this.limit + ' elements) reached, ' + this.delta + ' removed.');
+    }
+    const expire_key = typeof expires === 'number' ? expires : Date.now();
+    obj.expires = expire_key;
+    this.storage[obj.id] = obj;
+    this.expire[expire_key] = this.expire[expire_key] || [];
+    this.expire[expire_key].push(obj);
+    this.count++;
+    if (typeof window !== 'undefined' && expire_key !== 1) {
+      const updateService = new UpdateService();
+      updateService.then((updateService) => {
+        updateService.subscribe(obj.id);
+      });
+    }
+  },
+  remove: function (key) {
+    const obj = this.storage[key];
+    const expires = obj.expires;
+    this.expire[expires] = this.expire[expires].filter((item) => item.id !== key);
+    if (this.expire[expires].length === 0) {
+      delete this.expire[expires];
+    }
+    this.count--;
+    if (typeof window !== 'undefined') {
+      const updateService = new UpdateService();
+      updateService.then((updateService) => {
+        updateService.unsubscribe(key);
+      });
+    }
+    return delete this.storage[key];
+  },
+  clear: function () {
+    this.count = 0;
+    this.storage = {};
+    this.expire = {};
+    if (typeof window !== 'undefined') {
+      const updateService = new UpdateService();
+      updateService.then((updateService) => {
+        updateService.unsubscribe();
+      });
+    }
+  },
+};
+
 /**
  * @constructor
  * @param {string} uri URI of individual. If not specified, than id of individual will be generated automatically.
- * @param {boolean} cache Use cache true / false. If true or not set, then object will be return from application cache (veda.cache). If false or individual not found in application cache - than individual will be loaded from database
+ * @param {boolean} cache Use cache true / false. If true or not set, then object will be return from cache. If false or individual not found in cache, then individual will be loaded from database.
  * @param {boolean} init individual with class model at load. If true or not set, then individual will be initialized with class specific model upon load.
  */
 function IndividualModel (uri, cache, init) {
@@ -47,9 +123,9 @@ function IndividualModel (uri, cache, init) {
     let cached;
     if (typeof uri === 'string') {
       this.id = uri;
-      cached = veda.cache.get(this.id);
+      cached = IndividualModel.cache.get(this.id);
     } else if (typeof uri === 'object') {
-      cached = veda.cache.get(this.id);
+      cached = IndividualModel.cache.get(this.id);
       if (cached && !cached.isLoaded()) {
         cached.properties = uri;
       }
@@ -59,7 +135,7 @@ function IndividualModel (uri, cache, init) {
     if (cached) {
       return cached;
     } else {
-      veda.cache.set(this, this._.cache);
+      IndividualModel.cache.set(this, this._.cache);
     }
   }
 
@@ -270,9 +346,9 @@ Object.defineProperty(proto, 'id', {
   set: function (value) {
     const previous = this.properties && this.properties['@'];
     this.properties['@'] = value;
-    if (previous && this._.cache && veda.cache.get(previous)) {
-      veda.cache.remove(previous);
-      veda.cache.set(this, this._.cache);
+    if (previous && this._.cache && IndividualModel.cache.get(previous)) {
+      IndividualModel.cache.remove(previous);
+      IndividualModel.cache.set(this, this._.cache);
     }
   },
 });
@@ -363,7 +439,7 @@ Object.defineProperty(proto, 'rightsOrigin', {
 });
 
 /**
- * Load individual specified by uri from database. If cache parameter (from constructor) is true, than try to load individual from browser cache first.
+ * Load individual specified by uri from database. If cache parameter (from constructor) is true, then try to load individual from browser cache first.
  * @return {Promise<IndividualModel>}
  */
 proto.load = function () {
@@ -566,8 +642,8 @@ proto.remove = function () {
   return this.isRemoving(
     this.trigger('beforeRemove')
       .then(() => {
-        if (this._.cache && veda.cache && veda.cache.get(this.id)) {
-          veda.cache.remove(this.id);
+        if (this._.cache && IndividualModel.cache.get(this.id)) {
+          IndividualModel.cache.remove(this.id);
         }
         if (this.isNew()) {
           return;
@@ -1047,7 +1123,7 @@ proto.prefetch = function (depth, ...allowed_props) {
 function prefetch (result, depth, uris, ...allowed_props) {
   uris = Util.unique( uris );
   const toGet = uris.filter((uri) => {
-    const cached = veda.cache.get(uri);
+    const cached = IndividualModel.cache.get(uri);
     if ( cached && result.indexOf(cached) < 0 ) {
       result.push(cached);
     }
