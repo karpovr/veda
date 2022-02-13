@@ -158,7 +158,7 @@ BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   return call_server(params);
 };
 
-BrowserBackend.wait_module = function (module_id, op_id, maxCalls = 5) {
+BrowserBackend.wait_module = function (module_id, op_id, maxCalls = 10) {
   if (!maxCalls) {
     return Promise.resolve(false);
   }
@@ -169,7 +169,7 @@ BrowserBackend.wait_module = function (module_id, op_id, maxCalls = 5) {
   return BrowserBackend.get_operation_state(module_id, op_id)
     .then((module_op_id) =>
       module_op_id < op_id ?
-        wait().then(() => BrowserBackend.wait_module(module_id, op_id, --maxCalls)) :
+        wait(2000 / maxCalls).then(() => BrowserBackend.wait_module(module_id, op_id, --maxCalls)) :
         true,
     );
 };

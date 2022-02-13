@@ -14,7 +14,7 @@ const Util = veda.Util || {};
 
 export default veda.Util = Util;
 
-Util.registerHandler = function (individual, template, event, handler) {
+Util.registerHandler = function (individual, event, template, handler) {
   individual.on(event, handler);
   template.one('remove', function () {
     individual.off(event, handler);

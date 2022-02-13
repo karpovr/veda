@@ -99,7 +99,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   // Генерация Uri
-  BrowserUtil.registerHandler(individual, template, 'beforeSave', function () {
+  BrowserUtil.registerHandler(individual, 'beforeSave', template, function () {
     const shortLabel = individual['v-s:hasClassifierCountry'][0]['v-s:shortLabel'];
     const taxId = individual['v-s:taxId'];
     if (individual.hasValue('v-s:hasClassifierCountry', 'd:Country_RUS') && individual.isNew()) {
