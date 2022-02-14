@@ -97,4 +97,6 @@ test040({test, assert, Backend, Helpers, Constants, Util});
 test041({test, assert, Backend, Helpers, Constants, Util});
 test042({test, assert, Backend, Helpers, Constants, Util});
 
-test.run();
+(async function() {
+  assert(await test.run());
+})();
