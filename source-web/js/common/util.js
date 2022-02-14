@@ -97,10 +97,6 @@ Util.diff = function (changed, base) {
   return delta;
 };
 
-Util.decimalDatetimeReviver = function (key, value) {
-  return key === 'data' && this.type === 'Datetime' ? new Date(value) : key === 'data' && this.type === 'Decimal' ? parseFloat(value) : value;
-};
-
 Util.hasValue = function (individual, property, value) {
   const any = !!(individual && individual[property] && individual[property].length);
   if (!value) return any;
@@ -111,19 +107,6 @@ Util.hasValue = function (individual, property, value) {
 
 Util.toJson = function (value) {
   return JSON.stringify(value, null, 2);
-};
-
-Util.simpleHash = function (str) {
-  let hash = 0; let char;
-  if (str.length === 0) {
-    return hash;
-  }
-  for (let i = 0; i < str.length; i++) {
-    char = str.charCodeAt(i);
-    hash = ((hash<<5)-hash)+char;
-    hash = hash & hash;
-  }
-  return hash;
 };
 
 Util.processQuery = function (vql, sql, sort, limit, queryDelta, processDelta, pause, fn) {
@@ -298,24 +281,6 @@ function formatNumber (n) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 20,
   }).replace(/\s/g, ' ');
-};
-
-Util.forSubIndividual = function (net, property, id, func) {
-  if (net[property] === undefined) {
-    return;
-  }
-  net[property].forEach((el) => {
-    if (el.id == id) {
-      func(el);
-    }
-  });
-};
-
-Util.removeSubIndividual = function (net, property, id) {
-  if (net[property] === undefined) {
-    return;
-  }
-  return net[property].filter((item) => item.id !== id);
 };
 
 /*

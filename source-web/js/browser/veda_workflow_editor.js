@@ -267,7 +267,7 @@ jsWorkflow.ready(() => {
       if (info.originalSourceId !== info.newSourceId) {
         net['v-wf:consistsOf'].forEach((state) => {
           if (state.id === info.originalSourceId) {
-            state['v-wf:hasFlow'] = Util.removeSubIndividual(state, 'v-wf:hasFlow', info.connection.id);
+            state['v-wf:hasFlow'] = removeSubIndividual(state, 'v-wf:hasFlow', info.connection.id);
           }
           if (state.id === info.newSourceId) {
             state['v-wf:hasFlow'] = state.hasValue('v-wf:hasFlow') ? state['v-wf:hasFlow'].concat(new IndividualModel(info.connection.id)):[new IndividualModel(info.connection.id)];
@@ -374,7 +374,7 @@ jsWorkflow.ready(() => {
       individualM['v-wf:mapToVariable'] = [variable];
       individualM['v-wf:mappingExpression'] = ['process.getInputVariable (\''+variable['v-wf:varDefineName'][0]+'\')'];
 
-      Util.forSubIndividual(net, 'v-wf:consistsOf', stateId, function (state) {
+      forSubIndividual(net, 'v-wf:consistsOf', stateId, function (state) {
         state[mapping] = state[mapping].concat(individualM); // <- Add new Mapping to State
         net['v-wf:consistsOf'] = net['v-wf:consistsOf'].concat(individualM);
       });
@@ -747,7 +747,7 @@ jsWorkflow.ready(() => {
     instance.deleteState = function (element) {
       instance.detachAllConnections(element);
       instance.remove(element);
-      net['v-wf:consistsOf'] = Util.removeSubIndividual(net, 'v-wf:consistsOf', element.id);
+      net['v-wf:consistsOf'] = removeSubIndividual(net, 'v-wf:consistsOf', element.id);
       net['v-wf:consistsOf'].forEach((state) => {
         if (state.hasValue('v-wf:hasFlow')) {
           state['v-wf:hasFlow'].forEach((flow) => {
@@ -773,9 +773,9 @@ jsWorkflow.ready(() => {
 
     instance.deleteFlow = function (flow, source) {
       instance.detach(flow, {fireEvent: false, forceDetach: true});
-      net['v-wf:consistsOf'] = Util.removeSubIndividual(net, 'v-wf:consistsOf', flow.id);
+      net['v-wf:consistsOf'] = removeSubIndividual(net, 'v-wf:consistsOf', flow.id);
       const sourceIndividual = new IndividualModel(source.id);
-      sourceIndividual['v-wf:hasFlow'] = Util.removeSubIndividual(sourceIndividual, 'v-wf:hasFlow', flow.id);
+      sourceIndividual['v-wf:hasFlow'] = removeSubIndividual(sourceIndividual, 'v-wf:hasFlow', flow.id);
     };
 
     instance.createEmptyNetElement = function (type) {
@@ -1136,4 +1136,22 @@ function collectEntities (element, list) {
       });
     }
   }
+}
+
+function forSubIndividual (net, property, id, func) {
+  if (net[property] === undefined) {
+    return;
+  }
+  net[property].forEach((el) => {
+    if (el.id == id) {
+      func(el);
+    }
+  });
+}
+
+function removeSubIndividual (net, property, id) {
+  if (net[property] === undefined) {
+    return;
+  }
+  return net[property].filter((item) => item.id !== id);
 }
