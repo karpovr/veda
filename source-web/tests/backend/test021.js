@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#021 User1 stores 3 individuals, user1 should read individuals using get_individuals`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#021 User1 stores 3 individuals, user1 should read individuals using get_individuals`, async () => {
     const ticket = await Helpers.get_user1_ticket();
 
     const A = await Helpers.create_test_document1(ticket);

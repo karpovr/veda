@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#034 Check put_individuals`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#034 Check put_individuals`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
 
     const new_test_doc1_uri_1 = 'test21_1:' + Util.guid();
@@ -65,6 +65,6 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     res = await Backend.put_individual(ticket_user2.ticket, new_test_doc4);
     assert(await Backend.wait_module(Constants.m_acl, res.op_id));
 
-    assert.rejects(Backend.put_individuals(ticket_user1.ticket, [new_test_doc1, new_test_doc2, new_test_doc3, new_test_doc4]), {code: 472});
+    await assert.rejects(Backend.put_individuals(ticket_user1.ticket, [new_test_doc1, new_test_doc2, new_test_doc3, new_test_doc4]), {code: 472});
   });
 };

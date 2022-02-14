@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#007 User1 stores individual, admin should read individual`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#007 User1 stores individual, admin should read individual`, async () => {
     const ticket_user1 = (await Helpers.get_user1_ticket()).ticket;
     const admin_ticket = (await Helpers.get_admin_ticket()).ticket;
 
@@ -24,6 +24,6 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc1['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc1_uri));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc1_uri));
   });
 };

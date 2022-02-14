@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#014 Check put_individual, add_to_individual, set_in_individual, remove_from_individual, remove_individual`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#014 Check put_individual, add_to_individual, set_in_individual, remove_from_individual, remove_individual`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
 
     const now = Util.newDate(new Date());
@@ -150,6 +150,6 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(Helpers.compare(new_test_doc1_remove_from1, read_individual));
 
     res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
-    assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1['@']));
   });
 };

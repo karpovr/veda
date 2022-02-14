@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#010 Store 3 and read 3 individuals of type "v-s:NoPermissionStatement"`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#010 Store 3 and read 3 individuals of type "v-s:NoPermissionStatement"`, async () => {
     const ticket = await Helpers.get_user1_ticket();
 
     const permissionSubject = 'test9:' + Util.guid();
@@ -28,7 +28,7 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
     res = await Backend.remove_individual(ticket.ticket, new_test_doc1['@']);
-    assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc1['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc1['@']));
 
     const new_test_doc2 = new_test_doc1;
     const new_test_doc2_uri = 'test9:' + Util.guid();
@@ -44,7 +44,7 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(Helpers.compare(new_test_doc2, server_test_doc2));
 
     res = await Backend.remove_individual(ticket.ticket, new_test_doc2['@']);
-    assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc2['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc2['@']));
 
     const new_test_doc3 = new_test_doc2;
     const new_test_doc3_uri = 'test9:' + Util.guid();
@@ -60,6 +60,6 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(Helpers.compare(new_test_doc3, server_test_doc3));
 
     res = await Backend.remove_individual(ticket.ticket, new_test_doc3['@']);
-    assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc3['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc3['@']));
   });
 };

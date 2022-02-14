@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(
 `#013 User1 stores 3 individuals (one of the individuals contains an invalid field [author]).
        User1 finds 2 individuals, and user2 should not find anything.`,
   async () => {
@@ -77,15 +77,15 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(data.result.length === 2);
 
     res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
-    assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1['@']));
 
     res = await Backend.remove_individual(ticket_user2.ticket, new_test_doc2['@']);
-    assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc2['@']));
+    await assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc2['@']));
 
     res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc3['@']);
-    assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc3['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc3['@']));
 
     res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc4['@']);
-    assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc4['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc4['@']));
   });
 };

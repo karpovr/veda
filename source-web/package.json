@@ -23,7 +23,7 @@
     "@rollup/plugin-node-resolve": "^10.0.0",
     "babel-eslint": "^10.1.0",
     "babel-preset-minify": "^0.5.1",
-    "beartest-js": "^4.0.0",
+    "baretest": "^2.0.0",
     "eslint": "^7.15.0",
     "eslint-config-google": "^0.14.0",
     "eslint-config-standard": "^16.0.2",
@@ -70,7 +70,9 @@
     "vis-network": "^8.5.2"
   },
   "scripts": {
-    "test": "node ./tests/backend/index.js && testcafe --speed 0.9 chrome:headless ./tests/testcafe",
+    "test": "npm run test-backend && npm run test-frontend",
+    "test-backend": "node ./tests/backend/index.js",
+    "test-frontend": "testcafe --speed 0.9 chrome:headless ./tests/testcafe",
     "build": "npm run clean && npm run build-browser-scripts && npm run build-templates && npm run build-server-scripts && npm run update-version",
     "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel --config-file ./.babelrc . --out-dir ../public --source-maps --copy-files",

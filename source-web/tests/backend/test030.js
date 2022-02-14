@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#030 Check search using ranges`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#030 Check search using ranges`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
 
     const test_group_uid = 'test13:' + Util.guid();

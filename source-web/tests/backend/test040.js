@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#040 Check Membership dropCount`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#040 Check Membership dropCount`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
     const ticket_user = await Helpers.get_user1_ticket();
     const doc_group = 'g:doc_resource_group';

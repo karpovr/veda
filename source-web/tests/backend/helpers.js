@@ -355,7 +355,7 @@ export default class Helpers {
   }
 
   static async test_fail_read (ticket, original_individual) {
-    assert.rejects(Backend.get_individual(ticket.ticket, original_individual['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, original_individual['@']));
   }
 
   static async test_success_update (ticket, indvidual) {
@@ -363,7 +363,7 @@ export default class Helpers {
   }
 
   static async test_fail_update (ticket, indvidual) {
-    assert.rejects(Backend.put_individual(ticket.ticket, indvidual));
+    await assert.rejects(Backend.put_individual(ticket.ticket, indvidual));
   }
 
   static async check_rights_success (ticket, uri, expected_rights) {

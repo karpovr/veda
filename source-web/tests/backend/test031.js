@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#031 Check rights filter`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#031 Check rights filter`, async () => {
     const ticket_user1 = await Helpers.get_user1_ticket();
     const ticket_user2 = await Helpers.get_user2_ticket();
     const ticket_admin = await Helpers.get_admin_ticket();

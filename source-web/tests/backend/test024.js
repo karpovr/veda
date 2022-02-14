@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#024 Check get_membership`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#024 Check get_membership`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
 
     const res = await Backend.get_membership(ticket_admin.ticket, 'td:RomanKarpov_pref');

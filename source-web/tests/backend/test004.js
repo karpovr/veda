@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#004 Attributive search`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#004 Attributive search`, async () => {
     const ticket_user1 = (await Helpers.get_user1_ticket()).ticket;
     const test_group_uid = 'test30:' + Util.guid();
 
@@ -105,24 +105,24 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(data.length === 1);
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc1['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc1['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc1['@']));
 
     data = (await Backend.query(ticket_user1, "'rdfs:comment' == 'comm1*' && 'v-s:test_group' === '" + test_group_uid + "'")).result;
     assert(data.length === 1);
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc5['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc5['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc5['@']));
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc2['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc2['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc2['@']));
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc3['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc3['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc3['@']));
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc4['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc4['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc4['@']));
 
     res = await Backend.remove_individual(ticket_user1, new_test_doc6['@']);
-    assert.rejects(Backend.get_individual(ticket_user1, new_test_doc6['@']));
+    await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc6['@']));
   });
 };

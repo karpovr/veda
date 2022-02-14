@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#018 Nested groups with restrictions (2)`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#018 Nested groups with restrictions (2)`, async () => {
     const ticket1 = await Helpers.get_user1_ticket();
     const ticket2 = await Helpers.get_user2_ticket();
 

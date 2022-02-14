@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#012 Store, read and delete 3 individuals`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#012 Store, read and delete 3 individuals`, async () => {
     const ticket = await Helpers.get_user1_ticket();
 
     const memberOf = 'test11:' + Util.guid();
@@ -24,7 +24,7 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
     res = await Backend.remove_individual(ticket.ticket, new_test_doc1['@']);
-    assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc1['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc1['@']));
 
     const new_test_doc2 = new_test_doc1;
     const new_test_doc2_uri = 'test11:' + Util.guid();
@@ -36,10 +36,10 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
 
     const server_test_doc2 = await Backend.get_individual(ticket.ticket, new_test_doc2_uri);
-    assert.ok(Helpers.compare(new_test_doc2, server_test_doc2));
+    assert(Helpers.compare(new_test_doc2, server_test_doc2));
 
     res = await Backend.remove_individual(ticket.ticket, new_test_doc2['@']);
-    assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc2['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc2['@']));
 
     const new_test_doc3 = new_test_doc2;
     const new_test_doc3_uri = 'test11:' + Util.guid();
@@ -51,9 +51,9 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
 
     const server_test_doc3 = await Backend.get_individual(ticket.ticket, new_test_doc3_uri);
-    assert.ok(Helpers.compare(new_test_doc3, server_test_doc3));
+    assert(Helpers.compare(new_test_doc3, server_test_doc3));
 
     res = await Backend.remove_individual(ticket.ticket, new_test_doc3['@']);
-    assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc3['@']));
+    await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc3['@']));
   });
 };

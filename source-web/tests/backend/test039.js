@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(
 `#039 User1 stores individual, user1 should read individual.
        User2 should fail to remove individual.`,
   async () => {
@@ -21,7 +21,7 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
 
     await Helpers.test_success_read(ticket_user1, new_test_doc1);
 
-    assert.rejects(Backend.remove_individual(ticket_user2.ticket, new_test_doc1['@']));
+    await assert.rejects(Backend.remove_individual(ticket_user2.ticket, new_test_doc1['@']));
 
     await Helpers.test_success_read(ticket_user1, new_test_doc1);
   });

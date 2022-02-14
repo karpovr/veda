@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#023 Check get_rights_origin`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#023 Check get_rights_origin`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
 
     let res = await Backend.get_rights_origin(ticket_admin.ticket, 'td:RomanKarpov_pref');

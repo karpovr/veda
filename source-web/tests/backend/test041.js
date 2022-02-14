@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#041 Check PermissionStatement dropCount`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#041 Check PermissionStatement dropCount`, async () => {
     const ticket_user = await Helpers.get_user1_ticket();
     const user = ticket_user.user_uri;
     const ticket_admin = await Helpers.get_admin_ticket();

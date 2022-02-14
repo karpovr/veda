@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(`#022 Search with invalid query`, async () => {
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(`#022 Search with invalid query`, async () => {
     const ticket = await Helpers.get_user1_ticket();
 
     const A = await Helpers.create_test_document1(ticket);

@@ -1,5 +1,5 @@
-export default ({it, assert, Backend, Helpers, Constants, Util}) => {
-  it(
+export default ({test, assert, Backend, Helpers, Constants, Util}) => {
+  test(
 `#006 User1 stores individual and adds right [R] for user2, user2 should successfully read individual.
        User1 adds forbidding right [!R], user2 should fail to read individual`,
   async () => {
@@ -26,7 +26,7 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     server_test_doc1 = await Backend.get_individual(ticket_user1.ticket, new_test_doc1_uri);
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
-    assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc1));
+    await assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc1));
 
     res = await Helpers.addRight(ticket_user1.ticket, ticket_user2.user_uri, new_test_doc1_uri, ['v-s:canRead']);
     const new_permission = res[0];
@@ -57,12 +57,12 @@ export default ({it, assert, Backend, Helpers, Constants, Util}) => {
     res = await Helpers.addRight(ticket_user1.ticket, ticket_user2.user_uri, new_test_doc1_uri, ['v-s:canRead']);
     assert(await Backend.wait_module(Constants.m_acl, res[1].op_id));
 
-    assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc1));
+    await assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc1));
 
     new_test_doc1['v-s:updateCounter'] = Util.newInt(0);
-    assert.rejects(Backend.put_individual(ticket_user2.ticket, new_test_doc1));
+    await assert.rejects(Backend.put_individual(ticket_user2.ticket, new_test_doc1));
 
     res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1_uri);
-    assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1));
+    await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1));
   });
 };
