@@ -13,6 +13,7 @@ use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
+use v_common::storage::common::VStorage;
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::ResultCode;
 
@@ -25,6 +26,7 @@ pub(crate) struct AuthWorkPlace<'a> {
     pub sys_ticket: &'a str,
     pub xr: &'a mut XapianReader,
     pub backend: &'a mut Backend,
+    pub auth_data: &'a mut VStorage,
     pub user_stat: &'a mut UserStat,
     pub stored_password: String,
     pub stored_salt: String,
@@ -70,8 +72,8 @@ impl<'a> AuthWorkPlace<'a> {
             }
         }
 
-        let candidate_account_ids = get_candidate_users_of_login(self.login, self.backend, self.xr);
-        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
+        let candidate_account_ids = get_candidate_users_of_login(self.login, self.backend, self.xr, &mut self.auth_data);
+        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.result.len() > 0 {
             for account_id in &candidate_account_ids.result {
                 let (op, res) = self.prepare_candidate_account(account_id, &mut ticket);
                 if op && res == ResultCode::Ok || res != ResultCode::Ok {

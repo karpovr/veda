@@ -107,6 +107,8 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
         ctx.membership_counter += 1;
     } else if new_state.any_exists("rdf:type", &["v-s:PermissionFilter"]) || prev_state.any_exists("rdf:type", &["v-s:PermissionFilter"]) {
         prepare_permission_filter(&mut prev_state, &mut new_state, ctx);
+    } else if new_state.any_exists("rdf:type", &["v-s:Account"]) || prev_state.any_exists("rdf:type", &["v-s:Account"]) {
+        prepare_account(&mut prev_state, &mut new_state, ctx);
     }
 
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
@@ -135,4 +137,21 @@ fn prepare_membership(prev_state: &mut Individual, new_state: &mut Individual, c
 
 fn prepare_permission_filter(prev_state: &mut Individual, new_state: &mut Individual, ctx: &mut Context) {
     index_right_sets(prev_state, new_state, "v-s:permissionObject", "v-s:resource", FILTER_PREFIX, 0, ctx);
+}
+
+fn prepare_account(prev_state: &mut Individual, new_state: &mut Individual, ctx: &mut Context) {
+    if new_state.is_empty() && !prev_state.is_empty() {
+        if let Some(login) = prev_state.get_first_literal("v-s:login") {
+            let key = format!("_L:{}", login.to_lowercase());
+            ctx.storage.remove(StorageId::Az, &key);
+            info!("index account, remove: {} {}", prev_state.get_id(), login);
+        }
+    } else {
+        if let Some(login) = new_state.get_first_literal("v-s:login") {
+            let key = format!("_L:{}", login.to_lowercase());
+            let val = new_state.get_id();
+            ctx.storage.put_kv(StorageId::Az, &key, &val);
+            info!("index account, update: {} {}", new_state.get_id(), login);
+        }
+    }
 }

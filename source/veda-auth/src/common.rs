@@ -12,6 +12,7 @@ use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
 use v_common::search::common::{FTQuery, QueryResult};
+use v_common::storage::common::{StorageId, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 use v_common::v_authorization::common::Trace;
@@ -66,10 +67,11 @@ pub(crate) fn get_ticket_trusted(
     login: Option<&str>,
     ip: Option<&str>,
     xr: &mut XapianReader,
-    module: &mut Backend,
+    backend: &mut Backend,
+    auth_data: &mut VStorage,
 ) -> Ticket {
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
-    let mut tr_ticket = module.get_ticket_from_db(tr_ticket_id);
+    let mut tr_ticket = backend.get_ticket_from_db(tr_ticket_id);
 
     let login = if let Some(l) = login {
         l
@@ -108,14 +110,14 @@ pub(crate) fn get_ticket_trusted(
             Err(e) => error!("failed to get authorization group, user = {}, err = {}", &tr_ticket.user_uri, e),
         }
 
-        let candidate_account_ids = get_candidate_users_of_login(login, module, xr);
+        let candidate_account_ids = get_candidate_users_of_login(login, backend, xr, auth_data);
         if candidate_account_ids.result_code != ResultCode::Ok {
             error!("get_ticket_trusted: query result={:?}", candidate_account_ids.result_code);
         }
 
-        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.count > 0 {
+        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.result.len() > 0 {
             for check_account_id in &candidate_account_ids.result {
-                if let Some(account) = module.get_individual(check_account_id, &mut Individual::default()) {
+                if let Some(account) = backend.get_individual(check_account_id, &mut Individual::default()) {
                     let check_user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
                     if check_user_id.is_empty() {
                         error!("user id is null, user_indv = {}", account);
@@ -135,7 +137,7 @@ pub(crate) fn get_ticket_trusted(
 
                     let mut ticket = Ticket::default();
                     if is_allow_trusted || tr_ticket.user_login.to_lowercase() == check_user_login.to_lowercase() {
-                        create_new_ticket(login, &check_user_id, ip.unwrap_or_default(), conf.ticket_lifetime, &mut ticket, &mut module.storage);
+                        create_new_ticket(login, &check_user_id, ip.unwrap_or_default(), conf.ticket_lifetime, &mut ticket, &mut backend.storage);
                         info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;
@@ -159,18 +161,26 @@ pub(crate) fn get_ticket_trusted(
     tr_ticket
 }
 
-pub(crate) fn get_candidate_users_of_login(login: &str, module: &mut Backend, xr: &mut XapianReader) -> QueryResult {
+pub(crate) fn get_candidate_users_of_login(login: &str, backend: &mut Backend, xr: &mut XapianReader, auth_data: &mut VStorage) -> QueryResult {
     lazy_static! {
         static ref RE: Regex = Regex::new("[-]").unwrap();
     }
 
+    if let Some(account_id) = auth_data.get_value(StorageId::Az, &format!("_L:{}", login.to_lowercase())) {
+        info!("az.db: found account {}, {}", account_id, login);
+        let mut qr = QueryResult::default();
+        qr.result_code = ResultCode::Ok;
+        qr.result = Vec::from([account_id.to_owned()]);
+        return qr;
+    }
+
     let query = format!("'v-s:login' == '{}'", RE.replace_all(login, " +"));
 
-    let res = xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage, OptAuthorize::NO, true);
+    let res = xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut backend.storage, OptAuthorize::NO, true);
 
     if res.result_code == ResultCode::Ok && res.result.len() == 0 {
         warn!("empty query result, retry");
-        return xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut module.storage, OptAuthorize::NO, true);
+        return xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut backend.storage, OptAuthorize::NO, true);
     }
 
     res

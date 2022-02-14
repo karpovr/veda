@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::module::{create_sys_ticket, init_log, Module};
 use v_common::module::veda_backend::Backend;
-use v_common::storage::common::StorageMode;
+use v_common::storage::common::{StorageMode, VStorage};
 
 fn main() -> std::io::Result<()> {
     init_log("AUTH");
@@ -29,6 +29,7 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut backend = Backend::create(StorageMode::ReadWrite, false);
+    let mut auth_data = VStorage::new_lmdb("./data", StorageMode::ReadOnly);
 
     let systicket = if let Ok(t) = backend.get_sys_ticket_id() {
         t
@@ -45,7 +46,7 @@ fn main() -> std::io::Result<()> {
     if let Some(mut xr) = XapianReader::new("russian", &mut backend.storage) {
         loop {
             if let Ok(recv_msg) = server.recv() {
-                let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut backend, &mut suspicious);
+                let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut backend, &mut suspicious, &mut auth_data);
                 if let Err(e) = server.send(res) {
                     error!("failed to send, err = {:?}", e);
                 }
@@ -57,7 +58,15 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut XapianReader, module: &mut Backend, suspicious: &mut HashMap<String, UserStat>) -> Message {
+fn req_prepare(
+    conf: &AuthConf,
+    request: &Message,
+    systicket: &str,
+    xr: &mut XapianReader,
+    backend: &mut Backend,
+    suspicious: &mut HashMap<String, UserStat>,
+    auth_data: &mut VStorage,
+) -> Message {
     let v: JSONValue = if let Ok(v) = serde_json::from_slice(request.as_slice()) {
         v
     } else {
@@ -81,7 +90,8 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
                 secret,
                 sys_ticket: systicket,
                 xr,
-                backend: module,
+                backend,
+                auth_data,
                 user_stat,
                 stored_password: "".to_owned(),
                 stored_salt: "".to_string(),
@@ -105,7 +115,7 @@ fn req_prepare(conf: &AuthConf, request: &Message, systicket: &str, xr: &mut Xap
             return Message::from(res.to_string().as_bytes());
         },
         "get_ticket_trusted" => {
-            let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), v["addr"].as_str(), xr, module);
+            let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), v["addr"].as_str(), xr, backend, auth_data);
 
             let mut res = JSONValue::default();
             res["type"] = json!("ticket");
