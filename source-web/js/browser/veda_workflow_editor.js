@@ -14,11 +14,7 @@ import riot from '../common/lib/riot.js';
 
 import IndividualModel from '../common/individual_model.js';
 
-import BrowserUtil from '../common/util.js';
-
-import CommonUtil from '../browser/util.js';
-
-const Util = {...BrowserUtil, ...CommonUtil};
+import BrowserUtil from '../browser/util.js';
 
 const jsWorkflow = {};
 
@@ -135,7 +131,7 @@ jsWorkflow.ready(() => {
               x1 <= state['v-wf:locationX'][0] && state['v-wf:locationX'][0] <= x2 &&
               y1 <= state['v-wf:locationY'][0] && state['v-wf:locationY'][0] <= y2
             ) {
-              const $state = $('#' + Util.escape4$(state.id), template);
+              const $state = $('#' + BrowserUtil.escape4$(state.id), template);
               instance.addToDragList($state);
               e.stopPropagation();
             }
@@ -411,37 +407,37 @@ jsWorkflow.ready(() => {
               'v-wf:startingMapping': function () {
                 instance.addVarProperty(taskId, 'v-wf:startingMapping', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
               'v-wf:completedMapping': function () {
                 instance.addVarProperty(taskId, 'v-wf:completedMapping', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
               'v-wf:wosResultsMapping': function () {
                 instance.addVarProperty(taskId, 'v-wf:wosResultsMapping', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
               'v-wf:startingJournalMap': function () {
                 instance.addVarProperty(taskId, 'v-wf:startingJournalMap', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
               'v-wf:completedJournalMap': function () {
                 instance.addVarProperty(taskId, 'v-wf:completedJournalMap', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
               'v-wf:startingExecutorJournalMap': function () {
                 instance.addVarProperty(taskId, 'v-wf:startingExecutorJournalMap', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
               'v-wf:completedExecutorJournalMap': function () {
                 instance.addVarProperty(taskId, 'v-wf:completedExecutorJournalMap', varId);
                 $(this).dialog('close');
-                $('#'+Util.escape4$(taskId), template).trigger('click');
+                $('#'+BrowserUtil.escape4$(taskId), template).trigger('click');
               },
             },
           });
@@ -553,7 +549,7 @@ jsWorkflow.ready(() => {
       if (mode=='edit') {
         windows.bind('dblclick', function (e) {
           const _this = e.delegateTarget;
-          Util.showModal(new IndividualModel($(_this).attr('id')), 'v-wf:TaskTemplateAsModal', 'edit');
+          BrowserUtil.showModal(new IndividualModel($(_this).attr('id')), 'v-wf:TaskTemplateAsModal', 'edit');
         });
 
         instance.draggable(windows, {
@@ -736,7 +732,7 @@ jsWorkflow.ready(() => {
       }
       if (stateElement!=='') {
         wdata.append(stateElement);
-        const $state = $('#' + Util.escape4$(state.id), template);
+        const $state = $('#' + BrowserUtil.escape4$(state.id), template);
         bindStateEvents($state);
         if (mode=='edit') subNetViewButton(state, $state);
         executorMark(state, $state);
@@ -894,7 +890,7 @@ jsWorkflow.ready(() => {
         const o = connection.getOverlay('flowLabel');
         if (o != undefined) o.setVisible(true);
       });
-      $('#'+Util.escape4$(selectedElementId), template).removeClass('w_active');
+      $('#'+BrowserUtil.escape4$(selectedElementId), template).removeClass('w_active');
       if (selectedElementSourceId!=null) {
         instance.select({source: selectedElementSourceId}).each((e) => {
           e.setPaintStyle({strokeStyle: '#666666'});
@@ -921,8 +917,8 @@ jsWorkflow.ready(() => {
 
         wis.forEach((wi) => {
           if (wi.hasValue('v-wf:forNetElement')) {
-            const state = $('#'+Util.escape4$(wi['v-wf:forNetElement'][0].id), template);
-            if ($(state).find('[work-item-id="'+Util.escape4$(wi.id)+'"]').length == 0) {
+            const state = $('#'+BrowserUtil.escape4$(wi['v-wf:forNetElement'][0].id), template);
+            if ($(state).find('[work-item-id="'+BrowserUtil.escape4$(wi.id)+'"]').length == 0) {
               $('<span/>', {
                 'type': 'work-item',
                 'work-item-id': wi.id,
@@ -966,7 +962,7 @@ jsWorkflow.ready(() => {
         instance.createProcessView(process);
       }
 
-      $('#'+Util.escape4$(veda['workflow'+elementId+'-selectedElement']), template).trigger('click');
+      $('#'+BrowserUtil.escape4$(veda['workflow'+elementId+'-selectedElement']), template).trigger('click');
 
       /* CONTEXT MENU [BEGIN] */
       $contextMenu = $('#workflow-context-menu', template);
@@ -1009,25 +1005,25 @@ jsWorkflow.ready(() => {
       $('#workflow-export-ttl', template).on('click', function () {
         const list = [net].concat(net['v-wf:consistsOf']);
         collectEntities(net, list);
-        Util.exportTTL(list);
+        BrowserUtil.exportTTL(list);
       });
 
       // Add new State event.
       $('.create-state', template).bind('click', function (e) {
         const _this = e.delegateTarget;
         const individual = instance.createEmptyNetElement($(_this).hasClass('create-condition') ? 'condition' : 'task');
-        $('#' + Util.escape4$(individual.id), template).click();
+        $('#' + BrowserUtil.escape4$(individual.id), template).click();
         $(_this).blur();
       });
 
       $('.delete-state', template).on('click', function () {
         if (dragList.length > 0) {
           dragList.forEach((item) => {
-            instance.deleteState(instance.getSelector('#'+Util.escape4$(item.attr('id')))[0]);
+            instance.deleteState(instance.getSelector('#'+BrowserUtil.escape4$(item.attr('id')))[0]);
           });
         } else if (selectedElementType == 'state') {
           if (confirm('Delete state ' + selectedElementId + ' ?')) {
-            instance.deleteState(instance.getSelector('#'+Util.escape4$(selectedElementId))[0]);
+            instance.deleteState(instance.getSelector('#'+BrowserUtil.escape4$(selectedElementId))[0]);
           }
         } else if (selectedElementType == 'flow') {
           if (confirm('Delete flow ' + selectedElementId + ' ?')) {
