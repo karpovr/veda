@@ -4,15 +4,15 @@ import veda from '../common/veda.js';
 
 import appModel from '../common/app_model.js';
 
-import '../browser/install_sw.js';
-
 import appPresenter from '../browser/app_presenter.js';
 
 import auth from '../browser/auth.js';
 
-import '../browser/individual_presenter.js';
+import '../browser/install_sw.js';
 
 import 'regenerator-runtime/runtime';
+
+import '../browser/individual_presenter.js';
 
 export default veda;
 
@@ -24,6 +24,6 @@ export default veda;
   const response = await fetch('./manifest');
   const manifest = await response.json();
   appModel.call(veda, manifest);
+  appPresenter(veda);
   auth();
-  appPresenter();
 })();

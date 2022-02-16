@@ -8,8 +8,6 @@ import '../browser/line_status_listener.js';
 
 import '../browser/show_ttl.js';
 
-import veda from '../common/veda.js';
-
 import riot from '../common/lib/riot.js';
 
 import IndividualModel from '../common/individual_model.js';
@@ -23,7 +21,7 @@ import {delegateHandler, clear} from '../browser/dom_helpers.js';
 /**
  * Application presenter
  */
-export default function AppPresenter () {
+export default function AppPresenter (veda) {
   /**
    * Localize resources on the page on language change
    */
