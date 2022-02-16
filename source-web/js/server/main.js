@@ -26,11 +26,7 @@ veda.Workflow = {...Workflow, WorkflowUtil};
 
 try {
   veda.ticket = get_env_str_var('$ticket');
-
-  App.call(veda);
-
   veda.init('cfg:VedaSystem');
-
   console.log('user:', veda.user.id, '| ticket:', veda.ticket);
 } catch (error) {
   console.log('Veda init error', error.stack);

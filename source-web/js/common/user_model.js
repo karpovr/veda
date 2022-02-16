@@ -43,7 +43,7 @@ proto._init = function () {
 
 proto.initAspect = function () {
   const aspect_id = this.id + '_aspect';
-  const aspect = this.hasValue('v-s:hasAspect') ? this['v-s:hasAspect'][0] : new veda.IndividualModel(aspect_id);
+  const aspect = this.hasValue('v-s:hasAspect') ? this['v-s:hasAspect'][0] : new IndividualModel(aspect_id);
   return aspect.load()
     .catch((error) => {
       console.log('personal aspect load error', error);
@@ -89,7 +89,7 @@ proto.initAppointment = function () {
 
 proto.initPreferences = function () {
   const preferences_id = this.id + '_pref';
-  const preferences = this.hasValue('v-ui:hasPrefences') ? this['v-ui:hasPrefences'][0] : new veda.IndividualModel(preferences_id);
+  const preferences = this.hasValue('v-ui:hasPrefences') ? this['v-ui:hasPrefences'][0] : new IndividualModel(preferences_id);
   return preferences.load()
     .catch((error) => {
       console.log('personal preferences load error', error);

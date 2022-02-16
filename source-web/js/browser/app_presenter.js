@@ -8,6 +8,8 @@ import '../browser/line_status_listener.js';
 
 import '../browser/show_ttl.js';
 
+import veda from '../common/veda.js';
+
 import riot from '../common/lib/riot.js';
 
 import IndividualModel from '../common/individual_model.js';
@@ -20,8 +22,9 @@ import {delegateHandler, clear} from '../browser/dom_helpers.js';
 
 /**
  * Application presenter
+ * @param {Object} manifest
  */
-export default function AppPresenter (veda) {
+export default function AppPresenter (manifest) {
   /**
    * Localize resources on the page on language change
    */
@@ -172,9 +175,9 @@ export default function AppPresenter (veda) {
     const loadIndicator = document.getElementById('load-indicator');
     loadIndicator.style.display = '';
 
-    const layout_uri = veda.manifest.veda_layout;
-    const main_uri = veda.manifest.veda_main;
-    const {start_url} = veda.manifest;
+    const layout_uri = manifest.veda_layout;
+    const main_uri = manifest.veda_main;
+    const {start_url} = manifest;
     const appContainer = document.getElementById('app');
     clear(appContainer);
     if (layout_uri && main_uri && start_url) {

@@ -4,6 +4,8 @@ import Ontology from '../common/ontology_model.js';
 
 import User from '../common/user_model.js';
 
+import riot from '../common/lib/riot.js';
+
 /**
  * Application model
  * @param {Object} manifest - app config
@@ -24,5 +26,5 @@ export default function App (manifest) {
     });
   };
 
-  return this;
+  return riot.observable(this);
 };

@@ -18,7 +18,7 @@ import IndividualModel from '../common/individual_model.js';
 
 import CommonUtil from '../common/util.js';
 
-import BrowserUtil from '../common/util.js';
+import BrowserUtil from '../browser/util.js';
 
 import Backend from '../common/backend.js';
 
@@ -37,7 +37,6 @@ export default veda;
   const response = await fetch('./manifest');
   const manifest = await response.json();
 
-  appModel.call(veda, manifest);
-  appPresenter(veda);
+  appPresenter(manifest);
   auth();
 })();

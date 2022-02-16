@@ -1,9 +1,7 @@
 // Application instance
 
-import riot from '../common/lib/riot.js';
+import App from '../common/app_model.js';
 
-const veda = riot.observable({
-  env: typeof window === 'undefined' && typeof process === 'undefined' ? 'server' : 'browser',
-});
+const veda = new App();
 
 export default veda;
