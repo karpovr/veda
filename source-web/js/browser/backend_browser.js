@@ -1,7 +1,5 @@
 // Browser backend
 
-import veda from '../common/veda.js';
-
 import BackendError from '../browser/backend_error.js';
 
 const BrowserBackend = {};
@@ -38,9 +36,6 @@ function call_server (params) {
   }).then((response) => {
     if (response.ok) {
       return response.json();
-    }
-    if (response.status === 470 || response.status === 471) {
-      veda.trigger('login:failed');
     }
     throw new BackendError(response.status);
   });
