@@ -53,9 +53,9 @@ delegateHandler(loginForm, 'keyup', '#login, #password', function (e) {
 delegateHandler(loginForm, 'mousedown', '.show-password', function (e) {
   const passwords = loginForm.querySelectorAll('.password');
   passwords.forEach((input) => input.type = 'text');
-  document.addEventListener('mouseup', function(){
+  document.addEventListener('mouseup', function () {
     passwords.forEach((input) => input.type = 'password');
-  }, {once:true});
+  }, {once: true});
 });
 
 /**
@@ -453,7 +453,7 @@ veda.on('login:failed', function () {
   }).catch((error) => {
     console.log(err);
     loginForm.style.display = 'block';
-  })
+  });
 });
 
 // Initialize application if ticket is valid
@@ -522,7 +522,7 @@ export default function Auth () {
   const loadIndicator = document.getElementById('load-indicator');
   const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
 
-  veda.init('cfg:Guest')
+  Promise.resolve()
     .then(() => {
       // Check if ticket is valid
       const ticket = storage.ticket;
@@ -542,7 +542,7 @@ export default function Auth () {
           end_time: storage.end_time,
         });
       } else {
-        const authRequired = new IndividualModel('cfg:AuthRequired');
+        const authRequired = new IndividualModel('cfg:AuthRequired', true, false);
         authRequired.load().then((authRequiredParam) => {
           if ( authRequiredParam && authRequiredParam.hasValue('rdf:value', false) ) {
             veda.trigger('login:success', {
