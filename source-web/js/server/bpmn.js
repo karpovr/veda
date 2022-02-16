@@ -2,11 +2,11 @@
 
 import veda from '../common/veda.js';
 
-import Util from '../server/util.js';
+import ServerUtil from '../server/util.js';
 
 const BPMN = {};
 
-export default veda.BPMN = BPMN;
+export default BPMN;
 
 BPMN.addToJournal = function (journal_uri, record) {
   const journal = get_individual(veda.ticket, journal_uri);
@@ -17,20 +17,20 @@ BPMN.addToJournal = function (journal_uri, record) {
   put_individual(veda.ticket, record);
   const add = {
     '@': journal_uri,
-    'v-s:childRecord': Util.newUri(record['@']),
+    'v-s:childRecord': ServerUtil.newUri(record['@']),
   };
   add_to_individual(veda.ticket, add);
 };
 
 BPMN.addToGroup = function (group, resource, restriction) {
-  const membership_id = 'd:' + Util.Sha256.hash('membership' + group + resource + restriction);
+  const membership_id = 'd:' + ServerUtil.Sha256.hash('membership' + group + resource + restriction);
   let membership = get_individual(veda.ticket, membership_id);
   if (!membership) {
     membership = {
       '@': membership_id,
-      'rdf:type': Util.newUri('v-s:Membership'),
-      'v-s:memberOf': Util.newUri(group),
-      'v-s:resource': Util.newUri(resource),
+      'rdf:type': ServerUtil.newUri('v-s:Membership'),
+      'v-s:memberOf': ServerUtil.newUri(group),
+      'v-s:resource': ServerUtil.newUri(resource),
     };
     restriction.toLowerCase().split('').forEach((char) => {
       let res;
@@ -41,21 +41,21 @@ BPMN.addToGroup = function (group, resource, restriction) {
       case 'd': res = 'v-s:canDelete'; break;
       default: return;
       }
-      membership[res] = Util.newBool(true);
+      membership[res] = ServerUtil.newBool(true);
     });
     put_individual(veda.ticket, membership);
   }
 };
 
 BPMN.addRight = function (subject, object, right) {
-  const permission_statement_id = 'd:' + Util.Sha256.hash('permission statement' + subject + object + right);
+  const permission_statement_id = 'd:' + ServerUtil.Sha256.hash('permission statement' + subject + object + right);
   let permission_statement = get_individual(veda.ticket, permission_statement_id);
   if (!permission_statement) {
     permission_statement = {
       '@': permission_statement_id,
-      'rdf:type': Util.newUri('v-s:PermissionStatement'),
-      'v-s:permissionSubject': Util.newUri(subject),
-      'v-s:permissionObject': Util.newUri(object),
+      'rdf:type': ServerUtil.newUri('v-s:PermissionStatement'),
+      'v-s:permissionSubject': ServerUtil.newUri(subject),
+      'v-s:permissionObject': ServerUtil.newUri(object),
     };
     right.toLowerCase().split('').forEach((char) => {
       let res;
@@ -66,7 +66,7 @@ BPMN.addRight = function (subject, object, right) {
       case 'd': res = 'v-s:canDelete'; break;
       default: return;
       }
-      permission_statement[res] = Util.newBool(true);
+      permission_statement[res] = ServerUtil.newBool(true);
     });
     put_individual(veda.ticket, permission_statement);
   }

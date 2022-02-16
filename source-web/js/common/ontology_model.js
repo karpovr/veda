@@ -8,7 +8,7 @@ import Backend from '../common/backend.js';
 
 import Util from '../common/util.js';
 
-export default veda.Ontology = Ontology;
+export default Ontology;
 
 /**
  * Ontology

@@ -4,17 +4,44 @@ import veda from '../common/veda.js';
 
 import Sha256 from '../common/lib/sha256.js';
 
-import riot from '../common/lib/riot.js';
-
 import Mustache from 'mustache';
 
-const Util = veda.Util || {};
+const Util = {};
 
-export default veda.Util = Util;
+export default Util;
 
 Util.Sha256 = Sha256;
 
 Util.Mustache = Mustache;
+
+Util.genUri = function () {
+  const uid = Util.guid(); const re = /^\d/;
+  return (re.test(uid) ? 'd:a' + uid : 'd:' + uid);
+};
+
+Util.guid = function () {
+  let d = new Date().getTime();
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    d += performance.now(); // use high-precision timer if available
+  }
+  return 'xxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/x/g, function (c) {
+    const r = (d + Math.random() * 36) % 36 | 0;
+    d = Math.floor(d / 36);
+    return r.toString(36);
+  });
+};
+
+Util.hasValue = function (individual, property, value) {
+  const any = !!(individual && individual[property] && individual[property].length);
+  if (!value) return any;
+  return !!(any && individual[property].filter((i) => {
+    return (i.type === value.type && i.data.valueOf() === value.data.valueOf());
+  }).length);
+};
+
+Util.toJson = function (value) {
+  return JSON.stringify(value, null, 2);
+};
 
 Util.addToGroup = function (ticket, group, resource, allow, deny) {
   const new_membership_uri = Util.genUri() + '-mbh';
@@ -503,7 +530,7 @@ Util.create_version = function (ticket, document, prev_state, user_uri, _event_i
     const versionId = Util.genUri() + '-vr';
 
     // Create new version
-    const version = veda.Util.clone(prev_state);
+    const version = Util.clone(prev_state);
     version['@'] = versionId;
     version['v-s:actualVersion'] = [{
       data: document['@'],
@@ -513,7 +540,7 @@ Util.create_version = function (ticket, document, prev_state, user_uri, _event_i
       data: document['@'],
       type: 'Uri',
     }];
-    if (veda.Util.hasValue(document, 'v-s:previousVersion')) {
+    if (Util.hasValue(document, 'v-s:previousVersion')) {
       version['v-s:previousVersion'] = [{
         data: document['v-s:previousVersion'][0].data,
         type: 'Uri',
@@ -528,7 +555,7 @@ Util.create_version = function (ticket, document, prev_state, user_uri, _event_i
     put_individual(ticket, version, _event_id);
 
     // Add version to document group
-    veda.Util.addToGroup(ticket, document['@'], version['@'], ['v-s:canRead']);
+    Util.addToGroup(ticket, document['@'], version['@'], ['v-s:canRead']);
 
     // Update previous version
     if (document['v-s:previousVersion']) {

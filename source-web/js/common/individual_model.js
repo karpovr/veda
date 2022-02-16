@@ -10,7 +10,7 @@ import UpdateService from '../browser/update_service.js';
 
 import Util from '../common/util.js';
 
-export default veda.IndividualModel = IndividualModel;
+export default IndividualModel;
 
 IndividualModel.cache = {
   limit: 20000,

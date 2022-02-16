@@ -25,18 +25,16 @@
  * Numbers are stored in v-s:enumeratedProperty.
  */
 
-import veda from '../common/veda.js';
-
-import Util from '../common/util.js';
+import ServerUtil from '../server/util.js';
 
 const Numerator = {};
 
-export default veda.Numerator = Numerator;
+export default Numerator;
 
 Numerator.numerate = function (ticket, individual, super_classes, prev_state, _event_id) {
   try {
-    const deleted = Util.hasValue( individual, 'v-s:deleted', {data: true, type: 'Boolean'} );
-    const prevDeleted = prev_state && Util.hasValue( prev_state, 'v-s:deleted', {data: true, type: 'Boolean'} );
+    const deleted = ServerUtil.hasValue( individual, 'v-s:deleted', {data: true, type: 'Boolean'} );
+    const prevDeleted = prev_state && ServerUtil.hasValue( prev_state, 'v-s:deleted', {data: true, type: 'Boolean'} );
 
     individual['rdf:type'] && individual['rdf:type'].length && individual['rdf:type'].forEach((typeValue) => {
       const type = get_individual(ticket, typeValue.data);
@@ -64,11 +62,11 @@ Numerator.numerate = function (ticket, individual, super_classes, prev_state, _e
           // update doc, commit number
           number = getNewValue(ticket, individual, rule, scope);
           commitValue(ticket, scope, number, _event_id);
-          individual[enumeratedProperty] = Util.newStr( number.toString() );
+          individual[enumeratedProperty] = ServerUtil.newStr( number.toString() );
           put_individual(ticket, individual, _event_id);
           // print("@3 update doc, commit number");
         } else if (!number && prevNumber) {
-          individual[enumeratedProperty] = Util.newStr( prevNumber.toString() ); // Restore number
+          individual[enumeratedProperty] = ServerUtil.newStr( prevNumber.toString() ); // Restore number
           put_individual(ticket, individual, _event_id);
         } else if (number && !prev_state) {
           // commit number
@@ -222,7 +220,7 @@ function commitValue (ticket, scope, value, _event_id) {
         put_individual(ticket, nextInterval, _event_id);
       } else {
         // new interval
-        const intervalId = Util.genUri() + '-intv';
+        const intervalId = ServerUtil.genUri() + '-intv';
         const interval = {
           '@': intervalId,
           'rdfs:label': [{data: value + ' - ' + value, type: 'String'}],
@@ -237,7 +235,7 @@ function commitValue (ticket, scope, value, _event_id) {
       }
     } else {
       // Scope is empty - create new interval
-      const intervalId = Util.genUri() + '-intv';
+      const intervalId = ServerUtil.genUri() + '-intv';
       const interval = {
         '@': intervalId,
         'rdfs:label': [{data: value + ' - ' + value, type: 'String'}],
@@ -336,7 +334,7 @@ function revokeValue (ticket, scope, value, _event_id) {
           intervals.push(intervalUri);
 
           // add new interval from value
-          const newIntervalUri = {data: Util.genUri() + '-intv', type: 'Uri'};
+          const newIntervalUri = {data: ServerUtil.genUri() + '-intv', type: 'Uri'};
 
           put_individual(
             ticket,

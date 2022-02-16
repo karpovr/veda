@@ -10,9 +10,9 @@ import Notify from '../browser/notify.js';
 
 import riot from '../common/lib/riot.js';
 
-const Util = veda.Util || {};
+const Util = {};
 
-export default veda.Util = Util;
+export default Util;
 
 Util.registerHandler = function (individual, event, template, handler) {
   individual.on(event, handler);

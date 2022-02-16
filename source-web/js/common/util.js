@@ -6,9 +6,9 @@ import IndividualModel from '../common/individual_model.js';
 
 import Backend from '../common/backend.js';
 
-const Util = veda.Util || {};
+const Util = {};
 
-export default veda.Util = Util;
+export default Util;
 
 Util.mergeMutualChanges = function (high, low, base) {
   let key; const merged = {};
@@ -194,6 +194,7 @@ Util.genUri = function () {
   const uid = Util.guid(); const re = /^\d/;
   return (re.test(uid) ? 'd:a' + uid : 'd:' + uid);
 };
+
 Util.guid = function () {
   let d = new Date().getTime();
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {

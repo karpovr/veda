@@ -4,7 +4,7 @@ import veda from '../common/veda.js';
 
 import IndividualModel from '../common/individual_model.js';
 
-export default veda.User = User;
+export default User;
 
 /**
  * Application user
