@@ -8,9 +8,9 @@ import Backend from '../common/backend.js';
 
 import BackendError from '../browser/backend_error.js';
 
-import Util from '../common/util.js';
+import CommonUtil from '../common/util.js';
 
-import '../browser/util.js';
+import BrowserUtil from '../browser/util.js';
 
 import Notify from '../browser/notify.js';
 
@@ -137,7 +137,7 @@ function errorHandler (error) {
     const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
     errorIndividual.load().then((errorIndividual) => {
       const severity = String(errorIndividual['v-s:tag'][0]) || 'danger';
-      notify(severity, {code: errorIndividual['v-s:errorCode'][0], message: errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')});
+      notify(severity, {code: errorIndividual['v-s:errorCode'][0], message: errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' ')});
     }).catch(() => {
       notify('danger', error);
     });
@@ -167,7 +167,7 @@ function errorPrinter (error, container) {
   return errorIndividual.load()
     .then((errorIndividual) => `
       <span class="padding-sm bg-${errorIndividual['v-s:tag'][0]} text-${errorIndividual['v-s:tag'][0]}" title="${this.id}">
-        <strong>${errorIndividual['v-s:errorCode'][0] || ''}</strong> ${errorIndividual['v-s:errorMessage'].map(Util.formatValue).join(' ')}
+        <strong>${errorIndividual['v-s:errorCode'][0] || ''}</strong> ${errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' ')}
       </span>`)
     .catch(() => `
       <span class="padding-sm bg-danger text-danger" title="${this.id}">
@@ -395,7 +395,7 @@ function processTemplate (individual, container, wrapper, mode) {
     if (parent) {
       return acc;
     }
-    const uris = Util.unique(acc);
+    const uris = CommonUtil.unique(acc);
     return uris.reduce((p, item) => p.then(() => new IndividualModel(item).reset(true)), Promise.resolve())
       .then(switchToView)
       .catch(errorHandler);
@@ -419,7 +419,7 @@ function processTemplate (individual, container, wrapper, mode) {
       return acc;
     }
     individual.isSync(false);
-    const uris = Util.unique(acc);
+    const uris = CommonUtil.unique(acc);
     const individuals_properties = uris.map((item) => {
       const individual = new IndividualModel(item);
       if (!individual.isSync()) {
@@ -481,7 +481,7 @@ function processTemplate (individual, container, wrapper, mode) {
     if (parent) {
       return acc;
     }
-    const uris = Util.unique(acc);
+    const uris = CommonUtil.unique(acc);
     return uris.reduce((p, item) => p.then(() => new IndividualModel(item).remove()), Promise.resolve())
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
@@ -508,7 +508,7 @@ function processTemplate (individual, container, wrapper, mode) {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
         msg.load().then((msg) => {
-          const msgStr = msg['rdfs:label'].map(Util.formatValue).join(' ');
+          const msgStr = msg['rdfs:label'].map(CommonUtil.formatValue).join(' ');
           notify('warning', {name: msgStr});
           const deletedHeader = document.createElement('h4');
           deletedHeader.classList.add('deleted-header');
@@ -543,7 +543,7 @@ function processTemplate (individual, container, wrapper, mode) {
         const notify = new Notify();
         const msg = new IndividualModel('v-s:InvalidAlert');
         msg.load().then((msg) => {
-          const msgStr = msg['rdfs:label'].map(Util.formatValue).join(' ');
+          const msgStr = msg['rdfs:label'].map(CommonUtil.formatValue).join(' ');
           notify('warning', {name: msgStr});
           const invalidHeader = document.createElement('h4');
           invalidHeader.classList.add('invalid-header');
@@ -725,7 +725,7 @@ function processTemplate (individual, container, wrapper, mode) {
           relContainer.append(...nodes.flat());
           const prev_uris = Object.keys(prev_rendered);
           if (prev_uris.length) {
-            const selector = prev_uris.map((uri) => `[resource="${Util.escape4$(uri)}"]`).join(',');
+            const selector = prev_uris.map((uri) => `[resource="${BrowserUtil.escape4$(uri)}"]`).join(',');
             relContainer.querySelectorAll(selector).forEach((node) => node.remove());
           }
           if (sort_required) {
@@ -936,7 +936,7 @@ function processTemplate (individual, container, wrapper, mode) {
           });
           Promise.all(causesPromises).then((causes) => {
             explanation = causes.map((cause) => {
-              return cause['rdfs:comment'].map(Util.formatValue).filter(Boolean).join(', ');
+              return cause['rdfs:comment'].map(CommonUtil.formatValue).filter(Boolean).join(', ');
             }).join('\n');
           });
         }
@@ -1003,14 +1003,14 @@ function processTemplate (individual, container, wrapper, mode) {
 function renderPropertyValues (about, isAbout, property_uri, propertyContainer, template, mode) {
   propertyContainer.innerHTML = '';
   about.get(property_uri).map((value) => {
-    const formattedValue = Util.formatValue(value);
+    const formattedValue = CommonUtil.formatValue(value);
     if (isAbout) {
       const prevValue = propertyContainer.textContent;
       propertyContainer.textContent = prevValue ? prevValue + (formattedValue ? ' ' + formattedValue : '') : formattedValue;
     } else {
       const valueHolder = document.createElement('span');
       valueHolder.classList.add('value-holder');
-      valueHolder.textContent = Util.formatValue(value);
+      valueHolder.textContent = CommonUtil.formatValue(value);
       propertyContainer.append(valueHolder);
       const btnGroup = document.createElement('div');
       btnGroup.classList.add('prop-actions', 'btn-group', 'btn-group-xs');
