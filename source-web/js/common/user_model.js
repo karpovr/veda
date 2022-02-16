@@ -4,22 +4,22 @@ import veda from '../common/veda.js';
 
 import IndividualModel from '../common/individual_model.js';
 
-export default veda.UserModel = UserModel;
+export default veda.User = User;
 
 /**
  * Application user
  * @param {string} uri
- * @return {UserModel}
+ * @return {User}
  */
-function UserModel (uri) {
+function User (uri) {
   return IndividualModel.call(this, uri);
 };
 
-UserModel.prototype = Object.create(IndividualModel.prototype);
+User.prototype = Object.create(IndividualModel.prototype);
 
-UserModel.prototype.constructor = UserModel;
+User.prototype.constructor = User;
 
-const proto = UserModel.prototype;
+const proto = User.prototype;
 
 proto.getLanguage = function () {
   return this.preferences && this.preferences.language ? Object.keys(this.preferences.language) : undefined;

@@ -1,29 +1,25 @@
 // Application model
 
-import riot from '../common/lib/riot.js';
+import Ontology from '../common/ontology_model.js';
 
-import OntologyModel from '../common/ontology_model.js';
-
-import UserModel from '../common/user_model.js';
+import User from '../common/user_model.js';
 
 /**
  * Application model
  * @param {Object} manifest - app config
- * @return {AppModel}
+ * @return {App}
  */
-export default function AppModel (manifest) {
-  riot.observable(this);
-
-  this.manifest = manifest;
+export default function App (manifest) {
   this.ticket = this.ticket || '';
   this.ontology = {};
+  this.manifest = manifest;
 
   // Load ontology
   this.init = function (user) {
-    const ontology = new OntologyModel();
-    return ontology.then((ontology) => {
+    const ontology = new Ontology();
+    return ontology.init().then((ontology) => {
       this.ontology = ontology;
-      this.user = new UserModel(user);
+      this.user = new User(user);
       return this.user._init();
     });
   };

@@ -8,16 +8,16 @@ import Backend from '../common/backend.js';
 
 import Util from '../common/util.js';
 
-export default veda.OntologyModel = OntologyModel;
+export default veda.Ontology = Ontology;
 
 /**
  * Ontology
- * @return {OntologyModel}
+ * @return {Ontology}
  */
-function OntologyModel () {
+function Ontology () {
   // Singleton pattern
-  if (OntologyModel.prototype._singletonInstance) {
-    return OntologyModel.prototype._singletonInstance;
+  if (Ontology.prototype._singletonInstance) {
+    return Ontology.prototype._singletonInstance;
   }
 
   this.ontology = [];
@@ -30,12 +30,15 @@ function OntologyModel () {
   this.classTree = {};
   this.templates = {};
 
-  return OntologyModel.prototype._singletonInstance = this.init();
+  return Ontology.prototype._singletonInstance = this;
 };
 
-const proto = OntologyModel.prototype;
+const proto = Ontology.prototype;
 
 proto.init = function () {
+  if (this.ontology.length) {
+    return Promise.resolve(this);
+  }
   if (typeof window !== 'undefined') {
     return fetch('/ontology.json', {
       mode: 'same-origin',
@@ -275,4 +278,3 @@ proto.processOntology = function () {
     return Promise.resolve(this);
   }
 };
-

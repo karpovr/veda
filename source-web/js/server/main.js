@@ -2,7 +2,7 @@
 
 import veda from '../common/veda.js';
 
-import AppModel from '../common/app_model.js';
+import App from '../common/app_model.js';
 
 import '../common/backend.js';
 
@@ -21,7 +21,7 @@ import '../server/bpmn.js';
 try {
   veda.ticket = get_env_str_var('$ticket');
 
-  AppModel.call(veda);
+  App.call(veda);
 
   veda.init('cfg:VedaSystem');
 
