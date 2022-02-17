@@ -1,12 +1,14 @@
 // Codelets
 
-import veda from '../common/veda.js';
-
 import Sha256 from '../common/lib/sha256.js';
+
+import ServerUtil from '../server/util.js';
+
+import WorkflowUtil from '../server/workflow_util.js';
 
 const Codelet = {};
 
-export default veda.Codelet = Codelet;
+export default Codelet;
 
 Codelet.down_right_and_store = function (process, task) {
   return Codelet.change_rights(process, task, [
@@ -31,8 +33,8 @@ Codelet.change_rights_actor = function (process, task, rightset, actor, docId, e
       doc_id = process.getInputVariable('docId');
     }
     // print ("@JS change_rights_actor");
-    // print ("@JS doc_id=", veda.Util.toJson (doc_id));
-    // print ("@JS rightset=", veda.Util.toJson (rightset));
+    // print ("@JS doc_id=", ServerUtil.toJson (doc_id));
+    // print ("@JS rightset=", ServerUtil.toJson (rightset));
     const allow_set = [];
     if (rightset[0].data.indexOf('r') >= 0) {
       allow_set.push('v-s:canRead');
@@ -42,8 +44,8 @@ Codelet.change_rights_actor = function (process, task, rightset, actor, docId, e
     }
     if (doc_id) {
       // print ("@JS0 actor=", actor);
-      // print ("@JS1 process.getLocalVariable (" + actor + ")=", veda.Util.toJson(process.getLocalVariable (actor)));
-      // print ("@JS2 process.getExecutor()=", veda.Util.toJson(process.getExecutor()));
+      // print ("@JS1 process.getLocalVariable (" + actor + ")=", ServerUtil.toJson(process.getLocalVariable (actor)));
+      // print ("@JS2 process.getExecutor()=", ServerUtil.toJson(process.getExecutor()));
       let executorArr;
       if (executors) {
         executorArr = executors;
@@ -57,24 +59,24 @@ Codelet.change_rights_actor = function (process, task, rightset, actor, docId, e
 
       for (let i = 0; i<executorArr.length; i++) {
         let executor = [executorArr[i]];
-        print('@JS3 executor=', veda.Util.toJson(executor));
-        const employee = veda.Workflow.get_properties_chain(executor, [
+        print('@JS3 executor=', ServerUtil.toJson(executor));
+        const employee = WorkflowUtil.get_properties_chain(executor, [
           {
             $get: 'v-s:employee',
           }], undefined);
 
-        print('@JS4 employee=', veda.Util.toJson(employee));
+        print('@JS4 employee=', ServerUtil.toJson(employee));
         if (employee) {
-          const employee_uri = veda.Util.getUri(employee);
+          const employee_uri = ServerUtil.getUri(employee);
 
           if (employee_uri) {
-            veda.Util.addRight(ticket, employee_uri, veda.Util.getUri(doc_id), allow_set);
+            ServerUtil.addRight(ticket, employee_uri, ServerUtil.getUri(doc_id), allow_set);
           } else {
-            print('ERR! change_rights_actor: undefined employee_uri, actor=[' + actor + '], executor=' + veda.Util.toJson(executor) + ', doc_id=' + veda.Util.getUri(doc_id) + ', process=' + veda.Util.getUri(process) + ', task=' + veda.Util.getUri(task));
+            print('ERR! change_rights_actor: undefined employee_uri, actor=[' + actor + '], executor=' + ServerUtil.toJson(executor) + ', doc_id=' + ServerUtil.getUri(doc_id) + ', process=' + ServerUtil.getUri(process) + ', task=' + ServerUtil.getUri(task));
           }
         }
 
-        executor = veda.Workflow.get_properties_chain(executor, [
+        executor = WorkflowUtil.get_properties_chain(executor, [
           {
             $get: 'v-s:occupation',
           }], executor);
@@ -84,21 +86,21 @@ Codelet.change_rights_actor = function (process, task, rightset, actor, docId, e
         }
 
         if (executor) {
-          const executor_uri = veda.Util.getUri(executor);
+          const executor_uri = ServerUtil.getUri(executor);
           if (executor_uri) {
-            veda.Util.addRight(ticket, executor_uri, veda.Util.getUri(doc_id), allow_set);
+            ServerUtil.addRight(ticket, executor_uri, ServerUtil.getUri(doc_id), allow_set);
           } else {
-            print('ERR! change_rights_actor: undefined executor_uri, actor=[' + actor + '], executor=' + veda.Util.toJson(executor) + ', doc_id=' + veda.Util.getUri(doc_id) + ', process=' + veda.Util.getUri(process) + ', task=' + veda.Util.getUri(task));
+            print('ERR! change_rights_actor: undefined executor_uri, actor=[' + actor + '], executor=' + ServerUtil.toJson(executor) + ', doc_id=' + ServerUtil.getUri(doc_id) + ', process=' + ServerUtil.getUri(process) + ', task=' + ServerUtil.getUri(task));
           }
         }
       }
 
 
-      // var instanceOf = veda.Util.getUri(process['v-wf:instanceOf']);
+      // var instanceOf = ServerUtil.getUri(process['v-wf:instanceOf']);
       // var net_doc_id = instanceOf + "_" + doc_id[0].data;
       // print("[WORKFLOW]:down_right_and_store, find=", net_doc_id);
     }
-    return [veda.Workflow.get_new_variable('right', veda.Util.newStr('acl1'))];
+    return [WorkflowUtil.get_new_variable('right', ServerUtil.newStr('acl1'))];
   } catch (e) {
     print(e.stack);
   }
@@ -106,7 +108,7 @@ Codelet.change_rights_actor = function (process, task, rightset, actor, docId, e
 
 Codelet.restore_right = function (task) {
   try {
-    return [veda.Workflow.get_new_variable('result', veda.Util.newStr('Ok'))];
+    return [WorkflowUtil.get_new_variable('result', ServerUtil.newStr('Ok'))];
   } catch (e) {
     print(e.stack);
   }
@@ -121,7 +123,7 @@ Codelet.interrupt_process = function (ticket, process, _event_id) {
 };
 
 Codelet.change_process_status = function (ticket, process, status, _event_id) {
-  // print('>>> '+veda.Util.toJson(process));
+  // print('>>> '+ServerUtil.toJson(process));
   const vars = process['v-wf:inVars'];
   if (!vars) return;
   for (let i = 0; i < vars.length; i++) {
@@ -133,10 +135,10 @@ Codelet.change_process_status = function (ticket, process, status, _event_id) {
 
       if (!doc['v-wf:isProcess']) continue;
       for (let j = 0; j < doc['v-wf:isProcess'].length; j++) {
-        // print('>>> '+veda.Util.toJson(doc['v-wf:isProcess'][j].data));
+        // print('>>> '+ServerUtil.toJson(doc['v-wf:isProcess'][j].data));
         if (doc['v-wf:isProcess'][j].data == process['@']) {
           delete doc['v-wf:isProcess'];
-          doc['v-wf:hasStatusWorkflow'] = veda.Util.newUri(status);
+          doc['v-wf:hasStatusWorkflow'] = ServerUtil.newUri(status);
           put_individual(ticket, doc, _event_id);
           break;
         }
@@ -148,52 +150,52 @@ Codelet.change_process_status = function (ticket, process, status, _event_id) {
 Codelet.change_document_workflow_status = function (process, status) {
   // status: InProcess, InReworking
   const doc_id = process.getInputVariable('docId');
-  // print('$$$$ doc:', veda.Util.toJson(doc_id));
+  // print('$$$$ doc:', ServerUtil.toJson(doc_id));
   if (doc_id) {
     const set_in_document = {
-      '@': veda.Util.getUri(doc_id),
+      '@': ServerUtil.getUri(doc_id),
     };
-    set_in_document['v-wf:hasStatusWorkflow'] = veda.Util.newUri(status);
+    set_in_document['v-wf:hasStatusWorkflow'] = ServerUtil.newUri(status);
 
     set_in_individual(process.ticket, set_in_document, _event_id);
   };
-  return [veda.Workflow.get_new_variable('workflowStatus', veda.Util.newStr(status))];
+  return [WorkflowUtil.get_new_variable('workflowStatus', ServerUtil.newStr(status))];
 };
 
 Codelet.change_document_status = function (process, status) {
-  // print ("@JS setStatus=", veda.Util.toJson(process.getInputVariable('setStatus')));
+  // print ("@JS setStatus=", ServerUtil.toJson(process.getInputVariable('setStatus')));
   if ( status ) {
     const setStatus=process.getInputVariable('setStatus');
     if (setStatus && setStatus[0].data == true) {
       const doc_id = process.getInputVariable('docId');
       if (doc_id) {
         const set_in_document = {
-          '@': veda.Util.getUri(doc_id),
+          '@': ServerUtil.getUri(doc_id),
         };
-        set_in_document['v-s:hasStatus'] = veda.Util.newUri(status);
+        set_in_document['v-s:hasStatus'] = ServerUtil.newUri(status);
         if (status == 'v-s:StatusExecuted') {
-          set_in_document['v-s:dateFact'] = veda.Util.newDate(Date.now());
+          set_in_document['v-s:dateFact'] = ServerUtil.newDate(Date.now());
         } else if (status == 'v-s:StatusExecution') {
-          const doc = get_individual(process.ticket, veda.Util.getUri(doc_id));
+          const doc = get_individual(process.ticket, ServerUtil.getUri(doc_id));
           if (doc && !doc['v-s:dateToPlan'] && (doc['v-s:count'] && doc['v-s:count'].length > 0)) {
-            set_in_document['v-s:dateFromPlan'] = veda.Util.newDate(new Date().setHours(0, 0, 0, 0));
+            set_in_document['v-s:dateFromPlan'] = ServerUtil.newDate(new Date().setHours(0, 0, 0, 0));
             const countDays = doc['v-s:count'][0].data;
             const dueDate = new Date(Date.now() + countDays*86400000).setHours(0, 0, 0, 0);
-            set_in_document['v-s:dateToPlan'] = veda.Util.newDate(dueDate);
+            set_in_document['v-s:dateToPlan'] = ServerUtil.newDate(dueDate);
           }
         }
-        // print ("@JS set_in_document=", veda.Util.toJson(set_in_document));
+        // print ("@JS set_in_document=", ServerUtil.toJson(set_in_document));
         set_in_individual(process.ticket, set_in_document, _event_id);
       };
     }
   };
-  return [veda.Workflow.get_new_variable('status', veda.Util.newStr(status))];
+  return [WorkflowUtil.get_new_variable('status', ServerUtil.newStr(status))];
 };
 
 Codelet.createPermissionStatement = function (process, stage) {
   print('###### Start Codelet.createPermissionStatement ######');
   const docId = process.getInputVariable('docId');
-  print('docId:', veda.Util.toJson(docId));
+  print('docId:', ServerUtil.toJson(docId));
   let subjectAppointmentUri;
   let statementUri;
   if (stage === 'rework') {
@@ -203,19 +205,19 @@ Codelet.createPermissionStatement = function (process, stage) {
     subjectAppointmentUri = process.getLocalVariable('actor');
     statementUri = docId[0].data + '-pf-task';
   };
-  print('subjectAppointmentUri: ', veda.Util.toJson(subjectAppointmentUri));
+  print('subjectAppointmentUri: ', ServerUtil.toJson(subjectAppointmentUri));
   if (subjectAppointmentUri) {
     const subjectAppointment = get_individual(ticket, subjectAppointmentUri[0].data);
     if (subjectAppointment) {
       const permissionStatement= {
         '@': statementUri,
-        'rdf:type': veda.Util.newUri('v-s:PermissionStatement'),
-        'v-s:useFilter': veda.Util.newUri('v-s:StatusStarted'),
+        'rdf:type': ServerUtil.newUri('v-s:PermissionStatement'),
+        'v-s:useFilter': ServerUtil.newUri('v-s:StatusStarted'),
         'v-s:permissionObject': docId,
         'v-s:permissionSubject': subjectAppointment['v-s:employee'].concat(subjectAppointment['v-s:occupation']),
-        'v-s:canUpdate': veda.Util.newBool('true'),
+        'v-s:canUpdate': ServerUtil.newBool('true'),
       };
-      print('@@@@@responsible:', veda.Util.toJson(subjectAppointment['v-s:employee'].concat(subjectAppointment['v-s:occupation'])));
+      print('@@@@@responsible:', ServerUtil.toJson(subjectAppointment['v-s:employee'].concat(subjectAppointment['v-s:occupation'])));
       put_individual(ticket, permissionStatement, _event_id);
       print('put_individual: ', statementUri);
     } else {
@@ -225,13 +227,13 @@ Codelet.createPermissionStatement = function (process, stage) {
     print('Error create_permission_statement_executor: not found local variable \'responsible\'');
   }
   print('###### Finish Codelet.createPermissionStatement ######');
-  return veda.Util.newStr(statementUri);
+  return ServerUtil.newStr(statementUri);
 };
 
 Codelet.deletePermissionStatement = function (process, stage) {
   print('###### Start Codelet.deletePermissionStatement ######');
   const docId = process.getInputVariable('docId');
-  print('docId:', veda.Util.toJson(docId));
+  print('docId:', ServerUtil.toJson(docId));
   let statementUri;
   if (stage === 'rework') {
     statementUri = docId[0].data + '-pf-rework';
@@ -240,17 +242,17 @@ Codelet.deletePermissionStatement = function (process, stage) {
   };
   const set_in_statement = {
     '@': statementUri,
-    'v-s:deleted': veda.Util.newBool('true'),
+    'v-s:deleted': ServerUtil.newBool('true'),
   };
   set_in_individual(ticket, set_in_statement);
   print('###### Finish Codelet.deletePermissionStatement ######');
-  return veda.Util.newStr('empty');
+  return ServerUtil.newStr('empty');
 };
 
 Codelet.is_exists_net_executor = function (process) {
   try {
     const res = process.getExecutor() !== undefined;
-    return [veda.Workflow.get_new_variable('res', veda.Util.newBool(res))];
+    return [WorkflowUtil.get_new_variable('res', ServerUtil.newBool(res))];
   } catch (e) {
     print(e.stack);
   }
@@ -271,7 +273,7 @@ Codelet.get_type_of_docId = function (task) {
       }
     }
 
-    return [veda.Workflow.get_new_variable('res', veda.Util.newUri(res))];
+    return [WorkflowUtil.get_new_variable('res', ServerUtil.newUri(res))];
   } catch (e) {
     print(e.stack);
   }
@@ -280,19 +282,19 @@ Codelet.get_type_of_docId = function (task) {
 Codelet.is_in_docflow_and_set_if_true = function (task) {
   // # 322
   // // # 285
-  //    return [veda.Workflow.get_new_variable('result', veda.Util.newUri(false))];
+  //    return [WorkflowUtil.get_new_variable('result', ServerUtil.newUri(false))];
 
   try {
     const res = false;
     if (task) {
       const doc_id = task.getInputVariable('docId');
       if (doc_id) {
-        const forProcess = veda.Util.getUri(task.src_data['v-wf:forProcess']);
-        // print("[Z1Z] := "+veda.Util.toJson(forProcess));
+        const forProcess = ServerUtil.getUri(task.src_data['v-wf:forProcess']);
+        // print("[Z1Z] := "+ServerUtil.toJson(forProcess));
         const process = get_individual(task.ticket, forProcess);
-        // print("[Z2Z] := "+veda.Util.toJson(process));
+        // print("[Z2Z] := "+ServerUtil.toJson(process));
         if (process) {
-          const instanceOf = veda.Util.getUri(process['v-wf:instanceOf']);
+          const instanceOf = ServerUtil.getUri(process['v-wf:instanceOf']);
 
           const net_doc_id = instanceOf + '_' + doc_id[0].data;
           // print("[WORKFLOW]:is_in_docflow_and_set_if_true, find=", net_doc_id);
@@ -308,15 +310,15 @@ Codelet.is_in_docflow_and_set_if_true = function (task) {
 
           const add_to_document = {
             '@': doc_id[0].data,
-            'v-wf:isProcess': veda.Util.newUri(process['@']),
+            'v-wf:isProcess': ServerUtil.newUri(process['@']),
           };
-          print('$ add_to_document >>' + veda.Util.toJson(add_to_document));
+          print('$ add_to_document >>' + ServerUtil.toJson(add_to_document));
           add_to_individual(ticket, add_to_document, _event_id);
         }
       }
     }
 
-    return [veda.Workflow.get_new_variable('result', veda.Util.newUri(res))];
+    return [WorkflowUtil.get_new_variable('result', ServerUtil.newUri(res))];
   } catch (e) {
     print(e.stack);
   }
@@ -336,9 +338,9 @@ Codelet.add_value_to_document = function (process, task) {
       let src;
 
       if (name_uri && value) {
-        src = get_individual(task.ticket, veda.Util.getUri(src_uri));
+        src = get_individual(task.ticket, ServerUtil.getUri(src_uri));
         if (src) {
-          name_uri = veda.Util.getUri(name_uri);
+          name_uri = ServerUtil.getUri(name_uri);
           let ch_value = src[name_uri];
 
           if (!ch_value) {
@@ -357,7 +359,7 @@ Codelet.add_value_to_document = function (process, task) {
       }
     }
 
-    return [veda.Workflow.get_new_variable('res', src_uri)];
+    return [WorkflowUtil.get_new_variable('res', src_uri)];
   } catch (e) {
     print(e.stack);
   }
@@ -375,16 +377,16 @@ Codelet.set_value_to_document = function (process, task) {
       let src;
 
       if (name_uri && value) {
-        src = get_individual(task.ticket, veda.Util.getUri(src_uri));
+        src = get_individual(task.ticket, ServerUtil.getUri(src_uri));
         if (src) {
-          name_uri = veda.Util.getUri(name_uri);
+          name_uri = ServerUtil.getUri(name_uri);
           src[name_uri] = value;
           put_individual(ticket, src, _event_id);
         }
       }
     }
 
-    return [veda.Workflow.get_new_variable('res', src_uri)];
+    return [WorkflowUtil.get_new_variable('res', src_uri)];
   } catch (e) {
     print(e.stack);
   }
@@ -399,11 +401,11 @@ Codelet.create_use_transformation = function (process, task) {
       const transform_link = task.getInputVariable('transformation_uri');
 
       if (transform_link) {
-        const transform = get_individual(task.ticket, veda.Util.getUri(transform_link));
+        const transform = get_individual(task.ticket, ServerUtil.getUri(transform_link));
         if (transform) {
-          const document = get_individual(task.ticket, veda.Util.getUri(src_doc_id));
+          const document = get_individual(task.ticket, ServerUtil.getUri(src_doc_id));
           if (document) {
-            const new_items = veda.Util.transformation(task.ticket, document, transform, null, null, veda.Util.newUri(process.src_data['@']));
+            const new_items = ServerUtil.transformation(task.ticket, document, transform, null, null, ServerUtil.newUri(process.src_data['@']));
             for (let i = 0; i < new_items.length; i++) {
               put_individual(ticket, new_items[i], _event_id);
               new_items_uri.push(
@@ -417,7 +419,7 @@ Codelet.create_use_transformation = function (process, task) {
       }
     }
 
-    return [veda.Workflow.get_new_variable('res', new_items_uri)];
+    return [WorkflowUtil.get_new_variable('res', new_items_uri)];
   } catch (e) {
     print(e.stack);
   }
@@ -444,7 +446,7 @@ Codelet.find_long_terms = function (ticket, uri, execute_script) {
           const document = get_individual(ticket, i_uri);
 
           if (document) {
-            if ( veda.Util.hasValue(document, 'rdf:type', {data: 'v-s:Appointment', type: 'Uri'}) ) {
+            if ( ServerUtil.hasValue(document, 'rdf:type', {data: 'v-s:Appointment', type: 'Uri'}) ) {
               let hash = Sha256.hash(i_uri);
 
               hash = 'd:appt_' + hash.substr(0, 50);
@@ -509,13 +511,13 @@ Codelet.find_long_terms = function (ticket, uri, execute_script) {
 Codelet.onto_rename = function (ticket, document, execute_script) {
   //    print ('$$$$$$$$$$$$$$ script_onto_rename:doc= ' + document['@']);
   try {
-    // print ('$ script_onto_rename:execute_script= ' + veda.Util.toJson (execute_script));
+    // print ('$ script_onto_rename:execute_script= ' + ServerUtil.toJson (execute_script));
     if (document['@'] === execute_script['@']) {
       return;
     }
 
     const args_uris = execute_script['v-s:argument'];
-    const args = veda.Util.loadVariablesUseField(ticket, args_uris);
+    const args = ServerUtil.loadVariablesUseField(ticket, args_uris);
 
     for (const idx in args_uris) {
       if (Object.hasOwnProperty.call(args_uris, idx)) {
@@ -576,7 +578,7 @@ Codelet.onto_rename = function (ticket, document, execute_script) {
                 if (Object.hasOwnProperty.call(from_2_to, from)) {
                   if (value.type == 'Uri' || value.type == 'String') {
                     const to = from_2_to[from];
-                    const new_str = veda.Util.replace_word(value.data, from, to);
+                    const new_str = ServerUtil.replace_word(value.data, from, to);
                     if (new_str !== value.data) {
                       is_update = true;
                       value.data = new_str;
@@ -592,7 +594,7 @@ Codelet.onto_rename = function (ticket, document, execute_script) {
             if (Object.hasOwnProperty.call(from_2_to, from)) {
               const to = from_2_to[from];
               // print ('values=', values, ', from=', from, ', to=', to);
-              const new_str = veda.Util.replace_word(values, from, to);
+              const new_str = ServerUtil.replace_word(values, from, to);
               if (new_str !== values) {
                 is_replace = true;
                 document['@'] = new_str;
@@ -611,13 +613,13 @@ Codelet.onto_rename = function (ticket, document, execute_script) {
       if (is_update) {
         put_individual(ticket, document, '');
         // print('$ script_onto_rename:is_update, ' + prev_doc['@'] + '->' + document['@']);
-        //            print('$ script_onto_rename:is_update, ' + veda.Util.toJson(prev_doc) + '->' + veda.Util.toJson(document));
+        //            print('$ script_onto_rename:is_update, ' + ServerUtil.toJson(prev_doc) + '->' + ServerUtil.toJson(document));
       }
     }
 
     if (is_replace || is_update) {
       //            print('$ script_onto_rename:is_update, ' + prev_doc['@'] + '->' + document['@']);
-      //                        print('$ script_onto_rename:is_update, ' + veda.Util.toJson(prev_doc) + '->' + veda.Util.toJson(document));
+      //                        print('$ script_onto_rename:is_update, ' + ServerUtil.toJson(prev_doc) + '->' + ServerUtil.toJson(document));
     }
   } catch (e) {
     if (typeof window === 'undefined') {
