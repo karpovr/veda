@@ -10,6 +10,8 @@ import Notify from '../browser/notify.js';
 
 import riot from '../common/lib/riot.js';
 
+import CommonUtil from '../common/util.js';
+
 const Util = {};
 
 export default Util;
@@ -771,7 +773,7 @@ Util.transformation = function (individuals, transform) {
               let group_key;
               if (!grouping) {
                 out_data0_el = {};
-                out_data0_el['@'] = Util.genUri() + '-tr';
+                out_data0_el['@'] = CommonUtil.genUri() + '-tr';
               } else {
                 let useExistsUid = false;
                 for (const i in grouping) {
@@ -791,7 +793,7 @@ Util.transformation = function (individuals, transform) {
                   if (useExistsUid) {
                     out_data0_el['@'] = individual['@'];
                   } else {
-                    out_data0_el['@'] = Util.genUri() + '-tr';
+                    out_data0_el['@'] = CommonUtil.genUri() + '-tr';
                   }
                 }
               }

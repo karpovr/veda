@@ -22,7 +22,7 @@ veda.BPMN = BPMN;
 veda.Codelet = Codelet;
 veda.Numerator = Numerator;
 veda.Util = {...ServerUtil, ...CommonUtil};
-veda.Workflow = {...Workflow, WorkflowUtil};
+veda.Workflow = {...Workflow, ...WorkflowUtil};
 
 try {
   veda.ticket = get_env_str_var('$ticket');
