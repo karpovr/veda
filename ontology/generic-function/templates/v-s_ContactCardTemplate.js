@@ -166,7 +166,7 @@ export const html = `
     </td>
     <td class="hideInStructure">
       <div>
-        <span class="fa fa-lg fa-sitemap open-structure pointer margin-sm-h"></span>
+        <span class="fa fa-lg fa-sitemap open-structure pointer margin-sm-h" role="button" tabindex="0"></span>
         <span about="@" rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></span>
       </div>
     </td>

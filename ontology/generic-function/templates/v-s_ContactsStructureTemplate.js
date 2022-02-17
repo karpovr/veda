@@ -25,6 +25,9 @@ export const pre = function (individual, template, container, mode, extra) {
     .then(function () {
       if (veda.user && veda.user.hasValue('v-s:parentOrganization')) {
         const selfOrg = veda.user['v-s:parentOrganization'][0];
+        if (!individual.hasValue('v-s:managedOrganization')) {
+          individual['v-s:managedOrganization'] = [selfOrg];
+        }
         return selfOrg.present($('#selfOrg span', template), 'v-ui:LabelTemplate');
       } else {
         $('#selfOrg', template).remove();
@@ -683,40 +686,24 @@ export const post = function (individual, template, container, mode, extra) {
     e.stopPropagation();
     e.preventDefault();
     const self = $(this);
-    if (self.attr('data-popovered') == 'true') {
-      openedPopover = undefined;
-      self.popover('hide');
-      self.attr('data-popovered', false);
-    } else {
-      if (openedPopover) {
-        openedPopover.popover('hide');
-        openedPopover.attr('data-popovered', false);
-      }
-      if (self.attr('data-popovered') == undefined) {
-        initPopover($(this)).then(function (content) {
-          self.popover({
-            trigger: 'manual',
-            placement: 'auto right',
-            html: true,
-            content: content,
-            container: template,
-          });
-          content.on('click', '.close', function (e) {
-            e.stopPropagation();
-            openedPopover = undefined;
-            self.popover('hide');
-            self.attr('data-popovered', false);
-          });
-          openedPopover = self;
-          self.popover('show');
-          self.attr('data-popovered', true);
-        });
-      } else {
-        openedPopover = self;
-        self.popover('show');
-        self.attr('data-popovered', true);
-      }
-    }
+    initPopover($(this)).then(function (content) {
+      self.popover({
+        trigger: 'manual focus',
+        placement: 'auto right',
+        html: true,
+        content: content,
+        container: template,
+      });
+      content.on('click', '.close', function (e) {
+        e.stopPropagation();
+        //openedPopover = undefined;
+        self.popover('hide');
+        self.attr('data-popovered', false);
+      });
+      //openedPopover = self;
+      self.popover('show');
+      self.attr('data-popovered', true);
+    });
 
     // return openFromStructure(uri);
   });
@@ -724,9 +711,9 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('click', 'a.to-structure', function (e) {
     e.stopPropagation();
     e.preventDefault();
-    openedPopover.popover('hide');
-    openedPopover.attr('data-popovered', false);
-    openedPopover = undefined;
+    // openedPopover.popover('hide');
+    // openedPopover.attr('data-popovered', false);
+    // openedPopover = undefined;
     const uri = $(this).attr('about');
     const section = $(this).closest('section');
     $('.section-header', section).click();
