@@ -1,0 +1,14 @@
+[package]
+name = "veda-queue2storage"
+version = "0.1.0"
+authors = ["itiu <ValeriyBushenev@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+chrono = "0.4"
+env_logger = "0.6"
+log = "0.4"
+url = "2.1.1"
+
+v_common = { package = "v-common", version = "0.1.106" }
+#v_common = { package = "v-common", path = "../../../v-common" }

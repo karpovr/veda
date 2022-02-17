@@ -149,6 +149,10 @@ if [ -z $1 ] || [ $1 == "web-api" ] || [ $1 == "veda-web-api" ] || [ $1 == "basi
     build_server_module "veda-web-api"
 fi
 
+if [ -z $1 ] || [ $1 == "queue2storage" ] || [ $1 == "veda-queue2storage" ] || [ $1 == "all" ]; then
+    build_server_module "veda-queue2storage"
+fi
+
 if [ -z $1 ] || [ $1 == "gowebserver" ] || [ $1 == "veda-gowebserver" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
 
     if [ -z $GOROOT ]; then
