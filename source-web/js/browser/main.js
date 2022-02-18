@@ -2,8 +2,6 @@
 
 import veda from '../common/veda.js';
 
-import appModel from '../common/app_model.js';
-
 import appPresenter from '../browser/app_presenter.js';
 
 import auth from '../browser/auth.js';

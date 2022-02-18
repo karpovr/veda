@@ -1,7 +1,5 @@
 // User notifications
 
-import veda from '../common/veda.js';
-
 export default Notify;
 
 /**

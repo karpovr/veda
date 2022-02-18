@@ -18,10 +18,10 @@ $.fn.veda_radio = function (params) {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
-  const source = this.attr('data-source') || undefined;
+  const source = this.attr('data-source');
   const template = this.attr('data-template') || '{@.rdfs:label}';
   let options = [];
-  let withDeleted = false || this.attr('data-deleted');
+  let withDeleted = this.attr('data-deleted') || false;
 
   populate();
 

@@ -11,7 +11,7 @@ $.fn.veda_uri = function ( options ) {
   if (tabindex) {
     this.removeAttr('tabindex');
     control.attr('tabindex', tabindex);
-  };
+  }
 
   this.on('view edit search', function (e) {
     e.stopPropagation();
@@ -28,7 +28,7 @@ $.fn.veda_uri = function ( options ) {
   function changeHandler () {
     if (control.val()) {
       individual.id = control.val();
-    };
+    }
   }
 
   individual.on('idChanged', function () {

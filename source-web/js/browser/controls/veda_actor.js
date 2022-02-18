@@ -93,7 +93,7 @@ $.fn.veda_actor = function ( options ) {
   $('[name=\'only-deleted\']', control).each((i, el) => {
     const label = new IndividualModel(el.value);
     const self = el;
-    label.load().then((label) => {
+    label.load().then(() => {
       $(self).parent().append( new IndividualModel(self.value).toString() );
     });
   }).change(() => {
@@ -134,7 +134,7 @@ $.fn.veda_actor = function ( options ) {
     e.stopPropagation();
     const $modal = $(modal);
     const cntr = $('.modal-body', $modal);
-    $modal.on('hidden.bs.modal', function (e) {
+    $modal.on('hidden.bs.modal', function () {
       $modal.remove();
     });
     $modal.modal();
@@ -151,7 +151,7 @@ $.fn.veda_actor = function ( options ) {
   });
 
   if (placeholder instanceof IndividualModel) {
-    placeholder.load().then((placeholder) => {
+    placeholder.load().then(() => {
       fulltext.attr({
         'placeholder': placeholder.toString(),
         'name': (individual.hasValue('rdf:type') ? individual['rdf:type'][0].id + '_' + rel_uri : rel_uri).toLowerCase().replace(/[-:]/g, '_'),
@@ -165,7 +165,6 @@ $.fn.veda_actor = function ( options ) {
   }
 
   fulltext.on('input change focus blur', function (e) {
-    const fulltext = $(e.target);
     const value = fulltext.val();
     if (value) {
       const rows = value.split('\n').length;
@@ -270,11 +269,11 @@ $.fn.veda_actor = function ( options ) {
       }
     }
 
-    const ftQueryPromise = interpolate(queryPrefix, individual).then((queryPrefix) => {
+    const ftQueryPromise = interpolate(queryPrefix, individual).then((prefix) => {
       if (onlyDeleted) {
-        return ftQuery(queryPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
+        return ftQuery(prefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
       } else {
-        return ftQuery(queryPrefix, value, sort, withDeleted);
+        return ftQuery(prefix, value, sort, withDeleted);
       }
     });
 
@@ -311,7 +310,8 @@ $.fn.veda_actor = function ( options ) {
       Promise.all(renderedPromises).then((rendered) => {
         rendered = rendered.sort((a, b) => {
           return a.text() < b.text() ? -1 : 1;
-        }).reduce((acc, curr) => {
+        });
+        rendered = rendered.reduce((acc, curr) => {
           if ( !acc.length || acc[acc.length - 1].text() !== curr.text() ) {
             acc.push(curr);
           }
@@ -561,7 +561,7 @@ $.fn.veda_actor = function ( options ) {
   function propertyModifiedHandler (values) {
     if ( isSingle && (individual.hasValue(rel_uri) || individual.hasValue(rel_uri + '.v-s:employee') || individual.hasValue(rel_uri + '.v-s:occupation') || individual.hasValue(rel_uri + '.v-s:parentUnit')) ) {
       const value = individual.get(rel_uri).concat(individual.get(rel_uri + '.v-s:employee'), individual.get(rel_uri + '.v-s:occupation'), individual.get(rel_uri + '.v-s:parentUnit')).filter(Boolean)[0];
-      value.load().then((value) => {
+      value.load().then(() => {
         const newValueStr = value.toString();
         const oldValueStr = fulltext.val();
         if (newValueStr != oldValueStr) {

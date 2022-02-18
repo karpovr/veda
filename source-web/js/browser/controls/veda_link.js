@@ -26,7 +26,7 @@ $.fn.veda_link = function ( options ) {
   const source = this.attr('data-source') || undefined;
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
-  let withDeleted = false || this.attr('data-deleted');
+  let withDeleted = this.attr('data-deleted') || false;
 
   if (isSingle == "false") isSingle = false;
 
@@ -84,7 +84,7 @@ $.fn.veda_link = function ( options ) {
             const ok = $('#ok', modal).click((e) => {
               select(newVal);
             });
-            const close = $('.close', modal).click((e) => {
+            $('.close', modal).click((e) => {
               newVal.delete();
             });
             const cntr = $('.modal-body', modal);
@@ -238,7 +238,7 @@ $.fn.veda_link = function ( options ) {
     this.on('view edit search', function (e) {
       e.stopPropagation();
       if (e.type === 'search') {
-        const isSingle = false || $(e.delegateTarget).data('single');
+        const isSingle = $(e.delegateTarget).data('single') || false;
         if (isSingle) {
           header.hide();
         } else {
@@ -500,7 +500,7 @@ $.fn.veda_link = function ( options ) {
             $(document).off('keydown', arrowHandler);
             fulltextMenu.show();
             $(document).on('click', clickOutsideMenuHandler);
-            $(document).on('keydown', arrowHandler);  
+            $(document).on('keydown', arrowHandler);
           }
         }
       });
@@ -538,7 +538,7 @@ $.fn.veda_link = function ( options ) {
     this.on('view edit search', function (e) {
       e.stopPropagation();
       if (e.type === 'search') {
-        const isSingle = false || $(e.delegateTarget).data('single');
+        const isSingle = $(e.delegateTarget).data('single') || false;
         if (!isSingle) {
           $('.clear', control).remove();
         }
@@ -556,7 +556,7 @@ $.fn.veda_link = function ( options ) {
   this.on('view edit search', function (e) {
     e.stopPropagation();
     if (e.type === 'search') {
-      isSingle = false || $(e.delegateTarget).data('single');
+      isSingle = $(e.delegateTarget).data('single') || false;
       const dataDeleted = $(e.delegateTarget).data('deleted');
       withDeleted = typeof dataDeleted === 'boolean' ? dataDeleted : true;
     }

@@ -281,7 +281,9 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
  * @this Individual
  * @return {Promise}
  */
-function processTemplate (individual, container, wrapper, mode) {
+function processTemplate (individual, container, wrapper, templateMode) {
+  let mode = templateMode;
+
   const template = wrapper.firstElementChild;
 
   // Get properties specifications
@@ -290,7 +292,6 @@ function processTemplate (individual, container, wrapper, mode) {
     ...veda.ontology.getClassSpecifications(type.id),
   }), {});
 
-  template.setAttribute('data-mode', mode);
   template.setAttribute('resource', individual.id);
   template.setAttribute('typeof', individual['rdf:type'].map((item) => item.id).join(' '));
   template.classList.add('template');
@@ -311,9 +312,9 @@ function processTemplate (individual, container, wrapper, mode) {
    * @return {void}
    */
   const modeHandler = function (event) {
+    mode = event.type;
     event.stopPropagation();
-    const newMode = event.type;
-    template.setAttribute('data-mode', newMode);
+    template.setAttribute('data-mode', mode);
     switch (mode) {
     case 'view':
       view.forEach((node) => node.style.display = '');
@@ -331,7 +332,7 @@ function processTemplate (individual, container, wrapper, mode) {
 
     // sync mode for embedded templates
     embedded.forEach((item) => {
-      item.dispatchEvent(new Event(newMode));
+      item.dispatchEvent(new Event(mode));
     });
   };
   template.addEventListener('view', modeHandler);
@@ -501,9 +502,8 @@ function processTemplate (individual, container, wrapper, mode) {
    * @return {void}
    */
   const deletedHandler = function () {
-    const templateMode = template.getAttribute('data-mode');
     if ( this.hasValue('v-s:deleted', true) ) {
-      if (templateMode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
+      if (mode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
         template.classList.add('deleted');
       }
       if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
@@ -537,9 +537,8 @@ function processTemplate (individual, container, wrapper, mode) {
    * @return {void}
    */
   const validHandler = function () {
-    const templateMode = template.getAttribute('data-mode');
     if ( this.hasValue('v-s:valid', false) ) {
-      if (templateMode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
+      if (mode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
         template.classList.add('invalid');
       }
       if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
@@ -628,14 +627,12 @@ function processTemplate (individual, container, wrapper, mode) {
 
         // Re-render all property values if model's property was changed
         const propertyModifiedHandler = function () {
-          const currentTemplateMode = template.getAttribute('data-mode');
-          renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, currentTemplateMode);
+          renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
         };
         about.on(property_uri, propertyModifiedHandler);
         template.addEventListener('remove', () => about.off(property_uri, propertyModifiedHandler));
 
-        const templateMode = template.getAttribute('data-mode');
-        renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, templateMode);
+        renderPropertyValues(about, isAbout, property_uri, propertyContainer, template, mode);
       })
       .catch((error) => errorPrinter.call(about, error, propertyContainer));
   });
@@ -719,8 +716,7 @@ function processTemplate (individual, container, wrapper, mode) {
               delete prev_rendered[value.id];
               return;
             }
-            const templateMode = template.getAttribute('data-mode');
-            return renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, templateMode, embedded, isEmbedded, false)
+            return renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false)
               .then((template) => {
                 curr_rendered[value.id] = i;
                 return template;
@@ -760,8 +756,7 @@ function processTemplate (individual, container, wrapper, mode) {
       };
 
       const embeddedHandler = function (values) {
-        const templateMode = template.getAttribute('data-mode');
-        if (templateMode === 'edit') {
+        if (mode === 'edit') {
           values.map((value) => {
             if (
               value.id !== about.id && // prevent self parent
@@ -813,8 +808,7 @@ function processTemplate (individual, container, wrapper, mode) {
     } else {
       about = new IndividualModel(aboutContainer.getAttribute('about'));
     }
-    const templateMode = template.getAttribute('data-mode');
-    return about.present(aboutContainer, aboutTemplate, isEmbedded ? templateMode : undefined).then((rendered) => {
+    return about.present(aboutContainer, aboutTemplate, isEmbedded ? mode : undefined).then((rendered) => {
       if (!Array.isArray(rendered)) {
         rendered = [rendered];
       }
@@ -822,7 +816,7 @@ function processTemplate (individual, container, wrapper, mode) {
         embedded.push(...rendered);
         rendered.forEach((node) => {
           node.setAttribute('data-embedded', 'true');
-          if (templateMode === 'edit') {
+          if (mode === 'edit') {
             node.dispatchEvent(new Event('internal-validate'));
           }
         });
@@ -845,8 +839,7 @@ function processTemplate (individual, container, wrapper, mode) {
     if (event instanceof Event) {
       event.stopPropagation();
     }
-    const templateMode = template.getAttribute('data-mode');
-    if (templateMode !== 'edit') return;
+    if (mode !== 'edit') return;
 
     Object.keys(validation).forEach((property_uri) => {
       if (property_uri === 'state') {
@@ -888,8 +881,7 @@ function processTemplate (individual, container, wrapper, mode) {
   const mergeValidationResult = function (event) {
     const validationResult = event.detail;
     event.stopPropagation();
-    const templateMode = template.getAttribute('data-mode');
-    if (templateMode === 'edit') {
+    if (mode === 'edit') {
       Object.keys(validationResult).forEach((property_uri) => {
         if (property_uri === 'state') {
           return;
@@ -986,7 +978,7 @@ function processTemplate (individual, container, wrapper, mode) {
       individual: individual,
       property_uri: property_uri,
       spec: spec,
-      mode: template.getAttribute('data-mode'),
+      mode: mode,
     };
 
     controlType.call(control, opts);

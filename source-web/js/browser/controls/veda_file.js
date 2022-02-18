@@ -47,7 +47,7 @@ function uploadFile (params, tries) {
     }
     throw error;
   });
-};
+}
 
 /**
  * Load image to browser
@@ -85,7 +85,8 @@ function resizeImage (image, maxWidth) {
     if (image.width <= maxWidth) {
       resolve(image);
     } else {
-      const temp = $('<div></div>').append(image);
+      const temp = $('<div></div>');
+      temp.append(image);
       import('cropper/cropper.min.js').then((module) => {
         const Cropper = module.default;
         import('cropper/cropper.min.css').then((module) => {
@@ -166,7 +167,7 @@ function cropImage (imageForCrop, ratio, maxWidth) {
       });
     });
   });
-};
+}
 
 $.fn.veda_file = function ( options ) {
   const opts = {...defaults, ...options};
@@ -271,8 +272,8 @@ $.fn.veda_file = function ( options ) {
               console.log('curRatio: ', curRatio);
               if ( !((targetRatio - 0.1) < curRatio && curRatio < (targetRatio + 0.1)) ) {
                 return cropImage(image, targetRatio, maxWidth);
-              };
-            };
+              }
+            }
             return image;
           }).then((image) => {
             if (image === false) {
@@ -286,7 +287,7 @@ $.fn.veda_file = function ( options ) {
                     resolve(fileIndividual);
                   });
               });
-            };
+            }
           });
       } else {
         resolve(fileIndividual);

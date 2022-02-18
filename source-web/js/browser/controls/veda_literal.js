@@ -133,7 +133,7 @@ function veda_literal (options) {
     });
   }
   return input;
-};
+}
 
 const defaults = {
   template: `<input type="text" class="form-control" autocomplete="on" />`,

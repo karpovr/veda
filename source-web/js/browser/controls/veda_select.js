@@ -25,7 +25,7 @@ $.fn.veda_select = function (params) {
   const template = this.attr('data-template') || '{@.rdfs:label}';
   let options = [];
   const isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
-  let withDeleted = false || this.attr('data-deleted');
+  let withDeleted = this.attr('data-deleted') || false;
 
   if (placeholder instanceof IndividualModel) {
     placeholder.load().then((placeholderLoaded) => {

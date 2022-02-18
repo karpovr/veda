@@ -159,7 +159,6 @@ function UpdateService () {
         self.trigger('offline');
         clearInterval(pingInterval);
         this.close();
-        return;
       }
     }, pingTimeout);
   }
@@ -199,7 +198,7 @@ function UpdateService () {
     self.trigger('offline');
     clearInterval(pingInterval);
   }
-};
+}
 
 const proto = UpdateService.prototype;
 
