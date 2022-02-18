@@ -66,7 +66,7 @@ export const html = `
       <span about="v-s:Appointment" property="rdfs:label"> :
     </div>
     <div class="col-md-9">
-        <veda-control rel="@" data-type="link" class="fulltext dropdown"></veda-control>
+        <!--veda-control rel="@" data-type="link" class="fulltext dropdown"></veda-control-->
     </div>
   </div>
 </div>

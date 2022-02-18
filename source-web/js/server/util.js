@@ -382,8 +382,7 @@ Util.isTecnicalChange = function (newdoc, olddoc) {
     if (key === '@') continue;
 
     if (
-      (newdoc[key] && !olddoc[key]) || // добвили
-      (newdoc[key] && !olddoc[key]) || // удалили
+      (newdoc[key] && !olddoc[key]) || // добавили
       (newdoc[key].length !== olddoc[key].length) // изменили количество
     ) {
       if (!Util.isTechnicalAttribute(key, olddoc[key])) {
@@ -459,7 +458,7 @@ Util.replace_word = function (src, from, to) {
   const pos_f = from.indexOf('*');
   const pos_t = to.indexOf('*');
 
-  if (pos_f > 0 && pos_f > 0) {
+  if (pos_f > 0) {
     from = from.substring(0, pos_f);
     to = to.substring(0, pos_t);
 

@@ -21,7 +21,7 @@ $.fn.veda_checkbox = function (params) {
   const source = this.attr('data-source') || undefined;
   const template = this.attr('data-template') || '{@.rdfs:label}';
   let options = [];
-  let withDeleted = false || this.attr('data-deleted');
+  let withDeleted = this.attr('data-deleted') || false;
 
   populate();
 

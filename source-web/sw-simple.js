@@ -68,6 +68,7 @@ watchChanges();
  * Listen to messages from client
  */
 this.addEventListener('message', (event) => {
+  if (event.origin !== this.registration.scope.slice(0, -1)) return;
   if (event.data === 'version') {
     event.source.postMessage({version: veda_version});
   }

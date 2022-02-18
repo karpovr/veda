@@ -44,7 +44,7 @@ $.fn.veda_booleanRadio = function (params) {
    */
   function renderOptions () {
     self.empty();
-    options.map((option) => {
+    options.forEach((option) => {
       const hld = $(opts.template).appendTo(self);
       option.label.then((label) => {
         const lbl = $('label', hld).append( label );

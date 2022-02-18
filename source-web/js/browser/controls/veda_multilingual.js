@@ -27,7 +27,7 @@ function veda_multilingual (options) {
     this.find('input').attr('tabindex', tabindex);
   }
 
-  Object.keys(veda.user.preferences.language).map((language_name) => {
+  Object.keys(veda.user.preferences.language).forEach((language_name) => {
     const localedInput = $(opts.template);
 
     localedInput.find('.language-tag').text(language_name);

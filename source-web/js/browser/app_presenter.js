@@ -149,11 +149,14 @@ export default function AppPresenter (manifest) {
   function parse (value) {
     if (!Number.isNaN(value.split(' ').join('').split(',').join('.'))) {
       return parseFloat(value.split(' ').join('').split(',').join('.'));
-    } if (!Number.isNaN(Date.parse(value))) {
+    }
+    if (!Number.isNaN(Date.parse(value))) {
       return new Date(value);
-    } if (value === 'true') {
+    }
+    if (value === 'true') {
       return true;
-    } if (value === 'false') {
+    }
+    if (value === 'false') {
       return false;
     }
     const individual = new IndividualModel(value);
@@ -198,10 +201,10 @@ export default function AppPresenter (manifest) {
       const main_param_uri = veda.user.hasValue('v-s:origin', 'ExternalUser') ? 'cfg:MainExternal' : 'cfg:Main';
       const main_param = new IndividualModel(main_param_uri);
       layout_param.load()
-        .then((layout_param) => layout_param['rdf:value'][0].load())
+        .then(() => layout_param['rdf:value'][0].load())
         .then((layout) => layout.present(appContainer))
         .then(() => main_param.load())
-        .then((main_param) => main_param['rdf:value'][0].load())
+        .then(() => main_param['rdf:value'][0].load())
         .then(installRouter)
         .catch((error) => {
           const notify = new Notify();

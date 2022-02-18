@@ -83,6 +83,13 @@ BrowserBackend.get_membership = function (ticket, uri) {
   return call_server(params);
 };
 
+function adjustTicket(result) {
+  return {
+    ticket: result.id,
+    user_uri: result.user_uri,
+    end_time: Math.floor((result.end_time - 621355968000000000) / 10000),
+  };
+}
 
 BrowserBackend.authenticate = function (login, password, secret) {
   const arg = login;
@@ -96,14 +103,7 @@ BrowserBackend.authenticate = function (login, password, secret) {
       'secret': isObj ? arg.secret : secret,
     },
   };
-  return call_server(params)
-    .then((result) => {
-      return {
-        ticket: result.id,
-        user_uri: result.user_uri,
-        end_time: Math.floor((result.end_time - 621355968000000000) / 10000),
-      };
-    });
+  return call_server(params).then(adjustTicket);
 };
 
 BrowserBackend.get_ticket_trusted = function (ticket, login) {
@@ -117,14 +117,7 @@ BrowserBackend.get_ticket_trusted = function (ticket, login) {
       'login': isObj ? arg.login : login,
     },
   };
-  return call_server(params)
-    .then((result) => {
-      return {
-        ticket: result.id,
-        user_uri: result.user_uri,
-        end_time: Math.floor((result.end_time - 621355968000000000) / 10000),
-      };
-    });
+  return call_server(params).then(adjustTicket);
 };
 
 BrowserBackend.is_ticket_valid = function (ticket) {

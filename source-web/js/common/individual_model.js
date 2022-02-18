@@ -243,7 +243,7 @@ IndividualModel.defineProperty = function (property_uri) {
       return this.get(property_uri);
     },
     set: function (values) {
-      return this.set(property_uri, values);
+      this.set(property_uri, values);
     },
     configurable: false,
     enumerable: false,
@@ -506,7 +506,7 @@ proto.save = function (isAtomic) {
   return this.isSaving(
     this.trigger('beforeSave')
       .then(() => {
-        Object.keys(this.properties).reduce((acc, property_uri) => {
+        this.properties = Object.keys(this.properties).reduce((acc, property_uri) => {
           if (property_uri === '@') return acc;
           if (!acc[property_uri].length) delete acc[property_uri];
           return acc;
@@ -933,7 +933,7 @@ proto.init = function (forced) {
         return Promise.all( models_promises );
       })
       .then((models) => {
-        models.map((model) => {
+        models.forEach((model) => {
           if ( !model.modelFn ) {
             model.modelFn = new Function('veda', model.get('v-s:script')[0]);
           }

@@ -74,7 +74,7 @@ function submitLoginPassword (event) {
 
   const ntlmProvider = new IndividualModel('cfg:NTLMAuthProvider', true, false);
   return ntlmProvider.load()
-    .then((ntlmProvider) => {
+    .then(() => {
       const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
       if (path) {
         return ntlmAuth(path, login, password);
@@ -92,7 +92,25 @@ function submitLoginPassword (event) {
 
 delegateHandler(loginForm, 'input', '#new-password, #confirm-new-password, #secret', validateNewPassword);
 
-const re = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{6,})');
+const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.{6,})/;
+
+/**
+ * Show element
+ * @param {HTMLElement} el
+ * @return {void}
+ */
+function show (el) {
+  el.style.display = 'block';
+}
+
+/**
+ * Hide element
+ * @param {HTMLElement} el
+ * @return {void}
+ */
+function hide (el) {
+  el.style.display = 'none';
+}
 
 /**
  * Validate new password
@@ -114,19 +132,19 @@ function validateNewPassword () {
   const isValid = reMatch && passwordsMatch && isSecret;
 
   if ( !reMatch ) {
-    passwordStrength.style.display = 'block';
+    show(passwordStrength);
   } else {
-    passwordStrength.style.display = 'none';
+    hide(passwordStrength);
   }
   if ( !passwordsMatch ) {
-    passwordMustMatch.style.display = 'block';
+    show(passwordMustMatch);
   } else {
-    passwordMustMatch.style.display = 'none';
+    hide(passwordMustMatch);
   }
   if ( !isSecret ) {
-    enterSecret.style.display = 'block';
+    show(enterSecret);
   } else {
-    enterSecret.style.display = 'none';
+    hide(enterSecret);
   }
   if ( !isValid ) {
     submit.setAttribute('disabled', 'disabled');
@@ -176,7 +194,7 @@ let captchaRendered = false;
 function reCAPTCHA (onSuccess, onExpired, onError) {
   if (!captchaRendered) {
     const reCAPTCHA_key = new IndividualModel('cfg:reCAPTCHA_client_key');
-    reCAPTCHA_key.load().then((reCAPTCHA_key) => {
+    reCAPTCHA_key.load().then(() => {
       window.captchaCallback = function () {
         grecaptcha.render('recaptcha', {
           'sitekey': reCAPTCHA_key.get('rdf:value')[0].toString(),
@@ -203,9 +221,9 @@ function reCAPTCHA (onSuccess, onExpired, onError) {
  */
 function handleLoginError (error) {
   const enterLoginPassword = loginForm.querySelector('#enter-login-password');
-  enterLoginPassword.style.display = 'none';
+  hide(enterLoginPassword);
   const enterNewPassword = loginForm.querySelector('#enter-new-password');
-  enterNewPassword.style.display = 'none';
+  hide(enterNewPassword);
 
   const invalidSecretWarning = loginForm.querySelector('#invalid-secret-warning');
   const emptyPasswordWarning = loginForm.querySelector('#empty-password-warning');
@@ -225,155 +243,151 @@ function handleLoginError (error) {
   const secretRequestInfo = loginForm.querySelector('#secret-request-info');
 
   const alerts = loginForm.querySelectorAll('.alert');
-  Array.prototype.forEach.call(alerts, (alert) => alert.style.display = 'none');
+  Array.prototype.forEach.call(alerts, (alert) => hide(alert));
 
   const inputs = loginForm.querySelectorAll('input:not(#login)');
   Array.prototype.forEach.call(inputs, (input) => input.value = '');
 
   const ok = loginForm.querySelector('.btn.ok');
-  ok.style.display = 'none';
-  let okHandler = () => {};
+  hide(ok);
+  let okHandler = () => true;
 
   const onSuccess = function () {
-    Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, fieldset'), (item) => item.style.display = 'none');
-    enterLoginPassword.style.display = 'block';
-  };
-  const onExpired = function () {
-    Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, fieldset'), (item) => item.style.display = 'none');
-    loginFailedError.style.display = 'block';
+    Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, .fieldset'), (item) => hide(item));
+    show(enterLoginPassword);
   };
 
   switch (error.code) {
   case 0: // Network error
-    networkError.style.display = 'block';
-    ok.style.display = 'block';
+    show(networkError);
+    show(ok);
     okHandler = function () {
-      networkError.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(networkError);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 423: // Password change is allowed once a day
-    frequentPassChangeWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(frequentPassChangeWarning);
+    show(ok);
     okHandler = function () {
-      frequentPassChangeWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(frequentPassChangeWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 429: // Too many auth fails
-    authLockedError.style.display = 'block';
-    ok.style.display = 'block';
+    show(authLockedError);
+    show(ok);
     okHandler = function () {
-      authLockedError.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(authLockedError);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 430: // Too many pass change fails
-    passChangeLockedError.style.display = 'block';
-    ok.style.display = 'block';
+    show(passChangeLockedError);
+    show(ok);
     okHandler = function () {
-      passChangeLockedError.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(passChangeLockedError);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 463: // Password change not allowed
-    passChangeNotAllowedWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(passChangeNotAllowedWarning);
+    show(ok);
     okHandler = function () {
-      passChangeNotAllowedWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(passChangeNotAllowedWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 464: // Secret expired
-    secretExpiredWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(secretExpiredWarning);
+    show(ok);
     okHandler = function () {
-      secretExpiredWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(secretExpiredWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 465: // Empty password
-    emptyPasswordWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(emptyPasswordWarning);
+    show(ok);
     okHandler = function () {
-      emptyPasswordWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(emptyPasswordWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 466: // New password is equal to old
-    equalPasswordWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(equalPasswordWarning);
+    show(ok);
     okHandler = function () {
-      equalPasswordWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(equalPasswordWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 467: // Invalid password
-    invalidPasswordWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(invalidPasswordWarning);
+    show(ok);
     okHandler = function () {
-      invalidPasswordWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(invalidPasswordWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 468: // Invalid secret
-    invalidSecretWarning.style.display = 'block';
-    ok.style.display = 'block';
+    show(invalidSecretWarning);
+    show(ok);
     okHandler = function () {
-      invalidSecretWarning.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(invalidSecretWarning);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   case 469: // Password expired
     if ( !changePasswordPressed ) {
-      passwordExpiredError.style.display = 'block';
-      secretRequestInfo.style.display = 'block';
-      ok.style.display = 'block';
+      show(passwordExpiredError);
+      show(secretRequestInfo);
+      show(ok);
       okHandler = function () {
-        passwordExpiredError.style.display = 'none';
-        enterNewPassword.style.display = 'block';
+        hide(passwordExpiredError);
+        show(enterNewPassword);
         ok.removeEventListener('click', okHandler);
-        ok.style.display = 'none';
+        hide(ok);
       };
     } else {
-      enterNewPassword.style.display = 'block';
-      secretRequestInfo.style.display = 'block';
+      show(enterNewPassword);
+      show(secretRequestInfo);
     }
     break;
   case 472: // Not authorized
   case 473: // Authentication failed
-    loginFailedError.style.display = 'block';
-    enterLoginPassword.style.display = 'none';
+    show(loginFailedError);
+    hide(enterLoginPassword);
     reCAPTCHA(onSuccess, undefined, onSuccess);
     break;
   default:
-    unavailableError.style.display = 'block';
-    ok.style.display = 'block';
+    show(unavailableError);
+    show(ok);
     okHandler = function () {
-      unavailableError.style.display = 'none';
-      enterLoginPassword.style.display = 'block';
+      hide(unavailableError);
+      show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
-      ok.style.display = 'none';
+      hide(ok);
     };
     break;
   }
@@ -389,15 +403,15 @@ function handleLoginSuccess (authResult) {
   const enterLoginPassword = loginForm.querySelector('#enter-login-password');
 
   const alerts = loginForm.querySelectorAll('.alert');
-  Array.prototype.forEach.call(alerts, (alert) => alert.style.display = 'none');
+  Array.prototype.forEach.call(alerts, (alert) => hide(alert));
 
   const inputs = loginForm.querySelectorAll('input:not(#login)');
   Array.prototype.forEach.call(inputs, (input) => input.value = '');
 
   const ok = loginForm.querySelector('.btn.ok');
-  ok.style.display = 'none';
+  hide(ok);
 
-  enterLoginPassword.style.display = 'block';
+  show(enterLoginPassword);
 
   handleAuthSuccess(authResult);
 }
@@ -431,34 +445,34 @@ function handleAuthError () {
   delTicketCookie();
 
   if (storage.logout) {
-    loginForm.style.display = 'block';
+    show(loginForm);
     delete storage.logout;
     return;
   }
 
   // Auto login using NTLM
   const ntlmProvider = new IndividualModel('cfg:NTLMAuthProvider', true, false);
-  ntlmProvider.load().then((ntlmProvider) => {
+  ntlmProvider.load().then(() => {
     const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
     if (path) {
       ntlmAuth(path)
         .then((authResult) => handleAuthSuccess(authResult))
         .catch((err) => {
           console.log(err);
-          loginForm.style.display = 'block';
+          show(loginForm);
         });
     } else {
-      loginForm.style.display = 'block';
+      show(loginForm);
     }
   }).catch((error) => {
     console.log(err);
-    loginForm.style.display = 'block';
+    show(loginForm);
   });
 }
 
 // Initialize application if ticket is valid
 function handleAuthSuccess (authResult) {
-  loginForm.style.display = 'none';
+  hide(loginForm);
   veda.user_uri = storage.user_uri = authResult.user_uri;
   veda.ticket = storage.ticket = authResult.ticket;
   veda.end_time = storage.end_time = authResult.end_time;
@@ -476,10 +490,10 @@ function handleAuthSuccess (authResult) {
         handleAuthError();
       } else {
         console.log('Refresh ticket in background.');
-        Backend.get_ticket_trusted(veda.ticket).then((authResult) => {
-          veda.user_uri = storage.user_uri = authResult.user_uri;
-          veda.ticket = storage.ticket = authResult.ticket;
-          veda.end_time = storage.end_time = authResult.end_time;
+        Backend.get_ticket_trusted(veda.ticket).then((result) => {
+          veda.user_uri = storage.user_uri = result.user_uri;
+          veda.ticket = storage.ticket = result.ticket;
+          veda.end_time = storage.end_time = result.end_time;
           setTicketCookie(veda.ticket, veda.end_time);
         });
       }
@@ -491,7 +505,7 @@ function handleAuthSuccess (authResult) {
 
   veda.init(veda.user_uri).then(() => {
     clearTimeout(loadIndicatorTimer);
-    loadIndicator.style.display = 'none';
+    hide(loadIndicator);
     veda.trigger('started');
   });
 }
@@ -561,6 +575,6 @@ export default function Auth () {
     })
     .then(() => {
       clearTimeout(loadIndicatorTimer);
-      loadIndicator.style.display = 'none';
+      hide(loadIndicator);
     });
 }

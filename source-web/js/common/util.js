@@ -226,10 +226,12 @@ Util.formatValue = function (value) {
   case value instanceof Date:
     formatted = formatDate(value);
     break;
-  case value instanceof Number || typeof value === 'number':
+  case value instanceof Number:
+  case typeof value === 'number':
     formatted = formatNumber(value);
     break;
-  case value instanceof String || typeof value === 'string':
+  case value instanceof String:
+  case typeof value === 'string':
     formatted = formatString(value);
     break;
   default:
@@ -540,7 +542,7 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
         const values = individual.get(property_uri).sort((a, b) => {
           return a < b ? - 1 : a === b ? 0 : 1;
         });
-        const prop = property_uri.replace(re, '_');
+        let prop = property_uri.replace(re, '_');
         let oneProp;
         switch (true) {
         case Number.isInteger(values[0]):
@@ -768,7 +770,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
             const values = individual.get(property_uri).sort((a, b) => {
               return a < b ? - 1 : a === b ? 0 : 1;
             });
-            const prop = alias + '.' + property_uri.replace(re, '_');
+            let prop = alias + '.' + property_uri.replace(re, '_');
             let oneProp;
             switch (true) {
             case Number.isInteger(values[0]):
@@ -920,11 +922,7 @@ Util.queryFromIndividual = function (individual) {
         oneProp = values
           .filter((item) => !!item && !!item.valueOf())
           .map((value) => {
-            if (property_uri === 'rdf:type') {
-              return '\'' + property_uri + '\'==\'' + value.data + '\'';
-            } else {
-              return '\'' + property_uri + '\'==\'' + value.data + '\'';
-            }
+            return '\'' + property_uri + '\'==\'' + value.data + '\'';
           })
           .join(' || ');
         break;

@@ -545,12 +545,10 @@ dl {
 }
 dd {
   margin-top: 3px;
+  font-weight: normal;
 }
 dt {
   font-weight: bold;
-}
-dd {
-  font-weight: normal;
 }
 ol.no-marks, ul.no-marks {
   list-style: none;
@@ -762,7 +760,7 @@ button.close {
 .mainbar {
   position:fixed;
   top:70px;
-  rigth:0px;
+  right:0px;
   bottom:0px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -839,22 +837,16 @@ button.close {
   -webkit-transition:background-color 0.25s ease-in;
   -moz-transition:background-color 0.25s ease-in;
   transition:background-color 0.25s ease-in;
-}
-
-.aLabel._jsPlumb_hover, ._jsPlumb_source_hover, ._jsPlumb_target_hover {
-  color:blue;
-}
-._jsPlumb_overlay {
-  font-size: larger;
-}
-
-.aLabel {
   background-color:white;
   opacity:0.8;
   padding:0.3em;
   border-radius:0.5em;
   border:1px solid #bbb;
   cursor:pointer;
+}
+
+.aLabel._jsPlumb_hover, ._jsPlumb_source_hover, ._jsPlumb_target_hover {
+  color:blue;
 }
 
 .ep {
@@ -873,10 +865,6 @@ button.close {
 
 .ep:hover {
   box-shadow: 0px 0px 6px black;
-}
-
-._jsPlumb_endpoint {
-  z-index:3;
 }
 
 .dragHover {
@@ -899,20 +887,12 @@ path {
   cursor: pointer;
 }
 
-.aLabel {
-  display: none;
-}
-
 ._jsPlumb_connector { z-index:18 !important; }
 ._jsPlumb_endpoint { z-index:19 !important; }
-._jsPlumb_overlay { z-index:20 !important; }
-
-
-.calculated-height {
-  height: -moz-calc(100% - 50px - 23px);
-  height: -webkit-calc(100% - 50px - 23px);
-  height: calc(100% - 50px - 23px);
-}​
+._jsPlumb_overlay {
+  z-index:20 !important;
+  font-size: larger;
+}
 
 .split-join {
   background-repeat:no-repeat;
@@ -963,7 +943,7 @@ path {
   border: 1px solid #ccc;
   list-style-type: none;
   padding: 5px;
-  font-family: Lucida Console;
+  font-family: Lucida Console, sans-serif;
 }
 
 svg.process-path-highlight path
@@ -1236,7 +1216,6 @@ svg.process-path-highlight path
 .bg-sun-flower * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-carrot * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-alizarin * { color: #fff; text-shadow: 0px 1px 2px black; }
-.bg-clouds * {  }
 .bg-concrete * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-orange * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-pumpkin * { color: #fff; text-shadow: 0px 1px 2px black; }
@@ -1244,9 +1223,7 @@ svg.process-path-highlight path
 .bg-silver * { color: #fff; text-shadow: 0px 1px 2px black; }
 .bg-asbestos * { color: #fff; text-shadow: 0px 1px 2px black; }
 
-
 /* Sortable table */
-
 .table-sortable thead tr:last-child th:hover {
   cursor: pointer;
 }

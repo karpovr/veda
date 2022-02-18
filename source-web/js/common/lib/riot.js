@@ -24,9 +24,10 @@ riot.observable = function(el) {
     if (events === "*") callbacks = {};
     else if (fn) {
       events.replace(/[^\s]+/g, function(name) {
-        var arr = callbacks[name];
-        for (var i = 0, cb; (cb = arr && arr[i]); ++i) {
-          if (cb === fn) { arr.splice(i, 1); i--; }
+        if (callbacks[name]) {
+          callbacks[name] = callbacks[name].filter(function (cb) {
+            return cb !== fn;
+          });
         }
       });
     } else {
@@ -89,7 +90,6 @@ riot.render = function(tmpl, data, escape_fn) {
 
   function pop(hash) {
     hash = hash.type ? location.hash : hash;
-    //if (hash !== currentHash) pops.trigger("pop", hash);
     pops.trigger("pop", hash);
     currentHash = hash;
   }
@@ -99,12 +99,10 @@ riot.render = function(tmpl, data, escape_fn) {
   // standard browsers
   if (listen) {
     listen("popstate", pop, false);
-    //doc.addEventListener("DOMContentLoaded", pop, false);
 
   // IE
   } else {
     doc.attachEvent("onreadystatechange", function() {
-      //if (doc.readyState === "complete") pop("");
       pop("");
     });
   }

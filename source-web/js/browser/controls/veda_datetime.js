@@ -117,7 +117,7 @@ function veda_dateTime (options) {
   });
 
   return control;
-};
+}
 
 const defaults = {
   template: `

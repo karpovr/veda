@@ -117,7 +117,7 @@ jsWorkflow.ready(() => {
       }
     }).on('mouseup', function (e) {
       if (e.shiftKey) {
-        end = [e.offsetX, e.offsetY];
+        const end = [e.offsetX, e.offsetY];
 
         const x1 = Math.min(as_start[0], end[0]) - canvasSizePx/2;
         const x2 = Math.max(as_start[0], end[0]) - canvasSizePx/2;
@@ -857,12 +857,10 @@ jsWorkflow.ready(() => {
         }
       });
 
-      // TODO update this from css;
       miny-=25;
       minx-=25;
       maxx+=100;
       maxy+=100;
-
 
       // read viewport div
       $('.workflow-canvas-wrapper', template).each((i, el) => {
@@ -970,7 +968,6 @@ jsWorkflow.ready(() => {
 
       /* NET MENU [BEGIN] */
       $('#workflow-save-button', template).on('click', function () {
-        // TODO REFACTOR - recursive save (based on type checking)
         if (net.hasValue('v-wf:consistsOf')) {
           net['v-wf:consistsOf'].forEach((el) => {
             const saveMapping = function (mapping, el) {

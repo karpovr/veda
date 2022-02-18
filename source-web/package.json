@@ -46,7 +46,6 @@
     "chokidar": "^3.5.2",
     "construct-style-sheets-polyfill": "^2.4.16",
     "core-js": "^3.14.0",
-    "cors": "^2.8.5",
     "cropperjs": "^1.5.9",
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
     "express": "^4.17.2",

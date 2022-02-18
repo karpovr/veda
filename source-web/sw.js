@@ -78,6 +78,7 @@ function ping () {
 }
 
 this.addEventListener('message', (event) => {
+  if (event.origin !== this.registration.scope.slice(0, -1)) return;
   if (event.data === 'status') {
     ping();
   }
@@ -125,6 +126,7 @@ watchChanges();
  * Listen to messages from client
  */
 this.addEventListener('message', (event) => {
+  if (event.origin !== this.registration.scope.slice(0, -1)) return;
   if (event.data === 'version') {
     event.source.postMessage({version: veda_version});
   }
@@ -229,7 +231,6 @@ function handleAPIGet (event) {
         ping();
         throw error;
       });
-    break;
   // Fetch first
   case 'get_rights':
   case 'get_rights_origin':
@@ -255,7 +256,6 @@ function handleAPIGet (event) {
           throw error;
         });
       });
-    break;
   // Cache first
   case 'get_individual':
     return caches.match(url).then((cached) => cached || fetch(event.request)
@@ -279,7 +279,6 @@ function handleAPIGet (event) {
           throw error;
         });
       });
-    break;
   default:
     return fetch(event.request)
       .then((response) => {
@@ -292,7 +291,6 @@ function handleAPIGet (event) {
         ping();
         throw error;
       });
-    break;
   }
 }
 

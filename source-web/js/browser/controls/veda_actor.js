@@ -21,7 +21,7 @@ $.fn.veda_actor = function ( options ) {
   const actorType = this.attr('data-actor-type') || 'v-s:Appointment v-s:Person v-s:Position v-s:Department';
   const complex = this.attr('data-complex') || false;
   let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
-  const withDeleted = false || this.attr('data-deleted');
+  const withDeleted = this.attr('data-deleted') || false;
   let chosenActorType;
   let fullName;
   let onlyDeleted;
@@ -79,7 +79,7 @@ $.fn.veda_actor = function ( options ) {
   $('[name=\'full-name\']', control).each((i, el) => {
     const label = new IndividualModel(el.value);
     const self = el;
-    label.load().then((label) => {
+    label.load().then(() => {
       $(self).parent().append( new IndividualModel(self.value).toString() );
     });
   }).change(() => {
@@ -212,7 +212,7 @@ $.fn.veda_actor = function ( options ) {
   this.on('view edit search', function (e) {
     e.stopPropagation();
     if (e.type === 'search') {
-      isSingle = false || $(e.delegateTarget).data('single');
+      isSingle = $(e.delegateTarget).data('single') || false;
       if (isSingle) {
         header.hide();
       } else {
@@ -261,12 +261,11 @@ $.fn.veda_actor = function ( options ) {
         value = value.trim().split('\n').map((line) => {
           const fullNameProps = ['v-s:employee.v-s:lastName', 'v-s:employee.v-s:firstName', 'v-s:employee.v-s:middleName'];
           const fullNameInput = line.trim().replace(/\s+/g, ' ').split(' ');
-          const fullNameQuery = fullNameInput.map((token, i) => {
+          return fullNameInput.map((token, i) => {
             if (i < 3 && token) {
               return '\'' + fullNameProps[i] + '\'==\'' + token + '*\'';
             }
           }).filter(Boolean).join(' && ');
-          return fullNameQuery;
         }).join('\n');
       }
     }
@@ -276,7 +275,7 @@ $.fn.veda_actor = function ( options ) {
         return ftQuery(queryPrefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
       } else {
         return ftQuery(queryPrefix, value, sort, withDeleted);
-      };
+      }
     });
 
     ftQueryPromise

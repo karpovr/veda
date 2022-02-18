@@ -66,7 +66,6 @@
 
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private" />
-    <!--meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src https://www.google.com:443 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src https://www.google.com:443 https://www.gstatic.com:443 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: wss:;" /-->
   </head>
   <body>
     <!-- Load indicator -->
@@ -135,7 +134,7 @@
         <p><strong>Info!</strong> Secret code was sent to you. Please, change your password using secret code.</p>
       </div>
       <button style="display:none;" class="ok btn btn-lg btn-block btn-primary">Ok</button>
-      <fieldset id="enter-login-password">
+      <div class="fieldset" id="enter-login-password">
         <input class="form-control input-lg" id="login" placeholder="Логин / login" type="text" name="login" autofocus="autofocus"/>
         <div class="input-group margin-lg">
           <input class="form-control input-lg password" id="password" placeholder="Пароль / password" type="password" name="password"/>
@@ -145,8 +144,8 @@
         </div>
         <button type="submit" id="submit-login-password" class="btn btn-lg btn-primary btn-block margin-lg">Войти / Sign in</button>
         <button type="submit" id="change-password" class="btn btn-link btn-block btn-sm">Изменить пароль / Change password</button>
-      </fieldset>
-      <fieldset id="enter-new-password" style="display:none;">
+      </div>
+      <div class="fieldset" id="enter-new-password" style="display:none;">
         <div class="input-group">
           <input class="form-control input-lg password" id="new-password" placeholder="Новый пароль / New password" type="password" name="new-password" autocomplete="off"/>
           <span class="input-group-btn">
@@ -167,11 +166,11 @@
         <span class="help-block enter-secret" style="display:none;">Введите код из письма</span>
         <span class="help-block enter-secret" style="display:none;">Enter secret form e-mail</span>
         <button disabled="disabled" type="submit" id="submit-new-password" class="btn btn-lg btn-primary btn-block margin-lg">Отправить / Submit</button>
-      </fieldset>
+      </div>
     </form>
 
     <!-- Autocomplete feature -->
-    <iframe name="autocomplete-frame" style="display:none" src="about:blank"></iframe>
+    <iframe name="autocomplete-frame" style="display:none" src="about:blank" title="Autocomplete frame"></iframe>
     <form name="autocomplete-form" target="autocomplete-frame" method="post" action="about:invalid" autocomplete="on" onkeypress="return (event.keyCode !== 13 || event.target.tagName === 'TEXTAREA')">
       <!-- Application container -->
       <div id="app"></div>

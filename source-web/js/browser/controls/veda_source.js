@@ -41,10 +41,13 @@ $.fn.veda_source = function (options) {
 
     this.on('view edit search', function (e) {
       e.stopPropagation();
-      e.type === 'view' ? ( editor.setReadOnly(true) ) :
-        e.type === 'edit' ? ( editor.setReadOnly(false) ) :
-          e.type === 'search' ? ( editor.setReadOnly(false) ) :
-            true;
+      if (e.type === 'view') {
+        editor.setReadOnly(true);
+      } else if (e.type === 'edit') {
+        editor.setReadOnly(false);
+      } else if (e.type === 'search') {
+        editor.setReadOnly(false);
+      }
     });
 
     const editorHandler = function (delta) {
