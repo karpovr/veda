@@ -421,7 +421,7 @@ function delTicketCookie () {
   setTicketCookie(null, 0);
 }
 
-function handleAuthError() {
+function handleAuthError () {
   const appContainer = document.getElementById('app');
   clear(appContainer);
 
@@ -457,7 +457,7 @@ function handleAuthError() {
 }
 
 // Initialize application if ticket is valid
-function handleAuthSuccess(authResult) {
+function handleAuthSuccess (authResult) {
   loginForm.style.display = 'none';
   veda.user_uri = storage.user_uri = authResult.user_uri;
   veda.ticket = storage.ticket = authResult.ticket;
