@@ -79,7 +79,7 @@ function submitLoginPassword (event) {
       if (path) {
         return ntlmAuth(path, login, password);
       } else {
-        return Promise.reject(Error('AD provider is not defined'));
+        return Promise.reject(Error('NTLM auth provider provider is not defined'));
       }
     })
     .catch((error) => {
@@ -399,7 +399,7 @@ function handleLoginSuccess (authResult) {
 
   enterLoginPassword.style.display = 'block';
 
-  veda.trigger('login:success', authResult);
+  handleAuthSuccess(authResult);
 }
 
 /**
@@ -421,7 +421,7 @@ function delTicketCookie () {
   setTicketCookie(null, 0);
 }
 
-veda.on('login:failed', function () {
+function handleAuthError() {
   const appContainer = document.getElementById('app');
   clear(appContainer);
 
@@ -442,7 +442,7 @@ veda.on('login:failed', function () {
     const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
     if (path) {
       ntlmAuth(path)
-        .then((authResult) => veda.trigger('login:success', authResult))
+        .then((authResult) => handleAuthSuccess(authResult))
         .catch((err) => {
           console.log(err);
           loginForm.style.display = 'block';
@@ -454,10 +454,10 @@ veda.on('login:failed', function () {
     console.log(err);
     loginForm.style.display = 'block';
   });
-});
+}
 
 // Initialize application if ticket is valid
-veda.on('login:success', function (authResult) {
+function handleAuthSuccess(authResult) {
   loginForm.style.display = 'none';
   veda.user_uri = storage.user_uri = authResult.user_uri;
   veda.ticket = storage.ticket = authResult.ticket;
@@ -473,7 +473,7 @@ veda.on('login:success', function (authResult) {
       if (Date.now() - lastActivity > ticketDelay * 0.9) {
         clearInterval(refreshInterval);
         console.log('Ticket expired, re-login.');
-        veda.trigger('login:failed');
+        handleAuthError();
       } else {
         console.log('Refresh ticket in background.');
         Backend.get_ticket_trusted(veda.ticket).then((authResult) => {
@@ -494,7 +494,7 @@ veda.on('login:success', function (authResult) {
     loadIndicator.style.display = 'none';
     veda.trigger('started');
   });
-});
+}
 
 // Activity handler
 let lastActivity = Date.now();
@@ -536,7 +536,7 @@ export default function Auth () {
     })
     .then((valid) => {
       if (valid) {
-        veda.trigger('login:success', {
+        handleAuthSuccess({
           ticket: storage.ticket,
           user_uri: storage.user_uri,
           end_time: storage.end_time,
@@ -545,17 +545,17 @@ export default function Auth () {
         const authRequired = new IndividualModel('cfg:AuthRequired', true, false);
         authRequired.load().then((authRequiredParam) => {
           if ( authRequiredParam && authRequiredParam.hasValue('rdf:value', false) ) {
-            veda.trigger('login:success', {
+            handleAuthSuccess({
               ticket: '',
               user_uri: 'cfg:Guest',
               end_time: 0,
             });
           } else {
-            veda.trigger('login:failed');
+            handleAuthError();
           }
         }).catch((error) => {
           console.log('cfg:AuthRequired load error', error);
-          veda.trigger('login:failed');
+          handleAuthError();
         });
       }
     })
