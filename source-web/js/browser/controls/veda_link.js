@@ -41,12 +41,12 @@ $.fn.veda_link = function ( options ) {
   }
 
   // Select value
-  const select = function (selected) {
-    selected = selected instanceof Array ? selected : [selected];
+  const select = function (values) {
+    values = values instanceof Array ? values : [values];
     if (isSingle) {
-      individual.set(rel_uri, [selected[0]]);
+      individual.set(rel_uri, [values[0]]);
     } else {
-      const filtered = selected.filter((i) => {
+      const filtered = values.filter((i) => {
         return individual.get(rel_uri).indexOf(i) < 0;
       });
       individual.set(rel_uri, individual.get(rel_uri).concat(filtered));
@@ -69,22 +69,22 @@ $.fn.veda_link = function ( options ) {
         create.addClass('disabled');
         create.off('click keyup');
       } else {
-        create.on('click keydown', function (e) {
-          if (e.type !== 'click' && e.which !== 13 && e.which !== 32) {
+        create.on('click keydown', function (ev) {
+          if (ev.type !== 'click' && ev.which !== 13 && ev.which !== 32) {
             return;
           }
-          e.preventDefault();
-          e.stopPropagation();
+          ev.preventDefault();
+          ev.stopPropagation();
           const newVal = createValue();
           if ( inModal ) {
             let modal = $('#individual-modal-template').html();
             modal = $(modal).modal({'show': false});
             $('body').append(modal);
             modal.modal('show');
-            const ok = $('#ok', modal).click((e) => {
+            const ok = $('#ok', modal).click(() => {
               select(newVal);
             });
-            $('.close', modal).click((e) => {
+            $('.close', modal).click(() => {
               newVal.delete();
             });
             const cntr = $('.modal-body', modal);
@@ -152,7 +152,7 @@ $.fn.veda_link = function ( options ) {
       e.stopPropagation();
       const $modal = $(modal);
       const cntr = $('.modal-body', $modal);
-      $modal.on('hidden.bs.modal', function (e) {
+      $modal.on('hidden.bs.modal', () => {
         $modal.remove();
       });
       $modal.modal();
@@ -177,7 +177,7 @@ $.fn.veda_link = function ( options ) {
   const fulltextMenu = $('.fulltext-menu', control);
   if ( this.hasClass('fulltext') || this.hasClass('full') ) {
     if (placeholder instanceof IndividualModel) {
-      placeholder.load().then((placeholder) => {
+      placeholder.load().then(() => {
         fulltext.attr({
           'placeholder': placeholder.toString(),
           'name': (individual.hasValue('rdf:type') ? individual['rdf:type'][0].id + '_' + rel_uri : rel_uri).toLowerCase().replace(/[-:]/g, '_'),
@@ -191,7 +191,6 @@ $.fn.veda_link = function ( options ) {
     }
 
     fulltext.on('input change focus blur', function (e) {
-      const fulltext = $(e.target);
       const value = fulltext.val();
       if (value) {
         const rows = value.split('\n').length;
@@ -238,8 +237,7 @@ $.fn.veda_link = function ( options ) {
     this.on('view edit search', function (e) {
       e.stopPropagation();
       if (e.type === 'search') {
-        const isSingle = $(e.delegateTarget).data('single') || false;
-        if (isSingle) {
+        if ( $(e.delegateTarget).data('single') ) {
           header.hide();
         } else {
           header.show();
@@ -258,8 +256,8 @@ $.fn.veda_link = function ( options ) {
         if (isDynamicQueryPrefix) {
           queryPrefix = self.attr('data-query-prefix');
         }
-        interpolate(queryPrefix, individual).then((queryPrefix) => {
-          ftQuery(queryPrefix, value, sort, withDeleted)
+        interpolate(queryPrefix, individual).then((prefix) => {
+          ftQuery(prefix, value, sort, withDeleted)
             .then(renderResults)
             .catch((error) => {
               console.log('Fulltext query error', error);
@@ -447,13 +445,13 @@ $.fn.veda_link = function ( options ) {
       }
     };
 
-    const propertyModifiedHandler = function (value) {
+    const propertyModifiedHandler = function () {
       if ( isSingle && individual.hasValue(rel_uri) ) {
         individual.get(rel_uri)[0].load()
           .then((value) => renderValue(value, template))
           .then((rendered) => {
-            const value = fulltext.val();
-            if (value != rendered) {
+            const inputValue = fulltext.val();
+            if (inputValue != rendered) {
               fulltext.val(rendered);
             }
           });
@@ -492,7 +490,6 @@ $.fn.veda_link = function ( options ) {
           $(document).off('click', clickOutsideMenuHandler);
           $(document).off('keydown', arrowHandler);
         } else {
-          const suggestions = $('.suggestions', control);
           if ( suggestions.is(':empty') || isDynamicQueryPrefix ) {
             performSearch();
           } else {
@@ -538,8 +535,7 @@ $.fn.veda_link = function ( options ) {
     this.on('view edit search', function (e) {
       e.stopPropagation();
       if (e.type === 'search') {
-        const isSingle = $(e.delegateTarget).data('single') || false;
-        if (!isSingle) {
+        if ( !$(e.delegateTarget).data('single') ) {
           $('.clear', control).remove();
         }
       }

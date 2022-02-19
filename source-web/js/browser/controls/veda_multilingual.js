@@ -77,18 +77,18 @@ function veda_multilingual (options) {
    * @return {void}
    */
   function keyupHandler (e) {
-    const input = $(e.target);
+    const thisInput = $(e.target);
     if (
       e.which !== 188 &&
       e.which !== 190 &&
       e.which !== 110 &&
-      input.val() !== input.data('prev')
+      thisInput.val() !== thisInput.data('prev')
     ) {
-      input.data('prev', input.val());
-      input.change();
+      thisInput.data('prev', thisInput.val());
+      thisInput.change();
     }
     if (e.which !== 9) {
-      input.focus();
+      thisInput.focus();
     }
   }
 
@@ -99,22 +99,21 @@ function veda_multilingual (options) {
    */
   function handler (values) {
     input.each((i, el) => {
-      const self = el;
       const lang = el.lang;
       individual.get(property_uri).forEach((value) => {
-        if ( value.language === lang || !value.language && self.value != value) {
+        if ( value.language === lang || !value.language && el.value != value) {
           try {
-            if (self === document.activeElement) {
-              const start_shift = self.selectionStart - self.value.length;
-              const end_shift = self.selectionEnd - self.value.length;
-              self.value = value;
-              self.selectionStart = value.length + start_shift;
-              self.selectionEnd = value.length + end_shift;
+            if (el === document.activeElement) {
+              const start_shift = el.selectionStart - el.value.length;
+              const end_shift = el.selectionEnd - el.value.length;
+              el.value = value;
+              el.selectionStart = value.length + start_shift;
+              el.selectionEnd = value.length + end_shift;
             } else {
-              self.value = value;
+              el.value = value;
             }
           } catch (ex) {
-            self.value = value;
+            el.value = value;
             console.log('selectionStart/End error:', property_uri, value, typeof value);
           }
         }

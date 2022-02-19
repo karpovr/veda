@@ -21,7 +21,8 @@ function veda_literal (options) {
   const individual = opts.individual;
   let timeout;
 
-  input.isSingle = typeof opts.isSingle !== 'undefined' ? opts.isSingle : (spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true);
+  const isSpecSingle = spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true;
+  input.isSingle = typeof opts.isSingle !== 'undefined' ? opts.isSingle : isSpecSingle;
 
   input
     .attr({
@@ -95,7 +96,6 @@ function veda_literal (options) {
    * @return {void}
    */
   function keyupHandler (e) {
-    const input = $(e.target);
     if (
       e.which !== 188 &&
       e.which !== 190 &&

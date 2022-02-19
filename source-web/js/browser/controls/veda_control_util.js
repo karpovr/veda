@@ -65,21 +65,22 @@ function ftQuery (prefix, input, sort, withDeleted) {
    * @return {Promise}
    */
   function incrementalSearch (results = [], cursor = 0, limit = 100) {
+    const sortSuffix = (veda.user.getLanguage()[0] ? '_' + veda.user.getLanguage()[0].toLowerCase() : '');
     return Backend.query({
       ticket: veda.ticket,
       query: queryString,
-      sort: sort ? sort : '\'rdfs:label' + (veda.user.getLanguage()[0] ? '_' + veda.user.getLanguage()[0].toLowerCase() : '') + '\' asc',
+      sort: sort ? sort : "'rdfs:label" + sortSuffix + "' asc",
       from: cursor,
       top: 10,
       limit: 1000,
     }).then((queryResult) => {
       results = results.concat(queryResult.result);
-      const cursor = queryResult.cursor;
-      const estimated = queryResult.estimated;
-      if (results.length >= limit || cursor >= estimated) {
-        return results;
+      const resultCursor = queryResult.cursor;
+      const resultEstimated = queryResult.estimated;
+      if (results.length >= limit || resultCursor >= resultEstimated) {
+        return Promise.resolve(result);
       } else {
-        return incrementalSearch(results, cursor, limit);
+        return Promise.resolve(incrementalSearch(results, resultCursor, limit));
       }
     });
   }
@@ -93,11 +94,11 @@ function ftQuery (prefix, input, sort, withDeleted) {
  */
 function renderValue (value, template) {
   if (value instanceof IndividualModel) {
-    return value.load().then((value) => {
+    return value.load().then(() => {
       if (template) {
-        return interpolate(template, value);
+        return Promise.resolve(interpolate(template, value));
       } else {
-        return value.toString();
+        return Promise.resolve(value.toString());
       }
     });
   } else {

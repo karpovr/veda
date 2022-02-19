@@ -87,10 +87,10 @@ function resizeImage (image, maxWidth) {
     } else {
       const temp = $('<div></div>');
       temp.append(image);
-      import('cropper/cropper.min.js').then((module) => {
-        const Cropper = module.default;
-        import('cropper/cropper.min.css').then((module) => {
-          const styleSheet = module.default;
+      import('cropper/cropper.min.js').then((cropperModule) => {
+        const Cropper = cropperModule.default;
+        import('cropper/cropper.min.css').then((cropperStyle) => {
+          const styleSheet = cropperStyle.default;
           document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
 
           const cropper = new Cropper(image, {
@@ -130,10 +130,10 @@ function cropImage (imageForCrop, ratio, maxWidth) {
   container.append(temp);
 
   return new Promise((resolve, reject) => {
-    import('cropper/cropper.min.js').then((module) => {
-      const Cropper = module.default;
-      import('cropper/cropper.min.css').then((module) => {
-        const styleSheet = module.default;
+    import('cropper/cropper.min.js').then((cropperModule) => {
+      const Cropper = cropperModule.default;
+      import('cropper/cropper.min.css').then((cropperStyle) => {
+        const styleSheet = cropperStyle.default;
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
 
         // in templates ratio=h/w, in crop ratio=w/h
@@ -309,7 +309,8 @@ $.fn.veda_file = function ( options ) {
   fileInput.change((e) => {
     const self = e.delegateTarget;
     const fileIndividualPromises = [];
-    for (let i = 0, file; (file = self.files && self.files[i]); i++) {
+    for (let i = 0, file; i < self.files.length; i++) {
+      file = self.files[i];
       const fileIndividualPromise = createFileIndividual(file, undefined, individual);
       fileIndividualPromises.push(fileIndividualPromise);
     }

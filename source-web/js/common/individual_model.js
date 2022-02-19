@@ -287,10 +287,14 @@ const reg_round_decimal = /^[0-9]+(\.|\,)0$/;
  */
 function serializer (value) {
   if (typeof value === 'number' ) {
-    return {
-      type: Util.isInteger(value) ? 'Integer' : 'Decimal',
-      data: value,
-    };
+    if (isNaN(value)) {
+      return null;
+    } else {
+      return {
+        type: Util.isInteger(value) ? 'Integer' : 'Decimal',
+        data: value,
+      };
+    }
   } else if (typeof value === 'boolean') {
     return {
       type: 'Boolean',
