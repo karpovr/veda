@@ -234,11 +234,11 @@ export const post = function (individual, template, container, mode, extra) {
       })
       .then(function (emp) {
         if (tempCommunicationMean && emp.isNew()) {
-          tempCommunicationMean.map(function (CommunicationMean) {
+          return Promise.all(tempCommunicationMean.map(function (CommunicationMean) {
             // Средства связи
             CommunicationMean['v-s:parent'] = [emp.id];
             return CommunicationMean.save();
-          });
+          }));
         }
         if (tempAccount && emp.isNew()) {
           // Аккаунт
@@ -247,8 +247,7 @@ export const post = function (individual, template, container, mode, extra) {
           tempAccount.id = emp.id + '_account';
           tempAccount['v-s:origin'] = individual['v-s:origin'];
           return tempAccount.save();
-        } else return undefined;
-        return Promise.all();
+        }
       })
       .then(function () {
         // Должность

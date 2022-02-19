@@ -266,7 +266,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   function addOutLinks (id) {
     const individual = nodes.get(id).individual;
-    Object.getOwnPropertyNames(individual.properties).map(function (property_uri) {
+    Object.getOwnPropertyNames(individual.properties).forEach(function (property_uri) {
       if (property_uri === '@') {
         return;
       }
@@ -307,7 +307,7 @@ export const post = function (individual, template, container, mode, extra) {
           addNode(res);
           const to = id;
           const from = res.id;
-          Object.getOwnPropertyNames(res.properties).map(function (property_uri) {
+          Object.getOwnPropertyNames(res.properties).forEach(function (property_uri) {
             if (property_uri === '@') {
               return;
             }
