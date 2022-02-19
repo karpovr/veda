@@ -843,6 +843,7 @@ button.close {
   border-radius:0.5em;
   border:1px solid #bbb;
   cursor:pointer;
+  display: none;
 }
 
 .aLabel._jsPlumb_hover, ._jsPlumb_source_hover, ._jsPlumb_target_hover {

@@ -38,6 +38,7 @@ import { Selector, t } from 'testcafe';
       .wait(3000)
       .click('button#toggle-actions')
       .click('div[rel="v-wf:isProcess"] span#label')
+      .wait(3000)
       .expect(red).eql(1)
       .expect(red1).eql(1)
       .expect(green).eql(1)
