@@ -78,7 +78,7 @@ function ftQuery (prefix, input, sort, withDeleted) {
       const resultCursor = queryResult.cursor;
       const resultEstimated = queryResult.estimated;
       if (results.length >= limit || resultCursor >= resultEstimated) {
-        return Promise.resolve(result);
+        return Promise.resolve(results);
       } else {
         return Promise.resolve(incrementalSearch(results, resultCursor, limit));
       }
