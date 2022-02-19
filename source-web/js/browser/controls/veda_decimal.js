@@ -27,9 +27,10 @@ $.fn.veda_decimal = function ( options ) {
 };
 
 const defaults = {
-  template: '<input type="text" class="form-control" placeholder="#.#" />',
+  template: `<input type="text" class="form-control" placeholder="#.#" />`,
   parser: function (input) {
-    const float = parseFloat( input.replace(/\s/g, '').replace(/,/g, '.') );
-    return Util.isInteger(float) ? float + '.0' : float.toString();
+    const float = parseFloat( input.replace(/\s/g, '').replace(/\.|,/g, '.') );
+    if (isNaN(float)) return null;
+    return Util.isInteger(float) ? float + '.0' : float;
   },
 };
