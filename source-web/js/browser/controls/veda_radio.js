@@ -20,7 +20,6 @@ $.fn.veda_radio = function (params) {
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   const source = this.attr('data-source');
   const template = this.attr('data-template') || '{@.rdfs:label}';
-  let options = [];
   let withDeleted = this.attr('data-deleted') || false;
 
   populate();
@@ -40,7 +39,7 @@ $.fn.veda_radio = function (params) {
    */
   function populate () {
     if (spec && spec.hasValue('v-ui:optionValue')) {
-      options = spec['v-ui:optionValue'];
+      const options = spec['v-ui:optionValue'];
       return renderOptions(options);
     } else if (source) {
       return Promise.resolve(eval(source))
@@ -50,8 +49,8 @@ $.fn.veda_radio = function (params) {
         });
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
-        .then((queryPrefix) => {
-          return ftQuery(queryPrefix, undefined, sort, withDeleted);
+        .then((prefix) => {
+          return ftQuery(prefix, undefined, sort, withDeleted);
         })
         .then(renderOptions)
         .catch((error) => {

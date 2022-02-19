@@ -23,7 +23,6 @@ $.fn.veda_select = function (params) {
   let placeholder = this.attr('placeholder') || ( spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : new IndividualModel('v-s:SelectValueBundle') );
   const source = this.attr('data-source') || undefined;
   const template = this.attr('data-template') || '{@.rdfs:label}';
-  let options = [];
   const isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   let withDeleted = this.attr('data-deleted') || false;
 
@@ -69,7 +68,7 @@ $.fn.veda_select = function (params) {
    */
   function populate () {
     if (spec && spec.hasValue('v-ui:optionValue')) {
-      options = spec['v-ui:optionValue'];
+      const options = spec['v-ui:optionValue'];
       return renderOptions(options);
     } else if (source) {
       return Promise.resolve(eval(source))
@@ -79,8 +78,8 @@ $.fn.veda_select = function (params) {
         });
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
-        .then((queryPrefix) => {
-          return ftQuery(queryPrefix, undefined, sort, withDeleted);
+        .then((prefix) => {
+          return ftQuery(prefix, undefined, sort, withDeleted);
         })
         .then(renderOptions)
         .catch((error) => {

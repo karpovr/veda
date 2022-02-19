@@ -18,10 +18,10 @@ function delegateHandler (el, event, delegateSelector, handler, useCapture) {
    * @return {void}
    * @this Element
    */
-  function ancestorHandler (event) {
-    for (let {target} = event; target && target !== this; target = target.parentNode) {
+  function ancestorHandler (e) {
+    for (let {target} = e; target && target !== this; target = target.parentNode) {
       if (target.matches(delegateSelector)) {
-        handler.call(target, event);
+        handler.call(target, e);
         break;
       }
     }

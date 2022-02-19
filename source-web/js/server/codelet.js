@@ -324,8 +324,6 @@ Codelet.is_in_docflow_and_set_if_true = function (task) {
   }
 };
 
-Codelet.distribution = function (process, task) {};
-
 Codelet.add_value_to_document = function (process, task) {
   try {
     let src_uri;
