@@ -233,8 +233,9 @@ export const post = function (individual, template, container, mode, extra) {
         return emp[0].load();
       })
       .then(function (emp) {
+        const promises = [];
         if (tempCommunicationMean && emp.isNew()) {
-          return Promise.all(tempCommunicationMean.map(function (CommunicationMean) {
+          promises.concat(tempCommunicationMean.map(function (CommunicationMean) {
             // Средства связи
             CommunicationMean['v-s:parent'] = [emp.id];
             return CommunicationMean.save();
@@ -246,8 +247,9 @@ export const post = function (individual, template, container, mode, extra) {
           tempAccount['v-s:parent'] = [emp];
           tempAccount.id = emp.id + '_account';
           tempAccount['v-s:origin'] = individual['v-s:origin'];
-          return tempAccount.save();
+          promises.push(tempAccount.save());
         }
+        return Promise.all(promises);
       })
       .then(function () {
         // Должность
