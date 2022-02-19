@@ -233,9 +233,9 @@ export const post = function (individual, template, container, mode, extra) {
         return emp[0].load();
       })
       .then(function (emp) {
-        const promises = [];
+        let promises = [];
         if (tempCommunicationMean && emp.isNew()) {
-          promises.concat(tempCommunicationMean.map(function (CommunicationMean) {
+          promises = promises.concat(tempCommunicationMean.map(function (CommunicationMean) {
             // Средства связи
             CommunicationMean['v-s:parent'] = [emp.id];
             return CommunicationMean.save();
