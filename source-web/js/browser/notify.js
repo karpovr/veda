@@ -38,7 +38,7 @@ wrapper.appendChild(container);
  * @param {Object} note - note object with properties 'code', 'name', 'message'
  * @return {void}
  */
-function notify (type = 'info', {code = '', name = '', message = ''}) {
+function notify (type, {code = '', name = '', message = ''}) {
   console.log(`${new Date().toLocaleString()} [${type.toUpperCase()}] - ${code} - ${name} - ${message}`);
 
   let iconClass;
