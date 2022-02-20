@@ -32,7 +32,7 @@ Util.escape4$ = function (str) {
 Util.toTTL = function (individualList, callback) {
   const prefixes = {};
 
-  const prefixer = function (value, prefixes) {
+  const prefixer = function (value, prefixesHash) {
     const reg_uri = /^([a-z-0-9]+:)[a-zA-Z0-9-_]*$/;
     const ontologies = veda.ontology.ontologies;
     const result = reg_uri.exec(value);
@@ -46,7 +46,7 @@ Util.toTTL = function (individualList, callback) {
       expanded = ontologies[prefix]['v-s:fullUrl'][0].toString();
     }
     if (expanded) {
-      prefixes[prefix] = expanded;
+      prefixesHash[prefix] = expanded;
       return value;
     } else {
       return '<' + value + '>';
@@ -82,7 +82,7 @@ Util.toTTL = function (individualList, callback) {
               prefixer('xsd:', prefixes);
               break;
             case 'String':
-              if (/("|\n)/.test(resource.data)) {
+              if (/(["\n])/.test(resource.data)) {
                 value = '"""' + resource.data + '"""';
               } else {
                 value = '"' + resource.data + '"';
@@ -134,13 +134,13 @@ Util.createReport = function (report, params) {
   }
   const jasperServerCfg = new IndividualModel('cfg:jasperServerAddress');
   Promise.all([report.load(), jasperServerCfg.load()]).then((loaded) => {
-    const report = loaded[0];
-    const jasperServerCfg = loaded[1];
-    const jasperServerAddress = jasperServerCfg['rdf:value'][0];
+    const reportIndividual = loaded[0];
+    const jasperServerCfgIndividual = loaded[1];
+    const jasperServerAddress = jasperServerCfgIndividual['rdf:value'][0];
 
     const form = document.createElement('form');
     form.setAttribute('method', 'post');
-    form.setAttribute('action', jasperServerAddress + 'flow.html?_flowId=viewReportFlow&reportUnit=' + encodeURIComponent(report['v-s:reportPath'][0]) + '&output=' + encodeURIComponent(report['v-s:reportFormat'][0]) + '&documentId=' + encodeURIComponent(params.id) + '&ticket=' + veda.ticket);
+    form.setAttribute('action', jasperServerAddress + 'flow.html?_flowId=viewReportFlow&reportUnit=' + encodeURIComponent(reportIndividual['v-s:reportPath'][0]) + '&output=' + encodeURIComponent(reportIndividual['v-s:reportFormat'][0]) + '&documentId=' + encodeURIComponent(params.id) + '&ticket=' + veda.ticket);
     form.setAttribute('target', 'Report');
 
     Object.getOwnPropertyNames(params.properties).forEach((key) => {
@@ -149,9 +149,13 @@ Util.createReport = function (report, params) {
         hiddenField.setAttribute('type', 'hidden');
         hiddenField.setAttribute('name', key.replace(':', '_').replace('-', '_'));
         const value = params.get(key).map((item) => {
-          return item instanceof IndividualModel ? item.id :
-            item instanceof Date ? item.toISOString() :
-              item;
+          if (item instanceof IndividualModel) {
+            return item.id;
+          } else if (item instanceof Date) {
+            return item.toISOString();
+          } else {
+            return item;
+          }
         }).join(',');
         hiddenField.setAttribute('value', value);
         form.appendChild(hiddenField);
@@ -189,7 +193,7 @@ Util.showRights = function (individual) {
 Util.showModal = function (individual, template, mode) {
   if ( $('body').hasClass('modal-open')) {
     $('.modal').modal('hide').remove();
-  };
+  }
   const modal = $( $('#notification-modal-template').html() );
   modal.modal();
   $('body').append(modal);
@@ -198,14 +202,14 @@ Util.showModal = function (individual, template, mode) {
     individual = new IndividualModel(individual);
   }
   individual.present(container, template, mode);
-  modal.find('#follow').click(() => {
+  modal.find('#follow').on('click', () => {
     const resourceTemplate = modal.find('[resource]').first();
     const uri = resourceTemplate.attr('resource');
-    const mode = resourceTemplate.attr('data-mode');
+    const templateMode = resourceTemplate.attr('data-mode');
     modal.modal('hide');
-    riot.route( ['#', uri, '#main', undefined, mode].join('/') );
+    riot.route( ['#', uri, '#main', undefined, templateMode].join('/') );
   });
-  $('.action#cancel', modal).click(() => {
+  $('.action#cancel', modal).on('click', () => {
     modal.modal('hide');
   });
   modal.on('hidden.bs.modal', function () {
@@ -257,7 +261,7 @@ Util.confirm = function (individual, template, mode) {
  */
 Util.startProcess = function (processDefinition, document) {
   return processDefinition.load()
-    .then((processDefinition) => {
+    .then(() => {
       const startFormClass = processDefinition['bpmn:hasStartFormClass'][0];
       if (!startFormClass) throw Error('start form class is not defined');
       const processDefinitionKey = processDefinition['bpmn:processDefinitionKey'][0];
@@ -290,7 +294,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
     return (!individual.isSync() ? template[0].veda.save() : Backend.get_individual(veda.ticket, individual.id).catch(() => template[0].veda.save()))
       .then(() => {
         const transform = new IndividualModel(transformId);
-        return transform.load().then((transform) => {
+        return transform.load().then(() => {
           return Util.buildStartFormByTransformation(individual, transform).then((startForm) => {
             return Util.showModal(startForm, startFormTemplate, 'edit');
           });
@@ -310,7 +314,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
       .then(() => {
         template.closest('.modal').modal('hide').remove();
         const sendSuccess = new IndividualModel('v-s:SendSuccess');
-        sendSuccess.load().then((sendSuccess) => {
+        sendSuccess.load().then(() => {
           notify('success', {name: sendSuccess});
         });
       })
@@ -371,13 +375,13 @@ Util.transformation = function (individuals, transform) {
     individuals = [individuals];
   }
 
-  const rules = transform['v-wf:transformRule'].map((rule) => rule.data);
+  const rulesUris = transform['v-wf:transformRule'].map((rule) => rule.data);
 
-  if (!rules.length) {
+  if (!rulesUris.length) {
     return Promise.resolve();
   }
 
-  return Backend.get_individuals(veda.ticket, rules).then((rules) => {
+  return Backend.get_individuals(veda.ticket, rulesUris).then((rules) => {
     const out_data0 = {};
 
     let out_data0_el = {};
@@ -722,11 +726,7 @@ Util.transformation = function (individuals, transform) {
                 return false;
               }
               const str = element[0].data;
-              if (str == value) {
-                return true;
-              } else {
-                return false;
-              }
+              return str == value;
             };
           })();
           /* Segregate functions [END] */
@@ -753,14 +753,14 @@ Util.transformation = function (individuals, transform) {
 
               if (segregateObject) {
                 res = eval(segregateObject[0].data);
-                if (res == false) {
+                if (!res) {
                   continue;
                 }
               }
 
               if (segregateElement) {
                 res = eval(segregateElement[0].data);
-                if (res == false) {
+                if (!res) {
                   continue;
                 }
               }

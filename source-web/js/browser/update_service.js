@@ -36,7 +36,9 @@ function UpdateService () {
   let lastPing = Date.now();
   let pingInterval;
 
-  return UpdateService.prototype._singletonInstance = initSocket();
+  const instance = initSocket();
+  UpdateService.prototype._singletonInstance = instance;
+  return instance;
 
   /**
    * Initialize instance
@@ -78,7 +80,6 @@ function UpdateService () {
     if (msg === '=' || msg === '-*' || msg.indexOf('ccus') === 0) {
       if (socket.readyState === 1) {
         socket.send(msg);
-        // console.log("client -> server:", msg);
       }
       return;
     }
@@ -88,7 +89,6 @@ function UpdateService () {
         const message = buffer.join(',');
         if (socket.readyState === 1) {
           socket.send(message);
-          // console.log("client -> server:", message);
         }
         buffer = [];
         socketTimeout = undefined;
@@ -102,7 +102,6 @@ function UpdateService () {
    * @return {void}
    */
   function receiveMessage (msg) {
-    // console.log("server -> client:", msg);
     if (msg === '') {
       lastPing = Date.now();
       return;
@@ -112,14 +111,14 @@ function UpdateService () {
       return;
     }
     uris = uris.split(',');
-    for (let i = 0; i < uris.length; i++) {
+    for (const pairStr of uris) {
       try {
-        const tmp = uris[i].split('=');
-        const uri = tmp[0];
+        const pair = pairStr.split('=');
+        const uri = pair[0];
         if ( !uri ) {
           continue;
         }
-        const updateCounter = parseInt(tmp[1]);
+        const updateCounter = parseInt(pair[1]);
         const individual = new IndividualModel(uri);
         if ( individual.hasValue('v-s:updateCounter', updateCounter) ) {
           continue;

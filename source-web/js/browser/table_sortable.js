@@ -14,11 +14,11 @@ $.fn.tableSortable = function (clicked) {
     const ths = thead.find('tr:last-child > th');
     table.addClass('table-sortable-done');
 
-    ths.each((i, el) => {
-      const th = $(el);
-      const index = th.index();
+    ths.each((j, th) => {
+      const $th = $(th);
+      const index = $th.index();
 
-      th.click((e) => {
+      $th.on('click', (e) => {
         const rows = tbody.children();
         e.preventDefault();
         e.stopPropagation();
