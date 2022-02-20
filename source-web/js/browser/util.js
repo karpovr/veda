@@ -6,7 +6,7 @@ import IndividualModel from '../common/individual_model.js';
 
 import Backend from '../common/backend.js';
 
-import Notify from '../browser/notify.js';
+import notify from '../browser/notify.js';
 
 import riot from '../common/lib/riot.js';
 
@@ -270,7 +270,6 @@ Util.startProcess = function (processDefinition, document) {
       return Util.showModal(startForm, undefined, 'edit');
     })
     .catch((error) => {
-      const notify = new Notify();
       notify('danger', error);
       throw error;
     });
@@ -298,9 +297,8 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
         });
       })
       .catch((error) => {
-        const notify = new Notify();
         const sendError = new IndividualModel('v-s:SendError');
-        sendError.load().then((sendError) => {
+        sendError.load().then(() => {
           notify('danger', {name: sendError});
         });
         console.log('Save before send error:', error.stack);
@@ -311,16 +309,14 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
     return template[0].veda.save()
       .then(() => {
         template.closest('.modal').modal('hide').remove();
-        const notify = new Notify();
         const sendSuccess = new IndividualModel('v-s:SendSuccess');
         sendSuccess.load().then((sendSuccess) => {
           notify('success', {name: sendSuccess});
         });
       })
       .catch((error) => {
-        const notify = new Notify();
         const sendError = new IndividualModel('v-s:SendError');
-        sendError.load().then((sendError) => {
+        sendError.load().then(() => {
           notify('danger', {name: sendError});
         });
         console.log('Send error:', error.stack);

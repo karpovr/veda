@@ -1,13 +1,11 @@
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
-import Notify from '/js/browser/notify.js';
+import notify from '/js/browser/notify.js';
 import IndividualModel from '/js/common/individual_model.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
-
-  const notify = new Notify();
 
   if (!individual.hasValue('v-s:creator', veda.appointment || veda.user)) {
     $('.action.save-create', template).click(function () {

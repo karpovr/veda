@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
-import Notify from '/js/browser/notify.js';
+import notify from '/js/browser/notify.js';
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -30,7 +30,6 @@ export const post = function (individual, template, container, mode, extra) {
           .then(function () {
             const successMsg = new IndividualModel('v-s:SuccessBundle').load();
             return successMsg.then(function (successMsg) {
-              const notify = Notify ? new Notify() : function () {};
               notify('success', {name: successMsg});
             });
           })
@@ -38,7 +37,6 @@ export const post = function (individual, template, container, mode, extra) {
             console.log(error);
             const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
             return errorMsg.then(function (errorMsg) {
-              const notify = Notify ? new Notify() : function () {};
               notify('danger', {name: errorMsg});
             });
           })

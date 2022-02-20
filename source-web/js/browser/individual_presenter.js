@@ -12,7 +12,7 @@ import CommonUtil from '../common/util.js';
 
 import BrowserUtil from '../browser/util.js';
 
-import Notify from '../browser/notify.js';
+import notify from '../browser/notify.js';
 
 import validate from '../browser/validate.js';
 
@@ -65,11 +65,11 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
         }
       }
     })
-    .then((template) => {
-      if (Array.isArray(template)) {
-        return Promise.all(template.map(({template, name}) => renderTemplate(this, container, template, name, mode, extra, toAppend)));
+    .then((namedTemplate) => {
+      if (Array.isArray(namedTemplate)) {
+        return Promise.all(namedTemplate.map(({templateString, name}) => renderTemplate(this, container, templateString, name, mode, extra, toAppend)));
       }
-      return renderTemplate(this, container, template.template, template.name, mode, extra, toAppend);
+      return renderTemplate(this, container, namedTemplate.templateString, namedTemplate.name, mode, extra, toAppend);
     })
     .catch(errorHandler)
     .catch((error) => errorPrinter.call(this, error, container));
@@ -91,7 +91,7 @@ function getTemplate (template) {
       const templateString = template['v-ui:template'][0];
       return {
         name: templateName,
-        template: templateString,
+        templateString,
       };
     });
   } else if (typeof template === 'string' && reg_uri.test(template)) {
@@ -100,12 +100,12 @@ function getTemplate (template) {
   } else if (typeof template === 'string') {
     return {
       name: String(template.length),
-      template: template,
+      templateString: template,
     };
   } else if (template instanceof HTMLElement) {
     return {
       name: String(template.length),
-      template: template.outerHTML,
+      templateString: template.outerHTML,
     };
   }
   const generic = new IndividualModel('v-ui:generic');
@@ -119,8 +119,7 @@ function getTemplate (template) {
  */
 function successHandler (result) {
   const successMsg = new IndividualModel('v-s:SuccessBundle');
-  successMsg.load().then((successMsg) => {
-    const notify = new Notify();
+  successMsg.load().then(() => {
     notify('success', {name: successMsg.toString()});
   }).catch(console.log);
   return result;
@@ -132,10 +131,9 @@ function successHandler (result) {
  * @throw {Error}
  */
 function errorHandler (error) {
-  const notify = new Notify();
   if (error instanceof BackendError) {
     const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
-    errorIndividual.load().then((errorIndividual) => {
+    errorIndividual.load().then(() => {
       const severity = String(errorIndividual['v-s:tag'][0]) || 'danger';
       notify(severity, {code: errorIndividual['v-s:errorCode'][0], message: errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' ')});
     }).catch(() => {
@@ -165,7 +163,7 @@ function errorPrinter (error, container) {
     errorIndividual['v-s:errorMessage'] = error.toString();
   }
   return errorIndividual.load()
-    .then((errorIndividual) => `
+    .then(() => `
       <span class="padding-sm bg-${errorIndividual['v-s:tag'][0]} text-${errorIndividual['v-s:tag'][0]}" title="${this.id}">
         <strong>${errorIndividual['v-s:errorCode'][0] || ''}</strong> ${errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' ')}
       </span>`)
@@ -224,17 +222,17 @@ function wrap (html) {
  * Render template
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
- * @param {IndividualModel|string} templateStr - template string to render individual with
+ * @param {IndividualModel|string} templateString - template string to render individual with
  * @param {string} name - name of template for sourceURL
  * @param {string} mode - view | edit | search
  * @param {Object} extra - extra parameters to pass ro template
  * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
  * @return {Promise}
  */
-function renderTemplate (individual, container, templateStr, name, mode, extra, toAppend) {
+function renderTemplate (individual, container, templateString, name, mode, extra, toAppend) {
   const reg_file = /\.js$/;
-  if (reg_file.test(templateStr)) {
-    return import(`/templates/${templateStr}`)
+  if (reg_file.test(templateString)) {
+    return import(`/templates/${templateString}`)
       .then((templateModule) => {
         const pre = templateModule.pre;
         const post = templateModule.post;
@@ -245,23 +243,24 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
             const post_result = post ? post.call(individual, individual, template, container, mode, extra) : undefined;
             return Promise.resolve(post_result).then(() => undefined);
           });
+        } else {
+          const wrapper = wrap(templateModule.html);
+          const template = wrapper.firstElementChild;
+          const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
+          return Promise.resolve(pre_result)
+            .then(() => processTemplate(individual, container, wrapper, mode))
+            .then((processed) => {
+              if (toAppend) {
+                container.appendChild(processed);
+              }
+              processed.dispatchEvent(new Event(mode));
+              const post_result = post ? post.call(individual, individual, processed, container, mode, extra) : undefined;
+              return Promise.resolve(post_result).then(() => processed);
+            });
         }
-        const wrapper = wrap(templateModule.html);
-        const template = wrapper.firstElementChild;
-        const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
-        return Promise.resolve(pre_result)
-          .then(() => processTemplate(individual, container, wrapper, mode))
-          .then((template) => {
-            if (toAppend) {
-              container.appendChild(template);
-            }
-            template.dispatchEvent(new Event(mode));
-            const post_result = post ? post.call(individual, individual, template, container, mode, extra) : undefined;
-            return Promise.resolve(post_result).then(() => template);
-          });
       });
   } else {
-    const wrapper = wrap(templateStr);
+    const wrapper = wrap(templateString);
     return processTemplate(individual, container, wrapper, mode).then((template) => {
       if (toAppend) {
         container.appendChild(template);
@@ -277,7 +276,7 @@ function renderTemplate (individual, container, templateStr, name, mode, extra, 
  * @param {IndividualModel} individual - individual to render
  * @param {Element} container - container to render individual to
  * @param {Element} wrapper - template wrapper
- * @param {string} mode - view | edit | search
+ * @param {string} templateMode - view | edit | search
  * @this Individual
  * @return {Promise}
  */
@@ -392,7 +391,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
    */
   function resetHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => typeof item.veda.reset === 'function' ? item.veda.reset(individual.id, acc) : acc, acc);
+    acc = embedded.reduce((acc1, item) => typeof item.veda.reset === 'function' ? item.veda.reset(individual.id, acc1) : acc1, acc);
     acc.push(individual.id);
     if (parent) {
       return acc;
@@ -411,8 +410,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
    */
   function saveHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => {
-      return typeof item.veda.save === 'function' ? item.veda.save(individual.id, acc) : acc;
+    acc = embedded.reduce((acc1, item) => {
+      return typeof item.veda.save === 'function' ? item.veda.save(individual.id, acc1) : acc1;
     }, acc);
     if (parent !== individual.id) {
       acc.push(individual.id);
@@ -422,23 +421,23 @@ function processTemplate (individual, container, wrapper, templateMode) {
     }
     individual.isSync(false);
     const uris = CommonUtil.unique(acc);
-    const individuals_properties = uris.map((item) => {
-      const individual = new IndividualModel(item);
-      if (!individual.isSync()) {
+    const individuals_properties = uris.map((uri) => {
+      const embeddedIndividual = new IndividualModel(uri);
+      if (!embeddedIndividual.isSync()) {
         return individual.properties;
       }
     }).filter(Boolean);
-    return Promise.all(individuals_properties.map((props) => new IndividualModel(props['@']).trigger('beforeSave')))
+    return Promise.all(individuals_properties.map((props0) => new IndividualModel(props0['@']).trigger('beforeSave')))
       .then(() => Backend.put_individuals(veda.ticket, individuals_properties))
       .then(() => {
-        individuals_properties.forEach((props) => {
-          const individual = new IndividualModel(props['@']);
-          individual.isNew(false);
-          individual.isSync(true);
-          individual.isLoaded(true);
+        individuals_properties.forEach((props1) => {
+          const embeddedIndividual = new IndividualModel(props1['@']);
+          embeddedIndividual.isNew(false);
+          embeddedIndividual.isSync(true);
+          embeddedIndividual.isLoaded(true);
         });
       })
-      .then(() => Promise.all(individuals_properties.map((props) => new IndividualModel(props['@']).trigger('afterSave'))))
+      .then(() => Promise.all(individuals_properties.map((props2) => new IndividualModel(props2['@']).trigger('afterSave'))))
       .then(switchToView)
       .then(successHandler)
       .catch(errorHandler);
@@ -476,8 +475,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
    */
   function removeHandler (parent, acc) {
     acc = acc || [];
-    acc = embedded.reduce((acc, item) => {
-      return typeof item.veda.remove === 'function' ? item.veda.remove(individual.id, acc) : acc;
+    acc = embedded.reduce((acc1, item) => {
+      return typeof item.veda.remove === 'function' ? item.veda.remove(individual.id, acc1) : acc1;
     }, acc);
     acc.push(individual.id);
     if (parent) {
@@ -487,7 +486,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
     return uris.reduce((p, item) => p.then(() => new IndividualModel(item).remove()), Promise.resolve())
       .then(() => {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
-        removedAlert.load().then((removedAlert) => {
+        removedAlert.load().then(() => {
           clear(template);
           template.innerHTML = `<code>${removedAlert.toString()}</code>`;
         }).catch(console.log);
@@ -507,9 +506,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
         template.classList.add('deleted');
       }
       if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
-        const notify = new Notify();
         const msg = new IndividualModel('v-s:DeletedAlert');
-        msg.load().then((msg) => {
+        msg.load().then(() => {
           const msgStr = msg['rdfs:label'].map(CommonUtil.formatValue).join(' ');
           notify('warning', {name: msgStr});
           const deletedHeader = document.createElement('h4');
@@ -542,9 +540,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
         template.classList.add('invalid');
       }
       if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
-        const notify = new Notify();
         const msg = new IndividualModel('v-s:InvalidAlert');
-        msg.load().then((msg) => {
+        msg.load().then(() => {
           const msgStr = msg['rdfs:label'].map(CommonUtil.formatValue).join(' ');
           notify('warning', {name: msgStr});
           const invalidHeader = document.createElement('h4');
@@ -588,7 +585,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
     const title = node.getAttribute('title');
     if ((/^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/).test(title) ) {
       const titleIndividual = new IndividualModel(title);
-      titleIndividual.load().then((titleIndividual) => {
+      titleIndividual.load().then(() => {
         node.setAttribute('title', titleIndividual.toString());
       });
     }
@@ -614,7 +611,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
     }
 
     return about.load()
-      .then((about) => {
+      .then(() => {
         const idModifiedHandler = function () {
           propertyContainer.textContent = about.id;
         };
@@ -674,9 +671,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
           !individual.hasValue(rel_uri) &&
           !(property.hasValue('rdfs:range') && property['rdfs:range'][0].id === 'v-s:File')
       ) {
-        const valueType = spec && spec.hasValue('v-ui:rangeRestriction') ?
-          spec['v-ui:rangeRestriction'] : property.hasValue('rdfs:range') ?
-            property['rdfs:range'] : [];
+        const valueType = spec && spec.hasValue('v-ui:rangeRestriction') && spec['v-ui:rangeRestriction'] ||
+          property.hasValue('rdfs:range') && property['rdfs:range'] || [];
         const emptyValue = new IndividualModel();
         if ( valueType.length ) {
           emptyValue['rdf:type'] = valueType;
@@ -686,14 +682,14 @@ function processTemplate (individual, container, wrapper, templateMode) {
       e.stopPropagation();
     });
 
-    return about.load().then((about) => {
+    return about.load().then(() => {
       let prev_rendered = {};
       let curr_rendered = {};
       let sort_required = false;
 
-      const propertyModifiedHandler = function (values, limit_param) {
+      const propertyModifiedHandler = function (propertyValues, limit_param) {
         curr_rendered = {};
-        if (!values.length) {
+        if (!propertyValues.length) {
           prev_rendered = {};
           sort_required = false;
           relContainer.innerHTML = '';
@@ -703,7 +699,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
         limit = limit_param || limit;
 
         return Promise.all(
-          values.map((value, i) => {
+          propertyValues.map((value, i) => {
             if (i >= limit) {
               return;
             }
@@ -716,10 +712,10 @@ function processTemplate (individual, container, wrapper, templateMode) {
               delete prev_rendered[value.id];
               return;
             }
-            return renderRelationValue(about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, false)
-              .then((template) => {
+            return renderRelationValue({about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend: false})
+              .then((renderedTemplate) => {
                 curr_rendered[value.id] = i;
-                return template;
+                return renderedTemplate;
               });
           }).filter(Boolean),
         ).then((nodes) => {
@@ -736,13 +732,13 @@ function processTemplate (individual, container, wrapper, templateMode) {
             });
             relContainer.append(...list);
           }
-          if (limit < values.length && more) {
+          if (limit < propertyValues.length && more) {
             let moreButton = relContainer.querySelector('a.more');
             if (!moreButton) {
               moreButton = document.createElement('a');
               moreButton.classList.add('more', 'badge');
             }
-            moreButton.textContent = `↓ ${values.length - limit}`;
+            moreButton.textContent = `↓ ${propertyValues.length - limit}`;
             moreButton.addEventListener('click', (e) => {
               e.stopPropagation();
               const countDisplayed = relContainer.children.length - 1; // last children is .more button
@@ -755,9 +751,9 @@ function processTemplate (individual, container, wrapper, templateMode) {
         });
       };
 
-      const embeddedHandler = function (values) {
+      const embeddedHandler = function (propertyValues) {
         if (mode === 'edit') {
-          values.map((value) => {
+          propertyValues.map((value) => {
             if (
               value.id !== about.id && // prevent self parent
               rel_uri !== 'v-s:parent' && // prevent circular parent
@@ -916,23 +912,21 @@ function processTemplate (individual, container, wrapper, templateMode) {
     const spec = specs[property_uri] ? new IndividualModel( specs[property_uri] ) : undefined;
     const controlType = $.fn['veda_' + type];
 
-    // control.removeAttr("property").removeAttr("rel");
-
     // Initial validation state
     validation[property_uri] = {state: true, cause: []};
 
     const validatedHandler = function (e) {
-      const validation = e.detail;
-      if ( validation.state || !validation[property_uri] || validation[property_uri].state === true ) {
+      const validationResult = e.detail;
+      if ( validationResult.state || !validationResult[property_uri] || validationResult[property_uri].state === true ) {
         control.removeClass('has-error');
         control.popover('destroy');
       } else {
         control.addClass('has-error');
         let explanation;
-        if (validation[property_uri].message) {
-          explanation = validation[property_uri].message;
+        if (validationResult[property_uri].message) {
+          explanation = validationResult[property_uri].message;
         } else {
-          const causesPromises = validation[property_uri].cause.map((cause_uri) => {
+          const causesPromises = validationResult[property_uri].cause.map((cause_uri) => {
             return new IndividualModel(cause_uri).load();
           });
           Promise.all(causesPromises).then((causes) => {
@@ -1007,7 +1001,11 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
     const formattedValue = CommonUtil.formatValue(value);
     if (isAbout) {
       const prevValue = propertyContainer.textContent;
-      propertyContainer.textContent = prevValue ? prevValue + (formattedValue ? ' ' + formattedValue : '') : formattedValue;
+      if (prevValue) {
+        propertyContainer.textContent += formattedValue ? ' ' + formattedValue : '';
+      } else {
+        propertyContainer.textContent = formattedValue;
+      }
     } else {
       const valueHolder = document.createElement('span');
       valueHolder.classList.add('value-holder');
@@ -1056,7 +1054,7 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
  * @param {Boolean} toAppend - flag defining either to append or replace the relContainer's content with rendered value template
  * @return {void}
  */
-function renderRelationValue (about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend) {
+function renderRelationValue ({about, isAbout, rel_uri, value, relContainer, relTemplate, template, mode, embedded, isEmbedded, toAppend}) {
   return value.present(relContainer, relTemplate, isEmbedded ? mode : undefined, undefined, toAppend).then((rendered) => {
     if (!Array.isArray(rendered)) {
       rendered = [rendered];

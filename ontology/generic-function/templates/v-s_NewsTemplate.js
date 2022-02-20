@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
-import Notify from '/js/browser/notify.js';
+import notify from '/js/browser/notify.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -17,24 +17,23 @@ export const pre = function (individual, template, container, mode, extra) {
       scriptBlock.remove();
       audience.remove();
     } else {
-      const notify = $('.notify', template);
+      const notifyAction = $('.notify-action', template);
       const clientNotification = new IndividualModel('cfg:ClientNotification');
       clientNotification.load().then(function (clientNotification) {
         if (clientNotification.hasValue('rdf:value', individual)) {
-          notify.addClass('disabled').attr('disabled', 'disabled');
+          notifyAction.addClass('disabled').attr('disabled', 'disabled');
         } else {
-          notify.removeClass('disabled').removeAttr('disabled');
+          notifyAction.removeClass('disabled').removeAttr('disabled');
         }
-        notify.click(function () {
+        notifyAction.click(function () {
           try {
             const newsLinks = clientNotification['rdf:value'];
             newsLinks.unshift(individual);
             clientNotification['rdf:value'] = newsLinks.slice(0, 5);
             clientNotification.save();
-            notify.addClass('disabled').attr('disabled', 'disabled');
+            notifyAction.addClass('disabled').attr('disabled', 'disabled');
           } catch (error) {
-            const notification = new Notify();
-            notification('danger', {name: error});
+            notify('danger', {name: error});
           }
         });
       });
@@ -71,7 +70,7 @@ export const html = `
       </div>
       <div class="actions margin-lg">
         <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
-        <button class="btn btn-warning view -edit -search notify" about="v-s:NotifyBundle" property="rdfs:label"></button>
+        <button class="btn btn-warning view -edit -search notify-action" about="v-s:NotifyBundle" property="rdfs:label"></button>
         <a
           class="btn btn-default view -edit -search"
           href="#/cfg:ClientNotification//v-s:ClientNotificationTemplate"

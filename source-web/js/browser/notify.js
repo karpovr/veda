@@ -1,18 +1,6 @@
 // User notifications
 
-export default Notify;
-
-/**
- * Notify singleton constructor
- * @return {Function} notify function
- */
-function Notify () {
-  if (Notify.prototype._single) {
-    return Notify.prototype._single;
-  }
-
-  return (Notify.prototype._single = notify);
-}
+export default notify;
 
 const styles = `
   #notifications {

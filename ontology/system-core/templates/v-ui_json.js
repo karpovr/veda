@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import Notify from '/js/browser/notify.js';
+import notify from '/js/browser/notify.js';
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -15,7 +15,6 @@ export const post = function (individual, template, container, mode, extra) {
   pre.html(anchorized);
   textarea.val(formatted);
   textarea.css('min-height', height);
-  const notify = Notify ? new Notify() : function () {};
   const original = individual.properties;
   let validationState = true;
   textarea.on('keyup', function () {

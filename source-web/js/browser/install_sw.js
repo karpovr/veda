@@ -26,7 +26,7 @@ if ('serviceWorker' in navigator) {
       veda.on('update', function () {
         registration.update()
           .catch(console.log)
-          .then((registration) => {
+          .then(() => {
             window.location.reload();
           });
       });

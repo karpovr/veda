@@ -5,7 +5,7 @@ import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
 import Backend from '/js/common/backend.js';
 import riot from 'riot';
-import Notify from '/js/browser/notify.js';
+import notify from '/js/browser/notify.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -157,7 +157,6 @@ export const pre = function (individual, template, container, mode, extra) {
       })
       .catch(function (error) {
         console.log(error, error.stack);
-        const notify = new Notify();
         notify('danger', {message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.'});
       });
   });

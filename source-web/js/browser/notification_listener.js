@@ -8,7 +8,7 @@ import IndividualModel from '../common/individual_model.js';
 
 veda.one('started', () => {
   const serverNotification = new IndividualModel('cfg:ClientNotification');
-  serverNotification.reset().then((serverNotification) => {
+  serverNotification.reset().then(() => {
     serverNotification.on('afterReset', checkNotification);
     checkNotification.call(serverNotification);
   });

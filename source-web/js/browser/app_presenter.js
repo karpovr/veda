@@ -14,7 +14,7 @@ import riot from '../common/lib/riot.js';
 
 import IndividualModel from '../common/individual_model.js';
 
-import Notify from './notify.js';
+import notify from '../browser/notify.js';
 
 import Util from '../common/util.js';
 
@@ -189,7 +189,6 @@ export default function AppPresenter (manifest) {
         .then(() => new IndividualModel(main_uri).load())
         .then(installRouter)
         .catch((error) => {
-          const notify = new Notify();
           notify('danger', error);
         })
         .then(() => riot.route(window.location.hash || start_url))
@@ -207,7 +206,6 @@ export default function AppPresenter (manifest) {
         .then(() => main_param['rdf:value'][0].load())
         .then(installRouter)
         .catch((error) => {
-          const notify = new Notify();
           notify('danger', error);
         })
         .then(() => riot.route(window.location.hash))

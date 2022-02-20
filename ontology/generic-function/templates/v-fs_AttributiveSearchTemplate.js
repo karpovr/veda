@@ -1,7 +1,7 @@
 import BrowserUtil from '/js/browser/util.js';
 import CommonUtil from '/js/common/util.js';
 import $ from 'jquery';
-import Notify from '/js/browser/notify.js';
+import notify from '/js/browser/notify.js';
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -144,7 +144,6 @@ export const post = function (individual, template, container, mode, extra) {
       })
       .catch(function (error) {
         console.log(error, error.stack);
-        const notify = new Notify();
         notify('danger', {message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.'});
       })
       .then(function () {
