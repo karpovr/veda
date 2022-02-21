@@ -19,6 +19,7 @@ use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::storage::common::StorageMode;
+use v_common::v_api::api_client::IndvOp;
 use xapian_rusty::*;
 use v_common::v_queue::consumer::Consumer;
 
@@ -176,7 +177,9 @@ fn process(backend: &mut Backend, ctx: &mut Indexer, queue_element: &mut Individ
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
 
     let mut prev_state = Individual::default();
-    get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
+    if cmd != Some(IndvOp::Remove) {
+        get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
+    }
 
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);

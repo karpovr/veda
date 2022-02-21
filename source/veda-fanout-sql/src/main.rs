@@ -14,6 +14,7 @@ use v_common::onto::datatype::{DataType, Lang};
 use v_common::onto::individual::Individual;
 use v_common::onto::onto::Onto;
 use v_common::onto::resource::{Resource, Value};
+use v_common::v_api::api_client::IndvOp;
 use v_common::v_queue::consumer::Consumer;
 
 pub struct Context {
@@ -85,6 +86,11 @@ fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
         error!("queue message cmd is none, skip");
         return Ok(true);
     }
+    let cmd = cmd.unwrap();
+
+    if cmd == IndvOp::Remove {
+        return Ok(true);
+    }
 
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
     if let Err(e) = ctx.module_info.put_info(op_id, op_id) {
@@ -92,7 +98,11 @@ fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     }
 
     let mut prev_state = Individual::default();
-    let is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
+
+    let mut is_new= false;
+    if cmd != IndvOp::Remove {
+        is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
+    }
 
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);

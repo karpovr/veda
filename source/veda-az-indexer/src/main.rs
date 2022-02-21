@@ -10,6 +10,7 @@ use v_common::onto::individual::Individual;
 use v_common::v_authorization::common::{Access, FILTER_PREFIX, MEMBERSHIP_PREFIX, PERMISSION_PREFIX};
 use v_common::v_queue::consumer::Consumer;
 use v_common::storage::common::{VStorage, StorageMode, StorageId};
+use v_common::v_api::api_client::IndvOp;
 
 mod common;
 
@@ -90,12 +91,14 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
         error!("skip queue message: cmd is none");
         return Ok(true);
     }
+    let cmd = cmd.unwrap();
 
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
 
     let mut prev_state = Individual::default();
-    get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
-
+    if cmd != IndvOp::Remove {
+        get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
+    }
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
