@@ -180,73 +180,17 @@ fn add_or_del_right_sets(
     let removed_in_set = get_disappeared(&prev_data.in_set, &new_data.in_set);
 
     if is_deleted && new_data.resource.is_empty() && new_data.in_set.is_empty() {
-        update_right_set(
-            id,
-            &prev_data.resource,
-            &prev_data.in_set,
-            aux_data.marker,
-            is_deleted,
-            aux_data.is_drop_count,
-            aux_data.use_filter,
-            aux_data.prefix,
-            prev_data.access,
-            new_data.access,
-            ctx,
-            cache,
-            mode,
-        );
+        update_right_set(id, &prev_data.resource, &prev_data.in_set, new_data.access, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
     } else {
-        update_right_set(
-            id,
-            &new_data.resource,
-            &new_data.in_set,
-            aux_data.marker,
-            is_deleted,
-            aux_data.is_drop_count,
-            aux_data.use_filter,
-            aux_data.prefix,
-            prev_data.access,
-            new_data.access,
-            ctx,
-            cache,
-            mode,
-        );
+        update_right_set(id, &new_data.resource, &new_data.in_set, new_data.access, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
     }
 
     if !removed_resource.is_empty() {
-        update_right_set(
-            id,
-            &removed_resource,
-            &new_data.in_set,
-            aux_data.marker,
-            true,
-            aux_data.is_drop_count,
-            aux_data.use_filter,
-            aux_data.prefix,
-            prev_data.access,
-            new_data.access,
-            ctx,
-            cache,
-            mode,
-        );
+        update_right_set(id, &removed_resource, &new_data.in_set, new_data.access, true, prev_data.access, aux_data, ctx, cache, mode);
     }
 
     if !removed_in_set.is_empty() {
-        update_right_set(
-            id,
-            &new_data.resource,
-            &removed_in_set,
-            aux_data.marker,
-            true,
-            aux_data.is_drop_count,
-            aux_data.use_filter,
-            aux_data.prefix,
-            prev_data.access,
-            new_data.access,
-            ctx,
-            cache,
-            mode,
-        );
+        update_right_set(id, &new_data.resource, &removed_in_set, new_data.access, true, prev_data.access, aux_data, ctx, cache, mode);
     }
 }
 
@@ -254,19 +198,16 @@ fn update_right_set(
     source_id: &str,
     resources: &[String],
     in_set: &[String],
-    marker: char,
-    is_deleted: bool,
-    is_drop_count: bool,
-    filter: &str,
-    prefix: &str,
-    prev_access: u8,
     new_access: u8,
+    is_deleted: bool,
+    prev_access: u8,
+    aux_data: &AuxData,
     ctx: &mut Context,
     cache: &mut HashMap<String, String>,
     mode: &Cache,
 ) {
     for rs in resources.iter() {
-        let key = prefix.to_owned() + filter + rs;
+        let key = aux_data.prefix.to_owned() + aux_data.use_filter + rs;
 
         debug!("APPLY ACCESS = {}", new_access);
         if is_deleted {
@@ -286,9 +227,9 @@ fn update_right_set(
         for in_set_id in in_set.iter() {
             if let Some(rr) = new_right_set.get_mut(in_set_id) {
                 rr.is_deleted = is_deleted;
-                rr.marker = marker;
-                if is_drop_count {
-                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, is_drop_count);
+                rr.marker = aux_data.marker;
+                if aux_data.is_drop_count {
+                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, aux_data.is_drop_count);
                     if rr.access != 0 && !rr.counters.is_empty() {
                         rr.is_deleted = false;
                     }
@@ -308,7 +249,7 @@ fn update_right_set(
                     Right {
                         id: in_set_id.to_string(),
                         access: new_access,
-                        marker,
+                        marker: aux_data.marker,
                         is_deleted,
                         level: 0,
                         counters: HashMap::default(),
