@@ -180,25 +180,39 @@ fn add_or_del_right_sets(
     let removed_in_set = get_disappeared(&prev_data.in_set, &new_data.in_set);
 
     if is_deleted && new_data.resource.is_empty() && new_data.in_set.is_empty() {
-        update_right_set(id, &prev_data.resource, &prev_data.in_set, new_data.access, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
+        let t_data = RightData {
+            resource: &prev_data.resource,
+            in_set: &prev_data.in_set,
+            access: new_data.access,
+        };
+
+        update_right_set(id, &t_data, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
     } else {
-        update_right_set(id, &new_data.resource, &new_data.in_set, new_data.access, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
+        update_right_set(id, &new_data, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
     }
 
     if !removed_resource.is_empty() {
-        update_right_set(id, &removed_resource, &new_data.in_set, new_data.access, true, prev_data.access, aux_data, ctx, cache, mode);
+        let t_data = RightData {
+            resource: &removed_resource,
+            in_set: &new_data.in_set,
+            access: new_data.access,
+        };
+        update_right_set(id, &t_data, true, prev_data.access, aux_data, ctx, cache, mode);
     }
 
     if !removed_in_set.is_empty() {
-        update_right_set(id, &new_data.resource, &removed_in_set, new_data.access, true, prev_data.access, aux_data, ctx, cache, mode);
+        let t_data = RightData {
+            resource: &new_data.resource,
+            in_set: &removed_in_set,
+            access: new_data.access,
+        };
+        update_right_set(id, &t_data, true, prev_data.access, aux_data, ctx, cache, mode);
     }
 }
 
 fn update_right_set(
     source_id: &str,
-    resources: &[String],
-    in_set: &[String],
-    new_access: u8,
+    new_data: &RightData,
     is_deleted: bool,
     prev_access: u8,
     aux_data: &AuxData,
@@ -206,10 +220,10 @@ fn update_right_set(
     cache: &mut HashMap<String, String>,
     mode: &Cache,
 ) {
-    for rs in resources.iter() {
+    for rs in new_data.resource.iter() {
         let key = aux_data.prefix.to_owned() + aux_data.use_filter + rs;
 
-        debug!("APPLY ACCESS = {}", new_access);
+        debug!("APPLY ACCESS = {}", new_data.access);
         if is_deleted {
             debug!("IS DELETED");
         }
@@ -224,12 +238,12 @@ fn update_right_set(
             decode_rec_to_rightset(&prev_data_str, &mut new_right_set);
         }
 
-        for in_set_id in in_set.iter() {
+        for in_set_id in new_data.in_set.iter() {
             if let Some(rr) = new_right_set.get_mut(in_set_id) {
                 rr.is_deleted = is_deleted;
                 rr.marker = aux_data.marker;
                 if aux_data.is_drop_count {
-                    rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, aux_data.is_drop_count);
+                    rr.access = update_counters(&mut rr.counters, prev_access, new_data.access, is_deleted, aux_data.is_drop_count);
                     if rr.access != 0 && !rr.counters.is_empty() {
                         rr.is_deleted = false;
                     }
@@ -240,7 +254,7 @@ fn update_right_set(
                             rr.is_deleted = false;
                         }
                     } else {
-                        rr.access = update_counters(&mut rr.counters, prev_access, new_access, is_deleted, false);
+                        rr.access = update_counters(&mut rr.counters, prev_access, new_data.access, is_deleted, false);
                     }
                 }
             } else {
@@ -248,7 +262,7 @@ fn update_right_set(
                     in_set_id.to_string(),
                     Right {
                         id: in_set_id.to_string(),
-                        access: new_access,
+                        access: new_data.access,
                         marker: aux_data.marker,
                         is_deleted,
                         level: 0,
