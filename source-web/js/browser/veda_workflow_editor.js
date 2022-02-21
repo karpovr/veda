@@ -275,8 +275,8 @@ jsWorkflow.ready(() => {
     // Handle creating new flow event
     instance.bind('connection', function (info) {
       const source = new IndividualModel(info.sourceId);
-      const flowExists = source.get('v-wf:hasFlow').filter((flow) => {
-        return flow.hasValue('v-wf:flowsInto', info.targetId);
+      const flowExists = source.get('v-wf:hasFlow').filter((flow1) => {
+        return flow1.hasValue('v-wf:flowsInto', info.targetId);
       }).length;
       if (flowExists) {
         return;
@@ -295,7 +295,7 @@ jsWorkflow.ready(() => {
         return;
       }
       $('<span/>', {
-        'click': ((instance) => {
+        'click': (() => {
           riot.route('#/'+state['v-wf:subNet'][0].id+'///edit');
         }),
         'class': 'glyphicon glyphicon-search subnet-link',
@@ -504,7 +504,7 @@ jsWorkflow.ready(() => {
               $('<a/>', {
                 'text': (wi.hasValue('rdfs:label')?wi['rdfs:label'][0]:wi.id),
                 'href': '#',
-                'click': ((wi) => {
+                'click': ((workItem) => {
                   return function (event) {
                     event.preventDefault();
                     props.empty();
@@ -513,9 +513,9 @@ jsWorkflow.ready(() => {
                       const o = connection.getOverlay('flowLabel');
                       if (o != undefined) o.setVisible(false);
                     });
-                    instance.showProcessRunPath(wi, 0);
+                    instance.showProcessRunPath(workItem, 0);
                     const holder = $('<div>');
-                    wi.present(holder, 'v-wf:WorkItemTemplate');
+                    workItem.present(holder, 'v-wf:WorkItemTemplate');
                     props.append(holder);
                   };
                 })(wi),
@@ -801,13 +801,13 @@ jsWorkflow.ready(() => {
 
     /**
      * Create workflow Net by given Object (v-wf:Net individual).
-     * @param {IndividualModel} net
+     * @param {IndividualModel} net1
      * @return {IndividualModel} net
      */
-    instance.createNetView = function (net) {
-      return net.prefetch(Infinity, 'v-wf:consistsOf', 'v-wf:hasFlow', 'v-wf:executor').then((prefetched) => {
-        net = prefetched[0];
-        $('#workflow-net-name', template).text(net['rdfs:label'][0]);
+    instance.createNetView = function (net1) {
+      return net1.prefetch(Infinity, 'v-wf:consistsOf', 'v-wf:hasFlow', 'v-wf:executor').then((prefetched) => {
+        net1 = prefetched[0];
+        $('#workflow-net-name', template).text(net1['rdfs:label'][0]);
         const netElements = prefetched.slice(1);
         // Create states
         let hasInput = false;
@@ -833,7 +833,7 @@ jsWorkflow.ready(() => {
             });
           }
         });
-        return net;
+        return net1;
       });
     };
 
@@ -900,13 +900,13 @@ jsWorkflow.ready(() => {
       selectedElementSourceId = null;
     };
 
-    instance.loadProcessWorkItems = function (process) {
-      return process.prefetch(Infinity, 'v-wf:workItemList');
+    instance.loadProcessWorkItems = function (process1) {
+      return process1.prefetch(Infinity, 'v-wf:workItemList');
     };
 
-    instance.createProcessView = function (process) {
+    instance.createProcessView = function (process1) {
       // Apply WorkItems to Net
-      instance.loadProcessWorkItems(process).then((wis) => {
+      instance.loadProcessWorkItems(process1).then((wis) => {
         wis = wis.slice(1);
         $('.w', template).each((index, el) => {
           $('span', el).text('');
@@ -937,7 +937,7 @@ jsWorkflow.ready(() => {
             if (!wi.hasValue('v-wf:workOrderList')) {
               state.css('background-color', '#FF3333');
               state.attr('colored-to', 'red');
-            } else if (wi.hasValue('v-wf:isCompleted') && wi['v-wf:isCompleted'][0]==true && !red) {
+            } else if (wi.hasValue('v-wf:isCompleted') && wi['v-wf:isCompleted'][0] && !red) {
               state.css('background-color', '#88B288');
               state.attr('colored-to', 'green');
             } else if (!red) {
@@ -949,11 +949,11 @@ jsWorkflow.ready(() => {
       });
     };
     let $contextMenu;
-    instance.createNetView(net).then((net) => {
-      if (net['currentScale']==1.0) {
+    instance.createNetView(net).then((net1) => {
+      if (net1['currentScale']==1.0) {
         instance.optimizeView();
       } else {
-        instance.changeScale(net['currentScale']);
+        instance.changeScale(net1['currentScale']);
       }
 
       if (mode=='view') {
@@ -968,11 +968,11 @@ jsWorkflow.ready(() => {
 
       /* NET MENU [BEGIN] */
       $('#workflow-save-button', template).on('click', function () {
-        if (net.hasValue('v-wf:consistsOf')) {
-          net['v-wf:consistsOf'].forEach((el) => {
-            const saveMapping = function (mapping, el) {
-              if (el.hasValue(mapping)) {
-                el[mapping].forEach((m) => {
+        if (net1.hasValue('v-wf:consistsOf')) {
+          net1['v-wf:consistsOf'].forEach((el) => {
+            const saveMapping = function (mapping, element) {
+              if (element.hasValue(mapping)) {
+                element[mapping].forEach((m) => {
                   if (m.hasValue('v-wf:mapToVariable')) {
                     m['v-wf:mapToVariable'].forEach((v) => {
                       v.save();
@@ -996,12 +996,12 @@ jsWorkflow.ready(() => {
             el.save();
           });
         }
-        net.save();
+        net1.save();
       });
 
       $('#workflow-export-ttl', template).on('click', function () {
-        const list = [net].concat(net['v-wf:consistsOf']);
-        collectEntities(net, list);
+        const list = [net1].concat(net1['v-wf:consistsOf']);
+        collectEntities(net1, list);
         BrowserUtil.exportTTL(list);
       });
 
@@ -1040,7 +1040,7 @@ jsWorkflow.ready(() => {
       });
 
       $('.to-net-editor', template).on('click', function () {
-        riot.route('#/' + net.id + '///edit');
+        riot.route('#/' + net1.id + '///edit');
       });
 
       $('.copy-net-element', template).on('click', function () {
@@ -1053,7 +1053,7 @@ jsWorkflow.ready(() => {
                 clone['v-wf:locationY'] = [individual['v-wf:locationY'][0] + 50];
                 clone['v-wf:hasFlow'] = [];
                 instance.createState(clone);
-                net['v-wf:consistsOf'] = net['v-wf:consistsOf'].concat(clone);
+                net1['v-wf:consistsOf'] = net1['v-wf:consistsOf'].concat(clone);
               });
             }
           }
@@ -1062,19 +1062,19 @@ jsWorkflow.ready(() => {
 
       /* ZOOM [BEGIN] */
       const zoomIn = function () {
-        if (net['currentScale']<1) {
-          return instance.changeScale(net['currentScale'] + 0.1);
+        if (net1['currentScale']<1) {
+          return instance.changeScale(net1['currentScale'] + 0.1);
         }
-        if (net['currentScale']<2) {
-          return instance.changeScale(net['currentScale'] + 0.25);
+        if (net1['currentScale']<2) {
+          return instance.changeScale(net1['currentScale'] + 0.25);
         }
       };
       const zoomOut = function () {
-        if (net['currentScale']>1) {
-          return instance.changeScale(net['currentScale'] - 0.25);
+        if (net1['currentScale']>1) {
+          return instance.changeScale(net1['currentScale'] - 0.25);
         }
-        if (net['currentScale']>0.2) {
-          return instance.changeScale(net['currentScale'] - 0.1);
+        if (net1['currentScale']>0.2) {
+          return instance.changeScale(net1['currentScale'] - 0.1);
         }
       };
 
@@ -1112,17 +1112,16 @@ jsWorkflow.ready(() => {
  */
 function collectEntities (element, list) {
   const props = Object.getOwnPropertyNames(element);
-  for (let key = 0; key < props.length; key++) {
-    const prop = props[key];
+  for (const prop of props) {
     if (element[prop] && Array.isArray(element[prop])) {
-      element[prop].forEach((subelement) => {
-        if (typeof subelement.hasValue === 'function' && subelement.hasValue('rdf:type')) {
-          subelement['rdf:type'].forEach((subRdfType) => {
-            if (subRdfType.id == 'v-wf:VarDefine' || subRdfType.id == 'v-wf:Transform' || subRdfType.id == 'v-wf:Mapping') {
-              list.add(subelement);
+      element[prop].forEach((subElement) => {
+        if (typeof subElement.hasValue === 'function' && subElement.hasValue('rdf:type')) {
+          subElement['rdf:type'].forEach((subRdfType) => {
+            if (subRdfType.id === 'v-wf:VarDefine' || subRdfType.id === 'v-wf:Transform' || subRdfType.id === 'v-wf:Mapping') {
+              list.add(subElement);
             }
-            if (subRdfType.id == 'v-wf:Mapping') {
-              list.add(subelement['v-wf:mapToVariable'][0]);
+            if (subRdfType.id === 'v-wf:Mapping') {
+              list.add(subElement['v-wf:mapToVariable'][0]);
             }
           });
         }

@@ -83,7 +83,7 @@ BrowserBackend.get_membership = function (ticket, uri) {
   return call_server(params);
 };
 
-function adjustTicket(result) {
+function adjustTicket (result) {
   return {
     ticket: result.id,
     user_uri: result.user_uri,

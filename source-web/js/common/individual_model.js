@@ -12,64 +12,62 @@ import Util from '../common/util.js';
 
 export default IndividualModel;
 
+let updateService;
+if (typeof window !== 'undefined') {
+  updateService = new UpdateService();
+  updateService.init();
+}
+
 IndividualModel.cache = {
-  limit: 20000,
+  limit: 10000,
   count: 0,
-  delta: 1000,
   storage: {},
   expire: {},
   get: function (key) {
     return this.storage[key];
   },
-  set: function (obj, expires) {
-    let count = this.count;
-    const limit = this.limit;
-    const delta = this.delta;
-    if ( count >= limit ) {
+  set: function (individual, expires) {
+    if ( this.count >= this.limit ) {
       const keys = Object.keys(this.expire);
       // First key is for ontology objects
-      for (let i = 1, key; (key = keys[i]) && (limit - count < delta); i++) {
-        this.expire[key] = this.expire[key].filter((obj) => {
-          if (limit - count >= delta) {
-            return true;
-          }
-          delete this.storage[obj.id];
-          count--;
-          return false;
-        });
-        if (this.expire[key].length === 0) {
-          delete this.expire[key];
+      let i = 1;
+      while (this.limit - this.count < this.limit / 10) {
+        const key = keys[i];
+        if (!key) {
+          break;
         }
+        this.expire[key].forEach((expired) => {
+          if (updateService) {
+            updateService.unsubscribe(expired.id);
+          }
+          delete this.storage[expired.id];
+          this.count--;
+        });
+        delete this.expire[key];
+        i++;
       }
-      this.count = count;
-      console.log('Cache limit (' + this.limit + ' elements) reached, ' + this.delta + ' removed.');
+      console.log(`Cache limit (${this.limit} elements) reached, ${this.limit - this.count} removed.`);
     }
     const expire_key = typeof expires === 'number' ? expires : Date.now();
-    obj.expires = expire_key;
-    this.storage[obj.id] = obj;
+    individual.expires = expire_key;
+    this.storage[individual.id] = individual;
     this.expire[expire_key] = this.expire[expire_key] || [];
-    this.expire[expire_key].push(obj);
+    this.expire[expire_key].push(individual);
     this.count++;
-    if (typeof window !== 'undefined' && expire_key !== 1) {
-      const updateService = new UpdateService();
-      updateService.then((updateService) => {
-        updateService.subscribe(obj.id);
-      });
+    if (updateService && expire_key !== 1) {
+      updateService.subscribe(individual.id);
     }
   },
   remove: function (key) {
-    const obj = this.storage[key];
-    const expires = obj.expires;
+    const individual = this.storage[key];
+    const expires = individual.expires;
     this.expire[expires] = this.expire[expires].filter((item) => item.id !== key);
-    if (this.expire[expires].length === 0) {
+    if (!this.expire[expires].length) {
       delete this.expire[expires];
     }
     this.count--;
-    if (typeof window !== 'undefined') {
-      const updateService = new UpdateService();
-      updateService.then((updateService) => {
-        updateService.unsubscribe(key);
-      });
+    if (updateService) {
+      updateService.unsubscribe(key);
     }
     return delete this.storage[key];
   },
@@ -77,18 +75,15 @@ IndividualModel.cache = {
     this.count = 0;
     this.storage = {};
     this.expire = {};
-    if (typeof window !== 'undefined') {
-      const updateService = new UpdateService();
-      updateService.then((updateService) => {
-        updateService.unsubscribe();
-      });
+    if (updateService) {
+      updateService.unsubscribe();
     }
   },
 };
 
 /**
  * @constructor
- * @param {string} uri URI of individual. If not specified, than id of individual will be generated automatically.
+ * @param {string} uri URI of individual. If not specified, then id of individual will be generated automatically.
  * @param {boolean} cache Use cache true / false. If true or not set, then object will be return from cache. If false or individual not found in cache, then individual will be loaded from database.
  * @param {boolean} init individual with class model at load. If true or not set, then individual will be initialized with class specific model upon load.
  */
@@ -145,7 +140,7 @@ function IndividualModel (uri, cache, init) {
   this.on('beforeSave', beforeSaveHandler);
 
   return this;
-};
+}
 
 /**
  * Save handler. Sets creator & creation date
@@ -190,12 +185,12 @@ proto.set = function (property_uri, values, silently) {
   const uniq = unique(serialized);
   const prevValues = this.properties[property_uri] == undefined ? [] : this.properties[property_uri];
   let isChanged = false;
-  if (uniq.length != prevValues.length) {
+  if (uniq.length !== prevValues.length) {
     isChanged = true;
   } else {
-    for (let i = 0; i < uniq.length; i++) {
-      const isExist = prevValues.some(function (v) {
-        return v.data == uniq[i].data && v.type == uniq[i].type;
+    for (const value of uniq) {
+      const isExist = prevValues.some(function (prevValue) {
+        return prevValue.data == value.data && prevValue.type == value.type;
       });
       if (!isExist) {
         isChanged = true;
@@ -278,7 +273,7 @@ function parser (value) {
 const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
 const reg_date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 const reg_ml_string = /^(.*)\^([a-z]{2})$/ims;
-const reg_round_decimal = /^[0-9]+(\.|\,)0$/;
+const reg_round_decimal = /^\d+([\.\,])0$/;
 
 /**
  * Serialize value
@@ -355,18 +350,19 @@ Object.defineProperty(proto, 'id', {
 
 Object.defineProperty(proto, 'membership', {
   get: function () {
-    // if (this._.membership) { return Promise.resolve(this._.membership); }
     if (this.isNew()) {
       this._.membership = new IndividualModel({cache: false});
       return Promise.resolve(this._.membership);
     }
     return Backend.get_membership(veda.ticket, this.id)
       .then((membershipJSON) => {
-        return this._.membership = new IndividualModel({uri: membershipJSON, cache: false});
+        this._.membership = new IndividualModel({uri: membershipJSON, cache: false});
+        return this._.membership;
       })
       .catch((error) => {
         console.log('membership error', this.id, error);
-        return this._.membership = new IndividualModel({cache: false});
+        this._.membership = new IndividualModel({cache: false});
+        return this._.membership;
       });
   },
   configurable: false,
@@ -385,7 +381,6 @@ proto.isMemberOf = function (group_uri) {
 
 Object.defineProperty(proto, 'rights', {
   get: function () {
-    // if (this._.rights) { return Promise.resolve(this._.rights); }
     if (this.isNew()) {
       this._.rights = new IndividualModel({cache: false});
       this._.rights['v-s:canCreate'] = [true];
@@ -395,10 +390,12 @@ Object.defineProperty(proto, 'rights', {
       return Promise.resolve(this._.rights);
     }
     return Backend.get_rights(veda.ticket, this.id).then((rightsJSON) => {
-      return this._.rights = new IndividualModel(rightsJSON, false);
+      this._.rights = new IndividualModel(rightsJSON, false);
+      return this._.rights;
     }).catch((error) => {
       console.log('rights error', this.id, error);
-      return this._.rights = new IndividualModel({cache: false});
+      this._.rights = new IndividualModel({cache: false});
+      return this._.rights;
     });
   },
   configurable: false,
@@ -424,14 +421,15 @@ proto.canDelete = function () {
 
 Object.defineProperty(proto, 'rightsOrigin', {
   get: function () {
-    // if (this._.rightsOrigin) { return Promise.resolve(this._.rightsOrigin); }
     return Backend.get_rights_origin(veda.ticket, this.id).then((rightsOriginArr) => {
-      return this._.rightsOrigin = Promise.all(rightsOriginArr.map((item) => {
+      this._.rightsOrigin = Promise.all(rightsOriginArr.map((item) => {
         return new IndividualModel(item, false);
       }));
+      return this._.rightsOrigin;
     }).catch((error) => {
       console.log('rights error', this.id, error);
-      return this._.rightsOrigin = [];
+      this._.rightsOrigin = [];
+      return this._.rightsOrigin;
     });
   },
   configurable: false,
@@ -515,7 +513,7 @@ proto.save = function (isAtomic) {
         const original = this.original ? JSON.parse(this.original) : {'@': this.id};
         const delta = Util.diff(this.properties, original);
 
-        const promise = (this.isNew() || isAtomic ?
+        return (this.isNew() || isAtomic ?
           Backend.put_individual(veda.ticket, this.properties) :
           Promise.all([
             delta.added && Object.keys(delta.added).length ? (delta.added['@'] = this.id, Backend.add_to_individual(veda.ticket, delta.added)) : undefined,
@@ -528,7 +526,6 @@ proto.save = function (isAtomic) {
           this.isSync(true);
           this.isLoaded(true);
         });
-        return promise;
       })
       .then(() => this.trigger('afterSave'))
       .then(() => {
@@ -699,11 +696,11 @@ proto.recover = function () {
 proto.hasValue = function (property_uri, value) {
   if (!property_uri && typeof value !== 'undefined' && value !== null) {
     let found = false;
-    for (const property_uri in this.properties) {
-      if (property_uri === '@') {
+    for (const prop in this.properties) {
+      if (prop === '@') {
         continue;
       }
-      found = found || this.hasValue(property_uri, value);
+      found = found || this.hasValue(prop, value);
     }
     return found;
   }
@@ -872,12 +869,14 @@ proto.is = function (_class) {
       return is;
     }
     if (!type.hasValue('rdfs:subClassOf')) {
-      return (is = is || false);
+      is = is || false;
+      return is;
     } else if (type.hasValue('rdfs:subClassOf', _class.id)) {
-      return (is = is || true);
+      is = is || true;
+      return is;
     } else {
-      const types = type.get('rdfs:subClassOf');
-      return Promise.all(types.map(isSub)).then((results) => results.reduce((state, isSub) => state || isSub, false));
+      const superClasses = type.get('rdfs:subClassOf');
+      return Promise.all(superClasses.map(isSub)).then((results) => results.reduce((state, isSubClass) => state || isSubClass, false));
     }
   };
 
@@ -890,7 +889,7 @@ proto.is = function (_class) {
     return Promise.resolve(is);
   } else {
     return Promise.all(types.map(isSub)).then((results) => {
-      return results.reduce((state, isSub) => state || isSub, false);
+      return results.reduce((state, isSubClass) => state || isSubClass, false);
     });
   }
 };
@@ -965,7 +964,10 @@ proto.clone = function () {
  * @return {boolean}
  */
 proto.isInited = function (value) {
-  return ( typeof value !== 'undefined' ? this._.isInited = value : this._.isInited );
+  if (typeof value !== 'undefined') {
+    this._.isInited = value;
+  }
+  return this._.isInited;
 };
 
 /**
@@ -974,7 +976,10 @@ proto.isInited = function (value) {
  * @return {boolean}
  */
 proto.isSync = function (value) {
-  return ( typeof value !== 'undefined' ? this._.isSync = value : this._.isSync );
+  if (typeof value !== 'undefined') {
+    this._.isSync = value;
+  }
+  return this._.isSync;
 };
 
 /**
@@ -983,7 +988,10 @@ proto.isSync = function (value) {
  * @return {boolean}
  */
 proto.isNew = function (value) {
-  return ( typeof value !== 'undefined' ? this._.isNew = value : this._.isNew );
+  if (typeof value !== 'undefined') {
+    this._.isNew = value;
+  }
+  return this._.isNew;
 };
 
 /**
@@ -992,11 +1000,17 @@ proto.isNew = function (value) {
  * @return {boolean}
  */
 proto.isLoaded = function (value) {
-  return ( typeof value !== 'undefined' ? this._.isLoaded = value : this._.isLoaded );
+  if (typeof value !== 'undefined') {
+    this._.isLoaded = value;
+  }
+  return this._.isLoaded;
 };
 
 proto.isPending = function (operation, value) {
-  return ( typeof value !== 'undefined' ? this._.pending[operation] = value : this._.pending[operation] );
+  if (typeof value !== 'undefined') {
+    this._.pending[operation] = value;
+  }
+  return this._.pending[operation];
 };
 proto.isLoading = function (value) {
   return this.isPending('load', value);
@@ -1030,7 +1044,13 @@ proto.toJson = function () {
  * @return {String} String representation of individual.
  */
 proto.toString = function () {
-  return this.hasValue('rdfs:label') ? this.get('rdfs:label').map(Util.formatValue).join(' ') : this.hasValue('rdf:type') ? this.get('rdf:type')[0].toString() + ': ' + this.id : this.id;
+  if (this.hasValue('rdfs:label')) {
+    return this.get('rdfs:label').map(Util.formatValue).join(' ');
+  } else if (this.hasValue('rdf:type')) {
+    return this.get('rdf:type')[0].toString() + ': ' + this.id;
+  } else {
+    return this.id;
+  }
 };
 
 /**
@@ -1072,8 +1092,8 @@ proto.getChainValue = function (...properties) {
   }
   const property_uri = properties.shift();
   const promises = individuals.map((individual) => individual.load());
-  return Promise.all(promises).then((individuals) => {
-    const children = individuals.reduce((acc, individual) => acc.concat(individual[property_uri]), []);
+  return Promise.all(promises).then((loadedIndividuals) => {
+    const children = loadedIndividuals.reduce((acc, individual) => acc.concat(individual[property_uri]), []);
     if ( !properties.length ) {
       return children;
     } else {

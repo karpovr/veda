@@ -20,44 +20,28 @@ function validate (individual, property_uri, spec) {
   const values = individual.get(property_uri);
   // cardinality check
   if (spec.hasValue('v-ui:minCardinality')) {
-    const minCardinalityState = (values.length >= spec['v-ui:minCardinality'][0] &&
-    // filter empty values
-    values.length === values.filter((item) => {
-      return (
-        typeof item === 'boolean' ? true :
-          typeof item === 'number' ? true : !!item
-      );
-    }).length);
+    const minCardinalityState = values.length >= spec['v-ui:minCardinality'][0];
     result.state = result.state && minCardinalityState;
     if (!minCardinalityState) {
       result.cause.push('v-ui:minCardinality');
     }
   }
   if (spec.hasValue('v-ui:maxCardinality')) {
-    const maxCardinalityState = (
-      values.length <= spec['v-ui:maxCardinality'][0] &&
-      // filter empty values
-      values.length === values.filter((item) => {
-        return (
-          typeof item === 'boolean' ? true :
-            typeof item === 'number' ? true : !!item
-        );
-      }).length
-    );
+    const maxCardinalityState = values.length <= spec['v-ui:maxCardinality'][0];
     result.state = result.state && maxCardinalityState;
     if (!maxCardinalityState) {
       result.cause.push('v-ui:maxCardinality');
     }
   }
   // check each value
-  result = result && values.reduce((result, value) => {
+  result = result && values.reduce((acc, value) => {
     // regexp check
     if (spec.hasValue('v-ui:regexp')) {
       const regexp = new RegExp(spec['v-ui:regexp'][0]);
       const regexpState = regexp.test(value.toString());
-      result.state = result.state && regexpState;
+      acc.state = acc.state && regexpState;
       if (!regexpState) {
-        result.cause.push('v-ui:regexp');
+        acc.cause.push('v-ui:regexp');
       }
     }
     // range check
@@ -65,37 +49,37 @@ function validate (individual, property_uri, spec) {
     case 'v-ui:DatatypePropertySpecification':
       if (spec.hasValue('v-ui:minValue')) {
         const minValueState = (value >= spec['v-ui:minValue'][0]);
-        result.state = result.state && minValueState;
+        acc.state = acc.state && minValueState;
         if (!minValueState) {
-          result.cause.push('v-ui:minValue');
+          acc.cause.push('v-ui:minValue');
         }
       }
       if (spec.hasValue('v-ui:maxValue')) {
         const maxValueState = (value <= spec['v-ui:maxValue'][0]);
-        result.state = result.state && maxValueState;
+        acc.state = acc.state && maxValueState;
         if (!maxValueState) {
-          result.cause.push('v-ui:maxValue');
+          acc.cause.push('v-ui:maxValue');
         }
       }
       if (spec.hasValue('v-ui:minLength')) {
         const minLengthState = (value.toString().length >= spec['v-ui:minLength'][0]);
-        result.state = result.state && minLengthState;
+        acc.state = acc.state && minLengthState;
         if (!minLengthState) {
-          result.cause.push('v-ui:minLength');
+          acc.cause.push('v-ui:minLength');
         }
       }
       if (spec.hasValue('v-ui:maxLength')) {
         const maxLengthState = (value.toString().length <= spec['v-ui:maxLength'][0]);
-        result.state = result.state && maxLengthState;
+        acc.state = acc.state && maxLengthState;
         if (!maxLengthState) {
-          result.cause.push('v-ui:maxLength');
+          acc.cause.push('v-ui:maxLength');
         }
       }
       break;
     case 'v-ui:ObjectPropertySpecification':
       break;
     }
-    return result;
+    return acc;
   }, result);
   return result;
 }

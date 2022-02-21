@@ -19,12 +19,12 @@ export default function App (manifest) {
   // Load ontology
   this.init = function (user) {
     const ontology = new Ontology();
-    return ontology.init().then((ontology) => {
-      this.ontology = ontology;
+    this.ontology = ontology;
+    return ontology.init().then(() => {
       this.user = new User(user);
       return this.user._init();
     });
   };
 
   return riot.observable(this);
-};
+}

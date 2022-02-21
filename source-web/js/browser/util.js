@@ -224,7 +224,7 @@ Util.showSmallModal = function (individual, template, mode) {
   $('body').append(modal);
   const container = $('.modal-body', modal);
   individual.present(container, template, mode);
-  $('.action#cancel', modal).click(() => {
+  $('.action#cancel', modal).on('click', () => {
     modal.modal('hide');
   });
   modal.on('hidden.bs.modal', function () {
@@ -243,10 +243,10 @@ Util.confirm = function (individual, template, mode) {
   const container = $('.modal-body', modal);
   return individual.present(container, template, mode).then(() => {
     return new Promise((resolve, reject) => {
-      $('.modal-footer > .ok', modal).click(() => {
+      $('.modal-footer > .ok', modal).on('click', () => {
         resolve(true);
       });
-      $('.modal-footer > .cancel', modal).click(() => {
+      $('.modal-footer > .cancel', modal).on('click', () => {
         resolve(false);
       });
     });
