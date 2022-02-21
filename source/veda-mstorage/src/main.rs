@@ -190,23 +190,23 @@ fn request_prepare(
     match v["function"].as_str().unwrap_or_default() {
         "put" => {
             cmd = IndvOp::Put;
-        }
+        },
         "remove" => {
             cmd = IndvOp::Remove;
-        }
+        },
         "add_to" => {
             cmd = IndvOp::AddTo;
-        }
+        },
         "set_in" => {
             cmd = IndvOp::SetIn;
-        }
+        },
         "remove_from" => {
             cmd = IndvOp::RemoveFrom;
-        }
+        },
         _ => {
             error!("unknown command {:?}", v["function"].as_str());
             return Err(ResultCode::BadRequest);
-        }
+        },
     }
 
     if let Some(jindividuals) = v["individuals"].as_array() {
@@ -358,8 +358,10 @@ fn operation_prepare(
         new_indv.add_datetime("v-s:created", Utc::now().naive_utc().timestamp());
     }
 
+    let mut prev_state_c1 = vec![];
     if cmd == IndvOp::Remove {
         new_indv.set_bool("v-s:deleted", true);
+        prev_state_c1 = prev_state.clone();
     }
 
     if cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom {
@@ -380,7 +382,7 @@ fn operation_prepare(
 
     if cmd == IndvOp::Remove {
         new_indv.set_integer("v-s:updateCounter", upd_counter);
-        if !add_to_transaction(IndvOp::Remove, &cmd, new_indv, vec![], upd_counter, transaction) {
+        if !add_to_transaction(IndvOp::Remove, &cmd, new_indv, prev_state_c1, upd_counter, transaction) {
             error!("failed to commit update to main DB");
             return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
         }
