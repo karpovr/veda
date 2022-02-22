@@ -13,7 +13,7 @@ export default User;
  */
 function User (uri) {
   return IndividualModel.call(this, uri);
-};
+}
 
 User.prototype = Object.create(IndividualModel.prototype);
 
@@ -47,21 +47,21 @@ proto.initAspect = function () {
   return aspect.load()
     .catch((error) => {
       console.log('personal aspect load error', error);
-      const aspect = new IndividualModel(aspect_id);
-      aspect['rdf:type'] = 'v-s:PersonalAspect';
-      aspect['v-s:owner'] = this;
-      aspect['rdfs:label'] = 'PersonalAspect_' + this.id;
-      return this.id !== 'cfg:Guest' ? aspect.save() : aspect;
+      const newAspect = new IndividualModel(aspect_id);
+      newAspect['rdf:type'] = 'v-s:PersonalAspect';
+      newAspect['v-s:owner'] = this;
+      newAspect['rdfs:label'] = 'PersonalAspect_' + this.id;
+      return this.id !== 'cfg:Guest' ? newAspect.save() : newAspect;
     })
     .catch((error) => {
       console.log('personal aspect save error', error);
       throw error;
     })
-    .then((aspect) => {
+    .then((userAspect) => {
       if (!this.hasValue('v-s:hasAspect')) {
-        this['v-s:hasAspect'] = aspect;
+        this['v-s:hasAspect'] = userAspect;
       }
-      this.aspect = aspect;
+      this.aspect = userAspect;
     });
 };
 
@@ -72,12 +72,13 @@ proto.initAppointment = function () {
     this['v-s:defaultAppointment'] = [this['v-s:hasAppointment'][0]];
     veda.appointment = this['v-s:defaultAppointment'][0];
   } else {
-    return veda.appointment = undefined;
+    veda.appointment = undefined;
+    return;
   }
   const setAppointment = () => {
     const appointment = this.hasValue('v-s:defaultAppointment') && this['v-s:defaultAppointment'][0];
     if (appointment) {
-      appointment.load().then((appointment) => {
+      appointment.load().then(() => {
         veda.appointment = appointment;
       });
     }
@@ -93,23 +94,23 @@ proto.initPreferences = function () {
   return preferences.load()
     .catch((error) => {
       console.log('personal preferences load error', error);
-      const preferences = new IndividualModel(preferences_id);
-      preferences['v-s:owner'] = this;
-      preferences['rdf:type'] = 'v-ui:Preferences';
-      preferences['rdfs:label'] = 'Preferences_' + this.id;
-      this['v-ui:hasPreferences'] = preferences;
-      return this.id !== 'cfg:Guest' ? preferences.save() : preferences;
+      const newPreferences = new IndividualModel(preferences_id);
+      newPreferences['v-s:owner'] = this;
+      newPreferences['rdf:type'] = 'v-ui:Preferences';
+      newPreferences['rdfs:label'] = 'Preferences_' + this.id;
+      this['v-ui:hasPreferences'] = newPreferences;
+      return this.id !== 'cfg:Guest' ? newPreferences.save() : newPreferences;
     })
     .catch((error) => {
       console.log('personal preferences save error', error);
       throw error;
     })
-    .then((preferences) => {
+    .then((userPreferences) => {
       if (!this.hasValue('v-ui:hasPreferences')) {
-        this['v-ui:hasPreferences'] = preferences;
+        this['v-ui:hasPreferences'] = userPreferences;
       }
-      this.preferences = preferences;
-      return preferences;
+      this.preferences = userPreferences;
+      return userPreferences;
     });
 };
 

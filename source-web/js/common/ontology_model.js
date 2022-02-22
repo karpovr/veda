@@ -19,6 +19,7 @@ function Ontology () {
   if (Ontology.prototype._singletonInstance) {
     return Ontology.prototype._singletonInstance;
   }
+  Ontology.prototype._singletonInstance = this;
 
   this.ontology = [];
   this.ontologies = {};
@@ -30,8 +31,8 @@ function Ontology () {
   this.classTree = {};
   this.templates = {};
 
-  return Ontology.prototype._singletonInstance = this;
-};
+  return this;
+}
 
 const proto = Ontology.prototype;
 
@@ -72,8 +73,8 @@ proto.init = function () {
 
 proto.getClassProperties = function (_class_uri) {
   const classTree = this.classTree;
-  const getProps = (_class_uri) => {
-    const _class = classTree[_class_uri];
+  const getProps = (uri) => {
+    const _class = classTree[uri];
     let props;
     if (_class) {
       props = _class.properties;
@@ -87,8 +88,8 @@ proto.getClassProperties = function (_class_uri) {
 
 proto.getClassSpecifications = function (_class_uri) {
   const classTree = this.classTree;
-  const getSpecs = (_class_uri) => {
-    const _class = classTree[_class_uri];
+  const getSpecs = (uri) => {
+    const _class = classTree[uri];
     let specs;
     if (_class) {
       specs = _class.specifications;

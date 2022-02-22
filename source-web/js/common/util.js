@@ -121,20 +121,20 @@ Util.processQuery = function (vql, sql, sort, limit, queryDelta, processDelta, p
       top: queryDelta,
       limit: limit,
     }).then((query_result) => {
-      const cursor = query_result.cursor;
+      const currCursor = query_result.cursor;
       const estimated = query_result.estimated;
       if ( limit > estimated ) {
         limit = estimated;
       }
       append.apply(result, query_result.result);
-      if ( cursor/limit - fetchingProgress >= 0.05 ) {
-        fetchingProgress = cursor/limit;
-        console.log('Fetching progress:', Math.floor(fetchingProgress * 100) + '%', '(' + cursor, 'of', limit + ')');
+      if ( currCursor/limit - fetchingProgress >= 0.05 ) {
+        fetchingProgress = currCursor/limit;
+        console.log('Fetching progress:', Math.floor(fetchingProgress * 100) + '%', '(' + currCursor, 'of', limit + ')');
       }
-      if ( cursor === estimated || cursor >= limit ) {
+      if ( currCursor === estimated || currCursor >= limit ) {
         console.log((new Date()).toString(), 'Fetching done:', limit);
         console.timeEnd('Fetching total');
-        result.splice(limit - cursor || limit); // cut result to limit
+        result.splice(limit - currCursor || limit); // cut result to limit
         Util.processResult(result, processDelta, pause, fn);
       } else {
         fetchResult(query_result.cursor);
@@ -156,7 +156,6 @@ Util.processQuery = function (vql, sql, sort, limit, queryDelta, processDelta, p
   const result = []; const append = [].push; let fetchingProgress = 0;
   console.time('Fetching total');
   fetchResult();
-  return;
 };
 
 Util.processResult = function (result, delta, pause, fn) {
@@ -269,10 +268,18 @@ function formatDate (date) {
   if ( (UTChours + UTCmins + UTCsecs) === 0 ) {
     return [zeroPref(day), zeroPref(month), year].join('.');
   }
-  const fdate = [zeroPref(day), zeroPref(month), year].join('.');
-  const ftime = [zeroPref(hours), zeroPref(mins), zeroPref(secs)].join(':');
-  return (fdate === '01.01.1970' ? '' : fdate) + (ftime === '00:00:00' ? '' : ' ' + ( secs === 0 ? ftime.substr(0, 5) : ftime) );
-};
+  let fdate = [zeroPref(day), zeroPref(month), year].join('.');
+  if (fdate === '01.01.1970') fdate = '';
+
+  let ftime = [zeroPref(hours), zeroPref(mins), zeroPref(secs)].join(':');
+  if (ftime === '00:00:00') {
+    ftime = '';
+  } else if (secs === 0) {
+    ftime = ftime.substring(0, 5);
+  }
+
+  return [fdate, ftime].join(' ');
+}
 
 /**
  * Format date
@@ -284,7 +291,7 @@ function formatNumber (n) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 20,
   }).replace(/\s/g, ' ');
-};
+}
 
 /*
  * from http://stackoverflow.com/questions/27266550/how-to-flatten-nested-array-in-javascript
@@ -321,10 +328,10 @@ Util.flatten = function (array, mutable) {
 
 Util.unique = function (arr) {
   const n = {}; const r = [];
-  for (let i = 0; i < arr.length; i++) {
-    if (!n[arr[i]]) {
-      n[arr[i]] = true;
-      r.push(arr[i]);
+  for (const item of arr) {
+    if (!n[item]) {
+      n[item] = true;
+      r.push(item);
     }
   }
   return r;
@@ -345,7 +352,7 @@ Number.isFloat = Number.isFloat || function (value) {
 };
 
 Util.queryFromIndividualPT = function (individual, sort) {
-  const orderBy = function (sort) {
+  const orderBy = function () {
     if (typeof sort === 'string' || sort instanceof String) {
       return sort.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri, dir) {
         const range = veda.ontology.properties[property_uri].get('rdfs:range')[0];
@@ -372,7 +379,7 @@ Util.queryFromIndividualPT = function (individual, sort) {
     }
   };
 
-  const buildQuery = function (individual) {
+  const buildQuery = function () {
     const tables = [];
     let i = -1;
     const where = Object.keys(individual.properties)
@@ -386,7 +393,11 @@ Util.queryFromIndividualPT = function (individual, sort) {
         i++;
         const table = 'veda_pt.`' + property_uri + '` as p' + i;
         tables[i] = table;
-        const values = individual.get(property_uri).sort((a, b) => a < b ? - 1 : a === b ? 0 : 1);
+        const values = individual.get(property_uri).sort((a, b) => {
+          if (a < b) return -1;
+          else if (a === b) return 0;
+          else return 1;
+        });
         let oneProp;
         switch (true) {
         case Number.isInteger(values[0]):
@@ -450,8 +461,8 @@ Util.queryFromIndividualPT = function (individual, sort) {
       .filter(Boolean)
       .join(' AND ');
 
-    const from = tables.reduce((acc, table, i) => {
-      return acc ? acc + ' JOIN ' + table + ' ON p' + (i - 1) + '.id = p' + i + '.id' : table;
+    const from = tables.reduce((acc, table, j) => {
+      return acc ? acc + ' JOIN ' + table + ' ON p' + (j - 1) + '.id = p' + j + '.id' : table;
     }, '');
 
     return 'SELECT DISTINCT id FROM ' + from + (where ? ' WHERE ' + where : '');
@@ -459,8 +470,8 @@ Util.queryFromIndividualPT = function (individual, sort) {
 
   const re = /[^a-zA-Z0-9]/g;
   try {
-    let query = buildQuery;
-    const order = orderBy(sort);
+    let query = buildQuery();
+    const order = orderBy();
     query = query && order ? query + ' ORDER BY ' + order : query;
     return query;
   } catch (error) {
@@ -469,38 +480,38 @@ Util.queryFromIndividualPT = function (individual, sort) {
 };
 
 Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
-  const groupBy = function (sort) {
+  const groupBy = function (sortStr) {
     const by = 'id';
     let props;
-    if (typeof sort === 'string' || sort instanceof String) {
-      props = sort.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri) {
+    if (typeof sortStr === 'string' || sortStr instanceof String) {
+      props = sortStr.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri) {
         const range = veda.ontology.properties[property_uri].get('rdfs:range')[0];
-        let by = property_uri.replace(re, '_');
+        let byClause = property_uri.replace(re, '_');
         switch (range.id) {
         case 'xsd:dateTime':
-          by = by + '_date';
+          byClause = byClause + '_date';
           break;
         case 'xsd:boolean':
         case 'xsd:integer':
-          by = by + '_int';
+          byClause = byClause + '_int';
           break;
         case 'xsd:decimal':
-          by = by + '_dec';
+          byClause = byClause + '_dec';
           break;
         case 'xsd:string':
         default:
-          by = by + '_str';
+          byClause = byClause + '_str';
           break;
         }
-        return by;
+        return byClause;
       });
     }
     return props ? by + ', ' + props : by;
   };
 
-  const orderBy = function (sort) {
-    if (typeof sort === 'string' || sort instanceof String) {
-      return sort.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri, dir) {
+  const orderBy = function (sortStr) {
+    if (typeof sortStr === 'string' || sortStr instanceof String) {
+      return sortStr.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri, dir) {
         const range = veda.ontology.properties[property_uri].get('rdfs:range')[0];
         const by = property_uri.replace(re, '_');
         let clause;
@@ -525,13 +536,13 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
     }
   };
 
-  const buildQuery = function (individual) {
-    if (individual.id in visited) {
+  const buildQuery = function (individualParam) {
+    if (individualParam.id in visited) {
       return;
     } else {
-      visited[individual.id] = true;
+      visited[individualParam.id] = true;
     }
-    let where = Object.keys(individual.properties)
+    let where = Object.keys(individualParam.properties)
       .map((property_uri, i) => {
         if (property_uri.indexOf('.') >= 0 || property_uri.indexOf('*') >= 0) {
           throw new Error('VQL style property nesting: ' + property_uri);
@@ -539,8 +550,10 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
         if (property_uri === '@' || property_uri === 'rdf:type') {
           return;
         }
-        const values = individual.get(property_uri).sort((a, b) => {
-          return a < b ? - 1 : a === b ? 0 : 1;
+        const values = individualParam.get(property_uri).sort((a, b) => {
+          if (a < b) return -1;
+          else if (a === b) return 0;
+          else return 1;
         });
         let prop = property_uri.replace(re, '_');
         let oneProp;
@@ -625,11 +638,10 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
       return;
     }
 
-    return individual.get('rdf:type')
+    return individualParam.get('rdf:type')
       .map((type) => {
         const from = 'veda_tt.`' + type.id + '`';
-        const query = 'SELECT id FROM ' + from + (where ? ' WHERE ' + where : '');
-        return query;
+        return 'SELECT id FROM ' + from + (where ? ' WHERE ' + where : '');
       })
       .filter(Boolean)
       .join(' UNION ALL ');
@@ -668,33 +680,33 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
 
       /**
        * Form `group by` clause
-       * @param {string} sort
+       * @param {string} sortStr
        * @return {string}
        */
-      function groupBy (sort) {
+      function groupBy (sortStr) {
         const by = 'id';
         let props;
-        if (typeof sort === 'string' || sort instanceof String) {
-          props = sort.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri) {
+        if (typeof sortStr === 'string' || sortStr instanceof String) {
+          props = sortStr.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri) {
             const range = veda.ontology.properties[property_uri].get('rdfs:range')[0];
-            let by = property_uri.replace(re, '_');
+            let byClause = property_uri.replace(re, '_');
             switch (range.id) {
             case 'xsd:dateTime':
-              by = by + '_date';
+              byClause = byClause + '_date';
               break;
             case 'xsd:boolean':
             case 'xsd:integer':
-              by = by + '_int';
+              byClause = byClause + '_int';
               break;
             case 'xsd:decimal':
-              by = by + '_dec';
+              byClause = byClause + '_dec';
               break;
             case 'xsd:string':
             default:
-              by = by + '_str';
+              byClause = byClause + '_str';
               break;
             }
-            return by;
+            return byClause;
           });
         }
         return props ? by + ', ' + props : by;
@@ -702,12 +714,12 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
 
       /**
        * Form `order by` clause
-       * @param {string} sort
+       * @param {string} sortStr
        * @return {string}
        */
-      function orderBy (sort) {
-        if (typeof sort === 'string' || sort instanceof String) {
-          return sort.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri, dir) {
+      function orderBy (sortStr) {
+        if (typeof sortStr === 'string' || sortStr instanceof String) {
+          return sortStr.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri, dir) {
             const range = veda.ontology.properties[property_uri].get('rdfs:range')[0];
             const by = property_uri.replace(re, '_');
             let clause;
@@ -734,19 +746,19 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
 
       /**
        * Recursive from & where population
-       * @param {IndividualModel} individual
+       * @param {IndividualModel} individualParam
        * @param {string} parent_prop
-       * @param {number} type_index
+       * @param {number} type_index_param
        */
-      function buildQuery (individual, parent_prop, type_index) {
-        if (!individual.hasValue('rdf:type')) {
+      function buildQuery (individualParam, parent_prop, type_index_param) {
+        if (!individualParam.hasValue('rdf:type')) {
           return;
         }
         table_counter++;
-        type_index = type_index || 0;
-        const type = individual.get('rdf:type')[type_index].id;
+        type_index_param = type_index_param || 0;
+        const type = individualParam.get('rdf:type')[type_index_param].id;
         const alias = 't' + table_counter;
-        visited[individual.id] = alias;
+        visited[individualParam.id] = alias;
         const table_aliased = 'veda_tt.`' + type + '` AS ' + alias;
         if (!parent_prop) {
           from += table_aliased;
@@ -759,7 +771,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
           where += 'NOT ' + alias + '.v_s_deleted_int = [1]';
         }
 
-        const where_aliased = Object.keys(individual.properties)
+        const where_aliased = Object.keys(individualParam.properties)
           .map((property_uri, i) => {
             if (property_uri.indexOf('.') >= 0 || property_uri.indexOf('*') >= 0) {
               throw new Error('VQL style property nesting: ' + property_uri);
@@ -767,8 +779,10 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
             if (property_uri === '@' || property_uri === 'rdf:type') {
               return;
             }
-            const values = individual.get(property_uri).sort((a, b) => {
-              return a < b ? - 1 : a === b ? 0 : 1;
+            const values = individualParam.get(property_uri).sort((a, b) => {
+              if (a < b) return -1;
+              else if (a === b) return 0;
+              else return 1;
             });
             let prop = alias + '.' + property_uri.replace(re, '_');
             let oneProp;
@@ -871,7 +885,9 @@ Util.queryFromIndividual = function (individual) {
         return;
       }
       const values = flat[property_uri].sort((a, b) => {
-        return a.data < b.data ? - 1 : a.data === b.data ? 0 : 1;
+        if (a.data < b.data) return -1;
+        else if (a.data === b.data) return 0;
+        else return 1;
       });
       let oneProp;
       switch (values[0].type) {
@@ -931,8 +947,7 @@ Util.queryFromIndividual = function (individual) {
     })
     .filter((item) => typeof item !== 'undefined')
     .join(' && ');
-  const query = allProps ? '( ' + allProps + ' )' : undefined;
-  return query;
+  return (allProps ? '( ' + allProps + ' )' : undefined);
 };
 
 /**
@@ -959,8 +974,7 @@ function flattenIndividual (object, prefix, union, visited) {
     }
     const values = object[property_uri];
     const prefixed = prefix ? prefix + '.' + property_uri : property_uri;
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i];
+    for (const value of values) {
       if (value.type === 'Uri') {
         const individ = new IndividualModel(value.data);
         if ( individ.isNew() ) {
@@ -991,7 +1005,10 @@ Util.complexLabel = function (individual) {
   cache[individual['@']] = individual;
   const re_date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/i;
   const get_cached = function (uri) {
-    return cache[uri] ? cache[uri] : cache[uri] = get_individual(veda.ticket, uri);
+    if (!cache[uri]) {
+      cache[uri] = get_individual(veda.ticket, uri);
+    }
+    return cache[uri];
   };
   const get_localized_chain = function (language, uri, ...properties) {
     const startPoint = get_cached(uri);
@@ -999,9 +1016,9 @@ Util.complexLabel = function (individual) {
       return '';
     }
     let intermediates = [startPoint];
-    for (let i = 0, property; (property = properties[i]); i++) {
-      const length = properties.length;
-      if (i === length - 1) {
+    for (let i = 0; i < properties.length; i++) {
+      const property = properties[i];
+      if (i === properties.length - 1) {
         const parts = [];
         intermediates.forEach((item) => {
           if (item[property]) {
@@ -1010,12 +1027,11 @@ Util.complexLabel = function (individual) {
                 let data = value.data;
                 if ( data instanceof Date || re_date.test(data) ) {
                   data = new Date(data);
-                  data = new Date(data.getTime() - (data.getTimezoneOffset() * 60000)).toISOString().substr(0, 10);
+                  data = new Date(data.getTime() - (data.getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
                 }
-                return acc += data;
-              } else {
-                return acc;
+                acc += data;
               }
+              return acc;
             }, '');
             parts.push(part);
           }

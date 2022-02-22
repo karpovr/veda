@@ -14,7 +14,8 @@ riot.observable = function (el) {
   el.on = function (events, fn) {
     if (typeof fn === 'function') {
       events.replace(/[^\s]+/g, function (name, pos) {
-        (callbacks[name] = callbacks[name] || []).push(fn);
+        callbacks[name] = callbacks[name] || [];
+        callbacks[name].push(fn);
         fn.typed = pos > 0;
       });
     }
@@ -73,11 +74,12 @@ riot.render = function (tmpl, data, escape_fn) {
   if (escape_fn === true) escape_fn = default_escape_fn;
   tmpl = tmpl || '';
 
-  return (FN[tmpl] = FN[tmpl] || new Function('_', 'e', "return '" +
-    tmpl.replace(/[\\\n\r']/g, function (char) {
-      return template_escape[char];
-    }).replace(/{\s*([\w\.]+)\s*}/g, "' + (e?e(_.$1,'$1'):_.$1||(_.$1==null?'':_.$1)) + '") + "'")
-  )(data, escape_fn);
+  FN[tmpl] = FN[tmpl] || new Function('_', 'e', "return '" +
+  tmpl.replace(/[\\\n\r']/g, function (char) {
+    return template_escape[char];
+  }).replace(/{\s*([\w\.]+)\s*}/g, "' + (e?e(_.$1,'$1'):_.$1||(_.$1==null?'':_.$1)) + '") + "'");
+
+  return FN[tmpl](data, escape_fn);
 };
 /* Cross browser popstate */
 (function () {
@@ -86,25 +88,13 @@ riot.render = function (tmpl, data, escape_fn) {
 
   const pops = riot.observable({});
   const listen = window.addEventListener;
-  const doc = document;
 
   function pop (hash) {
     hash = hash.type ? location.hash : hash;
     pops.trigger('pop', hash);
   }
 
-  /* Always fire pop event upon page load (normalize behaviour across browsers) */
-
-  // standard browsers
-  if (listen) {
-    listen('popstate', pop, false);
-
-  // IE
-  } else {
-    doc.attachEvent('onreadystatechange', function () {
-      pop('');
-    });
-  }
+  listen('popstate', pop, false);
 
   /* Change the browser URL or listen to changes on the URL */
   riot.route = function (to, prevent) {
