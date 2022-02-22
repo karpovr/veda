@@ -72,8 +72,8 @@ impl<'a> AuthWorkPlace<'a> {
             }
         }
 
-        let candidate_account_ids = get_candidate_users_of_login(self.login, self.backend, self.xr, &mut self.auth_data);
-        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.result.len() > 0 {
+        let candidate_account_ids = get_candidate_users_of_login(self.login, self.backend, self.xr, self.auth_data);
+        if candidate_account_ids.result_code == ResultCode::Ok && !candidate_account_ids.result.is_empty() {
             for account_id in &candidate_account_ids.result {
                 let (op, res) = self.prepare_candidate_account(account_id, &mut ticket);
                 if op && res == ResultCode::Ok || res != ResultCode::Ok {
@@ -173,13 +173,13 @@ impl<'a> AuthWorkPlace<'a> {
 
         if old_secret.is_empty() {
             error!("update password: secret not found, user = {}", person.get_id());
-            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
+            remove_secret(self.credential, person.get_id(), self.backend, self.sys_ticket);
             return ResultCode::InvalidSecret;
         }
 
         if self.secret != old_secret {
             error!("request for update password: sent secret not equal to request secret {}, user = {}", self.secret, person.get_id());
-            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
+            remove_secret(self.credential, person.get_id(), self.backend, self.sys_ticket);
             return ResultCode::InvalidSecret;
         }
 
@@ -191,13 +191,13 @@ impl<'a> AuthWorkPlace<'a> {
 
         if self.verify_password() {
             error!("update password: password equals to previous password, reject, user = {}", person.get_id());
-            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
+            remove_secret(self.credential, person.get_id(), self.backend, self.sys_ticket);
             return ResultCode::NewPasswordIsEqualToOld;
         }
 
         if self.password == EMPTY_SHA256_HASH {
             error!("update password: password is empty, reject, user = {}", person.get_id());
-            remove_secret(&mut self.credential, person.get_id(), self.backend, self.sys_ticket);
+            remove_secret(self.credential, person.get_id(), self.backend, self.sys_ticket);
             return ResultCode::EmptyPassword;
         }
 
@@ -251,7 +251,7 @@ impl<'a> AuthWorkPlace<'a> {
 
         match account.get_first_literal("v-s:usesCredential") {
             Some(uses_credential_uri) => {
-                if let Some(_credential) = self.backend.get_individual(&uses_credential_uri, &mut self.credential) {
+                if let Some(_credential) = self.backend.get_individual(&uses_credential_uri, self.credential) {
                     _credential.parse_all();
                     self.stored_password = _credential.get_first_literal("v-s:password").unwrap_or_default();
                     self.stored_salt = _credential.get_first_literal("v-s:salt").unwrap_or_default();
@@ -259,14 +259,14 @@ impl<'a> AuthWorkPlace<'a> {
                     self.is_permanent = _credential.get_first_bool("v-s:isPermanent").unwrap_or(false);
                 } else {
                     error!("failed to read credential {}", uses_credential_uri);
-                    create_new_credential(self.sys_ticket, self.backend, &mut self.credential, account);
+                    create_new_credential(self.sys_ticket, self.backend, self.credential, account);
                 }
             },
             None => {
                 warn!("failed to find credential, create new");
                 self.stored_password = account.get_first_literal("v-s:password").unwrap_or_default();
 
-                create_new_credential(self.sys_ticket, self.backend, &mut self.credential, account);
+                create_new_credential(self.sys_ticket, self.backend, self.credential, account);
             },
         }
     }

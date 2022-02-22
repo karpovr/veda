@@ -115,7 +115,7 @@ pub(crate) fn get_ticket_trusted(
             error!("get_ticket_trusted: query result={:?}", candidate_account_ids.result_code);
         }
 
-        if candidate_account_ids.result_code == ResultCode::Ok && candidate_account_ids.result.len() > 0 {
+        if candidate_account_ids.result_code == ResultCode::Ok && !candidate_account_ids.result.is_empty() {
             for check_account_id in &candidate_account_ids.result {
                 if let Some(account) = backend.get_individual(check_account_id, &mut Individual::default()) {
                     let check_user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
@@ -170,7 +170,7 @@ pub(crate) fn get_candidate_users_of_login(login: &str, backend: &mut Backend, x
         info!("az.db: found account {}, {}", account_id, login);
         let mut qr = QueryResult::default();
         qr.result_code = ResultCode::Ok;
-        qr.result = Vec::from([account_id.to_owned()]);
+        qr.result = Vec::from([account_id]);
         return qr;
     }
 
@@ -178,7 +178,7 @@ pub(crate) fn get_candidate_users_of_login(login: &str, backend: &mut Backend, x
 
     let res = xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut backend.storage, OptAuthorize::NO, true);
 
-    if res.result_code == ResultCode::Ok && res.result.len() == 0 {
+    if res.result_code == ResultCode::Ok && res.result.is_empty() {
         warn!("empty query result, retry");
         return xr.query_use_authorize(FTQuery::new_with_user("cfg:VedaSystem", &query), &mut backend.storage, OptAuthorize::NO, true);
     }
