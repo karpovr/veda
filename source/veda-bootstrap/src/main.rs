@@ -37,7 +37,7 @@ struct VedaModule {
     args: Vec<String>,
     memory_limit: Option<u64>,
     order: u32,
-    is_enabled: bool,
+    //is_enabled: bool,
 }
 
 struct App {
@@ -59,10 +59,10 @@ impl App {
                 Ok(child) => {
                     info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                     self.started_modules.push((module.name.to_owned(), child));
-                }
+                },
                 Err(e) => {
                     return Err(Error::new(ErrorKind::Other, format!("failed to execute {}, err = {:?}", module.exec_name, e)));
-                }
+                },
             }
         }
 
@@ -162,10 +162,10 @@ impl App {
                                 Ok(child) => {
                                     info!("{} restart module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                                     *process = child;
-                                }
+                                },
                                 Err(e) => {
                                     error!("failed to execute, name = {}, err = {:?}", module.exec_name, e);
-                                }
+                                },
                             }
                         } else {
                             error!("failed to find module, name = {}", name);
@@ -196,10 +196,10 @@ impl App {
                         Ok(child) => {
                             info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                             self.started_modules.push((module.name.to_owned(), child));
-                        }
+                        },
                         Err(e) => {
                             error!("failed to execute, name = {}, err = {:?}", module.exec_name, e);
-                        }
+                        },
                     }
                 }
             }
@@ -280,7 +280,7 @@ impl App {
                     args: Vec::new(),
                     memory_limit: None,
                     order,
-                    is_enabled: true,
+                    //is_enabled: true,
                     exec_name: String::new(),
                 };
                 order += 1;
@@ -377,8 +377,6 @@ fn main() {
         return;
     }
 
-    let module_full_names: Vec<String> = app.modules_info.values().map(|x| x.exec_name[2..].to_string()).collect();
-
     let mut sys = sysinfo::System::new();
     sys.refresh_processes();
 
@@ -390,7 +388,7 @@ fn main() {
             continue;
         }
 
-        if proc.name().starts_with("veda-") && module_full_names.contains(&proc.name().to_string()) {
+        if proc.name().starts_with("veda-") && app.modules_info.values().map(|x| x.exec_name[2..].to_string()).any(|x| x == *proc.name()) {
             error!("failed to start, found other running process, pid = {}, {:?} ({:?}) ", pid, proc.exe(), proc.status());
             return;
         }
@@ -452,7 +450,7 @@ fn start_module(module: &VedaModule) -> io::Result<Child> {
                 thread::sleep(time::Duration::from_millis(100));
             }
             Ok(p)
-        }
+        },
         Err(e) => Err(e),
     }
 }
