@@ -174,7 +174,7 @@ impl PTIndexer {
                         for op in ops {
                             operations.insert(op);
                         }
-                    }
+                    },
                     Err(_) => break,
                 }
             }
@@ -310,7 +310,7 @@ impl PTIndexer {
             let ops = committed_props_ops.get_mut(&predicate).unwrap();
             let signed_op = op_id * (sign as i64);
             if !ops.contains(&signed_op) {
-                PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, &predicate, predicate_tables, &mut text_content, op_id);
+                PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, (&predicate, predicate_tables, &mut text_content), op_id);
                 ops.insert(signed_op);
             } else {
                 info!("skip already exported, uri = {}, type= {}, predicate = {}, op_id = {}", id, type_name, predicate, signed_op);
@@ -321,7 +321,7 @@ impl PTIndexer {
             let text_predicate = String::from("text");
             let text = text_content.join(" ");
             individual.set_string(&text_predicate, &text, Lang::NONE);
-            PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, &text_predicate, predicate_tables, &mut text_content, op_id);
+            PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, (&text_predicate, predicate_tables, &mut text_content), op_id);
         }
     }
 
@@ -332,11 +332,10 @@ impl PTIndexer {
         created: DateTime<Tz>,
         type_name: &str,
         individual: &mut Individual,
-        predicate: &str,
-        predicate_tables: &mut PredicateTables,
-        text_content: &mut Vec<String>,
+        p: (&str, &mut PredicateTables, &mut Vec<String>),
         op_id: i64,
     ) {
+        let (predicate, predicate_tables, text_content) = p;
         if let Some(resources) = individual.get_resources(predicate) {
             if !predicate_tables.contains_key(predicate) {
                 let new_table = (vec![], vec![], vec![], vec![], vec![], vec![], HashMap::new());
@@ -368,7 +367,7 @@ impl PTIndexer {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                }
+                },
                 DataType::String => {
                     let column_name = "str".to_string();
                     let column_value: Vec<String> = resources
@@ -397,7 +396,7 @@ impl PTIndexer {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                }
+                },
                 DataType::Uri => {
                     let column_name = "str".to_string();
                     let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri().to_string()).collect();
@@ -413,7 +412,7 @@ impl PTIndexer {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                }
+                },
                 DataType::Boolean => {
                     let column_name = "int".to_string();
                     let column_value: Vec<i64> = resources
@@ -435,7 +434,7 @@ impl PTIndexer {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                }
+                },
                 DataType::Decimal => {
                     let column_name = "dec".to_string();
                     let column_value: Vec<f64> = resources.iter().map(|resource| resource.get_float()).collect();
@@ -451,7 +450,7 @@ impl PTIndexer {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                }
+                },
                 DataType::Datetime => {
                     let column_name = "date".to_string();
                     let column_value: Vec<DateTime<Tz>> = resources.iter().map(|resource| Tz::UTC.timestamp(resource.get_datetime(), 0)).collect();
@@ -467,10 +466,10 @@ impl PTIndexer {
                         column.append(&mut empty);
                         column.push(column_value);
                     }
-                }
+                },
                 _ => {
                     error!("attribute value type is not supported");
-                }
+                },
             }
         }
     }
@@ -607,7 +606,7 @@ fn main() -> Result<(), Error> {
             Err(err) => {
                 println!("failed to connect to clickhouse, err = {:?}", err);
                 thread::sleep(Duration::from_secs(10));
-            }
+            },
         }
     }
 

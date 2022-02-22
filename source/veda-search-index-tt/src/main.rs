@@ -154,7 +154,7 @@ impl TTIndexer {
                         for op in ops {
                             committed_ops.insert(op);
                         }
-                    }
+                    },
                     Err(_) => break,
                 }
             }
@@ -232,7 +232,7 @@ impl TTIndexer {
 
         let rows = id_column.len();
 
-        let block = TTIndexer::mk_block(db_name, type_name, id_column, sign_column, version_column, text_column, &mut columns, client, db_type_tables).await?;
+        let block = TTIndexer::mk_block(db_name, type_name, id_column, sign_column, version_column, (text_column, &mut columns), client, db_type_tables).await?;
 
         if block.row_count() == 0 {
             info!("block is empty! nothing to insert");
@@ -335,7 +335,7 @@ impl TTIndexer {
                             column.append(&mut empty);
                             column.push(column_value);
                         }
-                    }
+                    },
                     DataType::String => {
                         column_name.push_str("_str");
                         let column_value: Vec<String> = resources
@@ -365,7 +365,7 @@ impl TTIndexer {
                             column.append(&mut empty);
                             column.push(column_value);
                         }
-                    }
+                    },
                     DataType::Uri => {
                         column_name.push_str("_str");
                         let column_value: Vec<String> = resources.iter().map(|resource| resource.get_uri().to_string()).collect();
@@ -382,7 +382,7 @@ impl TTIndexer {
                             column.append(&mut empty);
                             column.push(column_value);
                         }
-                    }
+                    },
                     DataType::Boolean => {
                         column_name.push_str("_int");
                         let column_value: Vec<i64> = resources
@@ -405,7 +405,7 @@ impl TTIndexer {
                             column.append(&mut empty);
                             column.push(column_value);
                         }
-                    }
+                    },
                     DataType::Decimal => {
                         column_name.push_str("_dec");
                         let column_value: Vec<f64> = resources.iter().map(|resource| resource.get_float()).collect();
@@ -422,7 +422,7 @@ impl TTIndexer {
                             column.append(&mut empty);
                             column.push(column_value);
                         }
-                    }
+                    },
                     DataType::Datetime => {
                         column_name.push_str("_date");
                         let column_value: Vec<DateTime<Tz>> = resources.iter().map(|resource| Tz::UTC.timestamp(resource.get_datetime(), 0)).collect();
@@ -439,10 +439,10 @@ impl TTIndexer {
                             column.append(&mut empty);
                             column.push(column_value);
                         }
-                    }
+                    },
                     _ => {
                         error!("value type is not supported");
-                    }
+                    },
                 }
             }
         }
@@ -456,11 +456,11 @@ impl TTIndexer {
         id_column: Vec<String>,
         sign_column: Vec<i8>,
         version_column: Vec<u32>,
-        text_column: Vec<String>,
-        columns: &mut HashMap<String, ColumnData>,
+        c: (Vec<String>, &mut HashMap<String, ColumnData>),
         client: &mut ClientHandle,
         db_type_tables: &mut HashMap<String, HashMap<String, String>>,
     ) -> Result<Block, Error> {
+        let (text_column, columns) = c;
         let rows = id_column.len();
 
         let mut block = Block::new().column("id", id_column).column("sign", sign_column).column("version", version_column).column("text", text_column);
@@ -571,7 +571,7 @@ fn main() -> Result<(), Error> {
             Err(err) => {
                 println!("failed to connect to clickhouse, err = {:?}", err);
                 thread::sleep(Duration::from_secs(10));
-            }
+            },
         }
     }
 
