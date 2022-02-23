@@ -213,7 +213,7 @@ fn main() -> std::io::Result<()> {
         .filter(None, LevelFilter::Info)
         .init();
 
-    let ccus_port = Module::get_property("ccus_port").expect("param [ccus_port] not found in veda.properties").clone();
+    let ccus_port = Module::get_property("ccus_port").expect("param [ccus_port] not found in veda.properties");
 
     info!("ccus port = {:?}", ccus_port);
 

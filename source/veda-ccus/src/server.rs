@@ -1,5 +1,6 @@
 use actix::prelude::*;
 use rand::{self, rngs::ThreadRng, Rng};
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::str;
 use std::sync::mpsc;
@@ -41,18 +42,10 @@ pub struct ClientMessage {
     pub msg: String,
 }
 
+#[derive(Default)]
 pub struct SubscribeElement {
     counter: u64,
     sessions: HashSet<usize>,
-}
-
-impl Default for SubscribeElement {
-    fn default() -> SubscribeElement {
-        SubscribeElement {
-            counter: 0,
-            sessions: HashSet::new(),
-        }
-    }
 }
 
 pub struct CCUSServer {
@@ -101,16 +94,20 @@ impl CCUSServer {
             loop {
                 if let Ok(msg) = self.my_receiver.recv_timeout(Duration::from_millis(1000)) {
                     // success receive, now store id of this message, for next id generate
-                    if msg_id < msg.1 {
-                        panic!("received someone else's message, ignore it. expected = {}, received = {}", msg_id, msg.1);
-                    } else if msg_id > msg.1 {
-                        error!("received someone else's message, ignore it. expected = {}, received = {}", msg_id, msg.1);
-                    } else {
-                        if msg.0 >= 0 {
-                            info!("{}, from storage: {}, {}", self.msg_id, uri, msg.0);
-                            storage_counter = msg.0 as u64;
-                        }
-                        break;
+                    match msg_id.cmp(&msg.1) {
+                        Ordering::Greater => {
+                            error!("received someone else's message, ignore it. expected = {} > received = {}", msg_id, msg.1);
+                        },
+                        Ordering::Less => {
+                            error!("received someone else's message, ignore it. expected = {} < received = {}", msg_id, msg.1);
+                        },
+                        Ordering::Equal => {
+                            if msg.0 >= 0 {
+                                info!("{}, from storage: {}, {}", self.msg_id, uri, msg.0);
+                                storage_counter = msg.0 as u64;
+                            }
+                            break;
+                        },
                     }
                 } else {
                     error!("failed to read message, timeout exceeded, message = {}, individual = {}", self.msg_id, uri);
@@ -258,19 +255,23 @@ impl Actor for CCUSServer {
                 return;
             }
 
-            if act.queue_consumer.queue.count_pushed - act.queue_consumer.count_popped == 0 {
-                // if not new messages, read queue info
-                act.queue_consumer.queue.get_info_queue();
+            match (act.queue_consumer.queue.count_pushed - act.queue_consumer.count_popped).cmp(&0) {
+                Ordering::Greater => {
+                    if act.queue_consumer.queue.id != act.queue_consumer.id {
+                        size_batch = 1;
+                    } else {
+                        size_batch = act.queue_consumer.queue.count_pushed - act.queue_consumer.count_popped;
+                    }
+                },
+                Ordering::Less => {},
+                Ordering::Equal => {
+                    // if not new messages, read queue info
+                    act.queue_consumer.queue.get_info_queue();
 
-                if act.queue_consumer.queue.id > act.queue_consumer.id {
-                    size_batch = 1;
-                }
-            } else if act.queue_consumer.queue.count_pushed - act.queue_consumer.count_popped > 0 {
-                if act.queue_consumer.queue.id != act.queue_consumer.id {
-                    size_batch = 1;
-                } else {
-                    size_batch = act.queue_consumer.queue.count_pushed - act.queue_consumer.count_popped;
-                }
+                    if act.queue_consumer.queue.id > act.queue_consumer.id {
+                        size_batch = 1;
+                    }
+                },
             }
 
             if size_batch > 0 {
