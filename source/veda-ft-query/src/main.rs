@@ -18,7 +18,7 @@ use v_common::v_api::obj::*;
 fn main() {
     init_log("FT_QUERY");
 
-    let mut query_url = Module::get_property("ft_query_service_url").expect("param [search_query_url] not found in veda.properties").to_owned();
+    let mut query_url = Module::get_property("ft_query_service_url").expect("param [search_query_url] not found in veda.properties");
 
     let args: Vec<String> = env::args().collect();
     for el in args.iter() {
@@ -70,16 +70,16 @@ fn main() {
                             error!("failed to send answer, err = {:?}", e);
                             break;
                         }
-                    }
+                    },
                     Err(e) => match e {
                         Error::TimedOut => {
                             info!("count requests: {}", count);
                             break;
-                        }
+                        },
                         _ => {
                             error!("failed to get request, err = {:?}", e);
                             break;
-                        }
+                        },
                     },
                 }
             }
@@ -110,7 +110,7 @@ fn req_prepare(backend: &mut Backend, s: &str, xr: &mut XapianReader) -> Message
         let ticket_id = a.get(TICKET).unwrap().as_str().unwrap_or_default();
         let mut query = a.get(QUERY).unwrap().as_str().unwrap_or_default().to_string();
 
-        if !(query.find("==").is_some() || query.find("&&").is_some() || query.find("||").is_some()) {
+        if !(query.contains("==") || query.contains("&&") || query.contains("||")) {
             query = "'*' == '".to_owned() + &query + "'";
         }
 
@@ -128,7 +128,7 @@ fn req_prepare(backend: &mut Backend, s: &str, xr: &mut XapianReader) -> Message
             if ticket_id.starts_with("UU=") {
                 user_uri = ticket_id.trim_start_matches("UU=").to_owned();
             } else {
-                let ticket = backend.get_ticket_from_db(&ticket_id);
+                let ticket = backend.get_ticket_from_db(ticket_id);
                 if ticket.result == ResultCode::Ok {
                     user_uri = ticket.user_uri;
                 }
