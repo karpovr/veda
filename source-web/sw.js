@@ -1,3 +1,107 @@
+// Local DB for api calls
+
+const fallback = {
+  get: function (key) {
+    return Promise.resolve(this[key]);
+  },
+  put: function (key, value) {
+    this[key] = value;
+    return Promise.resolve(value);
+  },
+  remove: function (key) {
+    const result = delete this[key];
+    return Promise.resolve(result);
+  },
+};
+
+/**
+ * Local database singleton constructor
+ * @return {Promise} database instance promise
+ */
+function LocalDB () {
+  // Singleton pattern
+  if (LocalDB.prototype._singletonInstance) {
+    return LocalDB.prototype._singletonInstance;
+  }
+  LocalDB.prototype._singletonInstance = this;
+
+  this.veda_version = veda_version;
+  this.db_name = 'sw';
+  this.store_name = 'individuals';
+}
+
+LocalDB.prototype.constructor = LocalDB;
+
+/**
+ * Initialize database instance
+ * @return {Promise} database instance promise
+ */
+LocalDB.prototype.init = function () {
+  return new Promise((resolve, reject) => {
+    if (this.db) {
+      resolve(this);
+      return;
+    }
+    const openReq = indexedDB.open(this.db_name, this.veda_version);
+
+    openReq.onsuccess = (event) => {
+      this.db = event.target.result;
+      console.log(`DB open success: ${this.db_name}, version = ${this.veda_version}`);
+      resolve(this);
+    };
+
+    openReq.onerror = (error) => {
+      console.log('DB open error', error);
+      reject(error);
+    };
+
+    openReq.onblocked = function (event) {
+      self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
+        clients.forEach((client) => {
+          client.postMessage({alert: 'Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!'});
+        });
+      });
+    };
+
+    openReq.onupgradeneeded = (event) => {
+      const result = event.target.result;
+      if (result.objectStoreNames.contains(this.store_name)) {
+        result.deleteObjectStore(this.store_name);
+        console.log(`DB store deleted: ${this.store_name}`);
+      }
+      result.createObjectStore(this.store_name);
+      console.log(`DB store created: ${this.store_name}, version = ${this.veda_version}`);
+    };
+  }).catch((error) => {
+    console.log('IndexedDB error, using in-memory fallback.', error);
+    return fallback;
+  });
+};
+
+LocalDB.prototype.get = function (key) {
+  return new Promise((resolve, reject) => {
+    const request = this.db.transaction([this.store_name], 'readonly').objectStore(this.store_name).get(key);
+    request.onerror = reject;
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
+};
+
+LocalDB.prototype.put = function (key, value) {
+  return new Promise((resolve, reject) => {
+    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).put(value, key);
+    request.onerror = reject;
+    request.onsuccess = () => resolve(value);
+  });
+};
+
+LocalDB.prototype.remove = function (key) {
+  return new Promise((resolve, reject) => {
+    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).delete(key);
+    request.onerror = reject;
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
+};
+
 // API calls caching service worker
 
 const veda_version = 7;
@@ -5,6 +109,8 @@ const watchTimeout = 60 * 1000;
 const FILES = 'files';
 const STATIC = 'static';
 const API = 'api';
+const db = new LocalDB();
+db.init();
 
 const API_FNS = [
   '/get_rights',
@@ -31,7 +137,7 @@ const NTLM = [
 ];
 
 // Check line
-this.onLine = false;
+self.onLine = false;
 function sendStatus () {
   self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
     clients.forEach((client) => {
@@ -77,8 +183,8 @@ function ping () {
     });
 }
 
-this.addEventListener('message', (event) => {
-  if (event.origin !== this.registration.scope.slice(0, -1)) return;
+self.addEventListener('message', (event) => {
+  if (event.origin !== self.registration.scope.slice(0, -1)) return;
   if (event.data === 'status') {
     ping();
   }
@@ -125,8 +231,8 @@ watchChanges();
 /**
  * Listen to messages from client
  */
-this.addEventListener('message', (event) => {
-  if (event.origin !== this.registration.scope.slice(0, -1)) return;
+self.addEventListener('message', (event) => {
+  if (event.origin !== self.registration.scope.slice(0, -1)) return;
   if (event.data === 'version') {
     event.source.postMessage({version: veda_version});
   }
@@ -135,7 +241,7 @@ this.addEventListener('message', (event) => {
 /**
  * Clear cached resources
  */
-this.addEventListener('install', (event) => {
+self.addEventListener('install', (event) => {
   this.skipWaiting();
   console.log(`Service worker updated, veda_version = ${veda_version}, clear cache`);
   event.waitUntil(
@@ -143,7 +249,7 @@ this.addEventListener('install', (event) => {
   );
 });
 
-this.addEventListener('fetch', function (event) {
+self.addEventListener('fetch', function (event) {
   const url = new URL(event.request.url);
   const pathname = url.pathname;
   const isAPI = API_FNS.indexOf(pathname) >= 0;
@@ -173,10 +279,10 @@ this.addEventListener('fetch', function (event) {
 function handleFetch (event, CACHE) {
   const path = new URL(event.request.url).pathname;
   return caches.match(path).then((cached) => cached || fetch(event.request).then((response) => {
-    if (response.ok) {
-      return caches.open(CACHE).then((cache) => {
-        cache.put(path, response.clone());
-        return response;
+    if (response.ok && !cached) {
+      const clone = response.clone();
+      caches.open(CACHE).then((cache) => {
+        cache.put(path, clone);
       });
     }
     return response;
@@ -216,21 +322,6 @@ function handleAPIGet (event) {
   url.searchParams.delete('ticket');
   const fn = url.pathname.split('/').pop();
   switch (fn) {
-  // Fetch only
-  case 'authenticate':
-  case 'get_ticket_trusted':
-  case 'is_ticket_valid':
-    return fetch(event.request)
-      .then((response) => {
-        if (response.status === 0 || response.status === 503) {
-          ping();
-        }
-        return response;
-      })
-      .catch((error) => {
-        ping();
-        throw error;
-      });
   // Fetch first
   case 'get_rights':
   case 'get_rights_origin':
@@ -266,7 +357,7 @@ function handleAPIGet (event) {
           caches.open( API ).then((cache) => cache.put(url, clone));
         } else if (response.status === 0 || response.status === 503) {
           ping();
-          return caches.match(url).then((cached) => cached || response);
+          if (cached) return cached;
         }
         return response;
       }))
@@ -279,6 +370,10 @@ function handleAPIGet (event) {
           throw error;
         });
       });
+  // Fetch only
+  case 'authenticate':
+  case 'get_ticket_trusted':
+  case 'is_ticket_valid':
   default:
     return fetch(event.request)
       .then((response) => {
@@ -303,24 +398,20 @@ function handleAPIPost (event) {
     .then(function (response) {
       if (response.ok) {
         const responseClone = response.clone();
-        const db = new LocalDB();
-        db.then(function (db) {
-          Promise.all([serialize(cloneRequest), serialize(responseClone)]).then(function (req_res) {
-            const request = JSON.stringify(req_res[0]);
-            const response = req_res[1];
-            db.put(request, response);
-          });
+        Promise.all([serialize(cloneRequest), serialize(responseClone)]).then(function (req_res) {
+          const req = JSON.stringify(req_res[0]);
+          const res = req_res[1];
+          db.put(req, res);
         });
       } else if (response.status === 0 || response.status === 503) {
         ping();
         return serialize(cloneRequest).then(function (request) {
           request = JSON.stringify(request);
-          const db = new LocalDB();
-          return db.then(function (db) {
-            return db.get(request).then(deserialize);
-          }).catch((err) => {
-            return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
-          });
+          return db.get(request)
+            .then(deserialize)
+            .catch((err) => {
+              return new Response(OFFLINE_API_RESPONSE[fn], {headers: {'Content-Type': 'application/json'}});
+            });
         });
       }
       return response;
@@ -364,14 +455,11 @@ function handleAPIPut (event) {
  * @return {Request}
  */
 function enqueueRequest (request) {
-  const db = new LocalDB();
-  return db.then(function (db) {
-    return serialize(request).then(function (serializedRequest) {
-      return db.get('offline-queue').then(function (queue) {
-        queue = queue || [];
-        queue.push(serializedRequest);
-        return db.put('offline-queue', queue);
-      });
+  return serialize(request).then(function (serializedRequest) {
+    return db.get('offline-queue').then(function (queue) {
+      queue = queue || [];
+      queue.push(serializedRequest);
+      return db.put('offline-queue', queue);
     });
   });
 }
@@ -382,15 +470,14 @@ function enqueueRequest (request) {
  */
 function flushQueue () {
   console.log('Flushing queue');
-  const db = new LocalDB();
-  return db.then(function (db) {
-    return db.get('offline-queue').then(function (queue) {
+  return db.get('offline-queue')
+    .then(function (queue) {
       if (queue && queue.length) {
         return queue.reduce(function (prom, request) {
           return prom.then(function () {
             return deserialize(request);
-          }).then(function (request) {
-            return fetch(request);
+          }).then(function (req) {
+            return fetch(req);
           });
         }, Promise.resolve()).then(function () {
           db.remove('offline-queue');
@@ -399,8 +486,7 @@ function flushQueue () {
       } else {
         return Promise.resolve(0);
       }
-    });
-  })
+    })
     .then((queue_length) => console.log('Done, queue flushed', queue_length))
     .catch((error) => console.log('Error flushing queue', error));
 }
@@ -452,105 +538,3 @@ function serialize (subject) {
 function deserialize (subject) {
   return subject.method ? new Request(subject.url, subject) : new Response(subject.body, subject);
 }
-
-// Local DB for api calls
-
-const fallback = {
-  get: function (key) {
-    return Promise.resolve(this[key]);
-  },
-  put: function (key, value) {
-    this[key] = value;
-    return Promise.resolve(value);
-  },
-  remove: function (key) {
-    const result = delete this[key];
-    return Promise.resolve(result);
-  },
-};
-
-/**
- * Local database singleton constructor
- * @return {Promise} database instance promise
- */
-function LocalDB () {
-  this.veda_version = veda_version;
-  this.db_name = 'sw';
-  this.store_name = 'individuals';
-
-  // Singleton pattern
-  if (LocalDB.prototype[this.db_name + this.store_name]) {
-    return Promise.resolve(LocalDB.prototype[this.db_name + this.store_name]);
-  }
-
-  return LocalDB.prototype[this.db_name + this.store_name] = this.initDB();
-}
-
-const proto = LocalDB.prototype;
-
-/**
- * Initialize database instance
- * @return {Promise} database instance promise
- */
-proto.initDB = function () {
-  return new Promise((resolve, reject) => {
-    const openReq = indexedDB.open(this.db_name, this.veda_version);
-
-    openReq.onsuccess = (event) => {
-      const db = event.target.result;
-      this.db = db;
-      console.log(`DB open success: ${this.db_name}, version = ${this.veda_version}`);
-      resolve(this);
-    };
-
-    openReq.onerror = (error) => {
-      console.log('DB open error', error);
-      reject(error);
-    };
-
-    openReq.onblocked = function (event) {
-      self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
-        clients.forEach((client) => {
-          client.postMessage({alert: 'Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!'});
-        });
-      });
-    };
-
-    openReq.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (db.objectStoreNames.contains(this.store_name)) {
-        db.deleteObjectStore(this.store_name);
-        console.log(`DB store deleted: ${this.store_name}`);
-      }
-      db.createObjectStore(this.store_name);
-      console.log(`DB store created: ${this.store_name}, version = ${this.veda_version}`);
-    };
-  }).catch((error) => {
-    console.log('IndexedDB error, using in-memory fallback.', error);
-    return fallback;
-  });
-};
-
-proto.get = function (key) {
-  return new Promise((resolve, reject) => {
-    const request = this.db.transaction([this.store_name], 'readonly').objectStore(this.store_name).get(key);
-    request.onerror = reject;
-    request.onsuccess = (event) => resolve(event.target.result);
-  });
-};
-
-proto.put = function (key, value) {
-  return new Promise((resolve, reject) => {
-    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).put(value, key);
-    request.onerror = reject;
-    request.onsuccess = () => resolve(value);
-  });
-};
-
-proto.remove = function (key) {
-  return new Promise((resolve, reject) => {
-    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).delete(key);
-    request.onerror = reject;
-    request.onsuccess = (event) => resolve(event.target.result);
-  });
-};

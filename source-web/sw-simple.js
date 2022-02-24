@@ -67,7 +67,7 @@ watchChanges();
 /**
  * Listen to messages from client
  */
-this.addEventListener('message', (event) => {
+self.addEventListener('message', (event) => {
   if (event.origin !== this.registration.scope.slice(0, -1)) return;
   if (event.data === 'version') {
     event.source.postMessage({version: veda_version});
@@ -77,7 +77,7 @@ this.addEventListener('message', (event) => {
 /**
  * Clear cached resources
  */
-this.addEventListener('install', (event) => {
+self.addEventListener('install', (event) => {
   this.skipWaiting();
   console.log(`Service worker updated, veda_version = ${veda_version}, clear cache`);
   event.waitUntil(
@@ -94,17 +94,17 @@ this.addEventListener('install', (event) => {
 function handleFetch (event, CACHE) {
   const path = new URL(event.request.url).pathname;
   return caches.match(path).then((cached) => cached || fetch(event.request).then((response) => {
-    if (response.ok) {
-      return caches.open(CACHE).then((cache) => {
-        cache.put(path, response.clone());
-        return response;
+    if (response.ok && !cached) {
+      const clone = response.clone();
+      caches.open(CACHE).then((cache) => {
+        cache.put(path, clone);
       });
     }
     return response;
   }));
 }
 
-this.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const {pathname} = url;
   const isAPI = API.indexOf(pathname) >= 0;
