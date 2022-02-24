@@ -218,13 +218,12 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                     let file_uri = file_info.get_first_literal("v-s:fileUri");
                     let file_name = file_info.get_first_literal("v-s:fileName");
 
-                    if path.is_some() && file_uri.is_some() && file_name.is_some() {
-                        let mut path = path.unwrap();
+                    if let (Some(path), Some(file_uri), Some(file_name)) = (path, file_uri, file_name) {
                         if !path.is_empty() {
-                            path += "/";
-                            let full_path = ATTACHMENTS_DB_PATH.to_owned() + path.as_ref() + &file_uri.unwrap();
+                            let path = path + "/";
+                            let full_path = ATTACHMENTS_DB_PATH.to_owned() + path.as_ref() + &file_uri;
 
-                            match email.clone().attachment_from_file(Path::new(&full_path), Some(&file_name.unwrap_or_default()), &IMAGE_JPEG) {
+                            match email.clone().attachment_from_file(Path::new(&full_path), Some(&file_name), &IMAGE_JPEG) {
                                 Ok(att) => email = att,
                                 Err(e) => error!("failed to add attachment {} to email {}, err = {:?}", &full_path, prepared_indv.get_id(), e),
                             }
@@ -263,10 +262,10 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                     } else {
                         error!("failed to send email, mailer not found, uri = {}, ", prepared_indv.get_id());
                     }
-                }
+                },
                 Err(e) => {
                     error!("failed to build email, id = {}, err = {:?}", prepared_indv.get_id(), e);
-                }
+                },
             }
         }
     } else {
@@ -366,7 +365,7 @@ fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Conte
         label = indv.get_first_literal("rdfs:label").unwrap_or_default();
 
         if indv.any_exists("rdf:type", &["v-s:Appointment"]) {
-            return get_emails_from_appointment(&has_message_type, indv, backend);
+            return get_emails_from_appointment(has_message_type, indv, backend);
         } else if indv.any_exists("rdf:type", &["v-s:Position"]) {
             let l_individuals = backend
                 .fts
@@ -441,7 +440,7 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
                                 return false;
                             }
 
-                            if login.is_some() && pass.is_some() {
+                            if let (Some(login), Some(pass)) = (login, pass) {
                                 let auth_type = match connection.get_first_literal("v-s:authType").unwrap_or_default().as_str() {
                                     "PLAIN" => Mechanism::Plain,
                                     "LOGIN" => Mechanism::Login,
@@ -452,7 +451,7 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
                                 ctx.smtp_client = Some(
                                     client
                                         .unwrap()
-                                        .credentials(Credentials::new(login.unwrap(), pass.unwrap()))
+                                        .credentials(Credentials::new(login, pass))
                                         .smtp_utf8(use_smtp_utf8)
                                         .authentication_mechanism(auth_type)
                                         .connection_reuse(ConnectionReuseParameters::ReuseUnlimited)
