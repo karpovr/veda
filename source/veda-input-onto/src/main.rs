@@ -35,20 +35,11 @@ struct FileHash {
     data: HashMap<String, String>,
 }
 
+#[derive(Default)]
 struct Prefixes {
     namespaces2id: HashMap<String, String>,
     id2orignamespaces: HashMap<String, String>,
     id2namespaces: HashMap<String, String>,
-}
-
-impl Default for Prefixes {
-    fn default() -> Self {
-        Self {
-            namespaces2id: HashMap::new(),
-            id2orignamespaces: HashMap::new(),
-            id2namespaces: HashMap::new(),
-        }
-    }
 }
 
 impl fmt::Display for Prefixes {
@@ -115,7 +106,7 @@ fn main() -> NotifyResult<()> {
                 prev_hashes_set = FileHash {
                     data: HashMap::new(),
                 }
-            }
+            },
         };
     } else {
         prev_hashes_set = FileHash {
@@ -170,11 +161,11 @@ fn main() -> NotifyResult<()> {
                             store_hash_list(&new_hashes_set, &path_files_hashes);
                         }
                         prepared_count += 1;
-                    }
+                    },
                     _ => {
                         prepared_count += 1;
                         info!("ignore: {:?}", event);
-                    }
+                    },
                 },
                 Err(_) => {
                     if prepared_count > 0 {
@@ -182,7 +173,7 @@ fn main() -> NotifyResult<()> {
                         std::mem::drop(watcher);
                         break;
                     }
-                }
+                },
             };
         }
     }
@@ -280,17 +271,17 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                     }
                 }
                 Some(new_h)
-            }
+            },
             Err(e) => {
                 error!("failed to calculate HASH for file {}, err = {}", &path, e);
                 None
-            }
+            },
         };
         file_info_indv.set_id(&new_id);
 
         if file_need_for_load {
-            let mut individuals = file2indv.entry(path.to_owned()).or_default();
-            if let Some((onto_id, _onto_url, load_priority)) = parse_file(path, &mut individuals, &mut prefixes) {
+            let individuals = file2indv.entry(path.to_owned()).or_default();
+            if let Some((onto_id, _onto_url, load_priority)) = parse_file(path, individuals, &mut prefixes) {
                 //        info!("ontology: {} {} {}", &file, onto_id, load_priority);
                 full_file_info_indv(&onto_id, individuals, &mut file_info_indv, new_hash, path, name);
                 priority_list.push((load_priority, onto_id, path.to_owned()));
@@ -457,37 +448,37 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                         } => match datatype.iri.replace("#", "/").as_str() {
                             "http://www.w3.org/2001/XMLSchema/string" => {
                                 indv.add_string(&predicate, value, Lang::NONE);
-                            }
+                            },
                             "http://www.w3.org/2001/XMLSchema/nonNegativeInteger" => {
                                 if let Ok(v) = value.parse::<i64>() {
                                     indv.add_integer(&predicate, v);
                                 } else {
                                     error!("failed to parse [{}] to integer", value);
                                 }
-                            }
+                            },
                             "http://www.w3.org/2001/XMLSchema/integer" => {
                                 if let Ok(v) = value.trim().parse::<i64>() {
                                     indv.add_integer(&predicate, v);
                                 } else {
                                     error!("failed to parse [{}] to integer", value);
                                 }
-                            }
+                            },
                             "http://www.w3.org/2001/XMLSchema/boolean" => {
                                 if let Ok(v) = value.parse::<bool>() {
                                     indv.add_bool(&predicate, v);
                                 } else {
                                     error!("failed to parse [{}] to bool", value);
                                 }
-                            }
+                            },
                             "http://www.w3.org/2001/XMLSchema/decimal" => {
                                 indv.add_decimal_from_str(&predicate, value);
-                            }
+                            },
                             "http://www.w3.org/2001/XMLSchema/dateTime" => {
                                 indv.add_datetime_from_str(&predicate, value);
-                            }
+                            },
                             _ => {
                                 error!("unknown type {}", datatype.iri);
-                            }
+                            },
                         },
                     },
                 }
