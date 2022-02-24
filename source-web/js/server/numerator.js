@@ -56,7 +56,6 @@ Numerator.numerate = function (ticket, individual, super_classes, prev_state, _e
         const rule = get_individual(ticket, numeration['v-s:hasNumerationRule'][0].data);
         const scopeId = getScope(ticket, individual, rule);
         const scope = get_individual(ticket, scopeId) || createScope(ticket, scopeId);
-        // print("@2 | number", number, "| deleted", deleted, "| prev_state", !!prev_state, "| prevNumber", prevNumber, "| scopeId", scopeId);
 
         if (!number && !prevNumber) {
           // update doc, commit number
@@ -64,27 +63,21 @@ Numerator.numerate = function (ticket, individual, super_classes, prev_state, _e
           commitValue(ticket, scope, number, _event_id);
           individual[enumeratedProperty] = ServerUtil.newStr( number.toString() );
           put_individual(ticket, individual, _event_id);
-          // print("@3 update doc, commit number");
         } else if (!number && prevNumber) {
           individual[enumeratedProperty] = ServerUtil.newStr( prevNumber.toString() ); // Restore number
           put_individual(ticket, individual, _event_id);
         } else if (number && !prev_state) {
           // commit number
           commitValue(ticket, scope, number, _event_id);
-          // print("@4 commit number");
         } else if (number && deleted) {
           // revoke number
           revokeValue(ticket, scope, number, _event_id);
-          // print("@5 revoke number");
         } else if (number && prevNumber && number !== prevNumber) {
           // commit number, revoke prevNumber
           commitValue(ticket, scope, number, _event_id);
           const prevScopeId = getScope(ticket, prev_state, rule);
           const prevScope = get_individual(ticket, prevScopeId);
           revokeValue(ticket, prevScope, prevNumber, _event_id);
-          // print("@6 commit number, revoke prevNumber");
-        } else {
-          // print("@7 no condition fullfilled");
         }
       }
     });
@@ -104,7 +97,6 @@ Numerator.numerate = function (ticket, individual, super_classes, prev_state, _e
  */
 function getNewValue (ticket, individual, rule, scope) {
   try {
-    // print("getNewValue: ticket", ticket, "| individual", JSON.stringify(individual), "| rule", JSON.stringify(rule), "| scope", JSON.stringify(scope));
     return eval(rule['v-s:numerationGetNextValue'][0].data)(ticket, scope);
   } catch (e) {
     print('getNewValue error', e.stack);
@@ -121,7 +113,6 @@ function getNewValue (ticket, individual, rule, scope) {
  */
 function getScope (ticket, individual, rule) {
   try {
-    // print("getScope: ticket", ticket, "| individual", JSON.stringify(individual), "| rule", JSON.stringify(rule));
     return eval(rule['v-s:numerationScope'][0].data)(ticket, individual);
   } catch (e) {
     print(e.stack);
@@ -136,7 +127,6 @@ function getScope (ticket, individual, rule) {
  * @return {string}
  */
 function createScope (ticket, scopeId) {
-  // print("createScope: ticket", ticket, "| scopeId", JSON.stringify(scopeId));
   try {
     const scope = {
       '@': scopeId,
@@ -160,7 +150,6 @@ function createScope (ticket, scopeId) {
  * @return {boolean}
  */
 function commitValue (ticket, scope, value, _event_id) {
-  // print("commitValue: ticket", ticket, "| scope", JSON.stringify(scope), "| value", JSON.stringify(value));
   try {
     let nextInterval = null;
     let prevInterval = null;
@@ -264,7 +253,6 @@ function commitValue (ticket, scope, value, _event_id) {
  * @return {void}
  */
 function revokeValue (ticket, scope, value, _event_id) {
-  // print("revokeValue: ticket", ticket, "value", value);
   try {
     const intervals = [];
     for ( const i in scope['v-s:numerationCommitedInterval']) {
@@ -391,7 +379,6 @@ Numerator.getNextValueSimple = function (ticket, scope, FIRST_VALUE) {
       }
     } catch (err) {
       print('ERR! intervalUri = ', intervalUri);
-      // print ("ERR! interval=", intervalUri);
       print(err.stack);
     }
   });

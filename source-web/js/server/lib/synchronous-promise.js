@@ -1,17 +1,11 @@
 // https://github.com/fluffynuts/synchronous-promise
-;(function (global) {
+(function (global) {
+  'use strict';
+  const PENDING = 'pending';
+  const RESOLVED = 'resolved';
+  const REJECTED = 'rejected';
 
-  /* jshint node: true */
-  "use strict";
-  function makeArrayFrom(obj) {
-    return Array.prototype.slice.apply(obj);
-  }
-  var
-    PENDING = "pending",
-    RESOLVED = "resolved",
-    REJECTED = "rejected";
-
-  function SynchronousPromise(handler) {
+  function SynchronousPromise (handler) {
     this.status = PENDING;
     this._continuations = [];
     this._parent = null;
@@ -20,30 +14,30 @@
       handler.call(
         this,
         this._continueWith.bind(this),
-        this._failWith.bind(this)
+        this._failWith.bind(this),
       );
     }
   }
 
-  function looksLikeAPromise(obj) {
-    return obj && typeof (obj.then) === "function";
+  function looksLikeAPromise (obj) {
+    return obj && typeof (obj.then) === 'function';
   }
 
   SynchronousPromise.prototype = {
     then: function (nextFn, catchFn) {
-      var next = SynchronousPromise.unresolved()._setParent(this);
+      const next = SynchronousPromise.unresolved()._setParent(this);
       if (this._isRejected()) {
         if (this._paused) {
           this._continuations.push({
             promise: next,
             nextFn: nextFn,
-            catchFn: catchFn
+            catchFn: catchFn,
           });
           return next;
         }
         if (catchFn) {
           try {
-            var catchResult = catchFn(this._error);
+            const catchResult = catchFn(this._error);
             if (looksLikeAPromise(catchResult)) {
               this._chainPromiseData(catchResult, next);
               return next;
@@ -59,7 +53,7 @@
       this._continuations.push({
         promise: next,
         nextFn: nextFn,
-        catchFn: catchFn
+        catchFn: catchFn,
       });
       this._runResolutions();
       return next;
@@ -68,10 +62,10 @@
       if (this._isResolved()) {
         return SynchronousPromise.resolve(this._data)._setParent(this);
       }
-      var next = SynchronousPromise.unresolved()._setParent(this);
+      const next = SynchronousPromise.unresolved()._setParent(this);
       this._continuations.push({
         promise: next,
-        catchFn: handler
+        catchFn: handler,
       });
       this._runRejections();
       return next;
@@ -81,7 +75,7 @@
       return this;
     },
     resume: function () {
-      var firstPaused = this._findFirstPaused();
+      const firstPaused = this._findFirstPaused();
       if (firstPaused) {
         firstPaused._paused = false;
         firstPaused._runResolutions();
@@ -92,9 +86,9 @@
     _findAncestry: function () {
       return this._continuations.reduce(function (acc, cur) {
         if (cur.promise) {
-          var node = {
+          const node = {
             promise: cur.promise,
-            children: cur.promise._findAncestry()
+            children: cur.promise._findAncestry(),
           };
           acc.push(node);
         }
@@ -103,13 +97,13 @@
     },
     _setParent: function (parent) {
       if (this._parent) {
-        throw new Error("parent already set");
+        throw new Error('parent already set');
       }
       this._parent = parent;
       return this;
     },
     _continueWith: function (data) {
-      var firstPending = this._findFirstPending();
+      const firstPending = this._findFirstPending();
       if (firstPending) {
         firstPending._data = data;
         firstPending._setResolved();
@@ -126,8 +120,8 @@
       });
     },
     _findFirstAncestor: function (matching) {
-      var test = this;
-      var result;
+      let test = this;
+      let result;
       while (test) {
         if (matching(test)) {
           result = test;
@@ -137,7 +131,7 @@
       return result;
     },
     _failWith: function (error) {
-      var firstRejected = this._findFirstPending();
+      const firstRejected = this._findFirstPending();
       if (firstRejected) {
         firstRejected._error = error;
         firstRejected._setRejected();
@@ -150,17 +144,16 @@
       if (this._paused || !this._isRejected()) {
         return;
       }
-      var
-        error = this._error,
-        continuations = this._takeContinuations(),
-        self = this;
+      const
+        error = this._error;
+      const continuations = this._takeContinuations();
+      const self = this;
       continuations.forEach(function (cont) {
         if (cont.catchFn) {
           try {
-            var catchResult = cont.catchFn(error);
+            const catchResult = cont.catchFn(error);
             self._handleUserFunctionResult(catchResult, cont.promise);
           } catch (e) {
-            var message = e.message;
             cont.promise.reject(e);
           }
         } else {
@@ -172,16 +165,16 @@
       if (this._paused || !this._isResolved()) {
         return;
       }
-      var continuations = this._takeContinuations();
+      const continuations = this._takeContinuations();
       if (looksLikeAPromise(this._data)) {
         return this._handleWhenResolvedDataIsPromise(this._data);
       }
-      var data = this._data;
-      var self = this;
+      const data = this._data;
+      const self = this;
       continuations.forEach(function (cont) {
         if (cont.nextFn) {
           try {
-            var result = cont.nextFn(data);
+            const result = cont.nextFn(data);
             self._handleUserFunctionResult(result, cont.promise);
           } catch (e) {
             self._handleResolutionError(e, cont);
@@ -206,7 +199,7 @@
       }
     },
     _handleWhenResolvedDataIsPromise: function (data) {
-      var self = this;
+      const self = this;
       return data.then(function (result) {
         self._data = result;
         self._runResolutions();
@@ -250,7 +243,7 @@
     },
     _isRejected: function () {
       return this.status === REJECTED;
-    }
+    },
   };
 
   SynchronousPromise.resolve = function (result) {
@@ -280,8 +273,7 @@
     });
   };
 
-  SynchronousPromise.all = function () {
-    var args = makeArrayFrom(arguments);
+  SynchronousPromise.all = function (...args) {
     if (Array.isArray(args[0])) {
       args = args[0];
     }
@@ -289,22 +281,22 @@
       return SynchronousPromise.resolve([]);
     }
     return new SynchronousPromise(function (resolve, reject) {
-      var
-        allData = [],
-        numResolved = 0,
-        doResolve = function () {
-          if (numResolved === args.length) {
-            resolve(allData);
-          }
-        },
-        rejected = false,
-        doReject = function (err) {
-          if (rejected) {
-            return;
-          }
-          rejected = true;
-          reject(err);
-        };
+      const
+        allData = [];
+      let numResolved = 0;
+      const doResolve = function () {
+        if (numResolved === args.length) {
+          resolve(allData);
+        }
+      };
+      let rejected = false;
+      const doReject = function (err) {
+        if (rejected) {
+          return;
+        }
+        rejected = true;
+        reject(err);
+      };
       args.forEach(function (arg, idx) {
         SynchronousPromise.resolve(arg).then(function (thisResult) {
           allData[idx] = thisResult;
@@ -317,40 +309,36 @@
     });
   };
 
-  /* jshint ignore:start */
   if (Promise === SynchronousPromise) {
-    throw new Error("Please use SynchronousPromise.installGlobally() to install globally");
+    throw new Error('Please use SynchronousPromise.installGlobally() to install globally');
   }
-  var RealPromise = Promise;
-  SynchronousPromise.installGlobally = function(__awaiter) {
+  const RealPromise = Promise;
+  SynchronousPromise.installGlobally = function (__awaiter) {
     if (Promise === SynchronousPromise) {
       return __awaiter;
     }
-    var result = patchAwaiterIfRequired(__awaiter);
+    const result = patchAwaiterIfRequired(__awaiter);
     Promise = SynchronousPromise;
     return result;
   };
 
-  SynchronousPromise.uninstallGlobally = function() {
+  SynchronousPromise.uninstallGlobally = function () {
     if (Promise === SynchronousPromise) {
       Promise = RealPromise;
     }
   };
 
-  function patchAwaiterIfRequired(__awaiter) {
-    if (typeof(__awaiter) === "undefined" || __awaiter.__patched) {
+  function patchAwaiterIfRequired (__awaiter) {
+    if (typeof(__awaiter) === 'undefined' || __awaiter.__patched) {
       return __awaiter;
     }
-    var originalAwaiter = __awaiter;
-    __awaiter = function() {
-      var Promise = RealPromise;
-      originalAwaiter.apply(this, makeArrayFrom(arguments));
+    const originalAwaiter = __awaiter;
+    __awaiter = function (...args) {
+      originalAwaiter.apply(this, args);
     };
     __awaiter.__patched = true;
     return __awaiter;
   }
-  /* jshint ignore:end */
 
   global.Promise = SynchronousPromise;
-
 })(this);

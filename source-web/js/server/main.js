@@ -2,8 +2,6 @@
 
 import veda from '../common/veda.js';
 
-import App from '../common/app_model.js';
-
 import BPMN from '../server/bpmn.js';
 
 import Codelet from '../server/codelet.js';

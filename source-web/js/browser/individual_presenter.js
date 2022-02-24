@@ -238,9 +238,9 @@ function renderTemplate (individual, container, templateString, name, mode, extr
         const post = templateModule.post;
         const html = templateModule.html;
         if (!html) {
-          const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
+          const pre_result = pre ? pre.call(individual, individual, undefined, container, mode, extra) : undefined;
           return Promise.resolve(pre_result).then(() => {
-            const post_result = post ? post.call(individual, individual, template, container, mode, extra) : undefined;
+            const post_result = post ? post.call(individual, individual, undefined, container, mode, extra) : undefined;
             return Promise.resolve(post_result).then(() => undefined);
           });
         } else {
@@ -424,7 +424,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
     const individuals_properties = uris.map((uri) => {
       const embeddedIndividual = new IndividualModel(uri);
       if (!embeddedIndividual.isSync()) {
-        return individual.properties;
+        return embeddedIndividual.properties;
       }
     }).filter(Boolean);
     return Promise.all(individuals_properties.map((props0) => new IndividualModel(props0['@']).trigger('beforeSave')))

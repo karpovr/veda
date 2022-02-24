@@ -188,8 +188,7 @@ Util.newStrFromBundle = function (_bundle1, _bundle2, _sep) {
   if (!_sep) {
     _sep = ' ';
   }
-  const str = _bundle1['rdfs:label'][0] + _sep + _bundle2['rdfs:label'][0];
-  return str;
+  return _bundle1['rdfs:label'][0] + _sep + _bundle2['rdfs:label'][0];
 };
 
 Util.newBool = function (_data) {
@@ -245,31 +244,9 @@ Util.getValues = function (property_value) {
   return res;
 };
 
-Util.getUris = function (property_value) {
-  const res = [];
-  if (property_value) {
-    for (const i in property_value) {
-      if (!property_value.hasOwnProperty(i)) {
-        continue;
-      }
-      res.push(property_value[i].data);
-    }
-  }
-  return res;
-};
+Util.getUris = Util.getValues;
 
-Util.getStrings = function (property_value) {
-  const res = [];
-  if (property_value) {
-    for (const i in property_value) {
-      if (!property_value.hasOwnProperty(i)) {
-        continue;
-      }
-      res.push(property_value[i].data);
-    }
-  }
-  return res;
-};
+Util.getStrings = Util.getValues;
 
 Util.getUri = function (property_value) {
   if (property_value && property_value.length > 0) {
@@ -308,7 +285,7 @@ Util.getTraceJournalUri = function (object_uri) {
 Util.newJournalRecord = function (journal_uri) {
   const new_journal_record_uri = Util.genUri() + '-jr';
 
-  const new_journal_record = {
+  return {
     '@': new_journal_record_uri,
     'rdf:type': [
       {
@@ -326,7 +303,6 @@ Util.newJournalRecord = function (journal_uri) {
         type: 'Datetime',
       }],
   };
-  return new_journal_record;
 };
 
 Util.logToJournal = function (ticket, journal_uri, journal_record) {
@@ -343,7 +319,6 @@ Util.logToJournal = function (ticket, journal_uri, journal_record) {
 };
 
 Util.traceToJournal = function (ticket, journal_uri, label, _data) {
-  // print("@@@ traceToJournal, journal_uri=" + journal_uri + " #1");
   const journal_record = Util.newJournalRecord(journal_uri);
 
   journal_record['rdf:type'] = [
@@ -363,160 +338,6 @@ Util.traceToJournal = function (ticket, journal_uri, label, _data) {
     }];
 
   Util.logToJournal(ticket, journal_uri, journal_record, true);
-
-  // print("@@@ traceToJournal, journal_uri=" + journal_uri + ", " + Util.toJson(journal_record));
-};
-
-
-// DEPRECATED
-Util.isTecnicalChange = function (newdoc, olddoc) {
-  if (newdoc['v-s:actualVersion'] && newdoc['v-s:actualVersion'][0].data != newdoc['@']) {
-    olddoc = get_individual(ticket, newdoc['v-s:actualVersion'][0].data);
-  }
-  if (!olddoc) {
-    // print (newdoc['@']+' x ');
-    return false;
-  }
-
-  for (const key in newdoc) {
-    if (key === '@') continue;
-
-    if (
-      (newdoc[key] && !olddoc[key]) || // добавили
-      (newdoc[key].length !== olddoc[key].length) // изменили количество
-    ) {
-      if (!Util.isTechnicalAttribute(key, olddoc[key])) {
-        // в нетехническом атрибуте
-        // print (newdoc['@']+' x '+olddoc[key]+' >1> '+newdoc[key]+' : '+key);
-        return false;
-      }
-    } else {
-      for (const item in newdoc[key]) {
-        if (newdoc[key][item].data.valueOf() != olddoc[key][item].data.valueOf() && !Util.isTechnicalAttribute(key, olddoc[key][item].data)) { // поменялось одно из значений в нетехническом атрибуте
-          // print ('2 old:', Util.toJson(olddoc));
-          // print ('2 new:', Util.toJson(newdoc));
-          // print (newdoc['@']+' x '+olddoc[key][item].data+' >2> '+newdoc[key][item].data+' : '+key);
-          return false;
-        }
-      }
-    }
-  }
-
-  return true;
-};
-
-
-// DEPRECATED
-Util.isTechnicalAttribute = function (attName, oldvalue) {
-  if (!oldvalue && attName === 'v-s:actualVersion') return true;
-  if (!oldvalue && attName === 'v-s:previousVersion') return true;
-  if (!oldvalue && attName === 'v-s:nextVersion') return true;
-  if (attName === 'v-wf:hasStatusWorkflow') return true;
-  return false;
-};
-
-Util.loadVariablesUseField = function (ticket, field) {
-  const res = {};
-  for (const idx in field) {
-    if (Object.hasOwnProperty.call(field, idx)) {
-      const uri = field[idx].data;
-      if (uri) {
-        const indv = get_individual(ticket, uri);
-
-        if ( Util.hasValue(indv, 'rdf:type', {data: 'v-s:Variable', type: 'Uri'}) ) {
-          const varName = Util.getFirstValue(indv['v-s:variableName']);
-          const varValue = Util.getValues(indv['v-s:variableValue']);
-          res[varName] = varValue;
-        }
-      }
-    }
-  }
-  return res;
-};
-
-Util.isAlphaNumeric = function (src) {
-  if (!src) {
-    return false;
-  }
-  const alphanum = /[a-zA-Z0-9]/;
-  if (alphanum.test(src)) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-Util.replace_word = function (src, from, to) {
-  const trace = true;
-
-  let new_str = src;
-  // if (trace)
-  //  print ('src=', src, ', from=', from, ', to=', to);
-
-  let is_prepare = false;
-
-  const pos_f = from.indexOf('*');
-  const pos_t = to.indexOf('*');
-
-  if (pos_f > 0) {
-    from = from.substring(0, pos_f);
-    to = to.substring(0, pos_t);
-
-    let pos_w_b = src.indexOf(from);
-    let word;
-    if (pos_w_b >= 0) {
-      pos_w_b += from.length;
-      let pos_w_e = pos_w_b;
-      let ch = src.charAt(pos_w_e);
-      while (Util.isAlphaNumeric(ch)) {
-        pos_w_e++;
-        ch = src.charAt(pos_w_e);
-      }
-      if (pos_w_e > pos_w_b) {
-        word = src.substring(pos_w_b, pos_w_e);
-        // print ('is *1, from=', from, ", to=", to);
-        // print ('is *2, word=', word);
-        from = from + word;
-        to = to + word;
-        // print ('is *3, from=', from, ", to=", to);
-
-        is_prepare = true;
-      }
-    }
-  } else {
-    if (src.length == from.length) {
-      is_prepare = true;
-    }
-
-    if (is_prepare == false) {
-      const pos = src.indexOf(from);
-      if (pos && pos >= 0) {
-        if (trace) {
-          print('$replace_word #1 pos=', pos);
-        }
-
-        const last_ch = src[pos + from.length];
-
-        if (trace) {
-          print('$replace_word #2 last_ch=[' + last_ch + ']');
-        }
-
-        if (last_ch && Util.isAlphaNumeric(last_ch) == false) {
-          if (trace) {
-            print('$replace_word !isAlphaNumeric last_ch=', last_ch);
-          }
-          is_prepare = true;
-        }
-      }
-    }
-  }
-
-  if (is_prepare) {
-    new_str = src.replace(new RegExp(from, 'g'), to);
-  }
-
-
-  return new_str;
 };
 
 Util.create_version = function (ticket, document, prev_state, user_uri, _event_id) {
@@ -591,7 +412,7 @@ Util.recursiveCall = function (elem, path, ticket, _event_id) {
   if (elem['v-wf:decisionFormList']) {
     elem['v-wf:decisionFormList'].forEach((dfae) => {
       const df = get_individual(ticket, dfae.data);
-      if (!df['v-wf:isCompleted'] || df['v-wf:isCompleted'][0].data == false) {
+      if (!df['v-wf:isCompleted'] || !df['v-wf:isCompleted'][0].data) {
         df['v-s:deleted'] = Util.newBool(true);
         df['v-wf:isStopped'] = Util.newBool(true);
         put_individual(ticket, df, _event_id);
@@ -614,7 +435,7 @@ Util.recursiveCall = function (elem, path, ticket, _event_id) {
   if (elem['v-wf:isProcess']) {
     elem['v-wf:isProcess'].forEach((p) => {
       const df = get_individual(ticket, p.data);
-      if (!df['v-wf:isCompleted'] || df['v-wf:isCompleted'][0].data == false) {
+      if (!df['v-wf:isCompleted'] || !df['v-wf:isCompleted'][0].data) {
         df['v-wf:isStopped'] = Util.newBool(true);
         put_individual(ticket, df, _event_id);
       }
@@ -668,10 +489,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
       return;
     }
 
-    // print ("@B start transform");
     const tmp_rules = [];
-    // print ("rules_in=", Util.toJson (rules));
-    // print ("individuals=", Util.toJson (individuals));
     for (const i in rules) {
       if (Object.hasOwnProperty.call(rules, i)) {
         const rul = get_individual(ticket, rules[i].data);
@@ -984,10 +802,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
     for (const key in individuals) {
       if (Object.hasOwnProperty.call(individuals, key)) {
-        // print("#1 key=", key);
         const individual = individuals[key];
 
-        // print("#1.1 key=", key);
         const objectContentStrValue = (() => {
           return function (name, value) {
             if (individual[name]) {
@@ -1004,8 +820,8 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
         const iteratedObject = Object.keys(individual);
 
-        for (let key2 = 0; key2 < iteratedObject.length; key2++) {
-          element = individual[iteratedObject[key2]];
+        for (const property of iteratedObject) {
+          element = individual[property];
 
           const putValue = (() => {
             return function (name) {
@@ -1015,7 +831,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
                 out_data0_el_arr = [];
               }
 
-              if (iteratedObject[key2] == '@') {
+              if (property == '@') {
                 out_data0_el_arr.push(
                   {
                     data: element,
@@ -1038,7 +854,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
           })();
 
           const putValueFrom = (() => {
-            return function (name, path, transform) {
+            return function (name, path) {
               let out_data0_el_arr = out_data0_el[name];
               if (!out_data0_el_arr) {
                 out_data0_el_arr = [];
@@ -1076,7 +892,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
               if (!out_data0_el_arr) {
                 out_data0_el_arr = [];
               }
-              if (iteratedObject[key2] == '@') {
+              if (property == '@') {
                 out_data0_el_arr.unshift(
                   {
                     data: element,
@@ -1100,7 +916,7 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
           const putElement = (() => {
             return function () {
-              const name = iteratedObject[key2];
+              const name = property;
               if (name == '@') {
                 return;
               }
@@ -1129,21 +945,17 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
           /* Segregate functions [BEGIN] */
           const contentName = (() => {
             return function (name) {
-              return iteratedObject[key2] == name;
+              return property == name;
             };
           })();
 
           const elementContentStrValue = (() => {
             return function (name, value) {
-              if (iteratedObject[key2] !== name) {
+              if (property !== name) {
                 return false;
               }
               const str = element[0].data;
-              if (str == value) {
-                return true;
-              } else {
-                return false;
-              }
+              return str == value;
             };
           })();
           /* Segregate functions [END] */
@@ -1170,14 +982,14 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
               if (segregateObject) {
                 res = eval(segregateObject[0].data);
-                if (res == false) {
+                if (!res) {
                   continue;
                 }
               }
 
               if (segregateElement) {
                 res = eval(segregateElement[0].data);
-                if (res == false) {
+                if (!res) {
                   continue;
                 }
               }
@@ -1211,9 +1023,9 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
                 }
               }
 
-              const agregate = rule['v-wf:aggregate'];
-              for (let i2 = 0; i2 < agregate.length; i2++) {
-                eval(agregate[i2].data);
+              const aggregate = rule['v-wf:aggregate'];
+              for (const item of aggregate) {
+                eval(item.data);
               }
 
               if (!grouping) {
