@@ -99,7 +99,7 @@ fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
 
     let mut prev_state = Individual::default();
 
-    let mut is_new= false;
+    let mut is_new = false;
     if cmd != IndvOp::Remove {
         is_new = !get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
     }
@@ -109,7 +109,7 @@ fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
 
     if let Some(classes) = new_state.get_literals("rdf:type") {
         for class in &classes {
-            if ctx.onto.is_some_entered(&class, &["v-s:Exportable"]) {
+            if ctx.onto.is_some_entered(class, &["v-s:Exportable"]) {
                 return export(&mut new_state, &mut prev_state, &classes, is_new, ctx);
             }
         }
@@ -144,7 +144,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
         Err(e) => {
             error!("failed to get connection, err = {:?}", e);
             return Err(PrepareError::Recoverable);
-        }
+        },
         Ok(conn) => conn,
     };
 
@@ -152,7 +152,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
         Err(e) => {
             error!("failed to start transaction, err = {:?}", e);
             return Err(PrepareError::Recoverable);
-        }
+        },
         Ok(transaction) => transaction,
     };
 
@@ -161,12 +161,12 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
     // Remove previous item from DB
     if !is_new {
         prev_state.get_predicates().iter().for_each(|predicate| {
-            prev_state.get_resources(&predicate).unwrap().iter().for_each(|resource| {
+            prev_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
                 if resource.order == 0 {
                     let mut predicate = predicate.to_lowercase();
                     predicate.truncate(64);
                     // Check or create table before delete
-                    if check_create_predicate_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
+                    if check_create_predicate_table(&mut ctx.tables, &predicate, resource, &mut transaction).is_err() {
                         error!("failed to to create table, export aborted, property = {}, uri = {}", predicate, uri);
                         tr_error = true;
                     }
@@ -181,7 +181,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
     }
 
     let created = match new_state.get_first_datetime("v-s:created") {
-        Some(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(timestamp, 0).to_string()),
+        Some(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(timestamp, 0)),
         None => String::from("NULL"),
     };
     let deleted = if is_deleted {
@@ -196,7 +196,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
                 let mut predicate = predicate.to_lowercase();
                 predicate.truncate(64);
                 // Check or create table before insert
-                if resource.order == 0 && check_create_predicate_table(&mut ctx.tables, &predicate, &resource, &mut transaction).is_err() {
+                if resource.order == 0 && check_create_predicate_table(&mut ctx.tables, &predicate, resource, &mut transaction).is_err() {
                     error!("failed to create table, export aborted, property = {}, uri = {}", predicate, uri);
                     tr_error = true;
                 }
@@ -239,11 +239,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
             Ok(_) => {
                 info!("transaction rolled back for `{}`", uri);
                 return Ok(true);
-            }
+            },
             Err(e) => {
                 error!("failed to roll back transaction, uri = {}, err = {:?}", uri, e);
                 return Err(PrepareError::Fatal);
-            }
+            },
         }
     }
 
@@ -251,11 +251,11 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
         Ok(_) => {
             info!("Ok, uri = {}", uri);
             Ok(true)
-        }
+        },
         Err(e) => {
             error!("failed to commit transaction, uri = {}, err = {:?}", uri, e);
             Err(PrepareError::Fatal)
-        }
+        },
     }
 }
 
@@ -278,7 +278,7 @@ fn check_create_predicate_table(
         DataType::String => {
             sql_type = "TEXT";
             sql_value_index = "";
-        }
+        },
         DataType::Uri => sql_type = "CHAR(128)",
         _unsupported => error!("unsupported property value type: {:#?}", _unsupported),
     }
@@ -301,11 +301,11 @@ fn check_create_predicate_table(
         Ok(_) => {
             tables.insert(predicate.to_owned(), true);
             Ok(())
-        }
+        },
         Err(e) => {
             error!("failed to create property table, err = {}", e);
             Err("failed to create property table")
-        }
+        },
     }
 }
 
@@ -344,11 +344,11 @@ fn connect_to_mysql(backend: &mut Backend, tries: i64, timeout: u64) -> Result<m
                                 Ok(pool) => {
                                     info!("connection to MySQL established successfully");
                                     return Ok(pool);
-                                }
+                                },
                                 Err(e) => {
                                     error!("failed to connect to MySQL, err = {:?}", e);
                                     return Err("failed to connect to MySQL");
-                                }
+                                },
                             }
                         }
                     }
