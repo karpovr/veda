@@ -9,5 +9,5 @@ log = "0.4"
 nng = "1.0.0"
 serde_json = "1.0"
 
-v_common = { package = "v-common", version = "0.1.106" }
+v_common = { package = "v-common", version = "=0.1.107" }
 #v_common = { package = "v-common", path = "../../../v-common" }
