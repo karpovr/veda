@@ -29,6 +29,13 @@ use v_common::v_queue::record::Mode;
 
 pub const MSTORAGE_ID: i64 = 1;
 
+struct Context {
+    primary_storage: VStorage,
+    queue_out: Queue,
+    mstorage_info: ModuleInfo,
+    tickets_cache: HashMap<String, Ticket>,
+}
+
 fn main() -> std::io::Result<()> {
     init_log("MSTORAGE");
 
@@ -37,7 +44,7 @@ fn main() -> std::io::Result<()> {
     let mut primary_storage = get_storage_use_prop(StorageMode::ReadWrite);
     info!("total count: {}", primary_storage.count(StorageId::Individuals));
 
-    let mut queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
+    let queue_out = Queue::new(&(base_path.to_owned() + "/queue"), "individuals-flow", Mode::ReadWrite).expect("!!!!!!!!! FAIL QUEUE");
 
     let notify_channel_url = Module::get_property("notify_channel_url").expect("failed to read property [notify_channel_url]");
 
@@ -74,7 +81,7 @@ fn main() -> std::io::Result<()> {
     }
     info!("started listening {}", main_module_url);
 
-    let mut tickets_cache: HashMap<String, Ticket> = HashMap::new();
+    let tickets_cache: HashMap<String, Ticket> = HashMap::new();
 
     let info = ModuleInfo::new(base_path, "subject_manager", true);
     if info.is_err() {
@@ -89,11 +96,18 @@ fn main() -> std::io::Result<()> {
     }
     info!("started with op_id = {}", op_id);
 
+    let mut ctx = Context {
+        primary_storage,
+        queue_out,
+        mstorage_info,
+        tickets_cache,
+    };
+
     loop {
         if let Ok(recv_msg) = server.recv() {
             let mut out_msg = JSONValue::default();
             out_msg["type"] = json!("OpResult");
-            let resp = request_prepare(&sys_ticket, &mut op_id, &recv_msg, &mut primary_storage, &mut queue_out, &mut mstorage_info, &mut tickets_cache, check_ticket_ip);
+            let resp = request_prepare(&mut ctx, &sys_ticket, &mut op_id, &recv_msg, check_ticket_ip);
             if let Ok(v) = resp {
                 for el in v.iter() {
                     if el.res == ResultCode::Ok {
@@ -136,16 +150,7 @@ impl Response {
     }
 }
 
-fn request_prepare(
-    sys_ticket: &Ticket,
-    op_id: &mut i64,
-    request: &Message,
-    primary_storage: &mut VStorage,
-    queue_out: &mut Queue,
-    mstorage_info: &mut ModuleInfo,
-    tickets_cache: &mut HashMap<String, Ticket>,
-    check_ticket_ip: bool,
-) -> Result<Vec<Response>, ResultCode> {
+fn request_prepare(ctx: &mut Context, sys_ticket: &Ticket, op_id: &mut i64, request: &Message, check_ticket_ip: bool) -> Result<Vec<Response>, ResultCode> {
     let v: JSONValue = if let Ok(v) = serde_json::from_slice(request.as_slice()) {
         v
     } else {
@@ -160,15 +165,15 @@ fn request_prepare(
     let ticket_id = fticket.unwrap();
     let mut ticket = Ticket::default();
 
-    if let Some(cached_ticket) = tickets_cache.get(ticket_id) {
+    if let Some(cached_ticket) = ctx.tickets_cache.get(ticket_id) {
         ticket = cached_ticket.clone();
     } else {
-        get_ticket_from_db(ticket_id, &mut ticket, primary_storage);
+        get_ticket_from_db(ticket_id, &mut ticket, &mut ctx.primary_storage);
         if ticket.result != ResultCode::Ok {
             error!("ticket [{}] not found in storage", ticket_id);
             return Err(ResultCode::TicketNotFound);
         }
-        tickets_cache.insert(ticket_id.to_string(), ticket.clone());
+        ctx.tickets_cache.insert(ticket_id.to_string(), ticket.clone());
     }
 
     let assigned_subsystems = v["assigned_subsystems"].as_i64();
@@ -227,7 +232,7 @@ fn request_prepare(
                 error!("failed to parse individual from json");
                 return Err(ResultCode::InternalServerError);
             } else {
-                let resp = operation_prepare(cmd.clone(), op_id, &mut indv, primary_storage, sys_ticket, &mut transaction);
+                let resp = operation_prepare(cmd.clone(), op_id, &mut indv, &mut ctx.primary_storage, sys_ticket, &mut transaction);
                 if resp.res != ResultCode::Ok {
                     return Err(resp.res);
                 }
@@ -235,7 +240,7 @@ fn request_prepare(
             }
         }
 
-        if let Ok(res_op_id) = transaction.commit(primary_storage, queue_out, mstorage_info) {
+        if let Ok(res_op_id) = transaction.commit(&mut ctx.primary_storage, &mut ctx.queue_out, &mut ctx.mstorage_info) {
             *op_id = res_op_id;
             return Ok(res_of_id);
         }
