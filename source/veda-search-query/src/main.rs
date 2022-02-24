@@ -18,7 +18,7 @@ fn main() {
     let query_url = Module::get_property("search_query_url").expect("param [search_query_url] not found in veda.properties");
 
     let mut backend = Backend::default();
-    let mut ch_client = CHClient::new(query_search_db.to_owned());
+    let mut ch_client = CHClient::new(query_search_db);
 
     loop {
         if ch_client.connect() {
@@ -67,7 +67,7 @@ fn req_prepare(backend: &mut Backend, request: &Message, ch_client: &mut CHClien
 
             let mut user_uri = "cfg:Guest".to_owned();
             if !ticket_id.is_empty() {
-                let ticket = backend.get_ticket_from_db(&ticket_id);
+                let ticket = backend.get_ticket_from_db(ticket_id);
                 if ticket.result == ResultCode::Ok {
                     user_uri = ticket.user_uri;
                 }
