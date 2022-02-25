@@ -1,19 +1,3 @@
-// Local DB for api calls
-
-const fallback = {
-  get: function (key) {
-    return Promise.resolve(this[key]);
-  },
-  put: function (key, value) {
-    this[key] = value;
-    return Promise.resolve(value);
-  },
-  remove: function (key) {
-    const result = delete this[key];
-    return Promise.resolve(result);
-  },
-};
-
 /**
  * Local database singleton constructor
  * @return {Promise} database instance promise
@@ -48,19 +32,16 @@ LocalDB.prototype.init = function () {
       this.db = event.target.result;
       console.log(`DB open success: ${this.db_name}, version = ${this.veda_version}`);
       resolve(this);
+
+      this.db.onversionchange = () => {
+        this.db.close();
+        console.log('DB is outdated');
+        this.init();
+      };
     };
 
     openReq.onerror = (error) => {
-      console.log('DB open error', error);
       reject(error);
-    };
-
-    openReq.onblocked = function (event) {
-      self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
-        clients.forEach((client) => {
-          client.postMessage({alert: 'Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!'});
-        });
-      });
     };
 
     openReq.onupgradeneeded = (event) => {
@@ -72,33 +53,46 @@ LocalDB.prototype.init = function () {
       result.createObjectStore(this.store_name);
       console.log(`DB store created: ${this.store_name}, version = ${this.veda_version}`);
     };
+
+    openReq.onblocked = function (event) {
+      self.clients.matchAll({includeUncontrolled: true}).then(function (clients) {
+        clients.forEach((client) => {
+          client.postMessage({alert: 'Пожалуйста, закройте другие открытые вкладки системы! \nPlease close all other open tabs with the system!'});
+        });
+      });
+    };
   }).catch((error) => {
-    console.log('IndexedDB error, using in-memory fallback.', error);
-    return fallback;
+    console.log('IndexedDB error', error);
   });
 };
 
 LocalDB.prototype.get = function (key) {
   return new Promise((resolve, reject) => {
-    const request = this.db.transaction([this.store_name], 'readonly').objectStore(this.store_name).get(key);
-    request.onerror = reject;
-    request.onsuccess = (event) => resolve(event.target.result);
+    return this.init().then(() => {
+      const request = this.db.transaction([this.store_name], 'readonly').objectStore(this.store_name).get(key);
+      request.onerror = reject;
+      request.onsuccess = (event) => resolve(event.target.result);
+    });
   });
 };
 
 LocalDB.prototype.put = function (key, value) {
   return new Promise((resolve, reject) => {
-    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).put(value, key);
-    request.onerror = reject;
-    request.onsuccess = () => resolve(value);
+    return this.init().then(() => {
+      const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).put(value, key);
+      request.onerror = reject;
+      request.onsuccess = () => resolve(value);
+    });
   });
 };
 
 LocalDB.prototype.remove = function (key) {
   return new Promise((resolve, reject) => {
-    const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).delete(key);
-    request.onerror = reject;
-    request.onsuccess = (event) => resolve(event.target.result);
+    return this.init().then(() => {
+      const request = this.db.transaction([this.store_name], 'readwrite').objectStore(this.store_name).delete(key);
+      request.onerror = reject;
+      request.onsuccess = (event) => resolve(event.target.result);
+    });
   });
 };
 
