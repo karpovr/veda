@@ -104,25 +104,25 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     data = (await Backend.query(ticket_user1, "'rdfs:comment' == 'comment*' && 'v-s:test_group' === '" + test_group_uid + "'")).result;
     assert(data.length === 1);
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc1['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc1['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc1['@']));
 
     data = (await Backend.query(ticket_user1, "'rdfs:comment' == 'comm1*' && 'v-s:test_group' === '" + test_group_uid + "'")).result;
     assert(data.length === 1);
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc5['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc5['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc5['@']));
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc2['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc2['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc2['@']));
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc3['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc3['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc3['@']));
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc4['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc4['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc4['@']));
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc6['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc6['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc6['@']));
   });
 };

@@ -53,7 +53,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     server_test_doc1 = await Backend.get_individual(ticket_user2.ticket, new_test_doc1_uri);
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
-    res = await Helpers.addRight(ticket_user1.ticket, ticket_user2.user_uri, new_test_doc1_uri, [], ['v-s:canRead']);
+    await Helpers.addRight(ticket_user1.ticket, ticket_user2.user_uri, new_test_doc1_uri, [], ['v-s:canRead']);
     res = await Helpers.addRight(ticket_user1.ticket, ticket_user2.user_uri, new_test_doc1_uri, ['v-s:canRead']);
     assert(await Backend.wait_module(Constants.m_acl, res[1].op_id));
 
@@ -62,7 +62,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     new_test_doc1['v-s:updateCounter'] = Util.newInt(0);
     await assert.rejects(Backend.put_individual(ticket_user2.ticket, new_test_doc1));
 
-    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1_uri);
+    await Backend.remove_individual(ticket_user1.ticket, new_test_doc1_uri);
     await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1));
   });
 };

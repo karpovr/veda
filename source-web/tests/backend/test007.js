@@ -23,7 +23,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     server_test_doc1 = await Backend.get_individual(admin_ticket, new_test_doc1_uri);
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
-    res = await Backend.remove_individual(ticket_user1, new_test_doc1['@']);
+    await Backend.remove_individual(ticket_user1, new_test_doc1['@']);
     await assert.rejects(Backend.get_individual(ticket_user1, new_test_doc1_uri));
   });
 };

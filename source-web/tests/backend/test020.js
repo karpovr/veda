@@ -64,12 +64,12 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     assert(results_user2.count === 5 && results_user2.cursor === 13 && results_user2.processed === 10);
 
     async function createMeetings (creator, start, count) {
-      let res;
+      let result;
       for (let i = start; i < start + count; i++) {
         const meeting = JSON.parse(meeting_template.replace(/\$i/g, i.toString().length === 2 ? i : '0' + i).replace(/\$creator/g, creator.user_uri));
-        res = await Backend.put_individual(creator.ticket, meeting);
+        result = await Backend.put_individual(creator.ticket, meeting);
       }
-      return res;
+      return result;
     }
   });
 };

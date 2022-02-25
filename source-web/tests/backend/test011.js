@@ -21,13 +21,10 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     const doc_group = 'g:doc_g1roup_' + Util.guid();
     const user_group = 'g:user_g1roup_' + Util.guid();
 
-    res = await Helpers.addToGroup(ticket1.ticket, doc_group, new_test_doc1['@']);
-    res = await Helpers.addToGroup(ticket1.ticket, user_group, ticket2.user_uri);
-
-    const membersip1 = res[0];
+    await Helpers.addToGroup(ticket1.ticket, doc_group, new_test_doc1['@']);
+    await Helpers.addToGroup(ticket1.ticket, user_group, ticket2.user_uri);
 
     res = await Helpers.addRight(ticket1.ticket, user_group, doc_group, ['v-s:canRead']);
-    const op_id = res[1].op_id;
     assert(await Backend.wait_module(Constants.m_acl, res[1].op_id));
 
     server_test_doc1 = await Backend.get_individual(ticket2.ticket, new_test_doc1['@']);
@@ -38,7 +35,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
 
     await assert.rejects(Backend.get_individual(ticket2.ticket, new_test_doc1['@']));
 
-    res = await Backend.remove_individual(ticket1.ticket, new_test_doc1['@']);
+    await Backend.remove_individual(ticket1.ticket, new_test_doc1['@']);
     await assert.rejects(Backend.get_individual(ticket1.ticket, new_test_doc1['@']));
   });
 };

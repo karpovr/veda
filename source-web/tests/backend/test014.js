@@ -149,7 +149,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     };
     assert(Helpers.compare(new_test_doc1_remove_from1, read_individual));
 
-    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
+    await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
     await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1['@']));
   });
 };

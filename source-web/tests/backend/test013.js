@@ -51,11 +51,10 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
       'v-s:test_fieldB': Util.newUri('CCC' + test_data_uid),
     };
 
-    let res;
-    res = await Backend.put_individual(ticket_user1.ticket, new_test_doc1);
-    res = await Backend.put_individual(ticket_user1.ticket, new_test_doc2);
-    res = await Backend.put_individual(ticket_user1.ticket, new_test_doc3);
-    res = await Backend.put_individual(ticket_user1.ticket, new_test_doc4);
+    await Backend.put_individual(ticket_user1.ticket, new_test_doc1);
+    await Backend.put_individual(ticket_user1.ticket, new_test_doc2);
+    await Backend.put_individual(ticket_user1.ticket, new_test_doc3);
+    const res = await Backend.put_individual(ticket_user1.ticket, new_test_doc4);
 
     assert(await Backend.wait_module(Constants.m_acl, res.op_id));
     assert(await Backend.wait_module(Constants.m_fulltext_indexer, res.op_id));
@@ -76,16 +75,16 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     data = await Backend.query(ticket_user1.ticket, "'v-s:test_fieldB' === 'CCC" + test_data_uid + "' && 'v-s:test_fieldA' === 'BBB" + test_data_uid + "'");
     assert(data.result.length === 2);
 
-    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
+    await Backend.remove_individual(ticket_user1.ticket, new_test_doc1['@']);
     await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc1['@']));
 
-    res = await Backend.remove_individual(ticket_user2.ticket, new_test_doc2['@']);
+    await Backend.remove_individual(ticket_user2.ticket, new_test_doc2['@']);
     await assert.rejects(Backend.get_individual(ticket_user2.ticket, new_test_doc2['@']));
 
-    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc3['@']);
+    await Backend.remove_individual(ticket_user1.ticket, new_test_doc3['@']);
     await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc3['@']));
 
-    res = await Backend.remove_individual(ticket_user1.ticket, new_test_doc4['@']);
+    await Backend.remove_individual(ticket_user1.ticket, new_test_doc4['@']);
     await assert.rejects(Backend.get_individual(ticket_user1.ticket, new_test_doc4['@']));
   });
 };

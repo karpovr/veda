@@ -9,7 +9,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     await Helpers.addToGroup(ticket1.ticket, doc_group, new_test_doc3['@']);
 
     await Helpers.test_success_read(ticket1, new_test_doc3);
-    const new_test_membership1 = await Helpers.create_test_membership1(ticket1, doc_group);
+    await Helpers.create_test_membership1(ticket1, doc_group);
 
     await Helpers.test_success_read(ticket1, new_test_doc3);
     const new_test_doc4 = await Helpers.create_test_document4(ticket1);
@@ -19,7 +19,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
 
     await Helpers.test_fail_read(ticket1, new_test_doc4);
 
-    const new_test_membership2 = await Helpers.create_test_membership2(ticket1, doc_group);
+    await Helpers.create_test_membership2(ticket1, doc_group);
     await Helpers.test_success_read(ticket1, new_test_doc4);
 
     await Helpers.test_success_read(ticket1, new_test_doc3);

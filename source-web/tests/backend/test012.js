@@ -23,7 +23,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     const server_test_doc1 = await Backend.get_individual(ticket.ticket, new_test_doc1_uri);
     assert(Helpers.compare(new_test_doc1, server_test_doc1));
 
-    res = await Backend.remove_individual(ticket.ticket, new_test_doc1['@']);
+    await Backend.remove_individual(ticket.ticket, new_test_doc1['@']);
     await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc1['@']));
 
     const new_test_doc2 = new_test_doc1;
@@ -38,7 +38,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     const server_test_doc2 = await Backend.get_individual(ticket.ticket, new_test_doc2_uri);
     assert(Helpers.compare(new_test_doc2, server_test_doc2));
 
-    res = await Backend.remove_individual(ticket.ticket, new_test_doc2['@']);
+    await Backend.remove_individual(ticket.ticket, new_test_doc2['@']);
     await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc2['@']));
 
     const new_test_doc3 = new_test_doc2;
@@ -53,7 +53,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     const server_test_doc3 = await Backend.get_individual(ticket.ticket, new_test_doc3_uri);
     assert(Helpers.compare(new_test_doc3, server_test_doc3));
 
-    res = await Backend.remove_individual(ticket.ticket, new_test_doc3['@']);
+    await Backend.remove_individual(ticket.ticket, new_test_doc3['@']);
     await assert.rejects(Backend.get_individual(ticket.ticket, new_test_doc3['@']));
   });
 };

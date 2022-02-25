@@ -7,20 +7,20 @@ const Util = {...ServerUtil, ...CommonUtil};
 
 export default class Helpers {
   static async get_admin_ticket () {
-    return await Backend.authenticate('karpovrt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
+    return Backend.authenticate('karpovrt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
   }
 
   static async get_user1_ticket () {
-    return await Backend.authenticate('bushenevvt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
+    return Backend.authenticate('bushenevvt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
   }
 
   static async get_user2_ticket () {
-    return await Backend.authenticate('BychinAt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
+    return Backend.authenticate('BychinAt', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');
   }
 
   static generate_test_document1 (ticket) {
     const new_test_doc1_uri = Util.genUri();
-    const new_test_doc1 = {
+    return {
       '@': new_test_doc1_uri,
       'rdf:type': Util.newUri('rdfs:Resource1'),
       'v-s:test_integer_32': Util.newInt(922337203),
@@ -48,12 +48,11 @@ export default class Helpers {
       'v-s:permissionSubject': Util.newUri('individual_' + Util.guid()),
       'v-s:author': Util.newUri(ticket.user_uri),
     };
-    return new_test_doc1;
   }
 
   static generate_test_document2 (ticket) {
     const new_test_doc2_uri = Util.genUri();
-    const new_test_doc2 = {
+    return {
       '@': new_test_doc2_uri,
       'rdf:type': Util.newUri('rdfs:Resource1'),
       'v-s:test_integer_32': [Util.newInt(922337203)[0], Util.newInt(456403)[0]],
@@ -81,37 +80,33 @@ export default class Helpers {
       'rdfs:label': [Util.newStr('Русский', 'RU')[0], Util.newStr('English', 'EN')[0]],
       'v-s:author': Util.newUri(ticket.user_uri),
     };
-
-    return new_test_doc2;
   }
 
   static generate_test_document3 (ticket) {
     const new_test_doc3_uri = Util.genUri();
-    const new_test_doc3 = {
+    return {
       '@': new_test_doc3_uri,
       'rdf:type': Util.newUri('rdfs:Resource1'),
       'v-s:created': Util.newDate(new Date()),
       'rdfs:label': [Util.newStr('Русский', 'RU')[0], Util.newStr('English', 'EN')[0]],
       'v-s:author': Util.newUri(ticket.user_uri),
     };
-    return new_test_doc3;
   }
 
   static generate_test_document4 (ticket) {
     const new_test_doc4_uri = Util.genUri();
-    const new_test_doc4 = {
+    return {
       '@': new_test_doc4_uri,
       'rdf:type': Util.newUri('rdfs:Resource1'),
       'v-s:created': Util.newDate(new Date()),
       'rdfs:label': [Util.newStr('Русский', 'RU')[0], Util.newStr('English', 'EN')[0]],
       'v-s:author': Util.newUri(ticket.user_uri),
     };
-    return new_test_doc4;
   }
 
   static generate_test_membership1 (ticket, doc_group) {
     const new_test_membership1_uri = Util.genUri();
-    const new_test_membership1 = {
+    return {
       '@': new_test_membership1_uri,
       'rdf:type': Util.newUri('v-s:Membership'),
       'v-s:isExclusive': Util.newBool(true),
@@ -121,12 +116,11 @@ export default class Helpers {
       'v-s:author': Util.newUri(ticket.user_uri),
       'v-s:created': Util.newDate(new Date()),
     };
-    return new_test_membership1;
   }
 
   static generate_test_membership2 (ticket, doc_group) {
     const new_test_membership2_uri = Util.genUri();
-    const new_test_membership2 = {
+    return {
       '@': new_test_membership2_uri,
       'rdf:type': Util.newUri('v-s:Membership'),
       'v-s:ignoreExclusive': Util.newBool(true),
@@ -136,7 +130,6 @@ export default class Helpers {
       'v-s:created': Util.newDate(new Date()),
       'v-s:author': Util.newUri(ticket.user_uri),
     };
-    return new_test_membership2;
   }
 
   static async create_test_document1 (ticket, prefix) {
@@ -200,8 +193,7 @@ export default class Helpers {
   static async check_rights (ticket, uri, expected_rights) {
     const rights = await Backend.get_rights(ticket, uri);
     let result = true;
-    for (let i = 0; i < expected_rights.length; i++) {
-      const expected = expected_rights[i];
+    for (const expected of expected_rights) {
       if (expected === Constants.can_create) {
         result = result && ('v-s:canCreate' in rights);
       } else if (expected === Constants.can_read) {
@@ -308,7 +300,7 @@ export default class Helpers {
 
     const res = await Backend.put_individual(ticket, new_membership);
     return [new_membership, res];
-  };
+  }
 
   static async removeFromGroup (ticket, group, resource) {
     const membership_uri = Util.genUri() + '-mbh';
@@ -381,8 +373,7 @@ export default class Helpers {
 
     let result = true;
 
-    for (let i = 0; i < expected_rights.length; i++) {
-      const expected = expected_rights[i];
+    for (const expected of expected_rights) {
       if (expected === 'v-s:canCreate') {
         result = result && ('v-s:canCreate' in rights);
       } else if (expected === 'v-s:canRead') {

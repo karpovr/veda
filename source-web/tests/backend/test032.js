@@ -31,12 +31,12 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     await Backend.put_individuals(ticket.ticket, false);
     await Backend.put_individuals(ticket.ticket, []);
     await Backend.put_individuals(ticket.ticket, [{}]);
-    //await assert.rejects(Backend.put_individuals(ticket.ticket, {}), {code: 400});
-    //await assert.rejects(Backend.put_individuals(ticket.ticket, 1), {code: 400});
-    //await assert.rejects(Backend.put_individuals(ticket.ticket, '1'), {code: 400});
-    //await assert.rejects(Backend.put_individuals(ticket.ticket, false), {code: 400});
-    //await assert.rejects(Backend.put_individuals(ticket.ticket, []), {code: 400});
-    //await assert.rejects(Backend.put_individuals(ticket.ticket, [{}]), {code: 904});
+    //* await assert.rejects(Backend.put_individuals(ticket.ticket, {}), {code: 400});
+    //* await assert.rejects(Backend.put_individuals(ticket.ticket, 1), {code: 400});
+    //* await assert.rejects(Backend.put_individuals(ticket.ticket, '1'), {code: 400});
+    //* await assert.rejects(Backend.put_individuals(ticket.ticket, false), {code: 400});
+    //* await assert.rejects(Backend.put_individuals(ticket.ticket, []), {code: 400});
+    //* await assert.rejects(Backend.put_individuals(ticket.ticket, [{}]), {code: 904});
 
     await assert.rejects(Backend.set_in_individual(), {code: 400});
     await assert.rejects(Backend.set_in_individual(ticket.ticket), {code: 400});
