@@ -6,7 +6,7 @@ use std::str;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
-use v_common::module::module::wait_load_ontology;
+use v_common::module::module_impl::wait_load_ontology;
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::parser::parse_raw;
 use v_common::v_queue::consumer::Consumer;

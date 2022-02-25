@@ -74,7 +74,7 @@ pub(crate) async fn update(
         }
 
         let ticket = get_ticket(&req, &params.ticket).unwrap_or_default();
-        return match ms.updates_use_param_with_addr(&ticket, event_id, src, assigned_subsystems, cmd, &inds, addr) {
+        return match ms.updates_use_param_with_addr((&ticket, addr), event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
                 if r.result == ResultCode::Ok {
                     Ok(HttpResponse::Ok().json(json!({"op_id":r.op_id,"result":r.result})))

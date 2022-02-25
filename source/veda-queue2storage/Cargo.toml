@@ -10,5 +10,5 @@ env_logger = "0.6"
 log = "0.4"
 url = "2.1.1"
 
-v_common = { package = "v-common", version = "0.1.106" }
+v_common = { package = "v-common", version = "0.2.1" }
 #v_common = { package = "v-common", path = "../../../v-common" }

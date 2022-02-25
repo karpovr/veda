@@ -3,8 +3,8 @@ extern crate log;
 
 use nng::{Message, Protocol, Socket};
 use std::str;
-use v_common::module::module::init_log;
-use v_common::module::module::Module;
+use v_common::module::module_impl::init_log;
+use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::get_storage_use_prop;
 use v_common::onto::individual::Individual;
 use v_common::storage::common::{StorageId, StorageMode, VStorage};

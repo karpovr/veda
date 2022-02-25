@@ -2,7 +2,7 @@ use crate::common::{get_short_prefix, PrefixesCache, SparqlResponse};
 use actix_web::client::Client;
 use actix_web::web;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
-use v_common::module::module::Module;
+use v_common::module::module_impl::Module;
 use v_common::search::common::QueryResult;
 use v_common::storage::async_storage::AStorage;
 use v_common::v_api::obj::ResultCode;

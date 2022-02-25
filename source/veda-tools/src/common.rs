@@ -72,11 +72,11 @@ pub fn pause_if_overload(sys: &System, max_load: usize) {
                 } else {
                     break;
                 }
-            }
+            },
             Err(x) => {
                 info!("\nLoad average: error: {}", x);
                 break;
-            }
+            },
         }
     }
 }

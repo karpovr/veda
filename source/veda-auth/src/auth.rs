@@ -8,7 +8,7 @@ use std::num::NonZeroU32;
 use std::str::from_utf8;
 use uuid::Uuid;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module::create_new_ticket;
+use v_common::module::module_impl::create_new_ticket;
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;

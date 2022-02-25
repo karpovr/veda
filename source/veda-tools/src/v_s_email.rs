@@ -3,6 +3,7 @@ use chrono::prelude::*;
 use std::ops::Sub;
 use time::Duration;
 use v_v8::v_common::onto::individual::Individual;
+use v_v8::v_common::search::common::FTQuery;
 use v_v8::v_common::v_api::api_client::IndvOp;
 use v_v8::v_common::v_api::obj::OptAuthorize;
 use v_v8::v_common::v_api::obj::ResultCode;
@@ -14,7 +15,18 @@ pub fn clean_email(ctx: &mut CleanerContext) {
 
     let query =
         format!("SELECT DISTINCT id FROM veda_tt.`v-s:Email` FINAL WHERE v_s_deleted_int[1] = 0 AND v_s_created_date[1] < toDateTime ({})", date_before.timestamp());
-    let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, 0, OptAuthorize::NO);
+    let req = FTQuery {
+        ticket: "".to_string(),
+        user: ctx.sys_ticket.user_uri.to_owned(),
+        query,
+        sort: "".to_string(),
+        databases: "".to_string(),
+        reopen: false,
+        top: MAX_SIZE_BATCH as i32,
+        limit: MAX_SIZE_BATCH as i32,
+        from: 0,
+    };
+    let res = ctx.ch_client.select(req, OptAuthorize::NO);
 
     if res.result_code == ResultCode::Ok {
         for id in res.result.iter() {

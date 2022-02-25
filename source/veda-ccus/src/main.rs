@@ -12,7 +12,7 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::{Duration, Instant};
-use v_common::module::module::Module;
+use v_common::module::module_impl::Module;
 
 mod server;
 use crate::server::CMessage;

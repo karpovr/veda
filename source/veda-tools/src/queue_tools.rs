@@ -1,7 +1,7 @@
 use chrono::{TimeZone, Utc};
 use crc32fast::Hasher;
 use v_v8::v_common::ft_xapian::xapian_reader::XapianReader;
-use v_v8::v_common::module::module::{get_cmd, get_inner_binobj_as_individual, PrepareError};
+use v_v8::v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, PrepareError};
 use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::onto::individual::{Individual, RawObj};
 use v_v8::v_common::onto::individual2msgpack::to_msgpack;

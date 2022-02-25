@@ -22,11 +22,11 @@ use std::{fmt, fs, io};
 use std::{thread, time as std_time};
 use v_common::module::common::load_onto;
 use v_common::module::info::ModuleInfo;
-use v_common::module::module::init_log;
+use v_common::module::module_impl::init_log;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
-use v_common::onto::onto::Onto;
+use v_common::onto::onto_impl::Onto;
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_api::obj::*;
 

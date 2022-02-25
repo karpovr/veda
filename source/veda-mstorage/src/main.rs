@@ -13,7 +13,7 @@ use std::net::IpAddr;
 use std::str;
 use v_common::az_impl::common::f_authorize;
 use v_common::module::info::ModuleInfo;
-use v_common::module::module::{create_sys_ticket, init_log, Module};
+use v_common::module::module_impl::{create_sys_ticket, init_log, Module};
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::{get_storage_use_prop, indv_apply_cmd};
 use v_common::onto::individual::{Individual, RawObj};

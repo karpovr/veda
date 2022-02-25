@@ -7,14 +7,15 @@ use systemstat::{Platform, System};
 use v_v8::callback::*;
 use v_v8::common::{ScriptInfo, ScriptInfoContext};
 use v_v8::jsruntime::JsRuntime;
-use v_v8::v8::ContextScope;
 use v_v8::scripts_workplace::ScriptsWorkPlace;
 use v_v8::session_cache::{commit, CallbackSharedData, Transaction};
 use v_v8::v8;
-use v_v8::v_common::module::module::Module;
+use v_v8::v8::ContextScope;
+use v_v8::v_common::module::module_impl::Module;
 use v_v8::v_common::module::remote_indv_r_storage::inproc_storage_manager;
 use v_v8::v_common::module::veda_backend::Backend;
 use v_v8::v_common::search::clickhouse_client::CHClient;
+use v_v8::v_common::search::common::FTQuery;
 use v_v8::v_common::v_api::api_client::MStorageClient;
 use v_v8::v_common::v_api::obj::{OptAuthorize, ResultCode};
 use v_v8::v_common::v_queue::consumer::Consumer;
@@ -71,7 +72,18 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
 
     let query = fs::read_to_string(path_to_query)?;
     let mut sw = Stopwatch::start_new();
-    for el in ch_client.select(&sys_ticket.user_uri, &query, 1000000, 0, 0, OptAuthorize::NO).result.iter() {
+    let req = FTQuery {
+        ticket: "".to_string(),
+        user: sys_ticket.user_uri,
+        query,
+        sort: "".to_string(),
+        databases: "".to_string(),
+        reopen: false,
+        top: 10000,
+        limit: 0,
+        from: 0,
+    };
+    for el in ch_client.select(req, OptAuthorize::NO).result.iter() {
         if let Some(s) = scr_inf.compiled_script {
             let mut session_data = CallbackSharedData::default();
             session_data.g_key2attr.insert("$ticket".to_owned(), sys_ticket.id.to_owned());
@@ -129,11 +141,11 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
                             } else {
                                 break;
                             }
-                        }
+                        },
                         Err(e) => {
                             error!("fail read queue, err={:?}", e);
                             break;
-                        }
+                        },
                     }
                 }
                 pause_if_overload(&sys, max_load);

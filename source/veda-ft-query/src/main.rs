@@ -9,7 +9,7 @@ use std::time::Duration;
 use std::{env, str};
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::load_onto;
-use v_common::module::module::{init_log, Module};
+use v_common::module::module_impl::{init_log, Module};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::search::common::FTQuery;

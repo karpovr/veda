@@ -10,7 +10,7 @@ use redis::geo::Coord;
 use redis::{Commands, Connection};
 use std::io::Write;
 use std::{thread, time};
-use v_common::module::module::Module;
+use v_common::module::module_impl::Module;
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::parser::parse_raw;
 use v_common::v_queue::consumer::Consumer;

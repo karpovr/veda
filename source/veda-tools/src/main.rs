@@ -16,7 +16,7 @@ extern crate log;
 use crate::queue_tools::{export_from_query, queue_crc, queue_to_json, queue_to_veda};
 use cleaner::clean;
 use type_cli::CLI;
-use v_v8::v_common::module::module::init_log;
+use v_v8::v_common::module::module_impl::init_log;
 
 #[derive(CLI)]
 #[help = "veda tools"]
@@ -109,11 +109,11 @@ fn main() {
             path_to_js,
         } => {
             exec_js_on_query(&path_to_query, &path_to_js);
-        }
+        },
         Tools::QueryToQueue(query) => {
             info!("query={}", query);
             export_from_query(&query).expect("fail create query from queue");
-        }
+        },
         Tools::StorageCleaner {
             module,
             operation,
@@ -122,7 +122,7 @@ fn main() {
             date_to,
         } => {
             clean(module, operation, report, date_from, date_to);
-        }
+        },
         Tools::QueueToStorage {
             queue_path,
             part_id,
@@ -130,20 +130,20 @@ fn main() {
         } => {
             info!("queue_path={}, part_id={:?}", queue_path, part_id);
             queue_to_veda(queue_path, part_id, check_counter);
-        }
+        },
         Tools::QueueToJson {
             queue_path,
             part_id,
         } => {
             info!("queue_path={}, part_id={:?}", queue_path, part_id);
             queue_to_json(queue_path, part_id);
-        }
+        },
         Tools::QueueCrc {
             queue_path,
             part_id,
         } => {
             info!("queue_path={}, part_id={:?}", queue_path, part_id);
             queue_crc(queue_path, part_id);
-        }
+        },
     }
 }

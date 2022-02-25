@@ -89,15 +89,22 @@ async fn query(
     if data.sparql.is_some() {
         res = sparql_client.lock().await.prepare_query(&user.unwrap_or_default(), data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
+        let req = FTQuery{
+            ticket: "".to_string(),
+            user: user.unwrap_or_default(),
+            query: data.sql.clone().unwrap_or_default(),
+            sort: "".to_string(),
+            databases: "".to_string(),
+            reopen: false,
+            top: data.top.unwrap_or_default(),
+            limit: data.limit.unwrap_or_default(),
+            from: data.from.unwrap_or_default()
+        };
         res = ch_client
             .lock()
             .await
             .select_async(
-                &user.unwrap_or_default(),
-                &data.sql.clone().unwrap_or_default(),
-                data.top.unwrap_or_default() as i64,
-                data.limit.unwrap_or_default() as i64,
-                data.from.unwrap_or_default() as i64,
+                req,
                 OptAuthorize::YES,
             )
             .await?;

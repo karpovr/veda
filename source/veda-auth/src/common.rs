@@ -6,7 +6,7 @@ use ring::{digest, pbkdf2, rand};
 use std::num::NonZeroU32;
 use v_common::az_impl::common::f_authorize;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module::{create_new_ticket, Module};
+use v_common::module::module_impl::{create_new_ticket, Module};
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;

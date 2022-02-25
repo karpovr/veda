@@ -4,7 +4,7 @@ extern crate log;
 use std::env;
 use url::Url;
 use v_common::module::info::ModuleInfo;
-use v_common::module::module::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
+use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::onto::individual2msgpack::to_msgpack;

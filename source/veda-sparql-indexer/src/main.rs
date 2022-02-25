@@ -6,7 +6,7 @@ use reqwest::StatusCode;
 use std::collections::HashMap;
 use tokio::runtime::Runtime;
 use v_common::module::info::ModuleInfo;
-use v_common::module::module::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, Module, PrepareError, wait_load_ontology, wait_module};
+use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, Module, PrepareError, wait_load_ontology, wait_module};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::onto::individual2turtle::to_turtle_refs;

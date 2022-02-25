@@ -5,9 +5,10 @@ use nng::{Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
 use std::time::*;
 use std::{str, thread};
-use v_common::module::module::{init_log, Module};
+use v_common::module::module_impl::{init_log, Module};
 use v_common::module::veda_backend::Backend;
 use v_common::search::clickhouse_client::CHClient;
+use v_common::search::common::FTQuery;
 use v_common::v_api::obj::OptAuthorize;
 use v_common::v_api::obj::*;
 
@@ -73,7 +74,18 @@ fn req_prepare(backend: &mut Backend, request: &Message, ch_client: &mut CHClien
                 }
             }
 
-            let res = ch_client.select(&user_uri, query, top, limit, from, OptAuthorize::YES);
+            let req = FTQuery {
+                ticket: "".to_string(),
+                user: user_uri,
+                query: query.to_owned(),
+                sort: "".to_string(),
+                databases: "".to_string(),
+                reopen: false,
+                top: top as i32,
+                limit: limit as i32,
+                from: from as i32,
+            };
+            let res = ch_client.select(req, OptAuthorize::YES);
             info!("found & authorized: {}, query time: {}, authorize time: {}", res.count, res.query_time, res.authorize_time);
             if let Ok(s) = serde_json::to_string(&res) {
                 return Message::from(s.as_bytes());

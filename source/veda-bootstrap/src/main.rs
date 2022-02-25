@@ -16,7 +16,7 @@ use std::process::{Child, Command};
 use std::time::SystemTime;
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
-use v_common::module::module::Module;
+use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::v_api::api_client::IndvOp;

@@ -9,6 +9,7 @@ use stopwatch::Stopwatch;
 use systemstat::{Platform, System};
 use v_v8::v_common::module::info::ModuleInfo;
 use v_v8::v_common::onto::individual::Individual;
+use v_v8::v_common::search::common::FTQuery;
 use v_v8::v_common::v_api::obj::OptAuthorize;
 use v_v8::v_common::v_api::obj::ResultCode;
 
@@ -67,7 +68,19 @@ pub fn clean_process(ctx: &mut CleanerContext) {
             info!("current pos {}", date_from);
 
             let query = get_query_for_work_item_in_output_condition(&output_condition_list, Some(date_from), date_from.checked_add_signed(Duration::days(1)));
-            let res = ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, MAX_SIZE_BATCH, MAX_SIZE_BATCH, 0, OptAuthorize::NO);
+
+            let req = FTQuery {
+                ticket: "".to_string(),
+                user: ctx.sys_ticket.user_uri.to_owned(),
+                query: query.to_owned(),
+                sort: "".to_string(),
+                databases: "".to_string(),
+                reopen: false,
+                top: MAX_SIZE_BATCH as i32,
+                limit: MAX_SIZE_BATCH as i32,
+                from: 0,
+            };
+            let res = ctx.ch_client.select(req, OptAuthorize::NO);
 
             if res.result_code == ResultCode::Ok {
                 let mut sw = Stopwatch::start_new();
@@ -110,7 +123,7 @@ pub fn clean_process(ctx: &mut CleanerContext) {
 
                                                 collected_ids.push(s.get_id().to_owned());
                                                 collected.push(s);
-                                            }
+                                            },
                                             None => {
                                                 if let Some(mut s) = ctx.backend.get_individual_s(&id) {
                                                     if ctx.operations.contains("to_ttl") {
@@ -119,7 +132,7 @@ pub fn clean_process(ctx: &mut CleanerContext) {
                                                     collected_ids.push(s.get_id().to_owned());
                                                     collected.push(s);
                                                 }
-                                            }
+                                            },
                                         }
                                     }
 
@@ -174,14 +187,19 @@ pub fn clean_process(ctx: &mut CleanerContext) {
 
 fn get_list_of_output_condition(ctx: &mut CleanerContext) -> Vec<String> {
     let mut res = vec![];
-    let output_conditions_list = ctx.ch_client.select(
-        &ctx.sys_ticket.user_uri,
-        "SELECT DISTINCT id FROM veda_tt.`v-wf:OutputCondition` ORDER BY v_s_created_date ASC",
-        MAX_SIZE_BATCH,
-        MAX_SIZE_BATCH,
-        0,
-        OptAuthorize::NO,
-    );
+    let req = FTQuery {
+        ticket: "".to_string(),
+        user: ctx.sys_ticket.user_uri.to_owned(),
+        query: "SELECT DISTINCT id FROM veda_tt.`v-wf:OutputCondition` ORDER BY v_s_created_date ASC".to_owned(),
+        sort: "".to_string(),
+        databases: "".to_string(),
+        reopen: false,
+        top: MAX_SIZE_BATCH as i32,
+        limit: MAX_SIZE_BATCH as i32,
+        from: 0,
+    };
+
+    let output_conditions_list = ctx.ch_client.select(req, OptAuthorize::NO);
     for el in output_conditions_list.result.iter() {
         res.push(el.to_string());
     }
@@ -231,7 +249,19 @@ fn _collect_membership(process_elements: &mut HashMap<String, ProcessElement>, c
     }
 
     let query = format!("SELECT DISTINCT id FROM veda_tt.`v-s:Membership` FINAL WHERE {}", where_ids);
-    for id in ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, 1000000, 1000000, 0, OptAuthorize::NO).result.iter() {
+
+    let req = FTQuery {
+        ticket: "".to_string(),
+        user: ctx.sys_ticket.user_uri.to_owned(),
+        query: query.to_owned(),
+        sort: "".to_string(),
+        databases: "".to_string(),
+        reopen: false,
+        top: 1000000,
+        limit: 1000000,
+        from: 0,
+    };
+    for id in ctx.ch_client.select(req, OptAuthorize::NO).result.iter() {
         add_to_collect(id, "Membership", "", process_elements, None);
     }
 }
@@ -246,7 +276,19 @@ fn _collect_permission_statement(process_elements: &mut HashMap<String, ProcessE
     }
 
     let query = format!("SELECT DISTINCT id FROM veda_tt.`v-s:PermissionStatement` FINAL WHERE {}", where_ids);
-    for id in ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, 1000000, 1000000, 0, OptAuthorize::NO).result.iter() {
+
+    let req = FTQuery {
+        ticket: "".to_string(),
+        user: ctx.sys_ticket.user_uri.to_owned(),
+        query: query.to_owned(),
+        sort: "".to_string(),
+        databases: "".to_string(),
+        reopen: false,
+        top: 100000,
+        limit: 100000,
+        from: 0,
+    };
+    for id in ctx.ch_client.select(req, OptAuthorize::NO).result.iter() {
         add_to_collect(id, "PermissionStatement", "", process_elements, None);
     }
 }
@@ -265,7 +307,19 @@ fn collect_process_elements(parent_id: &str, process: &mut Individual, process_e
 
 fn collect_work_items(process: &mut Individual, process_elements: &mut HashMap<String, ProcessElement>, ctx: &mut CleanerContext) {
     let query = format!("SELECT DISTINCT id FROM veda_tt.`v-wf:WorkItem` WHERE v_wf_forProcess_str[1] = '{}'", process.get_id());
-    for w_id in ctx.ch_client.select(&ctx.sys_ticket.user_uri, &query, 1000000, 1000000, 0, OptAuthorize::NO).result.iter() {
+
+    let req = FTQuery {
+        ticket: "".to_string(),
+        user: ctx.sys_ticket.user_uri.to_owned(),
+        query: query.to_owned(),
+        sort: "".to_string(),
+        databases: "".to_string(),
+        reopen: false,
+        top: 100000,
+        limit: 100000,
+        from: 0,
+    };
+    for w_id in ctx.ch_client.select(req, OptAuthorize::NO).result.iter() {
         collect_work_orders_and_vars(w_id, process_elements, process.get_id(), ctx);
     }
 }
@@ -327,7 +381,7 @@ fn check_subprocesses(indvs: &mut Vec<Individual>, output_conditions_list: &[Str
                 if !wp.contains_key(el.get_id()) {
                     wp.insert(el.get_id().to_owned(), false);
                 }
-            }
+            },
             "v-wf:WorkItem" => {
                 let date_created = el.get_first_datetime("v-s:created").unwrap_or_default();
                 if date_created < date_before.timestamp() {
@@ -341,8 +395,8 @@ fn check_subprocesses(indvs: &mut Vec<Individual>, output_conditions_list: &[Str
                         }
                     }
                 }
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

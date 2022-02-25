@@ -11,7 +11,7 @@ use v_common::module::info::ModuleInfo;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::{DataType, Lang};
 use v_common::onto::individual::Individual;
-use v_common::onto::onto::Onto;
+use v_common::onto::onto_impl::Onto;
 use v_common::onto::resource::Resource;
 use v_common::v_api::api_client::IndvOp;
 use xapian_rusty::*;

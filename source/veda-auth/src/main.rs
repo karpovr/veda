@@ -13,7 +13,7 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module::{create_sys_ticket, init_log, Module};
+use v_common::module::module_impl::{create_sys_ticket, init_log, Module};
 use v_common::module::veda_backend::Backend;
 use v_common::storage::common::{StorageMode, VStorage};
 

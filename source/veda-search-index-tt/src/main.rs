@@ -17,7 +17,7 @@ use std::io::{BufReader, BufWriter};
 use std::time::{Duration, Instant};
 use std::{env, fs, process, thread};
 use v_common::module::info::ModuleInfo;
-use v_common::module::module::{get_cmd, get_inner_binobj_as_individual, Module, PrepareError};
+use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, Module, PrepareError};
 use v_common::module::veda_module::VedaQueueModule;
 use v_common::onto::datatype::{DataType, Lang};
 use v_common::onto::individual::Individual;
