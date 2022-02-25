@@ -1,7 +1,7 @@
-import { Selector, t } from 'testcafe';
+import {Selector, t} from 'testcafe';
 
-export default class basic {
-  async login(login, password) {
+export default class Basic {
+  async login (login, password) {
     await t
       .click('#login')
       .pressKey('ctrl+a delete')
@@ -13,12 +13,12 @@ export default class basic {
       .wait(1000);
   }
 
-  async logout() {
+  async logout () {
     await t
       .click('#logout');
   }
 
-  async createPerson(last, first, middle, birthDate) {
+  async createPerson (last, first, middle, birthDate) {
     await t
       .click('#menu')
       .click('li[id="menu"] li[resource="v-s:Create"]')
@@ -33,20 +33,20 @@ export default class basic {
       .pressKey('ctrl+a delete')
       .typeText('div.input-group.date input.form-control[name="v_s_person_v_s_birthday"]', birthDate)
       .click('span[data-template="v-ui:StandardButtonsTemplate"] span[typeof="v-s:Person"] button#save')
-      .wait(1000)
+      .wait(1000);
   }
 
-  async fullTextSearch(query, eql) {
+  async fullTextSearch (query, eql) {
     await t
       .click('ul.nav.navbar-nav.navbar-right li[about="v-fs:MultiFunctionalSearch"]')
       .click('veda-control[property="*"] input[type="text"]')
       .pressKey('ctrl+a delete')
       .typeText('veda-control[property="*"] input[type="text"]', query)
       .click('span.input-group-btn button[about="v-fs:Find"]')
-      .expect(Selector('small.stats-top.pull-right span.badge[property="v-fs:authorized"]').innerText).eql(eql)
+      .expect(Selector('small.stats-top.pull-right span.badge[property="v-fs:authorized"]').innerText).eql(eql);
   }
 
-  async createTestUI(label, timeStamp) {
+  async createTestUI (label, timeStamp) {
     const number = Selector('veda-control[property="v-ui:testInteger"] select.form-control').find('option').withText('2');
     const checkbox = Selector('veda-control[rel="v-ui:testLink"] div.checkbox').find('label').withText('Спецификация тестового объектного свойства');
     await t
@@ -68,10 +68,10 @@ export default class basic {
       .click(checkbox)
       .wait(1000)
       .click('button#save')
-      .wait(1000)
+      .wait(1000);
   }
 
-  async createTestUiForAttributiveSearch(label, comment, testString, date) {
+  async createTestUiForAttributiveSearch (label, comment, testString, date) {
     const number = Selector('veda-control[property="v-ui:testInteger"] select.form-control').find('option').withText('2');
     const checkbox = Selector('veda-control[rel="v-ui:testLink"] div.checkbox').find('label').withText('Спецификация тестового объектного свойства');
     await t
@@ -94,8 +94,6 @@ export default class basic {
       .pressKey('ctrl+a delete')
       .typeText('veda-control[property="v-ui:testDatetime"]#date', date)
       .click('button#save')
-      .wait(1000)
+      .wait(1000);
   }
-
 }
-
