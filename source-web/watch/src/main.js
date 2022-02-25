@@ -17,7 +17,7 @@ const watchHandler = (request, response, next) => {
   const headers = {
     'Content-Type': 'text/event-stream',
     'Connection': 'keep-alive',
-    'Cache-Control': 'no-cache'
+    'Cache-Control': 'no-cache',
   };
   response.writeHead(200, headers);
 
@@ -29,7 +29,7 @@ const watchHandler = (request, response, next) => {
 
   const newClient = {
     id: clientId,
-    response
+    response,
   };
 
   clients.push(newClient);
@@ -44,7 +44,7 @@ const watchHandler = (request, response, next) => {
 const propagateChange = (change) => {
   console.log(new Date().toISOString(), `File changed: ${JSON.stringify(change)}`);
   clients.forEach((client) => client.response.write(`data: ${JSON.stringify(change)}\n\n`));
-}
+};
 files.watchChanges(propagateChange);
 
 app.get('/watch', watchHandler);
@@ -54,6 +54,6 @@ app.listen(
   OPTIONS.host,
   () => {
     console.log(new Date().toISOString(), `App files changes service started on ${OPTIONS.host}:${OPTIONS.port}`);
-    console.log(new Date().toISOString(), `Initial state =`, files.getState());
+    console.log(new Date().toISOString(), `Initial state = ${JSON.stringify(files.getState(), null, 2)}`);
   },
 );
