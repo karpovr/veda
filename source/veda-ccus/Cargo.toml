@@ -18,5 +18,5 @@ scan_fmt = "0.2"
 log = "0.4"
 rand = "0.7"
 
-v_common = { package = "v-common", version = "=0.2.1" }
+v_common = { package = "v-common", version = "=0.2.2" }
 #v_common = { package = "v-common", path = "../../../v-common" }

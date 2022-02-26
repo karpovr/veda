@@ -10,5 +10,5 @@ redis = "0.12.0"
 env_logger = "0.6"
 log = "0.4"
 
-v_common = { package = "v-common", version = "=0.2.1" }
+v_common = { package = "v-common", version = "=0.2.2" }
 #v_common = { package = "v-common", path = "../../../v-common" }
