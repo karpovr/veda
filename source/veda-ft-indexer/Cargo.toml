@@ -10,5 +10,5 @@ log = "0.4"
 xapian-rusty = "=0.0.49"
 #xapian-rusty = { path = "../xapian-rusty" }
 
-v_common = { package = "v-common", version = "=0.2.2" }
+v_common = { package = "v-common", version = "=0.2.3" }
 #v_common = { package = "v-common", path = "../../../v-common" }
