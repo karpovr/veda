@@ -63,11 +63,15 @@ impl<'a> Transaction<'a> {
             }
 
             // add to queue
-            let store_to_queue = if let Some(i) = self.assigned_subsystems {
+            let mut store_to_queue = if let Some(i) = self.assigned_subsystems {
                 i != 1
             } else {
                 true
             };
+
+            if el.cmd == IndvOp::Remove && el.prev_state.is_empty() {
+                store_to_queue = false;
+            }
 
             if store_to_queue {
                 let mut queue_element = Individual::default();
