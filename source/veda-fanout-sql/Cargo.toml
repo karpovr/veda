@@ -9,5 +9,5 @@ mysql = "17.0.0"
 log = "0.4"
 chrono = "0.4"
 
-v_common = { package = "v-common", version = "=0.2.5" }
+v_common = { package = "v-common", version = "=0.2.6" }
 #v_common = { package = "v-common", path = "../../../v-common" }
