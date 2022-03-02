@@ -176,25 +176,25 @@ fn add_or_del_right_sets(
     cache: &mut HashMap<String, String>,
     mode: &Cache,
 ) {
-    let removed_resource = get_disappeared(&prev_data.resource, &new_data.resource);
-    let removed_in_set = get_disappeared(&prev_data.in_set, &new_data.in_set);
+    let removed_resource = get_disappeared(prev_data.resource, new_data.resource);
+    let removed_in_set = get_disappeared(prev_data.in_set, new_data.in_set);
 
     if is_deleted && new_data.resource.is_empty() && new_data.in_set.is_empty() {
         let t_data = RightData {
-            resource: &prev_data.resource,
-            in_set: &prev_data.in_set,
+            resource: prev_data.resource,
+            in_set: prev_data.in_set,
             access: new_data.access,
         };
 
         update_right_set(id, &t_data, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
     } else {
-        update_right_set(id, &new_data, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
+        update_right_set(id, new_data, is_deleted, prev_data.access, aux_data, ctx, cache, mode);
     }
 
     if !removed_resource.is_empty() {
         let t_data = RightData {
             resource: &removed_resource,
-            in_set: &new_data.in_set,
+            in_set: new_data.in_set,
             access: new_data.access,
         };
         update_right_set(id, &t_data, true, prev_data.access, aux_data, ctx, cache, mode);
@@ -202,7 +202,7 @@ fn add_or_del_right_sets(
 
     if !removed_in_set.is_empty() {
         let t_data = RightData {
-            resource: &new_data.resource,
+            resource: new_data.resource,
             in_set: &removed_in_set,
             access: new_data.access,
         };
@@ -247,15 +247,13 @@ fn update_right_set(
                     if rr.access != 0 && !rr.counters.is_empty() {
                         rr.is_deleted = false;
                     }
-                } else {
-                    if is_deleted {
-                        rr.access = update_counters(&mut rr.counters, prev_access, rr.access | prev_access, is_deleted, false);
-                        if rr.access != 0 && !rr.counters.is_empty() {
-                            rr.is_deleted = false;
-                        }
-                    } else {
-                        rr.access = update_counters(&mut rr.counters, prev_access, new_data.access, is_deleted, false);
+                } else if is_deleted {
+                    rr.access = update_counters(&mut rr.counters, prev_access, rr.access | prev_access, is_deleted, false);
+                    if rr.access != 0 && !rr.counters.is_empty() {
+                        rr.is_deleted = false;
                     }
+                } else {
+                    rr.access = update_counters(&mut rr.counters, prev_access, new_data.access, is_deleted, false);
                 }
             } else {
                 new_right_set.insert(

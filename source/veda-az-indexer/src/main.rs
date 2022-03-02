@@ -149,12 +149,10 @@ fn prepare_account(prev_state: &mut Individual, new_state: &mut Individual, ctx:
             ctx.storage.remove(StorageId::Az, &key);
             info!("index account, remove: {} {}", prev_state.get_id(), login);
         }
-    } else {
-        if let Some(login) = new_state.get_first_literal("v-s:login") {
-            let key = format!("_L:{}", login.to_lowercase());
-            let val = new_state.get_id();
-            ctx.storage.put_kv(StorageId::Az, &key, &val);
-            info!("index account, update: {} {}", new_state.get_id(), login);
-        }
+    } else if let Some(login) = new_state.get_first_literal("v-s:login") {
+        let key = format!("_L:{}", login.to_lowercase());
+        let val = new_state.get_id();
+        ctx.storage.put_kv(StorageId::Az, &key, val);
+        info!("index account, update: {} {}", new_state.get_id(), login);
     }
 }
