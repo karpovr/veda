@@ -167,12 +167,17 @@ fn req_prepare(backend: &mut Backend, s: &str, xr: &mut XapianReader) -> Message
             xr.load_index_schema(&mut backend.storage);
         }
 
-        if let Ok(mut res) = block_on(xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut ctx)) {
-            res.result = ctx;
-            info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
-            if let Ok(s) = serde_json::to_string(&res) {
-                return Message::from(s.as_bytes());
-            }
+        match block_on(xr.query_use_collect_fn(&request, add_out_element, OptAuthorize::YES, &mut ctx)) {
+            Ok(mut res) => {
+                res.result = ctx;
+                info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
+                if let Ok(s) = serde_json::to_string(&res) {
+                    return Message::from(s.as_bytes());
+                }
+            },
+            Err(e) => {
+                error!("{:?}", e);
+            },
         }
     }
     Message::from("[]".as_bytes())

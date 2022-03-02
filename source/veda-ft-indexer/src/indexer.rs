@@ -60,17 +60,17 @@ impl Indexer {
         self.use_db = use_db.to_string();
 
         for (db_name, path) in self.db2path.iter() {
-            let mut db;
             let full_path = &("./".to_owned() + path);
+            let mut db=
             if Path::new(full_path).is_dir() {
                 info!("opened db {}, path = {}", db_name, full_path);
                 Database::new_with_path(path, UNKNOWN)?;
-                db = WritableDatabase::new(path, DB_OPEN, UNKNOWN)?;
+                WritableDatabase::new(path, DB_OPEN, UNKNOWN)?
             } else {
                 info!("created new db {}, path = {}", db_name, full_path);
                 fs::create_dir_all(full_path)?;
-                db = WritableDatabase::new(path, DB_CREATE_OR_OPEN, CHERT)?;
-            }
+                WritableDatabase::new(path, DB_CREATE_OR_OPEN, CHERT)?
+            };
 
             let doc_count = db.get_doccount()?;
             info!("db {}, document count = {}", db_name, doc_count);
