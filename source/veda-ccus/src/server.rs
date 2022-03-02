@@ -200,7 +200,7 @@ impl CCUSServer {
                             changes.push(',');
                         }
 
-                        changes.push_str(&uri.to_owned());
+                        changes.push_str(uri);
                         changes.push('=');
                         changes.push_str(&registered_counter.to_string());
                     }
@@ -320,7 +320,7 @@ impl Actor for CCUSServer {
                         changes.push(',');
                     }
 
-                    changes.push_str(&uri.to_owned());
+                    changes.push_str(uri);
                     changes.push('=');
                     changes.push_str(&counter.to_string());
                 }
