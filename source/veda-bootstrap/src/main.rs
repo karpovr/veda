@@ -429,13 +429,13 @@ fn start_module(module: &VedaModule) -> io::Result<Child> {
     fs::create_dir_all("./logs").unwrap_or_default();
 
     let log_path = "./logs/veda-".to_owned() + &module.name + "-" + &datetime.format("%Y-%m-%d %H:%M:%S.%f").to_string() + ".log";
-    let std_log_file = File::create(log_path.to_string());
+    let std_log_file = File::create(&log_path);
     let err_log_file = File::create(log_path);
 
     let child = if module.args.is_empty() {
-        Command::new(module.exec_name.to_string()).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).spawn()
+        Command::new(&module.exec_name).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).spawn()
     } else {
-        Command::new(module.exec_name.to_string()).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).args(&module.args).spawn()
+        Command::new(&module.exec_name).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).args(&module.args).spawn()
     };
 
     match child {
