@@ -54,11 +54,11 @@ export const html = `
     <div class="row">
       <div class="col-md-4 from">
         <em about="v-wf:from" property="rdfs:label"></em>
-        <veda-control property="v-wf:from" data-single="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
+        <veda-control property="v-wf:from" data-single="true" data-delegated="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
       </div>
       <div class="col-md-4 to">
         <em about="v-wf:to" property="rdfs:label"></em>
-        <veda-control property="v-wf:to" data-single="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
+        <veda-control property="v-wf:to" data-single="true" data-delegated="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
       </div>
       <div class="col-md-8" about="@" rel="v-wf:onDocument" data-template="v-ft:TaskBlankTemplate_onDocument"></div>
     </div>
