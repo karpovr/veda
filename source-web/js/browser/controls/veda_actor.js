@@ -22,6 +22,7 @@ $.fn.veda_actor = function ( options ) {
   const complex = this.attr('data-complex') || false;
   let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   const withDeleted = this.attr('data-deleted') || false;
+  const withDelegation = this.attr('data-delegated') || false;
   let chosenActorType;
   let fullName;
   let onlyDeleted;
@@ -68,6 +69,10 @@ $.fn.veda_actor = function ( options ) {
         $('.tree', control).show();
       }
       queryPrefix = specQueryPrefix || queryPrefix;
+      // test feature
+      if (withDelegation && specQueryPrefix) {
+        queryPrefix += " || ('rdf:type'=='v-s:Appointment' && 'v-s:hasDelegationPurpose'=='d:delegate_Role' && 'v-s:employee.v-s:hasAccount.isExists'=='true')";
+      }
       const ftValue = $('.fulltext', control).val();
       if (ftValue) {
         performSearch(ftValue);
