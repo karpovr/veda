@@ -89,7 +89,7 @@ async fn query(
     if data.sparql.is_some() {
         res = sparql_client.lock().await.prepare_query(&user.unwrap_or_default(), data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
-        let req = FTQuery{
+        let req = FTQuery {
             ticket: "".to_string(),
             user: user.unwrap_or_default(),
             query: data.sql.clone().unwrap_or_default(),
@@ -98,16 +98,9 @@ async fn query(
             reopen: false,
             top: data.top.unwrap_or_default(),
             limit: data.limit.unwrap_or_default(),
-            from: data.from.unwrap_or_default()
+            from: data.from.unwrap_or_default(),
         };
-        res = ch_client
-            .lock()
-            .await
-            .select_async(
-                req,
-                OptAuthorize::YES,
-            )
-            .await?;
+        res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
         let mut ft_req = FTQuery {
             ticket: ticket.clone().unwrap_or_default(),

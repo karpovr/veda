@@ -177,16 +177,14 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
             AsyncWriteExt::flush(ff).await?;
             AsyncWriteExt::close(ff).await?;
         }
-    } else {
-        if !path.is_empty() && !uri.is_empty() {
-            let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-            if Path::new(&tmp_file_path).exists().await {
-                async_std::fs::create_dir_all(&dest_file_path).await?;
-                async_fs::copy(tmp_file_path.clone(), file_full_name).await?;
-                fs::remove_file(tmp_file_path)?;
-            } else {
-                async_fs::write(file_full_name, "").await?;
-            }
+    } else if !path.is_empty() && !uri.is_empty() {
+        let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
+        if Path::new(&tmp_file_path).exists().await {
+            async_std::fs::create_dir_all(&dest_file_path).await?;
+            async_fs::copy(tmp_file_path.clone(), file_full_name).await?;
+            fs::remove_file(tmp_file_path)?;
+        } else {
+            async_fs::write(file_full_name, "").await?;
         }
     }
 
