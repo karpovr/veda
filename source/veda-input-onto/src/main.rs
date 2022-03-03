@@ -74,13 +74,12 @@ fn main() -> NotifyResult<()> {
 
     info!("start processing files");
 
-    let systicket;
-    if let Ok(t) = backend.get_sys_ticket_id() {
-        systicket = t;
+    let systicket = if let Ok(t) = backend.get_sys_ticket_id() {
+        t
     } else {
         error!("failed to get systicket");
         return Ok(());
-    }
+    };
 
     let mut list_files: Vec<PathBuf> = Vec::new();
     collect_file_paths(&onto_path, &mut list_files);
@@ -199,12 +198,7 @@ fn get_hash_of_file(file_path: &str) -> io::Result<String> {
 }
 
 fn extract_path_and_name(path: &Path) -> Option<(&str, &str)> {
-    let sfp;
-    if let Some(s) = path.to_str() {
-        sfp = s;
-    } else {
-        return None;
-    }
+    let sfp = path.to_str()?;
 
     if let Some(s) = path.file_name() {
         if let Some(ss) = s.to_str() {
@@ -445,7 +439,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                         Typed {
                             value,
                             datatype,
-                        } => match datatype.iri.replace("#", "/").as_str() {
+                        } => match datatype.iri.replace('#', "/").as_str() {
                             "http://www.w3.org/2001/XMLSchema/string" => {
                                 indv.add_string(&predicate, value, Lang::NONE);
                             },
