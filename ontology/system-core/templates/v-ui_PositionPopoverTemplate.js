@@ -16,6 +16,7 @@ export const pre = function (individual, template, container, mode, extra) {
     })
     .then(function (appointments) {
       const personsPromises = appointments.map(function (appointment) {
+        if (appointment.hasValue("v-s:hasDelegationPurpose", "d:delegate_Control")) return false;
         return appointment['v-s:employee'].length > 0 ? appointment['v-s:employee'][0].load() : Promise.resolve(false);
       });
       return Promise.all(personsPromises).then(function (persons) {
@@ -23,7 +24,7 @@ export const pre = function (individual, template, container, mode, extra) {
         mBody.append('<hr class="no-margin">');
         appointments.forEach(function (appointment, i) {
           if (persons[i] && !persons[i].hasValue('v-s:deleted', true)) {
-            mBody.append('<small>' + appointment['rdfs:label'][0] + '</small><br>');
+            mBody.append('<small>' + persons[i]['rdfs:label'][0] + '</small><br>');
           }
         });
         return true;
