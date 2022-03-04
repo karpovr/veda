@@ -12,5 +12,5 @@ rust_decimal = "1.7.0"
 align-data = "0.1.0"
 scan_fmt = "0.2.6"
 
-v_v8 = { package = "v-common-v8", version = "=0.1.95" }
+v_v8 = { package = "v-common-v8", version = "=0.1.96" }
 #v_v8 = { package = "v-common-v8", path = "../../../v-common-v8" }
