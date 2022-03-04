@@ -179,7 +179,6 @@ fn request_prepare(ctx: &mut Context, sys_ticket: &Ticket, op_id: &mut i64, requ
     let assigned_subsystems = v["assigned_subsystems"].as_i64();
     let event_id = v["event_id"].as_str();
     let src = v["src"].as_str();
-    let cmd;
 
     let addr = if let Ok(v) = v["addr"].as_str().unwrap_or_default().parse::<IpAddr>() {
         Some(v)
@@ -192,27 +191,17 @@ fn request_prepare(ctx: &mut Context, sys_ticket: &Ticket, op_id: &mut i64, requ
         return Err(ResultCode::TicketExpired);
     }
 
-    match v["function"].as_str().unwrap_or_default() {
-        "put" => {
-            cmd = IndvOp::Put;
-        },
-        "remove" => {
-            cmd = IndvOp::Remove;
-        },
-        "add_to" => {
-            cmd = IndvOp::AddTo;
-        },
-        "set_in" => {
-            cmd = IndvOp::SetIn;
-        },
-        "remove_from" => {
-            cmd = IndvOp::RemoveFrom;
-        },
+    let cmd = match v["function"].as_str().unwrap_or_default() {
+        "put" => IndvOp::Put,
+        "remove" => IndvOp::Remove,
+        "add_to" => IndvOp::AddTo,
+        "set_in" => IndvOp::SetIn,
+        "remove_from" => IndvOp::RemoveFrom,
         _ => {
             error!("unknown command {:?}", v["function"].as_str());
             return Err(ResultCode::BadRequest);
         },
-    }
+    };
 
     if let Some(jindividuals) = v["individuals"].as_array() {
         let mut transaction = Transaction {
