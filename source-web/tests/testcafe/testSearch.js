@@ -10,7 +10,8 @@ test('testSearch', async (t) => {
   await t
     .expect(Selector('#user-info').innerText).contains('Администратор2 .')
     .navigateTo( pageForNavigateFromConfig )
-    .click('button#search-button');
+    .click('button#search-button')
+    .wait(5000);
   const search = Selector('div.results div.search-result.table-responsive.noSwipe tbody.result-container tr[typeof="v-ui:TestUIClass"]');
   const count = await search.count;
   await t
