@@ -350,6 +350,12 @@ Workflow.prepare_work_order = function (ticket, document) {
               if (is_position) {
                 ServerUtil.addRight(ticket, executor['@'], result['@'], ['v-s:canRead', 'v-s:canUpdate']);
               }
+
+              // включим задачу в группу документа
+              if (CommonUtil.hasValue(result, 'v-wf:onDocument')) {
+                const docId = ServerUtil.getUri(result['v-wf:onDocument']);
+                ServerUtil.addToGroup(ticket, docId, result['@'], ['v-s:canRead']);
+              }
             }
           }
 
