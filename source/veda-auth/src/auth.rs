@@ -145,7 +145,13 @@ impl<'a> AuthWorkPlace<'a> {
 
                     // ATTEMPT AUTHENTICATION
                     if !self.stored_password.is_empty() && !self.password.is_empty() && self.password.len() > 63 && self.verify_password() {
-                        create_new_ticket(self.login, &user_id, self.ip, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
+                        let addr = if self.conf.check_ticket_ip {
+                            self.ip
+                        } else {
+                            ""
+                        };
+
+                        create_new_ticket(self.login, &user_id, addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
                         self.user_stat.wrong_count_login = 0;
                         self.user_stat.last_wrong_login_date = 0;
                         return (true, ResultCode::Ok);
@@ -218,7 +224,13 @@ impl<'a> AuthWorkPlace<'a> {
             error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::AuthenticationFailed
         } else {
-            create_new_ticket(self.login, person.get_id(), self.ip, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
+            let addr = if self.conf.check_ticket_ip {
+                self.ip
+            } else {
+                ""
+            };
+
+            create_new_ticket(self.login, person.get_id(), addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
             self.user_stat.attempt_change_pass = 0;
             info!("updated password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::Ok
