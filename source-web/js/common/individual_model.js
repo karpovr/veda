@@ -46,7 +46,6 @@ IndividualModel.cache = {
         delete this.expire[key];
         i++;
       }
-      console.log(`Cache limit (${this.limit} elements) reached, ${this.limit - this.count} removed.`);
     }
     const expire_key = typeof expires === 'number' ? expires : Date.now();
     individual.expires = expire_key;
