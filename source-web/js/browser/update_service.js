@@ -65,6 +65,7 @@ proto.init = function () {
       return self;
     })
     .catch((error) => {
+      this.inited = false;
       reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
       console.log('init socket error, retry in', reconnectDelay / 1000, 'sec');
       setTimeout(self.init.bind(self), reconnectDelay);
