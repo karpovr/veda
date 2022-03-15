@@ -1,5 +1,7 @@
 import $ from 'jquery';
+import IndividualModel from '/js/common/individual_model.js';
 import notify from '/js/browser/notify.js';
+import riot from '/js/common/lib/riot.js';
 
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -17,7 +19,7 @@ export const post = function (individual, template, container, mode, extra) {
   textarea.css('min-height', height);
   const original = individual.properties;
   let validationState = true;
-  textarea.on('keyup', function () {
+  textarea.on('change', function () {
     try {
       formatted = textarea.val();
       json = JSON.parse(formatted);
@@ -37,8 +39,14 @@ export const post = function (individual, template, container, mode, extra) {
     }
     anchorized = anchorize(formatted);
     pre.html(anchorized);
-    individual.properties = json;
-    individual.isSync(false);
+    if (individual.properties['@'] !== json['@']) {
+      const newIndividual = new IndividualModel(json);
+      newIndividual.isSync(false);
+      riot.route(['#', newIndividual.id, '#main', 'v-ui:json', 'edit'].join('/'));
+    } else {
+      individual.properties = json;
+      individual.isSync(false);
+    }
   });
 
   // Mark not sync to force update on save
