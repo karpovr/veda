@@ -58,6 +58,14 @@ delegateHandler(loginForm, 'mousedown', '.show-password', function (e) {
   }, {once: true});
 });
 
+delegateHandler(loginForm, 'touchstart', '.show-password', function (e) {
+  const passwords = loginForm.querySelectorAll('.password');
+  passwords.forEach((input) => input.type = 'text');
+  document.addEventListener('touchend', function () {
+    passwords.forEach((input) => input.type = 'password');
+  }, {once: true});
+});
+
 /**
  * Submit credentials handler
  * @param {Event} event
