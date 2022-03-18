@@ -208,16 +208,32 @@ proto.subscribe = function (uri, action) {
     ++this.list[uri].subscribeCounter;
   } else {
     const individual = new IndividualModel(uri);
-    const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
-    this.list[uri] = {
-      subscribeCounter: 1,
-      updateCounter: updateCounter,
-    };
-    if (action) {
-      this.list[uri].action = action;
-    }
-    if (this.socket) {
-      this.socket.sendMessage('+' + uri + '=' + updateCounter);
+    if (individual.isNew()) {
+      const updateCounter = 0;
+      this.list[uri] = {
+        subscribeCounter: 1,
+        updateCounter: updateCounter,
+      };
+      if (action) {
+        this.list[uri].action = action;
+      }
+      if (this.socket) {
+        this.socket.sendMessage('+' + uri + '=' + updateCounter);
+      }
+    } else {
+      individual.one('afterLoad', () => {
+        const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
+        this.list[uri] = {
+          subscribeCounter: 1,
+          updateCounter: updateCounter,
+        };
+        if (action) {
+          this.list[uri].action = action;
+        }
+        if (this.socket) {
+          this.socket.sendMessage('+' + uri + '=' + updateCounter);
+        }
+      });
     }
   }
 };

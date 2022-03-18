@@ -129,7 +129,11 @@ function IndividualModel (uri, cache, init) {
     if (cached) {
       return cached;
     } else {
+      riot.observable(this);
+      this.on('rdf:type', this.init);
+      this.on('beforeSave', beforeSaveHandler);
       IndividualModel.cache.set(this, this._.cache);
+      return this;
     }
   }
 
