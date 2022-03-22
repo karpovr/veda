@@ -1,0 +1,50 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix mnd-s: <http://semantic-machines.com/veda/mondi-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://semantic-machines.com/veda/veda-individual-WorkPermitRoles>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология Veda. Справочник Роль в наряде-допуска"@ru ;
+  rdfs:label "Veda system ontology. Dictionary - WorkPermitRoles"@en ;
+  v-s:loadPriority 10 ;
+.
+#--------------------------------------------------Вид энергии--
+v-s:EnergyKind
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Вид энергии"@ru ;
+  rdfs:label "Energy Kind"@en ;
+.
+
+#---------------------------------------------------------
+d:EnergyKind_1
+  a v-s:EnergyKind;
+  rdfs:label "Электрическая"^^xsd:string.
+
+d:EnergyKind_2
+  a v-s:EnergyKind;
+  rdfs:label "Пневматическая"^^xsd:string.
+
+d:EnergyKind_3
+  a v-s:EnergyKind;
+  rdfs:label "Тепловая"^^xsd:string.
+
+d:EnergyKind_4
+  a v-s:EnergyKind;
+  rdfs:label "Кинетическая"^^xsd:string.
+
+d:EnergyKind_5
+  a v-s:EnergyKind;
+  rdfs:label "Механическая"^^xsd:string.
+
+d:EnergyKind_6
+  a v-s:EnergyKind;
+  rdfs:label "Химическая"^^xsd:string.
+
+d:EnergyKind_7
+  a v-s:EnergyKind;
+  rdfs:label "Прочее"^^xsd:string.

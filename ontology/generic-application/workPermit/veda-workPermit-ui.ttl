@@ -1,0 +1,124 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix s-wf: <http://semantic-machines.com/veda/simple-workflow-base/> .
+@prefix v-df: <http://semantic-machines.com/veda/veda-docflow/> .
+
+
+<http://semantic-machines.com/veda/veda-workPermit-ui>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология Veda. Наряд-допуска. UI"@ru ;
+  rdfs:label "Veda ontology. WorkPermit. UI"@en ;
+  v-s:loadPriority 20 ;
+.
+# ------------------------------------------------------------ СОБЫТИЯ --
+
+# ------------------------------------------------------------ СТРОКИ -----
+v-s:DateForResultsOfMeasurementsOfHarmfulFactors_Bundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Дата и время отбора проб"@ru ;
+  rdfs:label "Date and time of sampling"@en ;
+.
+ 
+
+# ------------------------------------------------------------ ШАБЛОНЫ --
+v-s:TS_ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:ResultsOfMeasurementsOfHarmfulFactorsTemplate;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors
+.
+v-s:CS_ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru, "Class specification v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  v-s:shelfLife 9999;
+  v-ui:defaultTemplate v-s:ResultsOfMeasurementsOfHarmfulFactorsTemplate ;
+  v-s:labelPattern "{@.v-s:date} {@.v-s:placeDescription}" ;
+  v-s:loadPriority 10 ;
+.
+v-s:ResultsOfMeasurementsOfHarmfulFactorsTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  rdfs:label "Шаблон v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
+  rdfs:label "ResultsOfMeasurementsOfHarmfulFactors template"@en ;
+  v-ui:template "v-s_ResultsOfMeasurementsOfHarmfulFactorsTemplate.js"
+.
+
+
+v-s:TS_ExtensionOfWorkPermit
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:ExtensionOfWorkPermitTemplate;
+  v-ui:forClass v-s:ExtensionOfWorkPermit
+.
+v-s:CS_ExtensionOfWorkPermit
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:ExtensionOfWorkPermit"@ru, "Class specification v-s:ExtensionOfWorkPermit"@en ;
+  v-ui:forClass v-s:ExtensionOfWorkPermit ;
+  v-s:shelfLife 9999;
+  v-ui:defaultTemplate v-s:ExtensionOfWorkPermitTemplate ;
+  v-s:labelPattern "{@.v-s:date} {@.v-s:placeDescription}" ;
+  v-s:loadPriority 10 ;
+.
+v-s:ExtensionOfWorkPermitTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  rdfs:label "Шаблон v-s:ExtensionOfWorkPermit"@ru ;
+  rdfs:label "ExtensionOfWorkPermit template"@en ;
+  v-ui:template "v-s_ExtensionOfWorkPermitTemplate.js"
+.
+
+v-s:TS_ChangingBrigadeComposition
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:ChangingBrigadeCompositionTemplate;
+  v-ui:forClass v-s:ChangingBrigadeComposition
+.
+v-s:CS_ChangingBrigadeComposition
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:ChangingBrigadeComposition"@ru, "Class specification v-s:ChangingBrigadeComposition"@en ;
+  v-ui:forClass v-s:ChangingBrigadeComposition ;
+  v-s:shelfLife 9999;
+  v-ui:defaultTemplate v-s:ChangingBrigadeCompositionTemplate ;
+  v-s:labelPattern "{@.v-s:date} {@.v-s:placeDescription}" ;
+  v-s:loadPriority 10 ;
+.
+v-s:ChangingBrigadeCompositionTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:ChangingBrigadeComposition ;
+  rdfs:label "Шаблон v-s:ChangingBrigadeComposition"@ru ;
+  rdfs:label "ChangingBrigadeComposition template"@en ;
+  v-ui:template "v-s_ChangingBrigadeCompositionTemplate.js"
+.
+
+
+v-s:TS_ClosingOfWorkPermit
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "10"^^xsd:integer;
+  v-ui:defaultTemplate v-s:ClosingOfWorkPermitTemplate;
+  v-ui:forClass v-s:ClosingOfWorkPermit
+.
+v-s:CS_ClosingOfWorkPermit
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:ClosingOfWorkPermit"@ru, "Class specification v-s:ClosingOfWorkPermit"@en ;
+  v-ui:forClass v-s:ClosingOfWorkPermit ;
+  v-s:shelfLife 9999;
+  v-ui:defaultTemplate v-s:ClosingOfWorkPermitTemplate ;
+  v-s:labelPattern "{@.v-s:date} {@.v-s:description}" ;
+  v-s:loadPriority 10 ;
+.
+v-s:ClosingOfWorkPermitTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  rdfs:label "Шаблон v-s:ClosingOfWorkPermit"@ru ;
+  rdfs:label "ClosingOfWorkPermit template"@en ;
+  v-ui:template "v-s_ClosingOfWorkPermitTemplate.js"
+.

@@ -1,0 +1,54 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix mnd-s: <http://semantic-machines.com/veda/mondi-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://semantic-machines.com/veda/veda-individual-WorkPermitRoles>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология Veda. Справочник Роль в наряде-допуска"@ru ;
+  rdfs:label "Veda system ontology. Dictionary - WorkPermitRoles"@en ;
+  v-s:loadPriority 10 ;
+.
+#--------------------------------------------------Роли в наряде-допуска--
+v-s:WorkPermitRoles
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Роль в наряде-допуска"@ru ;
+  rdfs:label "Work Permit Role"@en ;
+.
+
+#---------------------------------------------------------
+d:WorkPermitRoles_issuer
+  a v-s:WorkPermitRoles;
+  rdfs:label "Выдающий"^^xsd:string.
+
+d:WorkPermitRoles_allowing
+  a v-s:WorkPermitRoles;
+  rdfs:label "Допускающий"^^xsd:string.
+
+d:WorkPermitRoles_issuerOfWorkplace
+  a v-s:WorkPermitRoles;
+  rdfs:label "Выдающий разрешение на подготовку рабочего места"^^xsd:string.
+
+d:WorkPermitRoles_responsibleChief
+  a v-s:WorkPermitRoles;
+  rdfs:label "Ответственный руководитель работ"^^xsd:string.
+
+d:WorkPermitRoles_approvaller
+  a v-s:WorkPermitRoles;
+  rdfs:label "Утверждающий"^^xsd:string.
+
+d:WorkPermitRoles_watching
+  a v-s:WorkPermitRoles;
+  rdfs:label "Наблюдающий"^^xsd:string.
+
+d:WorkPermitRoles_worker
+  a v-s:WorkPermitRoles;
+  rdfs:label "Ответственный производитель работ"^^xsd:string.
+
+d:WorkPermitRoles_memberOfBrigade
+  a v-s:WorkPermitRoles;
+  rdfs:label "Член бригады"^^xsd:string.

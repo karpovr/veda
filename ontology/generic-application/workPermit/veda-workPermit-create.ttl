@@ -1,0 +1,25 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix mnd-s: <http://semantic-machines.com/veda/mondi-schema/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+
+<http://semantic-machines.com/veda/veda-workPermit-create>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология Veda. Наряд допуски. Создание"@ru ;
+  rdfs:label "Veda system ontology. workPermit. Create"@en ;
+  v-s:loadPriority 20 ;
+.
+#------------------ Create -------------
+v-s:WorkPermitCreate
+  rdf:type v-fc:Create ;
+  rdfs:label "Наряд-допуск"@ru ;
+  rdfs:label "Work permit"@en ;
+  v-fc:hasBlank v-s:WorkPermitBlank ;
+.

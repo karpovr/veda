@@ -1,0 +1,26 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix mnd-s: <http://semantic-machines.com/veda/mondi-schema/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+
+<http://semantic-machines.com/veda/mondi-workPermit-blanks>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология Монди. Наряд-допуск. Бланки"@ru ;
+  rdfs:label "Mondi ontology. Work permit. Blanks"@en ;
+  v-s:loadPriority 20 ;
+.
+#---------------Бланки----------------------
+v-s:WorkPermitBlank
+  a v-fc:Blank ;
+  rdfs:label "Наряд-допуск"@ru ;
+  rdfs:label "Work permit"@en ;
+  v-fc:targetType v-s:WorkPermit ;
+.

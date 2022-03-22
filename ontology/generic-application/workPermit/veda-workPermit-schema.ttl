@@ -1,0 +1,976 @@
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix mnd-s: <http://semantic-machines.com/veda/mondi-schema/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+
+<http://semantic-machines.com/veda/veda-workPermit-schema>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Наряд-допуск. Схема"@ru ;
+  rdfs:label "Veda system ontology. Work permit. Schema"@en ;
+  v-s:loadPriority 20 ;
+.
+# ------------------------------------------------------------ КЛАССЫ --
+
+#--------------------------------------------------Наряд-допуск--
+v-s:WorkPermit
+  rdf:type owl:Class ;
+  rdfs:label "Наряд-допуск"@ru ;
+  rdfs:label "Work Permit"@en ;
+  rdfs:subClassOf v-s:ActionPlan ;
+  rdfs:subClassOf v-s:Temporal ;
+  rdfs:subClassOf v-s:Spatial ;
+  rdfs:subClassOf v-s:Document ;
+  rdfs:subClassOf v-s:Maintained ;
+  rdfs:subClassOf v-s:UserSearchableDocument;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:Enumerated ;
+  v-s:labelPattern "{@.v-s:registrationNumber} {@.v-s:responsibleDepartment.rdfs:label} - {@.v-s:description}" ;
+  v-s:hasNumeration v-s:RegistrationNumberYearNumeration2_6 ;
+.
+
+#rdfs:label
+
+#v-s:registrationNumber
+
+#v-s:hasStatus
+v-s:PS_hasStatus_WorkPermit
+    rdf:type v-ui:ObjectPropertySpecification ;
+    v-ui:forClass v-s:WorkPermit;
+    v-ui:forProperty v-s:hasStatus ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    v-ui:defaultValue v-s:StatusAgreement ;
+    rdfs:label "Спецификация свойства v-s:hasStatus для класса mnd-s:WorkPermit"@ru ;
+    rdfs:label "v-s:hasStatus property specification for mnd-s:WorkPermit"@en ;
+.
+
+#Организация, на теорритории которой
+#v-s:checkedOrganization
+
+#Подразделение, на теорритории которого
+#v-s:checkedDepartment
+
+#v-s:responsibleOrganization
+
+#v-s:responsibleDepartment
+
+
+#Форма Наряда допуска
+v-s:hasWorkPermitForm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Форма наряда допуска"@ru ;
+  rdfs:label "Work permit form"@en ;
+  rdfs:range v-s:WorkKindInWorkPermit ;
+.
+v-s:PS_hasWorkPermitForm_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasWorkPermitForm ;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 1 ;
+  v-ui:queryPrefix "('@' == 'd:WorkKindInWorkPermit_1' || '@'=='d:WorkKindInWorkPermit_2' || '@'=='d:WorkKindInWorkPermit_3' || '@'=='d:WorkKindInWorkPermit_4' || '@'=='d:WorkKindInWorkPermit_5' || '@' == 'd:WorkKindInWorkPermit_6')"^^xsd:string ;
+  rdfs:label "Спецификация к свойству v-s:hasWorkPermitForm для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Spec for property v-s:hasWorkPermitForm for class v-s:WorkPermit"@en ;
+.
+
+#Вид работ
+v-s:hasWorkKindInWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Вид работ"@ru ;
+  rdfs:label "Work kind"@en ;
+  rdfs:range v-s:WorkKindInWorkPermit ;
+.
+
+v-s:workPermit_issuer
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain mnd-s:WorkPermit ;
+  rdfs:label "Выдающий"@ru ;
+  rdfs:label "Workpermit issuer"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_allowing
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Допускающий"@ru ;
+  rdfs:label "Workpermit allowing"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_issuerOfWorkplace
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Выдающий разрешение на подготовку рабочего места"@ru ;
+  rdfs:label "Workpermit issuer of Workplace"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_responsibleChief
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Ответственный руководитель работ"@ru ;
+  rdfs:label "Workpermit responsible chief"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_approvaller
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Утверждающий"@ru ;
+  rdfs:label "WorkPermit approvaller"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_watching
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Наблюдающий"@ru ;
+  rdfs:label "Workpermit watching"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_worker
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Ответственный производитель работ"@ru ;
+  rdfs:label "Workpermit worker"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:workPermit_brigade
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Состав бригады"@ru ;
+  rdfs:label "Work permit Brigade"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:PS_hasWorkPermitRoles_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация ролей в Наряде-допуске"@ru ;
+  rdfs:label "Specification for hasWorkPermitRoles"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:workPermit_issuer ;
+  v-ui:forProperty v-s:workPermit_allowing ;
+  v-ui:forProperty v-s:workPermit_issuerOfWorkplace ;
+  v-ui:forProperty v-s:workPermit_responsibleChief ;
+  v-ui:forProperty v-s:workPermit_approvaller ;
+  v-ui:forProperty v-s:workPermit_watching ;
+  v-ui:forProperty v-s:workPermit_worker ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
+.
+v-s:PS_workPermit_brigade_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация участников бригады в Наряде-допуске"@ru ;
+  rdfs:label "Specification for workPermit_brigade"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:workPermit_brigade ;
+  v-ui:forProperty v-s:workPermit_actualBrigade ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+v-s:workPermit_actualBrigade
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Актуальный состав бригады"@ru ;
+  rdfs:label "Work permit Actual brigade"@en ;
+  rdfs:range v-s:Appointment ;
+.
+#-----Описание работ
+#v-s:description
+#-----Место проведения работ
+#v-s:placeDescription
+
+v-s:earthworksPermission
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Разрешение на выполнение земляных работ"@ru ;
+  rdfs:label "Permission to carry out earthworks"@en ;
+  rdfs:range v-s:attachment ;
+.
+v-s:workPermit_tk_ppr_description
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Сведения о ТК/ППР"@ru ;
+  rdfs:label "workPermit tk and ppr description"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:workPermit_tk_ppr
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "ТК/ППР"@ru ;
+  rdfs:label "WorkPermit TK and PPR"@en ;
+  rdfs:range v-s:attachment ;
+.
+#v-s:dateFromPlan
+#v-s:dateToPlan
+
+v-s:workPermit_prepareActions
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Мероприятия по подготовке объекта"@ru ;
+  rdfs:label "WorkPermit prepare actions"@en ;
+  rdfs:range xsd:string ;
+.
+#v-s:attachment
+
+v-s:hasWorkingOperations
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Рабочие операции"@ru ;
+  rdfs:label "Рабочие операции"@en ;
+  rdfs:range v-s:WorkingOperations ;
+.
+v-s:PS_hasWorkingOperations_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasWorkingOperations для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasWorkingOperations for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasWorkingOperations ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasWorkPermitMainRisks
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Основные риски"@ru ;
+  rdfs:label "Основные риски"@en ;
+  rdfs:range v-s:WorkPermitMainRisks ;
+.
+v-s:PS_hasWorkPermitMainRisks_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasWorkPermitMainRisks для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasWorkPermitMainRisks for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasWorkPermitMainRisks ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_1_3
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Общие меры безопасности"@ru ;
+  rdfs:label "Общие меры безопасности"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_1_3_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_1_3 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_1_3 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_1_3 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_1_3')"^^xsd:string ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_6_1
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на высоте. Общие требования"@ru ;
+  rdfs:label "Меры безопасности при работах на высоте. Общие требования"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_6_1_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_6_1 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_6_1 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_6_1 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_6_1')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_6_2
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на высоте. Личная безопасность"@ru ;
+  rdfs:label "Меры безопасности при работах на высоте. Личная безопасность"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_6_2_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_6_2 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_6_2 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_6_2 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_6_2')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_6_3
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на высоте. Работы на лесах"@ru ;
+  rdfs:label "Меры безопасности при работах на высоте. Работы на лесах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_6_3_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_6_3 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_6_3 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_6_3 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_6_3')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_6_4
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на высоте. Подъемники (вышки)"@ru ;
+  rdfs:label "Меры безопасности при работах на высоте. Подъемники (вышки)"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_6_4_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_6_4 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_6_4 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_6_4 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_6_4')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_6_5
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на высоте. Лестница/стремянка"@ru ;
+  rdfs:label "Меры безопасности при работах на высоте. Лестница/стремянка"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_6_5_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_6_5 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_6_5 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_6_5 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_6_5')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_6_6
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на высоте. Работы на крыше"@ru ;
+  rdfs:label "Меры безопасности при работах на высоте. Работы на крыше"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_6_6_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_6_6 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_6_6 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_6_6 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_6_6')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_7
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при погрузочно-разгрузочных работах"@ru ;
+  rdfs:label "Меры безопасности при погрузочно-разгрузочных работах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_7_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_7 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_7 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_7 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_7')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_8
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при огневых работах"@ru ;
+  rdfs:label "Меры безопасности при огневых работах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_8_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_8 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_8 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_8 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_8')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_9_1
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах с блокировкой энергии"@ru ;
+  rdfs:label "Меры безопасности при работах с блокировкой энергии"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_9_1_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_9_1 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_9_1 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_9_1 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_9_1')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_9_2
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах без блокировки энергии"@ru ;
+  rdfs:label "Меры безопасности при работах без блокировки энергии"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_9_2_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_9_2 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_9_2 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_9_2 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_9_2')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_10
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при земляных работах"@ru ;
+  rdfs:label "Меры безопасности при земляных работах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_10_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_10 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_10 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_10 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_10')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_11
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах с оборудованием высокого давления"@ru ;
+  rdfs:label "Меры безопасности при работах с оборудованием высокого давления"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_11_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_11 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_11 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_11 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_11')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_12
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при водолазных работах"@ru ;
+  rdfs:label "Меры безопасности при водолазных работах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_12_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_12 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_12 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_12 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_12')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_13
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при демонтажных работах"@ru ;
+  rdfs:label "Меры безопасности при демонтажных работах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_13_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_13 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_13 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_13 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_13')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_14
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах на электрооборудовании"@ru ;
+  rdfs:label "Меры безопасности при работах на электрооборудовании"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_14_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_14 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_14 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_14 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_14')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_15
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при работах с материалами содержащими асбест"@ru ;
+  rdfs:label "Меры безопасности при работах с материалами содержащими асбест"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_15_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_15 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_15 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_15 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_15')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:hasSafetyWorkAction_16
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при в замкнутом пространстве"@ru ;
+  rdfs:label "Меры безопасности при в замкнутом пространстве"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_16_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_16 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_16 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_16 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_16')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:workPermit_safetyAction_additional
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Мероприятия, обеспечивающие безопасное выполнение работ (текст)"@ru ;
+  rdfs:label "WorkPermit additional safety action"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:technologicalSequenceOfOperations
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Технологическая последовательность операций"@ru ;
+  rdfs:label "Technological sequence of operations"@en ;
+  rdfs:range xsd:string ;
+.
+
+v-s:hasPPEType
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Применяемые СИЗ"@ru ;
+  rdfs:label "Ppe description"@en ;
+  rdfs:range v-s:PPEType ;
+  rdfs:domain v-s:WorkPermit ;
+.
+v-s:PS_hasPPEType_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasPPEType ;
+  v-ui:treeRoot d:qpna8idrvd07plk4dg8isevsrs ;
+  v-ui:treeRoot d:qwuj04lyvfgk4boubgxfvv7krm ;
+  v-ui:treeInProperty v-s:hasParentLink ;
+  v-ui:treeAllowedClass v-s:PPEType ;
+  v-ui:treeSelectableClass v-s:PPEType ;
+  v-ui:treeDisplayedProperty rdfs:label ;
+  v-ui:treeDisplayedProperty v-s:registrationNumber ;
+  v-ui:minCardinality 1 ;
+  v-ui:maxCardinality 49 ;
+  rdfs:label "Спецификация свойства v-s:hasPPEType для класса v-s:WorkPermit"@ru ;
+  rdfs:label "v-s:hasPPEType property specification for v-s:WorkPermit class"@en ;
+  v-ui:treeAllowedFilter """
+  return this.hasValue("rdf:type", "v-s:PPEType");
+  """ ;
+  v-ui:treeSelectableFilter """
+  return this.id != "d:qpna8idrvd07plk4dg8isevsrs"  && this.id != "d:qwuj04lyvfgk4boubgxfvv7krm" && this.hasValue("rdf:type", "v-s:PPEType");
+  """ ;
+.
+
+v-s:ppeDescriptionDofWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Средства общей и индивидуальной защиты (текст)"@ru ;
+  rdfs:label "Means of general and individual protection (text)"@en ;
+  rdfs:range xsd:string ;
+.
+
+v-s:hasResultsOfMeasurementsOfHarmfulFactors
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Результаты замеров вредных факторов"@ru ;
+  rdfs:label "The results of measurements of harmful factors"@en ;
+  rdfs:range v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+.
+v-s:PS_hasResultsOfMeasurementsOfHarmfulFactors_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasResultsOfMeasurementsOfHarmfulFactors для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasResultsOfMeasurementsOfHarmfulFactors for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasResultsOfMeasurementsOfHarmfulFactors ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:specialConditionsOfWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Особые условия"@ru ;
+  rdfs:label "Special conditions of WorkPermit"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:remainingEquipment
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Оборудование, остающееся в работе"@ru ;
+  rdfs:label "Equipment remaining in operation"@en ;
+  rdfs:range xsd:string ;
+.
+
+#v-s:date  - Дата и время выдачи наряда
+
+v-s:hasExtensionOfWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Продление наряда-допуска"@ru ;
+  rdfs:label "Extension of WorkPermit"@en ;
+  rdfs:range v-s:ExtensionOfWorkPermit ;
+.
+v-s:PS_hasExtensionOfWorkPermit_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasExtensionOfWorkPermit для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasExtensionOfWorkPermit for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasExtensionOfWorkPermit ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:dutyStaffOfAdjacentDepartment
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Дежурный персонал смежных цехов"@ru ;
+  rdfs:label "Duty staff of adjacent department"@en ;
+  rdfs:range v-s:Appointment ;
+.
+
+v-s:hasChangingBrigadeComposition
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Изменения в составе бригады"@ru ;
+  rdfs:label "Changing brigade composition"@en ;
+  rdfs:range v-s:ChangingBrigadeComposition ;
+.
+v-s:PS_hasChangingBrigadeComposition_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasChangingBrigadeComposition для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasChangingBrigadeComposition for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasChangingBrigadeComposition ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+v-s:dateOfWorkConditionsAreMet
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Условия производства работ выполнены"@ru ;
+  rdfs:label "Work conditions are met"@en ;
+  rdfs:range xsd:date ;
+.
+v-s:powerSupervisorsPermission
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Разрешение начальника смены электростанции (дежурного диспетчера)"@ru ;
+  rdfs:label "Power supervisors permission"@en ;
+  rdfs:range v-s:Appointment ;
+.
+
+#v-s:dateFromFact
+#v-s:dateToFact
+v-s:hasClosingOfWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Закрытие наряда-допуска"@ru ;
+  rdfs:label "Closing of WorkPermit"@en ;
+  rdfs:range v-s:ClosingOfWorkPermit ;
+.
+v-s:PS_hasClosingOfWorkPermit_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasClosingOfWorkPermit для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasClosingOfWorkPermit for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasClosingOfWorkPermit ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+
+v-s:headConclusionOnCompletionWork
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Заключение руководителя об окончании работ"@ru ;
+  rdfs:label "Conclusion of the head on the completion of work"@en ;
+  rdfs:range xsd:string ;
+.
+
+#v-s:dateTo  - Дата и время закрытия наряда
+#v-s:attachment
+v-s:hasHotWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Наряд-допуск на огневые работы"@ru ;
+  rdfs:label "Hot work permit"@en ;
+  rdfs:range v-s:WorkPermit ;
+.
+v-s:PS_hasHotWorkPermit_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasHotWorkPermit для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasHotWorkPermit for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasHotWorkPermit ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "10"^^xsd:integer ;
+.
+
+v-s:hasElectricalInstallationsWorkPermit
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Наряд-допуск на работы на электроустановках"@ru ;
+  rdfs:label "Electrical Installations work permit"@en ;
+  rdfs:range v-s:WorkPermit ;
+.
+v-s:PS_hasElectricalInstallationsWorkPermit_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasElectricalInstallationsWorkPermit для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasElectricalInstallationsWorkPermit for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasElectricalInstallationsWorkPermit ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
+.
+
+v-s:hasEnergyKind
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Вид энергии"@ru ;
+  rdfs:label "EnergyKind"@en ;
+  rdfs:range v-s:EnergyKind ;
+.
+v-s:PS_hasEnergyKind_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasEnergyKind для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasEnergyKind for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasEnergyKind ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
+.
+
+#v-s:hasComment
+#v-s:hasLink
+
+
+#--------------------------------------------------Вид работ в наряде-допуска--
+v-s:WorkKindInWorkPermit
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Вид работ в наряде-допуска"@ru ;
+  rdfs:label "Work kind in Work Permit"@en ;
+.
+#rdfs:label
+#v-s:parentUnit
+
+#Форма наряда-допуска 
+#v-s:hasWorkPermitForm
+v-s:PS_hasWorkPermitForm_WorkKindInWorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:WorkKindInWorkPermit ;
+  v-ui:forProperty v-s:hasWorkPermitForm ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 1 ;
+  v-ui:queryPrefix "('@' == 'd:WorkKindInWorkPermit_1' || '@'=='d:WorkKindInWorkPermit_2' || '@'=='d:WorkKindInWorkPermit_3' || '@'=='d:WorkKindInWorkPermit_4' || '@'=='d:WorkKindInWorkPermit_5' || '@' == 'd:WorkKindInWorkPermit_6')"^^xsd:string ;
+  rdfs:label "Спецификация к свойству v-s:hasWorkPermitForm для класса v-s:WorkKindInWorkPermit"@ru ;
+  rdfs:label "Spec for property v-s:hasWorkPermitForm for class v-s:WorkKindInWorkPermit"@en ;
+.
+
+v-s:hasVisibleFieldInWorkKind
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkKindInWorkPermit ;
+  rdfs:label "Отображаемые поля мероприятий по безопасности"@ru ;
+  rdfs:label "Visible fields"@en ;
+  rdfs:range owl:ObjectProperty ;
+.
+
+# Отображаемые пункты приложения и приложения «А»
+# Отображаемые поля для ввода мер безопасности
+# Автозаполняемые значения мероприятий (значение в скобках — ссылка на номер поля в справочниках таблиц ХХХХХХ)
+# Требования к выдадающему
+# Требования к ответственному руководителю
+# Требования к членам бригады
+
+
+#--------------------------------------------------Результаты замеров вредных факторов--
+v-s:ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Spatial ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:label "Результаты замеров вредных факторов"@ru ;
+  rdfs:label "The results of measurements of harmful factors"@en ;
+.
+#v-s:date - Дата и время отбора проб
+v-s:PS_date_ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasHarmfulSubstance для класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
+  rdfs:label "Specification for hasHarmfulSubstance for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  v-ui:forProperty v-s:date ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
+.
+
+#v-s:placeDescription - Место отбора проб
+v-s:hasHarmfulSubstance
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  rdfs:label "Вредное вещество"@ru ;
+  rdfs:label "Harmful Substance"@en ;
+  rdfs:range v-s:HarmfulSubstance ;
+.
+v-s:PS_hasHarmfulSubstance_ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasHarmfulSubstance для класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
+  rdfs:label "Specification for hasHarmfulSubstance for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  v-ui:forProperty v-s:hasHarmfulSubstance ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+#v-s:description - Результат анализа
+#v-s:responsible - Ответственный по проведению анализа
+
+
+
+#--------------------------------------------------Продление наряда-допуска--
+v-s:ExtensionOfWorkPermit
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Temporal ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:WorkPermit ;
+  rdfs:label "Продление наряда-допуска"@ru ;
+  rdfs:label "Extension of work permit"@en ;
+.
+#v-s:dateFrom - Дата и время начала работ
+#v-s:dateTo - Дата и время окончания работ
+#v-s:placeDescription - Наименование рабочего места
+#v-s:hasResultsOfMeasurementsOfHarmfulFactors - Результат анализа воздушной среды
+
+v-s:PS_hasResultsOfMeasurementsOfHarmfulFactors_ExtensionOfWorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasResultsOfMeasurementsOfHarmfulFactors для класса v-s:ExtensionOfWorkPermit"@ru ;
+  rdfs:label "Specification for hasResultsOfMeasurementsOfHarmfulFactors for v-s:ExtensionOfWorkPermit"@en ;
+  v-ui:forClass v-s:WorkPerExtensionOfWorkPermitmit ;
+  v-ui:forProperty v-s:hasResultsOfMeasurementsOfHarmfulFactors ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+
+
+#--------------------------------------------------Закрытие наряда-допуска--
+v-s:ClosingOfWorkPermit
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Temporal ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:label "Закрытие наряда-допуска"@ru ;
+  rdfs:label "Closing of work permit"@en ;
+.
+#v-s:dateFactFrom - Фактическая Дата начала работ
+#v-s:dateFactTo - Фактическая Дата окончания работ
+#v-s:description - Описание
+
+v-s:PS_dates_ClosingOfWorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация dates для класса v-s:ClosingOfWorkPermit"@ru ;
+  rdfs:label "Specification for dates for v-s:ClosingOfWorkPermit"@en ;
+  v-ui:forClass v-s:ClosingOfWorkPermit ;
+  v-ui:forProperty v-s:dateFromFact ;
+  v-ui:forProperty v-s:dateToFact ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
+.
+
+
+#--------------------------------------------------Изменение состава бригады--
+v-s:ChangingBrigadeComposition
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:label "Изменение состава бригады"@ru ;
+  rdfs:label "Changing brigade composition"@en ;
+.
+v-s:memberOutOfBrigade
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:ChangingBrigadeComposition ;
+  rdfs:label "Сотрудник выводимый из бригады"@ru ;
+  rdfs:label "Member out of brigade"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:functionOfmemberOutOfBrigade
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:ChangingBrigadeComposition ;
+  rdfs:label "Выполняемая функция выводимого сотрудника"@ru ;
+  rdfs:label "Function of member out of brigade"@en ;
+  rdfs:range xsd:string ;
+.
+#v-s:reason - Причина изменений
+#v-s:date - Дата и время изменения
+v-s:memberInOfBrigade
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:ChangingBrigadeComposition ;
+  rdfs:label "Сотрудник вводимый в бригаду"@ru ;
+  rdfs:label "Member in of brigade"@en ;
+  rdfs:range v-s:Appointment ;
+.
+v-s:functionOfmemberInOfBrigade
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:ChangingBrigadeComposition ;
+  rdfs:label "Выполняемая функция вводимого сотрудника"@ru ;
+  rdfs:label "Function of member in of brigade"@en ;
+  rdfs:range xsd:string ;
+.
