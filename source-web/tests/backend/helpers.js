@@ -387,4 +387,8 @@ export default class Helpers {
 
     return result;
   }
+
+  static async timeout (ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 }
