@@ -32,7 +32,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   const specs = veda.ontology.getClassSpecifications(this.id);
   for (const property_uri in specs) {
-    if (specs.hasOwnProperty(property_uri)) {
+    if (Object.prototype.hasOwnProperty.call(specs, property_uri)) {
       const spec_uri = specs[property_uri];
       const spec = new IndividualModel(spec_uri);
       const li = $('<li>').appendTo(specsContainer);

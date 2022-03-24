@@ -23,10 +23,9 @@ function uploadFile (params, tries) {
     const path = params.path;
     const uri = params.uri;
     const progress = params.progress;
-    const url = '/files';
     const xhr = new XMLHttpRequest();
     const fd = new FormData();
-    xhr.open('POST', url, true);
+    xhr.open('POST', '/files', true);
     xhr.timeout = 10 * 60 * 1000;
     xhr.upload.onprogress = progress;
     xhr.onload = done;

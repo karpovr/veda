@@ -13,7 +13,7 @@ export const pre = function (individual, template, container, mode, extra) {
       veda.user.preferences['v-ui:fullWidth'] = [!value];
       veda.user.preferences.save();
     } catch (error) {
-      console.log('Full width switch error', error);
+      console.error('Full width switch error');
     }
   });
   veda.user.preferences.on('v-ui:fullWidth', widthHandler);

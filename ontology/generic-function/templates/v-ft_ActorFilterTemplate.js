@@ -57,7 +57,7 @@ export const pre = function (individual, template, container, mode, extra) {
       );
       console.log(filtered);
       for (const actorUri in filtered) {
-        if (filtered.hasOwnProperty(actorUri)) {
+        if (Object.prototype.hasOwnProperty.call(filtered, actorUri)) {
           const isOfficial = filtered[actorUri];
           const notOfficialInject = isOfficial === false ? " class='not-official'" : '';
           let actor_template =

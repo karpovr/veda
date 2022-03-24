@@ -220,7 +220,7 @@ export default class Helpers {
     if (dl > 1 || dl < -1) return false;
     let result = true;
     for (const key in a) {
-      if (Object.hasOwnProperty(a, key)) {
+      if (Object.prototype.hasOwnProperty(a, key)) {
         let bb = b[key];
         let aa = a[key];
 

@@ -15,7 +15,7 @@ const setState = (dir, rootParam, stateParam = {}) => {
     try {
       stat = fs.statSync(name);
     } catch (err) {
-      console.log(`Skip file due to stat file error: ${err}`);
+      console.error(`Skip file due to stat file error, file: ${name}`);
       continue;
     }
     if (stat.isDirectory() && !anymatch(ignored, name)) {

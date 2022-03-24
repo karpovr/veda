@@ -81,11 +81,11 @@ export const pre = function (individual, template, container, mode) {
       const templateString = searchResultTemplate['v-ui:template'][0].toString();
       return import('/templates/' + templateString);
     })
-    .then(function(templateModule) {
+    .then(function (templateModule) {
       const searchResultTemplate = $(templateModule.html);
       const resultContainer = $('.result-container', searchResultTemplate);
       const pre_result = templateModule.pre != undefined ? templateModule.pre.call(individual, individual, searchResultTemplate, searchResultContainer, mode) : undefined;
-      return Promise.resolve(pre_result).then(function(){
+      return Promise.resolve(pre_result).then(function () {
         if (resultContainer.attr('data-template')) {
           const resultTemplateIndividual = new IndividualModel(resultContainer.attr('data-template'));
           resultContainer.empty();
@@ -548,7 +548,7 @@ export const post = function (individual, template, container, mode) {
           // Populate blank with extra parameters from URL
           if (extra) {
             for (const property_uri in extra) {
-              if (extra.hasOwnProperty(property_uri)) {
+              if (Object.prototype.hasOwnProperty.call(extra, property_uri)) {
                 blankObject[property_uri] = extra[property_uri];
               }
             }
@@ -568,7 +568,7 @@ export const post = function (individual, template, container, mode) {
           // Populate blank with extra parameters from URL
           if (extra) {
             for (const property_uri in extra) {
-              if (extra.hasOwnProperty(property_uri)) {
+              if (Object.prototype.hasOwnProperty.call(extra, property_uri)) {
                 blankObject[property_uri] = extra[property_uri];
               }
             }

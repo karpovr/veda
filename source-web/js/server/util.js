@@ -130,7 +130,7 @@ Util.clone = function (obj) {
     // Handle Object
     copy = {};
     for (const attr in obj) {
-      if (obj.hasOwnProperty(attr)) copy[attr] = Util.clone(obj[attr]);
+      if (Object.prototype.hasOwnProperty.call(obj, attr)) copy[attr] = Util.clone(obj[attr]);
     }
     return copy;
   } else {
@@ -226,7 +226,7 @@ Util.addDay = function (_data, _days) {
   try {
     _data.setDate(_data.getDate() + _days);
   } catch (e) {
-    console.log(e);
+    console.error('Error adding days');
   }
   return _data;
 };
@@ -235,7 +235,7 @@ Util.getValues = function (property_value) {
   const res = [];
   if (property_value) {
     for (const i in property_value) {
-      if (!property_value.hasOwnProperty(i)) {
+      if (!Object.prototype.hasOwnProperty.call(property_value, i)) {
         continue;
       }
       res.push(property_value[i].data);
@@ -1048,6 +1048,6 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
     return out_data;
   } catch (e) {
-    console.log(e.stack);
+    console.error('Error in transformation');
   }
 };

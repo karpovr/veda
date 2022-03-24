@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "veda client",
   "type": "module",
+  "sourceType": "module",
   "main": "main.js",
   "author": {
     "name": "Roman Karpov"

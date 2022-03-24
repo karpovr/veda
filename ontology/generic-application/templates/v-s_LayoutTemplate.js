@@ -53,7 +53,7 @@ export const html = `
         <a about="v-s:VedaPlatform" property="rdfs:label" href="https://github.com/semantic-machines/veda"></a>. &copy;
         <a href="https://semantic-machines.com" about="v-s:SemanticMachines" property="rdfs:label"></a>.
         <span about="v-s:License" property="rdfs:label"></span>
-        <a alt="GNU General Public License version 3 official text" href="http://www.gnu.org/licenses/gpl.html">GPLv3.</a>
+        <a alt="GNU General Public License version 3 official text" href="https://www.gnu.org/licenses/gpl.html">GPLv3.</a>
       </div>
     </nav>
   </div>

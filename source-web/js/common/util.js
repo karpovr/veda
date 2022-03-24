@@ -475,7 +475,7 @@ Util.queryFromIndividualPT = function (individual, sort) {
     query = query && order ? query + ' ORDER BY ' + order : query;
     return query;
   } catch (error) {
-    console.log(error);
+    console.error('Error building query');
   }
 };
 
@@ -656,7 +656,7 @@ Util.queryFromIndividualTT_SUB = function (individual, sort, withDeleted) {
     query = query && order ? query + ' ORDER BY ' + order : query;
     return query;
   } catch (error) {
-    console.log(error);
+    console.error('Error building query');
   }
 };
 
@@ -870,7 +870,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
       }
     }).join(' UNION ALL ');
   } catch (error) {
-    console.log(error);
+    console.error('Error building query');
   }
 };
 
@@ -1094,24 +1094,24 @@ Util.complexLabel = function (individual) {
       return acc;
     }, []);
   } catch (err) {
-    console.log('Complex label error', err, err.stack);
+    console.error('Complex label error');
     return [];
   }
 };
 
 Util.areEqual = function (x, y) {
-  if ( x === y ) return true;
-  if ( ! ( x instanceof Object ) || ! ( y instanceof Object ) ) return false;
-  if ( x.constructor !== y.constructor ) return false;
-  for ( const p in x ) {
-    if ( ! x.hasOwnProperty( p ) ) continue;
-    if ( ! y.hasOwnProperty( p ) ) return false;
-    if ( x[p] === y[p] ) continue;
-    if ( typeof( x[p] ) !== 'object' ) return false;
-    if ( ! Util.areEqual( x[p], y[p] ) ) return false;
+  if (x === y) return true;
+  if (!(x instanceof Object ) || !( y instanceof Object)) return false;
+  if (x.constructor !== y.constructor) return false;
+  for (const p in x) {
+    if (!Object.prototype.hasOwnProperty.call(x, p)) continue;
+    if (!Object.prototype.hasOwnProperty.call(y, p)) return false;
+    if (x[p] === y[p]) continue;
+    if (typeof(x[p]) !== 'object') return false;
+    if (!Util.areEqual(x[p], y[p])) return false;
   }
   for ( const p in y ) {
-    if ( y.hasOwnProperty( p ) && ! x.hasOwnProperty( p ) ) return false;
+    if (Object.prototype.hasOwnProperty.call(y, p) && !Object.prototype.hasOwnProperty.call(x, p)) return false;
   }
   return true;
 };

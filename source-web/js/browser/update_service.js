@@ -135,7 +135,7 @@ proto.init = function () {
           individual.reset(); // Default action
         }
       } catch (error) {
-        console.log('error: individual update service failed', error);
+        console.error('error: individual update service failed');
       }
     }
   }

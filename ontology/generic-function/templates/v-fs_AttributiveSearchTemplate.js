@@ -19,7 +19,7 @@ export const post = function (individual, template, container, mode, extra) {
   // Export table to 'blob' or 'xls'
   const exportTable = (function () {
     const template = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="https://www.w3.org/TR/REC-html40">
         <head>
           <!--[if gte mso 9]>
             <xml>

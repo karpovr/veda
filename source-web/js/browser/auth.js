@@ -189,39 +189,6 @@ loginForm.querySelector('#change-password').addEventListener('click', function (
     .catch(handleLoginError);
 });
 
-// CAPTCHA already rendered flag
-let captchaRendered = false;
-
-/**
- * Initialize CAPTCHA
- * @param {Function} onSuccess
- * @param {Function} onExpired
- * @param {Function} onError
- * @return {void}
- */
-function reCAPTCHA (onSuccess, onExpired, onError) {
-  if (!captchaRendered) {
-    const reCAPTCHA_key = new IndividualModel('cfg:reCAPTCHA_client_key');
-    reCAPTCHA_key.load().then(() => {
-      window.captchaCallback = function () {
-        grecaptcha.render('recaptcha', {
-          'sitekey': reCAPTCHA_key.get('rdf:value')[0].toString(),
-          'theme': 'light',
-          'callback': onSuccess,
-          'expired-callback': onExpired,
-          'error-callback': onError,
-        });
-        captchaRendered = true;
-      };
-      const captchaScript = document.createElement('script');
-      captchaScript.src = 'https://www.google.com/recaptcha/api.js?onload=captchaCallback&render=explicit';
-      document.head.appendChild(captchaScript);
-    });
-  } else {
-    grecaptcha.reset();
-  }
-}
-
 /**
  * Login error handler
  * @param {Error} error
@@ -259,11 +226,6 @@ function handleLoginError (error) {
   const ok = loginForm.querySelector('.btn.ok');
   hide(ok);
   let okHandler = () => true;
-
-  const onSuccess = function () {
-    Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, .fieldset'), (item) => hide(item));
-    show(enterLoginPassword);
-  };
 
   switch (error.code) {
   case 0: // Network error
@@ -386,7 +348,13 @@ function handleLoginError (error) {
   case 473: // Authentication failed
     show(loginFailedError);
     hide(enterLoginPassword);
-    reCAPTCHA(onSuccess, undefined, onSuccess);
+    show(ok);
+    okHandler = function () {
+      hide(loginFailedError);
+      show(enterLoginPassword);
+      ok.removeEventListener('click', okHandler);
+      hide(ok);
+    };
     break;
   default:
     show(unavailableError);

@@ -42,7 +42,6 @@ export const pre = function (individual, template, container, mode, extra) {
           if (visibleColumns.length > 0) {
             personalRegistry['v-fs:hasVisibleColumns'] = visibleColumns.map(function (c) {
               const uri = $('span.column-name span', c).attr('about');
-              console.log(uri);
               return new veda.IndividualModel(uri);
             });
           }
