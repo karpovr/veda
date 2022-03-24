@@ -73,19 +73,19 @@ pub(crate) fn get_ticket_trusted(
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
     let mut tr_ticket = backend.get_ticket_from_db(tr_ticket_id);
 
-    let login = if let Some(l) = login {
-        l
-    } else {
-        &tr_ticket.user_login
-    };
-    info!("get_ticket_trusted, login = {}, ticket = {}", login, tr_ticket_id);
-
-    if login.is_empty() || tr_ticket_id.len() < 6 {
-        warn!("trusted authenticate: invalid login {} or ticket {}", login, tr_ticket_id);
-        return Ticket::default();
-    }
-
     if tr_ticket.result == ResultCode::Ok {
+        let login = if let Some(l) = login {
+            l
+        } else {
+            &tr_ticket.user_login
+        };
+        info!("get_ticket_trusted: login = {}, ticket = {}", login, tr_ticket_id);
+
+        if login.is_empty() || tr_ticket_id.len() < 6 {
+            warn!("trusted authenticate: invalid login {} or ticket {}", login, tr_ticket_id);
+            return Ticket::default();
+        }
+
         let mut is_allow_trusted = false;
 
         let mut trace = Trace {
@@ -157,11 +157,11 @@ pub(crate) fn get_ticket_trusted(
             error!("failed trusted authentication: not found users for login {}", login);
         }
     } else {
-        error!("trusted authenticate: problem ticket {}", tr_ticket_id);
+        error!("trusted authenticate: couldn't get a ticket from the database, ticket = {}", tr_ticket_id);
     }
 
     tr_ticket.result = ResultCode::AuthenticationFailed;
-    error!("failed trusted authentication, ticket = {}, login = {}", tr_ticket_id, login);
+    error!("failed trusted authentication, ticket = {}, login = {:?}", tr_ticket_id, login);
 
     tr_ticket
 }
