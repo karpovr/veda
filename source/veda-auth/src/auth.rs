@@ -148,7 +148,7 @@ impl<'a> AuthWorkPlace<'a> {
                         let addr = if self.conf.check_ticket_ip {
                             self.ip
                         } else {
-                            ""
+                            "127.0.0.1"
                         };
 
                         create_new_ticket(self.login, &user_id, addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
@@ -227,7 +227,7 @@ impl<'a> AuthWorkPlace<'a> {
             let addr = if self.conf.check_ticket_ip {
                 self.ip
             } else {
-                ""
+                "127.0.0.1"
             };
 
             create_new_ticket(self.login, person.get_id(), addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);

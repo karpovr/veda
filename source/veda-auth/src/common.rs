@@ -75,7 +75,11 @@ pub(crate) fn get_ticket_trusted(
 
     if tr_ticket.result == ResultCode::Ok {
         let login = if let Some(l) = login {
-            l
+            if l.is_empty() {
+                &tr_ticket.user_login
+            } else {
+                l
+            }
         } else {
             &tr_ticket.user_login
         };
@@ -140,7 +144,7 @@ pub(crate) fn get_ticket_trusted(
                         let addr = if conf.check_ticket_ip {
                             ip.unwrap_or_default()
                         } else {
-                            ""
+                            "127.0.0.1"
                         };
                         create_new_ticket(login, &check_user_id, addr, conf.ticket_lifetime, &mut ticket, &mut backend.storage);
                         info!("trusted authenticate, result ticket = {:?}", ticket);
