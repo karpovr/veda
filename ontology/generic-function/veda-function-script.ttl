@@ -302,15 +302,8 @@ try {
 } catch (err) {
   print(err, err.stack);
 }
-document["v-s:output"] = [{
-  data: output,
-  lang: "NONE",
-  type: "String"
-}];
-document["v-s:lastRun"] = [{
-  data: new Date(),
-  type: "Datetime"
-}];
+document["v-s:output"] = veda.Util.newStr(output);
+document["v-s:lastRun"] = veda.Util.newDate(new Date());
 delete document["v-s:toBeRun"];
 put_individual(ticket, document, _event_id);
 

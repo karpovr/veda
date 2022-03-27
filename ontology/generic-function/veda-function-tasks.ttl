@@ -139,7 +139,7 @@ if ( !isNew && !isDeleted && !isCompleted ) { return; }
 var today = new Date(),
     monday = getMonday(today),
     sunday = getSunday(today);
-var isThisWeekTask = veda.Util.hasValue(task, "v-wf:dateGiven") && (monday < task["v-wf:dateGiven"][0].data && task["v-wf:dateGiven"][0].data < sunday);
+var isThisWeekTask = veda.Util.hasValue(task, "v-wf:dateGiven") && (monday < new Date(task["v-wf:dateGiven"][0].data) && new Date(task["v-wf:dateGiven"][0].data) < sunday);
 
 // print("task =", task_uri, "| from =", from_uris, "| to =", to_uris, "| isNew =", isNew, "| isDeleted =", isDeleted, "| isCompleted =", isCompleted, "| isThisWeekTask =", isThisWeekTask);
 

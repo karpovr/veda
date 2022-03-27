@@ -15,31 +15,11 @@ WorkflowUtil.create_work_item = function (ticket, process_uri, net_element_uri, 
     const new_uri = CommonUtil.genUri() + '-wit';
     const new_work_item = {
       '@': new_uri,
-      'rdf:type': [
-        {
-          data: 'v-wf:WorkItem',
-          type: 'Uri',
-        }],
-      'v-wf:forProcess': [
-        {
-          data: process_uri,
-          type: 'Uri',
-        }],
-      'v-wf:forNetElement': [
-        {
-          data: net_element_uri,
-          type: 'Uri',
-        }],
-      'v-s:created': [
-        {
-          data: new Date(),
-          type: 'Datetime',
-        }],
-      'v-s:creator': [
-        {
-          data: 'cfg:VedaSystem',
-          type: 'Uri',
-        }],
+      'rdf:type': ServerUtil.newUri('v-wf:WorkItem'),
+      'v-wf:forProcess': ServerUtil.newUri(process_uri),
+      'v-wf:forNetElement': ServerUtil.newUri(net_element_uri),
+      'v-s:created': ServerUtil.newDate(new Date()),
+      'v-s:creator': ServerUtil.newUri('cfg:VedaSystem'),
     };
 
     if (isTrace) {
@@ -47,11 +27,7 @@ WorkflowUtil.create_work_item = function (ticket, process_uri, net_element_uri, 
     }
 
     if (parent_uri !== null) {
-      new_work_item['v-wf:previousWorkItem'] = [
-        {
-          data: parent_uri,
-          type: 'Uri',
-        }];
+      new_work_item['v-wf:previousWorkItem'] = ServerUtil.newUri(parent_uri);
     }
 
     put_individual(ticket, new_work_item, _event_id);
@@ -290,18 +266,9 @@ WorkflowUtil.get_new_variable = function (variable_name, value) {
     const new_uri = CommonUtil.genUri() + '-var';
     const new_variable = {
       '@': new_uri,
-      'rdf:type': [{
-        data: 'v-wf:Variable',
-        type: 'Uri',
-      }],
-      'v-wf:variableName': [{
-        data: variable_name,
-        type: 'String',
-      }],
-      'v-s:created': [{
-        data: new Date(),
-        type: 'Datetime',
-      }],
+      'rdf:type': ServerUtil.newUri('v-wf:Variable'),
+      'v-wf:variableName': ServerUtil.newStr(variable_name),
+      'v-s:created': ServerUtil.newDate(new Date()),
     };
     if (value) {
       new_variable['v-wf:variableValue'] = value;
@@ -555,16 +522,8 @@ WorkflowUtil.create_new_journal = function (ticket, new_journal_uri, parent_jour
     if (!exists_journal) {
       const new_journal = {
         '@': new_journal_uri,
-        'rdf:type': [
-          {
-            data: 'v-s:Journal',
-            type: 'Uri',
-          }],
-        'v-s:created': [
-          {
-            data: new Date(),
-            type: 'Datetime',
-          }],
+        'rdf:type': ServerUtil.newUri('v-s:Journal'),
+        'v-s:created': ServerUtil.newDate(new Date()),
       };
 
       if (parent_journal_uri) {
@@ -643,10 +602,7 @@ WorkflowUtil.mapToMessage = function (map_container, ticket, _process, _task, _o
         const new_message_uri = CommonUtil.genUri() + '-msg';
         const new_message = {
           '@': new_message_uri,
-          'v-s:created': [{
-            data: new Date(),
-            type: 'Datetime',
-          }],
+          'v-s:created': ServerUtil.newDate(new Date()),
         };
 
         let template;
@@ -757,11 +713,7 @@ WorkflowUtil.create_new_trace_subjournal = function (parent_uri, net_element_imp
   const set_journal_to_element = {
     '@': el_uri,
     'v-wf:traceJournal': ServerUtil.newUri(new_sub_journal_uri),
-    'v-s:created': [
-      {
-        data: new Date(),
-        type: 'Datetime',
-      }],
+    'v-s:created': ServerUtil.newDate(new Date()),
   };
   add_to_individual(ticket, set_journal_to_element, _event_id);
 
@@ -849,22 +801,10 @@ WorkflowUtil.create_new_subprocess = function (ticket, f_useSubNet, f_executor, 
 
       const new_process = {
         '@': new_process_uri,
-        'rdf:type': [
-          {
-            data: 'v-wf:Process',
-            type: 'Uri',
-          }],
+        'rdf:type': ServerUtil.newUri('v-wf:Process'),
         'v-wf:instanceOf': use_net,
-        'v-wf:parentWorkOrder': [
-          {
-            data: parent_process_uri,
-            type: 'Uri',
-          }],
-        'v-s:created': [
-          {
-            data: new Date(),
-            type: 'Datetime',
-          }],
+        'v-wf:parentWorkOrder': ServerUtil.newUri(parent_process_uri),
+        'v-s:created': ServerUtil.newDate(new Date()),
       };
 
       let msg = 'экземпляр маршрута :' + ServerUtil.getFirstValue(_started_net['rdfs:label']) + ', запущен из ' + ServerUtil.getFirstValue(parent_net['rdfs:label']);

@@ -90,7 +90,7 @@ v-s:hasDelegationPurpose
   rdfs:label "Delegation purpose"@en ;
   rdfs:range v-s:DelegationPurpose ;
 .
-#v-s:dateFrom 
+#v-s:dateFrom
 #v-s:dateTo
   v-s:PsDatesRequestDelegation
     rdf:type v-ui:PropertySpecification ;
@@ -489,9 +489,9 @@ allDelegated["rdf:value"] = allDelegated["rdf:value"].filter(function (item) {
       return false;
     }
 
-    var isPremature = now < appointment["v-s:dateFrom"][0].data;
-    var isActual = appointment["v-s:dateFrom"][0].data <= now && now <= appointment["v-s:dateTo"][0].data;
-    var isOverdue = now > appointment["v-s:dateTo"][0].data;
+    var isPremature = now < new Date(appointment["v-s:dateFrom"][0].data);
+    var isActual = new Date(appointment["v-s:dateFrom"][0].data) <= now && now <= new Date(appointment["v-s:dateTo"][0].data);
+    var isOverdue = now > new Date(appointment["v-s:dateTo"][0].data);
     var isDeleted = veda.Util.hasValue(appointment, "v-s:deleted", {data: true, type: "Boolean"});
 
     print("[cfg:Event_Delegation]", "appointment =", appointment_uri, "| isPremature =", isPremature, "| isActual =", isActual, "| isOverdue =", isOverdue, "| isDeleted =", isDeleted );
@@ -545,7 +545,7 @@ allDelegated["rdf:value"] = allDelegated["rdf:value"].filter(function (item) {
       }
       // Keep premature appointment in list
       return true;
-    }  
+    }
   } catch (exp) {
     print(veda.Util.toJson(exp));
     return true;

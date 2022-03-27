@@ -1166,11 +1166,7 @@ Workflow.prepare_start_form = function (ticket, document) {
       '@': jrn_processed_doc_uri,
       'rdf:type': ServerUtil.newUri('v-s:Journal'),
       'v-s:onDocument': processedDocumentValue,
-      'v-s:created': [
-        {
-          data: new Date(),
-          type: 'Datetime',
-        }],
+      'v-s:created': ServerUtil.newDate(new Date()),
     };
     put_individual(ticket, jrn_processed_doc, _event_id);
   }
@@ -1184,11 +1180,7 @@ Workflow.prepare_start_form = function (ticket, document) {
     'v-s:processJournal': ServerUtil.newUri(ServerUtil.getJournalUri(new_process_uri)),
     'v-wf:onProcess': ServerUtil.newUri(new_process_uri),
     'v-s:onDocument': processedDocumentValue,
-    'v-s:created': [
-      {
-        data: new Date(),
-        type: 'Datetime',
-      }],
+    'v-s:created': ServerUtil.newDate(new Date()),
   };
 
   if (creator_f) {

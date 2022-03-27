@@ -6,6 +6,8 @@ import Sha256 from '../common/lib/sha256.js';
 
 import Mustache from 'mustache';
 
+import {addWorkingDays, isHoliday} from '../server/holidays_calendar.js';
+
 const Util = {};
 
 export default Util;
@@ -219,17 +221,9 @@ Util.newDate = function (_data) {
   }];
 };
 
-Util.addDay = function (_data, _days) {
-  if (!_data) {
-    _data = new Date();
-  }
-  try {
-    _data.setDate(_data.getDate() + _days);
-  } catch (e) {
-    console.error('Error adding days');
-  }
-  return _data;
-};
+Util.addDay = addWorkingDays;
+
+Util.isHoliday = isHoliday;
 
 Util.getValues = function (property_value) {
   const res = [];
@@ -287,21 +281,9 @@ Util.newJournalRecord = function (journal_uri) {
 
   return {
     '@': new_journal_record_uri,
-    'rdf:type': [
-      {
-        data: 'v-s:JournalRecord',
-        type: 'Uri',
-      }],
-    'v-s:parentJournal': [
-      {
-        data: journal_uri,
-        type: 'Uri',
-      }],
-    'v-s:created': [
-      {
-        data: new Date(),
-        type: 'Datetime',
-      }],
+    'rdf:type': Util.newUri('v-s:JournalRecord'),
+    'v-s:parentJournal': Util.newUri(journal_uri),
+    'v-s:created': Util.newDate(new Date()),
   };
 };
 
@@ -380,23 +362,14 @@ Util.create_version = function (ticket, document, prev_state, user_uri, _event_i
     // Update previous version
     if (document['v-s:previousVersion']) {
       const previous = get_individual(ticket, Util.getUri(document['v-s:previousVersion']));
-      previous['v-s:nextVersion'] = [{
-        data: version['@'],
-        type: 'Uri',
-      }];
+      previous['v-s:nextVersion'] = Util.newUri(version['@']);
       put_individual(ticket, previous, _event_id);
     }
 
     // Update actual version
-    document['v-s:actualVersion'] = [{
-      data: document['@'],
-      type: 'Uri',
-    }];
-    document['v-s:previousVersion'] = [{
-      data: version['@'],
-      type: 'Uri',
-    }];
-    document['v-s:edited'] = [{data: new Date(), type: 'Datetime'}];
+    document['v-s:actualVersion'] = Util.newUri(document['@']);
+    document['v-s:previousVersion'] = Util.newUri(version['@']);
+    document['v-s:edited'] = Util.newDate(new Date());
     document['v-s:lastEditor'] = Util.newUri(actor_uri);
     put_individual(ticket, document, _event_id);
   }

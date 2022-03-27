@@ -285,7 +285,7 @@ if (!scriptInfo) {
 }
 
 //print('scritInfo=', veda.Util.toJson(scriptInfo));
-var lastDate = scriptInfo['v-s:lastDateOfExecuting'][0].data;
+var lastDate = new Date(scriptInfo['v-s:lastDateOfExecuting'][0].data);
 var today = new Date();
 //что бы напоминания за час для времени, условно, в 11.15 выдавались в 10.00 а не в 11.00
 today.setMinutes(59);
@@ -313,7 +313,7 @@ for (var i=0; i<result.length; i++){
     continue;
   }
   //print('dateToPlan=', individ['v-s:dateToPlan']);
-  var deadline = individ['v-s:dateToPlan'][0].data;
+  var deadline = new Date(individ['v-s:dateToPlan'][0].data);
   var isAll = true;
   var set_in_document = {
     '@': result[i]

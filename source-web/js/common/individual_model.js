@@ -710,9 +710,9 @@ proto.hasValue = function (property_uri, value) {
   let result = !!(this.properties[property_uri] && this.properties[property_uri].length);
   if (typeof value !== 'undefined' && value !== null) {
     const serialized = serializer(value);
-    result = result && !!this.properties[property_uri].filter((item) => {
-      return ( item.type === serialized.type && item.data === serialized.data && (item.lang && serialized.lang ? item.lang === serialized.lang : true) );
-    }).length;
+    result = result && this.properties[property_uri].some((item) => {
+      return (item.type === serialized.type && item.data === serialized.data && (item.lang && serialized.lang ? item.lang === serialized.lang : true));
+    });
   }
   return result;
 };
