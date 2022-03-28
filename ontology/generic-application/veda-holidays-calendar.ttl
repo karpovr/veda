@@ -1,0 +1,53 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+
+<http://semantic-machines.com/veda/veda-holidays-calendar>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология выходных дней"@ru ;
+  rdfs:label "Holidays calendar ontology"@en ;
+  v-s:loadPriority 7 ;
+.
+
+v-s:HolidaysCalendar
+  rdf:type owl:Class ;
+  rdfs:label "Календарь выходных дней"@ru, "Holidays calendar"@en ;
+  rdfs:subClassOf rdfs:Resource ;
+.
+
+v-s:holiday
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Выходной день"@ru ;
+  rdfs:label "Holiday"@en ;
+  rdfs:domain v-s:HolidaysCalendar ;
+  rdfs:range xsd:dateTime ;
+.
+
+v-s:PsHoliday
+  rdf:type v-ui:DatatypePropertySpecification ;
+  v-ui:forClass v-s:HolidaysCalendar ;
+  v-ui:forProperty v-s:holiday ;
+  v-ui:maxCardinality 1000 ;
+  v-ui:minCardinality 0 ;
+  rdfs:label "Спецификация свойства v-s:holiday для класса v-s:HolidaysCalendar"@ru ;
+  rdfs:label "v-s:holiday property specification for v-s:HolidaysCalendar class"@en ;
+.
+
+v-s:HolidaysCalendarInstance
+  rdf:type v-s:HolidaysCalendar ;
+  rdfs:label "Календарь выходных дней"@ru, "Holidays calendar"@en ;
+  v-s:holiday "2022-03-27T00:00:00Z"^^xsd:dateTime ;
+.
+
+v-s:HolidaysCalendarTemplate
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:HolidaysCalendar ;
+  rdfs:label "Шаблон класса v-s:HolidaysCalendar"@ru, "Template for v-s:HolidaysCalendar class"@en ;
+  v-ui:template "v-s_HolidaysCalendarTemplate.js" ;
+.
