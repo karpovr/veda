@@ -25,6 +25,7 @@
     "tablesortable":"/js/browser/table_sortable.js",
     "sha256":"/js/common/lib/sha256.js",
     "riot":"/js/common/lib/riot.js",
-    "bowser":"/node_modules/bowser/es5.js"
+    "bowser":"/node_modules/bowser/es5.js",
+    "flatpickr/":"/node_modules/flatpickr/dist/"
   }
 }

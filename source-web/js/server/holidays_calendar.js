@@ -4,14 +4,11 @@ import IndividualModel from '../common/individual_model.js';
 
 function isHoliday (date) {
   try {
-    console.log('DATE', date);
     const HolidaysCalendar = new IndividualModel('v-s:HolidaysCalendarInstance');
-    HolidaysCalendar.load();
-    console.log('HOLIDAYS', HolidaysCalendar['v-s:holiday'].map(value => [value, value.valueOf()]));
+    HolidaysCalendar.reset();
     const bareDate = new Date(date);
     bareDate.setUTCHours(0, 0, 0, 0);
-    console.log('BARE DATE', bareDate, bareDate.valueOf());
-    return HolidaysCalendar.hasValue('v-s:holiday', bareDate);
+    return HolidaysCalendar.get('v-s:holiday').some((holiday) => bareDate.valueOf() === holiday.valueOf());
   } catch (error) {
     console.error('Holiday check failed');
     return false;

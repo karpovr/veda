@@ -19,6 +19,7 @@ v-s:HolidaysCalendar
   rdf:type owl:Class ;
   rdfs:label "Календарь выходных дней"@ru, "Holidays calendar"@en ;
   rdfs:subClassOf rdfs:Resource ;
+  v-ui:hasTemplate v-s:HolidaysCalendarTemplate ;
 .
 
 v-s:holiday
@@ -42,7 +43,6 @@ v-s:PsHoliday
 v-s:HolidaysCalendarInstance
   rdf:type v-s:HolidaysCalendar ;
   rdfs:label "Календарь выходных дней"@ru, "Holidays calendar"@en ;
-  v-s:holiday "2022-03-27T00:00:00Z"^^xsd:dateTime ;
 .
 
 v-s:HolidaysCalendarTemplate

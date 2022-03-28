@@ -11,7 +11,7 @@
  */
 function delegateHandler (el, event, delegateSelector, handler, useCapture) {
   el.addEventListener(event, ancestorHandler, useCapture);
-
+  return (() => el.removeEventListener(event, ancestorHandler, useCapture));
   /**
    * Event listener for ancestor element
    * @param {Event} event - event

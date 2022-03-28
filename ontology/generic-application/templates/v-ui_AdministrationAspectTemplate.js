@@ -57,6 +57,9 @@ export const html = `
       <li role="presentation" class="trusted-ticket">
         <a href="#TrustedTicket" aria-controls="TrustedTicket" role="tab" data-toggle="tab" about="v-s:TrustedTicketBundle" property="rdfs:label"></a>
       </li>
+      <li role="presentation">
+        <a href="#HolidaysCalendar" aria-controls="HolidayCalendar" role="tab" data-toggle="tab" about="v-s:HolidaysCalendarInstance" property="rdfs:label"></a>
+      </li>
     </ul>
     <br />
     <!-- Tab panes -->
@@ -265,6 +268,10 @@ export const html = `
           </div>
           <div class="panel-body" about="v-s:TrustedTicket" data-template="v-ui:TrustedTicketTemplate"></div>
         </div>
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="HolidaysCalendar">
+        <div about="v-s:HolidaysCalendarInstance" data-template="v-s:HolidaysCalendarTemplate"></div>
       </div>
     </div>
   </div>
