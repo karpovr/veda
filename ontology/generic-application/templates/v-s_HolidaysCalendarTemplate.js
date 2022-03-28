@@ -56,7 +56,11 @@ export const html = `
     <style scoped>
       .flatpickr-disabled {
         background-color: rgb(86, 159, 247, 0.6)!important;
+        border: 2px solid white!important;
         color: white!important;
+      }
+      .selected {
+        border: 2px solid white!important;
       }
     </style>
     <div id="calendar"></div>
