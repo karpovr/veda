@@ -441,7 +441,6 @@ function handleAuthError () {
       show(loginForm);
     }
   }).catch((error) => {
-    console.log(err);
     show(loginForm);
   });
 }

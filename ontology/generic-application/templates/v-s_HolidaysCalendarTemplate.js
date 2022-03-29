@@ -13,9 +13,10 @@ export const post = function (individual, template, container, mode, extra) {
     firstDayOfWeek: 1,
     mode: 'multiple',
     disable: individual.get('v-s:holiday'),
-    onChange: (selected) => {
-      individual.set('v-s:holiday', selected);
-      calendar.changeMonth(new Date(selected.slice(-1)[0]).getMonth(), false);
+    onChange: (_, iso) => {
+      console.log(iso);
+      individual.set('v-s:holiday', iso.split(', ').map((dateStr) => new Date(dateStr)));
+      calendar.changeMonth(new Date(individual.get('v-s:holiday').slice(-1)[0]).getMonth(), false);
     },
   });
   calendar.setDate(individual.get('v-s:holiday'));
