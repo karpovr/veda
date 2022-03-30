@@ -1,6 +1,6 @@
 {
   "ignore": [
-    "sw.js",
+    "sw-lite.js",
     "sw-simple.js",
     "tests/**",
     "**/node_modules/**",
@@ -22,7 +22,7 @@
       }
     ],
     [
-      "minify", 
+      "minify",
       {
         "booleans": true,
         "builtIns": false,
