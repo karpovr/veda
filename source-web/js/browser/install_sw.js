@@ -18,7 +18,7 @@ if ('serviceWorker' in navigator) {
   document.body.insertBefore(wrapper, document.body.firstChild);
 
   // Install SW
-  navigator.serviceWorker.register('/sw.js', {scope: window.location.pathname})
+  navigator.serviceWorker.register('/sw-simple.js', {scope: window.location.pathname})
     .then((registration) => {
       console.log('Service worker registered:', registration.scope);
 
