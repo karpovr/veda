@@ -47,12 +47,9 @@ proto.init = function () {
   let lastPing = Date.now();
   let pingInterval;
 
-  return Backend.get_individual('', 'cfg:ClientUpdateServicePort', false)
-    .then((ccusPortCfg) => {
-      const ccusPort = ccusPortCfg['rdf:value'] && ccusPortCfg['rdf:value'][0].data;
-      const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
-      const port = ccusPort || window.location.port;
-      const address = protocol + '//' + window.location.hostname + (port ? ':' + port : '') + '/ccus';
+  return Backend.get_individual('', 'cfg:ClientUpdateServiceAddress', false)
+    .then((addressCfg) => {
+      const address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
       const socket = new WebSocket(address);
 
       socket.onopen = openedHandler;
