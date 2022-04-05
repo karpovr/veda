@@ -39,7 +39,6 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   template.on('special-validate', function (e, validStates) {
     setTimeout(function () {
-      // console.log($('div.validating-block:not(.hide) veda-control.has-error', template));
       if ($('div.validating-block:not(.hide) .has-error', template).length == 0) {
         $('.action#save', template).removeAttr('disabled');
       } else {

@@ -14,7 +14,6 @@ export const pre = function (individual, template, container, mode, extra) {
       fileSizeArr.forEach(function (fileSize) {
         fileSizeSUM += +fileSize;
       });
-      console.log(fileSizeSUM > 15728640); // 15 мб
       if (fileSizeSUM > 15728640) {
         result['v-s:attachment'] = {
           state: false,

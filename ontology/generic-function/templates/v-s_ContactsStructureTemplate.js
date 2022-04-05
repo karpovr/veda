@@ -505,7 +505,6 @@ export const post = function (individual, template, container, mode, extra) {
         if ($('section#OrgStructure .section-header .glyphicon', template).hasClass('glyphicon-chevron-down')) {
           $('section#OrgStructure .section-header').click();
         }
-        console.log('searchHelperObj: ', searchHelperObj);
         loadIndicator.hide();
         return true;
       });
@@ -640,7 +639,7 @@ export const post = function (individual, template, container, mode, extra) {
         return Promise.all(loadPromises);
       })
       .catch(function (err) {
-        console.log(err);
+        console.error('Backend query failed');
         return [];
       });
   }
@@ -754,7 +753,7 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('dblclick', '#orgContent tbody tr', function (e) {
     const uri = $(this).attr('resource');
     if (uri == undefined) {
-      console.log('Unexpected behavior: empty attr[resource]');
+      console.error('Unexpected behavior: empty attr[resource]');
       return false;
     }
     return new IndividualModel(uri).load().then(function (loaded) {

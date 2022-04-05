@@ -34,7 +34,6 @@ export const post = function (individual, template, container, mode, extra) {
             });
           })
           .catch(function (error) {
-            console.log(error);
             const errorMsg = new IndividualModel('v-s:ErrorBundle').load();
             return errorMsg.then(function (errorMsg) {
               notify('danger', {name: errorMsg});

@@ -248,7 +248,7 @@ export const post = function (individual, template, container, mode) {
         toggleSpin(searchButtons);
       })
       .catch(function (error) {
-        console.log(error);
+        console.error('Search handler failed');
         toggleSpin(searchButtons);
         searchError.removeClass('hidden');
       });
@@ -278,7 +278,7 @@ export const post = function (individual, template, container, mode) {
       .search(self['v-fs:cursor'][0])
       .then(renderResult)
       .catch(function (error) {
-        console.log(error);
+        console.error('More results failed');
       });
   }
 

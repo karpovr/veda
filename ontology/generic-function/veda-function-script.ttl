@@ -614,8 +614,7 @@ for (var i = processed, max = processed + to_process, valueUri; (i < max) && dat
   try {
     operation.fn(valueUri);
   } catch (error) {
-    console.log(i, "Error processing individual", valueUri);
-    console.log(error, error.stack);
+    console.error(i, "Error processing individual", valueUri);
     continue;
   }
 }

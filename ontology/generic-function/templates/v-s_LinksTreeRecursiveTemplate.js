@@ -150,7 +150,7 @@ export const pre = function (individual, template, container, mode, extra) {
                 }
               })
               .catch(function (error) {
-                console.log(error);
+                console.error('Out type links failed');
               });
           } else {
             $this.toggleClass('fa fa-spinner fa-pulse fa-lg fa-fw');

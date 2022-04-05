@@ -55,7 +55,6 @@ export const pre = function (individual, template, container, mode, extra) {
         },
         {'v-ft:MyBundle': true},
       );
-      console.log(filtered);
       for (const actorUri in filtered) {
         if (Object.prototype.hasOwnProperty.call(filtered, actorUri)) {
           const isOfficial = filtered[actorUri];

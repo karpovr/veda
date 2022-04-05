@@ -367,14 +367,14 @@ if (!veda.GroupGenerators) {
 var isDeleted = veda.Util.hasValue(document, "v-s:deleted", {data: true, type: "Boolean"});
 if (isDeleted) {
   var groupsToDeleteFrom = generateGroups(prev_state);
-  console.log("document deleted, groups to delete from =", Object.keys(groupsToDeleteFrom));
+  console.log("Document deleted, groups to delete from =", Object.keys(groupsToDeleteFrom));
 
   var keep, group_label;
   for(var group_uri in groupsToDeleteFrom) {
     keep = groupsToDeleteFrom[group_uri].keep;
     group_label = groupsToDeleteFrom[group_uri].label;
     if (keep) {
-      console.log("keep membership in", group_uri, group_label);
+      console.log("Keep membership in", group_uri, group_label);
     } else {
       removeMembership(group_uri, groupsToDeleteFrom);
     }
@@ -447,14 +447,14 @@ function addMembership(group_uri, groups) {
   power_str += (power & 2) ? "R" : "";
   power_str += (power & 4) ? "U" : "";
   power_str += (power & 8) ? "D" : "";
-  console.log("added to", group_uri, group_label, "(", power_str, ")");
+  console.log("Added to", group_uri, group_label, "(", power_str, ")");
 }
 
 function removeMembership(group_uri, groups) {
   var group_label = groups[group_uri].label;
   var mem_uri = "d:mem-" + veda.Util.Sha256.hash(document["@"] + " " + group_uri).substring(32);
   remove_individual(veda.ticket, mem_uri);
-  console.log("removed from", group_uri, group_label);
+  console.log("Removed from", group_uri, group_label);
 }
 
 function checkAddMembership(group_uri, groups) {
@@ -478,7 +478,7 @@ function checkAddMembership(group_uri, groups) {
       power_str += (power & 2) ? "R" : "";
       power_str += (power & 4) ? "U" : "";
       power_str += (power & 8) ? "D" : "";
-      console.log("membership exists", group_uri, group_label, "(", power_str, ")");
+      console.log("Membership exists", group_uri, group_label, "(", power_str, ")");
     }
   }
 }
@@ -494,7 +494,7 @@ function checkAddGroup(group_uri, group_label) {
       "v-s:created": veda.Util.newDate(new Date())
     };
     put_individual(veda.ticket, group);
-    console.log("group created", group_uri, group_label);
+    console.log("Group created", group_uri, group_label);
   }
 }
 

@@ -279,7 +279,7 @@ export const pre = function (individual, template, container, mode, extra) {
       return renderRows(children, branchRow).then(function () {
         const nextLvl = parseInt(branchRow.next().attr('data-level'));
         if (isNaN(nextLvl) || nextLvl <= thatLvl) {
-          console.log('unexpected!!!!!!');
+          console.error('unexpected!!!!!!');
         }
       });
     });

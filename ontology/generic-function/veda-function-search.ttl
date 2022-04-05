@@ -310,7 +310,7 @@ v-fs:AttributiveSearchModel
         });
         resolve(result);
       } catch (error) {
-        console.log("Query evaluation error", error);
+        console.error("Query evaluation failed");
         reject(error);
       }
     });

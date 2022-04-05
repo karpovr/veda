@@ -56,7 +56,7 @@ export const pre = function (individual, template, container, mode, extra) {
           veda.user.aspect.save();
         })
         .catch(function (e) {
-          console.log(e);
+          console.error('Update user aspect failed');
         });
     });
 

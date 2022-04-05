@@ -17,8 +17,8 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   if (individual.hasValue('v-wf:onProcess')) {
     const process = individual.get('v-wf:onProcess')[0];
-    return process.load().catch(function (err) {
-      console.log('process deleted:', process.id);
+    return process.load().catch((error) => {
+      console.error('Process deleted:', process.id);
       $('.on-process', template).remove();
     });
   }
@@ -49,7 +49,7 @@ export const post = function (individual, template, container, mode, extra) {
           const canDelete = results[0];
           const isProcessBreakMember = results[1];
           if (!actor) {
-            console.log("Unexpected behavior: can't read v-s:actor from individual");
+            console.error("Unexpected behavior: can't read v-s:actor from individual");
             return false;
           }
           if (veda.appointment.id === actor.id || veda.appointment.id === 'cfg:AdministratorAppointment' || (canDelete && isProcessBreakMember)) {

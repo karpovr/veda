@@ -143,7 +143,6 @@ export const post = function (individual, template, container, mode, extra) {
         });
       })
       .catch(function (error) {
-        console.log(error, error.stack);
         notify('danger', {message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.'});
       })
       .then(function () {

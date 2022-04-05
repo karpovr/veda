@@ -156,7 +156,6 @@ export const pre = function (individual, template, container, mode, extra) {
         });
       })
       .catch(function (error) {
-        console.log(error, error.stack);
         notify('danger', {message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.'});
       });
   });

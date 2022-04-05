@@ -22,7 +22,6 @@ export const post = function (individual, template, container, mode, extra) {
     $('.codelet', template).hide();
     $('.appointment', template).show();
   });
-  console.log(individual['rdf:type'][0].id);
   if (individual.hasValue('rdf:type')) {
     if (individual['rdf:type'][0].id == 'v-wf:ExecutorDefinition') $('#executordefinition', template).trigger('click');
     if (individual['rdf:type'][0].id == 'v-s:Codelet') $('#codelet', template).trigger('click');

@@ -19,7 +19,7 @@ export const pre = function (individual, template, container, mode, extra) {
       }
     })
     .catch(function (error) {
-      console.log(error);
+      console.error('Rights failed');
     });
 
   let prevTaxId = individual.hasValue('v-s:taxId') && individual['v-s:taxId'][0].toString();
