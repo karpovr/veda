@@ -8,9 +8,7 @@ function isHoliday (date) {
     HolidaysCalendar.load();
     const bareDate = new Date(date);
     bareDate.setUTCHours(0, 0, 0, 0);
-    return HolidaysCalendar.get('v-s:holiday').some((holiday) => {
-      return bareDate.valueOf() === holiday.valueOf();
-    });
+    return HolidaysCalendar.get('v-s:holiday').some((holiday) => bareDate.valueOf() === holiday.valueOf());
   } catch (error) {
     console.error('Holiday check failed');
     return false;
