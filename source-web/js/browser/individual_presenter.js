@@ -121,7 +121,7 @@ function successHandler (result) {
   const successMsg = new IndividualModel('v-s:SuccessBundle');
   successMsg.load().then(() => {
     notify('success', {name: successMsg.toString()});
-  }).catch(console.log);
+  }).catch((error) => console.error('Msg load failed'));
   return result;
 }
 
@@ -153,7 +153,7 @@ function errorHandler (error) {
  * @return {HTMLElement}
  */
 function errorPrinter (error, container) {
-  console.log(`presenter error: ${this.id}`, error, error.stack);
+  console.error(`Presenter failed: ${this.id}`);
   let errorIndividual;
   if (error instanceof BackendError) {
     errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
@@ -196,7 +196,7 @@ function errorPrinter (error, container) {
 function wrap (html) {
   html = html.trim();
   if (html.startsWith('<script') || html.endsWith('script>')) {
-    console.log(`Scripts for inline templates are not supported, template = ${html}`);
+    console.error('Scripts for inline templates are not supported');
     throw new SyntaxError('Scripts for inline templates are not supported');
   }
   let tagName;
@@ -212,7 +212,7 @@ function wrap (html) {
   const template = wrapper.firstElementChild;
   const last = wrapper.lastElementChild;
   if (last !== template) {
-    console.log(`Unwrapped templates are not supported, template = ${html}`);
+    console.error('Unwrapped templates are not supported');
     throw new SyntaxError('Unwrapped templates are not supported');
   }
   return wrapper;
@@ -489,7 +489,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
         removedAlert.load().then(() => {
           clear(template);
           template.innerHTML = `<code>${removedAlert.toString()}</code>`;
-        }).catch(console.log);
+        }).catch((error) => console.error('Alert load failed'));
       })
       .then(successHandler)
       .catch(errorHandler);
@@ -515,7 +515,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
           deletedHeader.textContent = msgStr;
           deletedHeader.style.textAlign = 'center';
           template.prepend(deletedHeader);
-        }).catch(console.log);
+        }).catch((error) => console.error('Msg load failed'));
       }
     } else {
       if (container && container.id === 'main') {
@@ -549,7 +549,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
           invalidHeader.textContent = msgStr;
           invalidHeader.style.textAlign = 'center';
           template.prepend(invalidHeader);
-        }).catch(console.log);
+        }).catch((error) => console.error('Msg load failed'));
       }
     } else {
       if (container && container.id === 'main') {

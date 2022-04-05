@@ -37,7 +37,7 @@ proto._init = function () {
       }
     })
     .catch((error) => {
-      console.log('User init error', error.stack);
+      console.error('User init failed');
     });
 };
 
@@ -46,7 +46,7 @@ proto.initAspect = function () {
   const aspect = this.hasValue('v-s:hasAspect') ? this['v-s:hasAspect'][0] : new IndividualModel(aspect_id);
   return aspect.load()
     .catch((error) => {
-      console.log('personal aspect load error', error);
+      console.error('Personal aspect load failed');
       const newAspect = new IndividualModel(aspect_id);
       newAspect['rdf:type'] = 'v-s:PersonalAspect';
       newAspect['v-s:owner'] = this;
@@ -54,7 +54,7 @@ proto.initAspect = function () {
       return this.id !== 'cfg:Guest' ? newAspect.save() : newAspect;
     })
     .catch((error) => {
-      console.log('personal aspect save error', error);
+      console.error('Personal aspect save failed');
       throw error;
     })
     .then((userAspect) => {
@@ -93,7 +93,7 @@ proto.initPreferences = function () {
   const preferences = this.hasValue('v-ui:hasPrefences') ? this['v-ui:hasPrefences'][0] : new IndividualModel(preferences_id);
   return preferences.load()
     .catch((error) => {
-      console.log('personal preferences load error', error);
+      console.error('Personal preferences load failed');
       const newPreferences = new IndividualModel(preferences_id);
       newPreferences['v-s:owner'] = this;
       newPreferences['rdf:type'] = 'v-ui:Preferences';
@@ -102,7 +102,7 @@ proto.initPreferences = function () {
       return this.id !== 'cfg:Guest' ? newPreferences.save() : newPreferences;
     })
     .catch((error) => {
-      console.log('personal preferences save error', error);
+      console.error('Personal preferences save failed');
       throw error;
     })
     .then((userPreferences) => {

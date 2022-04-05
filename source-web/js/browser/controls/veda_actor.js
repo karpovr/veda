@@ -285,7 +285,7 @@ $.fn.veda_actor = function ( options ) {
     ftQueryPromise
       .then(renderResults)
       .catch((error) => {
-        console.log('Fulltext query error', error);
+        console.error('Fulltext query failed');
       });
   }
 
@@ -328,7 +328,9 @@ $.fn.veda_actor = function ( options ) {
         fulltextMenu.show();
         $(document).on('click', clickOutsideMenuHandler);
         $(document).on('keydown', arrowHandler);
-      }).catch(console.log);
+      }).catch((error) => {
+        console.error('Render results failed');
+      });
     } else {
       suggestions.empty();
       fulltextMenu.hide();

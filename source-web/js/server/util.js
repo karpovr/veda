@@ -82,10 +82,7 @@ Util.removeFromGroup = function (ticket, group, resource) {
 
 Util.addRight = function (ticket, subj_uri, obj_uri, allow, deny) {
   if (subj_uri === undefined || obj_uri === undefined) {
-    const error = new Error('Util.addRight: INVALID ARGS');
-    console.log('subj_uri =', subj_uri);
-    console.log('obj_uri =', obj_uri);
-    console.log('Error stack:', error.stack);
+    console.error('Util.addRight: INVALID ARGS', 'subj_uri =', subj_uri, 'obj_uri =', obj_uri);
     return;
   }
 
@@ -1021,6 +1018,6 @@ Util.transformation = function (ticket, individuals, transform, executor, work_o
 
     return out_data;
   } catch (e) {
-    console.error('Error in transformation');
+    console.error('Transformation failed');
   }
 };

@@ -165,8 +165,7 @@ Util.processResult = function (result, delta, pause, fn) {
       return prom.then(() => {
         return fn(item);
       }).catch((error) => {
-        console.log('Error processing item:', item);
-        console.log(error, error.stack);
+        console.error('Error processing item:', item);
       });
     }, Promise.resolve()).then(() => {
       if ( (total - result.length) / total - processingProgress >= 0.05 ) {
@@ -1094,7 +1093,7 @@ Util.complexLabel = function (individual) {
       return acc;
     }, []);
   } catch (err) {
-    console.error('Complex label error');
+    console.error('Complex label failed');
     return [];
   }
 };

@@ -95,7 +95,6 @@ function resizeImage (image, maxWidth) {
           const cropper = new Cropper(image, {
             autoCrop: false,
             ready: function (event) {
-              console.log('Crop ready');
               const ratio = image.height / image.width;
               const resized = new Image();
               resized.src = cropper.getCroppedCanvas({
@@ -232,8 +231,8 @@ $.fn.veda_file = function ( options ) {
       try {
         const percentComplete = Math.round(progressEvent.loaded / progressEvent.total * 100);
         indicatorPercentage.text(percentComplete + '%').show();
-      } catch (err) {
-        console.log('Progress indicator error', error);
+      } catch (error) {
+        console.error('Progress indicator failed');
       }
     } else {
       indicatorSpinner.show();
@@ -268,7 +267,6 @@ $.fn.veda_file = function ( options ) {
           .then((image) => {
             if (targetRatio) {
               const curRatio = image.height / image.width;
-              console.log('curRatio: ', curRatio);
               if ( !((targetRatio - 0.1) < curRatio && curRatio < (targetRatio + 0.1)) ) {
                 return cropImage(image, targetRatio, maxWidth);
               }
@@ -301,7 +299,7 @@ $.fn.veda_file = function ( options ) {
     }).then(() => {
       return fileIndividual.save();
     }).catch((error) => {
-      console.log(error);
+      console.error('File individual save failed');
     });
   };
 
@@ -332,7 +330,7 @@ $.fn.veda_file = function ( options ) {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error('Files individuals save failed');
       })
       .then(() => {
         control.removeClass('disabled');

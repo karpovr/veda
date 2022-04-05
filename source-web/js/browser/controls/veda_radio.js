@@ -45,7 +45,7 @@ $.fn.veda_radio = function (params) {
       return Promise.resolve(eval(source))
         .then(renderOptions)
         .catch((error) => {
-          console.log('Source error', source);
+          console.error('Source failed', source);
         });
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
@@ -54,7 +54,7 @@ $.fn.veda_radio = function (params) {
         })
         .then(renderOptions)
         .catch((error) => {
-          console.log('Query prefix error', queryPrefix);
+          console.error('Query prefix failed', queryPrefix);
         });
     }
   }

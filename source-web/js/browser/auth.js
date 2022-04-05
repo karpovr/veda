@@ -91,7 +91,7 @@ function submitLoginPassword (event) {
       }
     })
     .catch((error) => {
-      console.log(error);
+      console.error('NTLM auth failed');
       return Backend.authenticate(login, hash);
     })
     .then(handleLoginSuccess)
@@ -434,7 +434,7 @@ function handleAuthError () {
       ntlmAuth(path)
         .then((authResult) => handleAuthSuccess(authResult))
         .catch((err) => {
-          console.log(err);
+          console.error('NTLM auth failed');
           show(loginForm);
         });
     } else {
@@ -543,7 +543,7 @@ export default function Auth () {
             handleAuthError();
           }
         }).catch((error) => {
-          console.log('cfg:AuthRequired load error', error);
+          console.error('cfg:AuthRequired load failed');
           handleAuthError();
         });
       }

@@ -54,7 +54,7 @@ proto.init = function () {
       this.ontology = ontologyJSON;
       return this.processOntology();
     }).catch((error) => {
-      console.error('Ontology load error');
+      console.error('Ontology load failed');
       throw error;
     });
   } else {
@@ -184,7 +184,7 @@ proto.processOntology = function () {
         break;
       }
     } catch (error) {
-      console.error('Ontology init error, uri =', individual.id);
+      console.error('Ontology init failed, uri =', individual.id);
     }
   });
 
@@ -212,7 +212,7 @@ proto.processOntology = function () {
         classTree[_class.id].superClasses.push( superClass.id );
       });
     } catch (error) {
-      console.error('Ontology init error, uri =', uri);
+      console.error('Ontology init failed, uri =', uri);
     }
   });
 
@@ -227,7 +227,7 @@ proto.processOntology = function () {
         classTree[_class.id].properties.push(property.id);
       });
     } catch (error) {
-      console.error('Ontology init error, uri =', uri);
+      console.error('Ontology init failed, uri =', uri);
     }
   });
 
@@ -244,7 +244,7 @@ proto.processOntology = function () {
         });
       });
     } catch (error) {
-      console.error('Ontology init error, uri =', uri);
+      console.error('Ontology init failed, uri =', uri);
     }
   });
 
@@ -263,14 +263,14 @@ proto.processOntology = function () {
         }
       }).map((templateSpec) => templateSpec.properties['v-ui:defaultTemplate'][0].data);
     } catch (error) {
-      console.error('Ontology init error, uri =', uri);
+      console.error('Ontology init failed, uri =', uri);
     }
   });
 
   // Init ontology individuals
   const initPromises = ontologyIndividuals.map((individual, i) => {
     return individual.init()
-      .catch((error) => console.error('Ontology individual init error, uri =', individual.id));
+      .catch((error) => console.error('Ontology individual init failed, uri =', individual.id));
   });
 
   if (typeof window !== 'undefined') {

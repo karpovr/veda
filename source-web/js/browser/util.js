@@ -305,7 +305,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
         sendError.load().then(() => {
           notify('danger', {name: sendError});
         });
-        console.log('Save before send error:', error.stack);
+        console.error('Save before send failed');
         throw error;
       });
   } else {
@@ -323,7 +323,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
         sendError.load().then(() => {
           notify('danger', {name: sendError});
         });
-        console.log('Send error:', error.stack);
+        console.error('Send failed');
         throw error;
       });
   }
@@ -819,6 +819,6 @@ Util.transformation = function (individuals, transform) {
 
     return out_data;
   }).catch((error) => {
-    console.log(error);
+    console.error('Transformation failed');
   });
 };

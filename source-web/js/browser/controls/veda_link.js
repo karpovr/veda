@@ -28,7 +28,7 @@ $.fn.veda_link = function ( options ) {
   let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   let withDeleted = this.attr('data-deleted') || false;
 
-  if (isSingle == "false") isSingle = false;
+  if (isSingle == 'false') isSingle = false;
 
   const tabindex = this.attr('tabindex');
   if (tabindex) {
@@ -250,7 +250,7 @@ $.fn.veda_link = function ( options ) {
         return Promise.resolve(eval(source))
           .then(renderResults)
           .catch((error) => {
-            console.log('Source error', source);
+            console.error('Source failed', source);
           });
       } else {
         if (isDynamicQueryPrefix) {
@@ -260,7 +260,7 @@ $.fn.veda_link = function ( options ) {
           ftQuery(prefix, value, sort, withDeleted)
             .then(renderResults)
             .catch((error) => {
-              console.log('Fulltext query error', error);
+              console.error('Fulltext query failed');
             });
         });
       }

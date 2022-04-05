@@ -27,7 +27,7 @@ try {
   veda.init('cfg:VedaSystem');
   console.log('user:', veda.user.id, '| ticket:', veda.ticket);
 } catch (error) {
-  console.error('Veda init error');
+  console.error('Veda init failed');
 }
 
 export default veda;

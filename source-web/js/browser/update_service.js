@@ -64,7 +64,7 @@ proto.init = function () {
     .catch((error) => {
       this.inited = false;
       reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
-      console.log('init socket error, retry in', reconnectDelay / 1000, 'sec');
+      console.error('Init socket failed, retry in', reconnectDelay / 1000, 'sec');
       setTimeout(self.init.bind(self), reconnectDelay);
     });
 
@@ -132,7 +132,7 @@ proto.init = function () {
           individual.reset(); // Default action
         }
       } catch (error) {
-        console.error('error: individual update service failed');
+        console.error('Individual update service failed');
       }
     }
   }
@@ -180,7 +180,7 @@ proto.init = function () {
    * @return {void}
    */
   function errorHandler (event) {
-    console.log('client: ccus error', event);
+    console.error('CCUS failed', event);
     this.close();
   }
 

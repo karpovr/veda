@@ -25,13 +25,13 @@ if ('serviceWorker' in navigator) {
       // Update application on `update` event
       veda.on('update', function () {
         registration.update()
-          .catch(console.log)
+          .catch((error) => console.error('Service worker update failed'))
           .then(() => {
             window.location.reload();
           });
       });
     })
-    .catch((error) => console.log(`Registration failed with ${error}`));
+    .catch((error) => console.error('Service worker registration failed'));
 
   // Receive and log server worker message
   navigator.serviceWorker.addEventListener('message', (event) => {

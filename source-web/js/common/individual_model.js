@@ -363,7 +363,7 @@ Object.defineProperty(proto, 'membership', {
         return this._.membership;
       })
       .catch((error) => {
-        console.log('membership error', this.id, error);
+        console.error('Membership failed', this.id);
         this._.membership = new IndividualModel({cache: false});
         return this._.membership;
       });
@@ -396,7 +396,7 @@ Object.defineProperty(proto, 'rights', {
       this._.rights = new IndividualModel(rightsJSON, false);
       return this._.rights;
     }).catch((error) => {
-      console.log('rights error', this.id, error);
+      console.error('Rights failed', this.id);
       this._.rights = new IndividualModel({cache: false});
       return this._.rights;
     });
@@ -430,7 +430,7 @@ Object.defineProperty(proto, 'rightsOrigin', {
       }));
       return this._.rightsOrigin;
     }).catch((error) => {
-      console.log('rights error', this.id, error);
+      console.error('Rights failed', this.id);
       this._.rightsOrigin = [];
       return this._.rightsOrigin;
     });
@@ -483,7 +483,7 @@ proto.load = function () {
         return this;
       })
       .catch((error) => {
-        console.log('load individual error', this.id, error.stack);
+        console.error('Load individual failed', this.id);
         this.isLoading(false);
         throw error;
       }),
@@ -536,7 +536,7 @@ proto.save = function (isAtomic) {
         return this;
       })
       .catch((error) => {
-        console.log('save individual error', this.id, error);
+        console.error('Save individual failed', this.id);
         this.isSaving(false);
         throw error;
       }),
@@ -593,7 +593,7 @@ proto.reset = function (forced) {
         return this;
       })
       .catch((error) => {
-        console.log('reset individual error', this.id, error.stack);
+        console.error('Reset individual failed', this.id);
         this.isResetting(false);
         throw error;
       }),
@@ -624,7 +624,7 @@ proto.delete = function () {
         return this;
       })
       .catch((error) => {
-        console.log('delete individual error', this.id, error);
+        console.error('Delete individual failed', this.id);
         this.isDeleting(false);
         throw error;
       }),
@@ -656,7 +656,7 @@ proto.remove = function () {
         return this;
       })
       .catch((error) => {
-        console.log('remove individual error', this.id, error);
+        console.error('Remove individual failed', this.id);
         this.isRemoving(false);
         throw error;
       }),
@@ -683,7 +683,7 @@ proto.recover = function () {
         return this;
       })
       .catch((error) => {
-        console.log('recover individual error', this.id, error);
+        console.error('Recover individual failed', this.id);
         this.isRecovering(false);
         throw error;
       }),
@@ -1080,7 +1080,7 @@ proto.getPropertyChain = function (...args) {
     }
     return [];
   }).catch((error) => {
-    console.log(error);
+    console.error('Get property chain failed');
   });
 };
 
@@ -1103,7 +1103,7 @@ proto.getChainValue = function (...properties) {
       return proto.getChainValue.apply(children, properties);
     }
   }).catch((error) => {
-    console.log(error);
+    console.error('Get chain value failed');
     return [];
   });
 };

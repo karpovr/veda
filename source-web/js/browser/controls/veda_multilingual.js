@@ -114,7 +114,7 @@ function veda_multilingual (options) {
             }
           } catch (ex) {
             el.value = value;
-            console.log('selectionStart/End error:', property_uri, value, typeof value);
+            console.log('selectionStart/End failed:', property_uri, value, typeof value);
           }
         }
       });
