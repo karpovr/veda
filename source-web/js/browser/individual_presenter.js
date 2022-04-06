@@ -328,7 +328,6 @@ function processTemplate (individual, container, wrapper, templateMode) {
       _search.forEach((node) => node.style.display = 'none');
       break;
     }
-
     // sync mode for embedded templates
     embedded.forEach((item) => {
       item.dispatchEvent(new Event(mode));
@@ -851,10 +850,11 @@ function processTemplate (individual, container, wrapper, templateMode) {
       }
       return acc && validation[property_uri].state;
     }, true);
-    validation.state = validation.state && embedded.reduce((acc, embeddedTemplate) => {
+    validation.embeddedState = embedded.reduce((acc, embeddedTemplate) => {
       const embeddedValidation = embeddedTemplate.getAttribute('data-valid') === 'true';
       return acc && embeddedValidation;
     }, true);
+    validation.state = validation.state && validation.embeddedState;
     template.setAttribute('data-valid', validation.state);
     template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
 
@@ -884,12 +884,17 @@ function processTemplate (individual, container, wrapper, templateMode) {
         }
         validation[property_uri] = validationResult[property_uri];
       });
-      validation.state = validation.state && Object.keys(validation).reduce((acc, property_uri) => {
+      const mergedState = Object.keys(validation).reduce((acc, property_uri) => {
         if (property_uri === 'state') {
           return acc;
         }
+        if (property_uri === 'embeddedState') {
+          return acc && validation[property_uri];
+        }
         return acc && validation[property_uri].state;
       }, true);
+
+      validation.state = mergedState && validation.embeddedState;
       template.setAttribute('data-valid', validation.state);
       template.dispatchEvent(new CustomEvent('internal-validated', {detail: validation}));
 
@@ -898,6 +903,11 @@ function processTemplate (individual, container, wrapper, templateMode) {
         container.dispatchEvent(new Event('internal-validate', {bubbles: true}));
       }
     }
+    // вроде как больше не нужно
+    // // "validate" event should bubble up to be handled by parent template only if current template is embedded
+    // if ( template.data('isEmbedded') ) {
+    //   container.trigger('validated', {});
+    // }
   };
 
   // Handle validation events from template
@@ -974,7 +984,6 @@ function processTemplate (individual, container, wrapper, templateMode) {
       spec: spec,
       mode: mode,
     };
-
     controlType.call(control, opts);
   });
 
