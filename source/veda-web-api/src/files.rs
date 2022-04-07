@@ -83,9 +83,10 @@ pub(crate) async fn load_file(
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
-async fn check_and_create_file(path: &str, prefix: Option<&str>, uri: &str, f: &mut Vec<async_std::fs::File>) -> io::Result<String> {
-    let full_path = format!("{}/{}{}", path, prefix.unwrap_or_default(), sanitize_filename::sanitize(&uri));
-    if !path.is_empty() && !uri.is_empty() && f.is_empty() {
+async fn check_and_create_file(path: &str, prefix: Option<&str>, f: &mut Vec<async_std::fs::File>) -> io::Result<String> {
+    let full_path = format!("{}/{}", path, prefix.unwrap_or_default());
+
+    if !path.is_empty() && f.is_empty() {
         async_std::fs::create_dir_all(&path).await?;
         f.push(async_std::fs::File::create(full_path.clone()).await?);
     }
@@ -116,7 +117,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                     },
                     "file" => {
                         let cur_chunk = &chunk?;
-                        check_and_create_file(&tmp_path, Some(&upload_prefix), &uri, &mut tmp_file).await?;
+                        check_and_create_file(&tmp_path, Some(&upload_prefix), &mut tmp_file).await?;
 
                         if let Some(ff) = tmp_file.get_mut(0) {
                             AsyncWriteExt::write_all(ff, cur_chunk).await?;
@@ -136,13 +137,13 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                             }
 
                             if pos > 7 {
-                                check_and_create_file(&tmp_path, Some(&upload_prefix), &uri, &mut tmp_file).await?;
+                                check_and_create_file(&tmp_path, Some(&upload_prefix), &mut tmp_file).await?;
                                 if let Some(ff) = tmp_file.get_mut(0) {
                                     AsyncWriteExt::write_all(ff, cur_chunk.split_at(pos).1).await?;
                                 }
                             }
                         } else {
-                            check_and_create_file(&tmp_path, Some(&upload_prefix), &uri, &mut tmp_file).await?;
+                            check_and_create_file(&tmp_path, Some(&upload_prefix), &mut tmp_file).await?;
                             if let Some(ff) = tmp_file.get_mut(0) {
                                 AsyncWriteExt::write_all(ff, cur_chunk).await?;
                             }
@@ -161,7 +162,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
         AsyncWriteExt::close(ff).await?;
     }
 
-    let tmp_file_path = format!("{}/{}{}", tmp_path, upload_prefix, sanitize_filename::sanitize(&uri));
+    let tmp_file_path = format!("{}/{}", tmp_path, upload_prefix);
     let dest_file_path = &format!("{}{}", base_path, path);
 
     if is_encoded_file {
@@ -171,7 +172,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
         decoder.read_to_end(&mut result)?;
 
         let mut out_file: Vec<async_std::fs::File> = Vec::default();
-        check_and_create_file(dest_file_path, None, &uri, &mut out_file).await?;
+        check_and_create_file(dest_file_path, None, &mut out_file).await?;
         if let Some(ff) = out_file.get_mut(0) {
             AsyncWriteExt::write_all(ff, &result).await?;
             AsyncWriteExt::flush(ff).await?;
