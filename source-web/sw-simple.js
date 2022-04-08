@@ -276,7 +276,7 @@ function handleFetch (event, CACHE) {
     if (response.ok && !cached) {
       const clone = response.clone();
       caches.open(CACHE).then((cache) => {
-        cache.put(path, clone);
+        cache.put(event.request, clone);
       });
     }
     return response;
