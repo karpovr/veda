@@ -389,7 +389,7 @@ Workflow.prepare_work_order = function (ticket, document) {
       for (const item of workOrderList) {
         let workOrder;
         if (item.data != document['@']) {
-          workOrder = get_individual(ticket, workOrder.data);
+          workOrder = get_individual(ticket, item.data);
         } else {
           workOrder = document;
         }
