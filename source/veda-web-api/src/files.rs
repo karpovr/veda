@@ -16,7 +16,6 @@ use futures::lock::Mutex;
 use futures::{AsyncWriteExt, StreamExt, TryStreamExt};
 use std::fs::File;
 use std::io::Read;
-use std::{env, fs};
 use uuid::Uuid;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
@@ -29,20 +28,23 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, &extract_addr(&req), &db).await?;
+    let (res, w_user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
 
+    let user_uri = w_user_uri.unwrap_or("unknown".to_owned());
+
     if let Some(file_id) = req.path().strip_prefix("/files/") {
-        debug!("get file, file_id: {}, user: {:?}", file_id, user_uri);
-        let (mut file_info, res_code) = get_individual_from_db(file_id, &user_uri.unwrap_or_default(), &db, Some(&az)).await?;
+        let (mut file_info, res_code) = get_individual_from_db(file_id, &user_uri, &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
             return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));
         }
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
+
+        info!("[{}] get file {}", user_uri, &path);
 
         let file = NamedFile::open(&path)?;
         let metadata = file.metadata()?;
@@ -83,8 +85,8 @@ pub(crate) async fn load_file(
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
-async fn check_and_create_file(path: &str, prefix: Option<&str>, f: &mut Vec<async_std::fs::File>) -> io::Result<String> {
-    let full_path = format!("{}/{}", path, prefix.unwrap_or_default());
+async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_std::fs::File>) -> io::Result<String> {
+    let full_path = format!("{}/{}", path, file_name);
 
     if !path.is_empty() && f.is_empty() {
         async_std::fs::create_dir_all(&path).await?;
@@ -93,13 +95,21 @@ async fn check_and_create_file(path: &str, prefix: Option<&str>, f: &mut Vec<asy
     Ok(full_path)
 }
 
-pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Responder> {
+pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<TicketCache>, db: web::Data<AStorage>, req: HttpRequest) -> ActixResult<impl Responder> {
+    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, &extract_addr(&req), &db).await?;
+    if res != ResultCode::Ok {
+        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+    }
+
     let base_path = "./data/files";
     let mut path = String::new();
     let mut uri = String::new();
     let mut tmp_file: Vec<async_std::fs::File> = Vec::default();
-    let tmp_path = env::temp_dir().to_str().unwrap_or("tmp").to_owned();
-    let upload_prefix = format!("veda-upload-{}", &Uuid::new_v4().to_string());
+    let tmp_path = "./data/files/tmp";
+    if Path::new(&tmp_path).exists().await {
+        async_std::fs::create_dir_all(&tmp_path).await.unwrap();
+    }
+    let upload_tmp_id = format!("veda-upload-{}", &Uuid::new_v4().to_string());
 
     let mut is_encoded_file = false;
 
@@ -117,7 +127,7 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                     },
                     "file" => {
                         let cur_chunk = &chunk?;
-                        check_and_create_file(&tmp_path, Some(&upload_prefix), &mut tmp_file).await?;
+                        check_and_create_file(&tmp_path, &upload_tmp_id, &mut tmp_file).await?;
 
                         if let Some(ff) = tmp_file.get_mut(0) {
                             AsyncWriteExt::write_all(ff, cur_chunk).await?;
@@ -137,13 +147,13 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
                             }
 
                             if pos > 7 {
-                                check_and_create_file(&tmp_path, Some(&upload_prefix), &mut tmp_file).await?;
+                                check_and_create_file(&tmp_path, &upload_tmp_id, &mut tmp_file).await?;
                                 if let Some(ff) = tmp_file.get_mut(0) {
                                     AsyncWriteExt::write_all(ff, cur_chunk.split_at(pos).1).await?;
                                 }
                             }
                         } else {
-                            check_and_create_file(&tmp_path, Some(&upload_prefix), &mut tmp_file).await?;
+                            check_and_create_file(&tmp_path, &upload_tmp_id, &mut tmp_file).await?;
                             if let Some(ff) = tmp_file.get_mut(0) {
                                 AsyncWriteExt::write_all(ff, cur_chunk).await?;
                             }
@@ -162,8 +172,10 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
         AsyncWriteExt::close(ff).await?;
     }
 
-    let tmp_file_path = format!("{}/{}", tmp_path, upload_prefix);
+    let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
+    let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
+    info!("[{}] upload file {}", user_uri.unwrap_or("unknown".to_owned()), file_full_name);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;
@@ -172,22 +184,25 @@ pub(crate) async fn save_file(mut payload: Multipart) -> ActixResult<impl Respon
         decoder.read_to_end(&mut result)?;
 
         let mut out_file: Vec<async_std::fs::File> = Vec::default();
-        check_and_create_file(dest_file_path, None, &mut out_file).await?;
+        check_and_create_file(&dest_file_path, sanitize_filename::sanitize(&uri).as_str(), &mut out_file).await?;
         if let Some(ff) = out_file.get_mut(0) {
             AsyncWriteExt::write_all(ff, &result).await?;
             AsyncWriteExt::flush(ff).await?;
             AsyncWriteExt::close(ff).await?;
         }
     } else if !path.is_empty() && !uri.is_empty() {
-        let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
         if Path::new(&tmp_file_path).exists().await {
-            async_std::fs::create_dir_all(&dest_file_path).await?;
-            async_fs::copy(tmp_file_path.clone(), file_full_name).await?;
-            fs::remove_file(tmp_file_path)?;
+            async_std::fs::create_dir_all(&dest_file_path).await.unwrap();
+            debug!("ren file {} <- {}", file_full_name, tmp_file_path);
+            if let Err(e) = async_fs::rename(tmp_file_path.clone(), file_full_name).await {
+                error!("{:?}", e);
+                return Ok(HttpResponse::InternalServerError().into());
+            }
         } else {
+            warn!("write empty file {}", file_full_name);
             async_fs::write(file_full_name, "").await?;
         }
     }
 
-    Ok(HttpResponse::Ok())
+    Ok(HttpResponse::Ok().into())
 }

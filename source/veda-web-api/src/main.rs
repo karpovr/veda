@@ -113,7 +113,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
-    info!("listen {}", port);
+    info!("LISTEN {}", port);
 
     let mut server_future = HttpServer::new(move || {
         let db = if let Some(cfg) = &tt_config {
