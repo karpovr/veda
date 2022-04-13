@@ -96,7 +96,8 @@ async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_st
 }
 
 pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<TicketCache>, db: web::Data<AStorage>, req: HttpRequest) -> ActixResult<impl Responder> {
-    let (res, user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, &extract_addr(&req), &db).await?;
+    let ticket = get_ticket(&req, &None);
+    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -175,7 +176,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    info!("[{}] upload file {}", user_uri.unwrap_or("unknown".to_owned()), file_full_name);
+    info!("ticket = {}, user = {}, upload file {}", ticket.unwrap_or("unknown".to_owned()), user_uri.unwrap_or("unknown".to_owned()), file_full_name);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;

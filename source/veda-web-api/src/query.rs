@@ -100,6 +100,7 @@ async fn query(
             limit: data.limit.unwrap_or_default(),
             from: data.from.unwrap_or_default(),
         };
+        info!("user = {}/{}, query = {}, top = {}, limit = {}, from = {}", req.user, req.ticket, req.query, req.top, req.limit, req.from);
         res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
         let mut ft_req = FTQuery {
