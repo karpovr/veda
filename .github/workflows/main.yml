@@ -46,8 +46,9 @@ jobs:
         run: |
           node --version
           testcafe --version
-          go version
           rustc -V
+
+      # go version
 
       # Build
       - name: Build
