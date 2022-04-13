@@ -48,8 +48,6 @@ jobs:
           testcafe --version
           rustc -V
 
-      # go version
-
       # Build
       - name: Build
         run: |

@@ -1,6 +1,6 @@
-[![Semantic machines](https://circleci.com/gh/semantic-machines/veda.svg?style=svg)](https://circleci.com/gh/semantic-machines/veda)
+[![Semantic machines](https://github.com/semantic-machines/veda/actions/workflows/main.yml/badge.svg)](https://github.com/semantic-machines/veda/actions)
 
-# Veda - ontology driven application development platform 
+# Veda - ontology driven application development platform
 
 ![](https://github.com/semantic-machines/veda/blob/master/doc/images/search.png)
 
@@ -31,14 +31,14 @@
 
   - Various visualization libraries & plugins.
 
-    
+
 
 ## II. System requirements
   - OS - Ubuntu 18.04, 20.04 LTS 64-Bit. For run on common Linux-based operating systems, use Veda-x86_64.AppImage
 
   - RAM - 1Gb
 
-    
+
 
 ## III. How to install and run
 
