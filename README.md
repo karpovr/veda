@@ -1,3 +1,4 @@
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![CI](https://github.com/semantic-machines/veda/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/semantic-machines/veda/actions/workflows/main.yml)
 
 # Veda - ontology driven application development platform
