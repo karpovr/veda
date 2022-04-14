@@ -1,4 +1,4 @@
-[![Semantic machines](https://github.com/semantic-machines/veda/actions/workflows/main.yml/badge.svg)](https://github.com/semantic-machines/veda/actions)
+[![CI](https://github.com/semantic-machines/veda/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/semantic-machines/veda/actions/workflows/main.yml)
 
 # Veda - ontology driven application development platform
 
