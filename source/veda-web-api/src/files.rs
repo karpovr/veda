@@ -28,7 +28,9 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, w_user_uri) = check_ticket(&get_ticket(&req, &None), &ticket_cache, &extract_addr(&req), &db).await?;
+    let ticket = get_ticket(&req, &None);
+    let addr = extract_addr(&req);
+    let (res, w_user_uri) = check_ticket(&ticket, &ticket_cache, &addr, &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -44,7 +46,7 @@ pub(crate) async fn load_file(
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
 
-        info!("[{}] get file {}", user_uri, &path);
+        info!("user = {}/{}/{:?}, get file {}", user_uri, ticket.unwrap_or("unknown".to_owned()), addr, &path);
 
         let file = NamedFile::open(&path)?;
         let metadata = file.metadata()?;
@@ -97,7 +99,8 @@ async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_st
 
 pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<TicketCache>, db: web::Data<AStorage>, req: HttpRequest) -> ActixResult<impl Responder> {
     let ticket = get_ticket(&req, &None);
-    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await?;
+    let addr = extract_addr(&req);
+    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &addr, &db).await?;
     if res != ResultCode::Ok {
         return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
     }
@@ -176,7 +179,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    info!("ticket = {}, user = {}, upload file {}", ticket.unwrap_or("unknown".to_owned()), user_uri.unwrap_or("unknown".to_owned()), file_full_name);
+    info!("user = {}/{}/{:?}, upload file {}", user_uri.unwrap_or("unknown".to_owned()), ticket.unwrap_or("unknown".to_owned()), addr, file_full_name);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;

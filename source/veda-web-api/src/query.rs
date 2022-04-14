@@ -100,7 +100,7 @@ async fn query(
             limit: data.limit.unwrap_or_default(),
             from: data.from.unwrap_or_default(),
         };
-        info!("user = {}/{}, query = {}, top = {}, limit = {}, from = {}", req.user, req.ticket, req.query, req.top, req.limit, req.from);
+        info!("user = {}/{}/{:?}, query = {}, top = {}, limit = {}, from = {}", req.user, req.ticket, addr, req.query, req.top, req.limit, req.from);
         res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
         let mut ft_req = FTQuery {
@@ -129,8 +129,8 @@ async fn query(
         ft_req.query = ft_req.query.replace('\n', " ");
 
         info!(
-            "ticket = {}, user = {}, query = {}, sort = {}, db = {}, top = {}, limit = {}, from = {}",
-            ft_req.ticket, ft_req.user, ft_req.query, ft_req.sort, ft_req.databases, ft_req.top, ft_req.limit, ft_req.from
+            "user = {}/{}/{:?}, query = {}, sort = {}, db = {}, top = {}, limit = {}, from = {}",
+            ft_req.user, ft_req.ticket, addr, ft_req.query, ft_req.sort, ft_req.databases, ft_req.top, ft_req.limit, ft_req.from
         );
 
         let mut vc = vql_client.lock().await;
