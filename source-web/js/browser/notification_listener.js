@@ -2,7 +2,7 @@
 
 import veda from '../common/veda.js';
 
-import Util from '../common/util.js';
+import Util from '../browser/util.js';
 
 import IndividualModel from '../common/individual_model.js';
 
