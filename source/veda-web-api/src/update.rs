@@ -19,6 +19,8 @@ pub(crate) async fn update(
     mstorage: web::Data<Mutex<MStorageClient>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
+    let ticket = get_ticket(&req, &params.ticket).unwrap_or_default();
+
     if let Some(v) = data.into_inner().as_object() {
         let event_id = if let Some(d) = v.get("event_id") {
             d.as_str().unwrap_or("")
@@ -73,7 +75,6 @@ pub(crate) async fn update(
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::TicketExpired as u16).unwrap()));
         }
 
-        let ticket = get_ticket(&req, &params.ticket).unwrap_or_default();
         return match ms.updates_use_param_with_addr((&ticket, addr), event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
                 if r.result == ResultCode::Ok {

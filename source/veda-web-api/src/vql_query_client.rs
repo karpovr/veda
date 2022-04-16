@@ -1,10 +1,10 @@
-use actix_web::client::Client;
+use awc::Client;
 use std::net::IpAddr;
 use v_common::search::common::{FTQuery, QueryResult};
 
 pub struct VQLHttpClient {
     pub(crate) point: String,
-    pub(crate) client: actix_web::client::Client,
+    pub(crate) client: Client,
 }
 
 impl VQLHttpClient {
@@ -16,10 +16,11 @@ impl VQLHttpClient {
     }
 
     pub(crate) async fn query(&mut self, ticket: &Option<String>, addr: &Option<IpAddr>, query: FTQuery) -> QueryResult {
-        let mut cl = self.client.post(format!("{}?ticket={}", &self.point, ticket.as_ref().unwrap_or(&"".to_string()))).header("Content-Type", "application/json");
+        let mut cl =
+            self.client.post(format!("{}?ticket={}", &self.point, ticket.as_ref().unwrap_or(&"".to_string()))).insert_header(("Content-Type", "application/json"));
 
         if let Some(a) = addr {
-            cl = cl.header("X-Real-IP", a.to_string())
+            cl = cl.insert_header(("X-Real-IP", a.to_string()))
         }
         let res = cl.send_json(&query).await;
 

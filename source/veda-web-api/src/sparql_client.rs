@@ -1,6 +1,6 @@
 use crate::common::{get_short_prefix, PrefixesCache, SparqlResponse};
-use actix_web::client::Client;
 use actix_web::web;
+use awc::Client;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
 use v_common::search::common::QueryResult;
@@ -10,7 +10,7 @@ use v_common::v_authorization::common::{Access, AuthorizationContext};
 
 pub struct SparqlClient {
     pub(crate) point: String,
-    pub(crate) client: actix_web::client::Client,
+    pub(crate) client: Client,
     pub(crate) az: LmdbAzContext,
 }
 
@@ -26,8 +26,13 @@ impl Default for SparqlClient {
 
 impl SparqlClient {
     pub(crate) async fn prepare_query(&mut self, user_uri: &str, query: String, db: web::Data<AStorage>, prefix_cache: web::Data<PrefixesCache>) -> QueryResult {
-        let res =
-            self.client.post(&self.point).header("Content-Type", "application/sparql-query").header("Accept", "application/sparql-results+json").send_body(query).await;
+        let res = self
+            .client
+            .post(&self.point)
+            .insert_header(("Content-Type", "application/sparql-query"))
+            .insert_header(("Accept", "application/sparql-results+json"))
+            .send_body(query)
+            .await;
 
         let mut qres = QueryResult::default();
 

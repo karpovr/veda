@@ -6,11 +6,12 @@ edition = "2021"
 [dependencies]
 actix-web = "3"
 actix-files = "0.5.0"
-actix-web-static-files = "3.0.5"
-actix-multipart = "0.3.0"
+actix-web-static-files = "3"
+actix-multipart = "0.3"
 async-std = "1.11.0"
 futures = "0.3.5"
 sanitize-filename = "0.3"
+awc = "3.0.0"
 
 rusty_tarantool = "0.2.10"
 serde = "1.0"
@@ -39,5 +40,5 @@ filetime = "0.2.15"
 reqwest = { version = "0.11" }
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
-v_common = { package = "v-common", version = "=0.2.12" }
+v_common = { package = "v-common", version = "=0.2.13" }
 #v_common = { package = "v-common", path = "../../../v-common" }

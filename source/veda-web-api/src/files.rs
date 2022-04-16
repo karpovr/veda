@@ -1,9 +1,9 @@
+use crate::common::log;
 use crate::common::{extract_addr, get_ticket};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
-use actix_web::http::header::ExtendedValue;
 use actix_web::http::header::{Charset, DispositionParam};
-use actix_web::http::HeaderValue;
+use actix_web::http::header::{ExtendedValue, HeaderValue};
 use actix_web::http::{header, StatusCode};
 use actix_web::{get, Result as ActixResult};
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
@@ -46,7 +46,7 @@ pub(crate) async fn load_file(
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
 
-        info!("user = {}/{}/{:?}, get file {}", user_uri, ticket.unwrap_or("unknown".to_owned()), addr, &path);
+        log(Some(&user_uri), &ticket, &addr, "get_file", &path);
 
         let file = NamedFile::open(&path)?;
         let metadata = file.metadata()?;
@@ -179,7 +179,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    info!("user = {}/{}/{:?}, upload file {}", user_uri.unwrap_or("unknown".to_owned()), ticket.unwrap_or("unknown".to_owned()), addr, file_full_name);
+    log(user_uri.as_deref(), &ticket, &addr, "upload_file", &file_full_name);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;

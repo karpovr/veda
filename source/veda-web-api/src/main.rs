@@ -51,16 +51,16 @@ async fn ping() -> std::io::Result<HttpResponse> {
     return Ok(HttpResponse::Ok().content_type("text/plain").body("pong"));
 }
 async fn tests_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    Ok(NamedFile::open("public/tests.html".parse::<PathBuf>().unwrap())?)
+    NamedFile::open("public/tests.html".parse::<PathBuf>().unwrap())
 }
 async fn root_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    Ok(NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())?)
+    NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())
 }
 async fn onto_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    Ok(NamedFile::open("public/ontology.json".parse::<PathBuf>().unwrap())?)
+    NamedFile::open("public/ontology.json".parse::<PathBuf>().unwrap())
 }
 async fn manifest_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    Ok(NamedFile::open("public/manifest".parse::<PathBuf>().unwrap())?)
+    NamedFile::open("public/manifest".parse::<PathBuf>().unwrap())
 }
 
 #[derive(Deserialize)]
@@ -74,7 +74,7 @@ async fn apps_doc(info: web::Path<Info>) -> std::io::Result<NamedFile> {
             return NamedFile::open(format!("public/{}/{}", info.app_name, &info.data.clone().unwrap()).parse::<PathBuf>().unwrap());
         }
     }
-    Ok(NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())?)
+    NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())
 }
 
 #[actix_web::main]

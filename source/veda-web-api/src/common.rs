@@ -150,3 +150,25 @@ pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
 
     Some(req.peer_addr().unwrap().ip())
 }
+
+pub(crate) fn log(w_user_id: Option<&str>, w_ticket: &Option<String>, addr: &Option<IpAddr>, operation: &str, args: &str) {
+    let ip = if let Some(a) = addr {
+        a.to_string()
+    } else {
+        "unknown".to_string()
+    };
+
+    let ticket_id = if let Some(t) = w_ticket {
+        if let Some(part) = t.get(0..7) {
+            part
+        } else {
+            "unknown"
+        }
+    } else {
+        "unknown"
+    };
+
+    let user_id = w_user_id.unwrap_or("unknown");
+
+    info!("{} {} {} {} = {}", ip, user_id, ticket_id, operation, args);
+}

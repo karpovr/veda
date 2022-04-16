@@ -1,3 +1,4 @@
+use crate::common::log;
 use crate::common::{extract_addr, get_ticket, PrefixesCache, QueryRequest};
 use crate::sparql_client::SparqlClient;
 use crate::vql_query_client::VQLHttpClient;
@@ -85,12 +86,13 @@ async fn query(
     }
 
     let mut res = QueryResult::default();
+    let ticket_id = ticket.clone().unwrap_or_default();
 
     if data.sparql.is_some() {
         res = sparql_client.lock().await.prepare_query(&user.unwrap_or_default(), data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
         let req = FTQuery {
-            ticket: "".to_string(),
+            ticket: "".to_owned(),
             user: user.unwrap_or_default(),
             query: data.sql.clone().unwrap_or_default(),
             sort: "".to_string(),
@@ -100,11 +102,11 @@ async fn query(
             limit: data.limit.unwrap_or_default(),
             from: data.from.unwrap_or_default(),
         };
-        info!("user = {}/{}/{:?}, query = {}, top = {}, limit = {}, from = {}", req.user, req.ticket, addr, req.query, req.top, req.limit, req.from);
+        log(Some(&req.user), ticket, &addr, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from));
         res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
-        let mut ft_req = FTQuery {
-            ticket: ticket.clone().unwrap_or_default(),
+        let mut req = FTQuery {
+            ticket: ticket_id.clone(),
             user: data.user.clone().unwrap_or_default(),
             query: data.query.clone().unwrap_or_default(),
             sort: data.sort.clone().unwrap_or_default(),
@@ -120,17 +122,20 @@ async fn query(
             ctx.push(id.to_owned());
         }
 
-        ft_req.user = user.unwrap_or_default();
+        req.user = user.unwrap_or_default();
 
-        if !(ft_req.query.contains("==") || ft_req.query.contains("&&") || ft_req.query.contains("||")) {
-            ft_req.query = "'*' == '".to_owned() + &ft_req.query + "'";
+        if !(req.query.contains("==") || req.query.contains("&&") || req.query.contains("||")) {
+            req.query = "'*' == '".to_owned() + &req.query + "'";
         }
 
-        ft_req.query = ft_req.query.replace('\n', " ");
+        req.query = req.query.replace('\n', " ");
 
-        info!(
-            "user = {}/{}/{:?}, query = {}, sort = {}, db = {}, top = {}, limit = {}, from = {}",
-            ft_req.user, ft_req.ticket, addr, ft_req.query, ft_req.sort, ft_req.databases, ft_req.top, ft_req.limit, ft_req.from
+        log(
+            Some(&req.user),
+            ticket,
+            &addr,
+            "query",
+            &format!("{}, sort = {}, db = {}, top = {}, limit = {}, from = {}", &req.query, req.sort, req.databases, req.top, req.limit, req.from),
         );
 
         let mut vc = vql_client.lock().await;
@@ -148,24 +153,24 @@ async fn query(
                         xr.c_load_index_schema(&db).await;
                     }
 
-                    res = xr.query_use_collect_fn(&ft_req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
+                    res = xr.query_use_collect_fn(&req, add_out_element, OptAuthorize::YES, &mut res_out_list).await.unwrap();
                     res.result = res_out_list;
                 }
             },
             VQLClientConnectType::Http => {
                 if let Some(n) = vc.http_client.as_mut() {
-                    res = n.query(ticket, &addr, ft_req).await;
+                    res = n.query(ticket, &addr, req).await;
                 }
             },
             VQLClientConnectType::Nng => {
                 if let Some(n) = vc.nng_client.as_mut() {
-                    res = n.query(ft_req);
+                    res = n.query(req);
                 }
             },
             VQLClientConnectType::Unknown => {},
         }
     }
 
-    info!("count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
+    info!("Ok, count = {}, time: query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
     Ok(HttpResponse::Ok().json(res))
 }
