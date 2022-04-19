@@ -901,7 +901,7 @@ cfg:Event_16
         put_individual(ticket, mMembership, _event_id);
       };
     };
-    
+
     if (!backwardTarget) { continue; }
     if (isDeleted) {
       if (backwardPropertyUri && veda.Util.hasValue(backwardTarget, backwardPropertyUri, { data: backwardLinkUri, type: "Uri" })) {
@@ -1085,7 +1085,7 @@ for (var i = 0; i < types.length; i++) {
           print("      set 'deleted:false' in value: ", propValues[valueInd].data);
           set_in_individual(veda.ticket, set_in_value);
         }
-        
+
       }
     }
   }
@@ -1132,10 +1132,10 @@ for (var i = 0; i < result.length; i++) {
   print("***********spec: ", result[i]);
   if (result[i]) {
     var spec = get_individual(veda.ticket, result[i]);
-    
+
     if (!veda.Util.hasValue(spec, "v-s:shelfLife")) {
       print("Skip " + result[i] + ": empty shelfLife");
-      continue; 
+      continue;
     };
     if (veda.Util.hasValue(spec, "v-s:shelfLife", { data: 9999, type: "Integer" })) {
       print("Skip " + result[i] + ": shelfLife == 9999");
@@ -1143,14 +1143,14 @@ for (var i = 0; i < result.length; i++) {
     }
     if (!veda.Util.hasValue(spec, "v-ui:forClass")) {
       print("Skip " + result[i] + ": empty hasClass");
-      continue; 
+      continue;
     };
 
     var dateProperty = veda.Util.hasValue(spec, "v-s:dateProperties")? spec["v-s:dateProperties"][0].data : "v-s:created";
     var forClass = spec["v-ui:forClass"][0].data;
-    var timeLife = spec["v-s:shelfLife"][0].data;
+    var timeLife = new Date(spec["v-s:shelfLife"][0].data);
     var deletedProperties = spec["v-s:hasDeletedProperties"];
-    
+
     // print("forClass: ", forClass);
     // print("timeLife: ", timeLife);
     // print("deletedProperties: ", veda.Util.toJson(deletedProperties));
@@ -1179,7 +1179,7 @@ for (var i = 0; i < result.length; i++) {
       //     print("Break queue handler, srv:queue-state-scripts_main0 is undefined");
       //     break;
       //   }
-      //   if ((mainQ["srv:current_count"] && mainQ["srv:current_count"].length > 0) && 
+      //   if ((mainQ["srv:current_count"] && mainQ["srv:current_count"].length > 0) &&
       //       (mainQ["srv:total_count"] && mainQ["srv:total_count"].length > 0 )) {
       //     mainQCount = mainQ["srv:total_count"][0].data - mainQ["srv:current_count"][0].data;
       //   } else {
@@ -1198,7 +1198,7 @@ for (var i = 0; i < result.length; i++) {
       //     print("Break queue handler, srv:queue-state-scripts_lp0 is undefined");
       //     break;
       //   }
-      //   if ((lowQ["srv:current_count"] && lowQ["srv:current_count"].length > 0) && 
+      //   if ((lowQ["srv:current_count"] && lowQ["srv:current_count"].length > 0) &&
       //       (lowQ["srv:total_count"] && lowQ["srv:total_count"].length > 0 )) {
       //     lowQCount = lowQ["srv:total_count"][0].data - lowQ["srv:current_count"][0].data;
       //   } else {
@@ -1223,7 +1223,7 @@ for (var i = 0; i < result.length; i++) {
       };
       set_in_individual(veda.ticket, setInDoc);
       print(docsForArchive[docInd], " archived");
-    } 
+    }
   }
 }
 
@@ -1270,7 +1270,7 @@ for (var i=0; i<result.length; i++){
       var dateTo = new Date(account["v-s:dateTo"][0].data);
       if (today - dateTo < 0) {
         print("Skip ", result[i], ": today < dateTo");
-        continue;  
+        continue;
       }
     } else {
       print("Skip ", result[i], ": empty dateTo");
