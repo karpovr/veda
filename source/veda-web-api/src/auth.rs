@@ -22,9 +22,11 @@ pub(crate) async fn get_ticket_trusted(
     auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
     let addr = extract_addr(&req);
-    let (res, _) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &addr, &tt).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+    match check_ticket(&Some(params.ticket.clone()), &ticket_cache, &addr, &tt).await {
+        Ok(_) => {},
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
     }
 
     let user_addr = if let Some(ip) = &params.ip {
@@ -50,8 +52,10 @@ pub(crate) async fn is_ticket_valid(
     tt: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, _) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await?;
-    Ok(HttpResponse::Ok().json(res == ResultCode::Ok))
+    match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await {
+        Ok(_) => Ok(HttpResponse::Ok().json(true)),
+        Err(_) => Ok(HttpResponse::Ok().json(false)),
+    }
 }
 
 #[get("/authenticate")]
@@ -70,15 +74,17 @@ pub(crate) async fn get_rights(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
+    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     let rights = az
         .lock()
         .await
-        .authorize(&params.uri, &user_uri.unwrap(), Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false)
+        .authorize(&params.uri, &user_id, Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false)
         .unwrap_or(0);
     let mut pstm = Individual::default();
 
@@ -101,10 +107,12 @@ pub(crate) async fn get_membership(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
+    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     let mut acl_trace = Trace {
         acl: &mut "".to_string(),
@@ -116,7 +124,7 @@ pub(crate) async fn get_membership(
         str_num: 0,
     };
 
-    if az.lock().await.authorize_and_trace(&params.uri, &user_uri.unwrap(), Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
+    if az.lock().await.authorize_and_trace(&params.uri, &user_id, Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
         let mut mbshp = Individual::default();
 
         mbshp.set_id("_");
@@ -143,10 +151,12 @@ pub(crate) async fn get_rights_origin(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let (res, user_uri) = check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
+    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     let mut acl_trace = Trace {
         acl: &mut "".to_string(),
@@ -163,7 +173,7 @@ pub(crate) async fn get_rights_origin(
         .await
         .authorize_and_trace(
             &params.uri,
-            &user_uri.unwrap(),
+            &user_id,
             Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8,
             false,
             &mut acl_trace,

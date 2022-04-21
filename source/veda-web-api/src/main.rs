@@ -124,7 +124,7 @@ async fn main() -> std::io::Result<()> {
         } else {
             AStorage {
                 tt: None,
-                lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly))),
+                lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly, Some(100)))),
             }
         };
 

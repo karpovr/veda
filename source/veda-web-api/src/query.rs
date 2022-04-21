@@ -80,20 +80,22 @@ async fn query(
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
     let addr = extract_addr(&req);
-    let (res, user) = check_ticket(ticket, &ticket_cache, &addr, &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
+    let user_id = match check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     let mut res = QueryResult::default();
     let ticket_id = ticket.clone().unwrap_or_default();
 
     if data.sparql.is_some() {
-        res = sparql_client.lock().await.prepare_query(&user.unwrap_or_default(), data.sparql.clone().unwrap(), db, prefix_cache).await;
+        res = sparql_client.lock().await.prepare_query(&user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
         let req = FTQuery {
             ticket: "".to_owned(),
-            user: user.unwrap_or_default(),
+            user: user_id,
             query: data.sql.clone().unwrap_or_default(),
             sort: "".to_string(),
             databases: "".to_string(),
@@ -102,7 +104,7 @@ async fn query(
             limit: data.limit.unwrap_or_default(),
             from: data.from.unwrap_or_default(),
         };
-        log(Some(&req.user), ticket, &addr, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from));
+        log(Some(&req.user), ticket, &addr, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from), ResultCode::Ok);
         res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
         let mut req = FTQuery {
@@ -122,7 +124,7 @@ async fn query(
             ctx.push(id.to_owned());
         }
 
-        req.user = user.unwrap_or_default();
+        req.user = user_id;
 
         if !(req.query.contains("==") || req.query.contains("&&") || req.query.contains("||")) {
             req.query = "'*' == '".to_owned() + &req.query + "'";
@@ -136,6 +138,7 @@ async fn query(
             &addr,
             "query",
             &format!("{}, sort = {}, db = {}, top = {}, limit = {}, from = {}", &req.query, req.sort, req.databases, req.top, req.limit, req.from),
+            ResultCode::Ok,
         );
 
         let mut vc = vql_client.lock().await;

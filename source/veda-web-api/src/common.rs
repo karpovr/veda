@@ -1,13 +1,35 @@
-use actix_web::{HttpMessage, HttpRequest};
+use actix_web::{web, HttpMessage, HttpRequest};
 use async_std::sync::Arc;
 use futures::lock::Mutex;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
 use v_common::onto::onto_index::OntoIndex;
-use v_common::storage::async_storage::{get_individual_from_db, AStorage};
+use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
+use v_common::v_api::obj::ResultCode;
 
 pub(crate) const BASE_PATH: &str = "./data";
+
+pub struct UserInfo {
+    pub ticket: Option<String>,
+    pub addr: Option<IpAddr>,
+    pub user_id: String,
+}
+
+pub async fn get_user_info(req: &HttpRequest, ticket_cache: &web::Data<TicketCache>, db: &web::Data<AStorage>) -> Result<UserInfo, ResultCode> {
+    let ticket = get_ticket(&req, &None);
+    let addr = extract_addr(&req);
+    match check_ticket(&ticket, &ticket_cache, &addr, &db).await {
+        Ok(user_id) => Ok(UserInfo {
+            ticket,
+            addr,
+            user_id,
+        }),
+        Err(res) => {
+            return Err(res);
+        },
+    }
+}
 
 pub struct PrefixesCache {
     pub read: evmap::ReadHandle<String, String>,
@@ -151,7 +173,7 @@ pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
     Some(req.peer_addr().unwrap().ip())
 }
 
-pub(crate) fn log(w_user_id: Option<&str>, w_ticket: &Option<String>, addr: &Option<IpAddr>, operation: &str, args: &str) {
+pub(crate) fn log(w_user_id: Option<&str>, w_ticket: &Option<String>, addr: &Option<IpAddr>, operation: &str, args: &str, res: ResultCode) {
     let ip = if let Some(a) = addr {
         a.to_string()
     } else {
@@ -170,5 +192,5 @@ pub(crate) fn log(w_user_id: Option<&str>, w_ticket: &Option<String>, addr: &Opt
 
     let user_id = w_user_id.unwrap_or("unknown");
 
-    info!("{} {} {} {} = {}", ip, user_id, ticket_id, operation, args);
+    info!("{} {} {} {:?} {} = {}", ip, user_id, ticket_id, res, operation, args);
 }

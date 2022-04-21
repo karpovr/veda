@@ -39,18 +39,19 @@ pub(crate) async fn get_individuals(
 ) -> io::Result<HttpResponse> {
     let ticket = get_ticket(&req, &params.ticket);
     let addr = extract_addr(&req);
+    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
-    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
     let mut res = vec![];
-    let user_uri = user_uri.unwrap_or_default();
 
-    log(Some(&user_uri), &ticket, &addr, "get_individuals", &format!("{:?}", payload.uris));
+    log(Some(&user_id), &ticket, &addr, "get_individuals", &format!("{:?}", payload.uris), ResultCode::Ok);
 
     for uri in &payload.uris {
-        let (indv, res_code) = get_individual_from_db(uri, &user_uri, &db, Some(&az)).await?;
+        let (indv, res_code) = get_individual_from_db(uri, &user_id, &db, Some(&az)).await?;
         if res_code == ResultCode::Ok {
             res.push(indv.get_obj().as_json());
         }
@@ -73,12 +74,12 @@ pub(crate) async fn get_individual(
     //    warn!("{:?} = {:?}", header.0, header.1);
     //}
 
-    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
-
-    log(user_uri.as_deref(), &ticket, &addr, "get_individual", &params.uri);
+    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     if params.uri.contains(QUEUE_STATE_PREFIX) {
         if let Some(consumer_name) = &params.uri.strip_prefix(QUEUE_STATE_PREFIX) {
@@ -96,21 +97,22 @@ pub(crate) async fn get_individual(
                         individual.add_integer("srv:current_count", queue_consumer.count_popped as i64);
 
                         let v = individual.get_obj().as_json();
-                        info!("Ok");
+                        log(Some(&user_id), &ticket, &addr, "get_individual", &params.uri, ResultCode::Ok);
                         debug!("Ok, {}", v);
                         return Ok(HttpResponse::Ok().json(v));
                     }
                 },
                 Err(e) => {
+                    log(Some(&user_id), &ticket, &addr, "get_individual", &params.uri, ResultCode::InternalServerError);
                     error!("fail open consumer {}, err={:?}", consumer_name, e);
                 },
             }
         }
-        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::InternalServerError as u16).unwrap()));
     }
 
-    let (res, res_code) = get_individual_from_db(&params.uri, &user_uri.unwrap_or_default(), &db, Some(&az)).await?;
-    info!("{:?}", res_code);
+    let (res, res_code) = get_individual_from_db(&params.uri, &user_id, &db, Some(&az)).await?;
+    log(Some(&user_id), &ticket, &addr, "get_individual", &params.uri, res_code);
     if res_code == ResultCode::Ok {
         let v = res.get_obj().as_json();
         debug!("Ok {:?} {}", res_code, v);

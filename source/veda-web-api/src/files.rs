@@ -1,5 +1,5 @@
 use crate::common::log;
-use crate::common::{extract_addr, get_ticket};
+use crate::common::{extract_addr, get_ticket, get_user_info};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::http::header::{Charset, DispositionParam};
@@ -28,25 +28,21 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let ticket = get_ticket(&req, &None);
-    let addr = extract_addr(&req);
-    let (res, w_user_uri) = check_ticket(&ticket, &ticket_cache, &addr, &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
-
-    let user_uri = w_user_uri.unwrap_or("unknown".to_owned());
+    let uif = match get_user_info(&req, &ticket_cache, &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     if let Some(file_id) = req.path().strip_prefix("/files/") {
-        let (mut file_info, res_code) = get_individual_from_db(file_id, &user_uri, &db, Some(&az)).await?;
+        let (mut file_info, res_code) = get_individual_from_db(file_id, &uif.user_id, &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
             return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));
         }
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
-
-        log(Some(&user_uri), &ticket, &addr, "get_file", &path);
 
         let file = NamedFile::open(&path)?;
         let metadata = file.metadata()?;
@@ -100,10 +96,14 @@ async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_st
 pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<TicketCache>, db: web::Data<AStorage>, req: HttpRequest) -> ActixResult<impl Responder> {
     let ticket = get_ticket(&req, &None);
     let addr = extract_addr(&req);
-    let (res, user_uri) = check_ticket(&ticket, &ticket_cache, &addr, &db).await?;
-    if res != ResultCode::Ok {
-        return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-    }
+    let user_id = match check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
+
+    //let uif = get_user_info((), (), ());
 
     let base_path = "./data/files";
     let mut path = String::new();
@@ -179,7 +179,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    log(user_uri.as_deref(), &ticket, &addr, "upload_file", &file_full_name);
+    log(Some(&user_id), &ticket, &addr, "upload_file", &file_full_name, ResultCode::Ok);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;
