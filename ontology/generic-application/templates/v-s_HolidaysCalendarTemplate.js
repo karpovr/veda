@@ -16,8 +16,12 @@ export const pre = function (individual, template, container, mode, extra) {
     mode: 'multiple',
     disable: individual.get('v-s:holiday'),
     onChange: (_, iso) => {
-      individual.set('v-s:holiday', iso.split(', ').map((dateStr) => new Date(dateStr)));
-      calendar.changeMonth(new Date(individual.get('v-s:holiday').slice(-1)[0]).getMonth(), false);
+      if (iso.length) {
+        individual.set('v-s:holiday', iso.split(', ').map((dateStr) => new Date(dateStr)));
+        calendar.changeMonth(new Date(individual.get('v-s:holiday').slice(-1)[0]).getMonth(), false);
+      } else {
+        individual.clearValue('v-s:holiday');
+      }
     },
   });
   calendar.setDate(individual.get('v-s:holiday'));
