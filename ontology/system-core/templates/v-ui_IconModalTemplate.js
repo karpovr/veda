@@ -22,6 +22,10 @@ export const post = function (individual, template, container, mode, extra) {
     $('body').append(modal);
     modal.modal('show');
 
+    modal.on('hidden.bs.modal', () => {
+      modal.remove();
+    });
+
     if (newMode == 'edit') {
       modal.find('#follow').remove();
     } else {
