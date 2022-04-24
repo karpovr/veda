@@ -4,6 +4,7 @@ use futures::lock::Mutex;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
+use std::time::Instant;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
@@ -16,18 +17,26 @@ pub struct UserInfo {
     pub user_id: String,
 }
 
-pub async fn get_user_info(req: &HttpRequest, ticket_cache: &web::Data<TicketCache>, db: &web::Data<AStorage>) -> Result<UserInfo, ResultCode> {
-    let ticket = get_ticket(&req, &None);
-    let addr = extract_addr(&req);
-    match check_ticket(&ticket, &ticket_cache, &addr, &db).await {
+pub async fn get_user_info(
+    in_ticket: Option<String>,
+    req: &HttpRequest,
+    ticket_cache: &web::Data<TicketCache>,
+    db: &web::Data<AStorage>,
+) -> Result<UserInfo, ResultCode> {
+    let ticket = if in_ticket.is_some() {
+        in_ticket
+    } else {
+        get_ticket(req, &None)
+    };
+
+    let addr = extract_addr(req);
+    match check_ticket(&ticket, ticket_cache, &addr, db).await {
         Ok(user_id) => Ok(UserInfo {
             ticket,
             addr,
             user_id,
         }),
-        Err(res) => {
-            return Err(res);
-        },
+        Err(res) => Err(res),
     }
 }
 
@@ -173,14 +182,14 @@ pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
     Some(req.peer_addr().unwrap().ip())
 }
 
-pub(crate) fn log(w_user_id: Option<&str>, w_ticket: &Option<String>, addr: &Option<IpAddr>, operation: &str, args: &str, res: ResultCode) {
-    let ip = if let Some(a) = addr {
+pub(crate) fn log(start_time: &Instant, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
+    let ip = if let Some(a) = uinf.addr {
         a.to_string()
     } else {
         "unknown".to_string()
     };
 
-    let ticket_id = if let Some(t) = w_ticket {
+    let ticket_id = if let Some(t) = &uinf.ticket {
         if let Some(part) = t.get(0..7) {
             part
         } else {
@@ -190,7 +199,5 @@ pub(crate) fn log(w_user_id: Option<&str>, w_ticket: &Option<String>, addr: &Opt
         "unknown"
     };
 
-    let user_id = w_user_id.unwrap_or("unknown");
-
-    info!("{} {} {} {:?} {} = {}", ip, user_id, ticket_id, res, operation, args);
+    info!("{} {} {} {:?} {} = {}, time={} ms", ip, uinf.user_id, ticket_id, res, operation, args, start_time.elapsed().as_millis());
 }

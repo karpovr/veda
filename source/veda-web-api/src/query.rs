@@ -1,18 +1,19 @@
-use crate::common::log;
-use crate::common::{extract_addr, get_ticket, PrefixesCache, QueryRequest};
+use crate::common::{get_ticket, PrefixesCache, QueryRequest};
+use crate::common::{get_user_info, log};
 use crate::sparql_client::SparqlClient;
 use crate::vql_query_client::VQLHttpClient;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
+use std::time::Instant;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::c_load_onto;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::{FTQuery, QueryResult};
 use v_common::search::ft_client::FTClient;
-use v_common::storage::async_storage::{check_ticket, AStorage, TicketCache};
+use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 pub(crate) enum VQLClientConnectType {
@@ -79,8 +80,8 @@ async fn query(
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let addr = extract_addr(&req);
-    let user_id = match check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+    let uinf = match get_user_info(ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -91,11 +92,11 @@ async fn query(
     let ticket_id = ticket.clone().unwrap_or_default();
 
     if data.sparql.is_some() {
-        res = sparql_client.lock().await.prepare_query(&user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
+        res = sparql_client.lock().await.prepare_query(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
         let req = FTQuery {
             ticket: "".to_owned(),
-            user: user_id,
+            user: uinf.user_id.to_owned(),
             query: data.sql.clone().unwrap_or_default(),
             sort: "".to_string(),
             databases: "".to_string(),
@@ -104,7 +105,7 @@ async fn query(
             limit: data.limit.unwrap_or_default(),
             from: data.from.unwrap_or_default(),
         };
-        log(Some(&req.user), ticket, &addr, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from), ResultCode::Ok);
+        log(&start_time, &uinf, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from), ResultCode::Ok);
         res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
         let mut req = FTQuery {
@@ -124,7 +125,7 @@ async fn query(
             ctx.push(id.to_owned());
         }
 
-        req.user = user_id;
+        req.user = uinf.user_id.to_owned();
 
         if !(req.query.contains("==") || req.query.contains("&&") || req.query.contains("||")) {
             req.query = "'*' == '".to_owned() + &req.query + "'";
@@ -133,9 +134,8 @@ async fn query(
         req.query = req.query.replace('\n', " ");
 
         log(
-            Some(&req.user),
-            ticket,
-            &addr,
+            &start_time,
+            &uinf,
             "query",
             &format!("{}, sort = {}, db = {}, top = {}, limit = {}, from = {}", &req.query, req.sort, req.databases, req.top, req.limit, req.from),
             ResultCode::Ok,
@@ -162,7 +162,7 @@ async fn query(
             },
             VQLClientConnectType::Http => {
                 if let Some(n) = vc.http_client.as_mut() {
-                    res = n.query(ticket, &addr, req).await;
+                    res = n.query(ticket, &uinf.addr, req).await;
                 }
             },
             VQLClientConnectType::Nng => {

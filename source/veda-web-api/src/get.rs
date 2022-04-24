@@ -1,15 +1,16 @@
-use crate::common::log;
-use crate::common::{extract_addr, get_module_name, get_ticket, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::Utc;
 use futures::lock::Mutex;
 use std::io;
+use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
-use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
+use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 use v_common::v_queue::record::Mode;
@@ -37,9 +38,8 @@ pub(crate) async fn get_individuals(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let ticket = get_ticket(&req, &params.ticket);
-    let addr = extract_addr(&req);
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -48,10 +48,10 @@ pub(crate) async fn get_individuals(
 
     let mut res = vec![];
 
-    log(Some(&user_id), &ticket, &addr, "get_individuals", &format!("{:?}", payload.uris), ResultCode::Ok);
+    log(&start_time, &uinf, "get_individuals", &format!("{:?}", payload.uris), ResultCode::Ok);
 
     for uri in &payload.uris {
-        let (indv, res_code) = get_individual_from_db(uri, &user_id, &db, Some(&az)).await?;
+        let (indv, res_code) = get_individual_from_db(uri, &uinf.user_id, &db, Some(&az)).await?;
         if res_code == ResultCode::Ok {
             res.push(indv.get_obj().as_json());
         }
@@ -67,14 +67,8 @@ pub(crate) async fn get_individual(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let addr = extract_addr(&req);
-    let ticket = get_ticket(&req, &params.ticket);
-
-    //for header in req.headers().into_iter() {
-    //    warn!("{:?} = {:?}", header.0, header.1);
-    //}
-
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -97,13 +91,13 @@ pub(crate) async fn get_individual(
                         individual.add_integer("srv:current_count", queue_consumer.count_popped as i64);
 
                         let v = individual.get_obj().as_json();
-                        log(Some(&user_id), &ticket, &addr, "get_individual", &params.uri, ResultCode::Ok);
+                        log(&start_time, &uinf, "get_individual", &params.uri, ResultCode::Ok);
                         debug!("Ok, {}", v);
                         return Ok(HttpResponse::Ok().json(v));
                     }
                 },
                 Err(e) => {
-                    log(Some(&user_id), &ticket, &addr, "get_individual", &params.uri, ResultCode::InternalServerError);
+                    log(&start_time, &uinf, "get_individual", &params.uri, ResultCode::InternalServerError);
                     error!("fail open consumer {}, err={:?}", consumer_name, e);
                 },
             }
@@ -111,8 +105,8 @@ pub(crate) async fn get_individual(
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::InternalServerError as u16).unwrap()));
     }
 
-    let (res, res_code) = get_individual_from_db(&params.uri, &user_id, &db, Some(&az)).await?;
-    log(Some(&user_id), &ticket, &addr, "get_individual", &params.uri, res_code);
+    let (res, res_code) = get_individual_from_db(&params.uri, &uinf.user_id, &db, Some(&az)).await?;
+    log(&start_time, &uinf, "get_individual", &params.uri, res_code);
     if res_code == ResultCode::Ok {
         let v = res.get_obj().as_json();
         debug!("Ok {:?} {}", res_code, v);

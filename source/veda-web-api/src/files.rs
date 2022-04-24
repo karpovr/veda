@@ -1,5 +1,5 @@
+use crate::common::get_user_info;
 use crate::common::log;
-use crate::common::{extract_addr, get_ticket, get_user_info};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::http::header::{Charset, DispositionParam};
@@ -16,9 +16,10 @@ use futures::lock::Mutex;
 use futures::{AsyncWriteExt, StreamExt, TryStreamExt};
 use std::fs::File;
 use std::io::Read;
+use std::time::Instant;
 use uuid::Uuid;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
-use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
+use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
 
 #[get("/files/{file_id}")]
@@ -28,7 +29,7 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let uif = match get_user_info(&req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -36,7 +37,7 @@ pub(crate) async fn load_file(
     };
 
     if let Some(file_id) = req.path().strip_prefix("/files/") {
-        let (mut file_info, res_code) = get_individual_from_db(file_id, &uif.user_id, &db, Some(&az)).await?;
+        let (mut file_info, res_code) = get_individual_from_db(file_id, &uinf.user_id, &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
             return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));
@@ -94,16 +95,13 @@ async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_st
 }
 
 pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<TicketCache>, db: web::Data<AStorage>, req: HttpRequest) -> ActixResult<impl Responder> {
-    let ticket = get_ticket(&req, &None);
-    let addr = extract_addr(&req);
-    let user_id = match check_ticket(&ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+    let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-
-    //let uif = get_user_info((), (), ());
 
     let base_path = "./data/files";
     let mut path = String::new();
@@ -131,7 +129,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
                     },
                     "file" => {
                         let cur_chunk = &chunk?;
-                        check_and_create_file(&tmp_path, &upload_tmp_id, &mut tmp_file).await?;
+                        check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
 
                         if let Some(ff) = tmp_file.get_mut(0) {
                             AsyncWriteExt::write_all(ff, cur_chunk).await?;
@@ -151,13 +149,13 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
                             }
 
                             if pos > 7 {
-                                check_and_create_file(&tmp_path, &upload_tmp_id, &mut tmp_file).await?;
+                                check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
                                 if let Some(ff) = tmp_file.get_mut(0) {
                                     AsyncWriteExt::write_all(ff, cur_chunk.split_at(pos).1).await?;
                                 }
                             }
                         } else {
-                            check_and_create_file(&tmp_path, &upload_tmp_id, &mut tmp_file).await?;
+                            check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
                             if let Some(ff) = tmp_file.get_mut(0) {
                                 AsyncWriteExt::write_all(ff, cur_chunk).await?;
                             }
@@ -179,7 +177,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    log(Some(&user_id), &ticket, &addr, "upload_file", &file_full_name, ResultCode::Ok);
+    log(&start_time, &uinf, "upload_file", &file_full_name, ResultCode::Ok);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;
@@ -188,7 +186,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
         decoder.read_to_end(&mut result)?;
 
         let mut out_file: Vec<async_std::fs::File> = Vec::default();
-        check_and_create_file(&dest_file_path, sanitize_filename::sanitize(&uri).as_str(), &mut out_file).await?;
+        check_and_create_file(dest_file_path, sanitize_filename::sanitize(&uri).as_str(), &mut out_file).await?;
         if let Some(ff) = out_file.get_mut(0) {
             AsyncWriteExt::write_all(ff, &result).await?;
             AsyncWriteExt::flush(ff).await?;
