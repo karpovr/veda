@@ -29,7 +29,7 @@ fn main() -> Result<(), i32> {
     let mut ctx = Context {
         permission_statement_counter: 0,
         membership_counter: 0,
-        storage: VStorage::new_lmdb("./data", StorageMode::ReadWrite),
+        storage: VStorage::new_lmdb("./data", StorageMode::ReadWrite, None),
         version_of_index_format: 2,
         module_info: module_info.unwrap(),
     };

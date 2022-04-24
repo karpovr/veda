@@ -29,7 +29,7 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut backend = Backend::create(StorageMode::ReadWrite, false);
-    let mut auth_data = VStorage::new_lmdb("./data", StorageMode::ReadOnly);
+    let mut auth_data = VStorage::new_lmdb("./data", StorageMode::ReadOnly, None);
 
     let systicket = if let Ok(t) = backend.get_sys_ticket_id() {
         t
