@@ -3,7 +3,7 @@
 
 # Veda - ontology driven application development platform
 
-![](https://github.com/semantic-machines/veda/blob/master/doc/images/search.png)
+![](https://github.com/semantic-machines/veda/blob/master/doc/images/intro.jpg)
 
 ## I. Overview
 
