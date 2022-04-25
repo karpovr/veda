@@ -177,7 +177,7 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    log(&start_time, &uinf, "upload_file", &file_full_name, ResultCode::Ok);
+    log(Some(&start_time), &uinf, "upload_file", &file_full_name, ResultCode::Ok);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;

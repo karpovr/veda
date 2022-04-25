@@ -182,7 +182,7 @@ pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
     Some(req.peer_addr().unwrap().ip())
 }
 
-pub(crate) fn log(start_time: &Instant, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
+pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
     let ip = if let Some(a) = uinf.addr {
         a.to_string()
     } else {
@@ -199,5 +199,9 @@ pub(crate) fn log(start_time: &Instant, uinf: &UserInfo, operation: &str, args: 
         "unknown"
     };
 
-    info!("{} {} {} {:?} {} = {}, time={} ms", ip, uinf.user_id, ticket_id, res, operation, args, start_time.elapsed().as_millis());
+    if let Some(t) = start_time {
+        info!("{} {} {} {:?} {} = {}, time={} ms", ip, uinf.user_id, ticket_id, res, operation, args, t.elapsed().as_millis());
+    } else {
+        info!("{} {} {} {:?} {} = {}", ip, uinf.user_id, ticket_id, res, operation, args);
+    }
 }

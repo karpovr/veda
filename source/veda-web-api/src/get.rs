@@ -48,7 +48,7 @@ pub(crate) async fn get_individuals(
 
     let mut res = vec![];
 
-    log(&start_time, &uinf, "get_individuals", &format!("{:?}", payload.uris), ResultCode::Ok);
+    log(Some(&start_time), &uinf, "get_individuals", &format!("{:?}", payload.uris), ResultCode::Ok);
 
     for uri in &payload.uris {
         let (indv, res_code) = get_individual_from_db(uri, &uinf.user_id, &db, Some(&az)).await?;
@@ -91,13 +91,13 @@ pub(crate) async fn get_individual(
                         individual.add_integer("srv:current_count", queue_consumer.count_popped as i64);
 
                         let v = individual.get_obj().as_json();
-                        log(&start_time, &uinf, "get_individual", &params.uri, ResultCode::Ok);
+                        log(Some(&start_time), &uinf, "get_individual", &params.uri, ResultCode::Ok);
                         debug!("Ok, {}", v);
                         return Ok(HttpResponse::Ok().json(v));
                     }
                 },
                 Err(e) => {
-                    log(&start_time, &uinf, "get_individual", &params.uri, ResultCode::InternalServerError);
+                    log(Some(&start_time), &uinf, "get_individual", &params.uri, ResultCode::InternalServerError);
                     error!("fail open consumer {}, err={:?}", consumer_name, e);
                 },
             }
@@ -106,7 +106,7 @@ pub(crate) async fn get_individual(
     }
 
     let (res, res_code) = get_individual_from_db(&params.uri, &uinf.user_id, &db, Some(&az)).await?;
-    log(&start_time, &uinf, "get_individual", &params.uri, res_code);
+    log(Some(&start_time), &uinf, "get_individual", &params.uri, res_code);
     if res_code == ResultCode::Ok {
         let v = res.get_obj().as_json();
         debug!("Ok {:?} {}", res_code, v);

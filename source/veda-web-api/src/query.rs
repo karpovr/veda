@@ -6,7 +6,6 @@ use actix_web::http::StatusCode;
 use actix_web::{web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
-use std::time::Instant;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::c_load_onto;
 use v_common::onto::onto_index::OntoIndex;
@@ -80,7 +79,6 @@ async fn query(
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let start_time = Instant::now();
     let uinf = match get_user_info(ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
@@ -105,7 +103,7 @@ async fn query(
             limit: data.limit.unwrap_or_default(),
             from: data.from.unwrap_or_default(),
         };
-        log(&start_time, &uinf, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from), ResultCode::Ok);
+        log(None, &uinf, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from), ResultCode::Ok);
         res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
     } else {
         let mut req = FTQuery {
@@ -134,7 +132,7 @@ async fn query(
         req.query = req.query.replace('\n', " ");
 
         log(
-            &start_time,
+            None,
             &uinf,
             "query",
             &format!("{}, sort = {}, db = {}, top = {}, limit = {}, from = {}", &req.query, req.sort, req.databases, req.top, req.limit, req.from),
