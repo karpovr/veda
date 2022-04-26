@@ -229,7 +229,7 @@ v-s:PS_hasWorkingOperations_WorkPermit
   rdfs:label "Specification for hasWorkingOperations for v-s:WorkPermit"@en ;
   v-ui:forClass v-s:WorkPermit ;
   v-ui:forProperty v-s:hasWorkingOperations ;
-  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
@@ -246,7 +246,7 @@ v-s:PS_hasWorkPermitMainRisks_WorkPermit
   rdfs:label "Specification for hasWorkPermitMainRisks for v-s:WorkPermit"@en ;
   v-ui:forClass v-s:WorkPermit ;
   v-ui:forProperty v-s:hasWorkPermitMainRisks ;
-  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
@@ -264,7 +264,7 @@ v-s:PS_hasSafetyWorkAction_1_3_WorkPermit
   v-ui:forClass v-s:WorkPermit ;
   v-ui:forProperty v-s:hasSafetyWorkAction_1_3 ;
   v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_1_3')"^^xsd:string ;
-  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
@@ -596,28 +596,6 @@ v-s:hasPPEType
   rdfs:range v-s:PPEType ;
   rdfs:domain v-s:WorkPermit ;
 .
-v-s:PS_hasPPEType_WorkPermit
-  rdf:type v-ui:ObjectPropertySpecification ;
-  v-ui:forClass v-s:WorkPermit ;
-  v-ui:forProperty v-s:hasPPEType ;
-  v-ui:treeRoot d:qpna8idrvd07plk4dg8isevsrs ;
-  v-ui:treeRoot d:qwuj04lyvfgk4boubgxfvv7krm ;
-  v-ui:treeInProperty v-s:hasParentLink ;
-  v-ui:treeAllowedClass v-s:PPEType ;
-  v-ui:treeSelectableClass v-s:PPEType ;
-  v-ui:treeDisplayedProperty rdfs:label ;
-  v-ui:treeDisplayedProperty v-s:registrationNumber ;
-  v-ui:minCardinality 1 ;
-  v-ui:maxCardinality 49 ;
-  rdfs:label "Спецификация свойства v-s:hasPPEType для класса v-s:WorkPermit"@ru ;
-  rdfs:label "v-s:hasPPEType property specification for v-s:WorkPermit class"@en ;
-  v-ui:treeAllowedFilter """
-  return this.hasValue("rdf:type", "v-s:PPEType");
-  """ ;
-  v-ui:treeSelectableFilter """
-  return this.id != "d:qpna8idrvd07plk4dg8isevsrs"  && this.id != "d:qwuj04lyvfgk4boubgxfvv7krm" && this.hasValue("rdf:type", "v-s:PPEType");
-  """ ;
-.
 
 v-s:ppeDescriptionDofWorkPermit
   rdf:type owl:ObjectProperty ;
@@ -684,6 +662,15 @@ v-s:dutyStaffOfAdjacentDepartment
   rdfs:label "Дежурный персонал смежных цехов"@ru ;
   rdfs:label "Duty staff of adjacent department"@en ;
   rdfs:range v-s:Appointment ;
+.
+v-s:PS_dutyStaffOfAdjacentDepartment_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация dutyStaffOfAdjacentDepartment для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for dutyStaffOfAdjacentDepartment for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:dutyStaffOfAdjacentDepartment ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
 v-s:hasChangingBrigadeComposition
@@ -798,6 +785,170 @@ v-s:PS_hasEnergyKind_WorkPermit
   v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "1"^^xsd:integer ;
 .
+
+v-s:otherWorkingOperations
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Другие рабочие операции"@ru ;
+  rdfs:label "Other Working Operations"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:mechanicalCleaningMethod
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Способ механической очистки"@ru ;
+  rdfs:label "Mechanical cleaning method"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:otherMainRisks
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Другие риски"@ru ;
+  rdfs:label "Other risks"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:windSpeedForWorkAtHeight
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Скорость ветра (работы на высоте)"@ru ;
+  rdfs:label "Wind speed (work at height)"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:airTemperature
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Температура воздуха"@ru ;
+  rdfs:label "Air temperature"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:maxWeightOfCargo_1gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Максимальный вес груза соответствует грузоподъемности 1-го ГПМ"@ru ;
+  rdfs:label "The maximum weight of the load corresponds to the carrying capacity of the 1st GPM"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:weightOfCargo_1gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Вес груза для 1-го ГПМ"@ru ;
+  rdfs:label "Cargo weight for the 1st GPM"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:isTechnicalExaminationCarriedOut_1gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Проведено ли техническое освидетельствование 1-го ГПМ?"@ru ;
+  rdfs:label "Has the technical examination of the 1st GPM been carried out?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:is1GpmBeenCheckedBeforeStarting
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Проведено ли техническое освидетельствование 1-го ГПМ?"@ru ;
+  rdfs:label "Has the 1st GPM been checked before starting work?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:isEntryInLogbookBeenMade_1gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Сделана ли соответствующая запись 1-го ГПМ в вахтенном журнале ГПМ?"@ru ;
+  rdfs:label "Has the corresponding entry of the 1st GPM been made in the logbook of the GPM?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:maxWeightOfCargo_2gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Максимальный вес груза соответствует грузоподъемности 2-го ГПМ"@ru ;
+  rdfs:label "The maximum weight of the load corresponds to the carrying capacity of the 2nd GPM"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:weightOfCargo_2gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Вес груза для 2-го ГПМ"@ru ;
+  rdfs:label "Cargo weight for the 2nd GPM"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:isTechnicalExaminationCarriedOut_2gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Проведено ли техническое освидетельствование 2-го ГПМ?"@ru ;
+  rdfs:label "Has the technical examination of the 2nd GPM been carried out?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:is2GpmBeenCheckedBeforeStarting
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Проведено ли техническое освидетельствование 2-го ГПМ?"@ru ;
+  rdfs:label "Has the 2nd GPM been checked before starting work?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:isEntryInLogbookBeenMade_2gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Сделана ли соответствующая запись 2-го ГПМ в вахтенном журнале ГПМ?"@ru ;
+  rdfs:label "Has the corresponding entry of the 2nd GPM been made in the logbook of the GPM?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:maxWeightOfCargo_3gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Максимальный вес груза соответствует грузоподъемности 3-го ГПМ"@ru ;
+  rdfs:label "The maximum weight of the load corresponds to the carrying capacity of the 3rd GPM"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:weightOfCargo_3gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Вес груза для 3-го ГПМ"@ru ;
+  rdfs:label "Cargo weight for the 3rd GPM"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:isTechnicalExaminationCarriedOut_3gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Проведено ли техническое освидетельствование 3-го ГПМ?"@ru ;
+  rdfs:label "Has the technical examination of the 3rd GPM been carried out?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:is3GpmBeenCheckedBeforeStarting
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Проведено ли техническое освидетельствование 3-го ГПМ?"@ru ;
+  rdfs:label "Has the 3rd GPM been checked before starting work?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:isEntryInLogbookBeenMade_3gpm
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Сделана ли соответствующая запись 3-го ГПМ в вахтенном журнале ГПМ?"@ru ;
+  rdfs:label "Has the corresponding entry of the 3rd GPM been made in the logbook of the GPM?"@en ;
+  rdfs:range xsd:boolean ;
+.
+v-s:windSpeedForWorkAtGPM
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Скорость ветра (работы на ГПМ)"@ru ;
+  rdfs:label "Wind speed (work at GPM)"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:blockedEnergyKind
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Вид блокируемой энергии"@ru ;
+  rdfs:label "Blocked Energy Kind"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:railNumber
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "№ рейки"@ru ;
+  rdfs:label "rail number"@en ;
+  rdfs:range xsd:string ;
+.
+
+
 
 #v-s:hasComment
 #v-s:hasLink
