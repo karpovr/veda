@@ -11,6 +11,7 @@ use v_common::v_api::obj::ResultCode;
 
 pub(crate) const BASE_PATH: &str = "./data";
 
+#[derive(Default)]
 pub struct UserInfo {
     pub ticket: Option<String>,
     pub addr: Option<IpAddr>,

@@ -1,5 +1,5 @@
-use crate::common::get_user_info;
 use crate::common::log;
+use crate::common::{get_user_info, UserInfo};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::http::header::{Charset, DispositionParam};
@@ -29,14 +29,17 @@ pub(crate) async fn load_file(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
-        Ok(u) => u,
-        Err(res) => {
-            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-        },
-    };
+    let start_time = Instant::now();
 
     if let Some(file_id) = req.path().strip_prefix("/files/") {
+        let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
+            Ok(u) => u,
+            Err(res) => {
+                log(Some(&start_time), &UserInfo::default(), "get_file", file_id, res);
+                return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+            },
+        };
+
         let (mut file_info, res_code) = get_individual_from_db(file_id, &uinf.user_id, &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
@@ -44,12 +47,11 @@ pub(crate) async fn load_file(
         }
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
+        let original_file_name = file_info.get_first_literal_or_err("v-s:fileName")?;
 
         let file = NamedFile::open(&path)?;
         let metadata = file.metadata()?;
         if let Ok(mut resp) = file.respond_to(&req).await {
-            let original_file_name = file_info.get_first_literal_or_err("v-s:fileName")?;
-
             let file_path = Path::new(&original_file_name);
             let file_ext = file_path.extension().unwrap().to_str().unwrap();
             let file_mime = actix_files::file_extension_to_mime(file_ext);
@@ -68,7 +70,7 @@ pub(crate) async fn load_file(
                         parameters: vec![DispositionParam::FilenameExt(ExtendedValue {
                             charset: Charset::Ext("UTF-8".to_owned()),
                             language_tag: None,
-                            value: original_file_name.into_bytes(),
+                            value: original_file_name.clone().into_bytes(),
                         })],
                     },
                 )
@@ -77,10 +79,12 @@ pub(crate) async fn load_file(
 
             http_resp.headers_mut().insert(header::CONTENT_LENGTH, HeaderValue::from(50));
 
+            log(Some(&start_time), &uinf, "get_file", file_id, ResultCode::Ok);
             return Ok(http_resp);
         }
     }
 
+    log(Some(&start_time), &UserInfo::default(), "get_file", req.path(), ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
@@ -177,7 +181,6 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
-    log(Some(&start_time), &uinf, "upload_file", &file_full_name, ResultCode::Ok);
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;
@@ -196,15 +199,16 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
         if Path::new(&tmp_file_path).exists().await {
             async_std::fs::create_dir_all(&dest_file_path).await.unwrap();
             debug!("ren file {} <- {}", file_full_name, tmp_file_path);
-            if let Err(e) = async_fs::rename(tmp_file_path.clone(), file_full_name).await {
+            if let Err(e) = async_fs::rename(tmp_file_path.clone(), file_full_name.clone()).await {
                 error!("{:?}", e);
                 return Ok(HttpResponse::InternalServerError().into());
             }
         } else {
             warn!("write empty file {}", file_full_name);
-            async_fs::write(file_full_name, "").await?;
+            async_fs::write(file_full_name.clone(), "").await?;
         }
     }
 
+    log(Some(&start_time), &uinf, "upload_file", &file_full_name, ResultCode::Ok);
     Ok(HttpResponse::Ok().into())
 }

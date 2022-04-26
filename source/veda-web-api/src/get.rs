@@ -1,4 +1,4 @@
-use crate::common::{get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, BASE_PATH};
+use crate::common::{extract_addr, get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserInfo, BASE_PATH};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
@@ -20,12 +20,21 @@ const MAIN_QUEUE_NAME: &str = "individuals-flow";
 const MAIN_QUEUE_PATH: &str = "./data/queue";
 
 #[get("/get_operation_state")]
-pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequest>) -> io::Result<HttpResponse> {
-    if let Ok(mut module_info) = ModuleInfo::new(BASE_PATH, get_module_name(params.module_id), true) {
+pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequest>, req: HttpRequest) -> io::Result<HttpResponse> {
+    let start_time = Instant::now();
+    let uinf = UserInfo {
+        ticket: None,
+        addr: extract_addr(&req),
+        user_id: "".to_string(),
+    };
+    let module_name = get_module_name(params.module_id);
+    if let Ok(mut module_info) = ModuleInfo::new(BASE_PATH, module_name, true) {
         if let Some(r) = module_info.read_info() {
+            log(Some(&start_time), &uinf, "get_operation_state", module_name, ResultCode::Ok);
             return Ok(HttpResponse::Ok().content_type("text/plain").body(r.1.to_string()));
         }
     }
+    log(Some(&start_time), &uinf, "get_operation_state", module_name, ResultCode::Ok);
     return Ok(HttpResponse::Ok().content_type("text/plain").body("-1"));
 }
 

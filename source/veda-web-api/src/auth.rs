@@ -1,10 +1,12 @@
-use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest};
+use crate::common::log;
+use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
 use actix_web::{web, HttpResponse};
 use futures::lock::Mutex;
 use std::io;
 use std::net::IpAddr;
+use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
@@ -60,9 +62,21 @@ pub(crate) async fn is_ticket_valid(
 
 #[get("/authenticate")]
 pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
+    let start_time = Instant::now();
+    let uinf = UserInfo {
+        ticket: None,
+        addr: extract_addr(&req),
+        user_id: "".to_string(),
+    };
     return match auth.lock().await.authenticate(&params.login, &params.password, extract_addr(&req), &params.secret) {
-        Ok(r) => Ok(HttpResponse::Ok().json(r)),
-        Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
+        Ok(r) => {
+            log(Some(&start_time), &uinf, "authenticate", &params.login, ResultCode::Ok);
+            Ok(HttpResponse::Ok().json(r))
+        },
+        Err(e) => {
+            log(Some(&start_time), &uinf, "authenticate", &params.login, e.result);
+            Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap()))
+        },
     };
 }
 
