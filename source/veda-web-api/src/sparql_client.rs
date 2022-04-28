@@ -19,7 +19,7 @@ impl Default for SparqlClient {
         SparqlClient {
             point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "query", "default"),
             client: Client::default(),
-            az: LmdbAzContext::new(),
+            az: LmdbAzContext::new(1000),
         }
     }
 }

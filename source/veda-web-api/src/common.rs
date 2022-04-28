@@ -18,12 +18,7 @@ pub struct UserInfo {
     pub user_id: String,
 }
 
-pub async fn get_user_info(
-    in_ticket: Option<String>,
-    req: &HttpRequest,
-    ticket_cache: &web::Data<TicketCache>,
-    db: &web::Data<AStorage>,
-) -> Result<UserInfo, ResultCode> {
+pub async fn get_user_info(in_ticket: Option<String>, req: &HttpRequest, ticket_cache: &web::Data<TicketCache>, db: &AStorage) -> Result<UserInfo, ResultCode> {
     let ticket = if in_ticket.is_some() {
         in_ticket
     } else {
@@ -201,8 +196,8 @@ pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str
     };
 
     if let Some(t) = start_time {
-        info!("{} {} {} {:?} {} = {}, time={} ms", ip, uinf.user_id, ticket_id, res, operation, args, t.elapsed().as_millis());
+        info!("{}, user={}, action={} {:?}, ticket={}, args={:?}, time={} ms", ip, uinf.user_id, operation, res, ticket_id, args, t.elapsed().as_millis());
     } else {
-        info!("{} {} {} {:?} {} = {}", ip, uinf.user_id, ticket_id, res, operation, args);
+        info!("{}, user={}, action={} {:?}, ticket={}, args={:?}", ip, uinf.user_id, operation, res, ticket_id, args);
     }
 }

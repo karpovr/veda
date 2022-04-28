@@ -1,5 +1,5 @@
-use crate::common::log;
 use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
+use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
 use actix_web::{web, HttpResponse};
@@ -88,7 +88,8 @@ pub(crate) async fn get_rights(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -98,7 +99,7 @@ pub(crate) async fn get_rights(
     let rights = az
         .lock()
         .await
-        .authorize(&params.uri, &user_id, Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false)
+        .authorize(&params.uri, &uinf.user_id, Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8, false)
         .unwrap_or(0);
     let mut pstm = Individual::default();
 
@@ -110,6 +111,7 @@ pub(crate) async fn get_rights(
         }
     }
 
+    log(Some(&start_time), &uinf, "get_rights", &params.uri, ResultCode::Ok);
     return Ok(HttpResponse::Ok().json(pstm.get_obj().as_json()));
 }
 

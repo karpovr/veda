@@ -59,10 +59,11 @@ pub(crate) async fn load_file(
             let last_modified =
                 DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(FileTime::from_last_modification_time(&metadata).unix_seconds(), 0), Utc).to_rfc2822();
 
+            let size = file_info.get_first_integer("v-s:fileSize").unwrap_or_default() as u64;
             let mut http_resp = HttpResponse::Ok()
                 .header(header::LAST_MODIFIED, last_modified)
                 .header(header::ACCEPT_RANGES, "bytes")
-                .header(header::CONTENT_LENGTH, file_info.get_first_integer("v-s:fileSize").unwrap_or_default() as u64)
+                .header(header::CONTENT_LENGTH, size)
                 .header(
                     header::CONTENT_DISPOSITION,
                     header::ContentDisposition {
@@ -79,7 +80,7 @@ pub(crate) async fn load_file(
 
             http_resp.headers_mut().insert(header::CONTENT_LENGTH, HeaderValue::from(50));
 
-            log(Some(&start_time), &uinf, "get_file", file_id, ResultCode::Ok);
+            log(Some(&start_time), &uinf, "get_file", &format!("{}, size={}", file_id, size), ResultCode::Ok);
             return Ok(http_resp);
         }
     }

@@ -124,7 +124,7 @@ async fn main() -> std::io::Result<()> {
         } else {
             AStorage {
                 tt: None,
-                lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly, Some(100)))),
+                lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly, Some(1000)))),
             }
         };
 
@@ -184,7 +184,7 @@ async fn main() -> std::io::Result<()> {
             .data(db)
             .data(Mutex::new(ft_client))
             .data(Mutex::new(ch))
-            .data(Mutex::new(LmdbAzContext::new()))
+            .data(Mutex::new(LmdbAzContext::new(1000)))
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))
             .data(Mutex::new(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default())))
             //
