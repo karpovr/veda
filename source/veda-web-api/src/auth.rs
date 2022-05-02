@@ -221,7 +221,7 @@ pub(crate) async fn get_rights_origin(
         indv.set_id("_");
         indv.add_uri("rdf:type", "v-s:PermissionStatement");
         indv.add_uri("v-s:permissionSubject", "?");
-        indv.add_string("v-s:comment", acl_trace.info, Lang::NONE);
+        indv.add_string("v-s:comment", acl_trace.info, Lang::none());
         res.push(indv.get_obj().as_json());
 
         return Ok(HttpResponse::Ok().json(res));
