@@ -10,6 +10,7 @@ use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use async_std::fs as async_fs;
 use async_std::io;
 use async_std::path::Path;
+use awc::error::JsonPayloadError::ContentType;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use filetime::FileTime;
 use futures::lock::Mutex;
@@ -49,9 +50,17 @@ pub(crate) async fn load_file(
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
         let original_file_name = file_info.get_first_literal_or_err("v-s:fileName")?;
 
-        let file = NamedFile::open(&path)?;
+        let file = match NamedFile::open_async(&path).await {
+            Ok(f) => f,
+            Err(e) => {
+                error!("{}", e);
+                NamedFile::open_async(&path).await?
+            },
+        };
+
         let metadata = file.metadata()?;
-        if let Ok(mut resp) = file.respond_to(&req).await {
+        let mut resp = file.respond_to(&req);
+        {
             let file_path = Path::new(&original_file_name);
             let file_ext = file_path.extension().unwrap().to_str().unwrap();
             let file_mime = actix_files::file_extension_to_mime(file_ext);
@@ -60,28 +69,34 @@ pub(crate) async fn load_file(
                 DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(FileTime::from_last_modification_time(&metadata).unix_seconds(), 0), Utc).to_rfc2822();
 
             let size = file_info.get_first_integer("v-s:fileSize").unwrap_or_default() as u64;
-            let mut http_resp = HttpResponse::Ok()
-                .header(header::LAST_MODIFIED, last_modified)
-                .header(header::ACCEPT_RANGES, "bytes")
-                .header(header::CONTENT_LENGTH, size)
-                .header(
-                    header::CONTENT_DISPOSITION,
-                    header::ContentDisposition {
-                        disposition: header::DispositionType::Attachment,
-                        parameters: vec![DispositionParam::FilenameExt(ExtendedValue {
-                            charset: Charset::Ext("UTF-8".to_owned()),
-                            language_tag: None,
-                            value: original_file_name.clone().into_bytes(),
-                        })],
-                    },
-                )
-                .content_type(file_mime.essence_str())
-                .streaming(resp.take_body());
 
-            http_resp.headers_mut().insert(header::CONTENT_LENGTH, HeaderValue::from(50));
+            let cd = header::ContentDisposition {
+                disposition: header::DispositionType::Attachment,
+                parameters: vec![DispositionParam::FilenameExt(ExtendedValue {
+                    charset: Charset::Ext("UTF-8".to_owned()),
+                    language_tag: None,
+                    value: original_file_name.clone().into_bytes(),
+                })],
+            };
+
+            let headers = resp.headers_mut();
+
+            if let Ok(v) = HeaderValue::from_str(&last_modified) {
+                headers.insert(header::LAST_MODIFIED, v);
+            }
+            headers.insert(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"));
+            headers.insert(header::CONTENT_LENGTH, HeaderValue::from(size));
+
+            if let Ok(v) = HeaderValue::from_str(&cd.to_string()) {
+                headers.insert(header::CONTENT_DISPOSITION, v);
+            }
+
+            if let Ok(v) = HeaderValue::from_str(file_mime.essence_str()) {
+                headers.insert(header::CONTENT_TYPE, v);
+            }
 
             log(Some(&start_time), &uinf, "get_file", &format!("{}, size={}", file_id, size), ResultCode::Ok);
-            return Ok(http_resp);
+            return Ok(resp);
         }
     }
 
@@ -121,54 +136,56 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let mut is_encoded_file = false;
 
     while let Ok(Some(mut field)) = payload.try_next().await {
-        let content_type = field.content_disposition().ok_or(actix_web::error::ParseError::Incomplete)?;
+        let content_type = field.content_disposition().to_owned();
 
         if let Some(name) = content_type.get_name() {
-            while let Some(chunk) = field.next().await {
-                match name {
-                    "path" => {
-                        path = std::str::from_utf8(&chunk?)?.to_owned();
-                    },
-                    "uri" => {
-                        uri = std::str::from_utf8(&chunk?)?.to_owned();
-                    },
-                    "file" => {
-                        let cur_chunk = &chunk?;
-                        check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
-
-                        if let Some(ff) = tmp_file.get_mut(0) {
-                            AsyncWriteExt::write_all(ff, cur_chunk).await?;
-                        }
-                    },
-                    "content" => {
-                        is_encoded_file = true;
-                        let cur_chunk = &chunk?;
-
-                        if tmp_file.is_empty() {
-                            let mut pos = 0;
-                            for (idx, b) in cur_chunk.iter().enumerate() {
-                                if b == &(b',') {
-                                    pos = idx + 1;
-                                    break;
-                                }
-                            }
-
-                            if pos > 7 {
-                                check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
-                                if let Some(ff) = tmp_file.get_mut(0) {
-                                    AsyncWriteExt::write_all(ff, cur_chunk.split_at(pos).1).await?;
-                                }
-                            }
-                        } else {
+            while let Some(chunk) = &field.next().await {
+                if let Ok(chunk) = chunk {
+                    match name {
+                        "path" => {
+                            path = std::str::from_utf8(&chunk)?.to_owned();
+                        },
+                        "uri" => {
+                            uri = std::str::from_utf8(&chunk)?.to_owned();
+                        },
+                        "file" => {
+                            let cur_chunk = &chunk;
                             check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
+
                             if let Some(ff) = tmp_file.get_mut(0) {
                                 AsyncWriteExt::write_all(ff, cur_chunk).await?;
                             }
-                        }
-                    },
-                    _ => {
-                        error!("unknown param [{}]", name);
-                    },
+                        },
+                        "content" => {
+                            is_encoded_file = true;
+                            let cur_chunk = &chunk;
+
+                            if tmp_file.is_empty() {
+                                let mut pos = 0;
+                                for (idx, b) in cur_chunk.iter().enumerate() {
+                                    if b == &(b',') {
+                                        pos = idx + 1;
+                                        break;
+                                    }
+                                }
+
+                                if pos > 7 {
+                                    check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
+                                    if let Some(ff) = tmp_file.get_mut(0) {
+                                        AsyncWriteExt::write_all(ff, cur_chunk.split_at(pos).1).await?;
+                                    }
+                                }
+                            } else {
+                                check_and_create_file(tmp_path, &upload_tmp_id, &mut tmp_file).await?;
+                                if let Some(ff) = tmp_file.get_mut(0) {
+                                    AsyncWriteExt::write_all(ff, cur_chunk).await?;
+                                }
+                            }
+                        },
+                        _ => {
+                            error!("unknown param [{}]", name);
+                        },
+                    }
                 }
             }
         }
