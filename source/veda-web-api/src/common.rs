@@ -1,4 +1,4 @@
-use actix_web::{web, HttpMessage, HttpRequest};
+use actix_web::{web, HttpRequest};
 use async_std::sync::Arc;
 use futures::lock::Mutex;
 use serde_derive::{Deserialize, Serialize};

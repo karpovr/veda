@@ -10,7 +10,6 @@ use actix_web::{web, HttpRequest, HttpResponse, Responder};
 use async_std::fs as async_fs;
 use async_std::io;
 use async_std::path::Path;
-use awc::error::JsonPayloadError::ContentType;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use filetime::FileTime;
 use futures::lock::Mutex;
