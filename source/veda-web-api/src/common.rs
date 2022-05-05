@@ -182,22 +182,22 @@ pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str
     let ip = if let Some(a) = uinf.addr {
         a.to_string()
     } else {
-        "unknown".to_string()
+        "?".to_string()
     };
 
     let ticket_id = if let Some(t) = &uinf.ticket {
         if let Some(part) = t.get(0..7) {
             part
         } else {
-            "unknown"
+            "      ?"
         }
     } else {
-        "unknown"
+        "      ?"
     };
 
     if let Some(t) = start_time {
-        info!("{}, user={}, action={} {:?}, ticket={}, args={:?}, time={} ms", ip, uinf.user_id, operation, res, ticket_id, args, t.elapsed().as_millis());
+        info!("{}, {}, user={}, action={} {:?}, {:?}, time={} ms", ip, ticket_id, uinf.user_id, operation, res, args, t.elapsed().as_millis());
     } else {
-        info!("{}, user={}, action={} {:?}, ticket={}, args={:?}", ip, uinf.user_id, operation, res, ticket_id, args);
+        info!("{}, {}, user={}, action={} {:?}, {:?}", ip, ticket_id, uinf.user_id, operation, res, args);
     }
 }

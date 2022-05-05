@@ -23,12 +23,16 @@ pub(crate) async fn get_ticket_trusted(
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
-    let addr = extract_addr(&req);
-    match check_ticket(&Some(params.ticket.clone()), &ticket_cache, &addr, &tt).await {
-        Ok(_) => {},
-        Err(res) => {
-            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-        },
+    let start_time = Instant::now();
+    let uinf = UserInfo {
+        ticket: None,
+        addr: extract_addr(&req),
+        user_id: "".to_string(),
+    };
+
+    if let Err(e) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &uinf.addr, &tt).await {
+        log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), e);
+        return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
     }
 
     let user_addr = if let Some(ip) = &params.ip {
@@ -38,12 +42,18 @@ pub(crate) async fn get_ticket_trusted(
             None
         }
     } else {
-        addr
+        uinf.addr
     };
 
     return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), user_addr) {
-        Ok(r) => Ok(HttpResponse::Ok().json(r)),
-        Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
+        Ok(r) => {
+            log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), ResultCode::Ok);
+            Ok(HttpResponse::Ok().json(r))
+        },
+        Err(e) => {
+            log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), e.result);
+            Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap()))
+        },
     };
 }
 
@@ -54,23 +64,37 @@ pub(crate) async fn is_ticket_valid(
     tt: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await {
-        Ok(_) => Ok(HttpResponse::Ok().json(true)),
-        Err(_) => Ok(HttpResponse::Ok().json(false)),
-    }
-}
-
-#[get("/authenticate")]
-pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
     let uinf = UserInfo {
         ticket: None,
         addr: extract_addr(&req),
         user_id: "".to_string(),
     };
+
+    match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await {
+        Ok(_) => {
+            log(Some(&start_time), &uinf, "is_ticket_valid", "", ResultCode::Ok);
+            Ok(HttpResponse::Ok().json(true))
+        },
+        Err(e) => {
+            log(Some(&start_time), &uinf, "is_ticket_valid", "", e);
+            Ok(HttpResponse::Ok().json(false))
+        },
+    }
+}
+
+#[get("/authenticate")]
+pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
+    let start_time = Instant::now();
+    let mut uinf = UserInfo {
+        ticket: None,
+        addr: extract_addr(&req),
+        user_id: "".to_string(),
+    };
     return match auth.lock().await.authenticate(&params.login, &params.password, extract_addr(&req), &params.secret) {
         Ok(r) => {
-            log(Some(&start_time), &uinf, "authenticate", &params.login, ResultCode::Ok);
+            uinf.ticket = Some(r["id"].as_str().unwrap_or("").to_string());
+            log(Some(&start_time), &uinf, "authenticate", &r["user_uri"].as_str().unwrap_or(""), ResultCode::Ok);
             Ok(HttpResponse::Ok().json(r))
         },
         Err(e) => {
