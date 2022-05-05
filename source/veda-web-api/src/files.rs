@@ -32,7 +32,13 @@ pub(crate) async fn load_file(
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
-    if let Some(file_id) = req.path().strip_prefix("/files/") {
+    let path = if let Ok(v) = urlencoding::decode(req.path()) {
+        v
+    } else {
+        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+    };
+
+    if let Some(file_id) = path.strip_prefix("/files/") {
         let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
             Ok(u) => u,
             Err(res) => {
