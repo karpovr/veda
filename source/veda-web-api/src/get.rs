@@ -84,15 +84,25 @@ pub(crate) async fn get_individual(
         },
     };
 
-    if params.uri.contains(QUEUE_STATE_PREFIX) {
-        if let Some(consumer_name) = &params.uri.strip_prefix(QUEUE_STATE_PREFIX) {
+    let id = if params.uri.contains('%') {
+        if let Ok(v) = urlencoding::decode(&params.uri) {
+            v.to_string()
+        } else {
+            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+        }
+    } else {
+        params.uri.to_owned()
+    };
+
+    if id.contains(QUEUE_STATE_PREFIX) {
+        if let Some(consumer_name) = &id.strip_prefix(QUEUE_STATE_PREFIX) {
             match Consumer::new_with_mode(MAIN_QUEUE_PATH, consumer_name, MAIN_QUEUE_NAME, Mode::Read) {
                 Ok(mut queue_consumer) => {
                     if queue_consumer.get_info() {
                         let now = Utc::now().naive_utc().timestamp();
 
                         let mut individual = Individual::default();
-                        individual.set_id(&params.uri);
+                        individual.set_id(&id);
                         individual.add_uri("rdf:type", "v-s:AppInfo");
                         individual.add_datetime("v-s:created", now);
                         individual.add_uri("srv:queue", &format!("srv:{}-{}", QUEUE_STATE_PREFIX, consumer_name));
@@ -100,13 +110,13 @@ pub(crate) async fn get_individual(
                         individual.add_integer("srv:current_count", queue_consumer.count_popped as i64);
 
                         let v = individual.get_obj().as_json();
-                        log(Some(&start_time), &uinf, "get_individual", &params.uri, ResultCode::Ok);
+                        log(Some(&start_time), &uinf, "get_individual", &id, ResultCode::Ok);
                         debug!("Ok, {}", v);
                         return Ok(HttpResponse::Ok().json(v));
                     }
                 },
                 Err(e) => {
-                    log(Some(&start_time), &uinf, "get_individual", &params.uri, ResultCode::InternalServerError);
+                    log(Some(&start_time), &uinf, "get_individual", &id, ResultCode::InternalServerError);
                     error!("fail open consumer {}, err={:?}", consumer_name, e);
                 },
             }
@@ -114,8 +124,8 @@ pub(crate) async fn get_individual(
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::InternalServerError as u16).unwrap()));
     }
 
-    let (res, res_code) = get_individual_from_db(&params.uri, &uinf.user_id, &db, Some(&az)).await?;
-    log(Some(&start_time), &uinf, "get_individual", &params.uri, res_code);
+    let (res, res_code) = get_individual_from_db(&id, &uinf.user_id, &db, Some(&az)).await?;
+    log(Some(&start_time), &uinf, "get_individual", &id, res_code);
     if res_code == ResultCode::Ok {
         let v = res.get_obj().as_json();
         debug!("Ok {:?} {}", res_code, v);
