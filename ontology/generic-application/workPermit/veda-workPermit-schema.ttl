@@ -826,7 +826,7 @@ v-s:maxWeightOfCargo_1gpm
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "Максимальный вес груза соответствует грузоподъемности 1-го ГПМ"@ru ;
   rdfs:label "The maximum weight of the load corresponds to the carrying capacity of the 1st GPM"@en ;
-  rdfs:range xsd:string ;
+  rdfs:range xsd:boolean ;
 .
 v-s:weightOfCargo_1gpm
   rdf:type owl:ObjectProperty ;
@@ -861,7 +861,7 @@ v-s:maxWeightOfCargo_2gpm
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "Максимальный вес груза соответствует грузоподъемности 2-го ГПМ"@ru ;
   rdfs:label "The maximum weight of the load corresponds to the carrying capacity of the 2nd GPM"@en ;
-  rdfs:range xsd:string ;
+  rdfs:range xsd:boolean ;
 .
 v-s:weightOfCargo_2gpm
   rdf:type owl:ObjectProperty ;
@@ -896,7 +896,7 @@ v-s:maxWeightOfCargo_3gpm
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "Максимальный вес груза соответствует грузоподъемности 3-го ГПМ"@ru ;
   rdfs:label "The maximum weight of the load corresponds to the carrying capacity of the 3rd GPM"@en ;
-  rdfs:range xsd:string ;
+  rdfs:range xsd:boolean ;
 .
 v-s:weightOfCargo_3gpm
   rdf:type owl:ObjectProperty ;
@@ -1054,7 +1054,7 @@ v-s:PS_hasResultsOfMeasurementsOfHarmfulFactors_ExtensionOfWorkPermit
   rdf:type v-ui:ObjectPropertySpecification ;
   rdfs:label "Спецификация hasResultsOfMeasurementsOfHarmfulFactors для класса v-s:ExtensionOfWorkPermit"@ru ;
   rdfs:label "Specification for hasResultsOfMeasurementsOfHarmfulFactors for v-s:ExtensionOfWorkPermit"@en ;
-  v-ui:forClass v-s:WorkPerExtensionOfWorkPermitmit ;
+  v-ui:forClass v-s:ExtensionOfWorkPermit ;
   v-ui:forProperty v-s:hasResultsOfMeasurementsOfHarmfulFactors ;
   v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
