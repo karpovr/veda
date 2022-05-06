@@ -178,14 +178,14 @@ pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
     Some(req.peer_addr().unwrap().ip())
 }
 
-pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
-    let ip = if let Some(a) = uinf.addr {
+pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr: &Option<IpAddr>, user_id: &str, operation: &str, args: &str, res: ResultCode) {
+    let ip = if let Some(a) = addr {
         a.to_string()
     } else {
         "?".to_string()
     };
 
-    let ticket_id = if let Some(t) = &uinf.ticket {
+    let ticket_id = if let Some(t) = &ticket {
         if let Some(part) = t.get(0..7) {
             part
         } else {
@@ -195,9 +195,21 @@ pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str
         "      ?"
     };
 
-    if let Some(t) = start_time {
-        info!("{}, {}, user={}, action={} {:?}, {:?}, time={} ms", ip, ticket_id, uinf.user_id, operation, res, args, t.elapsed().as_millis());
+    if res != ResultCode::Ok {
+        if let Some(t) = start_time {
+            error!("{}, {}, user={}, action={} {:?}, {:?}, time={} ms", ip, ticket_id, user_id, operation, res, args, t.elapsed().as_millis());
+        } else {
+            error!("{}, {}, user={}, action={} {:?}, {:?}", ip, ticket_id, user_id, operation, res, args);
+        }
     } else {
-        info!("{}, {}, user={}, action={} {:?}, {:?}", ip, ticket_id, uinf.user_id, operation, res, args);
+        if let Some(t) = start_time {
+            info!("{}, {}, user={}, action={} {:?}, {:?}, time={} ms", ip, ticket_id, user_id, operation, res, args, t.elapsed().as_millis());
+        } else {
+            info!("{}, {}, user={}, action={} {:?}, {:?}", ip, ticket_id, user_id, operation, res, args);
+        }
     }
+}
+
+pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
+    log_w(start_time, &uinf.ticket, &uinf.addr, &uinf.user_id, operation, args, res)
 }

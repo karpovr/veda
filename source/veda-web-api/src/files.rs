@@ -1,5 +1,5 @@
-use crate::common::log;
 use crate::common::{get_user_info, UserInfo};
+use crate::common::{log, TicketRequest};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::http::header::{Charset, DispositionParam};
@@ -24,6 +24,7 @@ use v_common::v_api::obj::ResultCode;
 
 #[get("/files/{file_id}")]
 pub(crate) async fn load_file(
+    params: web::Query<TicketRequest>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
@@ -34,11 +35,12 @@ pub(crate) async fn load_file(
     let path = if let Ok(v) = urlencoding::decode(req.path()) {
         v
     } else {
+        log(Some(&start_time), &UserInfo::default(), "get_file", &req.path(), ResultCode::BadRequest);
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
     };
 
     if let Some(file_id) = path.strip_prefix("/files/") {
-        let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
+        let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
             Ok(u) => u,
             Err(res) => {
                 log(Some(&start_time), &UserInfo::default(), "get_file", file_id, res);
@@ -49,6 +51,7 @@ pub(crate) async fn load_file(
         let (mut file_info, res_code) = get_individual_from_db(file_id, &uinf.user_id, &db, Some(&az)).await?;
 
         if res_code != ResultCode::Ok {
+            log(Some(&start_time), &UserInfo::default(), "get_file", file_id, res_code);
             return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));
         }
 

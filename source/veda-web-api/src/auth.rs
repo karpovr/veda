@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
+use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo, log_w};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
@@ -113,9 +113,11 @@ pub(crate) async fn get_rights(
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
+
     let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "","get_rights", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
