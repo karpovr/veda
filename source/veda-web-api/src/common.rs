@@ -195,17 +195,17 @@ pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr:
         "      ?"
     };
 
-    if res != ResultCode::Ok {
+    if res == ResultCode::InternalServerError {
         if let Some(t) = start_time {
-            error!("{}, {}, user={}, action={} {:?}, {:?}, time={} ms", ip, ticket_id, user_id, operation, res, args, t.elapsed().as_millis());
+            error!("{}, {}, action = {}, user = {}, {:?}, {:?}, time = {} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_millis());
         } else {
-            error!("{}, {}, user={}, action={} {:?}, {:?}", ip, ticket_id, user_id, operation, res, args);
+            error!("{}, {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
         }
     } else {
         if let Some(t) = start_time {
-            info!("{}, {}, user={}, action={} {:?}, {:?}, time={} ms", ip, ticket_id, user_id, operation, res, args, t.elapsed().as_millis());
+            info!("{},  {}, action = {}, user = {}, {:?}, {:?}, time = {} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_millis());
         } else {
-            info!("{}, {}, user={}, action={} {:?}, {:?}", ip, ticket_id, user_id, operation, res, args);
+            info!("{},  {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
         }
     }
 }
