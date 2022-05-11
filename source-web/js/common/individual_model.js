@@ -107,8 +107,8 @@ function IndividualModel (uri, cache, init) {
   };
 
   if (typeof uri === 'object') {
-    this.properties = uri;
-    this.original = JSON.stringify(uri);
+    this.properties = {...uri};
+    this.original = JSON.stringify(this.properties);
   } else {
     this.properties = {};
   }
@@ -120,8 +120,9 @@ function IndividualModel (uri, cache, init) {
       cached = IndividualModel.cache.get(this.id);
     } else if (typeof uri === 'object') {
       cached = IndividualModel.cache.get(this.id);
-      if (cached && !cached.isLoaded()) {
-        cached.properties = uri;
+      if (cached) {
+        cached.properties = this.properties;
+        cached.original = this.original;
       }
     } else if (typeof uri === 'undefined') {
       this.id = Util.genUri();
@@ -468,7 +469,6 @@ proto.load = function () {
             this.isNew(false);
             this.isSync(true);
             this.isLoaded(true);
-            this.properties = uri;
           } else if (typeof uri === 'undefined') {
             this.isNew(true);
             this.isSync(false);
