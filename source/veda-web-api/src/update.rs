@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, get_ticket, TicketRequest};
+use crate::common::{extract_addr, get_user_info, log, log_w, TicketRequest};
 use actix_web::http::StatusCode;
 use actix_web::{put, web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
@@ -6,20 +6,32 @@ use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::io;
 use std::net::IpAddr;
+use std::time::Instant;
 use v_common::onto::individual::Individual;
 use v_common::onto::json2individual::parse_json_to_individual;
+use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::v_api::api_client::{IndvOp, MStorageClient};
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) async fn update(
+    action: &str,
     addr: Option<IpAddr>,
     params: web::Query<TicketRequest>,
     cmd: IndvOp,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
     req: HttpRequest,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    let ticket = get_ticket(&req, &params.ticket).unwrap_or_default();
+    let start_time = Instant::now();
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", action, "", res);
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
 
     if let Some(v) = data.into_inner().as_object() {
         let event_id = if let Some(d) = v.get("event_id") {
@@ -53,6 +65,7 @@ pub(crate) async fn update(
             let mut new_indv = Individual::default();
             if let Some(i) = v.get("individual") {
                 if !parse_json_to_individual(i, &mut new_indv) {
+                    log(Some(&start_time), &uinf, action, &i.to_string(), ResultCode::BadRequest);
                     return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
                 }
             } else if let Some(i) = v.get("uri") {
@@ -60,10 +73,12 @@ pub(crate) async fn update(
                     new_indv.set_id(v);
                 }
             } else {
+                log(Some(&start_time), &uinf, action, "", ResultCode::BadRequest);
                 return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
             }
 
             if new_indv.get_id().is_empty() {
+                log(Some(&start_time), &uinf, action, new_indv.get_id(), ResultCode::InvalidIdentifier);
                 return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::InvalidIdentifier as u16).unwrap()));
             }
             inds.push(new_indv);
@@ -71,22 +86,37 @@ pub(crate) async fn update(
 
         let mut ms = mstorage.lock().await;
 
+        let mut ind_ids: String = String::new();
+        for el in &inds {
+            if !ind_ids.is_empty() {
+                ind_ids.push(',');
+            }
+            ind_ids.push_str(el.get_id());
+        }
+
         if ms.check_ticket_ip && addr.is_none() {
+            log(Some(&start_time), &uinf, action, &ind_ids, ResultCode::TicketExpired);
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::TicketExpired as u16).unwrap()));
         }
 
-        return match ms.updates_use_param_with_addr((&ticket, addr), event_id, src, assigned_subsystems, cmd, &inds) {
+        let ticket = uinf.ticket.clone().unwrap_or("".to_owned());
+        return match ms.updates_use_param_with_addr((&ticket, uinf.addr), event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
+                log(Some(&start_time), &uinf, action, &ind_ids, r.result);
                 if r.result == ResultCode::Ok {
                     Ok(HttpResponse::Ok().json(json!({"op_id":r.op_id,"result":r.result})))
                 } else {
                     Ok(HttpResponse::new(StatusCode::from_u16(r.result as u16).unwrap()))
                 }
             },
-            Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
+            Err(e) => {
+                log(Some(&start_time), &uinf, action, &ind_ids, e.result);
+                Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap()))
+            },
         };
     }
 
+    log(Some(&start_time), &uinf, action, "", ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
@@ -96,8 +126,10 @@ async fn put_individuals(
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
     req: HttpRequest,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update(extract_addr(&req), params, IndvOp::Put, data, mstorage, req).await
+    update("put_individuals", extract_addr(&req), params, IndvOp::Put, data, mstorage, req, ticket_cache, db).await
 }
 
 #[put("/put_individual")]
@@ -106,8 +138,10 @@ async fn put_individual(
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
     req: HttpRequest,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update(extract_addr(&req), params, IndvOp::Put, data, mstorage, req).await
+    update("put_individual", extract_addr(&req), params, IndvOp::Put, data, mstorage, req, ticket_cache, db).await
 }
 
 #[put("/remove_individual")]
@@ -116,8 +150,10 @@ async fn remove_individual(
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update(extract_addr(&req), params, IndvOp::Remove, data, mstorage, req).await
+    update("remove_individual", extract_addr(&req), params, IndvOp::Remove, data, mstorage, req, ticket_cache, db).await
 }
 
 #[put("/add_to_individual")]
@@ -126,8 +162,10 @@ async fn add_to_individual(
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update(extract_addr(&req), params, IndvOp::AddTo, data, mstorage, req).await
+    update("add_to_individual", extract_addr(&req), params, IndvOp::AddTo, data, mstorage, req, ticket_cache, db).await
 }
 
 #[put("/set_in_individual")]
@@ -136,8 +174,10 @@ async fn set_in_individual(
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update(extract_addr(&req), params, IndvOp::SetIn, data, mstorage, req).await
+    update("set_in_individual", extract_addr(&req), params, IndvOp::SetIn, data, mstorage, req, ticket_cache, db).await
 }
 
 #[put("/remove_from_individual")]
@@ -146,6 +186,8 @@ async fn remove_from_individual(
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update(extract_addr(&req), params, IndvOp::RemoveFrom, data, mstorage, req).await
+    update("remove_from_individual", extract_addr(&req), params, IndvOp::RemoveFrom, data, mstorage, req, ticket_cache, db).await
 }

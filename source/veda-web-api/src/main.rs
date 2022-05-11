@@ -68,6 +68,7 @@ struct Info {
     app_name: String,
     data: Option<String>,
 }
+
 async fn apps_doc(info: web::Path<Info>) -> std::io::Result<NamedFile> {
     if let Some(v) = &info.data {
         if v == "manifest" {
@@ -101,6 +102,8 @@ async fn main() -> std::io::Result<()> {
     }
 
     let mut port = "8080".to_owned();
+    let mut ext_usr_http_port = None;
+    let mut are_external_users = true;
     let mut use_direct_ft_query = false;
     let mut workers = num_cpus::get();
 
@@ -114,6 +117,15 @@ async fn main() -> std::io::Result<()> {
         }
         if el.starts_with("--workers") {
             workers = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned().parse::<usize>().unwrap();
+        }
+        if el.starts_with("--ext_usr_http_port") {
+            ext_usr_http_port = Some(el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned());
+        }
+    }
+
+    if let Some(p) = ext_usr_http_port {
+        if p == port {
+            are_external_users = true;
         }
     }
 
@@ -179,6 +191,7 @@ async fn main() -> std::io::Result<()> {
                 read: ticket_cache_read,
                 write: Arc::new(Mutex::new(ticket_cache_write)),
                 check_ticket_ip,
+                are_external_users,
             })
             .data(PrefixesCache {
                 read: prefixes_cache_read,
