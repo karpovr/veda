@@ -144,9 +144,12 @@ pub(crate) async fn get_membership(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_membership", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -161,7 +164,7 @@ pub(crate) async fn get_membership(
         str_num: 0,
     };
 
-    if az.lock().await.authorize_and_trace(&params.uri, &user_id, Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
+    if az.lock().await.authorize_and_trace(&params.uri, &uinf.user_id, Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
         let mut mbshp = Individual::default();
 
         mbshp.set_id("_");
@@ -174,9 +177,11 @@ pub(crate) async fn get_membership(
         }
         mbshp.add_uri("v-s:resource", &params.uri);
 
+        log(Some(&start_time), &uinf, "get_membership", &params.uri, ResultCode::Ok);
         return Ok(HttpResponse::Ok().json(mbshp.get_obj().as_json()));
     }
 
+    log(Some(&start_time), &uinf, "get_membership", &params.uri, ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
@@ -188,9 +193,12 @@ pub(crate) async fn get_rights_origin(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights_origin", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -210,7 +218,7 @@ pub(crate) async fn get_rights_origin(
         .await
         .authorize_and_trace(
             &params.uri,
-            &user_id,
+            &uinf.user_id,
             Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8,
             false,
             &mut acl_trace,
@@ -245,8 +253,10 @@ pub(crate) async fn get_rights_origin(
         indv.add_string("v-s:comment", acl_trace.info, Lang::none());
         res.push(indv.get_obj().as_json());
 
+        log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::Ok);
         return Ok(HttpResponse::Ok().json(res));
     }
 
+    log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }

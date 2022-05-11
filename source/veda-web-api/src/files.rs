@@ -213,6 +213,9 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
                 error!("{:?}", e);
                 return Ok(HttpResponse::InternalServerError().into());
             }
+            if let Err(e) = async_fs::remove_file(tmp_file_path.clone()).await {
+                warn!("{:?}", e);
+            }
         } else {
             warn!("write empty file {}", file_full_name);
             async_fs::write(file_full_name.clone(), "").await?;
