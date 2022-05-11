@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo, log_w};
+use crate::common::{extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
@@ -65,19 +65,14 @@ pub(crate) async fn is_ticket_valid(
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = UserInfo {
-        ticket: None,
-        addr: extract_addr(&req),
-        user_id: "".to_string(),
-    };
 
     match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await {
-        Ok(_) => {
-            log(Some(&start_time), &uinf, "is_ticket_valid", "", ResultCode::Ok);
+        Ok(user_uri) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), &user_uri, "is_ticket_valid", "", ResultCode::Ok);
             Ok(HttpResponse::Ok().json(true))
         },
         Err(e) => {
-            log(Some(&start_time), &uinf, "is_ticket_valid", "", e);
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "is_ticket_valid", "", e);
             Ok(HttpResponse::Ok().json(false))
         },
     }
@@ -117,7 +112,7 @@ pub(crate) async fn get_rights(
     let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
-            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "","get_rights", "", res);
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };

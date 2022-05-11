@@ -102,6 +102,7 @@ async fn main() -> std::io::Result<()> {
 
     let mut port = "8080".to_owned();
     let mut use_direct_ft_query = false;
+    let mut workers = num_cpus::get();
 
     let args: Vec<String> = env::args().collect();
     for el in args.iter() {
@@ -110,6 +111,9 @@ async fn main() -> std::io::Result<()> {
         }
         if el.starts_with("--use-direct-ft-query") {
             use_direct_ft_query = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim() == "true";
+        }
+        if el.starts_with("--workers") {
+            workers = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned().parse::<usize>().unwrap();
         }
     }
 
@@ -217,6 +221,7 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("/", "./public"))
     })
     .bind(format!("0.0.0.0:{}", port))?
+    .workers(workers)
     .run()
     .fuse();
 
