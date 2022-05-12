@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
+use crate::common::{check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
@@ -10,7 +10,7 @@ use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
-use v_common::storage::async_storage::{check_ticket, AStorage, TicketCache};
+use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::v_api::api_client::AuthClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};

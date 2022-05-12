@@ -1,12 +1,17 @@
 use actix_web::{web, HttpMessage, HttpRequest};
 use async_std::sync::Arc;
 use futures::lock::Mutex;
+use rusty_tarantool::tarantool::IteratorType;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
 use std::time::Instant;
+use v_common::module::ticket::Ticket;
+use v_common::onto::individual::Individual;
 use v_common::onto::onto_index::OntoIndex;
-use v_common::storage::async_storage::{check_ticket, get_individual_from_db, AStorage, TicketCache};
+use v_common::onto::parser::parse_raw;
+use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache, TICKETS_SPACE_ID};
+use v_common::storage::common::{Storage, StorageId};
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) const BASE_PATH: &str = "./data";
@@ -212,4 +217,66 @@ pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr:
 
 pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
     log_w(start_time, &uinf.ticket, &uinf.addr, &uinf.user_id, operation, args, res)
+}
+
+pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &TicketCache, addr: &Option<IpAddr>, db: &AStorage) -> Result<String, ResultCode> {
+    if w_ticket_id.is_none() {
+        return Ok("cfg:Guest".to_owned());
+    }
+
+    let ticket_id = w_ticket_id.as_ref().unwrap();
+    if ticket_id.is_empty() || ticket_id == "systicket" {
+        return Ok("cfg:Guest".to_owned());
+    }
+
+    if let Some(cached_ticket) = ticket_cache.read.get(ticket_id) {
+        if let Some(t) = cached_ticket.get_one() {
+            if t.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
+                return Err(ResultCode::TicketNotFound);
+            }
+            Ok(t.user_uri.clone())
+        } else {
+            Err(ResultCode::TicketNotFound)
+        }
+    } else {
+        let mut ticket_obj = Ticket::default();
+
+        if let Some(tt) = &db.tt {
+            let response = match tt.select(TICKETS_SPACE_ID, 0, &(&ticket_id,), 0, 100, IteratorType::EQ).await {
+                Ok(r) => r,
+                Err(_) => {
+                    return Err(ResultCode::TicketNotFound);
+                },
+            };
+
+            let mut to = Individual::default();
+            to.set_raw(&response.data[5..]);
+            if parse_raw(&mut to).is_ok() {
+                ticket_obj.update_from_individual(&mut to);
+                ticket_obj.result = ResultCode::Ok;
+            }
+        }
+        if let Some(lmdb) = &db.lmdb {
+            let mut to = Individual::default();
+            if lmdb.lock().await.get_individual_from_db(StorageId::Tickets, ticket_id, &mut to) {
+                ticket_obj.update_from_individual(&mut to);
+                ticket_obj.result = ResultCode::Ok;
+            }
+        }
+
+        if ticket_obj.result != ResultCode::Ok {
+            return Err(ResultCode::TicketNotFound);
+        }
+        if ticket_obj.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
+            return Err(ResultCode::TicketNotFound);
+        }
+
+        let user_uri = ticket_obj.user_uri.clone();
+        let mut t = ticket_cache.write.lock().await;
+        t.insert(ticket_id.to_owned(), ticket_obj);
+        //info!("ticket cache size = {}", t.len());
+        t.refresh();
+
+        return Ok(user_uri);
+    }
 }
