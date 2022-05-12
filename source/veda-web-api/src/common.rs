@@ -272,6 +272,13 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
         }
 
         let user_uri = ticket_obj.user_uri.clone();
+
+        if ticket_cache.are_external_users {
+            if let Err(e) = check_external_user(&user_uri, db).await {
+                return Err(e);
+            }
+        }
+
         let mut t = ticket_cache.write.lock().await;
         t.insert(ticket_id.to_owned(), ticket_obj);
         //info!("ticket cache size = {}", t.len());
@@ -279,4 +286,27 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
 
         return Ok(user_uri);
     }
+}
+
+pub(crate) async fn check_external_user(user_uri: &str, db: &AStorage) -> Result<(), ResultCode> {
+    if let Ok((mut user_indv, res)) = get_individual_from_db(&user_uri, "", db, None).await {
+        if res == ResultCode::Ok {
+            if let Some(o) = user_indv.get_first_literal("v-s:origin") {
+                if o != "ExternalUser" {
+                    error!("user {} is not external", user_uri);
+                    return Err(ResultCode::NotAuthorized);
+                }
+            } else {
+                error!("user {} not content field [origin]", user_uri);
+                return Err(ResultCode::NotAuthorized);
+            }
+        } else {
+            error!("fail read user {}, err={:?}", user_uri, res);
+            return Err(ResultCode::NotAuthorized);
+        }
+    } else {
+        error!("fail read user {}", user_uri);
+        return Err(ResultCode::NotAuthorized);
+    }
+    Ok(())
 }

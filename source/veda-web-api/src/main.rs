@@ -103,7 +103,7 @@ async fn main() -> std::io::Result<()> {
 
     let mut port = "8080".to_owned();
     let mut ext_usr_http_port = None;
-    let mut are_external_users = true;
+    let mut are_external_users = false;
     let mut use_direct_ft_query = false;
     let mut workers = num_cpus::get();
 

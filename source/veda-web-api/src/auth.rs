@@ -1,4 +1,4 @@
-use crate::common::{check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
+use crate::common::{check_external_user, check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
@@ -79,7 +79,13 @@ pub(crate) async fn is_ticket_valid(
 }
 
 #[get("/authenticate")]
-pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
+pub(crate) async fn authenticate(
+    params: web::Query<AuthenticateRequest>,
+    auth: web::Data<Mutex<AuthClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
     let mut uinf = UserInfo {
         ticket: None,
@@ -89,7 +95,17 @@ pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: 
     return match auth.lock().await.authenticate(&params.login, &params.password, extract_addr(&req), &params.secret) {
         Ok(r) => {
             uinf.ticket = Some(r["id"].as_str().unwrap_or("").to_string());
-            log(Some(&start_time), &uinf, "authenticate", &r["user_uri"].as_str().unwrap_or(""), ResultCode::Ok);
+
+            let user_uri = &r["user_uri"].as_str().unwrap_or("");
+
+            if ticket_cache.are_external_users {
+                if let Err(e) = check_external_user(&user_uri, &db).await {
+                    log(Some(&start_time), &uinf, "authenticate", &params.login, e);
+                    return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
+                }
+            }
+
+            log(Some(&start_time), &uinf, "authenticate", user_uri, ResultCode::Ok);
             Ok(HttpResponse::Ok().json(r))
         },
         Err(e) => {
