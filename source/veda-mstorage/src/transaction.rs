@@ -92,7 +92,7 @@ impl<'a> Transaction<'a> {
                 }
 
                 if let Some(v) = self.event_id {
-                    queue_element.set_string("event_id", v, Lang::NONE);
+                    queue_element.set_string("event_id", v, Lang::none());
                 }
 
                 queue_element.set_integer("tnx_id", op_id);
@@ -106,7 +106,7 @@ impl<'a> Transaction<'a> {
                 } else {
                     "?"
                 };
-                queue_element.set_string("src", src, Lang::NONE);
+                queue_element.set_string("src", src, Lang::none());
                 queue_element.add_datetime("date", Utc::now().naive_utc().timestamp());
                 queue_element.add_integer("op_id", op_id);
                 queue_element.add_integer("u_count", el.update_counter);
