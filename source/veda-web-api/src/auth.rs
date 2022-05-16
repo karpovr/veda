@@ -99,7 +99,7 @@ pub(crate) async fn authenticate(
             let user_uri = &r["user_uri"].as_str().unwrap_or("");
 
             if ticket_cache.are_external_users {
-                if let Err(e) = check_external_user(&user_uri, &db).await {
+                if let Err(e) = check_external_user(user_uri, &db).await {
                     log(Some(&start_time), &uinf, "authenticate", &params.login, e);
                     return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
                 }

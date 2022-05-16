@@ -35,7 +35,7 @@ pub(crate) async fn load_file(
     let path = if let Ok(v) = urlencoding::decode(req.path()) {
         v
     } else {
-        log(Some(&start_time), &UserInfo::default(), "get_file", &req.path(), ResultCode::BadRequest);
+        log(Some(&start_time), &UserInfo::default(), "get_file", req.path(), ResultCode::BadRequest);
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
     };
 

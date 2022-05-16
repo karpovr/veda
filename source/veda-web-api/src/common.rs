@@ -202,16 +202,14 @@ pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr:
 
     if res == ResultCode::InternalServerError {
         if let Some(t) = start_time {
-            error!("{}, {}, action = {}, user = {}, {:?}, {:?}, time = {} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_millis());
+            error!("{}, {}, action = {}, user = {}, {:?}, {:?}, time = {:.3} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_secs_f64() * 1000.0);
         } else {
             error!("{}, {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
         }
+    } else if let Some(t) = start_time {
+        info!("{},  {}, action = {}, user = {}, {:?}, {:?}, time = {:.3} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_secs_f64() * 1000.0);
     } else {
-        if let Some(t) = start_time {
-            info!("{},  {}, action = {}, user = {}, {:?}, {:?}, time = {} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_millis());
-        } else {
-            info!("{},  {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
-        }
+        info!("{},  {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
     }
 }
 
@@ -284,12 +282,12 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
         //info!("ticket cache size = {}", t.len());
         t.refresh();
 
-        return Ok(user_uri);
+        Ok(user_uri)
     }
 }
 
 pub(crate) async fn check_external_user(user_uri: &str, db: &AStorage) -> Result<(), ResultCode> {
-    if let Ok((mut user_indv, res)) = get_individual_from_db(&user_uri, "", db, None).await {
+    if let Ok((mut user_indv, res)) = get_individual_from_db(user_uri, "", db, None).await {
         if res == ResultCode::Ok {
             if let Some(o) = user_indv.get_first_literal("v-s:origin") {
                 if o != "ExternalUser" {
