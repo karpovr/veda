@@ -1103,14 +1103,15 @@ function renderRelationValue ({about, isAbout, rel_uri, value, relContainer, rel
         e.preventDefault();
         e.stopPropagation();
         about.removeValue(rel_uri, value);
-        rendered.forEach((node) => {
-          if (embedded.length) {
-            const index = embedded.indexOf(node);
-            if ( index >= 0 ) embedded.splice(index, 1);
-          }
-        });
-        if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) ) {
-          value.delete();
+        if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) && !value.isNew() ) {
+          value.set('v-s:deleted', true);
+        } else {
+          rendered.forEach((node) => {
+            if (embedded.length) {
+              const index = embedded.indexOf(node);
+              if ( index >= 0 ) embedded.splice(index, 1);
+            }
+          });
         }
       });
       btnRemove.addEventListener('mouseenter', () => rendered.forEach((item) => item.classList.add('red-outline')));
