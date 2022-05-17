@@ -90,7 +90,11 @@ export const pre = function (individual, template, container, mode) {
           const resultTemplateIndividual = new IndividualModel(resultContainer.attr('data-template'));
           resultContainer.empty();
           return resultTemplateIndividual.load().then(function (resultTemplateIndividual) {
-            const resultTemplate = resultTemplateIndividual['v-ui:template'][0].toString();
+            const tmplString = resultTemplateIndividual['v-ui:template'][0];
+            return import(`/templates/${tmplString}`);
+          }).then(function (templateObj) {
+            if (templateObj.post != undefined) individual.resultTemplatePost = templateObj.post;
+            const resultTemplate = templateObj.html.toString();
             individual.resultTemplate = resultTemplate;
             searchResultContainer.append(searchResultTemplate);
           });
@@ -162,61 +166,61 @@ export const post = function (individual, template, container, mode) {
   const resultContainer = $('.result-container', template);
   const notFound = $('.not-found', template);
 
-  // Set columns
-  // individual.hiddenColumns = individual.hiddenColumns || {};
-  //
-  // var checksContainer = $(".set-columns-wrapper .dropdown-menu", template).on('click', function (e) {
-  //  e.stopPropagation();
-  // });
-  // var isHasVisibleColumns = individual.hasValue("v-fs:hasVisibleColumns");
-  // var checkTmpl = $(".set-columns-wrapper .dropdown-menu .checkbox", template).remove();
-  // if (checkTmpl.length) {
-  //  checkTmpl = checkTmpl.get(0).outerHTML;
-  //  $(".search-result table > thead > tr:last > th", template).each(function (index) {
-  //    var th = $(this);
-  //    var check = $(checkTmpl);
-  //    var checkbox = $("input", check);
-  //    var columnName = $(this).find("span").clone();
-  //    if ( columnName.length ) {
-  //      $(".column-name", check).html( columnName );
-  //    } else {
-  //      $(".column-name", check).text( th.text() );
-  //    }
-  //    var aboutAttr = columnName.attr("about");
-  //    if (aboutAttr != undefined && isHasVisibleColumns) {
-  //      var isVisible = individual["v-fs:hasVisibleColumns"].some(function(col) {
-  //        return col.id == aboutAttr;
-  //      })
-  //      if (!isVisible) individual.hiddenColumns[index] = true;
-  //    }
-  //
-  //    if (index in individual.hiddenColumns) {
-  //      checkbox.prop("checked", false);
-  //    } else {
-  //      checkbox.prop("checked", true);
-  //    }
-  //    checkbox.change(checkHandler);
-  //    checkHandler.call( checkbox.get(0) );
-  //    checksContainer.append(check);
-  //
-  //    // Show/hide result table columns & update resultTemplate accordingly
-  //    function checkHandler() {
-  //      individual.resultTemplate = $(individual.resultTemplate);
-  //      if ( $(this).is(":checked") ) {
-  //        th.removeClass("hidden");
-  //        $("tr td:nth-child(" + (index + 1) + ")", resultContainer).removeClass("hidden");
-  //        individual.resultTemplate.not("script").children().eq(index).removeClass("hidden");
-  //        delete individual.hiddenColumns[index];
-  //      } else {
-  //        th.addClass("hidden");
-  //        $("tr td:nth-child(" + (index + 1) + ")", resultContainer).addClass("hidden");
-  //        individual.resultTemplate.not("script").children().eq(index).addClass("hidden");
-  //        individual.hiddenColumns[index] = true;
-  //      }
-  //      individual.resultTemplate = individual.resultTemplate.map(function () { return this.outerHTML; }).get().join("");
-  //    }
-  //  });
-  // }
+
+  //  Set columns
+  individual.hiddenColumns = individual.hiddenColumns || {};
+  const checksContainer = $('.set-columns-wrapper .dropdown-menu', template).on('click', function (e) {
+    e.stopPropagation();
+  });
+  const isHasVisibleColumns = individual.hasValue('v-fs:hasVisibleColumns');
+  let checkTmpl = $('.set-columns-wrapper .dropdown-menu .checkbox', template).remove();
+  if (checkTmpl.length) {
+    checkTmpl = checkTmpl.get(0).outerHTML;
+    $('.search-result table > thead > tr:last > th', template).each(function (index) {
+      const th = $(this);
+      const check = $(checkTmpl);
+      const checkbox = $('input', check);
+      const columnName = $(this).find('span').clone();
+      if ( columnName.length ) {
+        $('.column-name', check).html( columnName );
+      } else {
+        $('.column-name', check).text( th.text() );
+      }
+      const aboutAttr = columnName.attr('about');
+      if (aboutAttr != undefined && isHasVisibleColumns) {
+        const isVisible = individual['v-fs:hasVisibleColumns'].some(function (col) {
+          return col.id == aboutAttr;
+        });
+        if (!isVisible) individual.hiddenColumns[index] = true;
+      }
+      if (index in individual.hiddenColumns) {
+        checkbox.prop('checked', false);
+      } else {
+        checkbox.prop('checked', true);
+      }
+      checkbox.change(checkHandler);
+      checkHandler.call( checkbox.get(0) );
+      checksContainer.append(check);
+      // Show/hide result table columns & update resultTemplate accordingly
+      function checkHandler () {
+        individual.resultTemplate = $(individual.resultTemplate);
+        if ( $(this).is(':checked') ) {
+          th.removeClass('hidden');
+          $('tr td:nth-child(' + (index + 1) + ')', resultContainer).removeClass('hidden');
+          individual.resultTemplate.not('script').children().eq(index).removeClass('hidden');
+          delete individual.hiddenColumns[index];
+        } else {
+          th.addClass('hidden');
+          $('tr td:nth-child(' + (index + 1) + ')', resultContainer).addClass('hidden');
+          individual.resultTemplate.not('script').children().eq(index).addClass('hidden');
+          individual.hiddenColumns[index] = true;
+        }
+        individual.resultTemplate = individual.resultTemplate.map(function () {
+          return this.outerHTML;
+        }).get().join('');
+      }
+    });
+  }
 
   // Remember scroll position
   template.one('remove', function () {
@@ -430,35 +434,39 @@ export const post = function (individual, template, container, mode) {
       .reduce(function (p, result, i) {
         return p.then(function (templates) {
           return result.present(resultContainer, individual.resultTemplate, undefined, undefined, false).then(function (tmpl) {
-            tmpl = $(tmpl);
-            $('.serial-number', tmpl).text(total - delta + i + 1);
-            if (result.id === self.marked) {
-              tmpl.addClass('marked');
-            }
-            tmpl.find('.toggle-select').prop('checked', self.hasValue('v-fs:selected', result));
-
-            $('td', tmpl).each(function () {
-              const text = this.innerText || this.textContent;
-              if (text && text.length > 100) {
-                const $this = $(this);
-                const contents = $this.contents();
-                const wrapper = $("<div class='td-wrapper'></div>").append(contents);
-                $this.empty().append(wrapper);
-                wrapper
-                  .popover({
-                    content: wrapper.html(),
-                    html: true,
-                    placement: 'top',
-                  })
-                  .tooltip({
-                    title: new IndividualModel('v-fs:ClickToViewContent')['rdfs:label'].map(CommonUtil.formatValue).join(' '),
-                    placement: 'bottom',
-                    delay: {show: 750, hide: 0},
-                  });
+            const post_result = individual.resultTemplatePost != undefined ?
+              individual.resultTemplatePost.call(result, result, tmpl, resultContainer, mode) : undefined;
+            return Promise.resolve(post_result).then(function () {
+              tmpl = $(tmpl);
+              $('.serial-number', tmpl).text(total - delta + i + 1);
+              if (result.id === self.marked) {
+                tmpl.addClass('marked');
               }
+              tmpl.find('.toggle-select').prop('checked', self.hasValue('v-fs:selected', result));
+
+              $('td', tmpl).each(function () {
+                const text = this.innerText || this.textContent;
+                if (text && text.length > 100) {
+                  const $this = $(this);
+                  const contents = $this.contents();
+                  const wrapper = $("<div class='td-wrapper'></div>").append(contents);
+                  $this.empty().append(wrapper);
+                  wrapper
+                    .popover({
+                      content: wrapper.html(),
+                      html: true,
+                      placement: 'top',
+                    })
+                    .tooltip({
+                      title: new IndividualModel('v-fs:ClickToViewContent')['rdfs:label'].map(CommonUtil.formatValue).join(' '),
+                      placement: 'bottom',
+                      delay: {show: 750, hide: 0},
+                    });
+                }
+              });
+              templates.push(tmpl);
+              return templates;
             });
-            templates.push(tmpl);
-            return templates;
           });
         });
       }, Promise.resolve([]))
@@ -648,7 +656,7 @@ export const html = `
           <button class="more-results btn btn-primary hidden" about="v-fs:MoreResults" property="rdfs:label"></button>
           <button class="all-results btn btn-warning hidden" about="v-fs:AllResults" property="rdfs:label"></button>
         </span>
-        <!--div class="pull-right btn-group dropup set-columns-wrapper" style="margin-left:3px;">
+        <div class="pull-right btn-group dropup set-columns-wrapper" style="margin-left:3px;">
         <button type="button" class="btn btn-info dropdown-toggle set-columns" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span about="v-fs:SetColumns" property="rdfs:label"></span>
           <span class="caret"></span>
@@ -660,7 +668,7 @@ export const html = `
             </label>
           </div>
         </div>
-      </div-->
+      </div>
       </div>
       <br />
     </div>
