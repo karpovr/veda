@@ -641,7 +641,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
     const spec = specs[rel_uri] ? new IndividualModel( specs[rel_uri] ) : undefined;
     const rel_inline_template = relContainer.innerHTML.trim();
     const rel_template_uri = relContainer.getAttribute('data-template');
-    let limit = relContainer.getAttribute('data-limit') || Infinity;
+    let limit = relContainer.getAttribute('data-limit') == null ? Infinity : parseInt(relContainer.getAttribute('data-limit'));
     const more = relContainer.getAttribute('data-more') || false;
     let relTemplate;
     let isAbout;
