@@ -176,7 +176,7 @@ pub(crate) fn get_candidate_users_of_login(login: &str, backend: &mut Backend, x
     }
 
     if let Some(account_id) = auth_data.get_value(StorageId::Az, &format!("_L:{}", login.to_lowercase())) {
-        info!("az.db: found account {}, {}", account_id, login);
+        info!("az.db: found account={}, login={}", account_id, login);
         return QueryResult {
             result: Vec::from([account_id]),
             count: 0,
