@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
+use crate::common::{check_external_user, check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
@@ -10,7 +10,7 @@ use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
-use v_common::storage::async_storage::{check_ticket, AStorage, TicketCache};
+use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::v_api::api_client::AuthClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
@@ -23,12 +23,16 @@ pub(crate) async fn get_ticket_trusted(
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
 ) -> io::Result<HttpResponse> {
-    let addr = extract_addr(&req);
-    match check_ticket(&Some(params.ticket.clone()), &ticket_cache, &addr, &tt).await {
-        Ok(_) => {},
-        Err(res) => {
-            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-        },
+    let start_time = Instant::now();
+    let uinf = UserInfo {
+        ticket: None,
+        addr: extract_addr(&req),
+        user_id: "".to_string(),
+    };
+
+    if let Err(e) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &uinf.addr, &tt).await {
+        log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), e);
+        return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
     }
 
     let user_addr = if let Some(ip) = &params.ip {
@@ -38,12 +42,18 @@ pub(crate) async fn get_ticket_trusted(
             None
         }
     } else {
-        addr
+        uinf.addr
     };
 
     return match auth.lock().await.get_ticket_trusted(&params.ticket, params.login.as_ref(), user_addr) {
-        Ok(r) => Ok(HttpResponse::Ok().json(r)),
-        Err(e) => Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap())),
+        Ok(r) => {
+            log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), ResultCode::Ok);
+            Ok(HttpResponse::Ok().json(r))
+        },
+        Err(e) => {
+            log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), e.result);
+            Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap()))
+        },
     };
 }
 
@@ -54,23 +64,48 @@ pub(crate) async fn is_ticket_valid(
     tt: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
+    let start_time = Instant::now();
+
     match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt).await {
-        Ok(_) => Ok(HttpResponse::Ok().json(true)),
-        Err(_) => Ok(HttpResponse::Ok().json(false)),
+        Ok(user_uri) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), &user_uri, "is_ticket_valid", "", ResultCode::Ok);
+            Ok(HttpResponse::Ok().json(true))
+        },
+        Err(e) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "is_ticket_valid", "", e);
+            Ok(HttpResponse::Ok().json(false))
+        },
     }
 }
 
 #[get("/authenticate")]
-pub(crate) async fn authenticate(params: web::Query<AuthenticateRequest>, auth: web::Data<Mutex<AuthClient>>, req: HttpRequest) -> io::Result<HttpResponse> {
+pub(crate) async fn authenticate(
+    params: web::Query<AuthenticateRequest>,
+    auth: web::Data<Mutex<AuthClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = UserInfo {
+    let mut uinf = UserInfo {
         ticket: None,
         addr: extract_addr(&req),
         user_id: "".to_string(),
     };
     return match auth.lock().await.authenticate(&params.login, &params.password, extract_addr(&req), &params.secret) {
         Ok(r) => {
-            log(Some(&start_time), &uinf, "authenticate", &params.login, ResultCode::Ok);
+            uinf.ticket = Some(r["id"].as_str().unwrap_or("").to_string());
+
+            let user_uri = &r["user_uri"].as_str().unwrap_or("");
+
+            if ticket_cache.are_external_users {
+                if let Err(e) = check_external_user(user_uri, &db).await {
+                    log(Some(&start_time), &uinf, "authenticate", &params.login, e);
+                    return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
+                }
+            }
+
+            log(Some(&start_time), &uinf, "authenticate", user_uri, ResultCode::Ok);
             Ok(HttpResponse::Ok().json(r))
         },
         Err(e) => {
@@ -89,9 +124,11 @@ pub(crate) async fn get_rights(
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
+
     let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -123,9 +160,12 @@ pub(crate) async fn get_membership(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_membership", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -140,7 +180,7 @@ pub(crate) async fn get_membership(
         str_num: 0,
     };
 
-    if az.lock().await.authorize_and_trace(&params.uri, &user_id, Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
+    if az.lock().await.authorize_and_trace(&params.uri, &uinf.user_id, Access::CanRead as u8, false, &mut acl_trace).unwrap_or(0) == Access::CanRead as u8 {
         let mut mbshp = Individual::default();
 
         mbshp.set_id("_");
@@ -153,9 +193,11 @@ pub(crate) async fn get_membership(
         }
         mbshp.add_uri("v-s:resource", &params.uri);
 
+        log(Some(&start_time), &uinf, "get_membership", &params.uri, ResultCode::Ok);
         return Ok(HttpResponse::Ok().json(mbshp.get_obj().as_json()));
     }
 
+    log(Some(&start_time), &uinf, "get_membership", &params.uri, ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
@@ -167,9 +209,12 @@ pub(crate) async fn get_rights_origin(
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
-    let user_id = match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &db).await {
+    let start_time = Instant::now();
+
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights_origin", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -189,7 +234,7 @@ pub(crate) async fn get_rights_origin(
         .await
         .authorize_and_trace(
             &params.uri,
-            &user_id,
+            &uinf.user_id,
             Access::CanRead as u8 | Access::CanCreate as u8 | Access::CanDelete as u8 | Access::CanUpdate as u8,
             false,
             &mut acl_trace,
@@ -224,8 +269,10 @@ pub(crate) async fn get_rights_origin(
         indv.add_string("v-s:comment", acl_trace.info, Lang::none());
         res.push(indv.get_obj().as_json());
 
+        log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::Ok);
         return Ok(HttpResponse::Ok().json(res));
     }
 
+    log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }

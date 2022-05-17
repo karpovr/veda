@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, get_module_name, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserInfo, BASE_PATH};
+use crate::common::{extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserInfo, BASE_PATH};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
@@ -51,6 +51,7 @@ pub(crate) async fn get_individuals(
     let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individuals", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -80,6 +81,7 @@ pub(crate) async fn get_individual(
     let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individual", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -88,6 +90,7 @@ pub(crate) async fn get_individual(
         if let Ok(v) = urlencoding::decode(&params.uri) {
             v.to_string()
         } else {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individual", "", ResultCode::BadRequest);
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
         }
     } else {
@@ -111,7 +114,6 @@ pub(crate) async fn get_individual(
 
                         let v = individual.get_obj().as_json();
                         log(Some(&start_time), &uinf, "get_individual", &id, ResultCode::Ok);
-                        debug!("Ok, {}", v);
                         return Ok(HttpResponse::Ok().json(v));
                     }
                 },
