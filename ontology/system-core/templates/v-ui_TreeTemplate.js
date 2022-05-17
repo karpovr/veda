@@ -22,7 +22,7 @@ export const pre = function (individual, template, container, mode, extra) {
   const rel_uri = extra && extra.target_rel_uri;
   const isSingle = extra && extra.isSingle;
   const withDeleted = extra && extra.withDeleted;
-  const sort = extra && extra.sort;
+  const sort = extra ? extra.sort : this.hasValue('v-ui:sort') ? this['v-ui:sort'][0] : undefined;
   const tbody = $('.tbody', template);
   const thead = $('.thead', template);
   let headTmpl = '';
@@ -104,7 +104,7 @@ export const pre = function (individual, template, container, mode, extra) {
       if (isLiteral) {
         rowTmpl += "<td about='@' property='" + property.id + "'></td>";
       } else if (isFile) {
-        rowTmpl += "<td about='@' rel='" + property.id + "' data-template='v-ui:FileMinTemplate'></td>";
+        rowTmpl += "<td about='@' rel='" + property.id + "' data-template='v-ui:FileToTreeTemplate'></td>";
       } else {
         rowTmpl += "<td about='@' rel='" + property.id + "' data-template='v-ui:LabelTemplate'></td>";
       }

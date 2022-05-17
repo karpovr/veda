@@ -2,7 +2,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
   if (individual.hasValue('v-s:valid', false)) {
-    $('a', template).addClass('invalid');
+    $('a', template).remove();
   }
 }
 export const html = `
