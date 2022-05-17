@@ -15,6 +15,9 @@ export const post = function (individual, template, container, mode, extra) {
   function submitLogin (e) {
     e.preventDefault();
     const useLogin = $('#login', template).val();
+    if (useLogin == undefined || useLogin == '') {
+      return;
+    }
     Backend.get_ticket_trusted(veda.ticket, useLogin).then(function (authResult) {
       veda.end_time = localStorage.end_time = authResult.end_time;
       veda.ticket = localStorage.ticket = authResult.ticket;

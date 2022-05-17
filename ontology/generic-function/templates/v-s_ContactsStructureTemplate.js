@@ -275,7 +275,7 @@ export const post = function (individual, template, container, mode, extra) {
     loadIndicator.show();
     const parentUri = parent.id;
 
-    const selectPart = 'SELECT id ';
+    const selectPart = 'SELECT DISTINCT id ';
     const wherePart = "WHERE v_s_parentUnit_str=['" + parentUri + "'] AND v_s_deleted_int=[0]";
     const endingPart = " group by id, rdfs_label_str having sum(sign) > 0 order by arraySort(x -> endsWith(x, '@en'), rdfs_label_str) asc";
     const queryDepartments = selectPart + 'FROM veda_tt.`v-s:Department` ' + wherePart + endingPart;
@@ -511,9 +511,9 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   function genQueryStringArray (searchText, findDeleted, findInParentOrg) {
-    const selectPart = 'SELECT target.id';
+    const selectPart = 'SELECT DISTINCT target.id';
     const endingPart =
-      " GROUP BY target.id, target.rdfs_label_str HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
+      " GROUP BY target.id, target.rdfs_label_str, target.version HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
     let basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0]';
     const orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]';
     const conditionForOrg = ' and org.`v_s_actualContacts_int`[1]=1';
