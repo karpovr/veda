@@ -1,3 +1,46 @@
+import $ from 'jquery';
+import veda from '/js/common/veda.js';
+import IndividualModel from '/js/common/individual_model.js';
+
+export const post = function (individual, template, container, mode, extra) {
+  template = $(template);
+  container = $(container);
+
+  function saveHandler() {
+    if (individual.hasValue('v-s:backwardTarget')) {
+      if (individual.hasValue('v-s:memberOutOfBrigade') || individual.hasValue('v-s:memberInOfBrigade')) {
+        return individual['v-s:backwardTarget'][0].load()
+          .then(function(backward) {
+            if (individual.hasValue('v-s:memberOutOfBrigade')) {
+              const memberOut = individual['v-s:memberOutOfBrigade'][0];
+              if (backward.hasValue('v-s:workPermit_actualBrigade', memberOut)) {
+                backward['v-s:workPermit_actualBrigade'] = backward['v-s:workPermit_actualBrigade'].filter(function(item) {
+                  return item.id != memberOut.id;
+                })
+              }
+            }
+            if (individual.hasValue('v-s:memberInOfBrigade')) {
+              const memberIn = individual['v-s:memberInOfBrigade'][0];
+              if (!backward.hasValue('v-s:workPermit_actualBrigade', memberIn)) {
+                backward['v-s:workPermit_actualBrigade'] = backward['v-s:workPermit_actualBrigade'].concat(memberIn);
+              } 
+            }
+            return backward.save();
+          })
+          .catch(function(err) {
+            console.log(err);
+          })
+      }
+    }
+  }
+
+  individual.on('beforeSave', saveHandler);
+  template.one('remove', function () {
+    individual.off('beforeSave', saveHandler);
+  });
+  
+};
+
 export const html = `
   <div>
     <div class="container sheet">
