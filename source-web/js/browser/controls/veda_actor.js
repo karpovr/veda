@@ -87,8 +87,8 @@ $.fn.veda_actor = function ( options ) {
     label.load().then(() => {
       $(self).parent().append( new IndividualModel(self.value).toString() );
     });
-  }).change(() => {
-    fullName = $(el).is(':checked') ? true : false;
+  }).change((e) => {
+    fullName = $(e.target).is(':checked') ? true : false;
     const ftValue = $('.fulltext', control).val();
     if (ftValue) {
       performSearch(ftValue);
@@ -101,8 +101,8 @@ $.fn.veda_actor = function ( options ) {
     label.load().then(() => {
       $(self).parent().append( new IndividualModel(self.value).toString() );
     });
-  }).change(() => {
-    onlyDeleted = $(el).is(':checked') ? true : false;
+  }).change((e) => {
+    onlyDeleted = $(e.target).is(':checked') ? true : false;
     const ftValue = $('.fulltext', control).val();
     if (ftValue) {
       performSearch(ftValue);
