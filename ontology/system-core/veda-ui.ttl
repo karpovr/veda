@@ -688,6 +688,12 @@ v-ui:FileMinTemplate
   rdfs:label "File template"@en ;
   v-ui:template "v-ui_FileMinTemplate.js" ;
 .
+v-ui:FileToTreeTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон файла для дерева"@ru ;
+  rdfs:label "File template to tree"@en ;
+  v-ui:template "v-ui_FileToTreeTemplate.js" ;
+.
 v-s:CS_File
   rdf:type v-s:ClassSpecification ;
   rdfs:label "Спецификация класса v-s:File "@ru, "Class specification v-s:File"@en;
