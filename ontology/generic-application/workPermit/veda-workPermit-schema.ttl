@@ -214,7 +214,13 @@ v-s:workPermit_prepareActions
   rdfs:label "WorkPermit prepare actions"@en ;
   rdfs:range xsd:string ;
 .
-#v-s:attachment
+v-s:workPermit_attachment_schema
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Приложение"@ru ;
+  rdfs:label "Additional"@en ;
+  rdfs:range v-s:attachment ;
+.
 
 v-s:hasWorkingOperations
   rdf:type owl:ObjectProperty ;
@@ -735,19 +741,19 @@ v-s:headConclusionOnCompletionWork
 
 #v-s:dateTo  - Дата и время закрытия наряда
 #v-s:attachment
-v-s:hasHotWorkPermit
+v-s:hasFireWorkPermit
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "Наряд-допуск на огневые работы"@ru ;
-  rdfs:label "Hot work permit"@en ;
+  rdfs:label "Fire work permit"@en ;
   rdfs:range v-s:WorkPermit ;
 .
-v-s:PS_hasHotWorkPermit_WorkPermit
+v-s:PS_hasFireWorkPermit_WorkPermit
   rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация hasHotWorkPermit для класса v-s:WorkPermit"@ru ;
-  rdfs:label "Specification for hasHotWorkPermit for v-s:WorkPermit"@en ;
+  rdfs:label "Спецификация hasFireWorkPermit для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasFireWorkPermit for v-s:WorkPermit"@en ;
   v-ui:forClass v-s:WorkPermit ;
-  v-ui:forProperty v-s:hasHotWorkPermit ;
+  v-ui:forProperty v-s:hasFireWorkPermit ;
   v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "10"^^xsd:integer ;
 .

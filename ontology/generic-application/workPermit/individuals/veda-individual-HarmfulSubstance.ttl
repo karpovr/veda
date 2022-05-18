@@ -25,186 +25,186 @@ v-s:HarmfulSubstance
 d:9jpqxjd33kz7q7xnvsibde5aby
   a v-s:HarmfulSubstance;
   rdfs:label "аммиак"^^xsd:string;
-  v-s:label "NH₃"^^xsd:string;
+  v-s:shortLabel "NH₃"^^xsd:string;
   v-s:description "(2-100) мг/м3"^^xsd:string;
 .
 d:uay5vg6w7beihjzotmij0bzdi1
   a v-s:HarmfulSubstance;
   rdfs:label "хлор"^^xsd:string;
-  v-s:label "Cl"^^xsd:string;
+  v-s:shortLabel "Cl"^^xsd:string;
   v-s:description "(0,25-10) мг/м3"^^xsd:string;
 .
 d:0mxirtxvh9pce7v5l61xqmqqqv
   a v-s:HarmfulSubstance;
   rdfs:label "оксид углерода"^^xsd:string;
-  v-s:label "CO"^^xsd:string;
+  v-s:shortLabel "CO"^^xsd:string;
   v-s:description "(2-200) мг/м3"^^xsd:string;
 .
 d:r0qjd4ym0gxk2scildid3vet9a
   a v-s:HarmfulSubstance;
   rdfs:label "кислород"^^xsd:string;
-  v-s:label "O"^^xsd:string;
+  v-s:shortLabel "O"^^xsd:string;
   v-s:description "(2,5-25) %"^^xsd:string;
 .
 d:1m1d6v5w05eh773spbz8cgow3v
   a v-s:HarmfulSubstance;
   rdfs:label "диоксида серы"^^xsd:string;
-  v-s:label "SO₂"^^xsd:string;
+  v-s:shortLabel "SO₂"^^xsd:string;
   v-s:description "(2,5-100) мг/м3"^^xsd:string;
 .
 d:eqgywl5nxvbdm3ynjhd4tvlok6
   a v-s:HarmfulSubstance;
   rdfs:label "сероводорода"^^xsd:string;
-  v-s:label "H₂S"^^xsd:string;
+  v-s:shortLabel "H₂S"^^xsd:string;
   v-s:description "(2,5-100) мг/м3"^^xsd:string;
 .
 d:qxn7qjgx9njf613bgwg1fvjwcy
   a v-s:HarmfulSubstance;
   rdfs:label "метанола"^^xsd:string;
-  v-s:label "CH₃OH"^^xsd:string;
+  v-s:shortLabel "CH₃OH"^^xsd:string;
   v-s:description "(0,1-30) мг/м3"^^xsd:string;
 .
 d:mdd23xnzvw71bbsm1n6ham4a7s
   a v-s:HarmfulSubstance;
   rdfs:label "диоксида азота"^^xsd:string;
-  v-s:label "NO₂"^^xsd:string;
+  v-s:shortLabel "NO₂"^^xsd:string;
   v-s:description "(0,5-20) мг/м3"^^xsd:string;
 .
 d:5g6j728f2vqtr0edmktyllpnb2
   a v-s:HarmfulSubstance;
   rdfs:label "оксид углерода"^^xsd:string;
-  v-s:label "CO"^^xsd:string;
+  v-s:shortLabel "CO"^^xsd:string;
   v-s:description "(4-200) мг/м3"^^xsd:string;
 .
 d:tj2brsdn7w2fmt85bytpxvjea1
   a v-s:HarmfulSubstance;
   rdfs:label "диоксид азота"^^xsd:string;
-  v-s:label "NO₂"^^xsd:string;
+  v-s:shortLabel "NO₂"^^xsd:string;
   v-s:description "(0,4-10) мг/м3"^^xsd:string;
 .
 d:yeybv9i6nm9khmmvs9f91axscw
   a v-s:HarmfulSubstance;
   rdfs:label "диоксид серы"^^xsd:string;
-  v-s:label "SO₂"^^xsd:string;
+  v-s:shortLabel "SO₂"^^xsd:string;
   v-s:description "(2-25) мг/м3"^^xsd:string;
 .
 d:9ezs4ex77n5mq2myx88kl7jl67
   a v-s:HarmfulSubstance;
   rdfs:label "диоксид углерода"^^xsd:string;
-  v-s:label "CO₂"^^xsd:string;
+  v-s:shortLabel "CO₂"^^xsd:string;
   v-s:description "(110-3500) мг/м3"^^xsd:string;
 .
 d:i5t82qeasjzqsdu3aw5vaw93x3
   a v-s:HarmfulSubstance;
   rdfs:label "сероводород"^^xsd:string;
-  v-s:label "H₂S"^^xsd:string;
+  v-s:shortLabel "H₂S"^^xsd:string;
   v-s:description "(0,6-30) мг/м3"^^xsd:string;
 .
 d:5a1qea86do8p3wia3m2v39j9bv
   a v-s:HarmfulSubstance;
   rdfs:label "кислород"^^xsd:string;
-  v-s:label "O"^^xsd:string;
+  v-s:shortLabel "O"^^xsd:string;
   v-s:description "(1-25)%"^^xsd:string;
 .
 d:iqmi3n3jspxn6pdhtxpqal48co
   a v-s:HarmfulSubstance;
   rdfs:label "хлор"^^xsd:string;
-  v-s:label "Cl"^^xsd:string;
+  v-s:shortLabel "Cl"^^xsd:string;
   v-s:description "(0,25 - 25)мг/м3"^^xsd:string;
 .
 d:96s0acr25gzwp2ixcdoui99l4l
   a v-s:HarmfulSubstance;
   rdfs:label "диоксид серы"^^xsd:string;
-  v-s:label "SO₂"^^xsd:string;
+  v-s:shortLabel "SO₂"^^xsd:string;
   v-s:description "(2,5 - 20)мг/м3"^^xsd:string;
 .
 d:mrk8hw33mr9tqab2vzynngaq7f
   a v-s:HarmfulSubstance;
   rdfs:label "Пропан-2-он (ацетон)"^^xsd:string;
-  v-s:label "C₃H₆O"^^xsd:string;
+  v-s:shortLabel "C₃H₆O"^^xsd:string;
   v-s:description "(100-10000) мг/м³"^^xsd:string;
 .
 d:w04zkhz5aoc46r9r045y3w20f0
   a v-s:HarmfulSubstance;
   rdfs:label "масла минеральные нефтяные (аэрозоли масел)"^^xsd:string;
-  v-s:label "масла минеральные нефтяные (аэрозоли масел)"^^xsd:string;
+  v-s:shortLabel "масла минеральные нефтяные (аэрозоли масел)"^^xsd:string;
   v-s:description "(5,0 -50,0) мг/м³"^^xsd:string;
 .
 d:oijvd181gi0sjx8ydr1di4fhai
   a v-s:HarmfulSubstance;
   rdfs:label "бензин"^^xsd:string;
-  v-s:label "C₃H₁₁O₂"^^xsd:string;
+  v-s:shortLabel "C₃H₁₁O₂"^^xsd:string;
   v-s:description "(50-4000) мг/м³"^^xsd:string;
 .
 d:t60l0ztw64sloxrl0y1jekhlm3
   a v-s:HarmfulSubstance;
   rdfs:label "диметилбензол (ксилол)"^^xsd:string;
-  v-s:label "C₈H₁₀"^^xsd:string;
+  v-s:shortLabel "C₈H₁₀"^^xsd:string;
   v-s:description "(20-1500) мг/м³"^^xsd:string;
 .
 d:xnsk231tyihvx200ilgh0l06bj
   a v-s:HarmfulSubstance;
   rdfs:label "метилбензол (толуол)"^^xsd:string;
-  v-s:label "C₇H₈"^^xsd:string;
+  v-s:shortLabel "C₇H₈"^^xsd:string;
   v-s:description "(25-2000) мг/м³"^^xsd:string;
 .
 d:ejvwjpkxjqg0f4gl7cv3mpxq98
   a v-s:HarmfulSubstance;
   rdfs:label "метантиол (метилмеркаптан)"^^xsd:string;
-  v-s:label "CH₃SH"^^xsd:string;
+  v-s:shortLabel "CH₃SH"^^xsd:string;
   v-s:description "(0,25-10,0) мг/м³"^^xsd:string;
 .
 d:zjxhm7x2x7wm5yufxcx7yzkikx
   a v-s:HarmfulSubstance;
   rdfs:label "этанол"^^xsd:string;
-  v-s:label "C₂H₅OH"^^xsd:string;
+  v-s:shortLabel "C₂H₅OH"^^xsd:string;
   v-s:description "(200-5000) мг/м³"^^xsd:string;
 .
 d:2sn3785tl659il52yovwxdvxns
   a v-s:HarmfulSubstance;
   rdfs:label "ртуть"^^xsd:string;
-  v-s:label "Hg"^^xsd:string;
+  v-s:shortLabel "Hg"^^xsd:string;
   v-s:description "(0,003-0,1)мг/м³"^^xsd:string;
 .
 d:3oftziszv4237vr0s90kcdw4t9
   a v-s:HarmfulSubstance;
   rdfs:label "углеводороды алифатические предельные С1-10 в пересчете на С (углеводороды нефти)"^^xsd:string;
-  v-s:label "углеводороды алифатические предельные С1-10 в пересчете на С (углеводороды нефти)"^^xsd:string;
+  v-s:shortLabel "углеводороды алифатические предельные С1-10 в пересчете на С (углеводороды нефти)"^^xsd:string;
   v-s:description "(50-4000) мг/м³"^^xsd:string;
 .
 d:rbc8w51csxt7mngxj3n4gjs5em
   a v-s:HarmfulSubstance;
   rdfs:label "озон"^^xsd:string;
-  v-s:label "O₃"^^xsd:string;
+  v-s:shortLabel "O₃"^^xsd:string;
   v-s:description "(0,05-15,0) мг/м³"^^xsd:string;
 .
 d:x56dk6p0vywiphb4gulpb53jx1
   a v-s:HarmfulSubstance;
   rdfs:label "гексан"^^xsd:string;
-  v-s:label "C₆H₁₄"^^xsd:string;
+  v-s:shortLabel "C₆H₁₄"^^xsd:string;
   v-s:description "(10-100) мг/м3"^^xsd:string;
 .
 d:ghv0f4rstfro9hl80yxcvdd6b2
   a v-s:HarmfulSubstance;
   rdfs:label "аэрозоли едких щелочей"^^xsd:string;
-  v-s:label "аэрозоли едких щелочей"^^xsd:string;
+  v-s:shortLabel "аэрозоли едких щелочей"^^xsd:string;
   v-s:description "(0,2-3,5) мг/м³"^^xsd:string;
 .
 d:5265p14c64oa7fqtwt8xtsy4fd
   a v-s:HarmfulSubstance;
   rdfs:label "серная кислота"^^xsd:string;
-  v-s:label "H₂SO₄"^^xsd:string;
+  v-s:shortLabel "H₂SO₄"^^xsd:string;
   v-s:description "(0,5-1,25) мг/м³"^^xsd:string;
 .
 d:mmjhm617l9zxvvgd0dt95zg3dv
   a v-s:HarmfulSubstance;
   rdfs:label "диоксид хлора"^^xsd:string;
-  v-s:label "ClO₂"^^xsd:string;
+  v-s:shortLabel "ClO₂"^^xsd:string;
   v-s:description "(0,05-0,5) мг/м³"^^xsd:string;
 .
 d:2ws2rqbd2i7sp70ntmfsxga1mt
   a v-s:HarmfulSubstance;
   rdfs:label "скипидар"^^xsd:string;
-  v-s:label "C₁₀H₁₆"^^xsd:string;
+  v-s:shortLabel "C₁₀H₁₆"^^xsd:string;
   v-s:description "(2,0-213) мг/м³"^^xsd:string;
 .
