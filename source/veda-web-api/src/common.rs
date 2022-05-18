@@ -1,3 +1,4 @@
+use crate::VQLHttpClient;
 use actix_web::{web, HttpMessage, HttpRequest};
 use async_std::sync::Arc;
 use futures::lock::Mutex;
@@ -6,15 +7,42 @@ use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
 use std::time::Instant;
+use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::ticket::Ticket;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::onto::parser::parse_raw;
+use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache, TICKETS_SPACE_ID};
 use v_common::storage::common::{Storage, StorageId};
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) const BASE_PATH: &str = "./data";
+
+pub(crate) enum VQLClientConnectType {
+    Direct,
+    Http,
+    Nng,
+    Unknown,
+}
+
+pub(crate) struct VQLClient {
+    pub(crate) query_type: VQLClientConnectType,
+    pub(crate) http_client: Option<VQLHttpClient>,
+    pub(crate) nng_client: Option<FTClient>,
+    pub(crate) xr: Option<XapianReader>,
+}
+
+impl Default for VQLClient {
+    fn default() -> Self {
+        VQLClient {
+            query_type: VQLClientConnectType::Unknown,
+            http_client: None,
+            nng_client: None,
+            xr: None,
+        }
+    }
+}
 
 #[derive(Default)]
 pub struct UserInfo {
@@ -98,6 +126,7 @@ pub(crate) struct Uris {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub(crate) struct QueryRequest {
+    pub params: Option<Value>,
     pub ticket: Option<String>,
     pub user: Option<String>,
     pub sparql: Option<String>,

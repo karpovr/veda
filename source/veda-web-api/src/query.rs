@@ -1,44 +1,18 @@
-use crate::common::{get_ticket, PrefixesCache, QueryRequest};
+use crate::common::{get_ticket, PrefixesCache, QueryRequest, UserInfo, VQLClientConnectType};
 use crate::common::{get_user_info, log};
 use crate::sparql_client::SparqlClient;
-use crate::vql_query_client::VQLHttpClient;
+use crate::VQLClient;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
+use serde_json::Value;
 use std::io;
-use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::c_load_onto;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::{FTQuery, QueryResult};
-use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
-
-pub(crate) enum VQLClientConnectType {
-    Direct,
-    Http,
-    Nng,
-    Unknown,
-}
-
-pub(crate) struct VQLClient {
-    pub(crate) query_type: VQLClientConnectType,
-    pub(crate) http_client: Option<VQLHttpClient>,
-    pub(crate) nng_client: Option<FTClient>,
-    pub(crate) xr: Option<XapianReader>,
-}
-
-impl Default for VQLClient {
-    fn default() -> Self {
-        VQLClient {
-            query_type: VQLClientConnectType::Unknown,
-            http_client: None,
-            nng_client: None,
-            xr: None,
-        }
-    }
-}
 
 pub(crate) async fn query_post(
     req: HttpRequest,
@@ -51,43 +25,74 @@ pub(crate) async fn query_post(
     db: web::Data<AStorage>,
     prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
-    let ticket = get_ticket(&req, &params.ticket);
-    query(&ticket, &*data, ticket_cache, vql_client, ch_client, sparql_client, db, prefix_cache, req).await
-}
-
-pub(crate) async fn query_get(
-    params: web::Query<QueryRequest>,
-    vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
-    ticket_cache: web::Data<TicketCache>,
-    db: web::Data<AStorage>,
-    prefix_cache: web::Data<PrefixesCache>,
-    req: HttpRequest,
-) -> io::Result<HttpResponse> {
-    query(&params.ticket, &*params, ticket_cache, vql_client, ch_client, sparql_client, db, prefix_cache, req).await
-}
-
-async fn query(
-    ticket: &Option<String>,
-    data: &QueryRequest,
-    ticket_cache: web::Data<TicketCache>,
-    vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
-    db: web::Data<AStorage>,
-    prefix_cache: web::Data<PrefixesCache>,
-    req: HttpRequest,
-) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(ticket.to_owned(), &req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(get_ticket(&req, &params.ticket), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
+    query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+}
 
+pub(crate) async fn query_get(
+    data: web::Query<QueryRequest>,
+    vql_client: web::Data<Mutex<VQLClient>>,
+    ch_client: web::Data<Mutex<CHClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
+    prefix_cache: web::Data<PrefixesCache>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
+    let uinf = match get_user_info(data.ticket.to_owned(), &req, &ticket_cache, &db).await {
+        Ok(u) => u,
+        Err(res) => {
+            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
+        },
+    };
+    query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+}
+
+async fn query(
+    uinf: UserInfo,
+    data: &QueryRequest,
+    vql_client: web::Data<Mutex<VQLClient>>,
+    ch_client: web::Data<Mutex<CHClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
+    db: web::Data<AStorage>,
+    prefix_cache: web::Data<PrefixesCache>,
+) -> io::Result<HttpResponse> {
+    if let Some(p) = &data.params {
+        stored_query(uinf, &*data, p, vql_client, ch_client, sparql_client, db, prefix_cache).await
+    } else {
+        direct_query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+    }
+}
+
+async fn stored_query(
+    _uinf: UserInfo,
+    _data: &QueryRequest,
+    _params: &Value,
+    _vql_client: web::Data<Mutex<VQLClient>>,
+    _ch_client: web::Data<Mutex<CHClient>>,
+    _sparql_client: web::Data<Mutex<SparqlClient>>,
+    _db: web::Data<AStorage>,
+    _prefix_cache: web::Data<PrefixesCache>,
+) -> io::Result<HttpResponse> {
+    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
+}
+
+async fn direct_query(
+    uinf: UserInfo,
+    data: &QueryRequest,
+    vql_client: web::Data<Mutex<VQLClient>>,
+    ch_client: web::Data<Mutex<CHClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
+    db: web::Data<AStorage>,
+    prefix_cache: web::Data<PrefixesCache>,
+) -> io::Result<HttpResponse> {
     let mut res = QueryResult::default();
-    let ticket_id = ticket.clone().unwrap_or_default();
+    let ticket_id = uinf.ticket.clone().unwrap_or_default();
 
     if data.sparql.is_some() {
         res = sparql_client.lock().await.prepare_query(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
@@ -160,7 +165,7 @@ async fn query(
             },
             VQLClientConnectType::Http => {
                 if let Some(n) = vc.http_client.as_mut() {
-                    res = n.query(ticket, &uinf.addr, req).await;
+                    res = n.query(&uinf.ticket, &uinf.addr, req).await;
                 }
             },
             VQLClientConnectType::Nng => {

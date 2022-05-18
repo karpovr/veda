@@ -14,10 +14,10 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
-use crate::common::{PrefixesCache, BASE_PATH};
+use crate::common::{PrefixesCache, VQLClient, VQLClientConnectType, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
-use crate::query::{query_get, query_post, VQLClient, VQLClientConnectType};
+use crate::query::{query_get, query_post};
 use crate::sparql_client::SparqlClient;
 use crate::update::*;
 use crate::vql_query_client::VQLHttpClient;
