@@ -1214,5 +1214,5 @@ Workflow.prepare_start_form = function (ticket, document) {
     ServerUtil.addRight(ticket, author_uri, new_process_uri, ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
   }
 
-  ServerUtil.addRight(ticket, 'v-wf:WorkflowReadUser', new_process_uri, ['v-s:canRead']);
+  // ServerUtil.addRight(ticket, 'v-wf:WorkflowReadUser', new_process_uri, ['v-s:canRead']);
 };

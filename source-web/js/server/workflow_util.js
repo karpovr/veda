@@ -302,7 +302,7 @@ WorkflowUtil.store_items_and_set_minimal_rights = function (ticket, data) {
           type: 'Uri',
         });
 
-      ServerUtil.addRight(ticket, 'v-wf:WorkflowReadUser', item['@'], ['v-s:canRead']);
+      // ServerUtil.addRight(ticket, 'v-wf:WorkflowReadUser', item['@'], ['v-s:canRead']);
     }
     return ids;
   } catch (e) {
