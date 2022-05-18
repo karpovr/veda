@@ -354,7 +354,7 @@ Workflow.prepare_work_order = function (ticket, document) {
               // включим задачу в группу документа
               if (CommonUtil.hasValue(result, 'v-wf:onDocument')) {
                 const docId = ServerUtil.getUri(result['v-wf:onDocument']);
-                ServerUtil.addToGroup(ticket, docId, result['@'], ['v-s:canRead']);
+                ServerUtil.addToGroup(ticket, docId, result['@'], ['v-s:canRead'], undefined,  'd:membership_' + result['@'].split(':').join('_') + '_' + docId.split(':').join('_'));
               }
             }
           }

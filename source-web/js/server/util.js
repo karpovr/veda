@@ -45,8 +45,8 @@ Util.toJson = function (value) {
   return JSON.stringify(value, null, 2);
 };
 
-Util.addToGroup = function (ticket, group, resource, allow, deny) {
-  const new_membership_uri = Util.genUri() + '-mbh';
+Util.addToGroup = function (ticket, group, resource, allow, deny, uri) {
+  const new_membership_uri = uri || Util.genUri() + '-mbh';
   const new_membership = {
     '@': new_membership_uri,
     'rdf:type': Util.newUri('v-s:Membership'),
