@@ -81,7 +81,7 @@ pub(crate) struct GetOperationStateRequest {
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub(crate) struct AuthenticateRequest {
     pub(crate) login: String,
-    pub(crate) password: String,
+    pub(crate) password: Option<String>,
     pub(crate) secret: Option<String>,
 }
 
