@@ -41,12 +41,12 @@ riot.observable = function (el) {
   };
 
   // only single event supported
-  el.one = function (name, fn) {
+  el.one = el.once = function (name, fn) {
     if (fn) fn.one = true;
     return el.on(name, fn);
   };
 
-  el.trigger = function (name, ...args) {
+  el.trigger = el.emit = function (name, ...args) {
     const fns = callbacks[name] || [];
     let c = 0;
     return fns.reduce((p, fn, i) => p.then(() => {

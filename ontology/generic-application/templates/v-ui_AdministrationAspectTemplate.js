@@ -42,6 +42,7 @@ export const html = `
       <!--li role="presentation"><a href="#Blanks" aria-controls="Blanks" role="tab" data-toggle="tab" about="v-s:BlanksBundle" property="rdfs:label"></a></li>
     <li role="presentation"><a href="#Registries" aria-controls="Registries" role="tab" data-toggle="tab" about="v-s:RegistriesBundle" property="rdfs:label"></a></li-->
       <li role="presentation"><a href="#Nets" aria-controls="Nets" role="tab" data-toggle="tab" about="v-s:NetsBundle" property="rdfs:label"></a></li>
+      <li role="presentation"><a href="#Processes" aria-controls="Processes" role="tab" data-toggle="tab" about="v-s:ProcessesBundle" property="rdfs:label"></a></li>
       <li role="presentation">
         <a href="#Rights" aria-controls="Rights" role="tab" data-toggle="tab" about="v-s:RightsManagementBundle" property="rdfs:label"></a>
       </li>
@@ -127,6 +128,17 @@ export const html = `
             <a href="#/v-s:NetBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
           </div>
           <div class="panel-body" about="v-s:NetRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
+        </div>
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="Processes">
+        <h3 about="v-s:ProcessesBundle" property="rdfs:label"></h3>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <span about="v-s:ProcessRegistry" property="rdfs:label"></span>
+            <a href="#/v-s:ProcessBlank" about="v-s:CreateBundle" property="rdfs:label" class="btn btn-xs btn-default pull-right"></a>
+          </div>
+          <div class="panel-body" about="v-s:ProcessRegistry" data-template="v-fs:AttributiveSearchInlineTemplate"></div>
         </div>
       </div>
 

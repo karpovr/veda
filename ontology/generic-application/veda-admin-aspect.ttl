@@ -7,6 +7,7 @@
 @prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
 @prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
 @prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix bpmn: <http://semantic-machines.com/veda/veda-bpmn/> .
 
 <http://semantic-machines.com/veda/veda-admin-aspect>
   rdf:type owl:Ontology ;
@@ -313,6 +314,31 @@ v-s:NetRegistryBlank
   rdfs:label "Сеть"@ru ;
   rdfs:label "Net"@en ;
   v-fc:targetType v-wf:Net ;
+.
+
+# -- ПРОЦЕССЫ --
+
+v-s:ProcessBlank
+  a v-fc:Blank ;
+  rdfs:label "Процесс"@ru ;
+  rdfs:label "Process"@en ;
+  v-fc:targetType bpmn:Process ;
+.
+v-s:ProcessRegistry
+  a v-fs:AttributiveSearch;
+  rdfs:label "Процессы"@ru ;
+  rdfs:label "Processes"@en ;
+  v-fs:searchBlank v-s:ProcessRegistryBlank ;
+  v-fs:searchBlankTemplate v-ui:AdminBlankTemplate ;
+  v-fs:searchResultTemplate v-ui:AdminResultTemplate ;
+  v-fs:searchOnLoad true;
+  v-fs:sortOrder "'rdfs:label' asc";
+.
+v-s:ProcessRegistryBlank
+  a v-fc:Blank ;
+  rdfs:label "Процесс"@ru ;
+  rdfs:label "Process"@en ;
+  v-fc:targetType bpmn:Process ;
 .
 
 # -- СКРИПТЫ --
@@ -623,6 +649,11 @@ v-s:NetsBundle
   rdf:type v-s:Bundle ;
   rdfs:label "Сети"@ru ;
   rdfs:label "Nets"@en ;
+.
+v-s:ProcessesBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Процессы"@ru ;
+  rdfs:label "Processes"@en ;
 .
 v-s:BlanksBundle
   rdf:type v-s:Bundle ;

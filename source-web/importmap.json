@@ -26,6 +26,10 @@
     "sha256":"/js/common/lib/sha256.js",
     "riot":"/js/common/lib/riot.js",
     "bowser":"/node_modules/bowser/es5.js",
-    "flatpickr/":"/node_modules/flatpickr/dist/"
+    "flatpickr/":"/node_modules/flatpickr/dist/",
+    "bpmn-js/":"/node_modules/bpmn-js/dist/",
+    "bpmn-js-properties-panel/":"/node_modules/bpmn-js-properties-panel/dist/",
+    "bpmn-moddle":"/node_modules/bpmn-moddle/dist/bpmn-moddle.umd.prod.js",
+    "camunda-bpmn-moddle":"/node_modules/camunda-bpmn-moddle/resources/camunda.json"
   }
 }
