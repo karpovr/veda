@@ -210,11 +210,14 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
             async_std::fs::create_dir_all(&dest_file_path).await.unwrap();
             debug!("ren file {} <- {}", file_full_name, tmp_file_path);
             if let Err(e) = async_fs::rename(tmp_file_path.clone(), file_full_name.clone()).await {
-                error!("{:?}", e);
-                return Ok(HttpResponse::InternalServerError().into());
-            }
-            if let Err(e) = async_fs::remove_file(tmp_file_path.clone()).await {
-                warn!("{:?}", e);
+                warn!("fail rename, use copy, reason={}", e);
+                if let Err(e) = async_fs::copy(tmp_file_path.clone(), file_full_name.clone()).await {
+                    error!("{:?}", e);
+                    return Ok(HttpResponse::InternalServerError().into());
+                }
+                if let Err(e) = async_fs::remove_file(tmp_file_path.clone()).await {
+                    warn!("{:?}", e);
+                }
             }
         } else {
             warn!("write empty file {}", file_full_name);
