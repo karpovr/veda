@@ -6,18 +6,20 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-function uploadFile (params, tries) {
-  tries = typeof tries === 'number' ? tries : 5;
+import notify from '../../browser/notify.js';
+
+function uploadFile (params, retry) {
+  retry = typeof retry === 'number' ? retry : 2;
   return new Promise((resolve, reject) => {
     const done = () => {
       if (xhr.status === 200) {
         resolve(params);
       } else {
-        reject(Error('File upload error'));
+        reject(Error(xhr.response || xhr.responseText));
       }
     };
     const fail = () => {
-      reject(Error('File upload error'));
+      reject(Error('File upload failed'));
     };
     const file = params.file;
     const path = params.path;
@@ -41,8 +43,8 @@ function uploadFile (params, tries) {
     }
     xhr.send(fd);
   }).catch((error) => {
-    if (tries > 0) {
-      return BrowserBackend.uploadFile(params, --tries);
+    if (retry > 0) {
+      return uploadFile(params, --retry);
     }
     throw error;
   });
@@ -299,7 +301,7 @@ $.fn.veda_file = function ( options ) {
     }).then(() => {
       return fileIndividual.save();
     }).catch((error) => {
-      console.error('File individual save failed');
+      notify('danger', error);
     });
   };
 
