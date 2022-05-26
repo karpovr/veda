@@ -571,8 +571,8 @@ v-s:BugReportBlank
 
 v-s:TrustedTicket
   rdf:type rdfs:Resource ;
-  rdfs:label "Вход"@ru ;
-  rdfs:label "Sign in"@en ;
+  rdfs:label "Доверенный вход"@ru ;
+  rdfs:label "Trusted sign in"@en ;
   v-ui:hasTemplate v-ui:TrustedTicketTemplate ;
 .
 
