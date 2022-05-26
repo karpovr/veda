@@ -5,6 +5,8 @@
 3) Xapian
 4) Графовая база данных
 
+названия доступных источников данных - ["clickhouse", "mysql", "xapian", "graphql"]
+
 Конечные точки подключения должны описываться индивидами типа v-s:Query
 Пример:
 
@@ -12,8 +14,9 @@ v-s:Query1
   rdf:type v-s:Query ;
   v-s:source "clickhouse" ;
   v-s:queryString """
-SELECT id, version, sign, rdfs_label_str as label FROM veda_tt.v-s:Person WHERE version = {v-s:param1}
+SELECT id, version, sign, rdfs_label_str as label FROM veda_tt."v-s:Person" WHERE version = {v-s:param1}
 """ ;
+  v-s:resultFormat "rows"|"cols"|"full"
 .
 
 Этот индивид описывает источник данных и сам запрос, содержащий подстановочные переменные. 
@@ -21,25 +24,24 @@ SELECT id, version, sign, rdfs_label_str as label FROM veda_tt.v-s:Person WHERE 
 
 Пример запроса:
 
-POST /query?ticket=_someTicketId
-payload: {
-  "@": _someRandomId,
-  "rdf:type": [{
-    "data":"v-s:QueryParams",
-    "type":"Uri"
-  }],
-  "v-s:queryIndividual": [{
-    "data":"v-s:Query1",
-    "type":"Uri"
-  }],
-  "v-s:param1": [{
-    "data":1,
-    "type":"Integer"
-  }],
-  "v-s:resultFormat": [{
-    "data":"rows"|"cols"|"full",
-    "type":"String"
-  }],
+POST /query?ticket=_ticket,
+{
+  "stored_query": "v-s:Query1",
+  "params": {
+    "@": _someRandomId,
+    "rdf:type": [{
+      "data":"v-s:QueryParams",
+      "type":"Uri"
+    }],
+    "v-s:param1": [{
+      "data":1,
+      "type":"Integer"
+    }],
+    "v-s:resultFormat": [{
+      "data":"rows"|"cols"|"full",
+      "type":"String"
+    }],
+  }
 }
 
 Результат исполнения запроса должен возвращаться в виде JSON объекта и содержать столбцы указанные в запросе с учетом параметра форматирования результатов ("v-s:resultFormat" = rows|cols).
@@ -51,13 +53,13 @@ payload: {
       "id": "d:123",
       "version": 1,
       "sign": -1,
-      "label": ['Администратор1  .@ru','Administrator1  .@en']
+      "label": ["Администратор1  .@ru", "Administrator1  .@en"]
     },
     {
       "id": "d:456",
       "version": 1,
       "sign": -1,
-      "label": ['Администратор2  .@ru','Administrator2  .@en']
+      "label": ["Администратор2  .@ru", "Administrator2  .@en"]
     },
     ...
   ]
@@ -67,8 +69,8 @@ payload: {
 {
   "cols": ["id", "version", "sign", "label"],
   "rows": [
-    ["d:123", 1, -1, ['Администратор1  .@ru','Administrator1  .@en']],
-    ["d:456", 1, -1, ['Администратор2  .@ru','Administrator2  .@en']],
+    ["d:123", 1, -1, ["Администратор1  .@ru", "Administrator1  .@en"]],
+    ["d:456", 1, -1, ["Администратор2  .@ru", "Administrator2  .@en"]],
     ...
   ]
 }
@@ -79,11 +81,10 @@ payload: {
   "version": [1, 1, ...],
   "sign": [-1, -1, ...],
   "label": [
-    ['Администратор1  .@ru','Administrator1  .@en'],
-    ['Администратор2  .@ru','Administrator2  .@en'],
+    ["Администратор1  .@ru", "Administrator1  .@en"],
+    ["Администратор2  .@ru", "Administrator2  .@en"],
     ...
   ]
 }
 
 Авторизация запроса должна осуществляться путем проверки прав текущего пользователя по отношению к индивиду запроса (v-s:Query1).
-

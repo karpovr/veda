@@ -126,6 +126,7 @@ pub(crate) struct Uris {
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub(crate) struct QueryRequest {
+    pub stored_query: Option<String>,
     pub params: Option<Value>,
     pub ticket: Option<String>,
     pub user: Option<String>,

@@ -5,13 +5,16 @@ use crate::VQLClient;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpRequest, HttpResponse};
 use futures::lock::Mutex;
-use serde_json::Value;
 use std::io;
+use std::time::Instant;
+use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::common::c_load_onto;
+use v_common::onto::individual::Individual;
+use v_common::onto::json2individual::parse_json_to_individual;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::search::clickhouse_client::CHClient;
-use v_common::search::common::{FTQuery, QueryResult};
-use v_common::storage::async_storage::{AStorage, TicketCache};
+use v_common::search::common::{prepare_sql_params, FTQuery, QueryResult};
+use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 pub(crate) async fn query_post(
@@ -23,6 +26,7 @@ pub(crate) async fn query_post(
     sparql_client: web::Data<Mutex<SparqlClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
+    az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
     let uinf = match get_user_info(get_ticket(&req, &params.ticket), &req, &ticket_cache, &db).await {
@@ -31,7 +35,7 @@ pub(crate) async fn query_post(
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-    query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+    query(uinf, &*data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
 }
 
 pub(crate) async fn query_get(
@@ -41,6 +45,7 @@ pub(crate) async fn query_get(
     sparql_client: web::Data<Mutex<SparqlClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
+    az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
@@ -50,7 +55,7 @@ pub(crate) async fn query_get(
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-    query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+    query(uinf, &*data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
 }
 
 async fn query(
@@ -60,26 +65,60 @@ async fn query(
     ch_client: web::Data<Mutex<CHClient>>,
     sparql_client: web::Data<Mutex<SparqlClient>>,
     db: web::Data<AStorage>,
+    az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
-    if let Some(p) = &data.params {
-        stored_query(uinf, &*data, p, vql_client, ch_client, sparql_client, db, prefix_cache).await
+    if data.stored_query.is_some() {
+        stored_query(uinf, data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
     } else {
         direct_query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
     }
 }
 
 async fn stored_query(
-    _uinf: UserInfo,
-    _data: &QueryRequest,
-    _params: &Value,
+    uinf: UserInfo,
+    data: &QueryRequest,
     _vql_client: web::Data<Mutex<VQLClient>>,
-    _ch_client: web::Data<Mutex<CHClient>>,
+    ch_client: web::Data<Mutex<CHClient>>,
     _sparql_client: web::Data<Mutex<SparqlClient>>,
-    _db: web::Data<AStorage>,
+    db: web::Data<AStorage>,
+    az: web::Data<Mutex<LmdbAzContext>>,
     _prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
-    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
+    let start_time = Instant::now();
+    let mut params = Individual::default();
+
+    if let (Some(stored_query_id), Some(v)) = (&data.stored_query, &data.params) {
+        if parse_json_to_individual(v, &mut params) {
+            let (mut stored_query_indv, res_code) = get_individual_from_db(stored_query_id, &uinf.user_id, &db, Some(&az)).await?;
+            if res_code != ResultCode::Ok {
+                return Ok(HttpResponse::new(StatusCode::from_u16(res_code as u16).unwrap()));
+            }
+
+            let format = stored_query_indv.get_first_literal("v-s:resultFormat").unwrap_or("full".to_owned());
+            if let (Some(source), Some(query_string)) = (stored_query_indv.get_first_literal("v-s:source"), stored_query_indv.get_first_literal("v-s:queryString")) {
+                if let Ok(sql) = prepare_sql_params(&query_string, &mut params, &source) {
+                    warn!("{}", sql);
+                    match source.as_str() {
+                        "clickhouse" => {
+                            let res = ch_client.lock().await.query_select_async(&sql, &format).await?;
+                            log(Some(&start_time), &uinf, "stored_query", &format!("{}", stored_query_id), ResultCode::Ok);
+                            return Ok(HttpResponse::Ok().json(res));
+                        },
+                        "mysql" => {
+                            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
+                        },
+                        _ => {
+                            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
+                        },
+                    }
+                }
+            }
+        }
+    }
+
+    log(Some(&start_time), &uinf, "stored_query", &format!("{:?}", data), ResultCode::BadRequest);
+    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
 }
 
 async fn direct_query(
