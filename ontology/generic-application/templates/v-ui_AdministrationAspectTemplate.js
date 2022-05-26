@@ -56,7 +56,7 @@ export const html = `
         <a href="#OrgStructure" aria-controls="OrgStructure" role="tab" data-toggle="tab" about="v-s:OrgStructureBundle" property="rdfs:label"></a>
       </li>
       <li role="presentation" class="trusted-ticket">
-        <a href="#TrustedTicket" aria-controls="TrustedTicket" role="tab" data-toggle="tab" about="v-s:TrustedTicketBundle" property="rdfs:label"></a>
+        <a href="#TrustedTicket" aria-controls="TrustedTicket" role="tab" data-toggle="tab" about="v-s:TrustedTicket" property="rdfs:label"></a>
       </li>
       <li role="presentation">
         <a href="#HolidaysCalendar" aria-controls="HolidayCalendar" role="tab" data-toggle="tab" about="v-s:HolidaysCalendarInstance" property="rdfs:label"></a>
@@ -273,10 +273,9 @@ export const html = `
       </div>
 
       <div role="tabpanel" class="tab-pane trusted-ticket" id="TrustedTicket">
-        <!-- <h3 about="v-s:TrustedTicketBundle" property="rdfs:label"></h3> -->
         <div class="panel panel-default">
           <div class="panel-heading">
-            <span about="v-s:TrustedTicketBundle" property="rdfs:label"></span>
+            <span about="v-s:TrustedTicket" property="rdfs:label"></span>
           </div>
           <div class="panel-body" about="v-s:TrustedTicket" data-template="v-ui:TrustedTicketTemplate"></div>
         </div>

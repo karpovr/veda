@@ -725,11 +725,6 @@ v-s:OrgStructureBundle
   rdfs:label "Organizational structure"@en ;
 .
 
-v-s:TrustedTicketBundle
-  rdf:type v-s:Bundle ;
-  rdfs:label "Доверенный вход"@ru ;
-  rdfs:label "Trusted ticket"@en ;
-.
 v-ui:AdministrationAspectTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для класса Аспекта администирования"@ru ;
