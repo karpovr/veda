@@ -18,7 +18,7 @@
   - Tarantool database (https://www.tarantool.io)
   - Integrated Xapian search engine library. Used for data indexing & querying (http://xapian.org).
   - Integrated V8 javascript engine library. Used for workflow execution engine and other server-side logic (https://code.google.com/p/v8).
-  - Fasthttp web server.
+  - Actix based web server.
   - Nanomsg - light-weight messaging protocol library.
 
 **4. Client components**
