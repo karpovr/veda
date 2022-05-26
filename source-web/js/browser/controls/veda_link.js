@@ -278,7 +278,11 @@ $.fn.veda_link = function ( options ) {
           return;
         }
         timeout = setTimeout(() => {
-          const value = e.target.value;
+          let value = e.target.value;
+          if (value.indexOf('"') >= 0) {
+            value = value.replaceAll('"', '');
+            fulltext.val(value);
+          }
           if (value.length >= minLength) {
             performSearch(value);
           } else if (!value.length) {
