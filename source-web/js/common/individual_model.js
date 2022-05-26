@@ -1081,6 +1081,7 @@ proto.getPropertyChain = function (...args) {
     return [];
   }).catch((error) => {
     console.error('Get property chain failed');
+    return [];
   });
 };
 
