@@ -11,8 +11,8 @@
   - Veda platform pursues Semantic Web methodology for data description, storage and exchange (https://en.wikipedia.org/wiki/Semantic_Web).
 
 **2. Two-tier architecture**
-  - Thin server (stateless).
-  - Rich browser-side web-client (stateful).
+  - Thin server written in Rust (stateless).
+  - Rich browser-side web-client written as HTML5 SPA (stateful).
 
 **3. Server components**
   - Tarantool database (https://www.tarantool.io)
