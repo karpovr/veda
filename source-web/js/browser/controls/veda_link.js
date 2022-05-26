@@ -279,10 +279,11 @@ $.fn.veda_link = function ( options ) {
         }
         timeout = setTimeout(() => {
           let value = e.target.value;
-          if (value.indexOf('"') >= 0) {
-            value = value.replaceAll('"', '');
+          if (value.indexOf('"') >= 0 || value.indexOf("'") >= 0) {
+            value = value.replaceAll('"', '').replaceAll("'", "");
             fulltext.val(value);
           }
+
           if (value.length >= minLength) {
             performSearch(value);
           } else if (!value.length) {
