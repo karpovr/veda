@@ -236,10 +236,18 @@ export const post = function (individual, template, container, mode) {
     }
   }
 
+  function showError () {
+    searchError.removeClass('hidden');
+  }
+
+  function hideError () {
+    searchError.addClass('hidden');
+  }
+
   // Search handler
   function searchHandler () {
     const searchButtons = $('.search-button', template);
-    searchError.addClass('hidden');
+    hideError();
     toggleSpin(searchButtons);
     self
       .search()
@@ -254,7 +262,7 @@ export const post = function (individual, template, container, mode) {
       .catch(function (error) {
         console.error('Search handler failed');
         toggleSpin(searchButtons);
-        searchError.removeClass('hidden');
+        showError();
       });
   }
   self.on('search', searchHandler);
@@ -278,11 +286,18 @@ export const post = function (individual, template, container, mode) {
 
   // More results handler
   function moreResultsHandler () {
+    toggleSpin(moreResults);
     return self
       .search(self['v-fs:cursor'][0])
       .then(renderResult)
+      .then(function () {
+        toggleSpin(moreResults);
+      })
       .catch(function (error) {
         console.error('More results failed');
+        showError();
+        toggleSpin(moreResults);
+        throw error;
       });
   }
 
@@ -298,7 +313,11 @@ export const post = function (individual, template, container, mode) {
   });
   function loadAll () {
     if (self['v-fs:cursor'][0] < self['v-fs:estimated'][0] && template.is(':visible')) {
-      moreResultsHandler().then(loadAll);
+      moreResultsHandler()
+        .then(loadAll)
+        .catch(function (error) {
+          console.error('All results failed');
+        });
     }
   }
 
@@ -540,6 +559,7 @@ export const post = function (individual, template, container, mode) {
             delete searchBlank.object;
             resetBlank();
             hideResults();
+            hideError();
           });
           return setupBlank();
         });
@@ -602,6 +622,10 @@ export const post = function (individual, template, container, mode) {
             if (location.hash.indexOf(individual.id) >= 0) {
               scrollTo(self.scroll);
             }
+          })
+          .catch(function (error) {
+            console.error('Search handler failed');
+            showError();
           });
         // Show results on load if they are available (e.g. if we came back)
       } else if (self.hasValue('v-fs:searchResult')) {

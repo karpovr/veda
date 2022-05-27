@@ -5,11 +5,11 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     await Backend.query();
     await Backend.query(ticket.ticket);
 
-    await Backend.query(ticket.ticket, {});
-    await Backend.query(ticket.ticket, 1);
+    await assert.rejects(Backend.query(ticket.ticket, {}));
+    await assert.rejects(Backend.query(ticket.ticket, 1));
     await Backend.query(ticket.ticket, '1');
-    await Backend.query(ticket.ticket, false);
-    await Backend.query(ticket.ticket, []);
+    await assert.rejects(Backend.query(ticket.ticket, false));
+    await assert.rejects(Backend.query(ticket.ticket, []));
     await Backend.query(ticket, [{}]);
 
     await assert.rejects(Backend.put_individual(), {code: 400});

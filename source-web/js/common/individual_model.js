@@ -914,7 +914,7 @@ proto.init = function (forced) {
           throw new TypeError('v-ui:ClassModel required!');
         }
         if (!model.modelFn) {
-          model.modelFn = new Function('veda', model['v-s:script'][0]);
+          model.modelFn = new Function('veda', model['v-s:script'][0] + ' //# sourceURL=' + model.id);
         }
         model.modelFn.call(this, veda);
         this.isInited(true);
@@ -937,7 +937,7 @@ proto.init = function (forced) {
       .then((models) => {
         models.forEach((model) => {
           if ( !model.modelFn ) {
-            model.modelFn = new Function('veda', model.get('v-s:script')[0]);
+            model.modelFn = new Function('veda', model.get('v-s:script')[0] + ' //# sourceURL=' + model.id);
           }
           model.modelFn.call(this, veda);
         });
