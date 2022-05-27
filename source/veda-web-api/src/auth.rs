@@ -254,9 +254,9 @@ pub(crate) async fn get_rights_origin(
 
                 let r = n.split(';').collect::<Vec<&str>>();
                 if r.len() == 3 {
+                    indv.add_uri("v-s:permissionObject", r[0].trim());
+                    indv.add_uri("v-s:permissionSubject", r[1].trim());
                     indv.add_bool(r[2].trim(), true);
-                    indv.add_uri("v-s:permissionObject", r[1].trim());
-                    indv.add_uri("v-s:permissionSubject", r[0].trim());
                 }
                 res.push(indv.get_obj().as_json());
             }
@@ -266,7 +266,7 @@ pub(crate) async fn get_rights_origin(
         indv.set_id("_");
         indv.add_uri("rdf:type", "v-s:PermissionStatement");
         indv.add_uri("v-s:permissionSubject", "?");
-        indv.add_string("v-s:comment", acl_trace.info, Lang::none());
+        indv.add_string("rdfs:comment", acl_trace.info, Lang::none());
         res.push(indv.get_obj().as_json());
 
         log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::Ok);
