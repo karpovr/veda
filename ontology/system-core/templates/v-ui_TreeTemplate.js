@@ -248,8 +248,13 @@ export const pre = function (individual, template, container, mode, extra) {
 
       getChildren([], value).then(function (branchUris) {
         value.deepSelected = !value.deepSelected;
-        const branch = branchUris.map(function (branchUri) {
-          const item = new IndividualModel(branchUri);
+        return Promise.all(
+          branchUris.map(function (branchUri) {
+            return new IndividualModel(branchUri).load();
+          }),
+        );
+      }).then(function (branchObjs) {
+        const branch = branchObjs.map(function (item) {
           item.deepSelected = value.deepSelected;
           return allowedFilterFn.call(item) && selectableFilterFn.call(item) ? item : undefined;
         });
@@ -322,8 +327,9 @@ export const pre = function (individual, template, container, mode, extra) {
       .then(function (children) {
         return Promise.all(
           children.map(function (childUri) {
+            const isAlreadyLoaded = acc.indexOf(childUri) >= 0;
             acc.push(childUri);
-            if (goDeeper !== false) {
+            if (goDeeper !== false && !isAlreadyLoaded) {
               const child = new IndividualModel(childUri);
               return getChildren(acc, child, goDeeper);
             }
