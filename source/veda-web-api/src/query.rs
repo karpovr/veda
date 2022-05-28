@@ -102,7 +102,7 @@ async fn stored_query(
                     match source.as_str() {
                         "clickhouse" => {
                             let res = ch_client.lock().await.query_select_async(&sql, &format).await?;
-                            log(Some(&start_time), &uinf, "stored_query", &format!("{}", stored_query_id), ResultCode::Ok);
+                            log(Some(&start_time), &uinf, "stored_query", stored_query_id, ResultCode::Ok);
                             return Ok(HttpResponse::Ok().json(res));
                         },
                         "mysql" => {
@@ -118,7 +118,7 @@ async fn stored_query(
     }
 
     log(Some(&start_time), &uinf, "stored_query", &format!("{:?}", data), ResultCode::BadRequest);
-    return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+    Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
 async fn direct_query(
@@ -218,7 +218,7 @@ async fn direct_query(
 
     if res.result_code != ResultCode::Ok {
         error!("{:?}", res.result_code);
-        return Ok(HttpResponse::new(StatusCode::from_u16(res.result_code as u16).unwrap()));
+        Ok(HttpResponse::new(StatusCode::from_u16(res.result_code as u16).unwrap()))
     } else {
         info!("Ok, count = {}, time(ms): query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
         Ok(HttpResponse::Ok().json(res))
