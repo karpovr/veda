@@ -17,7 +17,7 @@ function isHoliday (date) {
 
 function addWorkingDays (date, days) {
   if (!date) date = new Date();
-  while (days) {
+  while (days > 0) {
     date.setDate(date.getDate() + 1);
     if (!isHoliday(date)) days--;
   }
