@@ -159,7 +159,7 @@ Codelet.change_document_status = function (process, status) {
         };
         set_in_document['v-s:hasStatus'] = ServerUtil.newUri(status);
         if (status == 'v-s:StatusExecuted') {
-          set_in_document['v-s:dateFact'] = ServerUtil.newDate(Date.now());
+          set_in_document['v-s:dateFact'] = ServerUtil.newDate(new Date());
         } else if (status == 'v-s:StatusExecution') {
           const doc = get_individual(process.ticket, ServerUtil.getUri(doc_id));
           if (doc && !doc['v-s:dateToPlan'] && (doc['v-s:count'] && doc['v-s:count'].length > 0)) {
