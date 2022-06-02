@@ -55,7 +55,7 @@ export const html = `
           <label about="v-s:memberOutOfBrigade" property="rdfs:label"></label>
         </div>
         <div class="col-sm-9 col-xs-7">
-            <div rel="v-s:memberOutOfBrigade" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
+            <div rel="v-s:memberOutOfBrigade" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
             <veda-control rel="v-s:memberOutOfBrigade" data-type="link" class="-view edit search fulltext"></veda-control>
         </div>
       </div>         
@@ -91,7 +91,7 @@ export const html = `
           <label about="v-s:memberInOfBrigade" property="rdfs:label"></label>
         </div>
         <div class="col-sm-9 col-xs-7">
-            <div rel="v-s:memberInOfBrigade" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
+            <div rel="v-s:memberInOfBrigade" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
             <veda-control rel="v-s:memberInOfBrigade" data-type="link" class="-view edit search fulltext"></veda-control>
         </div>
       </div>         
