@@ -51,7 +51,7 @@ ccus
 
 web-api
     module = web-api
-    args = --http_port=8080 --use-direct-ft-query=true
+    args = --http_port=8080 --use-direct-ft-query=true --workers=1
 
 #ft-query
 #    module = web-api
@@ -65,3 +65,6 @@ input-onto
 #camunda-external-task-worker 
 
 #camunda-process-controller
+
+#sparql-indexer
+
