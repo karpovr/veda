@@ -94,23 +94,39 @@ export const post = function (individual, template, container, mode, extra) {
     resultTable.find('.hidden').remove();
 
     const filesEls = $("[typeof='v-s:File']", resultTable);
-
-    let filesPromises;
-
-    if (filesEls.length) {
-      filesPromises = filesEls.map(function () {
-        const link = $('a', this);
-        const fileName = link.text().trim();
-        const fileUrl = link.attr('href');
-        return filePromise(fileUrl, fileName);
-      });
-    } else {
-      filesPromises = [];
+    
+    const B_in_GB = 1024 * 1024 * 1024;
+    // file size in B
+    let sumSize = 0;
+    filesEls.each(function () {
+      // must already loaded
+      const fileIndivid = new veda.IndividualModel($(this).attr('resource'));
+      sumSize += fileIndivid['v-s:fileSize'][0];
+    });
+    if (sumSize > 1 * B_in_GB) {
+      let sizeGB = sumSize / B_in_GB;
+      sizeGB = Math.round(sizeGB * 100) / 100;
+      alert('Выгрузка файлов отменена: размер сформированного архива - ' + sizeGB+ 'ГБ , превысил  1ГБ , уменьшите выборку.');
+      toggleSpin(btn);
+      return;
     }
 
-    Promise.all(filesPromises)
+    const filesPromises = [];
+    filesEls.each(function () {
+      const link = $('a', this);
+      const fileName = link.text().trim();
+      const fileUrl = link.attr('href');
+      filesPromises.push(filePromise(fileUrl, fileName));
+    });
+
+    if (filesPromises.length == 0) {
+      toggleSpin(btn);
+      return;
+    }
+
+    return Promise.all(filesPromises)
       .then(function (files) {
-        import('jszip').then(function (module) {
+        return import('jszip').then(function (module) {
           const JSZip = module.default;
           const zip = new JSZip();
           const folder = zip.folder('files');
@@ -134,8 +150,8 @@ export const post = function (individual, template, container, mode, extra) {
           });
           const registry = exportTable(resultTable.get(0), individual['rdfs:label'].map(CommonUtil.formatValue).join(' '), 'blob');
           zip.file('registry.html', registry);
-          zip.generateAsync({type: 'blob'}).then(function (content) {
-            import('filesaver').then(function (module) {
+          return zip.generateAsync({type: 'blob'}).then(function (content) {
+            return import('filesaver').then(function (module) {
               const saveAs = module.default;
               saveAs(content, 'registry.zip');
             });
