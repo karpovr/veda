@@ -1,4 +1,4 @@
-use crate::common::{get_ticket, PrefixesCache, QueryRequest, UserInfo, VQLClientConnectType};
+use crate::common::{get_ticket, QueryRequest, UserInfo, VQLClientConnectType};
 use crate::common::{get_user_info, log};
 use crate::sparql_client::SparqlClient;
 use crate::VQLClient;
@@ -13,7 +13,9 @@ use v_common::onto::individual::Individual;
 use v_common::onto::json2individual::parse_json_to_individual;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::search::clickhouse_client::CHClient;
-use v_common::search::common::{prepare_sql_params, FTQuery, QueryResult};
+use v_common::search::common::{load_prefixes, FTQuery, PrefixesCache, QueryResult};
+use v_common::search::sparql_params::prepare_sparql_params;
+use v_common::search::sql_params::prepare_sql_params;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
@@ -80,10 +82,10 @@ async fn stored_query(
     data: &QueryRequest,
     _vql_client: web::Data<Mutex<VQLClient>>,
     ch_client: web::Data<Mutex<CHClient>>,
-    _sparql_client: web::Data<Mutex<SparqlClient>>,
+    sparql_client: web::Data<Mutex<SparqlClient>>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
-    _prefix_cache: web::Data<PrefixesCache>,
+    prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
     let mut params = Individual::default();
@@ -96,22 +98,40 @@ async fn stored_query(
             }
 
             let format = stored_query_indv.get_first_literal("v-s:resultFormat").unwrap_or("full".to_owned());
-            if let (Some(source), Some(query_string)) = (stored_query_indv.get_first_literal("v-s:source"), stored_query_indv.get_first_literal("v-s:queryString")) {
-                if let Ok(sql) = prepare_sql_params(&query_string, &mut params, &source) {
-                    warn!("{}", sql);
-                    match source.as_str() {
-                        "clickhouse" => {
+            if let (Some(source), Some(mut query_string)) = (stored_query_indv.get_first_literal("v-s:source"), stored_query_indv.get_first_literal("v-s:queryString")) {
+                // replace {paramN} to '{paramN}'
+                for pr in &params.get_predicates() {
+                    if pr.starts_with("v-s:param") {
+                        let pb = "{".to_owned() + pr + "}";
+                        query_string = query_string.replace(&pb, &format!("'{}'", &pr));
+                    }
+                }
+
+                match source.as_str() {
+                    "clickhouse" => {
+                        if let Ok(sql) = prepare_sql_params(&query_string, &mut params, &source) {
+                            warn!("{}", sql);
                             let res = ch_client.lock().await.query_select_async(&sql, &format).await?;
                             log(Some(&start_time), &uinf, "stored_query", stored_query_id, ResultCode::Ok);
                             return Ok(HttpResponse::Ok().json(res));
-                        },
-                        "mysql" => {
-                            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
-                        },
-                        _ => {
-                            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
-                        },
-                    }
+                        }
+                    },
+                    "oxygraph" => {
+                        if prefix_cache.full2short_r.is_empty() {
+                            load_prefixes(&db, &prefix_cache).await;
+                        }
+
+                        if let Ok(sparql) = prepare_sparql_params(&query_string, &mut params, &prefix_cache) {
+                            warn!("{}", sparql);
+                            let res = sparql_client.lock().await.query_select(&uinf.user_id, sparql, &format, prefix_cache).await?;
+                            log(Some(&start_time), &uinf, "stored_query", stored_query_id, ResultCode::Ok);
+                            return Ok(HttpResponse::Ok().json(res));
+                        }
+                        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
+                    },
+                    _ => {
+                        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotImplemented as u16).unwrap()));
+                    },
                 }
             }
         }
@@ -134,7 +154,7 @@ async fn direct_query(
     let ticket_id = uinf.ticket.clone().unwrap_or_default();
 
     if data.sparql.is_some() {
-        res = sparql_client.lock().await.prepare_query(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
+        res = sparql_client.lock().await.query_select_ids(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
         let req = FTQuery {
             ticket: "".to_owned(),

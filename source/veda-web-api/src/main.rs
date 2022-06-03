@@ -14,7 +14,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
-use crate::common::{PrefixesCache, VQLClient, VQLClientConnectType, BASE_PATH};
+use crate::common::{VQLClient, VQLClientConnectType, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
 use crate::query::{query_get, query_post};
@@ -35,6 +35,7 @@ use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::module_impl::{init_log_with_params, Module};
 use v_common::search::clickhouse_client::CHClient;
+use v_common::search::common::PrefixesCache;
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{AStorage, TicketCache};
 use v_common::storage::common::StorageMode;
@@ -172,7 +173,8 @@ async fn main() -> std::io::Result<()> {
         let check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
         info!("PARAM [check_ticket_ip] = {}", check_ticket_ip);
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
-        let (prefixes_cache_read, prefixes_cache_write) = evmap::new();
+        let (f2s_prefixes_cache_read, f2s_prefixes_cache_write) = evmap::new();
+        let (s2f_prefixes_cache_read, s2f_prefixes_cache_write) = evmap::new();
 
         let json_cfg = web::JsonConfig::default().limit(5 * 1024 * 1024);
 
@@ -194,8 +196,10 @@ async fn main() -> std::io::Result<()> {
                 are_external_users,
             })
             .data(PrefixesCache {
-                read: prefixes_cache_read,
-                write: Arc::new(Mutex::new(prefixes_cache_write)),
+                full2short_r: f2s_prefixes_cache_read,
+                full2short_w: Arc::new(Mutex::new(f2s_prefixes_cache_write)),
+                short2full_r: s2f_prefixes_cache_read,
+                short2full_w: Arc::new(Mutex::new(s2f_prefixes_cache_write)),
             })
             .data(Mutex::new(SparqlClient::default()))
             .data(db)

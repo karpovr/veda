@@ -1,9 +1,11 @@
-use crate::common::{get_short_prefix, PrefixesCache, SparqlResponse};
+use crate::common::SparqlResponse;
 use actix_web::web;
 use awc::Client;
+use serde_json::{json, Value};
+use std::io::Error;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
-use v_common::search::common::QueryResult;
+use v_common::search::common::{get_short_prefix, split_full_prefix, PrefixesCache, QueryResult};
 use v_common::storage::async_storage::AStorage;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext};
@@ -25,14 +27,9 @@ impl Default for SparqlClient {
 }
 
 impl SparqlClient {
-    pub(crate) async fn prepare_query(&mut self, user_uri: &str, query: String, db: web::Data<AStorage>, prefix_cache: web::Data<PrefixesCache>) -> QueryResult {
-        let res = self
-            .client
-            .post(&self.point)
-            .insert_header(("Content-Type", "application/sparql-query"))
-            .insert_header(("Accept", "application/sparql-results+json"))
-            .send_body(query)
-            .await;
+    pub(crate) async fn query_select_ids(&mut self, user_uri: &str, query: String, _db: web::Data<AStorage>, prefix_cache: web::Data<PrefixesCache>) -> QueryResult {
+        let res =
+            self.client.post(&self.point).header("Content-Type", "application/sparql-query").header("Accept", "application/sparql-results+json").send_body(query).await;
 
         let mut qres = QueryResult::default();
 
@@ -51,15 +48,8 @@ impl SparqlClient {
                         let r = &el[var];
                         if r["type"] == "uri" {
                             if let Some(v) = r["value"].as_str() {
-                                let pos = if let Some(n) = v.rfind('/') {
-                                    n
-                                } else {
-                                    v.rfind('#').unwrap_or_default()
-                                };
-
-                                let iri = v.split_at(pos + 1);
-                                let prefix = get_short_prefix(&db, iri.0, &prefix_cache).await;
-
+                                let iri = split_full_prefix(v);
+                                let prefix = get_short_prefix(iri.0, &prefix_cache);
                                 let short_iri = format!("{}:{}", prefix, iri.1);
 
                                 if self.az.authorize(&short_iri, user_uri, Access::CanRead as u8, true).unwrap_or(0) != Access::CanRead as u8 {
@@ -77,5 +67,61 @@ impl SparqlClient {
         }
 
         qres
+    }
+
+    pub(crate) async fn query_select(&mut self, _user_uri: &str, query: String, format: &str, prefix_cache: web::Data<PrefixesCache>) -> Result<Value, Error> {
+        let res =
+            self.client.post(&self.point).header("Content-Type", "application/sparql-query").header("Accept", "application/sparql-results+json").send_body(query).await;
+
+        let mut jres = Value::default();
+
+        match res {
+            Ok(mut response) => match response.json::<SparqlResponse>().await {
+                Ok(v) => {
+                    let mut v_cols = vec![];
+
+                    for el in v.head.vars.iter() {
+                        v_cols.push(Value::String(el.to_owned()));
+                    }
+                    jres["cols"] = Value::Array(v_cols);
+                    let mut jrows = vec![];
+
+                    for el in v.results.bindings {
+                        let mut jrow = if format == "full" {
+                            Value::from(serde_json::Map::new())
+                        } else {
+                            Value::Array(vec![])
+                        };
+                        for var in v.head.vars.iter() {
+                            let r = &el[var];
+                            if let (Some(r_type), Some(r_data)) = (r.get("type"), r.get("value")) {
+                                match (r_type.as_str(), r_data.as_str()) {
+                                    (Some("uri"), Some(data)) => {
+                                        let iri = split_full_prefix(data);
+                                        let prefix = get_short_prefix(iri.0, &prefix_cache);
+                                        let short_iri = format!("{}:{}", prefix, iri.1);
+
+                                        jrow[var] = json!(short_iri);
+                                    },
+                                    _ => {},
+                                }
+                                warn!("type={:?}, value={}", r_type, r_data);
+                            }
+                        }
+                        jrows.push(jrow);
+                    }
+
+                    jres["rows"] = Value::Array(jrows);
+                },
+                Err(e) => {
+                    error!("{:?}", e);
+                },
+            },
+            Err(e) => {
+                error!("{:?}", e);
+            },
+        }
+
+        Ok(jres)
     }
 }

@@ -1,7 +1,5 @@
 use crate::VQLHttpClient;
 use actix_web::{web, HttpMessage, HttpRequest};
-use async_std::sync::Arc;
-use futures::lock::Mutex;
 use rusty_tarantool::tarantool::IteratorType;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
@@ -10,7 +8,6 @@ use std::time::Instant;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::ticket::Ticket;
 use v_common::onto::individual::Individual;
-use v_common::onto::onto_index::OntoIndex;
 use v_common::onto::parser::parse_raw;
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache, TICKETS_SPACE_ID};
@@ -67,11 +64,6 @@ pub async fn get_user_info(in_ticket: Option<String>, req: &HttpRequest, ticket_
         }),
         Err(res) => Err(res),
     }
-}
-
-pub struct PrefixesCache {
-    pub read: evmap::ReadHandle<String, String>,
-    pub write: Arc<Mutex<evmap::WriteHandle<String, String>>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -166,38 +158,6 @@ pub(crate) fn get_ticket(req: &HttpRequest, in_ticket: &Option<String>) -> Optio
     }
 
     None
-}
-
-pub(crate) async fn get_short_prefix(storage: &AStorage, full_prefix: &str, prefixes_cache: &PrefixesCache) -> String {
-    if prefixes_cache.read.is_empty() {
-        let mut t = prefixes_cache.write.lock().await;
-        let onto_index = OntoIndex::load();
-        for id in onto_index.data.keys() {
-            if let Ok((mut rindv, _res)) = get_individual_from_db(id, "", storage, None).await {
-                rindv.parse_all();
-
-                if rindv.any_exists("rdf:type", &["owl:Ontology"]) {
-                    if let Some(full_url) = rindv.get_first_literal("v-s:fullUrl") {
-                        debug!("prefix : {} -> {}", rindv.get_id(), full_url);
-                        let short_prefix = rindv.get_id().trim_end_matches(':');
-
-                        t.insert(full_url, short_prefix.to_owned());
-                    }
-                }
-            } else {
-                error!("failed to read individual {}", id);
-            }
-            t.refresh();
-        }
-    }
-
-    if let Some(v) = prefixes_cache.read.get(full_prefix) {
-        if let Some(t) = v.get_one() {
-            return t.to_string();
-        }
-    }
-
-    full_prefix.to_owned()
 }
 
 pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
