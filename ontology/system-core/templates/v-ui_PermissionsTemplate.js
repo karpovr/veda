@@ -66,15 +66,7 @@ export const html = `
         </tbody>
       </table>
     </div>
-    <a
-      about="v-s:More"
-      property="rdfs:label"
-      class="btn btn-link"
-      role="button"
-      data-toggle="collapse"
-      href="#description"
-      aria-expanded="false"
-      aria-controls="description"></a>
+    <a about="v-s:More" property="rdfs:label" class="btn btn-link" role="button" data-toggle="collapse" href="#description" aria-expanded="false" aria-controls="description"></a>
     <div class="collapse" id="description">
       <pre about="@" property="rdfs:comment" style="border:none;background-color:#fff;"></pre>
     </div>
