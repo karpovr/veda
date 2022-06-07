@@ -5,6 +5,7 @@ use serde_json::{json, Value};
 use std::io::Error;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
+use v_common::onto::*;
 use v_common::search::common::{get_short_prefix, split_full_prefix, PrefixesCache, QueryResult};
 use v_common::storage::async_storage::AStorage;
 use v_common::v_api::obj::ResultCode;
@@ -94,7 +95,7 @@ impl SparqlClient {
                         };
                         for var in v.head.vars.iter() {
                             let r = &el[var];
-                            if let (Some(r_type), Some(r_data)) = (r.get("type"), r.get("value")) {
+                            if let (Some(r_type), Some(r_data), r_datatype) = (r.get("type"), r.get("value"), r.get("datatype")) {
                                 match (r_type.as_str(), r_data.as_str()) {
                                     (Some("uri"), Some(data)) => {
                                         let iri = split_full_prefix(data);
@@ -103,7 +104,36 @@ impl SparqlClient {
 
                                         jrow[var] = json!(short_iri);
                                     },
-                                    _ => {},
+                                    (Some("literal"), Some(data)) => {
+                                        if let Some(dt) = r_datatype {
+                                            match dt.as_str() {
+                                                Some(XSD_INTEGER) | Some(XSD_INT) | Some(XSD_LONG) => {
+                                                    jrow[var] = json!(data.parse::<i64>().unwrap_or_default());
+                                                },
+                                                Some(XSD_STRING) | Some(XSD_NORMALIZED_STRING) => {
+                                                    jrow[var] = json!(data);
+                                                },
+                                                Some(XSD_BOOLEAN) => {
+                                                    jrow[var] = json!(data.parse::<bool>().unwrap_or_default());
+                                                },
+                                                Some(XSD_DATE_TIME) => {
+                                                    jrow[var] = json!(data);
+                                                },
+                                                Some(XSD_FLOAT) | Some(XSD_DOUBLE) => {
+                                                    jrow[var] = json!(data.parse::<f64>().unwrap_or_default());
+                                                },
+                                                Some(XSD_DECIMAL) => {
+                                                    jrow[var] = json!(data.parse::<f64>().unwrap_or_default());
+                                                },
+                                                _ => {},
+                                            }
+                                        } else {
+                                            jrow[var] = json!(data);
+                                        }
+                                    },
+                                    _ => {
+                                        error!("unknown type: {:?}", r_type.as_str());
+                                    },
                                 }
                                 warn!("type={:?}, value={}", r_type, r_data);
                             }
