@@ -137,6 +137,7 @@ v-s:ScheduledAction
     v-ui:forProperty v-s:responsible ;
     v-ui:minCardinality 1 ;
     v-ui:maxCardinality 1 ;
+    v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' )  && ('v-s:employee.v-s:hasAccount.isExists'=='true') && ('v-s:origin'=='sap hr' || 'v-s:origin'=='Group') || ('rdf:type'=='v-s:Position') && ( 'v-s:origin'=='Role')"^^xsd:string;
     rdfs:label "Спецификация свойства v-s:responsible для класса v-s:ScheduledAction"@ru ;
     rdfs:label "v-s:responsible property specification for v-s:ScheduledAction class"@en ;
   .
