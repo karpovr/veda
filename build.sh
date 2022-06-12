@@ -153,24 +153,6 @@ if [ -z $1 ] || [ $1 == "queue2storage" ] || [ $1 == "veda-queue2storage" ] || [
     build_server_module "veda-queue2storage"
 fi
 
-if [ -z $1 ] || [ $1 == "gowebserver" ] || [ $1 == "veda-gowebserver" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-
-    if [ -z $GOROOT ]; then
-	export GOROOT=/usr/local/go
-    else 
-	echo "var GOROOT is set to '$GOROOT'"; 
-    fi
-
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-    export GOPATH=$HOME/go
-
-    echo build gowebserver
-    cd source/veda-gowebserver
-    go build
-    cd $BUILD_PATH
-    mv source/veda-gowebserver/veda-gowebserver $VEDA_BIN/veda-gowebserver
-fi
-
 if [ -z $1 ] || [ $1 == "web" ] || [ $1 == "public" ] || [ $1 == "all" ]; then
     echo BUILD PUBLIC
 

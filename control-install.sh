@@ -3,9 +3,6 @@
 
 ./tools/install-repo-libs.sh
 
-GO_VER=go1.12.1
-NANOMSG_VER=1.1.5
-
 INSTALL_PATH=$PWD
 
 # Get other dependencies
@@ -61,88 +58,10 @@ whereis rustc
 rustc -V
 cargo -V
 
-### GO LANG ###
-if [ "$1" = force ] || ! go version | grep $GO_VER ; then
-    echo "--- INSTALL GOLANG ---"
-    mkdir tmp
-    cd tmp
-    wget https://storage.googleapis.com/golang/$GO_VER.linux-amd64.tar.gz
-    tar -xf $GO_VER.linux-amd64.tar.gz
-
-    if env | grep -q ^GOROOT=
-    then
-        sudo rm -rf $GOROOT
-    else
-        export GOROOT=/usr/local/go
-        export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
-        echo 'export GOROOT=/usr/local/go'  >> $HOME/.profile
-        echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin'  >> $HOME/.profile
-    fi
-
-    export GOPATH=$HOME/go
-    echo 'export GOPATH=$HOME/go'  >> $HOME/.bashrc
-    source ~/.bashrc
-
-    sudo rm -rf /usr/local/go
-    sudo rm -rf /usr/bin/go
-    sudo rm -rf /usr/bin/gofmt
-    sudo mv go $GOROOT
-
-    go version
-    cd ..
-else
-    echo "--- GOLANG INSTALLED ---"
-fi
-
-#lmdb-go
-#go get -v github.com/muller95/lmdb-go/lmdb
-go get github.com/itiu/lmdb-go/lmdb
-
-#fasthttp
-go get -v github.com/itiu/fasthttp
-
-#go-nanomsg
-go get -v github.com/op/go-nanomsg
-
-go get github.com/tarantool/go-tarantool
-go get github.com/gorilla/websocket
-go get github.com/divan/expvarmon
-go get -v gopkg.in/vmihailenco/msgpack.v2
-cp -a ./source/golang-third-party/cbor $GOPATH/src
-ls $HOME/go/src
-
-
 ### LIB NANOMSG ###
-
-if ([ "$1" = force ] ||  [ "$1" = force-nanomsg ]) || ! ldconfig -p | grep libnanomsg ; then
-    echo "--- INSTALL NANOMSG ---"
-    # make nanomsg dependency
-    TRAVIS_TAG=$NANOMSG_VER
-    mkdir tmp
-    wget https://github.com/nanomsg/nanomsg/archive/$NANOMSG_VER.tar.gz -P tmp
-    cd tmp
-    tar -xvzf $NANOMSG_VER.tar.gz
-    cd nanomsg-$NANOMSG_VER
-    mkdir build
-    cd build
-    cmake ..
-    make
-    sudo make install
-
-    echo '/usr/local/lib/x86_64-linux-gnu' > x86_64-linux-gnu-local.conf
-    sudo cp x86_64-linux-gnu-local.conf /etc/ld.so.conf.d/x86_64-linux-gnu-local.conf
-    sudo ldconfig
-
-    cd ..
-    cd ..
-    cd ..
-else
-    echo "--- NANOMSG INSTALLED ---"
-fi
 
 sudo libtool --mode=install install -c $INSTALL_PATH/source/lib64/libxapianm/libxapianm.la /usr/local/lib/libxapianm.la
 sudo ldconfig
-
 
 ldd --version
 ls /usr/local/lib
