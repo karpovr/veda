@@ -78,9 +78,30 @@ pub(crate) async fn is_ticket_valid(
     }
 }
 
-#[get("/authenticate")]
-pub(crate) async fn authenticate(
+pub(crate) async fn authenticate_post(
+    data: web::Json<AuthenticateRequest>,
+    auth: web::Data<Mutex<AuthClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
+    authenticate(&data.login, &data.password, &data.secret, auth, ticket_cache, db, req).await
+}
+
+pub(crate) async fn authenticate_get(
     params: web::Query<AuthenticateRequest>,
+    auth: web::Data<Mutex<AuthClient>>,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
+    authenticate(&params.login, &params.password, &params.secret, auth, ticket_cache, db, req).await
+}
+
+async fn authenticate(
+    login: &str,
+    password: &Option<String>,
+    secret: &Option<String>,
     auth: web::Data<Mutex<AuthClient>>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
@@ -92,7 +113,7 @@ pub(crate) async fn authenticate(
         addr: extract_addr(&req),
         user_id: "".to_string(),
     };
-    return match auth.lock().await.authenticate(&params.login, &params.password, extract_addr(&req), &params.secret) {
+    return match auth.lock().await.authenticate(login, password, extract_addr(&req), secret) {
         Ok(r) => {
             uinf.ticket = Some(r["id"].as_str().unwrap_or("").to_string());
 
@@ -100,7 +121,7 @@ pub(crate) async fn authenticate(
 
             if ticket_cache.are_external_users {
                 if let Err(e) = check_external_user(user_uri, &db).await {
-                    log(Some(&start_time), &uinf, "authenticate", &params.login, e);
+                    log(Some(&start_time), &uinf, "authenticate", login, e);
                     return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
                 }
             }
@@ -109,7 +130,7 @@ pub(crate) async fn authenticate(
             Ok(HttpResponse::Ok().json(r))
         },
         Err(e) => {
-            log(Some(&start_time), &uinf, "authenticate", &params.login, e.result);
+            log(Some(&start_time), &uinf, "authenticate", login, e.result);
             Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap()))
         },
     };

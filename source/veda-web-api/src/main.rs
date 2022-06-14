@@ -13,7 +13,7 @@ mod vql_query_client;
 extern crate serde_derive;
 extern crate serde_json;
 
-use crate::auth::{authenticate, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
+use crate::auth::{authenticate_get, authenticate_post, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
 use crate::common::{VQLClient, VQLClientConnectType, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
@@ -209,7 +209,6 @@ async fn main() -> std::io::Result<()> {
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))
             .data(Mutex::new(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default())))
             //
-            .service(authenticate)
             .service(get_ticket_trusted)
             .service(is_ticket_valid)
             .service(get_rights)
@@ -235,6 +234,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(root_doc))
             .service(web::resource("/files").route(web::post().to(save_file)))
             .service(web::resource("/query").route(web::get().to(query_get)).route(web::post().to(query_post)))
+            .service(web::resource("/authenticate").route(web::get().to(authenticate_get)).route(web::post().to(authenticate_post)))
             .service(Files::new("/", "./public"))
     })
     .bind(format!("0.0.0.0:{}", port))?
