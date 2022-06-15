@@ -124,6 +124,7 @@ const API_FNS = [
   '/set_in_individual',
   '/remove_from_individual',
   '/put_individuals',
+  '/logout',
   '/watch',
 ];
 const NTLM = [
@@ -368,6 +369,7 @@ function handleAPIGet (event) {
   case 'authenticate':
   case 'get_ticket_trusted':
   case 'is_ticket_valid':
+  case 'logout':
   default:
     return fetch(event.request)
       .then((response) => {
