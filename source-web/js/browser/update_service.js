@@ -50,7 +50,13 @@ proto.init = function () {
   return Backend.get_individual('', 'cfg:ClientUpdateServiceAddress', false)
     .then((addressCfg) => {
       const address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
-      const socket = new WebSocket(address);
+      let url;
+      try {
+        url = new URL(address);
+      } catch (error) {
+        url = new URL(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${address}`);
+      }
+      const socket = new WebSocket(url);
 
       socket.onopen = openedHandler;
       socket.onclose = closedHandler;
