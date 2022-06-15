@@ -495,6 +495,7 @@ document.body.addEventListener('click', activityHandler);
 
 // Logout handler
 delegateHandler(document.body, 'click', '#logout, .logout', function () {
+  Backend.logout(veda.ticket).catch(error => console.log('Logout failed', error));
   delete storage.ticket;
   delete storage.user_uri;
   delete storage.end_time;

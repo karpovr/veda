@@ -132,6 +132,18 @@ BrowserBackend.is_ticket_valid = function (ticket) {
   return call_server(params);
 };
 
+BrowserBackend.logout = function (ticket) {
+  const arg = ticket;
+  const isObj = typeof arg === 'object';
+  const params = {
+    method: 'GET',
+    url: '/logout',
+    ticket: isObj ? arg.ticket : ticket,
+    data: {},
+  };
+  return call_server(params);
+};
+
 BrowserBackend.get_operation_state = function (module_id, wait_op_id) {
   const arg = module_id;
   const isObj = typeof arg === 'object';
