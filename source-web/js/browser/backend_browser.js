@@ -95,7 +95,7 @@ BrowserBackend.authenticate = function (login, password, secret) {
   const arg = login;
   const isObj = typeof arg === 'object';
   const params = {
-    method: 'GET',
+    method: 'POST',
     url: '/authenticate',
     data: {
       'login': isObj ? arg.login : login,

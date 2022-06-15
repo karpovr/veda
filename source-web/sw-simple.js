@@ -386,6 +386,20 @@ function handleAPIGet (event) {
 function handleAPIPost (event) {
   const url = new URL(event.request.url);
   const fn = url.pathname.split('/').pop();
+  // Fetch only
+  if (fn === 'authenticate') {
+  return fetch(event.request)
+    .then((response) => {
+      if (response.status === 0 || response.status === 503) {
+        ping();
+      }
+      return response;
+    })
+    .catch((error) => {
+      ping();
+      throw error;
+    });
+  }
   const cloneRequest = event.request.clone();
   // Fetch first
   return fetch(event.request)
