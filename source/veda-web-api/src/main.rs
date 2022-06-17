@@ -13,7 +13,7 @@ mod vql_query_client;
 extern crate serde_derive;
 extern crate serde_json;
 
-use crate::auth::{authenticate_get, authenticate_post, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid};
+use crate::auth::{authenticate_get, authenticate_post, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid, logout};
 use crate::common::{VQLClient, VQLClientConnectType, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
@@ -228,6 +228,7 @@ async fn main() -> std::io::Result<()> {
             .service(ping)
             .service(head)
             .service(web::resource("/apps/{app_name}").route(web::get().to(apps_doc)))
+            .service(logout)
             .route("/tests", web::get().to(tests_doc))
             .route("/ontology.json", web::get().to(onto_doc))
             .route("/manifest", web::get().to(manifest_doc))

@@ -322,7 +322,7 @@ impl<'a> AuthWorkPlace<'a> {
 
         let n_secret = thread_rng().gen_range(100_000, 999_999).to_string();
 
-        self.credential.set_string("v-s:secret", &n_secret, Lang::NONE);
+        self.credential.set_string("v-s:secret", &n_secret, Lang::none());
         self.credential.set_datetime("v-s:SecretDateFrom", now);
 
         let res = self.backend.mstorage_api.update(self.sys_ticket, IndvOp::Put, self.credential);
@@ -366,12 +366,12 @@ impl<'a> AuthWorkPlace<'a> {
                 let uuid1 = "d:mail_".to_owned() + &Uuid::new_v4().to_string();
                 mail_with_secret.set_id(&uuid1);
                 mail_with_secret.add_uri("rdf:type", "v-s:Email");
-                mail_with_secret.add_string("v-s:recipientMailbox", &mailbox, Lang::NONE);
+                mail_with_secret.add_string("v-s:recipientMailbox", &mailbox, Lang::none());
                 mail_with_secret.add_datetime("v-s:created", now);
                 mail_with_secret.add_uri("v-s:creator", "cfg:VedaSystemAppointment");
                 mail_with_secret.add_uri("v-wf:from", "cfg:VedaSystemAppointment");
-                mail_with_secret.add_string("v-s:subject", from_utf8(subject.as_slice()).unwrap_or_default(), Lang::NONE);
-                mail_with_secret.add_string("v-s:messageBody", from_utf8(body.as_slice()).unwrap_or_default(), Lang::NONE);
+                mail_with_secret.add_string("v-s:subject", from_utf8(subject.as_slice()).unwrap_or_default(), Lang::none());
+                mail_with_secret.add_string("v-s:messageBody", from_utf8(body.as_slice()).unwrap_or_default(), Lang::none());
 
                 let res = self.backend.mstorage_api.update(self.sys_ticket, IndvOp::Put, &mail_with_secret);
                 if res.result != ResultCode::Ok {

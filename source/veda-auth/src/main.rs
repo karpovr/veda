@@ -7,7 +7,7 @@ mod auth;
 mod common;
 
 use crate::auth::*;
-use crate::common::{get_ticket_trusted, read_auth_configuration, AuthConf, UserStat};
+use crate::common::{get_ticket_trusted, logout, read_auth_configuration, AuthConf, UserStat};
 use nng::{Message, Protocol, Socket};
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
@@ -122,6 +122,17 @@ fn req_prepare(
             res["id"] = json!(ticket.id);
             res["user_uri"] = json!(ticket.user_uri);
             res["user_login"] = json!(ticket.user_login);
+            res["result"] = json!(ticket.result as i64);
+            res["end_time"] = json!(ticket.end_time);
+
+            return Message::from(res.to_string().as_bytes());
+        },
+        "logout" => {
+            let ticket = logout(conf, v["ticket"].as_str(), v["addr"].as_str(), backend);
+
+            let mut res = JSONValue::default();
+            res["type"] = json!("ticket");
+            res["id"] = json!(ticket.id);
             res["result"] = json!(ticket.result as i64);
             res["end_time"] = json!(ticket.end_time);
 

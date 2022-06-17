@@ -57,6 +57,41 @@ pub(crate) async fn get_ticket_trusted(
     };
 }
 
+#[get("/logout")]
+pub(crate) async fn logout(
+    params: web::Query<TicketRequest>,
+    ticket_cache: web::Data<TicketCache>,
+    tt: web::Data<AStorage>,
+    auth: web::Data<Mutex<AuthClient>>,
+    req: HttpRequest,
+) -> io::Result<HttpResponse> {
+    let start_time = Instant::now();
+    let uinf = UserInfo {
+        ticket: None,
+        addr: extract_addr(&req),
+        user_id: "".to_string(),
+    };
+
+    match check_ticket(&params.ticket, &ticket_cache, &uinf.addr, &tt).await {
+        Ok(_user_uri) => {
+            return match auth.lock().await.logout(&params.ticket, uinf.addr) {
+                Ok(r) => {
+                    log(Some(&start_time), &uinf, "logout", &format!("ticket={:?}, ip={:?}", params.ticket, uinf.addr), ResultCode::Ok);
+                    Ok(HttpResponse::Ok().json(r))
+                },
+                Err(e) => {
+                    log(Some(&start_time), &uinf, "logout", &format!("ticket={:?}, ip={:?}", params.ticket, uinf.addr), e.result);
+                    Ok(HttpResponse::new(StatusCode::from_u16(e.result as u16).unwrap()))
+                },
+            }
+        },
+        Err(e) => {
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "logout", "", e);
+            Ok(HttpResponse::Ok().json(false))
+        },
+    }
+}
+
 #[get("/is_ticket_valid")]
 pub(crate) async fn is_ticket_valid(
     params: web::Query<TicketRequest>,

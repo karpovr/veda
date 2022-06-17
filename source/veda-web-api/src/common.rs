@@ -227,34 +227,8 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
             Err(ResultCode::TicketNotFound)
         }
     } else {
-        let mut ticket_obj = Ticket::default();
+        let ticket_obj = read_ticket_obj(ticket_id, db).await?;
 
-        if let Some(tt) = &db.tt {
-            let response = match tt.select(TICKETS_SPACE_ID, 0, &(&ticket_id,), 0, 100, IteratorType::EQ).await {
-                Ok(r) => r,
-                Err(_) => {
-                    return Err(ResultCode::TicketNotFound);
-                },
-            };
-
-            let mut to = Individual::default();
-            to.set_raw(&response.data[5..]);
-            if parse_raw(&mut to).is_ok() {
-                ticket_obj.update_from_individual(&mut to);
-                ticket_obj.result = ResultCode::Ok;
-            }
-        }
-        if let Some(lmdb) = &db.lmdb {
-            let mut to = Individual::default();
-            if lmdb.lock().await.get_individual_from_db(StorageId::Tickets, ticket_id, &mut to) {
-                ticket_obj.update_from_individual(&mut to);
-                ticket_obj.result = ResultCode::Ok;
-            }
-        }
-
-        if ticket_obj.result != ResultCode::Ok {
-            return Err(ResultCode::TicketNotFound);
-        }
         if ticket_obj.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
             return Err(ResultCode::TicketNotFound);
         }
@@ -274,6 +248,37 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
 
         Ok(user_uri)
     }
+}
+
+async fn read_ticket_obj(ticket_id: &str, db: &AStorage) -> Result<Ticket, ResultCode> {
+    let mut ticket_obj = Ticket::default();
+
+    if let Some(tt) = &db.tt {
+        let response = match tt.select(TICKETS_SPACE_ID, 0, &(&ticket_id,), 0, 100, IteratorType::EQ).await {
+            Ok(r) => r,
+            Err(_) => {
+                return Err(ResultCode::TicketNotFound);
+            },
+        };
+
+        let mut to = Individual::default();
+        to.set_raw(&response.data[5..]);
+        if parse_raw(&mut to).is_ok() {
+            ticket_obj.update_from_individual(&mut to);
+            ticket_obj.result = ResultCode::Ok;
+        }
+    }
+    if let Some(lmdb) = &db.lmdb {
+        let mut to = Individual::default();
+        if lmdb.lock().await.get_individual_from_db(StorageId::Tickets, ticket_id, &mut to) {
+            ticket_obj.update_from_individual(&mut to);
+            ticket_obj.result = ResultCode::Ok;
+        }
+    }
+    if ticket_obj.result != ResultCode::Ok {
+        return Err(ResultCode::TicketNotFound);
+    }
+    Ok(ticket_obj)
 }
 
 pub(crate) async fn check_external_user(user_uri: &str, db: &AStorage) -> Result<(), ResultCode> {

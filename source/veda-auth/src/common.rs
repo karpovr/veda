@@ -1,3 +1,4 @@
+use chrono::{NaiveDateTime, Utc};
 use data_encoding::HEXLOWER;
 use parse_duration::parse;
 use regex::Regex;
@@ -6,11 +7,12 @@ use ring::{digest, pbkdf2, rand};
 use std::num::NonZeroU32;
 use v_common::az_impl::common::f_authorize;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module_impl::{create_new_ticket, Module};
+use v_common::module::module_impl::{create_new_ticket, Module, TICKS_TO_UNIX_EPOCH};
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
+use v_common::onto::individual2msgpack::to_msgpack;
 use v_common::search::common::{FTQuery, QueryResult};
 use v_common::storage::common::{StorageId, VStorage};
 use v_common::v_api::api_client::IndvOp;
@@ -59,6 +61,29 @@ impl Default for AuthConf {
             check_ticket_ip: true,
         }
     }
+}
+
+pub(crate) fn logout(_conf: &AuthConf, tr_ticket_id: Option<&str>, _ip: Option<&str>, backend: &mut Backend) -> Ticket {
+    let tr_ticket_id = tr_ticket_id.unwrap_or_default();
+    let mut ticket_obj = backend.get_ticket_from_db(tr_ticket_id);
+    if ticket_obj.result == ResultCode::Ok {
+        ticket_obj.end_time = Utc::now().timestamp();
+
+        let mut raw1: Vec<u8> = Vec::new();
+        if to_msgpack(&ticket_obj.to_individual(), &mut raw1).is_ok() && backend.storage.put_kv_raw(StorageId::Tickets, &ticket_obj.id, raw1) {
+            let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp(ticket_obj.end_time, 0));
+            info!("logout: update ticket {}, user={}, addr={}, end={}", ticket_obj.id, ticket_obj.user_uri, ticket_obj.user_addr, end_time_str);
+            ticket_obj.result = ResultCode::Ok;
+        } else {
+            error!("logout: fail update ticket {:?}", ticket_obj.id);
+            ticket_obj.result = ResultCode::AuthenticationFailed;
+        }
+    } else {
+        error!("logout: couldn't get a ticket from the database, ticket = {}", tr_ticket_id);
+        ticket_obj.result = ResultCode::AuthenticationFailed;
+    }
+
+    ticket_obj
 }
 
 pub(crate) fn get_ticket_trusted(
@@ -241,10 +266,10 @@ pub(crate) fn set_password(credential: &mut Individual, password: &str) {
         debug!("Salt: {}", HEXLOWER.encode(&salt));
         debug!("PBKDF2 hash: {}", HEXLOWER.encode(&pbkdf2_hash));
 
-        credential.set_string("v-s:salt", &HEXLOWER.encode(&salt), Lang::NONE);
-        credential.set_string("v-s:password", &HEXLOWER.encode(&pbkdf2_hash), Lang::NONE);
+        credential.set_string("v-s:salt", &HEXLOWER.encode(&salt), Lang::none());
+        credential.set_string("v-s:password", &HEXLOWER.encode(&pbkdf2_hash), Lang::none());
     } else {
-        credential.set_string("v-s:password", password, Lang::NONE);
+        credential.set_string("v-s:password", password, Lang::none());
     }
 }
 
