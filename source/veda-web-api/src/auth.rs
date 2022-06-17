@@ -76,6 +76,10 @@ pub(crate) async fn logout(
         Ok(_user_uri) => {
             return match auth.lock().await.logout(&params.ticket, uinf.addr) {
                 Ok(r) => {
+                    let mut t = ticket_cache.write.lock().await;
+                    t.empty(params.ticket.clone().unwrap_or_default());
+                    t.refresh();
+
                     log(Some(&start_time), &uinf, "logout", &format!("ticket={:?}, ip={:?}", params.ticket, uinf.addr), ResultCode::Ok);
                     Ok(HttpResponse::Ok().json(r))
                 },
