@@ -163,9 +163,10 @@ Codelet.change_document_status = function (process, status) {
         } else if (status == 'v-s:StatusExecution') {
           const doc = get_individual(process.ticket, ServerUtil.getUri(doc_id));
           if (doc && !doc['v-s:dateToPlan'] && (doc['v-s:count'] && doc['v-s:count'].length > 0)) {
-            set_in_document['v-s:dateFromPlan'] = ServerUtil.newDate(new Date().setHours(0, 0, 0, 0));
+            const dateToPlan = new Date(new Date().setHours(0, 0, 0, 0));
+            set_in_document['v-s:dateFromPlan'] = ServerUtil.newDate(dateToPlan);
             const countDays = doc['v-s:count'][0].data;
-            const dueDate = new Date(Date.now() + countDays*86400000).setHours(0, 0, 0, 0);
+            const dueDate = new Date(new Date(Date.now() + countDays*86400000).setHours(0, 0, 0, 0));
             set_in_document['v-s:dateToPlan'] = ServerUtil.newDate(dueDate);
           }
         }
