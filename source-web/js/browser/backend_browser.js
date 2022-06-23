@@ -194,7 +194,7 @@ BrowserBackend.query = function (ticket, queryStr, sort, databases, top, limit, 
   };
   return call_server(params).catch((backendError) => {
     if (backendError.code === 999) {
-      return wait().then(() => BrowserBackend.query(ticket, queryStr, sort, databases, reopen, top, limit, from, sql));
+      return wait().then(() => BrowserBackend.query(ticket, queryStr, sort, databases, top, limit, from, sql));
     }
     throw backendError;
   });
