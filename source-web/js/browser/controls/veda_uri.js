@@ -27,7 +27,7 @@ $.fn.veda_uri = function ( options ) {
    */
   function changeHandler () {
     if (control.val()) {
-      individual.id = control.val();
+      individual.id = control.val().replaceAll(' ', '');
     }
   }
 
