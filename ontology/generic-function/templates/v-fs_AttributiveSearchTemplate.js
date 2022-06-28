@@ -101,7 +101,7 @@ export const post = function (individual, template, container, mode, extra) {
     filesEls.each(function () {
       // must already loaded
       const fileIndivid = new veda.IndividualModel($(this).attr('resource'));
-      sumSize += fileIndivid['v-s:fileSize'][0];
+      sumSize += +fileIndivid['v-s:fileSize'][0];
     });
     if (sumSize > 1 * B_in_GB) {
       let sizeGB = sumSize / B_in_GB;
