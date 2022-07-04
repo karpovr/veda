@@ -953,15 +953,20 @@ v-s:railNumber
   rdfs:label "rail number"@en ;
   rdfs:range xsd:string ;
 .
-v-s:cleaningWorkplaceWithinRadius
+v-s:cleaningWorkplace_Radius
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Очистка рабочего места в радиусе R (при высоте работ h), до h/R"@ru ;
-  rdfs:label "Cleaning of the workplace within radius R (at work height h), up to h/R"@en ;
-  rdfs:range xsd:string ;
+  rdfs:label "Очистка рабочего места в радиусе R (метры)"@ru ;
+  rdfs:label "Cleaning of the workplace within radius R (metr)"@en ;
+  rdfs:range xsd:decimal ;
 .
-
-
+v-s:cleaningWorkplace_Height
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Очистка рабочего места, высота (метры)"@ru ;
+  rdfs:label "Cleaning of the workplace, height (metr)"@en ;
+  rdfs:range xsd:decimal ;
+.
 
 #v-s:hasComment
 #v-s:hasLink
