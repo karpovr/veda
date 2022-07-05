@@ -768,6 +768,15 @@ function processTemplate (individual, container, wrapper, templateMode) {
           });
         }
       };
+      const filterEmbedded = function(propertyUri, values) {
+        if (propertyUri !== rel_uri) return;
+        if (embedded.length) {
+          for (let elem of relContainer.children) {
+            const index = embedded.indexOf(elem);
+            if ( index >= 0 ) embedded.splice(index, 1);
+          }
+        };
+      }
 
       const values = about.get(rel_uri);
 
@@ -775,6 +784,9 @@ function processTemplate (individual, container, wrapper, templateMode) {
         embeddedHandler(values);
         about.on(rel_uri, embeddedHandler);
         template.addEventListener('remove', () => about.off(rel_uri, embeddedHandler));
+
+        about.on('propertyModified', filterEmbedded);
+        template.addEventListener('remove', () => about.off(propertyModified, filterEmbedded));
       }
 
       about.on(rel_uri, propertyModifiedHandler);
@@ -1105,13 +1117,6 @@ function renderRelationValue ({about, isAbout, rel_uri, value, relContainer, rel
         about.removeValue(rel_uri, value);
         if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) && !value.isNew() ) {
           value.set('v-s:deleted', true);
-        } else {
-          rendered.forEach((node) => {
-            if (embedded.length) {
-              const index = embedded.indexOf(node);
-              if ( index >= 0 ) embedded.splice(index, 1);
-            }
-          });
         }
       });
       btnRemove.addEventListener('mouseenter', () => rendered.forEach((item) => item.classList.add('red-outline')));
