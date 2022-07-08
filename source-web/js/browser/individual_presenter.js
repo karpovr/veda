@@ -688,13 +688,6 @@ function processTemplate (individual, container, wrapper, templateMode) {
 
       const propertyModifiedHandler = function (propertyValues, limit_param) {
         curr_rendered = {};
-        if (!propertyValues.length) {
-          prev_rendered = {};
-          sort_required = false;
-          relContainer.innerHTML = '';
-          return;
-        }
-
         limit = limit_param || limit;
 
         return Promise.all(
@@ -722,7 +715,11 @@ function processTemplate (individual, container, wrapper, templateMode) {
           const prev_uris = Object.keys(prev_rendered);
           if (prev_uris.length) {
             const selector = prev_uris.map((uri) => `[resource="${BrowserUtil.escape4$(uri)}"]`).join(',');
-            relContainer.querySelectorAll(selector).forEach((node) => node.remove());
+            relContainer.querySelectorAll(selector).forEach((node) => {
+              const index = embedded.indexOf(node);
+              if (index >= 0) embedded.splice(index, 1);
+              node.remove()
+            });
           }
           if (sort_required) {
             const list = Array.from(relContainer.children).map((node) => relContainer.removeChild(node));
@@ -747,6 +744,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
             relContainer.append(moreButton);
           }
           prev_rendered = {...curr_rendered};
+          template.dispatchEvent(new Event('internal-validate'), {bubbles: true});
         });
       };
 
@@ -768,15 +766,6 @@ function processTemplate (individual, container, wrapper, templateMode) {
           });
         }
       };
-      const filterEmbedded = function(propertyUri, values) {
-        if (propertyUri !== rel_uri) return;
-        if (embedded.length) {
-          for (let elem of relContainer.children) {
-            const index = embedded.indexOf(elem);
-            if ( index >= 0 ) embedded.splice(index, 1);
-          }
-        };
-      }
 
       const values = about.get(rel_uri);
 
@@ -784,9 +773,6 @@ function processTemplate (individual, container, wrapper, templateMode) {
         embeddedHandler(values);
         about.on(rel_uri, embeddedHandler);
         template.addEventListener('remove', () => about.off(rel_uri, embeddedHandler));
-
-        about.on('propertyModified', filterEmbedded);
-        template.addEventListener('remove', () => about.off(propertyModified, filterEmbedded));
       }
 
       about.on(rel_uri, propertyModifiedHandler);
