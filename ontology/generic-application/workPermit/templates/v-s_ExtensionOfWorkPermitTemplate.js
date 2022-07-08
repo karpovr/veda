@@ -11,8 +11,8 @@ export const pre = function (individual, template, container, mode, extra) {
   template.on('validate', function () {
     const result = {};
     let dateState = false;
-    if (individual.hasValue('v-s:dateToPlan') && individual.hasValue('v-s:dateFromPlan')) {
-      dateState = individual['v-s:dateToPlan'][0] > individual['v-s:dateFromPlan'][0]
+    if (individual.hasValue('v-s:dateTo') && individual.hasValue('v-s:dateFrom')) {
+      dateState = individual['v-s:dateTo'][0] > individual['v-s:dateFrom'][0]
     }
     if (!dateState) {
       result['v-s:dateToPlan'] = {
@@ -20,8 +20,8 @@ export const pre = function (individual, template, container, mode, extra) {
         cause: ['mnd-s:DateFromToPlan_Bundle'],
       };
     }
-    if (individual.hasValue('v-s:dateFromPlan') && individual['v-s:dateFromPlan'][0] < new Date() && individual.isNew()) {
-      result['v-s:dateFromPlan'] = {
+    if (individual.hasValue('v-s:dateFrom') && individual['v-s:dateFrom'][0] < new Date() && individual.isNew()) {
+      result['v-s:dateFrom'] = {
         state: false,
         cause: ['v-ui:minCardinality'],
       };
@@ -29,8 +29,8 @@ export const pre = function (individual, template, container, mode, extra) {
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
-  if (individual.hasValue('v-s:dateFromPlan') && individual['v-s:dateFromPlan'][0] >= new Date() && individual.isNew()) {
-    result['v-s:dateFromPlan'] = {
+  if (individual.hasValue('v-s:dateFrom') && individual['v-s:dateFrom'][0] >= new Date() && individual.isNew()) {
+    result['v-s:dateFrom'] = {
       state: false,
       cause: ['v-ui:minCardinality'],
     };
