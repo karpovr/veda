@@ -35,7 +35,7 @@
 
 
 ## II. System requirements
-  - OS - Ubuntu 18.04, 20.04 LTS 64-Bit. For run on common Linux-based operating systems, use Veda-x86_64.AppImage
+  - OS - Ubuntu 18.04, 20.04, 22.04 LTS 64-Bit. For run on common Linux-based operating systems, use Veda-x86_64.AppImage
 
   - RAM - 1Gb
 
