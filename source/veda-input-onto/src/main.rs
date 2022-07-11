@@ -346,7 +346,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
                 url += "/";
             }
 
-            prefix_indv.set_string("v-s:fullUrl", &url, Lang::NONE);
+            prefix_indv.set_string("v-s:fullUrl", &url, Lang::none());
             let res = backend.mstorage_api.update(systicket, IndvOp::Put, &prefix_indv);
             if res.result != ResultCode::Ok {
                 error!("failed to store {}", prefix_indv.get_obj().as_json_str());
@@ -365,7 +365,7 @@ fn processing_files(files_paths: Vec<PathBuf>, hash_list: &mut HashMap<String, S
 
 fn full_file_info_indv(onto_id: &str, individuals: &mut HashMap<String, Individual>, new_indv: &mut Individual, hash: Option<String>, path: &str, name: &str) {
     if let Some(h) = hash {
-        new_indv.set_string("v-s:hash", &h, Lang::NONE);
+        new_indv.set_string("v-s:hash", &h, Lang::none());
     }
     new_indv.set_uri("rdf:type", "v-s:TTLFile");
     //    new_indv.obj.set_uri("v-s:created", Resource(DataType.Datetime, Clock.currTime().toUnixTime()));
@@ -431,7 +431,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                     Literal(l) => match l {
                         Simple {
                             value,
-                        } => indv.add_string(&predicate, value, Lang::NONE),
+                        } => indv.add_string(&predicate, value, Lang::none()),
                         LanguageTaggedString {
                             value,
                             language,
@@ -441,7 +441,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                             datatype,
                         } => match datatype.iri.replace('#', "/").as_str() {
                             "http://www.w3.org/2001/XMLSchema/string" => {
-                                indv.add_string(&predicate, value, Lang::NONE);
+                                indv.add_string(&predicate, value, Lang::none());
                             },
                             "http://www.w3.org/2001/XMLSchema/nonNegativeInteger" => {
                                 if let Ok(v) = value.parse::<i64>() {
@@ -499,7 +499,7 @@ fn parse_file(file_path: &str, individuals: &mut HashMap<String, Individual>, pr
                     }
 
                     if let Some(s) = prefixes.id2orignamespaces.get(indv.get_id()) {
-                        indv.set_string("v-s:fullUrl", s, Lang::NONE);
+                        indv.set_string("v-s:fullUrl", s, Lang::none());
                     }
 
                     if let Some(s) = prefixes.id2namespaces.get(indv.get_id()) {
