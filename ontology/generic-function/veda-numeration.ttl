@@ -149,6 +149,12 @@ v-s:RegistrationNumberIdeaAndProjectsNumeration
   v-s:enumeratedProperty v-s:registrationNumber ;
   v-s:hasNumerationRule v-s:IdeaAndProjectsNumeration ;
 .
+v-s:RegistrationNumberNumerationWithoutType
+  rdf:type v-s:Numeration ;
+  v-s:enumeratedProperty v-s:registrationNumber ;
+  v-s:hasNumerationRule v-s:NumerationWithoutType ;
+.
+
 # --- Rules ---
 
 v-s:SimpleNumerationYear
@@ -280,6 +286,24 @@ v-s:IdeaAndProjectsNumeration
 {
     if (!individual['rdf:type']) return '';
   return "numeration-scope_ideas_and_projects" + (new Date()).getFullYear();
+})
+""" ;
+  v-s:numerationGetNextValue """
+(function getNextValue(ticket, scope) {
+  return veda.Numerator.getNextValueSimple(ticket, scope, (new Date()).getFullYear()*10000+1);
+})
+""" ;
+.
+v-s:NumerationWithoutType
+  rdf:type v-s:NumerationRule ;
+  rdfs:isDefinedBy v-s: ;
+  rdfs:label "Нумерация 4+4 (год+номер) без учета класса в пределах года"@ru ;
+  rdfs:label "Numeration 4+4 (year+number) without class as scope"@en ;
+  v-s:numerationScope """
+(function (ticket, individual)
+{
+    if (!individual['rdf:type']) return '';
+  return "numeration-scope_project_capex_and_initiative_capex" + (new Date()).getFullYear();
 })
 """ ;
   v-s:numerationGetNextValue """
