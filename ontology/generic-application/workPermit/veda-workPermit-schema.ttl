@@ -1064,6 +1064,16 @@ v-s:PS_hasResultsOfMeasurementsOfHarmfulFactors_ExtensionOfWorkPermit
   v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
+v-s:PS_dates_ExtensionOfWorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:ExtensionOfWorkPermit ;
+  v-ui:forProperty v-s:dateFrom ;
+  v-ui:forProperty v-s:dateTo ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
+  rdfs:label "Спецификация dateFrom и dateTo для класса v-s:ExtensionOfWorkPermit"@ru ;
+  rdfs:label "Specification for dateFrom and dateTo for v-s:ExtensionOfWorkPermit"@en ;
+.
 
 
 
