@@ -12,29 +12,26 @@ export const pre = function (individual, template, container, mode, extra) {
     const result = {};
     let dateState = false;
     if (individual.hasValue('v-s:dateTo') && individual.hasValue('v-s:dateFrom')) {
-      dateState = individual['v-s:dateTo'][0] > individual['v-s:dateFrom'][0]
+      if (individual['v-s:dateTo'][0] <= individual['v-s:dateFrom'][0]) {
+        result['v-s:dateTo'] = {
+          state: false,
+          cause: ['mnd-s:DateFromToPlan_Bundle'],
+        };  
+      }
     }
-    if (!dateState) {
-      result['v-s:dateToPlan'] = {
-        state: false,
-        cause: ['mnd-s:DateFromToPlan_Bundle'],
-      };
-    }
-    if (individual.hasValue('v-s:dateFrom') && individual['v-s:dateFrom'][0] < new Date() && individual.isNew()) {
-      result['v-s:dateFrom'] = {
-        state: false,
-        cause: ['v-ui:minCardinality'],
-      };
+    if (individual.hasValue('v-s:dateFrom')) {
+      //смещение в 5 минут, так как поля со временем
+      const shift = 1000 * 60 * 5;
+      const diff = individual['v-s:dateFrom'][0] - new Date();
+      if (diff < -shift && individual.isNew()) {
+        result['v-s:dateFrom'] = {
+          state: false,
+          cause: ['v-ui:minCardinality'],
+        };
+      }
     }
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
-
-  if (individual.hasValue('v-s:dateFrom') && individual['v-s:dateFrom'][0] >= new Date() && individual.isNew()) {
-    result['v-s:dateFrom'] = {
-      state: false,
-      cause: ['v-ui:minCardinality'],
-    };
-  }
 
   // права зелёной кнопки
   const _classResults = new IndividualModel('v-s:ResultsOfMeasurementsOfHarmfulFactors');
