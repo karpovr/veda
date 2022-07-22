@@ -74,7 +74,7 @@ export const html = `
     <td about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate"></td>
     <td>
       <a href="#/@" about="@" property="rdfs:label"></a>
-      <div about="@" property="v-s:description"></div>
+      <div about="@" property="v-s:description" style="white-space: pre-line;"></div>
     </td>
     <td about="@" property="v-s:created"></td>
     <td>
