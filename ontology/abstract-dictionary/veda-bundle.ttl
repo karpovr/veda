@@ -417,7 +417,7 @@ v-s:ChangeSizeBundle
 
 v-s:AbsenceUntilBundle
   rdf:type v-s:Bundle;
-  rdfs:label "Отстутствует по:"@ru ;
+  rdfs:label "Отсутствует по:"@ru ;
   rdfs:label "Absence until:"@en ;
 .
 

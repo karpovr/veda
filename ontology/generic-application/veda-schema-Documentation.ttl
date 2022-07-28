@@ -80,8 +80,8 @@ v-s:recommendationDescription
 .
 v-s:isPositiveObservation
   rdf:type owl:DatatypeProperty ;
-  rdfs:label "Положительное наблюдение?"@ru ;
-  rdfs:label "Positive observation?"@en ;
+  rdfs:label "Положительное наблюдение"@ru ;
+  rdfs:label "Positive observation"@en ;
   rdfs:range xsd:boolean ;
   rdfs:domain v-s:Observation ;
 .
