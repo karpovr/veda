@@ -147,7 +147,7 @@ export default function AppPresenter (manifest) {
    * @return {Individual|Date|string|number|null}
    */
   function parse (value) {
-    if (!Number.isNaN(value.split(' ').join('').split(',').join('.'))) {
+    if (!Number.isNaN(parseFloat(value.split(' ').join('').split(',').join('.')))) {
       return parseFloat(value.split(' ').join('').split(',').join('.'));
     }
     if (!Number.isNaN(Date.parse(value))) {
