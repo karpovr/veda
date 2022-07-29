@@ -7,7 +7,6 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   const loadIndicator = $('#load-indicator');
-
   const tabs = $('#box-tabs li[data-type]', template);
   tabs.click(function (e) {
     e.preventDefault();
@@ -18,9 +17,8 @@ export const pre = function (individual, template, container, mode, extra) {
     self.addClass('active');
     individual['activeTab'] = self.data('type');
     $('.tabContainer', template).empty();
-
     if (individual['activeTab'] == 'search') {
-      return new IndividualModel('v-s:Contacts').present($('.tabContainer', template), 'v-s:ContactsStructureTemplate').then(function () {
+      return new IndividualModel('v-s:Contacts').present($('.tabContainer', template), 'v-s:ContactsStructureTemplate', undefined, extra).then(function () {
         loadIndicator.hide();
       });
     } else if (individual['activeTab'] == 'my') {

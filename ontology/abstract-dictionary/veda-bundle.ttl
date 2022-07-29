@@ -444,3 +444,9 @@ v-s:PositionsBundle
   rdfs:label "Должности"@ru ;
   rdfs:label "Positions"@en ;
 .
+
+v-s:ShowInContactsBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Показать в контактах"@ru ;
+  rdfs:label "Show in Contacts"@en ;
+.

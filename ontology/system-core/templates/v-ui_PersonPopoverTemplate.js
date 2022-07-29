@@ -4,6 +4,15 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
+  if (individual.id.indexOf('cfg:') < 0 && individual.hasValue('v-s:defaultAppointment')) {
+    $('.open-structure', template).click(function() {
+      const defaultAppointmentUri = individual['v-s:defaultAppointment'][0].id;
+      window.open('/#/v-s:Contacts////target='+defaultAppointmentUri);
+    }
+  } else {
+    $('.open-structure', template).remove();
+  }
+
   if (!individual.hasValue('v-s:hasImage')) {
     $('.media-left', template).remove();
   }
@@ -55,6 +64,9 @@ export const html = `
           </small>
         </div>
       </div>
+      <small class="open-structure pointer">
+        <a about="v-s:ShowInContactsBundle" property="rdfs:label"></a>
+      </small>
     </div>
   </div>
 `;

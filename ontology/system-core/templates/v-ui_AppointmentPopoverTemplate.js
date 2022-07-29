@@ -4,6 +4,14 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
+  if (individual.id.indexOf('cfg:') < 0) {
+    $('.open-structure', template).click(function() {
+      window.open('/#/v-s:Contacts////target='+individual.id);
+    });
+  } else {
+    $('.open-structure', template).remove();
+  }
+
   if (individual.hasValue('v-s:employee')) {
     return individual['v-s:employee'][0].load().then(function (employee) {
       if (!employee.hasValue('v-s:hasImage')) {
@@ -20,7 +28,7 @@ export const html = `
   <div class="media" style="margin-top:0px;">
     <span class="close">&nbsp;&times;</span>
     <div class="media-left" about="@" rel="v-s:employee" style="width:96px">
-      <a href="#/@" about="@" rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></a>
+        <a href="#/@" about="@" rel="v-s:hasImage" data-template="v-ui:ImageTemplate"></a>
     </div>
     <div class="media-body" style="width:auto;">
       <strong class="media-heading" about="@" rel="v-s:employee">
@@ -62,6 +70,9 @@ export const html = `
           </div>
         </div>
       </div>
+      <small class="open-structure pointer">
+        <a about="v-s:ShowInContactsBundle" property="rdfs:label"></a>
+      </small>
     </div>
   </div>
 `;

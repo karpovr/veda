@@ -32,6 +32,20 @@ export const pre = function (individual, template, container, mode, extra) {
       } else {
         $('#selfOrg', template).remove();
       }
+    }).then(function () {
+      if (extra != undefined && extra.target != undefined) {
+        const promise = extra.target[0] instanceof IndividualModel ? Promise.resolve(extra.target[0]) : new veda.IndividualModel(extra.target[0]).load();
+        return promise
+          .then(function(appointment) {
+            const splited = appointment['rdfs:label'][0].split(' ');
+            const searchText = splited.length > 1 ? [splited[0], splited[1]].join(' ') : splited[0];
+            $('#searchText input', template).val(searchText);
+            individual.targetToCards = appointment['v-s:parentUnit'][0].id;
+            individual['v-s:managedOrganization'] = appointment['v-s:parentOrganization'];
+          }).catch(function(exp) {
+            console.log(exp);
+          });
+      }
     });
 };
 
