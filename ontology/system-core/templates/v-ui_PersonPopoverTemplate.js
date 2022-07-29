@@ -8,7 +8,7 @@ export const pre = function (individual, template, container, mode, extra) {
     $('.open-structure', template).click(function() {
       const defaultAppointmentUri = individual['v-s:defaultAppointment'][0].id;
       window.open('/#/v-s:Contacts////target='+defaultAppointmentUri);
-    }
+    });
   } else {
     $('.open-structure', template).remove();
   }
