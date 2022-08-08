@@ -919,8 +919,9 @@ Util.queryFromIndividual = function (individual) {
               const lineQueries = lines.map((line) => {
                 const words = line
                   .trim()
-                  .replace(/[-*\s]+/g, ' ')
-                  .split(' ');
+                  .replace(/[-*\s'"]+/g, ' ')
+                  .split(' ')
+                  .filter(Boolean);
                 line = words.map((word) => {
                   return '+' + word + '*';
                 }).join(' ');

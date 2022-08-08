@@ -28,8 +28,8 @@ function ftQuery (prefix, input, sort, withDeleted) {
       if (special) {
         return special;
       }
-      const words = line.trim().replace(/[-*\s]+/g, ' ').split(' ');
-      return words.filter(Boolean).map((word) => {
+      const words = line.trim().replace(/[-*\s'"]+/g, ' ').split(' ').filter(Boolean);
+      return words.map((word) => {
         return '\'*\' == \'' + word + '*\'';
       }).join(' && ');
     });
