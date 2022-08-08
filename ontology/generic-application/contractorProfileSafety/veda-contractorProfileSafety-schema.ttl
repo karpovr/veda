@@ -167,6 +167,8 @@ v-s:hasMedicalCheckupCertificate
   rdfs:label "Медосмотр"@ru ;
   rdfs:label "Medical checkup"@en ;
   rdfs:range v-s:MedicalCheckupCertificationDocument ;
+  v-ui:info "Медицинское заключение мед. учреждения – это подтверждение о прохождении водителем периодического или предварительного медицинского осмотра согласно Приказа  Минздрава России от 28.01.2021 N 29н"@ru ;
+  v-ui:info "Medical report med. institutions are a confirmation that the driver has passed a periodic or preliminary medical examination in accordance with the Order of the Ministry of Health of the Russian Federation dated 28.01.2021 N 29n"@en ;
 .
 v-s:hasMedicalCheckupCertificateForWorkers
   rdf:type owl:ObjectProperty ;
@@ -188,6 +190,8 @@ v-s:hasLaborSafetyCertificate
   rdfs:label "Проверка знаний по ОТ"@ru ;
   rdfs:label "Labor safety certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
+  v-ui:info "Протокол, подтверждающий проведение обучения и проверки знаний требований охраны труда сотрудника. Постановление Правительства РФ от 24.12.2021 N 2464 «О порядке обучения по охране труда и проверки знания требований охраны труда» с 01.09.2022 (Постановление Минтруда России, Минобразования России от 13.01.2003 N 1/29 до 01.09.2022)"@ru ;
+  v-ui:info "A protocol confirming the training and verification of knowledge of the employee's occupational safety requirements. Decree of the Government of the Russian Federation of 12/24/2021 N 2464 «On the procedure for training in occupational safety and testing knowledge of occupational safety requirements» from 01.09.2022 (Resolution of the Ministry of Labor of Russia, Ministry of Education of Russia of 13.01.2003 N 1/29 to 01.09.2022)"@en ;
 .
 v-s:hasLaborSafetyCertificateForWorkers
   rdf:type owl:ObjectProperty ;
