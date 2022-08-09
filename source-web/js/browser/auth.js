@@ -10,8 +10,10 @@ import Sha256 from '../common/lib/sha256.js';
 
 import {delegateHandler, clear} from '../browser/dom_helpers.js';
 
+import Captcha from 'captcha';
+
 /**
- * Authenticat user using ntlm provider
+ * Authenticate user using ntlm provider
  * @param {String} path
  * @param {String} login
  * @param {String} password
@@ -227,6 +229,41 @@ function handleLoginError (error) {
   hide(ok);
   let okHandler = () => true;
 
+  // Captcha
+
+  let myCaptcha = new Captcha({
+    el: "#captcha-input",
+    requiredValue: '',
+    clearOnSubmit: true,
+    resetOnError: true,
+    focusOnError: true,
+    canvasClass: "captcha-canvas",
+    canvasStyle: {
+      width: 100,
+      height: 15,
+      textBaseline: "top",
+      font: "15px sans-serif",
+      textAlign: "left",
+      fillStyle: "#000"
+    },
+    callback: function(response, $captchaInputElement, numberOfTries) {
+      if (response === 'success') {
+        Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, .fieldset'), (item) => hide(item));
+        show(enterLoginPassword);
+      }
+      if (response === 'error') {
+        return;
+      }
+    }
+  });
+
+  function captchaSubmit(e) {
+    myCaptcha.validate();
+  };
+
+  document.getElementById("captcha-submit").addEventListener("click", captchaSubmit);
+  document.getElementById("captcha-input").addEventListener("change", captchaSubmit);
+
   switch (error.code) {
   case 0: // Network error
     show(networkError);
@@ -348,13 +385,6 @@ function handleLoginError (error) {
   case 473: // Authentication failed
     show(loginFailedError);
     hide(enterLoginPassword);
-    show(ok);
-    okHandler = function () {
-      hide(loginFailedError);
-      show(enterLoginPassword);
-      ok.removeEventListener('click', okHandler);
-      hide(ok);
-    };
     break;
   default:
     show(unavailableError);

@@ -30,6 +30,7 @@
     "bpmn-js/":"/node_modules/bpmn-js/dist/",
     "bpmn-js-properties-panel/":"/node_modules/bpmn-js-properties-panel/dist/",
     "bpmn-moddle":"/node_modules/bpmn-moddle/dist/bpmn-moddle.umd.prod.js",
-    "camunda-bpmn-moddle":"/node_modules/camunda-bpmn-moddle/resources/camunda.json"
+    "camunda-bpmn-moddle":"/node_modules/camunda-bpmn-moddle/resources/camunda.json",
+    "captcha": "/node_modules/js-captcha/dist/js/index.min.js"
   }
 }
