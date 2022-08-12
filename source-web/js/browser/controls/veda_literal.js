@@ -118,7 +118,7 @@ function veda_literal (options) {
   };
   if (spec && spec.hasValue('v-ui:tooltip')) {
     input.tooltip({
-      title: spec['v-ui:tooltip'].join(', '),
+      title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
       placement: 'bottom',
       container: 'body',
       trigger: 'manual',

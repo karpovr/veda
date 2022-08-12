@@ -63,7 +63,7 @@ function veda_dateTime (options) {
 
   if (spec && spec.hasValue('v-ui:tooltip')) {
     this.tooltip({
-      title: spec['v-ui:tooltip'].join(', '),
+      title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
       placement: 'auto left',
       container: 'body',
       trigger: 'manual',

@@ -2,6 +2,8 @@
 
 import $ from 'jquery';
 
+import Util from '../../common/util.js';
+
 $.fn.veda_boolean = function ( options ) {
   const opts = {...defaults, ...options};
   const control = $( opts.template );
@@ -59,7 +61,7 @@ $.fn.veda_boolean = function ( options ) {
       }
       if (spec && spec.hasValue('v-ui:tooltip')) {
         control.parents('label').tooltip({
-          title: spec['v-ui:tooltip'].join(', '),
+          title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
           placement: 'bottom',
           container: control,
           trigger: 'hover',

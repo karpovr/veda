@@ -2,6 +2,8 @@
 
 import $ from 'jquery';
 
+import Util from '../../common/util.js';
+
 import IndividualModel from '../../common/individual_model.js';
 
 import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
@@ -109,7 +111,7 @@ $.fn.veda_checkbox = function (params) {
 
   if (spec && spec.hasValue('v-ui:tooltip')) {
     this.tooltip({
-      title: spec['v-ui:tooltip'].join(', '),
+      title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
       placement: 'left',
       container: 'body',
       trigger: 'hover',

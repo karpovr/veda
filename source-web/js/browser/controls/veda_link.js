@@ -565,7 +565,7 @@ $.fn.veda_link = function ( options ) {
 
   if (spec && spec.hasValue('v-ui:tooltip')) {
     control.tooltip({
-      title: spec['v-ui:tooltip'].join(', '),
+      title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
       placement: 'top',
       container: 'body',
       trigger: 'manual',
