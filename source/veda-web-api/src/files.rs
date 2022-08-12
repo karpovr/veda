@@ -62,7 +62,7 @@ pub(crate) async fn load_file(
         let metadata = file.metadata()?;
         if let Ok(mut resp) = file.respond_to(&req).await {
             let file_path = Path::new(&original_file_name);
-            let file_ext = file_path.extension().unwrap().to_str().unwrap();
+            let file_ext = file_path.extension().unwrap_or_default().to_str().unwrap();
             let file_mime = actix_files::file_extension_to_mime(file_ext);
 
             let last_modified =
