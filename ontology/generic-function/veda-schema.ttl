@@ -60,6 +60,13 @@ v-s:thumbnail
   rdfs:label "Thumbnail"@en ;
   rdfs:range v-s:File ;
 .
+v-s:digitalSignature
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:File ;
+  rdfs:label "Электронная подпись"@ru ;
+  rdfs:label "Digital signature"@en ;
+  rdfs:range v-s:File ;
+.
 # ------------------------------------------------------------
 v-s:ClassifiedFile
   rdf:type owl:Class ;
@@ -367,7 +374,7 @@ if (prev_state["v-s:parentUnit"] && document["v-s:parentUnit"]) {
       };
       set_in_individual(veda.ticket, setInAppointment, _event_id);
     }
-  }  
+  }
 }
 """
 .

@@ -251,6 +251,7 @@ self.addEventListener('fetch', function (event) {
   const isNTLM = NTLM.indexOf(pathname) >= 0;
   const isFILES = pathname.indexOf('/files') === 0;
   const isSTATIC = !isAPI && !isFILES && !isNTLM;
+  const isEXTENSION = url.protocol === 'chrome-extension:';
   const METHOD = event.request.method;
   if (isAPI && METHOD === 'GET') {
     event.respondWith(handleAPIGet(event));
@@ -260,7 +261,7 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(handleAPIPut(event));
   } else if (isFILES && METHOD === 'GET') {
     event.respondWith(handleFetch(event, FILES));
-  } else if (isSTATIC && METHOD === 'GET') {
+  } else if (isSTATIC && METHOD === 'GET' && !isEXTENSION) {
     event.respondWith(handleFetch(event, STATIC));
   }
 });
