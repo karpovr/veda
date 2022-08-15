@@ -48,16 +48,16 @@ export const pre = async function (individual, template, container, mode, extra)
   template = $(template);
   container = $(container);
 
-  if (!(await cryptoPro.isValidSystemSetup())) {
+  try {
+    const isValidCryptoSetup = await cryptoPro.isValidSystemSetup();
+    if (!isValidCryptoSetup) {
+      throw new Error("Invalid crypto setup");
+    }
+  } catch (error) {
     $('.sys-info, .sign', template).remove();
+    console.log(error);
     return;
   }
-
-  $('.sys-info', template).click(async () => {
-    console.log('Is valid setup', await cryptoPro.isValidSystemSetup());
-    console.log('Crypto info', await cryptoPro.getSystemInfo());
-    console.log('User certificates', await cryptoPro.getUserCertificates());
-  });
 
   $('.sign', template).click(async () => {
     const response = await fetch(`/files/${individual.id}`);
@@ -119,27 +119,32 @@ export const html = `
       <em about="rdfs:comment" property="rdfs:label" class="-view edit search"></em>
       <strong property="rdfs:comment" class="view -edit -search"></strong>
       <veda-control data-type="string" property="rdfs:comment" class="-view edit search"></veda-control>
-      <hr class="margin-sm view -edit -search" />
       <div>
         <span id="icon" class="label label-primary"></span>
         <a href="/files/@">
           <span about="@" property="v-s:fileName"></span>
         </a>
       </div>
-      <div class="view -edit -search" style="font-style:italic">
+      <i class="view -edit -search">
         <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small property="v-s:created"></small>
-      </div>
+      </i>
       <hr class="margin-sm"/>
       <strong about="v-s:digitalSignature" property="rdfs:label" class="view edit search"></strong>
-      <span about="@" rel="v-s:digitalSignature" data-template="v-ui:FileMinTemplate" class="view -edit -search"></span>
+      <!--span about="@" rel="v-s:digitalSignature" data-template="v-ui:FileMinTemplate" class="view -edit -search"></span-->
       <div rel="v-s:digitalSignature" data-template="v-ui:FileMinTemplate" class="-view edit search"></div>
+      <ul rel="v-s:digitalSignature" class="view -edit -search" style="padding-inline-start: 0em; margin-inline-start: 1em;">
+        <li class="no-margin">
+          <a href="/files/@">
+            <span about="@" property="v-s:fileName"></span>
+          </a>
+          <i class="view -edit -search"> <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small property="v-s:created"></small> </i>
+        </li>
+      </ul>
     </div>
     <div class="actions panel-footer">
       <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
-      <button class="sys-info btn btn-default">Sys info</button>
-      <button class="sign btn btn-default">Sign</button>
+      <button class="sign btn btn-info">Подписать</button>
     </div>
-
     <dialog id="certificate-dialog">
       <form id="certificate-form" method="dialog">
         <div class="form-group">
