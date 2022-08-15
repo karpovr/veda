@@ -66,7 +66,6 @@ export const pre = async function (individual, template, container, mode, extra)
     }
     const contents = await response.arrayBuffer();
     const hash = await cryptoPro.createHash(contents);
-    console.log('hash', hash);
     const certificates = await cryptoPro.getUserCertificates();
     if (certificates.length > 1) {
       const dialog = document.getElementById('certificate-dialog');
