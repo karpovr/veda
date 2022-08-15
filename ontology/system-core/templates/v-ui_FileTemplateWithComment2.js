@@ -1,5 +1,6 @@
 import $ from 'jquery';
-import cryptoPro from 'crypto-pro';
+import { CryptoPro } from 'ruscryptojs';
+import notify from '/js/browser/notify.js';
 import CommonUtil from '/js/common/util.js';
 import IndividualModel from '/js/common/individual_model.js';
 
@@ -48,25 +49,23 @@ export const pre = async function (individual, template, container, mode, extra)
   template = $(template);
   container = $(container);
 
+  const cryptoPro = new CryptoPro;
   try {
-    const isValidCryptoSetup = await cryptoPro.isValidSystemSetup();
-    if (!isValidCryptoSetup) {
-      throw new Error("Invalid crypto setup");
-    }
+    const cryptoProInfo = await cryptoPro.init();
+    console.log('CryptoPro initialized', cryptoProInfo);
   } catch (error) {
-    $('.sys-info, .sign', template).remove();
+    $('.add-sign, .verify-sign', template).remove();
     console.log(error);
     return;
   }
 
-  $('.sign', template).click(async () => {
-    const response = await fetch(`/files/${individual.id}`);
-    if (!response.ok) {
+  $('.add-sign', template).click(async () => {
+    const fileResponse = await fetch(`/files/${individual.id}`);
+    if (!fileResponse.ok) {
       throw new Error('Network error.');
     }
-    const contents = await response.arrayBuffer();
-    const hash = await cryptoPro.createHash(contents);
-    const certificates = await cryptoPro.getUserCertificates();
+    const dataToSign = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+    const certificates = await cryptoPro.listCertificates();
     if (certificates.length > 1) {
       const dialog = document.getElementById('certificate-dialog');
       const select = document.getElementById('certificate-select');
@@ -74,7 +73,7 @@ export const pre = async function (individual, template, container, mode, extra)
       if (!select.children.length) {
         certificates.forEach((certificate) => {
           const option = document.createElement('option');
-          option.value = certificate.thumbprint;
+          option.value = certificate.id;
           option.label = certificate.name;
           select.appendChild(option);
         });
@@ -84,20 +83,47 @@ export const pre = async function (individual, template, container, mode, extra)
         });
         dialog.addEventListener('close', async () => {
           const thumbprint = dialog.returnValue;
-          const certificate = await cryptoPro.getCertificate(thumbprint);
-          const signature = await cryptoPro.createDetachedSignature(certificate.thumbprint, hash);
-          await createSignatureFile(signature, certificate.name, individual);
+          const certificate = await cryptoPro.certificateInfo(thumbprint);
+          const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
+          await createSignatureFile(signature, certificate.Name, individual);
         });
       }
       dialog.showModal();
     } else if (certificates.length === 1) {
-      const certificate = certificates[0];
-      const signature = await cryptoPro.createDetachedSignature(certificate.thumbprint, hash);
-      await createSignatureFile(signature, certificate.name, individual);
+      const certificate = await cryptoPro.certificateInfo(certificates[0].id);
+      const signature = await cryptoPro.createDetachedSignature(certificate.Thumbprint, hash);
+      await createSignatureFile(signature, certificate.Name, individual);
     } else {
       alert('Ошибка: Нет доступных сертификатов для подписи.');
     }
   });
+
+  $('.verify-sign', template).click(async () => {
+    if (!individual.hasValue('v-s:digitalSignature')) {
+      alert('Электронные подписи отсутствуют');
+      return;
+    }
+    const fileResponse = await fetch(`/files/${individual.id}`);
+    if (!fileResponse.ok) {
+      throw new Error('Network error.');
+    }
+    const dataToCheck = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+
+    try {
+      const verifyResult = await Promise.all(individual.get('v-s:digitalSignature').map(async (signatureIndividual) => {
+        const signatureResponse = await fetch(`/files/${signatureIndividual.id}`);
+        if (!signatureResponse.ok) {
+          throw new Error('Network error.');
+        }
+        const signature = await signatureResponse.text();
+        return await cryptoPro.verifySign(dataToCheck, signature);
+      }));
+      console.log(verifyResult);
+    } catch (error) {
+      alert(error);
+    }
+  });
+
 };
 
 export const post = async function (individual, template, container, mode, extra) {
@@ -142,7 +168,8 @@ export const html = `
     </div>
     <div class="actions panel-footer">
       <span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span>
-      <button class="sign btn btn-info">Подписать</button>
+      <button class="add-sign btn btn-info">Подписать</button>
+      <button class="verify-sign btn btn-info">Проверить</button>
     </div>
     <dialog id="certificate-dialog">
       <form id="certificate-form" method="dialog">
