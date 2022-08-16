@@ -715,12 +715,12 @@ v-ui:FileTemplateWithComment
   v-ui:forClass v-s:File ;
   v-ui:template "v-ui_FileTemplateWithComment.js" ;
 .
-v-ui:FileTemplateWithComment2
+v-ui:FileTemplateWithSignature
   rdf:type v-ui:ClassTemplate ;
-  rdfs:label "Шаблон для файла 2"@ru ;
-  rdfs:label "File template 2"@en ;
+  rdfs:label "Шаблон для файла с электронной подписью"@ru ;
+  rdfs:label "File template with digital signature"@en ;
   #v-ui:forClass v-s:File ;
-  v-ui:template "v-ui_FileTemplateWithComment2.js" ;
+  v-ui:template "v-ui_FileTemplateWithSignature.js" ;
 .
 v-ui:ImageTemplate
   rdf:type v-ui:ClassTemplate ;
