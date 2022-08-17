@@ -5,6 +5,32 @@ import IndividualModel from '/js/common/individual_model.js';
 
 const cryptoPro = new CryptoPro();
 
+function decorator (fn, pre, post, err) {
+  return async function (...args) {
+    try {
+      pre && await pre.call(this, ...args);
+      const result = await fn.call(this, ...args);
+      post && await post.call(this, ...args);
+      return result;
+    } catch (error) {
+      err && await err.call(this, ...args);
+      throw error;
+    }
+  };
+}
+
+function showSpinner () {
+  document.getElementById('load-indicator').style.display = '';
+}
+
+function hideSpinner () {
+  document.getElementById('load-indicator').style.display = 'none';
+}
+
+function spinnerDecorator (fn) {
+  return decorator(fn, showSpinner, hideSpinner, hideSpinner);
+}
+
 async function createSignatureFile (signature, name, parent) {
   const uri = CommonUtil.guid();
   const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
@@ -46,47 +72,61 @@ async function uploadSignatureFile (signature, path, uri) {
   }
 }
 
-function showSpinner () {
-  document.getElementById('load-indicator').style.display = '';
+async function init () {
+  try {
+    const cryptoProInfo = await cryptoPro.init();
+    console.log('CryptoPro initialized', cryptoProInfo);
+  } catch (error) {
+    if (error.message === 'Can\'t find object by id') {
+      confirm('Ошибка КриптоПро Browser plugin.\nОбновите страницу.') && window.location.reload();
+    }
+    console.log('Initialization failed', error);
+    throw error;
+  }
 }
 
-function hideSpinner () {
-  document.getElementById('load-indicator').style.display = 'none';
+async function getDataToSign (url) {
+  const fileResponse = await fetch(url);
+  if (!fileResponse.ok) {
+    throw new Error('Network error.');
+  }
+  const dataToSign = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+  return dataToSign;
+}
+
+async function getCertificates () {
+  let certificates = [];
+  try {
+    certificates = (await cryptoPro.listCertificates()).sort((a, b) => a.name > b.name ? 1 : -1);
+  } catch (error) {
+    if (error.message === 'Can\'t find object by id') {
+      confirm('Ошибка КриптоПро Browser plugin.\nОбновите страницу.') && window.location.reload();
+    } else {
+      console.log(error);
+    }
+  }
+  return certificates;
+}
+
+async function signData (dataToSign, thumbprint, individual) {
+  const certificate = await cryptoPro.certificateInfo(thumbprint);
+  const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
+  await createSignatureFile(signature, certificate.Name, individual);
 }
 
 export const pre = async function (individual, template, container, mode, extra) {
   const $template = $(template);
 
   try {
-    const cryptoProInfo = await cryptoPro.init();
-    console.log('CryptoPro initialized', cryptoProInfo);
+    await init();
   } catch (error) {
     $('.actions', $template).remove();
-    console.log(error);
     return;
   }
 
   $('.add-signature', $template).click(async () => {
-    showSpinner();
-    const fileResponse = await fetch(`/files/${individual.id}`);
-    if (!fileResponse.ok) {
-      hideSpinner();
-      throw new Error('Network error.');
-    }
-    const dataToSign = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-    let certificates;
-    try {
-      certificates = (await cryptoPro.listCertificates()).sort((a, b) => a.name > b.name ? 1 : -1);
-    } catch (error) {
-      if (error.message === 'Can\'t find object by id') {
-        confirm('Ошибка КриптоПро Browser plugin.\nОбновите страницу.') && window.location.reload();
-      } else {
-        console.log(error);
-      }
-      hideSpinner();
-      return;
-    }
-    hideSpinner();
+    const dataToSign = await spinnerDecorator(getDataToSign)(`/files/${individual.id}`);
+    const certificates = await spinnerDecorator(getCertificates)();
     if (certificates.length > 1) {
       const dialog = template.querySelector('.certificate-dialog');
       const select = template.querySelector('.certificate-select');
@@ -107,11 +147,7 @@ export const pre = async function (individual, template, container, mode, extra)
           if (!thumbprint) {
             return;
           }
-          showSpinner();
-          const certificate = await cryptoPro.certificateInfo(thumbprint);
-          const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
-          hideSpinner();
-          await createSignatureFile(signature, certificate.Name, individual);
+          await spinnerDecorator(signData)(dataToSign, thumbprint, individual);
         });
         cancel.addEventListener('click', () => {
           submit.value = '';
@@ -122,11 +158,7 @@ export const pre = async function (individual, template, container, mode, extra)
       dialog.returnValue = '';
       dialog.showModal();
     } else if (certificates.length === 1) {
-      showSpinner();
-      const certificate = await cryptoPro.certificateInfo(certificates[0].id);
-      const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
-      await createSignatureFile(signature, certificate.Name, individual);
-      hideSpinner();
+      await spinnerDecorator(signData)(dataToSign, certificates[0].id, individual);
     } else {
       alert('Ошибка: Нет доступных сертификатов для подписи.');
     }
@@ -137,27 +169,35 @@ export const post = async function (individual, template, container, mode, extra
   const $template = $(template);
 
   const fn = individual['v-s:fileName'][0];
+  const img = 'jpg|jpeg|gif|png|bmp|svg';
   if (typeof fn === 'string' || fn instanceof String) {
     const idx = fn.lastIndexOf('.');
     const ext = fn.substr(idx + 1);
-    $('span.icon', $template).text(ext);
+    $('span.icon', template).text(ext);
+    if (img.indexOf(ext.toLowerCase()) < 0) {
+      $('.thumbnail', template).remove();
+      $('.filename', template).css('width', '100%');
+    }
   }
 
   individual.on('v-s:digitalSignature', showSignature);
   $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
   showSignature();
 
-  $('.verify-signature', $template).click(verifySignature);
+  const spinningVerifySignature = spinnerDecorator(verifySignature);
+  $('.verify-signature', $template).click(spinningVerifySignature);
 
-  // individual.on('v-s:digitalSignature', verifySignature);
-  // $template.one('remove', () => individual.off('v-s:digitalSignature', verifySignature));
-  // verifySignature();
+  // individual.on('v-s:digitalSignature', spinningVerifySignature);
+  // $template.one('remove', () => individual.off('v-s:digitalSignature', spinningVerifySignature));
+  // spinningVerifySignature();
 
   function showSignature () {
     if (!individual.hasValue('v-s:digitalSignature')) {
-      $('.signatures', $template).hide();
+      $('.signatures', $template).addClass('hidden');
+      $('.verify-signature', $template).addClass('hidden');
     } else {
-      $('.signatures', $template).show();
+      $('.signatures', $template).removeClass('hidden');
+      $('.verify-signature', $template).removeClass('hidden');
     }
   }
 
@@ -165,21 +205,17 @@ export const post = async function (individual, template, container, mode, extra
     if (!individual.hasValue('v-s:digitalSignature')) {
       return;
     }
+
     try {
-      await cryptoPro.init();
+      await init();
     } catch (error) {
-      if (error.message === 'Can\'t find object by id') {
-        confirm('Ошибка КриптоПро Browser plugin.\nОбновите страницу.') && window.location.reload();
-      } else {
-        console.log(error);
-      }
       return;
     }
+
     const fileResponse = await fetch(`/files/${individual.id}`);
     if (!fileResponse.ok) {
       throw new Error('Network error.');
     }
-    showSpinner();
     const dataToCheck = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
     for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
       if (signatureIndividual.checked) continue;
@@ -200,25 +236,28 @@ export const post = async function (individual, template, container, mode, extra
       }
       signatureIndividual.checked = true;
     }
-    hideSpinner();
   }
 };
 
 export const html = `
-  <div class="panel panel-default" style="word-wrap:break-word; width:300px; display: inline-block; margin:0 20px 20px 0; overflow: hidden;">
+  <div class="panel panel-default" style="word-wrap:break-word; width:350px; display: inline-block; margin:0 20px 20px 0; overflow: hidden;">
     <div class="panel-body">
       <em about="rdfs:comment" property="rdfs:label" class="-view edit search"></em>
       <strong property="rdfs:comment" class="view -edit -search"></strong>
       <veda-control data-type="string" property="rdfs:comment" class="-view edit search"></veda-control>
-      <div>
-        <span class="icon label label-primary"></span>
-        <a href="/files/@">
-          <span about="@" property="v-s:fileName"></span>
-        </a>
+      <div class="clearfix margin-sm">
+        <div class="thumbnail pull-left" style="width:20%;display:inline-block;margin:0 3% 0 0;" about="@" data-template="v-ui:ModalImageTemplate"></div>
+        <div class="filename pull-left" style="width:77%;display:inline-block;">
+          <span class="icon label label-primary"></span>
+          <a href="/files/@">
+            <span about="@" property="v-s:fileName"></span>
+          </a>
+          <br>
+          <i class="view -edit -search">
+            <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small property="v-s:created"></small>
+          </i>
+        </div>
       </div>
-      <i class="view -edit -search">
-        <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small property="v-s:created"></small>
-      </i>
       <div class="signatures">
         <hr class="margin-sm"/>
         <strong about="v-s:digitalSignature" property="rdfs:label" class="view edit search"></strong>
@@ -245,7 +284,7 @@ export const html = `
     </div>
     <div class="actions panel-footer">
       <button class="add-signature btn btn-success">Подписать</button>
-      <button class="verify-signature btn btn-link">Проверить</button>
+      <button class="verify-signature btn btn-link view -edit -search">Проверить</button>
       <!--span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span-->
     </div>
   </div>
