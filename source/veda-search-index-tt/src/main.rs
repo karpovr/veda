@@ -19,7 +19,7 @@ use std::{env, fs, process, thread};
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, Module, PrepareError};
 use v_common::module::veda_module::VedaQueueModule;
-use v_common::onto::datatype::{DataType, Lang};
+use v_common::onto::datatype::DataType;
 use v_common::onto::individual::Individual;
 use v_common::onto::resource::Value;
 use v_common::v_api::api_client::IndvOp;
@@ -345,9 +345,9 @@ impl TTIndexer {
 
                                 text_content.push(str_value.trim().to_owned());
 
-                                let lang = match resource.get_lang() {
-                                    Lang::NONE => String::from(""),
-                                    lang => format!("@{}", lang.to_string()),
+                                let lang = match resource.get_lang().is_some() {
+                                    false => String::from(""),
+                                    true => format!("@{}", resource.get_lang().to_string()),
                                 };
                                 format!("{}{}", str_value.replace("'", "\\'"), lang)
                             })

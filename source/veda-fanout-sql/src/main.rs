@@ -10,7 +10,7 @@ use v_common::module::common::load_onto;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
-use v_common::onto::datatype::{DataType, Lang};
+use v_common::onto::datatype::DataType;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto_impl::Onto;
 use v_common::onto::resource::{Resource, Value};
@@ -217,9 +217,10 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
                     return;
                 }
 
-                let lang = match &resource.get_lang() {
-                    Lang::NONE => String::from("'NO'"),
-                    lang => format!("'{}'", lang.to_string().to_uppercase()),
+                let lang = if resource.get_lang().is_some() {
+                    format!("'{}'", &resource.get_lang().to_string().to_uppercase())
+                } else {
+                    String::from("'NO'")
                 };
                 let query = format!(
                     "INSERT INTO `{}` (doc_id, doc_type, created, value, lang, deleted) VALUES ('{}', '{}', {}, {}, {}, {})",

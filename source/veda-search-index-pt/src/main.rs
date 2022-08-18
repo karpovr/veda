@@ -320,7 +320,7 @@ impl PTIndexer {
         if !text_content.is_empty() {
             let text_predicate = String::from("text");
             let text = text_content.join(" ");
-            individual.set_string(&text_predicate, &text, Lang::NONE);
+            individual.set_string(&text_predicate, &text, Lang::none());
             PTIndexer::add_to_predicate_table(&id, version, sign, created, type_name, individual, (&text_predicate, predicate_tables, &mut text_content), op_id);
         }
     }
@@ -377,9 +377,9 @@ impl PTIndexer {
 
                             text_content.push(str_value.trim().to_owned());
 
-                            let lang = match resource.get_lang() {
-                                Lang::NONE => String::from(""),
-                                lang => format!("@{}", lang.to_string()),
+                            let lang = match resource.get_lang().is_some() {
+                                false => String::from(""),
+                                true => format!("@{}", resource.get_lang().to_string()),
                             };
                             format!("{}{}", str_value.replace("'", "\\'"), lang)
                         })
