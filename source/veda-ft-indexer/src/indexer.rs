@@ -9,7 +9,7 @@ use v_common::ft_xapian::to_lower_and_replace_delimiters;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::info::ModuleInfo;
 use v_common::module::veda_backend::Backend;
-use v_common::onto::datatype::{DataType, Lang};
+use v_common::onto::datatype::DataType;
 use v_common::onto::individual::Individual;
 use v_common::onto::onto_impl::Onto;
 use v_common::onto::resource::Resource;
@@ -209,9 +209,9 @@ impl Indexer {
                             iwp.index_uri(self, predicate, oo)?;
                         }
                         DataType::String => {
-                            if oo.get_lang() == Lang::RU {
+                            if oo.get_lang().to_string() == "RU" {
                                 p_text_ru.push_str(oo.get_str());
-                            } else if oo.get_lang() == Lang::EN {
+                            } else if oo.get_lang().to_string() == "EN" {
                                 p_text_en.push_str(oo.get_str());
                             }
 
