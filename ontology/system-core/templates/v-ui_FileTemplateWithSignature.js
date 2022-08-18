@@ -1,171 +1,33 @@
 import $ from 'jquery';
-import {CryptoPro} from 'ruscryptojs';
-import CommonUtil from '/js/common/util.js';
-import IndividualModel from '/js/common/individual_model.js';
-
-const cryptoPro = new CryptoPro();
-
-function decorator (fn, pre, post, err) {
-  return async function (...args) {
-    try {
-      pre && await pre.call(this, ...args);
-      const result = await fn.call(this, ...args);
-      post && await post.call(this, ...args);
-      return result;
-    } catch (error) {
-      err && await err.call(this, ...args);
-      throw error;
-    }
-  };
-}
-
-function showSpinner () {
-  document.getElementById('load-indicator').style.display = '';
-}
-
-function hideSpinner () {
-  document.getElementById('load-indicator').style.display = 'none';
-}
-
-function spinnerDecorator (fn) {
-  return decorator(fn, showSpinner, hideSpinner, hideSpinner);
-}
-
-async function createSignatureFile (signature, name, parent) {
-  const uri = CommonUtil.guid();
-  const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
-  const fileIndividual = new IndividualModel();
-  fileIndividual['rdf:type'] = 'v-s:File';
-  fileIndividual['v-s:fileName'] = name + '.sig';
-  fileIndividual['rdfs:label'] = name + '.sig';
-  fileIndividual['v-s:fileSize'] = signature.length;
-  fileIndividual['v-s:fileUri'] = uri;
-  fileIndividual['v-s:filePath'] = path;
-  fileIndividual['v-s:parent'] = parent;
-  fileIndividual['v-s:backwardTarget'] = parent;
-  fileIndividual['v-s:canRead'] = true;
-  fileIndividual['v-s:canUpdate'] = true;
-  fileIndividual['v-s:canDelete'] = true;
-  fileIndividual['v-s:backwardProperty'] = 'v-s:digitalSignature';
-
-  try {
-    await uploadSignatureFile(signature, path, uri);
-    await fileIndividual.save();
-  } catch (error) {
-    alert(error);
-  }
-}
-
-async function uploadSignatureFile (signature, path, uri) {
-  const formData = new FormData();
-  const blob = new Blob([signature], {type: 'plain/text'});
-  formData.append('file', blob);
-  formData.append('path', path);
-  formData.append('uri', uri);
-
-  const response = await fetch('/files', {
-    method: 'POST',
-    body: formData,
-  });
-  if (!response.ok) {
-    throw new Error('Не удалось создать файл-подписи. Failed to create signature file.');
-  }
-}
-
-async function init () {
-  try {
-    const cryptoProInfo = await cryptoPro.init();
-    console.log('CryptoPro initialized', cryptoProInfo);
-  } catch (error) {
-    if (error.message === 'Can\'t find object by id') {
-      confirm('Потеряно соединение с КриптоПро browser plugin. Обновите страницу.\nLost connection to CryptoPro browser plugin. Reload page.') && window.location.reload();
-    }
-    console.log('Initialization failed', error);
-    throw error;
-  }
-}
-
-async function getDataToSign (url) {
-  const fileResponse = await fetch(url);
-  if (!fileResponse.ok) {
-    throw new Error('Network error.');
-  }
-  const dataToSign = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-  return dataToSign;
-}
-
-async function getValidCertificates () {
-  let certificates = [];
-  try {
-    certificates = await cryptoPro.listCertificates();
-    certificates = (await Promise.all(certificates.map(async (certificate) => {
-      const certificateInfo = await cryptoPro.certificateInfo(certificate.id);
-      console.log(certificateInfo);
-      return certificateInfo.IsValid ? certificate : undefined;
-    }))).filter(Boolean).sort((a, b) => a.name > b.name ? 1 : -1);
-  } catch (error) {
-    if (error.message === 'Can\'t find object by id') {
-      confirm('Потеряно соединение с КриптоПро browser plugin. Обновите страницу.\nLost connection to CryptoPro browser plugin. Reload page.') && window.location.reload();
-    } else {
-      console.log(error);
-    }
-  }
-  return certificates;
-}
-
-async function signData (dataToSign, thumbprint, individual) {
-  const certificate = await cryptoPro.certificateInfo(thumbprint);
-  const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
-  await createSignatureFile(signature, certificate.Name, individual);
-}
+import Crypto from '/js/browser/crypto.js';
 
 export const pre = async function (individual, template, container, mode, extra) {
   const $template = $(template);
 
+  const crypto = Crypto.getInstance();
   try {
-    await init();
+    await crypto.init();
   } catch (error) {
     $('.actions', $template).remove();
     return;
   }
 
-  $('.add-signature', $template).click(async () => {
-    const dataToSign = await spinnerDecorator(getDataToSign)(`/files/${individual.id}`);
-    const certificates = await spinnerDecorator(getValidCertificates)();
-    if (certificates.length > 1) {
-      const dialog = template.querySelector('.certificate-dialog');
-      const select = template.querySelector('.certificate-select');
-      const submit = template.querySelector('.certificate-submit');
-      const cancel = template.querySelector('.certificate-cancel');
-      if (!select.children.length) {
-        certificates.forEach((certificate) => {
-          const option = document.createElement('option');
-          option.value = certificate.id;
-          option.label = certificate.name;
-          select.appendChild(option);
-        });
-        select.addEventListener('change', () => {
-          submit.value = select.value;
-        });
-        dialog.addEventListener('close', async () => {
-          const thumbprint = dialog.returnValue;
-          if (!thumbprint) {
-            return;
-          }
-          await spinnerDecorator(signData)(dataToSign, thumbprint, individual);
-        });
-        cancel.addEventListener('click', () => {
-          submit.value = '';
-          dialog.close();
-        });
+  $('.add-signature', $template).click(() => crypto.addSignature(individual));
+
+  $('.verify-signature', $template).click(async () => {
+    for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
+      if (signatureIndividual.checked) continue;
+      try {
+        await crypto.verifySignature(individual, signatureIndividual);
+        $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
+          .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
+          .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
+      } catch (error) {
+        $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
+          .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
+          .append(`<strong><small><i class="text-danger" title="${error}">Подпись не верна</i></small></strong>`);
       }
-      submit.value = select.value;
-      dialog.returnValue = '';
-      dialog.showModal();
-    } else if (certificates.length === 1) {
-      await spinnerDecorator(signData)(dataToSign, certificates[0].id, individual);
-    } else {
-      alert('Ошибка: Действующие сертификаты электронной подписи не найдены.\nError: Valid signature certificates not found.');
+      signatureIndividual.checked = true;
     }
   });
 };
@@ -189,9 +51,6 @@ export const post = async function (individual, template, container, mode, extra
   $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
   showSignature();
 
-  const spinningVerifySignature = spinnerDecorator(verifySignature);
-  $('.verify-signature', $template).click(spinningVerifySignature);
-
   function showSignature () {
     if (!individual.hasValue('v-s:digitalSignature')) {
       $('.signatures', $template).addClass('hidden');
@@ -199,43 +58,6 @@ export const post = async function (individual, template, container, mode, extra
     } else {
       $('.signatures', $template).removeClass('hidden');
       $('.verify-signature', $template).removeClass('hidden');
-    }
-  }
-
-  async function verifySignature () {
-    if (!individual.hasValue('v-s:digitalSignature')) {
-      return;
-    }
-
-    try {
-      await init();
-    } catch (error) {
-      return;
-    }
-
-    const fileResponse = await fetch(`/files/${individual.id}`);
-    if (!fileResponse.ok) {
-      throw new Error('Network error.');
-    }
-    const dataToCheck = btoa(new Uint8Array(await fileResponse.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-    for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
-      if (signatureIndividual.checked) continue;
-      try {
-        const signatureResponse = await fetch(`/files/${signatureIndividual.id}`);
-        if (!signatureResponse.ok) {
-          throw new Error('Network error.');
-        }
-        const signature = await signatureResponse.text();
-        await cryptoPro.verifySign(dataToCheck, signature);
-        $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
-          .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
-          .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
-      } catch (sigError) {
-        $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
-          .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
-          .append(`<strong><small><i class="text-danger" title="${sigError}">Подпись не верна</i></small></strong>`);
-      }
-      signatureIndividual.checked = true;
     }
   }
 };
@@ -272,21 +94,10 @@ export const html = `
           </li>
         </ol>
       </div>
-      <dialog class="certificate-dialog" style="border: 2px solid gray; border-radius: 0.5em;">
-        <form class="certificate-form" method="dialog">
-          <div class="form-group">
-            <label>Выберите сертификат</label>
-            <select class="certificate-select form-control"></select>
-          </div>
-          <button type="submit" class="certificate-submit btn btn-primary">Ok</button>
-          <button type="button" class="certificate-cancel btn btn-default">Cancel</button>
-        </form>
-      </dialog>
     </div>
     <div class="actions panel-footer">
       <button class="add-signature btn btn-success">Подписать</button>
       <button class="verify-signature btn btn-link view -edit -search">Проверить</button>
-      <!--span about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="edit save cancel delete"></span-->
     </div>
   </div>
 `;
