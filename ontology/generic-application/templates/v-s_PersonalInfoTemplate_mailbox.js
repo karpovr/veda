@@ -1,10 +1,10 @@
 import $ from 'jquery';
 
-export const pre = function (individual, template, container, mode, extra) {
+export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
-
-  $('a', template).attr('href', 'mailto:' + individual['v-s:mailbox'][0]);
+  const address = 'mailto:' + individual['v-s:mailbox'][0];
+  $('a', template).attr('href', address);
 };
 
 export const html = `
