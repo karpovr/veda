@@ -165,7 +165,7 @@ export const pre = async function (individual, template, container, mode, extra)
     } else if (certificates.length === 1) {
       await spinnerDecorator(signData)(dataToSign, certificates[0].id, individual);
     } else {
-      alert('Ошибка: Cертификаты электронной подписи не найдены.\nError: Signature certificates not found.');
+      alert('Ошибка: Действующие сертификаты электронной подписи не найдены.\nError: Valid signature certificates not found.');
     }
   });
 };
