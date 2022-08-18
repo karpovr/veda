@@ -68,7 +68,7 @@ async function uploadSignatureFile (signature, path, uri) {
     body: formData,
   });
   if (!response.ok) {
-    throw new Error('Ошибка создания файла-подписи.');
+    throw new Error('Не удалось создать файл-подписи. Failed to create signature file.');
   }
 }
 
@@ -78,7 +78,7 @@ async function init () {
     console.log('CryptoPro initialized', cryptoProInfo);
   } catch (error) {
     if (error.message === 'Can\'t find object by id') {
-      confirm('Ошибка КриптоПро Browser plugin.\nОбновите страницу.') && window.location.reload();
+      confirm('Потеряно соединение с КриптоПро browser plugin. Обновите страницу.\nLost connection to CryptoPro browser plugin. Reload page.') && window.location.reload();
     }
     console.log('Initialization failed', error);
     throw error;
@@ -94,13 +94,18 @@ async function getDataToSign (url) {
   return dataToSign;
 }
 
-async function getCertificates () {
+async function getValidCertificates () {
   let certificates = [];
   try {
-    certificates = (await cryptoPro.listCertificates()).sort((a, b) => a.name > b.name ? 1 : -1);
+    certificates = await cryptoPro.listCertificates();
+    certificates = (await Promise.all(certificates.map(async (certificate) => {
+      const certificateInfo = await cryptoPro.certificateInfo(certificate.id);
+      console.log(certificateInfo);
+      return certificateInfo.IsValid ? certificate : undefined;
+    }))).filter(Boolean).sort((a, b) => a.name > b.name ? 1 : -1);
   } catch (error) {
     if (error.message === 'Can\'t find object by id') {
-      confirm('Ошибка КриптоПро Browser plugin.\nОбновите страницу.') && window.location.reload();
+      confirm('Потеряно соединение с КриптоПро browser plugin. Обновите страницу.\nLost connection to CryptoPro browser plugin. Reload page.') && window.location.reload();
     } else {
       console.log(error);
     }
@@ -126,7 +131,7 @@ export const pre = async function (individual, template, container, mode, extra)
 
   $('.add-signature', $template).click(async () => {
     const dataToSign = await spinnerDecorator(getDataToSign)(`/files/${individual.id}`);
-    const certificates = await spinnerDecorator(getCertificates)();
+    const certificates = await spinnerDecorator(getValidCertificates)();
     if (certificates.length > 1) {
       const dialog = template.querySelector('.certificate-dialog');
       const select = template.querySelector('.certificate-select');
@@ -160,7 +165,7 @@ export const pre = async function (individual, template, container, mode, extra)
     } else if (certificates.length === 1) {
       await spinnerDecorator(signData)(dataToSign, certificates[0].id, individual);
     } else {
-      alert('Ошибка: Нет доступных сертификатов для подписи.');
+      alert('Ошибка: Cертификаты электронной подписи не найдены.\nError: Signature certificates not found.');
     }
   });
 };
@@ -186,10 +191,6 @@ export const post = async function (individual, template, container, mode, extra
 
   const spinningVerifySignature = spinnerDecorator(verifySignature);
   $('.verify-signature', $template).click(spinningVerifySignature);
-
-  // individual.on('v-s:digitalSignature', spinningVerifySignature);
-  // $template.one('remove', () => individual.off('v-s:digitalSignature', spinningVerifySignature));
-  // spinningVerifySignature();
 
   function showSignature () {
     if (!individual.hasValue('v-s:digitalSignature')) {
@@ -228,11 +229,11 @@ export const post = async function (individual, template, container, mode, extra
         await cryptoPro.verifySign(dataToCheck, signature);
         $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
           .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
-          .append('<span class="text-success">Подпись верна</span>');
+          .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
       } catch (sigError) {
         $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
           .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
-          .append(`<span class="text-danger" title="${sigError}">Подпись не верна</span>`);
+          .append(`<strong><small><i class="text-danger" title="${sigError}">Подпись не верна</i></small></strong>`);
       }
       signatureIndividual.checked = true;
     }
@@ -254,7 +255,7 @@ export const html = `
           </a>
           <br>
           <i class="view -edit -search">
-            <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small property="v-s:created"></small>
+            <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small about="@" property="v-s:created"></small>
           </i>
         </div>
       </div>
@@ -267,7 +268,7 @@ export const html = `
             <a href="/files/@">
               <span about="@" property="v-s:fileName"></span>
             </a>
-            <i class="view -edit -search"> <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small property="v-s:created"></small> </i>
+            <i class="view -edit -search"> <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small about="@" property="v-s:created"></small> </i>
           </li>
         </ol>
       </div>
