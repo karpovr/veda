@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if pgrep -f -l -U $USER '[t]arantool init_tarantool.lua'; then
+    echo
+    echo Attention! Tarantool database process is already running, please stop it before starting Veda. Run script.
+    echo $ ./control-stop.sh all
+    echo to stop tarantool and try to start veda again
+    echo
+    exit 0
+else
+    echo
+fi
+
 export APPDIR=$PWD/bin
 VEDA_ID=A1
 
