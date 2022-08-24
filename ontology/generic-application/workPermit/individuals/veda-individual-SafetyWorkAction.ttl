@@ -272,7 +272,7 @@ d:SafetyWorkAction_1_3
 d:SafetyWorkAction_1_3_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
-  rdfs:label "работы ведутся в соответствии с ППР, ТК."^^xsd:string.
+  rdfs:label "работы вести в соответствии с ППР, ТК."^^xsd:string.
 d:SafetyWorkAction_1_3_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
@@ -316,7 +316,7 @@ d:SafetyWorkAction_1_3_11
 d:SafetyWorkAction_1_3_12
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
-  rdfs:label "пролив водой места производства работ"^^xsd:string.
+  rdfs:label "пролить водой места производства работ"^^xsd:string.
 d:SafetyWorkAction_1_3_13
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
@@ -333,176 +333,187 @@ d:SafetyWorkAction_1_3_16
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "назначить наблюдающего"^^xsd:string.
+
 d:SafetyWorkAction_1_3_17
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* применять СИЗ, заполнить раздел 2"^^xsd:string.
 d:SafetyWorkAction_1_3_18
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при передаче территории по акту-допуску заполнить раздел 3"^^xsd:string.
 d:SafetyWorkAction_1_3_19
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при одновременной работе нескольких бригад на одном участке заполнить пункты раздела 4"^^xsd:string.
 d:SafetyWorkAction_1_3_20
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при работах на высоте заполнить раздел 6"^^xsd:string.
 d:SafetyWorkAction_1_3_21
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при погрузочно-разгрузочных работах заполнить раздел 7"^^xsd:string.
 d:SafetyWorkAction_1_3_22
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при огневых работах заполнить раздел 8"^^xsd:string.
 d:SafetyWorkAction_1_3_23
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при изоляции энергии заполнить раздел 9"^^xsd:string.
 d:SafetyWorkAction_1_3_24
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
   rdfs:label "* при выполнении работ: земляных, с оборудованием высокого давления, водолазных, по демонтажу зданий и сооружений, на электрооборудовании с напряжением 380В и выше, с асбестом, в замкнутом заполнить приложение А"^^xsd:string.
 
+
+
 d:SafetyWorkAction_6
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   rdfs:label "Работа на высоте или вблизи не огражденных перепадов по высоте"^^xsd:string.
 
 d:SafetyWorkAction_6_1
   a v-s:SafetyWorkAction;
-  v-s:parentUnit d:SafetyWorkAction_6;
   rdfs:label "Общие требования"^^xsd:string.
 d:SafetyWorkAction_6_1_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_1;
-  rdfs:label "Предоставлен безопасный доступ к месту, предполагающему работу на высоте?"^^xsd:string.
+  rdfs:label "Предоставить безопасный доступ к месту, проведения работ на высоте"^^xsd:string.
 d:SafetyWorkAction_6_1_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_1;
-  rdfs:label "Обеспечена безопасность рабочей зоны с риском падения предметов?"^^xsd:string.
+  rdfs:label "Обеспечить безопасность рабочей зоны с риском падения предметов"^^xsd:string.
 d:SafetyWorkAction_6_1_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_1;
-  rdfs:label "Предусмотрен надзор, ограждение для исключения воздействия на окружающих?"^^xsd:string.
+  rdfs:label "Предусмотреть надзор, ограждение для исключения воздействия на окружающих"^^xsd:string.
 d:SafetyWorkAction_6_1_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_1;
-  rdfs:label "Согласован план спасательных работ при необходимости?"^^xsd:string.
+  rdfs:label "Согласовать план спасательных работ"^^xsd:string.
 d:SafetyWorkAction_6_1_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_1;
-  rdfs:label "Определены руководителем работ места крепления страховочного фала?"^^xsd:string.
+  rdfs:label "Определить руководителем работ места крепления страховочного фала"^^xsd:string.
 
 d:SafetyWorkAction_6_2
   a v-s:SafetyWorkAction;
-  v-s:parentUnit d:SafetyWorkAction_6;
   rdfs:label "Личная безопасность"^^xsd:string.
 d:SafetyWorkAction_6_2_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_2;
-  rdfs:label "Проведен визуальный осмотр страховочной привязи, и пригоден он для работы?"^^xsd:string.
+  rdfs:label "Провести визуальный осмотр страховочной привязи"^^xsd:string.
 d:SafetyWorkAction_6_2_2
   a v-s:SafetyWorkAction;
+  v-s:deleted true;
   v-s:parentUnit d:SafetyWorkAction_6_2;
   rdfs:label "Cтраховочная привязь оснащена полным комплектом элементов"^^xsd:string.
 d:SafetyWorkAction_6_2_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_2;
-  rdfs:label "Оснащены каски подбородным ремнем с 4-мя точками крепления?"^^xsd:string.
+  rdfs:label "Каски оснащены подбородным ремнем с 4-мя точками крепления"^^xsd:string.
 
 d:SafetyWorkAction_6_3
   a v-s:SafetyWorkAction;
-  v-s:parentUnit d:SafetyWorkAction_6;
   rdfs:label "Работа на лесах"^^xsd:string.
 d:SafetyWorkAction_6_3_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_3;
-  rdfs:label "Заполнен акт приемки лесов выше 4-х метров?"^^xsd:string.
+  rdfs:label "Заполнить акт приемки лесов выше 4-х метров"^^xsd:string.
 d:SafetyWorkAction_6_3_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_3;
-  rdfs:label "Заполнен чек-лист на леса?"^^xsd:string.
+  rdfs:label "Заполнить чек-лист на леса"^^xsd:string.
 d:SafetyWorkAction_6_3_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_3;
-  rdfs:label "Проведена регистрация лесов в журнале?"^^xsd:string.
+  rdfs:label "Провести регистрацию лесов в журнале"^^xsd:string.
 d:SafetyWorkAction_6_3_4
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_3;
   rdfs:label "Имеется в наличие СИЗ от падения?"^^xsd:string.
 d:SafetyWorkAction_6_3_5
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_3;
   rdfs:label "Вывешены таблички на леса?"^^xsd:string.
 
 d:SafetyWorkAction_6_4
   a v-s:SafetyWorkAction;
-  v-s:parentUnit d:SafetyWorkAction_6;
   rdfs:label "Подъемники (вышки)"^^xsd:string.
 d:SafetyWorkAction_6_4_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_4;
-  rdfs:label "Проведена проверка с записью в журнале подъемника, вышки?"^^xsd:string.
+  rdfs:label "Провести проверку с записью в журнале подъемника, вышки"^^xsd:string.
 d:SafetyWorkAction_6_4_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_4;
-  rdfs:label "Имеет персонал удостоверения на право эксплуатации вышки, подъемника?"^^xsd:string.
+  rdfs:label "Персоналу иметь при себе удостоверения на право эксплуатации вышки, подъемника"^^xsd:string.
 d:SafetyWorkAction_6_4_3
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_4;
   rdfs:label "Используются СИЗ от падения?"^^xsd:string.
 d:SafetyWorkAction_6_4_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_4;
-  rdfs:label "В люльке определены точки крепления?"^^xsd:string.
+  rdfs:label "Определить точки крепления в люльке"^^xsd:string.
 d:SafetyWorkAction_6_4_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_4;
-  rdfs:label "Подъемники, вышки сертифицированы и зарегистрированы в Ростехнадзоре?"^^xsd:string.
+  rdfs:label "Подъемники, вышки сертифицированы и зарегистрированы в Ростехнадзоре"^^xsd:string.
 d:SafetyWorkAction_6_4_6
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_4;
   rdfs:label "Мобильная платформа соответствует выполняемому виду работ?"^^xsd:string.
 
 d:SafetyWorkAction_6_5
   a v-s:SafetyWorkAction;
-  v-s:parentUnit d:SafetyWorkAction_6;
   rdfs:label "Лестница/стремянка"^^xsd:string.
 d:SafetyWorkAction_6_5_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_5;
-  rdfs:label "Проведен осмотр, лестница/стремянка не имеет повреждений?"^^xsd:string.
+  rdfs:label "Провести осмотр, лестницы/стремянки на повреждения"^^xsd:string.
 d:SafetyWorkAction_6_5_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_5;
-  rdfs:label "Обеспечено присутствие напарника при работе с лестницы?"^^xsd:string.
+  rdfs:label "Обеспечить присутствие напарника при работе с лестницы"^^xsd:string.
 d:SafetyWorkAction_6_5_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_5;
-  rdfs:label "Произведена фиксация лестницы или стремянки исключающая их падение?"^^xsd:string.
+  rdfs:label "Произвести фиксацию лестницы или стремянки, исключающую их падение"^^xsd:string.
     
 d:SafetyWorkAction_6_6
   a v-s:SafetyWorkAction;
-  v-s:parentUnit d:SafetyWorkAction_6;
   rdfs:label "Работы на крыше"^^xsd:string.
 d:SafetyWorkAction_6_6_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_6;
-  rdfs:label "Максимальная статическая нагрузка крыши соответствует выполняемой работе и нагрузке на нее?"^^xsd:string.
+  rdfs:label "Максимальная статическая нагрузка крыши соответствует выполняемой работе и нагрузке на нее"^^xsd:string.
 d:SafetyWorkAction_6_6_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_6;
-  rdfs:label "Край крыши имеет жесткое ограждение?"^^xsd:string.
+  rdfs:label "Край крыши имеет жесткое ограждение"^^xsd:string.
 d:SafetyWorkAction_6_6_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_6;
-  rdfs:label "Используются СИЗ от падения?"^^xsd:string.
+  rdfs:label "Применять СИЗ от падения"^^xsd:string.
 d:SafetyWorkAction_6_6_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_6_6;
-  rdfs:label "Имеется безопасный доступ на крышу?"^^xsd:string.
+  rdfs:label "Имеется безопасный доступ на крышу"^^xsd:string.
 
 d:SafetyWorkAction_7
   a v-s:SafetyWorkAction;
@@ -510,39 +521,40 @@ d:SafetyWorkAction_7
 d:SafetyWorkAction_7_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Является ли грузоподъемность стропов/СГП достаточной для подъема перемещаемого груза?"^^xsd:string.
+  rdfs:label "Грузоподъемность стропов/СГП достаточна для подъема перемещаемого груза"^^xsd:string.
 d:SafetyWorkAction_7_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Проверено ли исправное состояние стропов/СГП?"^^xsd:string.
+  rdfs:label "Проверить ли исправное состояние стропов/СГП"^^xsd:string.
 d:SafetyWorkAction_7_3
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
   rdfs:label "Оборудованы ли все крюки предохранительными замками?"^^xsd:string.
 d:SafetyWorkAction_7_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Ограждена ли зона возможного падения груза?"^^xsd:string.
+  rdfs:label "Оградить зону возможного падения груза"^^xsd:string.
 d:SafetyWorkAction_7_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Назначен ли наблюдающий?"^^xsd:string.
+  rdfs:label "Назначить наблюдающего"^^xsd:string.
 d:SafetyWorkAction_7_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Груз направляется с помощью оттяжки?"^^xsd:string.
+  rdfs:label "Груз направить с помощью оттяжки"^^xsd:string.
 d:SafetyWorkAction_7_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Груз направляется с помощью шеста?"^^xsd:string.
+  rdfs:label "Груз направить с помощью шеста"^^xsd:string.
 d:SafetyWorkAction_7_8
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Обеспечен ли безопасный доступ к месту погрузочно-разгрузочных работ?"^^xsd:string.
+  rdfs:label "Обеспечить безопасный доступ к месту погрузочно-разгрузочных работ"^^xsd:string.
 d:SafetyWorkAction_7_9
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Имеется ТК или ППР на погрузочно-разгрузочные работы?"^^xsd:string.
+  rdfs:label "ТК или ППР на погрузочно-разгрузочные работы"^^xsd:string.
 
 d:SafetyWorkAction_8
   a v-s:SafetyWorkAction;
@@ -550,32 +562,33 @@ d:SafetyWorkAction_8
 d:SafetyWorkAction_8_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Проведена очистка рабочего места от горючих материалов?"^^xsd:string.
+  rdfs:label "Провести очистку рабочего места от горючих материалов"^^xsd:string.
 d:SafetyWorkAction_8_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Применяются огнестойкие негорючие укрывные материалы?"^^xsd:string.
+  rdfs:label "Применять огнестойкие негорючие укрывные материалы"^^xsd:string.
 d:SafetyWorkAction_8_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Имеются первичные средства пожаротушения?"^^xsd:string.
+  rdfs:label "Первичные средства пожаротушения"^^xsd:string.
 d:SafetyWorkAction_8_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Назначен наблюдающий в зоне производства работ?"^^xsd:string.
+  rdfs:label "Назначить наблюдающего в зоне производства работ"^^xsd:string.
 d:SafetyWorkAction_8_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Известны пути эвакуации?"^^xsd:string.
+  rdfs:label "Определить пути эвакуации"^^xsd:string.
 d:SafetyWorkAction_8_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Зона не является взрывоопасной?"^^xsd:string.
+  rdfs:label "Зона является взрывоопасной"^^xsd:string.
 d:SafetyWorkAction_8_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
-  rdfs:label "Пожарная сигнализация, система пожаротушения отключена, отключение согласованно?"^^xsd:string.
+  rdfs:label "Пожарную сигнализацию, систему пожаротушения отключить, отключение согласованно"^^xsd:string.
 d:SafetyWorkAction_8_8
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_8;
   rdfs:label "Работники выполняющие огневые работы имеют талон-допуск?"^^xsd:string.
@@ -590,23 +603,23 @@ d:SafetyWorkAction_9_1
 d:SafetyWorkAction_9_1_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_1;
-  rdfs:label "Работники вывесили индивидуальные замки на рейку?"^^xsd:string.
+  rdfs:label "Работникам вывесить индивидуальные замки на рейку"^^xsd:string.
 d:SafetyWorkAction_9_1_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_1;
-  rdfs:label "Определены все источники энергии?"^^xsd:string.
+  rdfs:label "Определить все источники энергии"^^xsd:string.
 d:SafetyWorkAction_9_1_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_1;
-  rdfs:label "Заблокированы все источники энергии?"^^xsd:string.
+  rdfs:label "Заблокировать все источники энергии"^^xsd:string.
 d:SafetyWorkAction_9_1_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_1;
-  rdfs:label "Остаточные опасные вещества и газы отсутствуют в трубопроводах и дренажах и т.д.?"^^xsd:string.
+  rdfs:label "Остаточные опасные вещества и газы удалить из трубопроводов и дренажей и т.д."^^xsd:string.
 d:SafetyWorkAction_9_1_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_1;
-  rdfs:label "Установлены заглушки безопасности на трубопроводах содержащие опасные вещества?"^^xsd:string.
+  rdfs:label "Установить заглушки безопасности на трубопроводах содержащих опасные вещества"^^xsd:string.
 d:SafetyWorkAction_9_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9;
@@ -614,15 +627,15 @@ d:SafetyWorkAction_9_2
 d:SafetyWorkAction_9_2_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_2;
-  rdfs:label "Возможно выполнить операцию применяя стандартную процедуру по блокировке энергии LOTO?"^^xsd:string.
+  rdfs:label "Не возможно выполнить операцию применяя стандартную процедуру по блокировке энергии LOTO"^^xsd:string.
 d:SafetyWorkAction_9_2_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_2;
-  rdfs:label "Имеется ТК на выполняемые работы, к перечню работ без выполнения блокировки энергии?"^^xsd:string.
+  rdfs:label "ТК на выполняемые работы, к перечню работ без выполнения блокировки энергии"^^xsd:string.
 d:SafetyWorkAction_9_2_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_9_2;
-  rdfs:label "Работы выполняются в присутствии руководителя работ?"^^xsd:string.
+  rdfs:label "Работы выполнять в присутствии руководителя работ"^^xsd:string.
 
 d:SafetyWorkAction_10
   a v-s:SafetyWorkAction;
@@ -630,35 +643,35 @@ d:SafetyWorkAction_10
 d:SafetyWorkAction_10_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Извлеченный грунт располагается минимум на 1 метр от места проведения работ? (котлована)"^^xsd:string.
+  rdfs:label "Извлеченный грунт располагать минимум на 1 метр от места проведения работ (котлована)"^^xsd:string.
 d:SafetyWorkAction_10_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Определено и обозначено расстояние размещения тяжелой техники от места проведения работ?"^^xsd:string.
+  rdfs:label "Определить и обозначить расстояние размещения тяжелой техники от места проведения работ"^^xsd:string.
 d:SafetyWorkAction_10_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Реализованы мероприятия для защиты от обрушения стенок котлована?"^^xsd:string.
+  rdfs:label "Реализовать мероприятия для защиты от обрушения стенок котлована"^^xsd:string.
 d:SafetyWorkAction_10_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "В зоне работ техники отсутствует персонал?"^^xsd:string.
+  rdfs:label "В зону работ техники не допускать персонал"^^xsd:string.
 d:SafetyWorkAction_10_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Обеспечено освещение зоны ограждений котлована/траншеи в темное время суток?"^^xsd:string.
+  rdfs:label "Обеспечить освещение зоны ограждений котлована/траншеи в темное время суток"^^xsd:string.
 d:SafetyWorkAction_10_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Оформлено разрешение на выполнение земляных работ?"^^xsd:string.
+  rdfs:label "Оформить разрешение на выполнение земляных работ"^^xsd:string.
 d:SafetyWorkAction_10_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Обеспечен безопасный доступ в котлован/траншею?"^^xsd:string.
+  rdfs:label "Обеспечить безопасный доступ в котлован/траншею"^^xsd:string.
 d:SafetyWorkAction_10_8
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_10;
-  rdfs:label "Установлено жесткое ограждение котлована/траншей, при перепаде по высоте более 1,8 м, ограничен доступ в опасную зону?"^^xsd:string.
+  rdfs:label "Установить жесткое ограждение котлована/траншей, при перепаде по высоте более 1,8 м, ограничить доступ в опасную зону"^^xsd:string.
 
 d:SafetyWorkAction_11
   a v-s:SafetyWorkAction;
@@ -666,120 +679,125 @@ d:SafetyWorkAction_11
 d:SafetyWorkAction_11_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Оборудование высокого давления и все его детали осмотрены и не имеют повреждений?"^^xsd:string.
+  rdfs:label "Оборудование высокого давления и все его детали осмотреть на повреждения"^^xsd:string.
 d:SafetyWorkAction_11_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Соединительные муфты шлангов оснащены средствами защиты от биений?"^^xsd:string.
+  rdfs:label "Соединительные муфты шлангов оснастить средствами защиты от биений"^^xsd:string.
 d:SafetyWorkAction_11_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Оператор контролирует работу пусковых механизмов педалями ножного управления?"^^xsd:string.
+  rdfs:label "Оператор контролирует работу пусковых механизмов педалями ножного управления"^^xsd:string.
 d:SafetyWorkAction_11_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "При работе с копьями высокого давления используются средства защиты от отдачи?"^^xsd:string.
+  rdfs:label "При работе с копьями высокого давления использовать средства защиты от отдачи"^^xsd:string.
 d:SafetyWorkAction_11_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Предоставлены СИЗ в соответствии с инструкцией по эксплуатации?"^^xsd:string.
+  rdfs:label "СИЗ в соответствии с инструкцией по эксплуатации"^^xsd:string.
 d:SafetyWorkAction_11_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Шланги размещены таким образом, что исключена опасность спотыкания?"^^xsd:string.
+  rdfs:label "Шланги разместить таким образом, чтобы исключить опасность спотыкания"^^xsd:string.
 d:SafetyWorkAction_11_7
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
   rdfs:label "Работник ознакомлен с инструкцией по эксплуатации?"^^xsd:string.
 d:SafetyWorkAction_11_8
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
   rdfs:label "Рабочая площадка имеет ограждение?"^^xsd:string.
 d:SafetyWorkAction_11_9
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Установлены предупреждающие знаки на всех входах на площадку?"^^xsd:string.
+  rdfs:label "Установить предупреждающие знаки на всех входах на площадку"^^xsd:string.
 d:SafetyWorkAction_11_10
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_11;
-  rdfs:label "Применяется предохранительный щиток для защиты лица и глаз?"^^xsd:string.
+  rdfs:label "Применять предохранительный щиток для защиты лица и глаз"^^xsd:string.
 
 d:SafetyWorkAction_12
   a v-s:SafetyWorkAction;
   rdfs:label "Водолазные работы"^^xsd:string.
-d:SafetyWorkAction_12_1
+d:SafetyWorkAction_12_1                                             
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
   rdfs:label "Согласованны ли водолазные работы с руководителем Группы Монди по безопасности?"^^xsd:string.
 d:SafetyWorkAction_12_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Выявлены факторы риска, составлена оценка рисков и согласованы меры контроля?"^^xsd:string.
+  rdfs:label "Выявлены факторы риска, составлена оценка рисков и согласованы меры контроля"^^xsd:string.
 d:SafetyWorkAction_12_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Водолазы обладают квалификацией, необходимой для проведения водолазных работ?"^^xsd:string.
+  rdfs:label "Водолазы обладают квалификацией, необходимой для проведения водолазных работ"^^xsd:string.
 d:SafetyWorkAction_12_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Обеспечена защита от падения предметов в зону погружения и подхода к ней?"^^xsd:string.
+  rdfs:label "Обеспечить защиту от падения предметов в зону погружения и подхода к ней"^^xsd:string.
 d:SafetyWorkAction_12_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Наличие систем коммуникации у водолазов и руководителя водолазных работ?"^^xsd:string.
+  rdfs:label "Наличие систем коммуникации у водолазов и руководителя водолазных работ"^^xsd:string.
 d:SafetyWorkAction_12_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Применяется система работы с напарником? (не менее двух водолазов)"^^xsd:string.
+  rdfs:label "Применяется система работы с напарником (не менее двух водолазов)"^^xsd:string.
 d:SafetyWorkAction_12_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Присутствие наблюдающего водолаза на поверхности на случай аварийной ситуации?"^^xsd:string.
+  rdfs:label "Присутствие наблюдающего водолаза на поверхности на случай аварийной ситуации"^^xsd:string.
 d:SafetyWorkAction_12_8
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Наличие в зоне погружения аварийно-спасательного оборудования?"^^xsd:string.
+  rdfs:label "Наличие в зоне погружения аварийно-спасательного оборудования"^^xsd:string.
 d:SafetyWorkAction_12_9
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Проведено предварительное тестирование водолазов на состояние алкогольного опьянения?"^^xsd:string.
+  rdfs:label "Провести предварительное тестирование водолазов на состояние алкогольного опьянения"^^xsd:string.
 d:SafetyWorkAction_12_10
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Водолазные костюмы и оборудование осмотрены и признаны безопасными для использования?"^^xsd:string.
+  rdfs:label "Водолазные костюмы и оборудование осмотрены и признаны безопасными для использования"^^xsd:string.
 d:SafetyWorkAction_12_11
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Обеспечен безопасный спуск водолаза в зону погружения?"^^xsd:string.
+  rdfs:label "Обеспечен безопасный спуск водолаза в зону погружения"^^xsd:string.
 d:SafetyWorkAction_12_12
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Очищены и проверены воздушные фильтры?"^^xsd:string.
+  rdfs:label "Очищены и проверены воздушные фильтры"^^xsd:string.
 d:SafetyWorkAction_12_13
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Подача воздуха осуществляется компрессором с поверхности?"^^xsd:string.
+  rdfs:label "Подача воздуха осуществляется компрессором с поверхности"^^xsd:string.
 d:SafetyWorkAction_12_14
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Выполнена предварительная оценка риска перед погружением с согласованием руководителя водолазных работ?"^^xsd:string.
+  rdfs:label "Выполнена предварительная оценка риска перед погружением с согласованием руководителя водолазных работ"^^xsd:string.
 d:SafetyWorkAction_12_15
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Качество подаваемого воздуха проверено и соответствует нормам?"^^xsd:string.
+  rdfs:label "Качество подаваемого воздуха проверено и соответствует нормам"^^xsd:string.
 d:SafetyWorkAction_12_16
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Вокруг зоны погружения отсутствует оборудование работающее на горючем топливе?"^^xsd:string.
+  rdfs:label "Вокруг зоны погружения отсутствует оборудование работающее на горючем топливе"^^xsd:string.
 d:SafetyWorkAction_12_17
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
-  rdfs:label "Присутствие дежурных аварийно-спасательных служб на площадке?"^^xsd:string.
+  rdfs:label "Присутствие дежурных аварийно-спасательных служб на площадке"^^xsd:string.
 d:SafetyWorkAction_12_18
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
   rdfs:label "Оформлен чек-лист?"^^xsd:string.
 d:SafetyWorkAction_12_19
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_12;
   rdfs:label "Применение спиртового раствора исключено?"^^xsd:string.
@@ -790,55 +808,56 @@ d:SafetyWorkAction_13
 d:SafetyWorkAction_13_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Определены и обозначены (промаркированы) все коммуникации в зоне демонтажных работ?"^^xsd:string.
+  rdfs:label "Определены и обозначены (промаркированы) все коммуникации в зоне демонтажных работ"^^xsd:string.
 d:SafetyWorkAction_13_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "У входа на место производства работ вывешены предупреждающие знаки?"^^xsd:string.
+  rdfs:label "У входа на место производства работ вывесить предупреждающие знаки"^^xsd:string.
 d:SafetyWorkAction_13_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Места для курения и отдыха персонала расположены вне опасной зоны?"^^xsd:string.
+  rdfs:label "Места для курения и отдыха персонала расположены вне опасной зоны"^^xsd:string.
 d:SafetyWorkAction_13_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Безопасные пути перемещения транспорта и пешеходов обозначены или оснащены защитными навесами, где это необходимо?"^^xsd:string.
+  rdfs:label "Безопасные пути перемещения транспорта и пешеходов обозначены или оснащены защитными навесами, где это необходимо"^^xsd:string.
 d:SafetyWorkAction_13_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Не допускается наличие строительного мусора ближе 1м от краев на различных отметках?"^^xsd:string.
+  rdfs:label "Не допускать наличие строительного мусора ближе 1м от краев на различных отметках"^^xsd:string.
 d:SafetyWorkAction_13_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Проведена блокировка энергии?"^^xsd:string.
+  rdfs:label "Проведена блокировка энергии"^^xsd:string.
 d:SafetyWorkAction_13_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Не разрешается проведение нескольких работ друг над другом на различной высоте?"^^xsd:string.
+  rdfs:label "Не разрешается проведение нескольких работ друг над другом на различной высоте"^^xsd:string.
 d:SafetyWorkAction_13_8
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
   rdfs:label "Имеется в наличии утвержденный ППР?"^^xsd:string.
 d:SafetyWorkAction_13_9
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Обеспечено временное освещение рабочей зоны?"^^xsd:string.
+  rdfs:label "Обеспечено временное освещение рабочей зоны"^^xsd:string.
 d:SafetyWorkAction_13_10
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Обеспечены зоны проходов не менее 0.8 м.?"^^xsd:string.
+  rdfs:label "Обеспечены зоны проходов не менее 0.8 м."^^xsd:string.
 d:SafetyWorkAction_13_11
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Зона демонтажных работ ограждена и доступ к ней ограничен?"^^xsd:string.
+  rdfs:label "Зону демонтажных работ оградить и доступ к ней ограничить"^^xsd:string.
 d:SafetyWorkAction_13_12
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Подлежащие демонтажу оборудование, его части, конструкции проверены на отсутствие мешающих демонтажу связей?"^^xsd:string.
+  rdfs:label "Подлежащие демонтажу оборудование, его части, конструкции проверить на отсутствие мешающих демонтажу связей"^^xsd:string.
 d:SafetyWorkAction_13_13
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_13;
-  rdfs:label "Определено и обозначено расстояние размещения тяжелой техники от места проведения работ?"^^xsd:string.
+  rdfs:label "Определить и обозначить расстояние размещения тяжелой техники от места проведения работ"^^xsd:string.
 
 d:SafetyWorkAction_14
   a v-s:SafetyWorkAction;
@@ -846,35 +865,36 @@ d:SafetyWorkAction_14
 d:SafetyWorkAction_14_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Предоставлены пригодные для работ измерительные приборы и оборудование?"^^xsd:string.
+  rdfs:label "Предоставлены пригодные для работ измерительные приборы и оборудование"^^xsd:string.
 d:SafetyWorkAction_14_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Использование изолирующих и защитных материалов для защиты работников, включая экраны, ограждения, коврики или иное спецоборудование?"^^xsd:string.
+  rdfs:label "Использование изолирующих и защитных материалов для защиты работников, включая экраны, ограждения, коврики или иное спецоборудование"^^xsd:string.
 d:SafetyWorkAction_14_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Наличие изолированного инструмента или иных неэлектропроводящих устройств и приспособлений (таких как клещи для плавких предохранителей, штанга для работы под напряжением, ключи и отвертки с диэлектрической изоляцией и т.д.)?"^^xsd:string.
+  rdfs:label "Наличие изолированного инструмента или иных неэлектропроводящих устройств и приспособлений (таких как клещи для плавких предохранителей, штанга для работы под напряжением, ключи и отвертки с диэлектрической изоляцией и т.д.)"^^xsd:string.
 d:SafetyWorkAction_14_4
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
   rdfs:label "Все работники обеспечены соответствующими СИЗ?"^^xsd:string.
 d:SafetyWorkAction_14_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Отсутствуют все электропроводящие украшения и одежда?"^^xsd:string.
+  rdfs:label "Не допускаются все электропроводящие украшения и одежда"^^xsd:string.
 d:SafetyWorkAction_14_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Рабочее место свободно от воды и токопроводящей пыли, проведена уборка?"^^xsd:string.
+  rdfs:label "Рабочее место свободить от воды и токопроводящей пыли, провести уборка"^^xsd:string.
 d:SafetyWorkAction_14_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Вывешены предупреждающие знаки, запрещен несанкционированный вход на место производства работ?"^^xsd:string.
+  rdfs:label "Вывесить предупреждающие знаки, запрещен несанкционированный вход на место производства работ"^^xsd:string.
 d:SafetyWorkAction_14_8
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_14;
-  rdfs:label "Оборудование осмотрено и не имеет повреждений?"^^xsd:string.
+  rdfs:label "Оборудование осмотрено и не имеет повреждений"^^xsd:string.
 
 d:SafetyWorkAction_15
   a v-s:SafetyWorkAction;
@@ -882,35 +902,36 @@ d:SafetyWorkAction_15
 d:SafetyWorkAction_15_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "Использование инструментов и техники, образующих низкий уровень пыли?"^^xsd:string.
+  rdfs:label "Использовать инструмент и технику, образующих низкий уровень пыли"^^xsd:string.
 d:SafetyWorkAction_15_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "Рабочая зона ограждается для предотвращения утечки асбестовой пыли?"^^xsd:string.
+  rdfs:label "Рабочую зону ограждить для предотвращения утечки асбестовой пыли"^^xsd:string.
 d:SafetyWorkAction_15_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "В изолированной зоне производится очистка воздуха за счет системы вентиляции с отрицательным давлением с высокоэффективными воздушными фильтрами (HEPA)?"^^xsd:string.
+  rdfs:label "В изолированной зоне производится очистка воздуха за счет системы вентиляции с отрицательным давлением с высокоэффективными воздушными фильтрами"^^xsd:string.
 d:SafetyWorkAction_15_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "Установлены предупреждающие знаки на всех входах на площадку?"^^xsd:string.
+  rdfs:label "Установлены предупреждающие знаки на всех входах на площадку"^^xsd:string.
 d:SafetyWorkAction_15_5
+  v-s:deleted true;
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
   rdfs:label "Имеется в наличии утвержденный ППР?"^^xsd:string.
 d:SafetyWorkAction_15_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "Воздействие пыли, содержащей асбест, на рабочего не превышает определенного лимита?"^^xsd:string.
+  rdfs:label "Воздействие пыли, содержащей асбест, на рабочего не должна превышать определенный лимит"^^xsd:string.
 d:SafetyWorkAction_15_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "Материалы, содержащие асбест, убираются в мешки и маркируются?"^^xsd:string.
+  rdfs:label "Материалы, содержащие асбест, убираются в мешки и маркируются"^^xsd:string.
 d:SafetyWorkAction_15_8
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_15;
-  rdfs:label "Персоналу выданы средства защиты органов дыхания, соответствующая спецодежда и проведено обучение по их использованию?"^^xsd:string.
+  rdfs:label "Персоналу выданы средства защиты органов дыхания, соответствующая спецодежда и проведено обучение по их использованию"^^xsd:string.
 
 d:SafetyWorkAction_16
   a v-s:SafetyWorkAction;
@@ -918,56 +939,56 @@ d:SafetyWorkAction_16
 d:SafetyWorkAction_16_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Проведены замеры воздуха в зоне работ?"^^xsd:string.
+  rdfs:label "Провести замеры воздуха в зоне работ"^^xsd:string.
 d:SafetyWorkAction_16_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Предусмотрена естественная/принудительная вентиляция?"^^xsd:string.
+  rdfs:label "Предусмотреть естественную/принудительную вентиляция"^^xsd:string.
 d:SafetyWorkAction_16_3
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Предусмотрено освещение во взрывозащищенном исполнении с напряжением не более 12В?"^^xsd:string.
+  rdfs:label "Предусмотрено освещение во взрывозащищенном исполнении с напряжением не более 12В"^^xsd:string.
 d:SafetyWorkAction_16_4
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Согласован План аварийно-спасательных мероприятий?"^^xsd:string.
+  rdfs:label "Согласован План аварийно-спасательных мероприятий"^^xsd:string.
 d:SafetyWorkAction_16_5
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Наблюдающий имеет средство связи со службами спасения?"^^xsd:string.
+  rdfs:label "Наблюдающий имеет средство связи со службами спасения"^^xsd:string.
 d:SafetyWorkAction_16_6
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Определен способ коммуникации наблюдающего с находящимися внутри людьми? (рация, мобильный телефон и т. д.)"^^xsd:string.
+  rdfs:label "Определен способ коммуникации наблюдающего с находящимися внутри людьми (рация, мобильный телефон и т. д.)"^^xsd:string.
 d:SafetyWorkAction_16_7
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Шланговый противогаз находится у входа в замкнутое пространство?"^^xsd:string.
+  rdfs:label "Шланговый противогаз находится у входа в замкнутое пространство"^^xsd:string.
 d:SafetyWorkAction_16_8
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Предусмотрен искробезопасный инструмент?"^^xsd:string.
+  rdfs:label "Предусмотрен искробезопасный инструмент"^^xsd:string.
 d:SafetyWorkAction_16_9
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Наблюдающий регистрирует время входа/выхода членов бригады в замкнутое пространство?"^^xsd:string.
+  rdfs:label "Наблюдающий регистрирует время входа/выхода членов бригады в замкнутое пространство"^^xsd:string.
 d:SafetyWorkAction_16_10
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Используется индивидуальный сигнализатор уровня кислорода?"^^xsd:string.
+  rdfs:label "Используется индивидуальный сигнализатор уровня кислорода"^^xsd:string.
 d:SafetyWorkAction_16_11
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Предусмотрены меры контроля не санкционированного доступа?"^^xsd:string.
+  rdfs:label "Предусмотрены меры контроля не санкционированного доступа"^^xsd:string.
 d:SafetyWorkAction_16_12
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Все отложения удалены, перед допуском людей, проведена оценка наличия отложений внутри емкостей?"^^xsd:string.
+  rdfs:label "Все отложения удалены, перед допуском людей, проведена оценка наличия отложений внутри емкостей"^^xsd:string.
 d:SafetyWorkAction_16_13
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "Отсутствует превышение предельно-допустимой концентрации вредных веществ в воздухе рабочей зоны?"^^xsd:string.
+  rdfs:label "Отсутствует превышение предельно-допустимой концентрации вредных веществ в воздухе рабочей зоны"^^xsd:string.
 d:SafetyWorkAction_16_14
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
-  rdfs:label "При работе с электроинструментом применяется УЗО?"^^xsd:string.
+  rdfs:label "При работе с электроинструментом применяется УЗО"^^xsd:string.

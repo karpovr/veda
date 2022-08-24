@@ -85,8 +85,8 @@ v-s:PS_hasWorkPermitForm_WorkPermit
 v-s:hasWorkKindInWorkPermit
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Вид работ"@ru ;
-  rdfs:label "Work kind"@en ;
+  rdfs:label "Специфичные условия работ"@ru ;
+  rdfs:label "Specific working conditions"@en ;
   rdfs:range v-s:WorkKindInWorkPermit ;
 .
 

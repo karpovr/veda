@@ -58,7 +58,6 @@ d:WorkKindInWorkPermit_7
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;
   rdfs:label "Работы с возможным воздействием на персонал опасной энергии (процедура LOTO)"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_9_1;
 . 
@@ -69,7 +68,6 @@ d:WorkKindInWorkPermit_8
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;
   rdfs:label "Работы невозможно выполнить с процедурой блокировки энергии по процедуре LOTO"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_9_2;
@@ -81,7 +79,6 @@ d:WorkKindInWorkPermit_9
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы на оборудовании для подачи опасных веществ/под давлением/с температурой среды или поверхности выше"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -93,7 +90,6 @@ d:WorkKindInWorkPermit_10
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы на сооружениях очистки и трубопроводах сточных вод"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -105,7 +101,6 @@ d:WorkKindInWorkPermit_11
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы на оборудовании кислородных компрессорных станциях, на кислородных или аммиачных трубопроводах."^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -117,7 +112,6 @@ d:WorkKindInWorkPermit_12
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Ремонт и обслуживание частей и элементов сооружений"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -129,7 +123,6 @@ d:WorkKindInWorkPermit_13
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Пусконаладочные работы вновь вводимого оборудования"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -141,7 +134,6 @@ d:WorkKindInWorkPermit_14
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы на высоте ближе 2-х метров от не ограждённого перепада по высоте более 1,8 м"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_6_1;
@@ -158,7 +150,6 @@ d:WorkKindInWorkPermit_15
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Устройство и разборка строительных лесов и подмостей"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_6_1;
@@ -176,7 +167,6 @@ d:WorkKindInWorkPermit_16
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы с использование подъёмника (люльки)"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_6_1;
@@ -194,7 +184,6 @@ d:WorkKindInWorkPermit_17
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы в замкнутом пространстве"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -207,7 +196,6 @@ d:WorkKindInWorkPermit_18
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы с использование подъемного сооружения (кран)"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_7;  
@@ -220,7 +208,6 @@ d:WorkKindInWorkPermit_19
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы с использование грузоподъемного механизма (таль, домкрат)"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_7;  
@@ -233,7 +220,6 @@ d:WorkKindInWorkPermit_20
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Работы с вблизи воздушных линий электропередач"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -245,7 +231,6 @@ d:WorkKindInWorkPermit_21
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Демонтажные работы и работы по разборке (обрушению) зданий и сооружений"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -258,7 +243,6 @@ d:WorkKindInWorkPermit_22
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;  
   rdfs:label "Земляные работы глубиной 40 см и более"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -271,7 +255,6 @@ d:WorkKindInWorkPermit_23
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;
   rdfs:label "Промывка водой установками высокого давления 200 Бар и выше"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -284,7 +267,6 @@ d:WorkKindInWorkPermit_24
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;
   rdfs:label "Работы с материалами, содержащими асбест"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
@@ -309,14 +291,13 @@ d:WorkKindInWorkPermit_26
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;
   rdfs:label "Ремонтные работы на ОПО"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;
 . 
 d:WorkKindInWorkPermit_27
   a v-s:WorkKindInWorkPermit;
-  v-s:parentUnit d:WorkKindInWorkPermit_6;
+  v-s:parentUnit d:WorkKindInWorkPermit_1;
   rdfs:label "Огневые работы на взрывопожароопасных объектах"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_8;  
