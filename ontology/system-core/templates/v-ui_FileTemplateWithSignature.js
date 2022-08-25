@@ -16,18 +16,19 @@ export const pre = async function (individual, template, container, mode, extra)
 
   $('.verify-signature', $template).click(async () => {
     for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
-      if (signatureIndividual.checked) continue;
+      const signatureView = $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template).not('.signature-checked');
+      if (!signatureView.length) continue;
       try {
         await crypto.verifySignature(individual, signatureIndividual);
-        $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
+        signatureView
           .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
           .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
       } catch (error) {
-        $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template)
+        signatureView
           .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
           .append(`<strong><small><i class="text-danger" title="${error}">Подпись не верна</i></small></strong>`);
       }
-      signatureIndividual.checked = true;
+      signatureView.addClass('signature-checked');
     }
   });
 };
