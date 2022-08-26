@@ -22,6 +22,7 @@ async function createSignatureFile (signature, name, parent) {
   fileIndividual['v-s:canUpdate'] = true;
   fileIndividual['v-s:canDelete'] = true;
   fileIndividual['v-s:backwardProperty'] = 'v-s:digitalSignature';
+  fileIndividual['v-s:uid'] = [crypto.randomUUID()];
   try {
     await uploadSignatureFile(signature, path, uri);
     await fileIndividual.save();
