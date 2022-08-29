@@ -593,6 +593,34 @@ d:SafetyWorkAction_8_8
   v-s:parentUnit d:SafetyWorkAction_8;
   rdfs:label "Работники выполняющие огневые работы имеют талон-допуск?"^^xsd:string.
 
+d:SafetyWorkAction_8_dop
+  a v-s:SafetyWorkAction;
+  rdfs:label "Дополнительные меры при Огневых работах"^^xsd:string.
+d:SafetyWorkAction_8_dop1
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_8_dop;
+  rdfs:label "Осуществлять контроль за состоянием парогазовоздушной среды в технологическом оборудовании"^^xsd:string.
+d:SafetyWorkAction_8_dop2
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_8_dop;
+  rdfs:label "Провентилировать помещения, в которых возможно скопление горючих газов, паров ГЖ"^^xsd:string.
+d:SafetyWorkAction_8_dop3
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_8_dop;
+  rdfs:label "Плотно закрыть все двери, соединяющие помещения, в которых проводятся ОР, с другими помещениями, открыть окна"^^xsd:string.
+d:SafetyWorkAction_8_dop4
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_8_dop;
+  rdfs:label "Следить за разлетом искр; на нижележащей отметке (этаже) назначить наблюдателя и обеспечить огнетушителем"^^xsd:string.
+d:SafetyWorkAction_8_dop5
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_8_dop;
+  rdfs:label "Назначить дополнительного наблюдающего (-их)"^^xsd:string.
+d:SafetyWorkAction_8_dop6
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_8_dop;
+  rdfs:label "Обеспечить наблюдающего дополнительным огнетушителем (указывается тип огнетушителя)"^^xsd:string.
+
 d:SafetyWorkAction_9
   a v-s:SafetyWorkAction;
   rdfs:label "Блокировка энергии"^^xsd:string.

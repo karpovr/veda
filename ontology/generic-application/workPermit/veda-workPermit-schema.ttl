@@ -418,6 +418,24 @@ v-s:PS_hasSafetyWorkAction_8_WorkPermit
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
+v-s:hasSafetyWorkAction_8_dop
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Дополнительные меры безопасности при огневых работах"@ru ;
+  rdfs:label "Дополнительные меры безопасности при огневых работах"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_8_dop_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_8_dop для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_8_dop for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_8_dop ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_8_dop')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
 v-s:hasSafetyWorkAction_9_1
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
