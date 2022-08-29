@@ -1007,6 +1007,13 @@ v-s:hasVisibleFieldInWorkKind
   rdfs:label "Visible fields"@en ;
   rdfs:range owl:ObjectProperty ;
 .
+v-s:hasRequiredFieldInWorkKind
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkKindInWorkPermit ;
+  rdfs:label "Обязательные поля мероприятий по безопасности"@ru ;
+  rdfs:label "Required fields"@en ;
+  rdfs:range owl:ObjectProperty ;
+.
 
 # Отображаемые пункты приложения и приложения «А»
 # Отображаемые поля для ввода мер безопасности
