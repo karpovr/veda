@@ -31,12 +31,6 @@ pub(crate) async fn load_file(
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
-        Ok(u) => u,
-        Err(res) => {
-            return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
-        },
-    };
 
     let path = if let Ok(v) = urlencoding::decode(req.path()) {
         v
@@ -100,7 +94,7 @@ pub(crate) async fn load_file(
         }
     }
 
-    log(Some(&start_time), &uinf, "get_file", &path, ResultCode::BadRequest);
+    log(Some(&start_time), &UserInfo::default(), "get_file", &path, ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
