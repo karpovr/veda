@@ -47,7 +47,7 @@ impl Drop for SetupGuard {
 fn setup() -> SetupGuard {
     static START: std::sync::Once = std::sync::Once::new();
     START.call_once(|| {
-        assert!(v8::icu::set_common_data_71(align_data::include_aligned!(align_data::Align16, "third_party/icu/common/icudtl.dat")).is_ok());
+        assert!(v8::icu::set_common_data_70(align_data::include_aligned!(align_data::Align16, "third_party/icu/common/icudtl.dat")).is_ok());
         v8::V8::initialize_platform(v8::new_default_platform(0,false).make_shared());
         v8::V8::initialize();
     });
