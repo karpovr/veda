@@ -656,13 +656,17 @@ cfg:Event_15
       linkFromUri = veda.Util.getUri(document["v-s:from"]),
       linkTo = get_individual(ticket, linkToUri),
       linkFrom = get_individual(ticket, linkFromUri),
+      rightsFrom = get_rights(ticket, linkFromUri, user_uri),
+      rightsTo = get_rights(ticket, linkToUri, user_uri),
+      canReadFrom = veda.Util.hasValue( rightsFrom, "v-s:canRead", {data: true, type: "Boolean"} ),
+      canReadTo = veda.Util.hasValue( rightsTo, "v-s:canRead", {data: true, type: "Boolean"} ),
+      isValidRights = canReadFrom && canReadTo,
       containsThisLink,
       mutualMembership = veda.Util.hasValue( document, "v-s:mutualMembership", {data: true, type: "Boolean"} ),
       membershipToFromUri = "d:link_membership_" + linkToUri.split(":").join("_") + "_" + linkFromUri.split(":").join("_"),
       membershipFromToUri = "d:link_membership_" + linkFromUri.split(":").join("_") + "_" + linkToUri.split(":").join("_"),
       membershipToFrom,
       membershipFromTo;
-
 
   remove_individual(ticket, membershipToFromUri, _event_id);
   remove_individual(ticket, membershipFromToUri, _event_id);
@@ -671,7 +675,7 @@ cfg:Event_15
     var isToMemberOfFrom = veda.Util.hasValue( document, "v-s:toMemberOfFrom", {data: true, type: "Boolean"});
     var isFromMemberOfTo = veda.Util.hasValue( document, "v-s:fromMemberOfTo", {data: true, type: "Boolean"});
     var isMutual = veda.Util.hasValue( document, "v-s:mutualMembership", {data: true, type: "Boolean"});
-    if (isToMemberOfFrom || isMutual) {
+    if (isValidRights && (isToMemberOfFrom || isMutual)) {
       membershipToFrom = {
         '@' : membershipToFromUri,
         'rdf:type'     : veda.Util.newUri('v-s:Membership'),
@@ -682,7 +686,7 @@ cfg:Event_15
       };
       put_individual(ticket, membershipToFrom, _event_id);
     }
-    if (isFromMemberOfTo || isMutual) {
+    if (isValidRights && (isFromMemberOfTo || isMutual)) {
       membershipFromTo = {
         '@' : membershipFromToUri,
         'rdf:type'     : veda.Util.newUri('v-s:Membership'),
@@ -742,7 +746,7 @@ cfg:Event_15_1
       linkFromUri = veda.Util.getUri(document["v-s:from"]),
       linkTo = get_individual(ticket, linkToUri),
       linkFrom = get_individual(ticket, linkFromUri),
-      containsThisLin;
+      containsThisLink;
      /* mutualMembership = veda.Util.hasValue( document, "v-s:mutualMembership", {data: true, type: "Boolean"} ),
       membershipToFromUri = "d:link_membership_" + linkToUri.split(":").join("_") + "_" + linkFromUri.split(":").join("_"),
       membershipFromToUri = "d:link_membership_" + linkFromUri.split(":").join("_") + "_" + linkToUri.split(":").join("_"),

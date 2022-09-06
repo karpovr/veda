@@ -62,6 +62,6 @@ export const html = `
     <!--<button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>-->
     <button title="v-s:Save" type="button" class="action btn btn-xs btn-success -view edit -search glyphicon glyphicon-ok" id="save"></button>
     <button title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" id="cancel"></button>
-    <button title="v-s:Delete" type="button" class="action btn btn-xs btn-default view edit -search glyphicon glyphicon-remove" id="delete"></button>
+    <button title="v-s:Delete" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-remove" id="delete"></button>
   </span>
 `;

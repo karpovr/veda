@@ -106,7 +106,7 @@ v-s:PS_type
   v-ui:forClass v-s:Link ;
   v-ui:forProperty v-s:type ;
   v-ui:minCardinality 0 ;
-  v-ui:maxCardinality 1 ;  
+  v-ui:maxCardinality 1 ;
   v-ui:placeholder "Выберите тип документа"@ru ;
   v-ui:placeholder "Select document type"@en ;
 .
@@ -209,7 +209,7 @@ v-s:LinksTreeTemplate
   rdfs:label "Шаблон для отображения дерева связей документа"@ru ;
   rdfs:label "Template to view document links tree"@en ;
   rdfs:comment "Дерево"@ru ;
-  rdfs:label "Tree"@en ;
+  rdfs:comment "Tree"@en ;
   v-ui:template "v-s_LinksTreeTemplate.js" ;
 .
 v-s:LinksTemplate
@@ -223,7 +223,7 @@ v-s:LinksListTemplate
   rdfs:label "Шаблон для управлениями произвольными связями документа"@ru ;
   rdfs:label "Template to manage generic document links"@en ;
   rdfs:comment "Список"@ru ;
-  rdfs:label "List"@en ;
+  rdfs:comment "List"@en ;
   v-ui:template "v-s_LinksListTemplate.js" ;
 .
 v-s:LinksListTemplate_inline
@@ -231,7 +231,7 @@ v-s:LinksListTemplate_inline
   rdfs:label "Шаблон для управлениями произвольными связями документа"@ru ;
   rdfs:label "Template to manage generic document links"@en ;
   rdfs:comment "Список"@ru ;
-  rdfs:label "List"@en ;
+  rdfs:comment "List"@en ;
   v-ui:template "v-s_LinksListTemplate_inline.js" ;
 .
 v-s:StandaloneLinksTreeTemplate
@@ -239,7 +239,7 @@ v-s:StandaloneLinksTreeTemplate
   rdfs:label "Шаблон для отображения дерева связей документа"@ru ;
   rdfs:label "Template to view document links tree"@en ;
   rdfs:comment "Дерево"@ru ;
-  rdfs:label "Tree"@en ;
+  rdfs:comment "Tree"@en ;
   v-ui:template "v-s_StandaloneLinksTreeTemplate.js" ;
 .
 v-s:LinksTreeRecursiveTemplate
@@ -247,7 +247,7 @@ v-s:LinksTreeRecursiveTemplate
   rdfs:label "Шаблон для отображения дерева связей документа"@ru ;
   rdfs:label "Template to view document links tree"@en ;
   rdfs:comment "Дерево"@ru ;
-  rdfs:label "Tree"@en ;
+  rdfs:comment "Tree"@en ;
   v-ui:template "v-s_LinksTreeRecursiveTemplate.js" ;
 .
 v-s:TrimmedLinkTemplate
@@ -261,7 +261,7 @@ v-s:LinksGraphTemplate
   rdfs:label "Шаблон для отображения графа связей документа"@ru ;
   rdfs:label "Template to view document links graph"@en ;
   rdfs:comment "Граф"@ru ;
-  rdfs:label "Graph"@en ;
+  rdfs:comment "Graph"@en ;
   v-ui:template "v-s_LinksGraphTemplate.js" ;
 .
 

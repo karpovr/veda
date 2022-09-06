@@ -45,23 +45,20 @@ export const html = `
   <tr>
     <td><a href="#/@" class="glyphicon glyphicon-search view -edit -search"></a></td>
     <td>
-      <div class="col-md-12">
-        <veda-control
-          rel="v-s:type"
-          data-single="true"
-          data-type="link"
-          class="fulltext dropdown -view edit -search"
-          data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
-        <veda-control
-          data-type="link"
-          rel="v-s:to"
-          class="-view edit search fulltext disabled"
-          data-query-prefix="'rdf:type'=='{@.v-s:type.id}'"></veda-control>
-      </div>
-      <div class="col-md-12">
-        <span class="link-from" about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
-        <span class="link-to view -edit -search" about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
-      </div>
+      <veda-control
+        data-type="link"
+        rel="v-s:type"
+        data-single="true"
+        class="fulltext dropdown -view edit -search"
+        data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'"></veda-control>
+      <veda-control
+        data-type="link"
+        rel="v-s:to"
+        class="-view edit search fulltext disabled"
+        data-template="{@.rdf:type.rdfs:label}: {@.rdfs:label}"
+        data-query-prefix="'rdf:type'=='{@.v-s:type.id}'"></veda-control>
+      <span class="link-from" about="@" rel="v-s:from" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
+      <span class="link-to view -edit -search" about="@" rel="v-s:to" data-template="v-ui:ClassNameLabelLinkTemplate"></span>
     </td>
     <td>
       <span class="link-from" about="@" rel="v-s:from"><span about="@" property="v-s:created"></span></span>

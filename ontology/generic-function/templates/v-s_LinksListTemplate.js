@@ -6,22 +6,18 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   const isMutual = container.attr('data-mutual') === 'true';
-  const rowTmpl = 'v-s:LinksListTemplate_inline';
 
   $('#add-link', template).click(function () {
     $('.links-table', template).removeClass('hidden');
     const cntr = $("[rel='v-s:hasLink']", template);
-    const _class = new IndividualModel('v-s:Link');
     const Link = new IndividualModel();
-    Link['rdf:type'] = [_class];
-    Link['v-s:from'] = [individual];
-
-    individual.isSync(false);
+    Link['rdf:type'] = 'v-s:Link'
+    Link['v-s:from'] = individual;
 
     if (isMutual) {
       Link['v-s:mutualMembership'] = [true];
     }
-    Link.present(cntr, rowTmpl, 'edit').then(function (newRow) {
+    Link.present(cntr, 'v-s:LinksListTemplate_inline', 'edit').then(function (newRow) {
       newRow = $(newRow);
       Link.one('beforeReset', function () {
         newRow.remove();
@@ -62,13 +58,6 @@ export const pre = function (individual, template, container, mode, extra) {
       $('.links-table', template).addClass('hidden');
     }
   }
-  function cl () {
-    console.log(this);
-  }
-  individual.on('beforeSave', cl);
-  template.one('remove', function () {
-    individual.off('beforeSave', cl);
-  });
 };
 
 export const html = `
