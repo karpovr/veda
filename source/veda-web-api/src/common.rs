@@ -108,6 +108,7 @@ pub(crate) struct AuthenticateRequest {
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub(crate) struct TicketUriRequest {
     pub(crate) ticket: Option<String>,
+    pub(crate) user_id: Option<String>,
     pub(crate) uri: String,
 }
 

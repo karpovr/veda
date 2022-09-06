@@ -185,13 +185,17 @@ pub(crate) async fn get_rights(
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
+    let mut uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
+
+    if let (Some (u), Some(_)) = (&params.user_id, &params.ticket) {
+        uinf.user_id = u.to_owned();
+    }
 
     let rights = az
         .lock()
