@@ -6,6 +6,26 @@ export default ServerBackend;
 
 ServerBackend.status = 'limited';
 
+ServerBackend.get_rights = function (ticket, uri, user_id) {
+  const arg = ticket;
+  const isObj = typeof arg === 'object';
+  if (isObj) {
+    ticket = arg.ticket;
+    uri = arg.uri;
+    user_id = arg.user_id;
+  }
+  try {
+    const json = get_rights(ticket, uri, user_id);
+    if (json) {
+      return Promise.resolve(json);
+    } else {
+      return Promise.reject(Error('get_rights failed'));
+    }
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
 ServerBackend.query = function (ticket, queryStr, sort, databases, top, limit, from) {
   const arg = ticket;
   const isObj = typeof arg === 'object';

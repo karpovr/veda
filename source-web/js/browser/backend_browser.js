@@ -3,7 +3,7 @@
 import BackendError from '../browser/backend_error.js';
 
 export default class BrowserBackend {
-  static async get_rights (ticket, uri) {
+  static async get_rights (ticket, uri, user_id) {
     const arg = ticket;
     const isObj = typeof arg === 'object';
     const params = {
@@ -12,6 +12,7 @@ export default class BrowserBackend {
       ticket: isObj ? arg.ticket : ticket,
       data: {
         'uri': isObj ? arg.uri : uri,
+        'user_id': isObj ? arg.user_id : user_id,
       },
     };
     return call_server(params);
