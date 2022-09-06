@@ -894,17 +894,21 @@ cfg:Event_16
       if (isDeleted) {
         remove_individual(ticket, mutualMembershipUri, _event_id);
       } else {
-        var mMembership = {
-          '@' : mutualMembershipUri,
-          'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-          'v-s:memberOf' : veda.Util.newUri(backwardLinkUri),
-          'v-s:resource' : veda.Util.newUri(backwardTargetUri),
-          'rdfs:comment' : veda.Util.newStr('создано cfg:Event_16 (mutual membership)'),
-          'v-s:canRead' : veda.Util.newBool(true)
-        };
-        put_individual(ticket, mMembership, _event_id);
-      };
-    };
+        const targetRights = get_rights(ticket, backwardTargetUri, user_uri);
+        const canReadTarget = veda.Util.hasValue( targetRights, "v-s:canRead", {data: true, type: "Boolean"} );
+        if (canReadTarget) {
+          var mMembership = {
+            '@' : mutualMembershipUri,
+            'rdf:type'     : veda.Util.newUri('v-s:Membership'),
+            'v-s:memberOf' : veda.Util.newUri(backwardLinkUri),
+            'v-s:resource' : veda.Util.newUri(backwardTargetUri),
+            'rdfs:comment' : veda.Util.newStr('создано cfg:Event_16 (mutual membership)'),
+            'v-s:canRead' : veda.Util.newBool(true)
+          };
+          put_individual(ticket, mMembership, _event_id);
+        }
+      }
+    }
 
     if (!backwardTarget) { continue; }
     if (isDeleted) {
