@@ -1,5 +1,5 @@
 export default ({test, assert, Backend, Helpers, Constants, Util}) => {
-  test.only('#045 get_rights', async () => {
+  test('#045 get_rights', async () => {
     const ticket_user1 = (await Helpers.get_user1_ticket()).ticket;
     const ticket_user2 = (await Helpers.get_user2_ticket()).ticket;
 
