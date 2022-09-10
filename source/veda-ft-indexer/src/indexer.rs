@@ -61,8 +61,7 @@ impl Indexer {
 
         for (db_name, path) in self.db2path.iter() {
             let full_path = &("./".to_owned() + path);
-            let mut db=
-            if Path::new(full_path).is_dir() {
+            let mut db = if Path::new(full_path).is_dir() {
                 info!("opened db {}, path = {}", db_name, full_path);
                 Database::new_with_path(path, UNKNOWN)?;
                 WritableDatabase::new(path, DB_OPEN, UNKNOWN)?
@@ -188,8 +187,7 @@ impl Indexer {
             new_indv.parse_all();
             for (predicate, resources) in new_indv.get_obj().get_resources() {
                 debug!("predicate = {}", predicate);
-                let mut p_text_ru = String::new();
-                let mut p_text_en = String::new();
+                let mut p_text: HashMap<String, &str> = HashMap::new();
 
                 if !resources.is_empty() {
                     iwp.index_boolean(self, &(predicate.to_owned() + ".isExists"), &Resource::new_bool(true))?;
@@ -207,43 +205,36 @@ impl Indexer {
                     match oo.rtype {
                         DataType::Uri => {
                             iwp.index_uri(self, predicate, oo)?;
-                        }
+                        },
                         DataType::String => {
-                            if oo.get_lang().to_string() == "RU" {
-                                p_text_ru.push_str(oo.get_str());
-                            } else if oo.get_lang().to_string() == "EN" {
-                                p_text_en.push_str(oo.get_str());
+                            let lang = oo.get_lang();
+                            if lang.is_some() && lang.to_string().len() == 2 {
+                                p_text.insert(lang.to_string().to_owned(), oo.get_str());
                             }
 
                             iwp.index_string(self, predicate, oo)?;
-                        }
+                        },
                         DataType::Integer => {
                             iwp.index_integer(self, predicate, oo)?;
-                        }
+                        },
                         DataType::Datetime => {
                             iwp.index_date(self, predicate, oo)?;
-                        }
+                        },
                         DataType::Decimal => {
                             iwp.index_double(self, predicate, oo)?;
-                        }
+                        },
                         DataType::Boolean => {
                             iwp.index_boolean(self, predicate, oo)?;
-                        }
-                        DataType::Binary => {}
+                        },
+                        DataType::Binary => {},
                     }
                 }
 
                 if !resources.is_empty() {
-                    if !p_text_ru.is_empty() {
-                        let slot_l1 = self.key2slot.get_slot_and_set_if_not_found(&(predicate.to_owned() + "_ru"));
-                        self.tg.index_text_with_prefix(&p_text_ru, &format!("X{}X", slot_l1))?;
-                        iwp.doc_add_text_value(slot_l1, &p_text_ru)?;
-                    }
-
-                    if !p_text_en.is_empty() {
-                        let slot_l1 = self.key2slot.get_slot_and_set_if_not_found(&(predicate.to_owned() + "_en"));
-                        self.tg.index_text_with_prefix(&p_text_en, &format!("X{}X", slot_l1))?;
-                        iwp.doc_add_text_value(slot_l1, &p_text_en)?;
+                    for (k, v) in p_text {
+                        let slot_l1 = self.key2slot.get_slot_and_set_if_not_found(&format!("{}_{}", predicate.to_owned(), k.to_lowercase()));
+                        self.tg.index_text_with_prefix(v, &format!("X{}X", slot_l1))?;
+                        iwp.doc_add_text_value(slot_l1, v)?;
                     }
                 }
             }
@@ -383,28 +374,28 @@ impl Indexer {
                                                         match rc.rtype {
                                                             DataType::Uri => {
                                                                 iwp.index_uri(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                            }
+                                                            },
                                                             DataType::String => {
                                                                 iwp.index_string(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                            }
+                                                            },
 
                                                             DataType::Integer => {
                                                                 iwp.index_integer(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                            }
+                                                            },
 
                                                             DataType::Datetime => {
                                                                 iwp.index_date(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                            }
+                                                            },
 
                                                             DataType::Decimal => {
                                                                 iwp.index_double(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                            }
+                                                            },
 
                                                             DataType::Boolean => {
                                                                 iwp.index_boolean(self, &format!("{}.{}", ln, indexed_field), rc)?;
-                                                            }
+                                                            },
 
-                                                            DataType::Binary => {}
+                                                            DataType::Binary => {},
                                                         }
                                                     }
 

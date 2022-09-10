@@ -20,8 +20,8 @@ use v_common::onto::individual::Individual;
 use v_common::onto::onto_impl::Onto;
 use v_common::storage::common::StorageMode;
 use v_common::v_api::api_client::IndvOp;
-use xapian_rusty::*;
 use v_common::v_queue::consumer::Consumer;
+use xapian_rusty::*;
 
 const BASE_PATH: &str = "./data";
 const FAILED_LIST_FILE_NAME: &str = "ft-indexer-failed-ids-list.dat";
@@ -96,10 +96,10 @@ fn index(backend: &mut Backend, module: &mut Module) -> Result<(), XError> {
             match e {
                 XError::Xapian(c) => {
                     error!("failed to init index base, err = {}", get_xapian_err_type(c));
-                }
+                },
                 _ => {
                     error!("failed to init index base, err = {:?}", e);
-                }
+                },
             }
             return Err(e);
         }
