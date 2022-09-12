@@ -16,6 +16,8 @@ use std::process::{Child, Command};
 use std::time::SystemTime;
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
+use teloxide::prelude::*;
+use teloxide::types::Recipient;
 use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
@@ -48,14 +50,20 @@ struct App {
     started_modules: Vec<(String, Child)>,
     backend: Backend,
     systicket: String,
+    tg: Option<TelegramDest>,
+}
+
+struct TelegramDest {
+    tg_notify_token: String,
+    tg_notify_chat_id: i64,
 }
 
 impl App {
-    fn start_modules(&mut self) -> io::Result<()> {
+    async fn start_modules(&mut self) -> io::Result<()> {
         for name in self.modules_start_order.iter() {
             //info!("start {:?}", module);
             let module = self.modules_info.get(name).unwrap();
-            match start_module(module) {
+            match start_module(&self.tg, module).await {
                 Ok(child) => {
                     info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                     self.started_modules.push((module.name.to_owned(), child));
@@ -92,7 +100,7 @@ impl App {
         Ok(())
     }
 
-    fn watch_started_modules(&mut self) {
+    async fn watch_started_modules(&mut self) {
         let mut mstorage_watchdog_check_period = None;
         if let Some(p) = Module::get_property("mstorage_watchdog_period") {
             if let Ok(t) = parse_duration::parse(&p) {
@@ -152,13 +160,15 @@ impl App {
                     };
 
                     if exit_code != ModuleError::Fatal as i32 {
-                        error!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code);
+                        let msg = format!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code);
+                        error!("{}", msg);
+                        send_msg_to_tg(&self.tg, &msg).await;
                         if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
                             warn!("@1 attempt to stop module, process = {}, name = {}", process.id(), name);
                         }
 
                         if let Some(module) = self.modules_info.get(name) {
-                            match start_module(module) {
+                            match start_module(&self.tg, module).await {
                                 Ok(child) => {
                                     info!("{} restart module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                                     *process = child;
@@ -192,7 +202,7 @@ impl App {
 
             for name in new_config_modules {
                 if let Some(module) = self.modules_info.get(&name) {
-                    match start_module(module) {
+                    match start_module(&self.tg, module).await {
                         Ok(child) => {
                             info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                             self.started_modules.push((module.name.to_owned(), child));
@@ -343,7 +353,8 @@ impl App {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let env_var = "RUST_LOG";
     match std::env::var_os(env_var) {
         Some(val) => println!("use env var: {}: {:?}", env_var, val.to_str()),
@@ -370,7 +381,19 @@ fn main() {
         started_modules: vec![],
         backend: Default::default(),
         systicket: "".to_string(),
+        tg: None,
     };
+
+    if let (Some(v), Some(t)) = (Module::get_property("tg_notify_chat_id"), Module::get_property("tg_notify_token")) {
+        if let Ok(d) = v.parse::<i64>() {
+            app.tg = Some(TelegramDest {
+                tg_notify_token: t,
+                tg_notify_chat_id: d,
+            });
+        }
+    } else {
+        warn!("sending notifications to Telegram is not available.");
+    }
 
     if let Err(e) = app.get_modules_info() {
         error!("failed to read modules info, err = {:?}", e);
@@ -394,7 +417,7 @@ fn main() {
         }
     }
 
-    let started = app.start_modules();
+    let started = app.start_modules().await;
     if started.is_err() {
         error!("failed to start veda, err = {:?}", started.err());
         return;
@@ -406,7 +429,7 @@ fn main() {
         }
     }
 
-    app.watch_started_modules();
+    app.watch_started_modules().await;
     //info!("started {:?}", started);
 }
 
@@ -423,7 +446,18 @@ fn is_ok_process(sys: &mut sysinfo::System, pid: u32) -> (bool, u64) {
     }
 }
 
-fn start_module(module: &VedaModule) -> io::Result<Child> {
+async fn send_msg_to_tg(tg: &Option<TelegramDest>, text: &str) {
+    if let Some(t) = tg {
+        let bot = Bot::new(t.tg_notify_token.to_owned()).auto_send();
+        let chat_id = Recipient::Id(ChatId(t.tg_notify_chat_id));
+
+        if let Err(e) = bot.send_message(chat_id, text).await {
+            error!("fail send message to telegram: err={:?}", e);
+        }
+    }
+}
+
+async fn start_module(tg: &Option<TelegramDest>, module: &VedaModule) -> io::Result<Child> {
     let datetime: DateTime<Local> = Local::now();
 
     fs::create_dir_all("./logs").unwrap_or_default();
@@ -440,7 +474,11 @@ fn start_module(module: &VedaModule) -> io::Result<Child> {
 
     match child {
         Ok(p) => {
-            info!("started successfully, module = {}, args = {:?}", module.exec_name.to_string(), &module.args);
+            let msg = format!("started successfully, module = {}, args = {:?}", module.exec_name.to_string(), &module.args);
+            info!("{}", msg);
+
+            send_msg_to_tg(tg, &msg).await;
+
             if let Ok(mut file) = File::create(".pids/__".to_owned() + &module.name + "-pid") {
                 if let Err(e) = file.write_all(format!("{}", p.id()).as_bytes()) {
                     error!("failed to create pid file, module = {}, process = {}, err = {:?}", &module.name, p.id(), e);
