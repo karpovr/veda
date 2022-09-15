@@ -535,10 +535,20 @@ function processTemplate (individual, container, wrapper, templateMode) {
    */
   const validHandler = function () {
     if ( this.hasValue('v-s:valid', false) ) {
-      if (mode === 'view' && container && container.id !== 'main' && !container.classList.contains('modal-body')) {
+      const isAlertVisible = (
+        container && container.id === 'main' ||
+        container.classList.contains('modal-body') ||
+        template.classList.contains('container') ||
+        template.children.length && template.children[0].classList.contains('container')
+      );
+      if (mode === 'view' && !isAlertVisible) {
         template.classList.add('invalid');
+        const msg = new IndividualModel('v-s:InvalidAlert');
+        msg.load().then(() => {
+          template.title = msg['rdfs:label'].map(CommonUtil.formatValue).join(' ');
+        });
       }
-      if (container && (container.id === 'main' || container.classList.contains('modal-body'))) {
+      if (isAlertVisible) {
         const msg = new IndividualModel('v-s:InvalidAlert');
         msg.load().then(() => {
           const msgStr = msg['rdfs:label'].map(CommonUtil.formatValue).join(' ');
@@ -718,7 +728,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
             relContainer.querySelectorAll(selector).forEach((node) => {
               const index = embedded.indexOf(node);
               if (index >= 0) embedded.splice(index, 1);
-              node.remove()
+              node.remove();
             });
           }
           if (sort_required) {
