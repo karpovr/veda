@@ -8,12 +8,12 @@ import Util from '../../common/util.js';
 
 import notify from '../../browser/notify.js';
 
-function uploadFile (params, retry) {
+function uploadFile ({file, path, uri, progress} = params, retry) {
   retry = typeof retry === 'number' ? retry : 2;
   return new Promise((resolve, reject) => {
     const done = () => {
       if (xhr.status === 200) {
-        resolve(params);
+        resolve();
       } else {
         reject(Error(xhr.response || xhr.responseText));
       }
@@ -21,19 +21,13 @@ function uploadFile (params, retry) {
     const fail = () => {
       reject(Error('File upload failed'));
     };
-    const file = params.file;
-    const path = params.path;
-    const uri = params.uri;
-    const progress = params.progress;
     const xhr = new XMLHttpRequest();
     const fd = new FormData();
     xhr.open('POST', '/files', true);
     xhr.timeout = 10 * 60 * 1000;
     xhr.upload.onprogress = progress;
     xhr.onload = done;
-    xhr.onerror = fail;
-    xhr.onabort = fail;
-    xhr.ontimeout = fail;
+    xhr.onerror = xhr.onabort = xhr.ontimeout = fail;
     fd.append('path', path);
     fd.append('uri', uri);
     if (file instanceof File) {
@@ -43,6 +37,7 @@ function uploadFile (params, retry) {
     }
     xhr.send(fd);
   }).catch((error) => {
+    console.log('File upload error:', error);
     if (retry > 0) {
       return uploadFile(params, --retry);
     }
@@ -257,6 +252,7 @@ $.fn.veda_file = function ( options ) {
     fileIndividual['v-s:canRead'] = [true];
     fileIndividual['v-s:canUpdate'] = [true];
     fileIndividual['v-s:canDelete'] = [true];
+    fileIndividual.file = file;
     if (isThumbnail) {
       fileIndividual['v-s:backwardProperty'] = ['v-s:thumbnail'];
     } else {
@@ -292,14 +288,9 @@ $.fn.veda_file = function ( options ) {
         resolve(fileIndividual);
       }
     }).then(() => {
-      return uploadFile({
-        file: file,
-        path: path,
-        uri: uri,
-        progress: progress,
-      });
+      return uploadFile({file, path, uri, progress});
     }).then(() => {
-      return fileIndividual.save();
+      return isThumbnail ? fileIndividual.save() : fileIndividual;
     }).catch((error) => {
       notify('danger', error);
     });

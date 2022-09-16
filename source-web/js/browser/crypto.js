@@ -6,7 +6,7 @@ import IndividualModel from '../common/individual_model.js';
 
 const cryptoPro = new CryptoPro();
 
-async function createSignatureFile (signature, name, parent) {
+async function createSignatureFileIndividual (signature, name, parent) {
   const uri = CommonUtil.guid();
   const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
   const fileIndividual = new IndividualModel();
@@ -26,6 +26,7 @@ async function createSignatureFile (signature, name, parent) {
   try {
     await uploadSignatureFile(signature, path, uri);
     await fileIndividual.save();
+    return fileIndividual;
   } catch (error) {
     alert(error);
   }
@@ -46,6 +47,17 @@ async function uploadSignatureFile (signature, path, uri) {
   }
 }
 
+async function readDataToSign (file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = function (e) {
+      const dataToSign = btoa(new Uint8Array(e.target.result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+      resolve(dataToSign);
+    };
+    reader.onerror = reject;
+  });
+}
 async function getDataToSign (url) {
   const fileResponse = await fetch(url);
   if (!fileResponse.ok) {
@@ -76,7 +88,8 @@ async function getValidCertificates () {
 async function signData (dataToSign, thumbprint, individual) {
   const certificate = await cryptoPro.certificateInfo(thumbprint);
   const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
-  await createSignatureFile(signature, certificate.Name, individual);
+  const signatureFileIndividual = await createSignatureFileIndividual(signature, certificate.Name, individual);
+  individual.addValue('v-s:digitalSignature', signatureFileIndividual);
 }
 
 const dialogTemplate = `
@@ -95,12 +108,12 @@ const dialogTemplate = `
 function decorator (fn, pre, post, err) {
   return async function (...args) {
     try {
-      pre && await pre.call(this, ...args);
+      pre && typeof pre === 'function' && await pre.call(this, ...args);
       const result = await fn.call(this, ...args);
-      post && await post.call(this, ...args);
+      post && typeof post === 'function' && await post.call(this, ...args);
       return result;
     } catch (error) {
-      err && await err.call(this, ...args);
+      err && typeof err === 'function' && await err.call(this, ...args);
       throw error;
     }
   };
@@ -149,7 +162,12 @@ export default class Crypto {
   }
 
   async addSignature (fileIndividual) {
-    const dataToSign = await spinnerDecorator(getDataToSign)(`/files/${fileIndividual.id}`);
+    let dataToSign;
+    if (fileIndividual.file) {
+      dataToSign = await spinnerDecorator(readDataToSign)(fileIndividual.file);
+    } else {
+      dataToSign = await spinnerDecorator(getDataToSign)(`/files/${fileIndividual.id}`);
+    }
     const certificates = await spinnerDecorator(getValidCertificates)();
     if (certificates.length > 1) {
       const container = document.createElement('div');
