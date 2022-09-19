@@ -2,8 +2,6 @@
 
 import veda from '../common/veda.js';
 
-import IndividualModel from '../common/individual_model.js';
-
 import riot from '../common/lib/riot.js';
 
 import Backend from '../common/backend.js';
@@ -12,28 +10,29 @@ export default UpdateService;
 
 /**
  * Client in memory cache update service singleton constructor
+ * @param {string} address - WebSocket address
  * @return {Promise} update service instance promise
  */
 function UpdateService () {
-  // Singleton pattern
   if (UpdateService.prototype._singletonInstance) {
     return UpdateService.prototype._singletonInstance;
   }
 
-  const self = riot.observable(this);
-  self.list = {};
-  self.onLine = false;
+  riot.observable(this);
+  this.list = {};
+  this.onLine = false;
 
   UpdateService.prototype._singletonInstance = this;
 }
 
 const proto = UpdateService.prototype;
 
-proto.init = function () {
-  if (this.inited) {
+proto.start = async function () {
+  if (this.started) {
     return Promise.resolve(this);
   }
-  this.inited = true;
+  this.started = true;
+  this.stopped = false;
   const self = this;
   const reconnectDelayInitial = 10000 + Math.floor(Math.random() * 50000); // 10 - 60 sec
   const reconnectDelayFactor = 1.25;
@@ -47,32 +46,29 @@ proto.init = function () {
   let lastPing = Date.now();
   let pingInterval;
 
-  return Backend.get_individual('', 'cfg:ClientUpdateServiceAddress', false)
-    .then((addressCfg) => {
-      const address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
-      let url;
-      try {
-        url = new URL(address);
-      } catch (error) {
-        url = new URL(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${address}`);
-      }
-      const socket = new WebSocket(url);
+  try {
+    const addressCfg = await Backend.get_individual('', 'cfg:ClientUpdateServiceAddress', false);
+    this.address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
+    this.url = new URL(this.address);
+  } catch (error) {
+    this.url = new URL(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${address}`);
+  }
 
-      socket.onopen = openedHandler;
-      socket.onclose = closedHandler;
-      socket.onerror = errorHandler;
-      socket.onmessage = messageHandler;
-      socket.receiveMessage = receiveMessage;
-      socket.sendMessage = sendMessage;
-      self.socket = socket;
-      return self;
-    })
-    .catch((error) => {
-      this.inited = false;
-      reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
-      console.error('Init socket failed, retry in', reconnectDelay / 1000, 'sec');
-      setTimeout(self.init.bind(self), reconnectDelay);
-    });
+  try {
+    const socket = new WebSocket(this.url);
+    socket.onopen = openedHandler;
+    socket.onclose = closedHandler;
+    socket.onerror = errorHandler;
+    socket.onmessage = messageHandler;
+    socket.receiveMessage = receiveMessage;
+    socket.sendMessage = sendMessage;
+    this.socket = socket;
+  } catch (error) {
+    this.started = false;
+    reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
+    console.error('Init socket failed, retry in', reconnectDelay / 1000, 'sec');
+    setTimeout(this.start.bind(this), reconnectDelay);
+  }
 
   /**
      * Send a message via socket
@@ -125,17 +121,11 @@ proto.init = function () {
           continue;
         }
         const updateCounter = parseInt(pair[1]);
-        const individual = new IndividualModel(uri);
-        if ( individual.hasValue('v-s:updateCounter', updateCounter) ) {
-          continue;
-        }
         if (self.list[uri]) {
           self.list[uri].updateCounter = updateCounter;
         }
-        if (self.list[uri].action) {
-          self.list[uri].action.call(individual, updateCounter); // Call action
-        } else if (updateCounter !== 0) {
-          individual.reset(); // Default action
+        if (self.list[uri] && typeof self.list[uri].callback === 'function') {
+          self.list[uri].callback(updateCounter);
         }
       } catch (error) {
         console.error('Individual update service failed');
@@ -196,48 +186,29 @@ proto.init = function () {
    * @return {void}
    */
   function closedHandler (event) {
-    reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
-    console.log('client: websocket closed', event.target.url, '| re-connect in', reconnectDelay / 1000, 'sec');
-    setTimeout(self.init.bind(self), reconnectDelay);
+    console.log('client: websocket closed', event.target.url);
+    self.socket = null;
     self.onLine = false;
-    self.inited = false;
+    self.started = false;
     self.trigger('offline');
     clearInterval(pingInterval);
+    if (!self.stopped) {
+      reconnectDelay = reconnectDelay < reconnectDelayLimit ? reconnectDelay * reconnectDelayFactor : reconnectDelayLimit;
+      console.log('client: re-connect in', reconnectDelay / 1000, 'sec');
+      setTimeout(self.start.bind(self), reconnectDelay);
+    }
   }
 };
 
-proto.subscribe = function (uri, action) {
-  if ( this.list[uri] ) {
-    ++this.list[uri].subscribeCounter;
-  } else {
-    const individual = new IndividualModel(uri);
-    if (individual.isNew()) {
-      const updateCounter = 0;
-      this.list[uri] = {
-        subscribeCounter: 1,
-        updateCounter: updateCounter,
-      };
-      if (action) {
-        this.list[uri].action = action;
-      }
-      if (this.socket) {
-        this.socket.sendMessage('+' + uri + '=' + updateCounter);
-      }
-    } else {
-      individual.one('afterLoad', () => {
-        const updateCounter = individual.hasValue('v-s:updateCounter') ? individual.get('v-s:updateCounter')[0] : 0;
-        this.list[uri] = {
-          subscribeCounter: 1,
-          updateCounter: updateCounter,
-        };
-        if (action) {
-          this.list[uri].action = action;
-        }
-        if (this.socket) {
-          this.socket.sendMessage('+' + uri + '=' + updateCounter);
-        }
-      });
-    }
+proto.stop = function () {
+  this.stopped = true;
+  this.socket.close();
+};
+
+proto.subscribe = function (uri, updateCounter = 0, callback) {
+  this.list[uri] = {updateCounter, callback};
+  if (this.socket) {
+    this.socket.sendMessage('+' + uri + '=' + updateCounter);
   }
 };
 
@@ -245,8 +216,6 @@ proto.unsubscribe = function (uri) {
   if ( !uri ) {
     this.list = {};
     this.socket.sendMessage('-*');
-  } else if ( this.list[uri] && this.list[uri].subscribeCounter > 1) {
-    --this.list[uri].subscribeCounter;
   } else {
     delete this.list[uri];
     if (this.socket) {

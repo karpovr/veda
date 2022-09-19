@@ -15,7 +15,7 @@ export default IndividualModel;
 let updateService;
 if (typeof window !== 'undefined') {
   updateService = new UpdateService();
-  updateService.init();
+  updateService.start();
 }
 
 IndividualModel.cache = {
@@ -54,7 +54,11 @@ IndividualModel.cache = {
     this.expire[expire_key].push(individual);
     this.count++;
     if (updateService && expire_key !== 1) {
-      updateService.subscribe(individual.id);
+      updateService.subscribe(
+        individual.id,
+        individual.get('v-s:updateCounter')[0],
+        (updateCounter) => individual.hasValue('v-s:updateCounter', updateCounter) || individual.reset(true),
+      );
     }
   },
   remove: function (key) {

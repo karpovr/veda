@@ -87,7 +87,7 @@ veda.on('status', statusHandler);
     });
 
     const updateService = new UpdateService();
-    await updateService.init();
+    await updateService.start();
     updateService.on('online', setStatus);
     updateService.on('offline', setStatus);
 

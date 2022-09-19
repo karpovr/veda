@@ -1,3 +1,5 @@
+import WebSocket from 'isomorphic-ws';
+
 import fetch, {
   Headers,
   Request,
@@ -13,4 +15,8 @@ if (!globalThis.fetch) {
 
 if (!globalThis.location) {
   globalThis.location = {origin: 'http://localhost:8080'};
+}
+
+if (!globalThis.WebSocket) {
+  globalThis.WebSocket = WebSocket;
 }
