@@ -30,13 +30,13 @@ export const html = `
           <label about="v-s:hasHarmfulSubstance" property="rdfs:label"></label>
         </div>
         <div class="col-sm-9 col-xs-7">
-            <div rel="v-s:hasHarmfulSubstance" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
-            <veda-control rel="v-s:hasHarmfulSubstance" data-type="link" class="-view edit search fulltext dropdown"></veda-control>
+            <div rel="v-s:hasHarmfulSubstance" data-template="v-s:HarmfulSubstance_Embedded_Template" class="view edit -search"></div>
+            <veda-control rel="v-s:hasHarmfulSubstance" data-type="link" data-template="{@.v-s:shortLabel} | {@.rdfs:label} | {@.v-s:description}" class="-view edit search fulltext dropdown"></veda-control>
         </div>
       </div>    
       <div class="row row-attribute">
         <div class="col-sm-3 col-xs-5">
-          <label about="v-s:description" property="rdfs:label"></label>
+          <label about="v-s:Description_ResultsOfMeasurementsOfHarmfulFactors_Bundle" property="rdfs:label"></label>
         </div>
         <div class="col-sm-9 col-xs-7">
             <div about="@" property="v-s:description" class="view -edit -search"></div>

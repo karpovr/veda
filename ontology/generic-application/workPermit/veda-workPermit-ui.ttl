@@ -26,7 +26,12 @@ v-s:DateForResultsOfMeasurementsOfHarmfulFactors_Bundle
   rdfs:label "Дата и время отбора проб"@ru ;
   rdfs:label "Date and time of sampling"@en ;
 .
- 
+v-s:Description_ResultsOfMeasurementsOfHarmfulFactors_Bundle 
+  rdf:type v-s:Bundle ;
+  rdfs:label "Результаты замеров"@ru ;
+  rdfs:label "Result of measurements"@en ;
+.
+
 
 # ------------------------------------------------------------ ШАБЛОНЫ --
 v-s:TS_ResultsOfMeasurementsOfHarmfulFactors
@@ -106,4 +111,13 @@ v-s:ClosingOfWorkPermitTemplate
   rdfs:label "Шаблон v-s:ClosingOfWorkPermit"@ru ;
   rdfs:label "ClosingOfWorkPermit template"@en ;
   v-ui:template "v-s_ClosingOfWorkPermitTemplate.js"
+.
+
+
+v-s:HarmfulSubstance_Embedded_Template
+  rdf:type v-ui:ClassTemplate ;
+  v-ui:forClass v-s:HarmfulSubstance ;
+  rdfs:label "Шаблон v-s:HarmfulSubstance"@ru ;
+  rdfs:label "HarmfulSubstance template"@en ;
+  v-ui:template "v-s_HarmfulSubstance_Embedded_Template.js"
 .
