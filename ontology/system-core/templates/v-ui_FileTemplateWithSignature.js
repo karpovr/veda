@@ -73,7 +73,8 @@ export const html = `
         <div class="thumbnail pull-left" style="width:20%;display:inline-block;margin:0 3% 0 0;" about="@" data-template="v-ui:ModalImageTemplate"></div>
         <div class="filename pull-left" style="width:77%;display:inline-block;">
           <span class="icon label label-primary"></span>
-          <a href="/files/@">
+          <span class="-view edit search" about="@" property="v-s:fileName"></span>
+          <a class="view -edit -search" href="/files/@">
             <span about="@" property="v-s:fileName"></span>
           </a>
           <br>

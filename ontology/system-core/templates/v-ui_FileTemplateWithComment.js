@@ -26,7 +26,8 @@ export const html = `
       <hr class="margin-sm view -edit -search" />
       <div class="file-name">
         <span class="icon label label-primary"></span>
-        <a href="/files/@">
+        <span class="-view edit search" about="@" property="v-s:fileName"></span>
+        <a class="view -edit -search" href="/files/@">
           <span about="@" property="v-s:fileName"></span>
         </a>
       </div>
