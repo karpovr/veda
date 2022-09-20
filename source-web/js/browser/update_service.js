@@ -51,6 +51,7 @@ proto.start = async function () {
     this.address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
     this.url = new URL(this.address);
   } catch (error) {
+    console.log(`CCUS address error, address = ${this.address}, url = ${this.url}`, error);
     this.url = new URL(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${this.address}`);
   }
 
