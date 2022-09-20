@@ -51,7 +51,7 @@ proto.start = async function () {
     this.address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
     this.url = new URL(this.address);
   } catch (error) {
-    this.url = new URL(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${address}`);
+    this.url = new URL(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}${this.address}`);
   }
 
   try {
