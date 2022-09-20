@@ -41,7 +41,6 @@ export const post = async function (individual, template, container, mode, extra
   if (typeof fn === 'string' || fn instanceof String) {
     const idx = fn.lastIndexOf('.');
     const ext = fn.substr(idx + 1);
-    $('span.icon', template).text(ext);
     if (img.indexOf(ext.toLowerCase()) < 0) {
       $('.thumbnail', template).remove();
       $('.filename', template).css('width', '100%');
@@ -72,12 +71,7 @@ export const html = `
       <div class="clearfix margin-sm">
         <div class="thumbnail pull-left" style="width:20%;display:inline-block;margin:0 3% 0 0;" about="@" data-template="v-ui:ModalImageTemplate"></div>
         <div class="filename pull-left" style="width:77%;display:inline-block;">
-          <span class="icon label label-primary"></span>
-          <span class="-view edit search" about="@" property="v-s:fileName"></span>
-          <a class="view -edit -search" href="/files/@">
-            <span about="@" property="v-s:fileName"></span>
-          </a>
-          <br>
+          <div about="@" data-template="v-ui:FileMinTemplate"></div>
           <i class="view -edit -search">
             <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small about="@" property="v-s:created"></small>
           </i>

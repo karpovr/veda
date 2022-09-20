@@ -9,7 +9,6 @@ export const pre = function (individual, template, container, mode, extra) {
   if (typeof fn === 'string' || fn instanceof String) {
     const idx = fn.lastIndexOf('.');
     const ext = fn.substr(idx + 1);
-    $('span.icon', template).text(ext);
     if (img.indexOf(ext.toLowerCase()) < 0) {
       $('.thumbnail', template).remove();
     }
@@ -24,13 +23,7 @@ export const html = `
       <veda-control data-type="string" property="rdfs:comment" class="-view edit search margin-sm"></veda-control>
       <strong property="rdfs:comment" class="view -edit -search header"></strong>
       <hr class="margin-sm view -edit -search" />
-      <div class="file-name">
-        <span class="icon label label-primary"></span>
-        <span class="-view edit search" about="@" property="v-s:fileName"></span>
-        <a class="view -edit -search" href="/files/@">
-          <span about="@" property="v-s:fileName"></span>
-        </a>
-      </div>
+      <div class="file-name" about="@" data-template="v-ui:FileMinTemplate"></div>
       <i class="view -edit -search"> <small rel="v-s:creator" data-template="v-ui:LabelTemplate"></small><small property="v-s:created"></small> </i>
     </div>
   </div>

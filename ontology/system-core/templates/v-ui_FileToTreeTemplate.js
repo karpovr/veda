@@ -7,8 +7,7 @@ export const pre = function (individual, template, container, mode, extra) {
 }
 export const html = `
   <div>
-    <span class="-view edit search" about="@" property="v-s:fileName"></span>
-    <a class="view -edit -search" href="/files/@">
+    <a href="/files/@">
       <span about="@" property="v-s:fileName"></span>
     </a>
   </div>
