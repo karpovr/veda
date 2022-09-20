@@ -34,7 +34,7 @@ jobs:
           sudo apt-get clean
           sudo apt-get update
           sudo apt-get install dpkg
-          npm install -g testcafe
+          npm install -g testcafe@1.18.3
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
           ./tools/install-tarantool.sh
