@@ -1020,3 +1020,85 @@ d:SafetyWorkAction_16_14
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_16;
   rdfs:label "При работе с электроинструментом применяется УЗО"^^xsd:string.
+
+
+d:SafetyWorkAction_17
+  a v-s:SafetyWorkAction;
+  rdfs:label "Меры безопасности при проведении газоопасных работ"^^xsd:string.
+d:SafetyWorkAction_17_1
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Применять инструмент из цветного металла, исключающий искрообразование"^^xsd:string.
+d:SafetyWorkAction_17_2
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Обильно смазать солидолом или другой аналогичной смазкой рабочую часть инструмента из черного металла"^^xsd:string.
+d:SafetyWorkAction_17_3
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Не допускать использование электрических инструментов, дающих искрение"^^xsd:string.
+d:SafetyWorkAction_17_4
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Применять обувь без стальных подковок и гвоздей"^^xsd:string.
+d:SafetyWorkAction_17_5
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Применять переносные светильники во взрывозащищенном исполнении напряжением до двенадцати вольт"^^xsd:string.
+d:SafetyWorkAction_17_6
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "При концентрации газа в помещении, превышающей десять процентов НКПРП, работы должны быть приостановлены"^^xsd:string.
+d:SafetyWorkAction_17_7
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "При содержании кислорода более одного процента по объему розжиг горелок не допускается"^^xsd:string.
+d:SafetyWorkAction_17_8
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Вблизи мест проведения газоопасных работ вывесить или выставить предупредительные знаки Огнеопасно - газ"^^xsd:string.
+d:SafetyWorkAction_17_9
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Оградить места проведения работ"^^xsd:string.
+d:SafetyWorkAction_17_10
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Принять меры, исключающие допуск на место проведения газоопасной работы лиц, не занятых ее выполнением"^^xsd:string.
+d:SafetyWorkAction_17_11
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Работать в шланговых или кислородно-изолирующих противогазах"^^xsd:string.
+d:SafetyWorkAction_17_12
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Входить в газоопасное место можно только с разрешения лица, ответственного за проведение работ, и в средствах индивидуальной защиты, надетых за пределами опасной зоны"^^xsd:string.
+d:SafetyWorkAction_17_13
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Работа должна начинаться в присутствии лица, ответственного за проведение работ"^^xsd:string.
+d:SafetyWorkAction_17_14
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Постоянное присутствие лица, ответственного за проведение работ на месте производства работ"^^xsd:string.
+d:SafetyWorkAction_17_15
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Устройства для подключения передвижного и переносного электрооборудования разместить вне взрывоопасной зоны"^^xsd:string.
+d:SafetyWorkAction_17_16
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Обеспечить непрерывный контроль состояния воздушной среды"^^xsd:string.
+d:SafetyWorkAction_17_17
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Снаружи с наветренной стороны должны находиться по два человека для страховки на каждого работающего в колодцах и котлованах и недопущения к месту работы посторонних лиц"^^xsd:string.
+d:SafetyWorkAction_17_18
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_17;
+  rdfs:label "Для предотвращения скольжения и искрения при опирании на твердое основание лестницы должны иметь резиновые упоры"^^xsd:string.
+
+
+
+
+

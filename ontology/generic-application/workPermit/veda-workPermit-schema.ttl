@@ -598,6 +598,25 @@ v-s:PS_hasSafetyWorkAction_16_WorkPermit
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
+v-s:hasSafetyWorkAction_17
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при проведении газоопасных работ"@ru ;
+  rdfs:label "Меры безопасности при проведении газоопасных работ"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_17_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_17 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_17 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_17 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_17')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+
+
 v-s:workPermit_safetyAction_additional
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
