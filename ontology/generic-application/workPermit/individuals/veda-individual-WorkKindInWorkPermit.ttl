@@ -189,10 +189,6 @@ d:WorkKindInWorkPermit_14
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_1;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_2;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_3;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_4;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_5;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_6;
 . 
 d:WorkKindInWorkPermit_15
   a v-s:WorkKindInWorkPermit;
@@ -215,9 +211,6 @@ d:WorkKindInWorkPermit_15
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_1;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_2;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_3;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_4;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_5;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_6;
 . 
 d:WorkKindInWorkPermit_16
   a v-s:WorkKindInWorkPermit;
@@ -239,10 +232,7 @@ d:WorkKindInWorkPermit_16
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_1;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_2;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_4;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_5;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_6_6;
 . 
 d:WorkKindInWorkPermit_17
   a v-s:WorkKindInWorkPermit;
