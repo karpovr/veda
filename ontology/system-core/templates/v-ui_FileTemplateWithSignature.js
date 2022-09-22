@@ -12,7 +12,16 @@ export const pre = async function (individual, template, container, mode, extra)
     return;
   }
 
-  $('.add-signature', $template).click(() => crypto.addSignature(individual));
+  $('.add-signature', $template).click(async () => {
+    await crypto.addSignature(individual);
+    if (!individual.hasValue('v-s:uid')) {
+      individual['v-s:uid'] = [crypto.genUUID()];
+      console.log(individual['v-s:uid']);
+      setTimeout(() => {
+        individual.save();
+      }, 500);
+    }
+  });
 
   $('.verify-signature', $template).click(async () => {
     for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
