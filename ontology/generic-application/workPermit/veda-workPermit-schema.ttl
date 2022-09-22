@@ -193,8 +193,8 @@ v-s:earthworksPermission
 v-s:workPermit_tk_ppr_description
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Сведения о ТК/ППР"@ru ;
-  rdfs:label "workPermit tk and ppr description"@en ;
+  rdfs:label "ТК/сведения (Документ Монди)"@ru ;
+  rdfs:label "TK Mondi documentation"@en ;
   rdfs:range xsd:string ;
 .
 v-s:workPermit_tk_ppr
