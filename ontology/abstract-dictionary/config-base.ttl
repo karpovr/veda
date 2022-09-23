@@ -54,9 +54,11 @@ if (parent_script_id) {
 
 var doc_uri = document['@'],
   isDefinedBy = document['rdfs:isDefinedBy'],
-  isGroup = veda.Util.getUri(document['rdf:type']) === "v-s:Group";
-  isConnection = veda.Util.getUri(document['rdf:type']) === "v-s:Connection";
-if ( !isDefinedBy || isGroup || isConnection) return;
+  isGroup = veda.Util.getUri(document['rdf:type']) === "v-s:Group",
+  isConnection = veda.Util.getUri(document['rdf:type']) === "v-s:Connection",
+  isCredential = veda.Util.getUri(document['rdf:type']) === "v-s:Credential",
+  isEvent = veda.Util.getUri(document['rdf:type']) === "v-s:Event";
+if ( !isDefinedBy || isGroup || isConnection || isCredential || isEvent) return;
 var uri = 'd:membership_' + doc_uri.split(':').join('_') + '_' + 'cfg_TTLResourcesGroup',
   membership = {
     '@' : uri,
