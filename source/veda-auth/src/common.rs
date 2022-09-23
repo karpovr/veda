@@ -277,7 +277,7 @@ pub(crate) fn remove_secret(uses_credential: &mut Individual, person_id: &str, m
     if uses_credential.get_first_literal("v-s:secret").is_some() {
         uses_credential.remove("v-s:secret");
 
-        let res = module.mstorage_api.update(systicket, IndvOp::Remove, uses_credential);
+        let res = module.mstorage_api.update(systicket, IndvOp::Put, uses_credential);
         if res.result != ResultCode::Ok {
             error!("failed to remove secret code for user, user = {}", person_id);
         }
