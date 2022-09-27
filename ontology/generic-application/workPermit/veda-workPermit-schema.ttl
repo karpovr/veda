@@ -219,7 +219,7 @@ v-s:workPermit_attachment_schema
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "Приложение"@ru ;
   rdfs:label "Additional"@en ;
-  rdfs:range v-s:attachment ;
+  rdfs:range v-s:File ;
 .
 
 v-s:hasWorkingOperations
