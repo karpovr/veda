@@ -1054,15 +1054,13 @@ v-s:ResultsOfMeasurementsOfHarmfulFactors
 #v-s:date - Дата и время отбора проб
 v-s:PS_date_ResultsOfMeasurementsOfHarmfulFactors
   rdf:type v-ui:ObjectPropertySpecification ;
-  rdfs:label "Спецификация hasHarmfulSubstance для класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
-  rdfs:label "Specification for hasHarmfulSubstance for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
+  rdfs:label "Спецификация date для класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
+  rdfs:label "Specification for date for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
   v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
   v-ui:forProperty v-s:date ;
   v-ui:minCardinality "1"^^xsd:integer ;
   v-ui:maxCardinality "1"^^xsd:integer ;
 .
-
-#v-s:placeDescription - Место отбора проб
 v-s:hasHarmfulSubstance
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ResultsOfMeasurementsOfHarmfulFactors ;
@@ -1076,8 +1074,18 @@ v-s:PS_hasHarmfulSubstance_ResultsOfMeasurementsOfHarmfulFactors
   rdfs:label "Specification for hasHarmfulSubstance for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
   v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
   v-ui:forProperty v-s:hasHarmfulSubstance ;
-  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:minCardinality "1"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
+.
+#v-s:placeDescription - Место отбора проб
+v-s:PS_placeDescription_ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация placeDescription для класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
+  rdfs:label "Specification for placeDescription for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  v-ui:forProperty v-s:placeDescription ;
+  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "1"^^xsd:integer ;
 .
 #v-s:description - Результат анализа
 #v-s:responsible - Ответственный по проведению анализа
