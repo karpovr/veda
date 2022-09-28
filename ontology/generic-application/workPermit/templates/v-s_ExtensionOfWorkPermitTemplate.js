@@ -17,6 +17,11 @@ export const pre = function (individual, template, container, mode, extra) {
           state: false,
           cause: ['mnd-s:DateFromToPlan_Bundle'],
         };  
+      } else if ((individual['v-s:dateTo'][0] - individual['v-s:dateFrom'][0]) > (1000*60*60*24*7)) {
+        result['v-s:dateTo'] = {
+          state: false,
+          cause: ['v-ui:maxCardinality'],
+        };
       }
     }
     if (individual.hasValue('v-s:dateFrom')) {
