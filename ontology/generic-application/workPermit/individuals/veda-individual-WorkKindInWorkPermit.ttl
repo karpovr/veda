@@ -247,7 +247,7 @@ d:WorkKindInWorkPermit_17
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkPermitMainRisks ;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_8;
+  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_16;
 . 
 d:WorkKindInWorkPermit_18
   a v-s:WorkKindInWorkPermit;
