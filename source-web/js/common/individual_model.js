@@ -389,14 +389,6 @@ Object.defineProperty(proto, 'rightsOrigin', {
  */
 proto.watch = function () {
   if (!updateService) return;
-//  const callback = (updateCounter) => {
-//    if (!this.hasValue('v-s:updateCounter', updateCounter)) {
-//      this.reset(true);
-//      updateService.subscribe(this.id, updateCounter, callback);
-//    }
-//  };
-//  const updateCounter = this.get('v-s:updateCounter')[0];
-//  updateService.subscribe(this.id, {updateCounter, callback});
   updateService.subscribe(this);
 };
 

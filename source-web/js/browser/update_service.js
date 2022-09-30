@@ -22,8 +22,9 @@ function UpdateService () {
 
   riot.observable(this);
   this.cache = new WeakCache();
-  this.registry = new FinalizationRegistry((uri) => {
-    this.unsubscribe(uri);
+  this.registry = new FinalizationRegistry((id) => {
+    // console.log('collected', id);
+    this.unsubscribe(id);
   });
   this.onLine = false;
 
@@ -114,22 +115,19 @@ proto.start = async function () {
       lastPing = Date.now();
       return;
     }
-    let uris = msg.indexOf('=') === 0 ? msg.substr(1) : msg;
-    if (uris.length === 0) {
+    let ids = msg.indexOf('=') === 0 ? msg.substr(1) : msg;
+    if (ids.length === 0) {
       return;
     }
-    uris = uris.split(',');
-    for (const pairStr of uris) {
+    ids = ids.split(',');
+    for (const pairStr of ids) {
       try {
         const pair = pairStr.split('=');
-        const uri = pair[0];
-        if ( !uri ) {
-          continue;
-        }
-        // const updateCounter = parseInt(pair[1]);
-        const individual = self.cache.get(uri);
+        const id = pair[0];
+        if (!id) continue;
+        const individual = self.cache.get(id);
         if (!individual) {
-          self.unsubscribe(uri);
+          self.unsubscribe(id);
         } else {
           individual.reset();
         }
@@ -233,9 +231,9 @@ proto.unsubscribe = function (id) {
 
 proto.restore = function () {
   this.socket.sendMessage('-*');
-  for (const uri of this.cache.keys()) {
-    if (this.socket && this.has(uri)) {
-      this.socket.sendMessage('+' + key + '=' + (this.cache.get(uri).get('v-s:updateCounter')[0] || 0));
+  for (const id of this.cache.keys()) {
+    if (this.socket && this.has(id)) {
+      this.socket.sendMessage('+' + id + '=' + (this.cache.get(id).get('v-s:updateCounter')[0] || 0));
     }
   }
 };
