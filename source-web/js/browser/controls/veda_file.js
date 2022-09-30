@@ -8,7 +8,7 @@ import Util from '../../common/util.js';
 
 import notify from '../../browser/notify.js';
 
-function uploadFile ({file, path, uri, progress} = params, retry) {
+function uploadFile ({file, path, uri, progress}, retry) {
   retry = typeof retry === 'number' ? retry : 2;
   return new Promise((resolve, reject) => {
     const done = () => {
@@ -39,7 +39,7 @@ function uploadFile ({file, path, uri, progress} = params, retry) {
   }).catch((error) => {
     console.log('File upload error:', error);
     if (retry > 0) {
-      return uploadFile(params, --retry);
+      return uploadFile({file, path, uri, progress}, --retry);
     }
     throw error;
   });
@@ -290,7 +290,7 @@ $.fn.veda_file = function ( options ) {
     }).then(() => {
       return uploadFile({file, path, uri, progress});
     }).then(() => {
-      return isThumbnail ? fileIndividual.save() : fileIndividual;
+      return fileIndividual.save();
     }).catch((error) => {
       notify('danger', error);
     });
