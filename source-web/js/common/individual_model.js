@@ -8,6 +8,8 @@ import Backend from '../common/backend.js';
 
 import UpdateService from '../browser/update_service.js';
 
+import WeakCache from '../common/weak_cache.js';
+
 import Util from '../common/util.js';
 
 export default IndividualModel;
@@ -18,71 +20,7 @@ if (typeof window !== 'undefined') {
   updateService.start();
 }
 
-IndividualModel.cache = {
-  limit: 10000,
-  count: 0,
-  storage: {},
-  expire: {},
-  get: function (key) {
-    return this.storage[key];
-  },
-  set: function (individual, expires) {
-    if ( this.count >= this.limit ) {
-      const keys = Object.keys(this.expire);
-      // First key is for ontology objects
-      let i = 1;
-      while (this.limit - this.count < this.limit / 10) {
-        const key = keys[i];
-        if (!key) {
-          break;
-        }
-        this.expire[key].forEach((expired) => {
-          if (updateService) {
-            updateService.unsubscribe(expired.id);
-          }
-          delete this.storage[expired.id];
-          this.count--;
-        });
-        delete this.expire[key];
-        i++;
-      }
-    }
-    const expire_key = typeof expires === 'number' ? expires : Date.now();
-    individual.expires = expire_key;
-    this.storage[individual.id] = individual;
-    this.expire[expire_key] = this.expire[expire_key] || [];
-    this.expire[expire_key].push(individual);
-    this.count++;
-    if (updateService && expire_key !== 1) {
-      updateService.subscribe(
-        individual.id,
-        individual.get('v-s:updateCounter')[0],
-        (updateCounter) => individual.hasValue('v-s:updateCounter', updateCounter) || individual.reset(true),
-      );
-    }
-  },
-  remove: function (key) {
-    const individual = this.storage[key];
-    const expires = individual.expires;
-    this.expire[expires] = this.expire[expires].filter((item) => item.id !== key);
-    if (!this.expire[expires].length) {
-      delete this.expire[expires];
-    }
-    this.count--;
-    if (updateService) {
-      updateService.unsubscribe(key);
-    }
-    return delete this.storage[key];
-  },
-  clear: function () {
-    this.count = 0;
-    this.storage = {};
-    this.expire = {};
-    if (updateService) {
-      updateService.unsubscribe();
-    }
-  },
-};
+IndividualModel.cache = new WeakCache();
 
 /**
  * @constructor
@@ -103,8 +41,8 @@ function IndividualModel (uri, cache, init) {
     cache: typeof cache === 'boolean' ? cache : cache || true,
     init: typeof init !== 'undefined' ? init : true,
     isNew: typeof uri === 'undefined',
-    isSync: typeof uri === 'object',
-    isLoaded: typeof uri === 'object',
+    isSync: false,
+    isLoaded: false,
     isInited: false,
     pending: {},
     uri: uri,
@@ -113,6 +51,8 @@ function IndividualModel (uri, cache, init) {
   if (typeof uri === 'object') {
     this.properties = {...uri};
     this.original = JSON.stringify(this.properties);
+    this.isLoaded(true);
+    this.isSync(true);
   } else {
     this.properties = {};
   }
@@ -137,7 +77,7 @@ function IndividualModel (uri, cache, init) {
       riot.observable(this);
       this.on('rdf:type', this.init);
       this.on('beforeSave', beforeSaveHandler);
-      IndividualModel.cache.set(this, this._.cache);
+      IndividualModel.cache.set(this.id, this);
       return this;
     }
   }
@@ -350,8 +290,8 @@ Object.defineProperty(proto, 'id', {
     const previous = this.properties && this.properties['@'];
     this.properties['@'] = value;
     if (previous && this._.cache && IndividualModel.cache.get(previous)) {
-      IndividualModel.cache.remove(previous);
-      IndividualModel.cache.set(this, this._.cache);
+      IndividualModel.cache.delete(previous);
+      IndividualModel.cache.set(this.id, this);
     }
   },
 });
@@ -445,6 +385,30 @@ Object.defineProperty(proto, 'rightsOrigin', {
 });
 
 /**
+ * Watch individual changes on server
+ */
+proto.watch = function () {
+  if (!updateService) return;
+//  const callback = (updateCounter) => {
+//    if (!this.hasValue('v-s:updateCounter', updateCounter)) {
+//      this.reset(true);
+//      updateService.subscribe(this.id, updateCounter, callback);
+//    }
+//  };
+//  const updateCounter = this.get('v-s:updateCounter')[0];
+//  updateService.subscribe(this.id, {updateCounter, callback});
+  updateService.subscribe(this);
+};
+
+/**
+ * Unwatch individual changes on server
+ */
+proto.unwatch = function () {
+  if (!updateService) return;
+  updateService.unsubscribe(this.id);
+};
+
+/**
  * Load individual specified by uri from database. If cache parameter (from constructor) is true, then try to load individual from browser cache first.
  * @return {Promise<IndividualModel>}
  */
@@ -484,6 +448,7 @@ proto.load = function () {
       .then(() => this.trigger('afterLoad'))
       .then(() => {
         this.isLoading(false);
+        this.watch();
         return this;
       })
       .catch((error) => {
@@ -537,6 +502,7 @@ proto.save = function (isAtomic) {
       .then(() => this.trigger('afterSave'))
       .then(() => {
         this.isSaving(false);
+        this.watch();
         return this;
       })
       .catch((error) => {
@@ -594,6 +560,7 @@ proto.reset = function (forced) {
       .then(() => this.trigger('afterReset'))
       .then(() => {
         this.isResetting(false);
+        this.watch();
         return this;
       })
       .catch((error) => {
@@ -647,7 +614,7 @@ proto.remove = function () {
     this.trigger('beforeRemove')
       .then(() => {
         if (this._.cache && IndividualModel.cache.get(this.id)) {
-          IndividualModel.cache.remove(this.id);
+          IndividualModel.cache.delete(this.id);
         }
         if (this.isNew()) {
           return;
@@ -657,6 +624,7 @@ proto.remove = function () {
       .then(() => this.trigger('afterRemove'))
       .then(() => {
         this.isRemoving(false);
+        this.unwatch();
         return this;
       })
       .catch((error) => {

@@ -133,7 +133,7 @@ proto.processOntology = function () {
     if (JSON.stringify(json) === '{"@":""}') {
       return;
     }
-    return new IndividualModel(json, 1, false);
+    return new IndividualModel(json, true, false);
   });
 
   ontologyIndividuals.forEach((individual) => {

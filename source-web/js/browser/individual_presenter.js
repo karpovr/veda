@@ -316,10 +316,12 @@ function processTemplate (individual, container, wrapper, templateMode) {
     template.setAttribute('data-mode', mode);
     switch (mode) {
     case 'view':
+      individual.watch();
       view.forEach((node) => node.style.display = '');
       _view.forEach((node) => node.style.display = 'none');
       break;
     case 'edit':
+      individual.unwatch();
       edit.forEach((node) => node.style.display = '');
       _edit.forEach((node) => node.style.display = 'none');
       break;

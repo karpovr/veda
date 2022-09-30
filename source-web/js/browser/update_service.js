@@ -6,6 +6,8 @@ import riot from '../common/lib/riot.js';
 
 import Backend from '../common/backend.js';
 
+import WeakCache from '../common/weak_cache.js';
+
 export default UpdateService;
 
 /**
@@ -19,7 +21,10 @@ function UpdateService () {
   }
 
   riot.observable(this);
-  this.list = {};
+  this.cache = new WeakCache();
+  this.registry = new FinalizationRegistry((uri) => {
+    this.unsubscribe(uri);
+  });
   this.onLine = false;
 
   UpdateService.prototype._singletonInstance = this;
@@ -121,12 +126,12 @@ proto.start = async function () {
         if ( !uri ) {
           continue;
         }
-        const updateCounter = parseInt(pair[1]);
-        if (self.list[uri]) {
-          self.list[uri].updateCounter = updateCounter;
-        }
-        if (self.list[uri] && typeof self.list[uri].callback === 'function') {
-          self.list[uri].callback(updateCounter);
+        // const updateCounter = parseInt(pair[1]);
+        const individual = self.cache.get(uri);
+        if (!individual) {
+          self.unsubscribe(uri);
+        } else {
+          individual.reset();
         }
       } catch (error) {
         console.error('Individual update service failed');
@@ -206,32 +211,31 @@ proto.stop = function () {
   this.socket.close();
 };
 
-proto.subscribe = function (uri, updateCounter = 0, callback) {
-  this.list[uri] = {updateCounter, callback};
+proto.subscribe = function (individual) {
+  this.cache.set(individual.id, individual);
+  this.registry.register(individual, individual.id);
   if (this.socket) {
-    this.socket.sendMessage('+' + uri + '=' + updateCounter);
+    this.socket.sendMessage('+' + individual.id + '=' + (individual.get('v-s:updateCounter')[0] || 0));
   }
 };
 
-proto.unsubscribe = function (uri) {
-  if ( !uri ) {
-    this.list = {};
+proto.unsubscribe = function (id) {
+  if ( !id ) {
+    this.cache.clear();
     this.socket.sendMessage('-*');
   } else {
-    delete this.list[uri];
+    this.cache.delete(id);
     if (this.socket) {
-      this.socket.sendMessage('-' + uri);
+      this.socket.sendMessage('-' + id);
     }
   }
 };
 
 proto.restore = function () {
   this.socket.sendMessage('-*');
-  for (const uri in this.list) {
-    if (Object.hasOwnProperty.call(this.list, uri)) {
-      if (this.socket) {
-        this.socket.sendMessage('+' + uri + '=' + this.list[uri].updateCounter);
-      }
+  for (const uri of this.cache.keys()) {
+    if (this.socket && this.has(uri)) {
+      this.socket.sendMessage('+' + key + '=' + (this.cache.get(uri).get('v-s:updateCounter')[0] || 0));
     }
   }
 };
