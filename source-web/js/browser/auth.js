@@ -231,22 +231,22 @@ function handleLoginError (error) {
 
   // Captcha
 
-  let myCaptcha = new Captcha({
-    el: "#captcha-input",
+  const myCaptcha = new Captcha({
+    el: '#captcha-input',
     requiredValue: '',
     clearOnSubmit: true,
     resetOnError: true,
     focusOnError: true,
-    canvasClass: "captcha-canvas",
+    canvasClass: 'captcha-canvas',
     canvasStyle: {
       width: 100,
       height: 15,
-      textBaseline: "top",
-      font: "15px sans-serif",
-      textAlign: "left",
-      fillStyle: "#000"
+      textBaseline: 'top',
+      font: '15px sans-serif',
+      textAlign: 'left',
+      fillStyle: '#000',
     },
-    callback: function(response, $captchaInputElement, numberOfTries) {
+    callback: function (response, $captchaInputElement, numberOfTries) {
       if (response === 'success') {
         Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, .fieldset'), (item) => hide(item));
         show(enterLoginPassword);
@@ -254,15 +254,15 @@ function handleLoginError (error) {
       if (response === 'error') {
         return;
       }
-    }
+    },
   });
 
-  function captchaSubmit(e) {
+  function captchaSubmit (e) {
     myCaptcha.validate();
   };
 
-  document.getElementById("captcha-submit").addEventListener("click", captchaSubmit);
-  document.getElementById("captcha-input").addEventListener("change", captchaSubmit);
+  document.getElementById('captcha-submit').addEventListener('click', captchaSubmit);
+  document.getElementById('captcha-input').addEventListener('change', captchaSubmit);
 
   switch (error.code) {
   case 0: // Network error
@@ -419,7 +419,7 @@ function handleLoginSuccess (authResult) {
 
   show(enterLoginPassword);
 
-  handleAuthSuccess(authResult);
+  initWithCredentials(authResult);
 }
 
 /**
@@ -462,7 +462,7 @@ function handleAuthError () {
     const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
     if (path) {
       ntlmAuth(path)
-        .then((authResult) => handleAuthSuccess(authResult))
+        .then((authResult) => initWithCredentials(authResult))
         .catch((err) => {
           console.error('NTLM auth failed');
           show(loginForm);
@@ -475,35 +475,50 @@ function handleAuthError () {
   });
 }
 
-// Initialize application if ticket is valid
+// Activity handler
+let lastActivity = Date.now();
+const activityHandler = () => {
+  lastActivity = Date.now();
+};
+document.body.addEventListener('keyup', activityHandler);
+document.body.addEventListener('click', activityHandler);
+
+// Check & refresh credentials
 function handleAuthSuccess (authResult) {
-  hide(loginForm);
   veda.user_uri = storage.user_uri = authResult.user_uri;
   veda.ticket = storage.ticket = authResult.ticket;
   veda.end_time = storage.end_time = authResult.end_time;
   setTicketCookie(veda.ticket, veda.end_time);
   // Re-login on ticket expiration
   if ( veda.end_time ) {
-    const ticketDelay = parseInt(veda.end_time) - Date.now();
-    const ticketDelayHours = Math.floor(ticketDelay / 1000 / 60 / 60);
-    const ticketDelayMinutes = Math.floor(ticketDelay / 1000 / 60 - ticketDelayHours * 60);
-    console.log('Ticket will expire in %d hrs. %d mins.', ticketDelayHours, ticketDelayMinutes);
+    const granted = Date.now();
+    const expires = parseInt(veda.end_time);
+    const lifetime = expires > granted ? expires - granted : 0;
+    const hh = Math.floor(lifetime / 1000 / 60 / 60);
+    const mm = Math.floor((lifetime % (1000 * 60 * 60)) / 1000 / 60);
+    const ss = Math.floor((lifetime % (1000 * 60)) / 1000);
+    console.log(`Ticket will expire in ${hh < 10 ? '0' + hh : hh}:${mm < 10 ? '0' + mm : mm}:${ss < 10 ? '0' + ss : ss}`);
     const refreshInterval = setInterval(() => {
-      if (Date.now() - lastActivity > ticketDelay * 0.9) {
+      const expired = expires <= Date.now();
+      const almostExpired = expires - lifetime * 0.1 <= Date.now() && !expired;
+      const expiresSoon = expires - lifetime * 0.2 <= Date.now() && !expired;
+      if (expired || almostExpired) {
         clearInterval(refreshInterval);
         console.log('Ticket expired, re-login.');
         handleAuthError();
-      } else {
+      } else if (expiresSoon && granted < lastActivity) {
+        clearInterval(refreshInterval);
         console.log('Refresh ticket in background.');
-        Backend.get_ticket_trusted(veda.ticket).then((result) => {
-          veda.user_uri = storage.user_uri = result.user_uri;
-          veda.ticket = storage.ticket = result.ticket;
-          veda.end_time = storage.end_time = result.end_time;
-          setTicketCookie(veda.ticket, veda.end_time);
-        });
+        Backend.get_ticket_trusted(veda.ticket).then(handleAuthSuccess).catch(handleAuthError);
       }
-    }, ticketDelay * 0.9);
+    }, 10000);
   }
+}
+
+// Initialize application with provided credentials
+function initWithCredentials (authResult) {
+  hide(loginForm);
+  handleAuthSuccess(authResult);
 
   const loadIndicator = document.getElementById('load-indicator');
   const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
@@ -515,17 +530,9 @@ function handleAuthSuccess (authResult) {
   });
 }
 
-// Activity handler
-let lastActivity = Date.now();
-const activityHandler = () => {
-  lastActivity = Date.now();
-};
-document.body.addEventListener('keyup', activityHandler);
-document.body.addEventListener('click', activityHandler);
-
 // Logout handler
 delegateHandler(document.body, 'click', '#logout, .logout', function () {
-  Backend.logout(veda.ticket).catch(error => console.log('Logout failed', error));
+  Backend.logout(veda.ticket).catch((error) => console.log('Logout failed', error));
   delete storage.ticket;
   delete storage.user_uri;
   delete storage.end_time;
@@ -556,7 +563,7 @@ export default function Auth () {
     })
     .then((valid) => {
       if (valid) {
-        handleAuthSuccess({
+        initWithCredentials({
           ticket: storage.ticket,
           user_uri: storage.user_uri,
           end_time: storage.end_time,
@@ -565,7 +572,7 @@ export default function Auth () {
         const authRequired = new IndividualModel('cfg:AuthRequired', true, false);
         authRequired.load().then((authRequiredParam) => {
           if ( authRequiredParam && authRequiredParam.hasValue('rdf:value', false) ) {
-            handleAuthSuccess({
+            initWithCredentials({
               ticket: '',
               user_uri: 'cfg:Guest',
               end_time: 0,
