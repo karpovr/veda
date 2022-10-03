@@ -1024,7 +1024,7 @@ d:SafetyWorkAction_16_14
 
 d:SafetyWorkAction_17
   a v-s:SafetyWorkAction;
-  rdfs:label "Меры безопасности при проведении газоопасных работ"^^xsd:string.
+  rdfs:label "Меры безопасности при проведении газоопасных работ (природный газ)"^^xsd:string.
 d:SafetyWorkAction_17_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_17;
@@ -1099,6 +1099,259 @@ d:SafetyWorkAction_17_18
   rdfs:label "Для предотвращения скольжения и искрения при опирании на твердое основание лестницы должны иметь резиновые упоры"^^xsd:string.
 
 
+
+d:SafetyWorkAction_18
+  a v-s:SafetyWorkAction;
+  rdfs:label "Меры безопасности при проведении газоопасных работ (по подразделению)"^^xsd:string.
+d:SafetyWorkAction_18_1
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "К проведению газоопасных работ следует приступать только после выполнения всех подготовительных работ и мероприятий, предусмотренных нарядом-допуском на проведение газоопасных работ и производственными инструкциями."^^xsd:string.
+d:SafetyWorkAction_18_2
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Не допускается увеличивать объем и характер работ, предусмотренных нарядом-допуском."^^xsd:string.
+d:SafetyWorkAction_18_3
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Не допускается совмещение газоопасных работ и огневых работ в одном помещении, а также в непосредственной близости на открытой площадке в случае возможного выделения в зону работ пожаровзрывоопасных веществ."^^xsd:string.
+d:SafetyWorkAction_18_4
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить последовательность и режим выполнения газоопасной работы."^^xsd:string.
+d:SafetyWorkAction_18_5
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить контроль за состоянием воздушной среды"^^xsd:string.
+d:SafetyWorkAction_18_6
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить непрерывный контроль состояния воздушной среды;"^^xsd:string.
+d:SafetyWorkAction_18_7
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить принятие мер, исключающих допуск на место проведения газоопасной работы лиц, не занятых ее выполнением."^^xsd:string.
+d:SafetyWorkAction_18_8
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Перед началом проведения газоопасных работ провести опрос каждого исполнителя о самочувствии. Не допускается привлекать к выполнению газоопасных работ лиц, заявивших о недомогании."^^xsd:string.
+d:SafetyWorkAction_18_9
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Входить в газоопасное место только с разрешения лица, ответственного за проведение работ, и в средствах индивидуальной защиты, надетых за пределами опасной зоны."^^xsd:string.
+d:SafetyWorkAction_18_10
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Работу начинать в присутствии лица, ответственного за проведение работ."^^xsd:string.
+d:SafetyWorkAction_18_11
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Ответственный за проведение работ должен постоянно присутствовать на месте производства газоопасных работ."^^xsd:string.
+d:SafetyWorkAction_18_12
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Представитель службы Пожгазсервис должен постоянно присутствовать на месте производства газоопасных работ."^^xsd:string.
+d:SafetyWorkAction_18_13
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять переносные светильники во взрывозащищенном исполнении, соответствующие по исполнению категории и группе взрывоопасной смеси;"^^xsd:string.
+d:SafetyWorkAction_18_14
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять средства связи во взрывозащищенном исполнении;"^^xsd:string.
+d:SafetyWorkAction_18_15
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять инструмент из материала, исключающего возможность искрообразования;"^^xsd:string.
+d:SafetyWorkAction_18_16
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять обувь, исключающую возможность искрообразования;"^^xsd:string.
+d:SafetyWorkAction_18_17
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять средства индивидуальной защиты органов дыхания."^^xsd:string.
+d:SafetyWorkAction_18_18
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Разместить устройства для подключения передвижного и переносного электрооборудования вне взрывоопасной зоны."^^xsd:string.
+d:SafetyWorkAction_18_19
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Начинать работу внутри емкости (аппарата) при температуре внутри не выше тридцати градусов Цельсия."^^xsd:string.
+d:SafetyWorkAction_18_20
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять шланговые противогазы."^^xsd:string.
+d:SafetyWorkAction_18_21
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять кислородно-изолирующие противогазы."^^xsd:string.
+d:SafetyWorkAction_18_22
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять воздушные изолирующие аппараты."^^xsd:string.
+d:SafetyWorkAction_18_23
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Срок единовременного пребывания работающего в средствах защиты органов дыхания лица не более тридцати минут."^^xsd:string.
+d:SafetyWorkAction_18_24
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Не допускать использование фильтрующих противогазов при работе внутри емкости (аппарата)."^^xsd:string.
+d:SafetyWorkAction_18_25
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Работающий в емкости (аппарате) должен использовать предохранительный пояс или страховочную привязь с сигнально-спасательной веревкой."^^xsd:string.
+d:SafetyWorkAction_18_26
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять средства связи и сигнализации на месте проведения работ"^^xsd:string.
+d:SafetyWorkAction_18_27
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Применять сигнально-спасательные веревки"^^xsd:string.
+d:SafetyWorkAction_18_28
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "При отсутствии зрительной связи между работающим и наблюдающим применять систему подачи условных сигналов."^^xsd:string.
+d:SafetyWorkAction_18_29
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить непрерывную гарантированную подачу свежего воздуха в емкость (аппарат), обеспечивающую нормальный воздушный режим в аппарате;"^^xsd:string.
+d:SafetyWorkAction_18_30
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить наличие у места проведения работ средств сигнализации и связи (световой, звуковой, радиотелефонной);"^^xsd:string.
+d:SafetyWorkAction_18_31
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить наличие у каждого работающего в емкости (аппарате) предохранительного пояса или страховочной привязи с сигнально-спасательной веревкой."^^xsd:string.
+d:SafetyWorkAction_18_32
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Для спуска работника в емкость (аппарат), работы внутри емкости (аппарате) и подъема из нее (него) применять переносные лестницы из неискрящих материалов."^^xsd:string.
+d:SafetyWorkAction_18_33
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Проверить исправность, устойчивость и надежность закрепления лестницы по месту работы в присутствии лица, ответственного за проведение газоопасных работ."^^xsd:string.
+d:SafetyWorkAction_18_34
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Инструменты и материалы подавать в емкость способом, исключающим их падение и травмирование работников."^^xsd:string.
+d:SafetyWorkAction_18_35
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "При возникновении обстоятельств, угрожающих безопасности работника внутри емкости (признаки недомогания, попытка снять маску противогаза, обрыв сигнальной веревки, неисправность шланга, остановка воздуходувки), работу следует прекратить, а работника из емкости эвакуировать."^^xsd:string.
+d:SafetyWorkAction_18_36
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Обеспечить принудительное удаление выделяемых вредных и пожаровзрывоопасных веществ при  нанесении защитных покрытий на внутренние поверхности емкостей (аппаратов)"^^xsd:string.
+d:SafetyWorkAction_18_37
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "После окончания работ внутри емкости (аппарата) лицу, ответственному за проведение газоопасных работ, перед закрытием люков убедиться в отсутствии в емкости (аппарате) работников, инструментов, материалов, посторонних предметов, затем закрыть люки и произвести запись в наряде-допуске на проведение газоопасных работ об окончании газоопасных работ."^^xsd:string.
+d:SafetyWorkAction_18_38
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_18;
+  rdfs:label "Лицу, ответственному за проведение газоопасных работ, поставить в известность работников, занятых ведением технологического процесса, об окончании газоопасных работ и произвести запись в журнале ведения технологического процесса и наряде-допуске на проведение газоопасных работ."^^xsd:string.
+
+
+d:SafetyWorkAction_19
+  a v-s:SafetyWorkAction;
+  rdfs:label "Мероприятия по подготовке объекта к проведению газоопасных работ (по подразделению)"^^xsd:string.
+d:SafetyWorkAction_19_1
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Снять давление с оборудования, работающего под избыточным давлением"^^xsd:string.
+d:SafetyWorkAction_19_2
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Удалить из оборудования опасные вещества,"^^xsd:string.
+d:SafetyWorkAction_19_3
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Исключить поступление в оборудование опасных веществ из смежных технологических систем,"^^xsd:string.
+d:SafetyWorkAction_19_4
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Исключить возможные источники искрообразования."^^xsd:string.
+d:SafetyWorkAction_19_5
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Место проведения газоопасной работы в пределах площади, где возможно поступление паров и газов опасных веществ, обозначить (оградить), установить предупреждающие знаки Газ или Газоопасные работы."^^xsd:string.
+d:SafetyWorkAction_19_6
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Выставить посты в целях исключения допуска посторонних лиц в опасную зону."^^xsd:string.
+d:SafetyWorkAction_19_7
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Электроприводы движущихся механизмов, а также другие электроприемники в местах проведения работ отключить от источников питания видимым разрывом (разрыв электрической цепи). На пусковых устройствах вывесить плакаты Не включать: работают люди!"^^xsd:string.
+d:SafetyWorkAction_19_8
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Отключение (подключение) электропривода от источника питания осуществлять электротехническиму персоналу."^^xsd:string.
+d:SafetyWorkAction_19_9
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Перед началом проведения газоопасной работы провести лабораторный или экспресс-анализ воздушной среды на содержание кислорода (в закрытых помещениях, внутри емкостей (аппаратов), котлованах) и опасных веществ, указанных в перечне газоопасных работ, согласно месту и характеру работы, с записью результатов в наряде-допуске."^^xsd:string.
+d:SafetyWorkAction_19_10
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Лицу, ответственному за подготовку газоопасной работы, проверить наличие и исправность средств индивидуальной защиты, инструментов, приспособлений и средств обеспечения безопасности исполнителей работ."^^xsd:string.
+d:SafetyWorkAction_19_11
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Лицу, ответственному за проведение газоопасной работы, провести инструктаж исполнителей работ и проверить их умение пользоваться средствами индивидуальной защиты, знание безопасных приемов работы и методов оказания первой помощи пострадавшим с отметкой в наряде-допуске."^^xsd:string.
+d:SafetyWorkAction_19_12
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "После окончания подготовительных работ лицу, ответственному за подготовку газоопасных работ, проверить полноту и качество выполненных работ и сдать объект лицу, ответственному за проведение газоопасной работы, с подписью в наряде-допуске."^^xsd:string.
+d:SafetyWorkAction_19_13
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Отключить емкость (аппарат) от действующего оборудования, систем трубопроводов и коммуникаций с помощью стандартных заглушек согласно схеме, прилагаемой к наряду-допуску."^^xsd:string.
+d:SafetyWorkAction_19_14
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Освободить емкость (аппарат) от опасных веществ, согласно схеме, прилагаемой к наряду-допуску."^^xsd:string.
+d:SafetyWorkAction_19_15
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Промыть емкость (аппарат), согласно схеме, прилагаемой к наряду-допуску."^^xsd:string.
+d:SafetyWorkAction_19_16
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Пропарить емкость (аппарат), согласно схеме, прилагаемой к наряду-допуску."^^xsd:string.
+d:SafetyWorkAction_19_17
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Продуть емкость (аппарат) инертным газом, согласно схеме, прилагаемой к наряду-допуску."^^xsd:string.
+d:SafetyWorkAction_19_18
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Продуть емкость (аппарат) воздухом, согласно схеме, прилагаемой к наряду-допуску."^^xsd:string.
+d:SafetyWorkAction_19_19
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Перед началом проведения работ внутри емкостей (аппаратов) произвести в них анализ воздушной среды на содержание кислорода и опасных веществ (паров, газов) с записью результатов в наряде-допуске."^^xsd:string.
+d:SafetyWorkAction_19_20
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Вывесить предупреждающие плакаты Газ, Газоопасные работы на емкости (аппарате) перед началом проведения работ."^^xsd:string.
+d:SafetyWorkAction_19_21
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Отключить электропривод перемешивающих устройств внутри емкости (аппарата) от источников питания видимым разрывом, а также вывесить плакат Не включать: работают люди! в электрораспределительном устройстве."^^xsd:string.
+d:SafetyWorkAction_19_22
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "Охладить нагретую емкость (аппарат) до температуры не выше тридцати градусов Цельсия."^^xsd:string.
+d:SafetyWorkAction_19_23
+  a v-s:SafetyWorkAction;
+  v-s:parentUnit d:SafetyWorkAction_19;
+  rdfs:label "При выполнении работ внутри емкости (аппарата) с температурой внутри выше тридцати градусов Цельсия, обеспечить непрерывную принудительную обдувку свежим воздухом, применение термозащитных костюмов, теплоизолирующей обуви, перерывов в работе."^^xsd:string."^^xsd:string.
 
 
 

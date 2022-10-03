@@ -9,6 +9,7 @@
 @prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
 @prefix cfg: <http://semantic-machines.com/veda/config/> .
 @prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
 
 <http://semantic-machines.com/veda/veda-workPermit-schema>
   rdf:type owl:Ontology ;
@@ -601,8 +602,8 @@ v-s:PS_hasSafetyWorkAction_16_WorkPermit
 v-s:hasSafetyWorkAction_17
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Меры безопасности при проведении газоопасных работ"@ru ;
-  rdfs:label "Меры безопасности при проведении газоопасных работ"@en ;
+  rdfs:label "Меры безопасности при проведении газоопасных работ (природный газ)"@ru ;
+  rdfs:label "Меры безопасности при проведении газоопасных работ (природный газ)"@en ;
   rdfs:range v-s:SafetyWorkAction ;
 .
 v-s:PS_hasSafetyWorkAction_17_WorkPermit
@@ -614,7 +615,45 @@ v-s:PS_hasSafetyWorkAction_17_WorkPermit
   v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_17')"^^xsd:string ;
   v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
+  v-fs:sortOrder "'rdfs:label' desc" ;
 .
+v-s:hasSafetyWorkAction_18
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Меры безопасности при проведении газоопасных работ (по подразделению)"@ru ;
+  rdfs:label "Меры безопасности при проведении газоопасных работ (по подразделению)"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_18_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_18 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_18 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_18 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_18')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+  v-fs:sortOrder "'rdfs:label' desc" ;
+.
+v-s:hasSafetyWorkAction_19
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:WorkPermit ;
+  rdfs:label "Мероприятия по подготовке объекта к проведению газоопасных работ (по подразделению)"@ru ;
+  rdfs:label "Мероприятия по подготовке объекта к проведению газоопасных работ (по подразделению)"@en ;
+  rdfs:range v-s:SafetyWorkAction ;
+.
+v-s:PS_hasSafetyWorkAction_19_WorkPermit
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация hasSafetyWorkAction_19 для класса v-s:WorkPermit"@ru ;
+  rdfs:label "Specification for hasSafetyWorkAction_19 for v-s:WorkPermit"@en ;
+  v-ui:forClass v-s:WorkPermit ;
+  v-ui:forProperty v-s:hasSafetyWorkAction_19 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:SafetyWorkAction' && 'v-s:parentUnit'=='d:SafetyWorkAction_19')"^^xsd:string ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+  v-fs:sortOrder "'rdfs:label' desc" ;
+.
+
 
 
 v-s:workPermit_safetyAction_additional
@@ -624,6 +663,8 @@ v-s:workPermit_safetyAction_additional
   rdfs:label "WorkPermit additional safety action"@en ;
   rdfs:range xsd:string ;
 .
+
+
 v-s:technologicalSequenceOfOperations
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
@@ -1089,6 +1130,14 @@ v-s:PS_placeDescription_ResultsOfMeasurementsOfHarmfulFactors
 .
 #v-s:description - Результат анализа
 #v-s:responsible - Ответственный по проведению анализа
+v-s:PS_responsible_ResultsOfMeasurementsOfHarmfulFactors
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация responsible для класса v-s:ResultsOfMeasurementsOfHarmfulFactors"@ru ;
+  rdfs:label "Specification for responsible for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
+  v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
+  v-ui:forProperty v-s:responsible ;
+  v-ui:queryPrefix "(('rdf:type'=='v-s:Appointment' )&& ('v-s:origin'=='sap hr' || 'v-s:origin'=='InternalUser'|| 'v-s:origin'=='ExternalUser' || 'v-s:origin'=='Group' ))"^^xsd:string ;
+.
 
 
 

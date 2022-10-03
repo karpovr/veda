@@ -28,11 +28,13 @@ d:WorkKindInWorkPermit_2
   rdfs:label "Газоопасные работы из утвержденного перечня по подразделению"^^xsd:string;
   v-s:hasWorkPermitForm d:WorkKindInWorkPermit_2 ;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
-  v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_17;
+  v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_18;
+  v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_19;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkPermitMainRisks ;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
-  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_17;
+  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_18;
+  v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_19;
 .
 d:WorkKindInWorkPermit_3
   a v-s:WorkKindInWorkPermit;
