@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserInfo, BASE_PATH};
+use crate::common::{extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserInfo, BASE_PATH, LIMITATA_COGNOSCI};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
@@ -61,9 +61,11 @@ pub(crate) async fn get_individuals(
     log(Some(&start_time), &uinf, "get_individuals", &format!("{:?}", payload.uris), ResultCode::Ok);
 
     for uri in &payload.uris {
-        let (indv, res_code) = get_individual_from_db(uri, &uinf.user_id, &db, Some(&az)).await?;
+        let (mut indv, res_code) = get_individual_from_db(uri, &uinf.user_id, &db, Some(&az)).await?;
         if res_code == ResultCode::Ok {
-            res.push(indv.get_obj().as_json());
+            if !indv.any_exists("rdf:type", LIMITATA_COGNOSCI) {
+                res.push(indv.get_obj().as_json());
+            }
         }
     }
     Ok(HttpResponse::Ok().json(res))
@@ -126,12 +128,16 @@ pub(crate) async fn get_individual(
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::InternalServerError as u16).unwrap()));
     }
 
-    let (res, res_code) = get_individual_from_db(&id, &uinf.user_id, &db, Some(&az)).await?;
+    let (mut res, res_code) = get_individual_from_db(&id, &uinf.user_id, &db, Some(&az)).await?;
     log(Some(&start_time), &uinf, "get_individual", &id, res_code);
     if res_code == ResultCode::Ok {
-        let v = res.get_obj().as_json();
-        debug!("Ok {:?} {}", res_code, v);
-        return Ok(HttpResponse::Ok().json(v));
+        if !res.any_exists("rdf:type", LIMITATA_COGNOSCI) {
+            let v = res.get_obj().as_json();
+            debug!("Ok {:?} {}", res_code, v);
+            return Ok(HttpResponse::Ok().json(v));
+        } else {
+            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()));
+        }
     }
 
     debug!("{:?}", res_code);

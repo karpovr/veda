@@ -115,6 +115,10 @@ impl TTIndexer {
                     info!("skip version, uri = {}", id);
                     return;
                 }
+                if types.contains(&"v-s:Credential".to_owned()) {
+                    info!("skip v-s:Credential, uri = {}", id);
+                    return;
+                }
                 for type_name in types {
                     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
                     let mut new_state = Individual::default();

@@ -193,7 +193,7 @@ pub(crate) async fn get_rights(
         },
     };
 
-    if let (Some (u), Some(_)) = (&params.user_id, &params.ticket) {
+    if let (Some(u), Some(_)) = (&params.user_id, &params.ticket) {
         uinf.user_id = u.to_owned();
     }
 

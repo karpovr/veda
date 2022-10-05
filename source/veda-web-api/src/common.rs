@@ -14,6 +14,7 @@ use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketC
 use v_common::storage::common::{Storage, StorageId};
 use v_common::v_api::obj::ResultCode;
 
+pub(crate) const LIMITATA_COGNOSCI: &[&str] = &["v-s:Credential", "v-s:Connection", "v-s:LinkedNode"];
 pub(crate) const BASE_PATH: &str = "./data";
 
 pub(crate) enum VQLClientConnectType {
@@ -237,9 +238,7 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
         let user_uri = ticket_obj.user_uri.clone();
 
         if ticket_cache.are_external_users {
-            if let Err(e) = check_external_user(&user_uri, db).await {
-                return Err(e);
-            }
+            check_external_user(&user_uri, db).await?;
         }
 
         let mut t = ticket_cache.write.lock().await;
@@ -288,19 +287,19 @@ pub(crate) async fn check_external_user(user_uri: &str, db: &AStorage) -> Result
             if let Some(o) = user_indv.get_first_literal("v-s:origin") {
                 if o != "ExternalUser" {
                     error!("user {} is not external", user_uri);
-                    return Err(ResultCode::NotAuthorized);
+                    return Err(ResultCode::AuthenticationFailed);
                 }
             } else {
                 error!("user {} not content field [origin]", user_uri);
-                return Err(ResultCode::NotAuthorized);
+                return Err(ResultCode::AuthenticationFailed);
             }
         } else {
             error!("fail read user {}, err={:?}", user_uri, res);
-            return Err(ResultCode::NotAuthorized);
+            return Err(ResultCode::AuthenticationFailed);
         }
     } else {
         error!("fail read user {}", user_uri);
-        return Err(ResultCode::NotAuthorized);
+        return Err(ResultCode::AuthenticationFailed);
     }
     Ok(())
 }

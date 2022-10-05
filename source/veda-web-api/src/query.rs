@@ -37,7 +37,10 @@ pub(crate) async fn query_post(
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-    query(uinf, &*data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
+    return match query(uinf, &*data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await {
+        Ok(res) => Ok(res),
+        Err(_) => Ok(HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)),
+    };
 }
 
 pub(crate) async fn query_get(
@@ -57,7 +60,10 @@ pub(crate) async fn query_get(
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-    query(uinf, &*data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
+    match query(uinf, &*data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await {
+        Ok(res) => Ok(res),
+        Err(_) => Ok(HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 async fn query(
@@ -73,7 +79,7 @@ async fn query(
     if data.stored_query.is_some() {
         stored_query(uinf, data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
     } else {
-        direct_query(uinf, &*data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+        direct_query(uinf, data, vql_client, ch_client, sparql_client, db, prefix_cache).await
     }
 }
 

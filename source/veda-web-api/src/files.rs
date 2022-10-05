@@ -15,12 +15,13 @@ use filetime::FileTime;
 use futures::lock::Mutex;
 use futures::{AsyncWriteExt, StreamExt, TryStreamExt};
 use std::fs::File;
-use std::io::Read;
+use std::io::{ErrorKind, Read};
 use std::time::Instant;
 use uuid::Uuid;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
+use v_common::v_authorization::common::{Access, AuthorizationContext};
 
 #[get("/files/{file_id}")]
 pub(crate) async fn load_file(
@@ -56,6 +57,11 @@ pub(crate) async fn load_file(
         }
 
         let path = format!("./data/files/{}/{}", file_info.get_first_literal_or_err("v-s:filePath")?, file_info.get_first_literal_or_err("v-s:fileUri")?);
+        if path.contains("..") {
+            log(Some(&start_time), &UserInfo::default(), "get_file", &path, ResultCode::BadRequest);
+            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
+        }
+
         let original_file_name = file_info.get_first_literal_or_err("v-s:fileName")?;
 
         let file = NamedFile::open(&path)?;
@@ -101,6 +107,10 @@ pub(crate) async fn load_file(
 async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_std::fs::File>) -> io::Result<String> {
     let full_path = format!("{}/{}", path, file_name);
 
+    if full_path.contains("..") {
+        return Err(io::Error::new(ErrorKind::InvalidData, ""));
+    }
+
     if !path.is_empty() && f.is_empty() {
         async_std::fs::create_dir_all(&path).await?;
         f.push(async_std::fs::File::create(full_path.clone()).await?);
@@ -108,7 +118,13 @@ async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_st
     Ok(full_path)
 }
 
-pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<TicketCache>, db: web::Data<AStorage>, req: HttpRequest) -> ActixResult<impl Responder> {
+pub(crate) async fn save_file(
+    mut payload: Multipart,
+    ticket_cache: web::Data<TicketCache>,
+    db: web::Data<AStorage>,
+    az: web::Data<Mutex<LmdbAzContext>>,
+    req: HttpRequest,
+) -> ActixResult<impl Responder> {
     let start_time = Instant::now();
     let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
         Ok(u) => u,
@@ -116,6 +132,10 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
+
+    if az.lock().await.authorize("v-s:File", &uinf.user_id, Access::CanCreate as u8, false).unwrap_or(0) != Access::CanCreate as u8 {
+        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()));
+    }
 
     let base_path = "./data/files";
     let mut path = String::new();
@@ -191,6 +211,9 @@ pub(crate) async fn save_file(mut payload: Multipart, ticket_cache: web::Data<Ti
     let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
+    if file_full_name.contains("..") {
+        return Ok(HttpResponse::InternalServerError().into());
+    }
 
     if is_encoded_file {
         let mut f_in = File::open(tmp_file_path.clone())?;
