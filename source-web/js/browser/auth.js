@@ -102,7 +102,7 @@ function submitLoginPassword (event) {
 
 delegateHandler(loginForm, 'input', '#new-password, #confirm-new-password, #secret', validateNewPassword);
 
-const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.{6,})/;
+const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.{8,})/;
 
 /**
  * Show element
