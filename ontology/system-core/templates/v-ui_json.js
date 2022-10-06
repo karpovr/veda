@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import IndividualModel from '/js/common/individual_model.js';
 import notify from '/js/browser/notify.js';
+import {sanitize} from '/js/browser/dom_helpers.js';
 import riot from '/js/common/lib/riot.js';
 
 export const post = function (individual, template, container, mode, extra) {
@@ -73,21 +74,6 @@ export const post = function (individual, template, container, mode, extra) {
         ordered[key] = json[key];
       });
     return JSON.stringify(ordered, null, 2);
-  }
-
-  function sanitize (string) {
-    const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      '/': '&#x2F;',
-    };
-    const reg = /[&<>"'/]/gi;
-    return string.replace(reg, function (match) {
-      return map[match];
-    });
   }
 
   function anchorize (string) {

@@ -16,7 +16,7 @@ export const post = function (individual, template, container, mode, extra) {
   }
   function labelHandler (values) {
     const $state = $('#' + BrowserUtil.escape4$(individual.id));
-    $('.state-name', $state).html(values);
+    $('.state-name', $state).text(values.join(' '));
   }
   individual.on('v-wf:join', joinSplitHandler);
   individual.on('v-wf:split', joinSplitHandler);

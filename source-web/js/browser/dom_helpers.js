@@ -47,4 +47,19 @@ function clear (container) {
   return container;
 }
 
-export {delegateHandler, clear};
+function sanitize (string) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '/': '&#x2F;',
+  };
+  const reg = /[&<>"'/]/gi;
+  return string.replace(reg, function (match) {
+    return map[match];
+  });
+}
+
+export {delegateHandler, clear, sanitize};

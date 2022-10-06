@@ -1,4 +1,5 @@
 import BrowserUtil from '/js/browser/util.js';
+import {sanitize} from '/js/browser/dom_helpers.js';
 import $ from 'jquery';
 
 export const post = function (individual, template, container, mode, extra) {
@@ -18,21 +19,6 @@ export const post = function (individual, template, container, mode, extra) {
       const sanitized = sanitize(ttl);
       const anchored = sanitized.replace(/([a-zA-Z][\w-]*:[\w-]*)(\,|\s|\;|\.)/gi, "<a class='text-black' href='#/$1//v-ui:ttl'>$1</a>$2");
       pre.html(anchored);
-    });
-  }
-
-  function sanitize (string) {
-    const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      '/': '&#x2F;',
-    };
-    const reg = /[&<>"'/]/gi;
-    return string.replace(reg, function (match) {
-      return map[match];
     });
   }
 };

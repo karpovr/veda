@@ -1,4 +1,5 @@
 // User notifications
+import {sanitize} from '../browser/dom_helpers.js';
 
 export default notify;
 
@@ -52,11 +53,11 @@ function notify (type, {code = '', name = '', message = ''}) {
   message = message && message.length > 70 ? message.substring(0, 70) + '...' : message;
 
   const HTML = `
-    <div class="alert alert-${type}">
-      <span class="${iconClass}"></span>
-      <strong>${name}</strong>
-      <strong>${code}</strong>
-      <span>${message}</span>
+    <div class="alert alert-${sanitize(type)}">
+      <span class="${sanitize(iconClass)}"></span>
+      <strong>${sanitize(name)}</strong>
+      <strong>${sanitize(code)}</strong>
+      <span>${sanitize(message)}</span>
     </div>
   `;
 

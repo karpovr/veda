@@ -1,25 +1,15 @@
 // Individual presenter
 
 import veda from '../common/veda.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import Backend from '../common/backend.js';
-
 import BackendError from '../browser/backend_error.js';
-
 import CommonUtil from '../common/util.js';
-
 import BrowserUtil from '../browser/util.js';
-
 import notify from '../browser/notify.js';
-
 import validate from '../browser/validate.js';
-
-import {clear} from '../browser/dom_helpers.js';
-
+import {clear, sanitize} from '../browser/dom_helpers.js';
 import $ from 'jquery';
-
 import '../browser/controls/veda_controls.js';
 
 IndividualModel.prototype.present = IndividualPresenter;
@@ -164,12 +154,12 @@ function errorPrinter (error, container) {
   }
   return errorIndividual.load()
     .then(() => `
-      <span class="padding-sm bg-${errorIndividual['v-s:tag'][0]} text-${errorIndividual['v-s:tag'][0]}" title="${this.id}">
-        <strong>${errorIndividual['v-s:errorCode'][0] || ''}</strong> ${errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' ')}
+      <span class="padding-sm bg-${sanitize(errorIndividual['v-s:tag'][0])} text-${sanitize(errorIndividual['v-s:tag'][0])}" title="${sanitize(this.id)}">
+        <strong>${sanitize(errorIndividual['v-s:errorCode'][0] || '')}</strong> ${sanitize(errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' '))}
       </span>`)
     .catch(() => `
-      <span class="padding-sm bg-danger text-danger" title="${this.id}">
-        <strong>${error.code}</strong> ${error.name} ${error.message}>
+      <span class="padding-sm bg-danger text-danger" title="${sanitize(this.id)}">
+        <strong>${sanitize(error.code)}</strong> ${sanitize(error.name)} ${sanitize(error.message)}>
       </span>`)
     .then((msg) => {
       let wrapper;
@@ -489,7 +479,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
         const removedAlert = new IndividualModel('v-s:RemovedAlert');
         removedAlert.load().then(() => {
           clear(template);
-          template.innerHTML = `<code>${removedAlert.toString()}</code>`;
+          template.innerHTML = `<code>${sanitize(removedAlert.toString())}</code>`;
         }).catch((error) => console.error('Alert load failed'));
       })
       .then(successHandler)

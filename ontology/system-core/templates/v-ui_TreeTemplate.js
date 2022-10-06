@@ -1,5 +1,6 @@
 import BrowserUtil from '/js/browser/util.js';
 import CommonUtil from '/js/common/util.js';
+import {sanitize} from '../browser/dom_helpers.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
@@ -79,7 +80,7 @@ export const pre = function (individual, template, container, mode, extra) {
   const literals = ['rdfs:Literal', 'xsd:string', 'xsd:boolean', 'xsd:integer', 'xsd:nonNegativeInteger', 'xsd:decimal', 'xsd:dateTime'];
 
   displayedProperty.forEach(function (property, index) {
-    headTmpl += '<th>' + property['rdfs:label'].map(CommonUtil.formatValue).join(' ') + '</th>';
+    headTmpl += '<th>' + sanitize(property['rdfs:label'].map(CommonUtil.formatValue).join(' ')) + '</th>';
     const isLiteral = literals.indexOf(property['rdfs:range'][0].id) >= 0;
     const isFile = property.hasValue('rdfs:range', 'v-s:File');
     if (index === 0) {

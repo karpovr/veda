@@ -7,7 +7,7 @@ export const post = function (individual, template, container, mode, extra) {
 
   function handler (values) {
     const $state = $('#' + BrowserUtil.escape4$(individual.id));
-    $('.state-name', $state).html(values);
+    $('.state-name', $state).text(values.join(' '));
   }
   individual.on('rdfs:label', handler);
   template.one('remove', function () {
