@@ -48,5 +48,6 @@
         "undefinedToVoid": true
       }
     ]
-  ]
+  ],
+  "comments": false
 }
