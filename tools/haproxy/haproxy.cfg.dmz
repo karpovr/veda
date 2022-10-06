@@ -19,17 +19,20 @@ global
   ssl-default-bind-options no-sslv3
 
 defaults
-  log     global
-  mode    http
-  option  httplog
-  #option  dontlognull
-  #option  dontlog-normal
-  timeout connect 5000
-  timeout client  50000
-  timeout server  50000
+  log global
+  mode http
+  option httplog
+  option dontlognull
+  timeout connect 1m
+  timeout client 5m
+  timeout server 5m
+  timeout tunnel 1h
+  option forwardfor header X-Real-IP
 
+http-errors myerrors
   errorfile 400 /etc/haproxy/errors/400.http
   errorfile 403 /etc/haproxy/errors/403.http
+  errorfile 404 /etc/haproxy/errors/404.http
   errorfile 408 /etc/haproxy/errors/408.http
   errorfile 500 /etc/haproxy/errors/500.http
   errorfile 502 /etc/haproxy/errors/502.http
@@ -37,21 +40,54 @@ defaults
   errorfile 504 /etc/haproxy/errors/504.http
 
 frontend proxy
+  bind *:443 ssl crt /etc/haproxy/fullcert2021_4096.pem
   bind *:80
+  redirect scheme https code 301 if !{ ssl_fc }
   mode http
-  acl acl-optiflow hdr_beg(host) -i optiflow. localhost
-  acl acl-optiflow-ccus path_beg /ccus
-  use_backend optiflow if acl-optiflow
-  use_backend optiflow-ccus if acl-optiflow-ccus
-  default_backend optiflow
 
-backend optiflow
+  errorfiles myerrors
+  http-response return status 400 default-errorfiles if { status 400 }
+  http-response return status 403 default-errorfiles if { status 403 }
+  http-response return status 404 default-errorfiles if { status 404 }
+  http-response return status 408 default-errorfiles if { status 408 }
+  http-response return status 500 default-errorfiles if { status 500 }
+  http-response return status 502 default-errorfiles if { status 502 }
+  http-response return status 503 default-errorfiles if { status 503 }
+  http-response return status 504 default-errorfiles if { status 504 }
+
+  http-request track-sc0 src table per_ip_rates
+  http-request deny deny_status 429 if { sc_http_req_rate(0) gt 300 }
+  http-request deny if HTTP_1.0
+  http-request deny if { req.hdr(user-agent) -i -m sub phantomjs slimerjs }
+  http-request deny unless { req.hdr(user-agent) -m found }
+
+  acl acl-ccus path_beg /ccus
+  acl acl-watch path_beg /watch
+  acl acl-jasper path_beg /jasperserver
+  acl acl-jasper-report query -m beg _flowId=viewReportFlow
+  use_backend ccus if acl-ccus
+  use_backend watch if acl-watch
+  use_backend jasper if acl-jasper acl-jasper-report
+  http-request deny if acl-jasper !acl-jasper-report
+  default_backend web
+
+backend per_ip_rates
+ stick-table type ip size 1m expire 10m store http_req_rate(1s)
+
+backend web
   mode http
-  balance roundrobin
-  option forwardfor
   option httpchk HEAD / HTTP/1.1\r\nHost:localhost
-  server veda01 127.0.0.1:8080 check
+  server web 127.0.0.1:8087 check
 
-backend optiflow-ccus
-  balance roundrobin
-  server veda01 127.0.0.1:8088
+backend ccus
+  server ccus 127.0.0.1:8088
+
+backend watch
+  timeout server 1h
+  server watch 127.0.0.1:8089
+
+backend jasper
+  timeout server 20m
+  mode http
+  option httpchk HEAD / HTTP/1.1\r\nHost:localhost
+  server jasper 127.0.0.1:8081 check
