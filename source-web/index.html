@@ -66,6 +66,7 @@
 
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; connect-src 'self' ws: wss:;" />
   </head>
   <body>
     <!-- Load indicator -->
@@ -162,8 +163,8 @@
             <button class="btn btn-default btn-lg show-password" type="button">&#128065;</button>
           </span>
         </div>
-        <span class="help-block password-strength" style="display:none;">Не менее 6 символов, должен содержать минимум 1 латинскую строчную букву, 1 латинскую прописную букву, 1 цифру</span>
-        <span class="help-block password-strength" style="display:none;">At least 6 characters and contain at least 1 lowercase latin letter, 1 uppercase latin letter, 1 digit</span>
+        <span class="help-block password-strength" style="display:none;">Не менее 8 символов, должен содержать минимум 1 латинскую строчную букву, 1 латинскую прописную букву, 1 цифру</span>
+        <span class="help-block password-strength" style="display:none;">At least 8 characters and contain at least 1 lowercase latin letter, 1 uppercase latin letter, 1 digit</span>
         <span class="help-block password-must-match" style="display:none;">Пароли должны совпадать</span>
         <span class="help-block password-must-match" style="display:none;">Passwords must match</span>
         <input class="form-control input-lg margin-lg" id="secret" placeholder="Код из письма / Code from e-mail" type="text" name="secret" autocomplete="off"/>
