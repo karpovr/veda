@@ -398,7 +398,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
       return acc;
     }
     const uris = CommonUtil.unique(acc);
-    return uris.reduce((p, item) => p.then(() => new IndividualModel(item).reset(true)), Promise.resolve())
+    return uris.reduce((p, item) => p.then(() => new IndividualModel(item).reset()), Promise.resolve())
       .then(switchToView)
       .catch(errorHandler);
   }

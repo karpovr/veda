@@ -510,7 +510,7 @@ proto.save = function (isAtomic) {
  * @param {Boolean} forced
  * @return {Promise<IndividualModel>}
  */
-proto.reset = function (forced) {
+proto.reset = function () {
   if ( this.isResetting() && typeof window !== 'undefined' ) {
     return this.isResetting();
   }
@@ -523,27 +523,14 @@ proto.reset = function (forced) {
   const mergeServerState = (server_state) => {
     this.original = JSON.stringify(server_state);
     const delta = Util.diff(this.properties, server_state);
-    if (forced || this.isSync() || !this.isLoaded()) {
-      this.properties = server_state;
-      this.isNew(false);
-      this.isSync(true);
-      this.isLoaded(true);
-      return Promise.all(Object.keys(delta.added).concat(Object.keys(delta.differ), Object.keys(delta.missing)).map((property_uri) => {
-        const values = this.get(property_uri);
-        return this.trigger('propertyModified', property_uri, values).then(() => this.trigger(property_uri, values));
-      }));
-    } else {
-      // Add missing properties
-      return Promise.all(Object.keys(delta.missing).map((property_uri) => {
-        return this.set(property_uri, server_state[property_uri].map(parser));
-      })).then(() => {
-        // Add missing object values
-        return Promise.all(Object.keys(delta.differ).map((property_uri) => {
-          const missing_object_values = server_state[property_uri].map(parser).filter((value) => !this.hasValue(property_uri, value) && value instanceof IndividualModel);
-          return this.addValue(property_uri, missing_object_values);
-        }));
-      });
-    }
+    this.properties = server_state;
+    this.isNew(false);
+    this.isSync(true);
+    this.isLoaded(true);
+    return Promise.all(Object.keys(delta.added).concat(Object.keys(delta.differ), Object.keys(delta.missing)).map((property_uri) => {
+      const values = this.get(property_uri);
+      return this.trigger('propertyModified', property_uri, values).then(() => this.trigger(property_uri, values));
+    }));
   };
 
   return this.isResetting(
