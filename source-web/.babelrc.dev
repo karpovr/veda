@@ -12,6 +12,7 @@
     "@babel/plugin-transform-instanceof",
     "@babel/plugin-transform-modules-systemjs"
   ],
+  "sourceMaps": "inline",
   "presets": [
     [
       "@babel/preset-env",
