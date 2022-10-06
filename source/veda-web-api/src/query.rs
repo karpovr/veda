@@ -15,7 +15,7 @@ use v_common::onto::onto_index::OntoIndex;
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::{load_prefixes, FTQuery, PrefixesCache, QueryResult};
 use v_common::search::sparql_params::prepare_sparql_params;
-use v_common::search::sql_params::prepare_sql_params;
+use v_common::search::sql_params::prepare_sql_with_params;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
@@ -76,6 +76,9 @@ async fn query(
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
+    if uinf.ticket.is_none() {
+        return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()));
+    }
     if data.stored_query.is_some() {
         stored_query(uinf, data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
     } else {
@@ -115,7 +118,7 @@ async fn stored_query(
 
                 match source.as_str() {
                     "clickhouse" => {
-                        if let Ok(sql) = prepare_sql_params(&query_string, &mut params, &source) {
+                        if let Ok(sql) = prepare_sql_with_params(&query_string, &mut params, &source) {
                             warn!("{}", sql);
                             let res = ch_client.lock().await.query_select_async(&sql, &format).await?;
                             log(Some(&start_time), &uinf, "stored_query", stored_query_id, ResultCode::Ok);
@@ -162,7 +165,7 @@ async fn direct_query(
     if data.sparql.is_some() {
         res = sparql_client.lock().await.query_select_ids(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
-        let req = FTQuery {
+        let mut req = FTQuery {
             ticket: "".to_owned(),
             user: uinf.user_id.to_owned(),
             query: data.sql.clone().unwrap_or_default(),
@@ -174,7 +177,18 @@ async fn direct_query(
             from: data.from.unwrap_or_default(),
         };
         log(None, &uinf, "query", &format!("{}, top = {}, limit = {}, from = {}", &req.query, req.top, req.limit, req.from), ResultCode::Ok);
-        res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
+
+        match prepare_sql_with_params(&req.query.replace('`', "\""), &mut Individual::default(), "clickhouse") {
+            Ok(sql) => {
+                info!("{}", sql);
+                req.query = sql;
+                res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
+            },
+            Err(e) => {
+                error!("{:?}", e);
+                return Ok(HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR));
+            },
+        }
     } else {
         let mut req = FTQuery {
             ticket: ticket_id.clone(),
