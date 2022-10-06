@@ -189,7 +189,7 @@ v-s:earthworksPermission
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "Разрешение на выполнение земляных работ"@ru ;
   rdfs:label "Permission to carry out earthworks"@en ;
-  rdfs:range v-s:attachment ;
+  rdfs:range v-s:File ;
 .
 v-s:workPermit_tk_ppr_description
   rdf:type owl:ObjectProperty ;
@@ -203,7 +203,7 @@ v-s:workPermit_tk_ppr
   rdfs:domain v-s:WorkPermit ;
   rdfs:label "ТК/ППР"@ru ;
   rdfs:label "WorkPermit TK and PPR"@en ;
-  rdfs:range v-s:attachment ;
+  rdfs:range v-s:File ;
 .
 #v-s:dateFromPlan
 #v-s:dateToPlan
@@ -1031,7 +1031,6 @@ v-s:railNumber
   rdfs:label "rail number"@en ;
   rdfs:range xsd:string ;
 .
-
 
 #v-s:hasComment
 #v-s:hasLink

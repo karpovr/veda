@@ -49,7 +49,7 @@ d:WorkKindInWorkPermit_3
 . 
 d:WorkKindInWorkPermit_4
   a v-s:WorkKindInWorkPermit;
-  rdfs:label "Работы на тепломеханическом оборудованим электростанций и тепловых сетей"^^xsd:string;
+  rdfs:label "Работы на тепломеханическом оборудовании электростанций и тепловых сетей"^^xsd:string;
   v-s:hasWorkPermitForm d:WorkKindInWorkPermit_4 ;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
