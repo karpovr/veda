@@ -1,4 +1,4 @@
-use crate::common::{get_user_info, UserInfo};
+use crate::common::{extract_addr, get_ticket, get_user_info, log_w, UserInfo};
 use crate::common::{log, TicketRequest};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
@@ -129,11 +129,13 @@ pub(crate) async fn save_file(
     let uinf = match get_user_info(None, &req, &ticket_cache, &db).await {
         Ok(u) => u,
         Err(res) => {
+            log_w(Some(&start_time), &get_ticket(&req, &None), &extract_addr(&req), "", "upload_file", "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
 
     if az.lock().await.authorize("v-s:File", &uinf.user_id, Access::CanCreate as u8, false).unwrap_or(0) != Access::CanCreate as u8 {
+        log(Some(&start_time), &uinf, "upload_file", &format!("user [{}] is not allowed to upload files", uinf.user_id), ResultCode::Ok);
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()));
     }
 
@@ -212,6 +214,7 @@ pub(crate) async fn save_file(
     let dest_file_path = &format!("{}{}", base_path, path);
     let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
     if file_full_name.contains("..") {
+        log(Some(&start_time), &uinf, "upload_file", &format!("incorrect path [{}]", file_full_name), ResultCode::Ok);
         return Ok(HttpResponse::InternalServerError().into());
     }
 
