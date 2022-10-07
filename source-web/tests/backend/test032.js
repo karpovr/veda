@@ -1,8 +1,8 @@
 export default ({test, assert, Backend, Helpers, Constants, Util}) => {
-  test(`#032 Bad requests`, async () => {
-    let ticket = await Helpers.get_user1_ticket();
+  test('#032 Bad requests', async () => {
+    const ticket = await Helpers.get_user1_ticket();
 
-    await Backend.query();
+    await assert.rejects(Backend.query(), {code: 472});
     await Backend.query(ticket.ticket);
 
     await assert.rejects(Backend.query(ticket.ticket, {}));
