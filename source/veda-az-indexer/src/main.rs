@@ -2,7 +2,7 @@
 extern crate log;
 
 use crate::common::*;
-use std::env;
+use std::{env, thread};
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
@@ -19,6 +19,10 @@ fn main() -> Result<(), i32> {
 
     let mut module = Module::default();
     let mut backend = Backend::create(StorageMode::ReadOnly, false);
+    while !backend.mstorage_api.connect() {
+        info!("waiting for start of main module...");
+        thread::sleep(std::time::Duration::from_millis(100));
+    }
 
     let module_info = ModuleInfo::new("./data", "acl_preparer", true);
     if module_info.is_err() {
@@ -45,8 +49,6 @@ fn main() -> Result<(), i32> {
 
         prepare_permission_statement(&mut Individual::default(), &mut sys_permission, &mut ctx);
     }
-
-    //wait_load_ontology();
 
     let mut queue_consumer = Consumer::new("./data/queue", "az-indexer", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
 
