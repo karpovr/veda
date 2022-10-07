@@ -59,6 +59,5 @@ jobs:
         run: |
           ./control-start.sh
           sleep 180
-	  dir ./logs
           cat ./logs/*.log
           cd ./source-web && npm test
