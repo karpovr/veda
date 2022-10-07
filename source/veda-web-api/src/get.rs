@@ -10,10 +10,12 @@ use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
-use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
+use v_common::storage::async_storage::{check_user_in_group, get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 use v_common::v_queue::record::Mode;
+
+pub const SUPER_USER_GROUP: &str = "cfg:SuperUser";
 
 const QUEUE_STATE_PREFIX: &str = "srv:queue-state-";
 const MAIN_QUEUE_NAME: &str = "individuals-flow";
@@ -65,6 +67,12 @@ pub(crate) async fn get_individuals(
         if res_code == ResultCode::Ok {
             if !indv.any_exists("rdf:type", LIMITATA_COGNOSCI) {
                 res.push(indv.get_obj().as_json());
+            } else {
+                if let Ok(b) = check_user_in_group(&uinf.user_id, SUPER_USER_GROUP, Some(&az)).await {
+                    if b {
+                        res.push(indv.get_obj().as_json());
+                    }
+                }
             }
         }
     }
@@ -131,13 +139,16 @@ pub(crate) async fn get_individual(
     let (mut res, res_code) = get_individual_from_db(&id, &uinf.user_id, &db, Some(&az)).await?;
     log(Some(&start_time), &uinf, "get_individual", &id, res_code);
     if res_code == ResultCode::Ok {
-        if !res.any_exists("rdf:type", LIMITATA_COGNOSCI) {
-            let v = res.get_obj().as_json();
-            debug!("Ok {:?} {}", res_code, v);
-            return Ok(HttpResponse::Ok().json(v));
+        return if !res.any_exists("rdf:type", LIMITATA_COGNOSCI) {
+            Ok(HttpResponse::Ok().json(res.get_obj().as_json()))
         } else {
-            return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()));
-        }
+            if let Ok(b) = check_user_in_group(&uinf.user_id, SUPER_USER_GROUP, Some(&az)).await {
+                if b {
+                    return Ok(HttpResponse::Ok().json(res.get_obj().as_json()));
+                }
+            }
+            Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()))
+        };
     }
 
     debug!("{:?}", res_code);
