@@ -128,7 +128,7 @@ proto.start = async function () {
           self.unsubscribe(id);
         } else {
           const [callback] = subscription.slice(-1);
-          callback(id, updateCounter);
+          callback(id, Number(updateCounter));
         }
       } catch (error) {
         console.error('Individual update service failed');

@@ -3,7 +3,7 @@ import UpdateService from '../../js/browser/update_service.js';
 const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default ({test, assert, Backend, Helpers, Constants, Util}) => {
-  test.skip('#046 ccus', async () => {
+  test('#046 ccus', async () => {
     const updateService = new UpdateService();
     await updateService.start();
 
@@ -19,9 +19,13 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     };
 
     let testUpdateCounter;
-    updateService.subscribe(new_test_doc1_uri, 0, (updateCounter) => {
-      testUpdateCounter = updateCounter;
-    });
+    updateService.subscribe(new_test_doc1, [
+      new_test_doc1_uri,
+      0,
+      (id, updateCounter) => {
+        testUpdateCounter = updateCounter;
+      }
+    ]);
 
     await Backend.put_individual(ticket_user1, new_test_doc1);
     await timeout(1500);
