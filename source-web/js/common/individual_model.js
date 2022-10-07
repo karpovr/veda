@@ -389,8 +389,13 @@ Object.defineProperty(proto, 'rightsOrigin', {
  */
 proto.watch = function () {
   if (!updateService) return;
-  updateService.subscribe(this);
+  updateService.subscribe(this, [this.id, this.get('v-s:updateCounter')[0], updater]);
 };
+
+function updater(id, updateCounter) {
+  const individual = new IndividualModel(id);
+  individual.reset();
+}
 
 /**
  * Unwatch individual changes on server

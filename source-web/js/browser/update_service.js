@@ -6,8 +6,6 @@ import riot from '../common/lib/riot.js';
 
 import Backend from '../common/backend.js';
 
-import WeakCache from '../common/weak_cache.js';
-
 export default UpdateService;
 
 /**
@@ -21,7 +19,7 @@ function UpdateService () {
   }
 
   riot.observable(this);
-  this.cache = new WeakCache();
+  this.subscriptions = new Map();
   this.registry = new FinalizationRegistry((id) => {
     // console.log('collected', id);
     this.unsubscribe(id);
@@ -123,13 +121,14 @@ proto.start = async function () {
     for (const pairStr of ids) {
       try {
         const pair = pairStr.split('=');
-        const id = pair[0];
+        const [id, updateCounter] = pair;
         if (!id) continue;
-        const individual = self.cache.get(id);
-        if (!individual) {
+        const subscription = self.subscriptions.get(id);
+        if (!subscription) {
           self.unsubscribe(id);
         } else {
-          individual.reset();
+          const [callback] = subscription.slice(-1);
+          callback(id, updateCounter);
         }
       } catch (error) {
         console.error('Individual update service failed');
@@ -209,20 +208,22 @@ proto.stop = function () {
   this.socket.close();
 };
 
-proto.subscribe = function (individual) {
-  this.cache.set(individual.id, individual);
-  this.registry.register(individual, individual.id);
+proto.subscribe = function (ref, subscription) {
+  const [id, updateCounter] = subscription;
+  if (this.subscriptions.has(id)) return;
+  this.subscriptions.set(id, subscription);
+  this.registry.register(ref, id);
   if (this.socket) {
-    this.socket.sendMessage('+' + individual.id + '=' + (individual.get('v-s:updateCounter')[0] || 0));
+    this.socket.sendMessage(`+${id}=${updateCounter || 0}`);
   }
 };
 
 proto.unsubscribe = function (id) {
   if ( !id ) {
-    this.cache.clear();
+    this.subscriptions.clear();
     this.socket.sendMessage('-*');
   } else {
-    this.cache.delete(id);
+    this.subscriptions.delete(id);
     if (this.socket) {
       this.socket.sendMessage('-' + id);
     }
@@ -231,9 +232,9 @@ proto.unsubscribe = function (id) {
 
 proto.restore = function () {
   this.socket.sendMessage('-*');
-  for (const id of this.cache.keys()) {
-    if (this.socket && this.has(id)) {
-      this.socket.sendMessage('+' + id + '=' + (this.cache.get(id).get('v-s:updateCounter')[0] || 0));
+  if (this.socket) {
+    for (const [id, updateCounter] of this.subscriptions.values()) {
+      this.socket.sendMessage(`+${id}=${updateCounter || 0}`);
     }
   }
 };
