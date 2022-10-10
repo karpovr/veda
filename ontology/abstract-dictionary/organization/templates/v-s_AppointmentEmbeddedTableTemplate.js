@@ -25,9 +25,11 @@ export const post = function (individual, template, container, mode, extra) {
   });
 
   $('#deleteAppointment', template).click(function () {
-    individual['rdf:type'] = individual['rdf:type'].concat('v-s:Deletable');
-    individual['v-s:deleted'] = [true];
-    individual.save();
+    if (confirm('Вы уверены?')) {
+      individual['rdf:type'] = individual['rdf:type'].concat('v-s:Deletable');
+      individual['v-s:deleted'] = [true];
+      individual.save();
+    }
   });
 
   $('#moveToAnotherDepartment', template).click(function () {
