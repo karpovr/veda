@@ -33,6 +33,17 @@ cfg:Event_1
   rdf:type v-s:Event ;
   v-s:author cfg:VedaSystemAppointment ;
   v-s:preventByType v-s:Version;
+  v-s:preventByType v-s:Group;
+  v-s:preventByType v-s:Connection;
+  v-s:preventByType v-s:Credential;
+  v-s:preventByType v-s:Event;
+  v-s:preventByType v-s:Account;
+  v-s:preventByType v-s:Person;
+  v-s:preventByType v-s:Position;
+  v-s:preventByType v-s:Appointment;
+  v-s:preventByType v-s:Department;
+  v-s:preventByType v-s:Organization;
+  v-s:preventByType v-s:OrganizationUnit;
   rdfs:label "Скрипт помещает все индивиды в группу cfg:TTLResourcesGroup" ;
   rdfs:comment "Скрипт помещает все индивиды в группу cfg:TTLResourcesGroup" ;
   v-s:script """
@@ -47,29 +58,20 @@ cfg:Event_1
  * super_classes = super classes of the document.
  */
 // First class event
-if (parent_script_id) {
-  // print("Not first class event. Exit.");
-  return;
-}
+if (parent_script_id) return;
 
-var doc_uri = document['@'],
-  isDefinedBy = document['rdfs:isDefinedBy'],
-  isGroup = veda.Util.getUri(document['rdf:type']) === "v-s:Group",
-  isConnection = veda.Util.getUri(document['rdf:type']) === "v-s:Connection",
-  isCredential = veda.Util.getUri(document['rdf:type']) === "v-s:Credential",
-  isEvent = veda.Util.getUri(document['rdf:type']) === "v-s:Event";
-if ( !isDefinedBy || isGroup || isConnection || isCredential || isEvent) return;
-var uri = 'd:membership_' + doc_uri.split(':').join('_') + '_' + 'cfg_TTLResourcesGroup',
-  membership = {
-    '@' : uri,
-    'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-    'v-s:memberOf' : veda.Util.newUri('cfg:TTLResourcesGroup'),
-    'v-s:resource' : veda.Util.newUri(doc_uri),
-    'rdfs:comment' : veda.Util.newStr('создано автоматически в обработчике cfg:Event_1')
-  };
+const doc_uri = document['@'];
+const isDefinedBy = document['rdfs:isDefinedBy'];
+if ( !isDefinedBy ) return;
+const uri = 'd:membership_' + doc_uri.split(':').join('_') + '_' + 'cfg_TTLResourcesGroup';
+const membership = {
+  '@': uri,
+  'rdf:type': veda.Util.newUri('v-s:Membership'),
+  'v-s:memberOf': veda.Util.newUri('cfg:TTLResourcesGroup'),
+  'v-s:resource': veda.Util.newUri(doc_uri),
+  'rdfs:comment': veda.Util.newStr('создано автоматически в обработчике cfg:Event_1'),
+};
 put_individual(ticket, membership, _event_id);
-//log_trace(uri);
-
   """ ;
 .
 
@@ -79,6 +81,7 @@ cfg:Event_2
   rdfs:label "Скрипт выдает права авторам (v-s:author), владельцам (v-s:owner), издателям (v-s:publisher) и создателям (v-s:creator)";
   rdfs:comment "Скрипт выдает права авторам (v-s:author), владельцам (v-s:owner), издателям (v-s:publisher) и создателям (v-s:creator)";
   v-s:preventByType v-s:Version;
+  v-s:preventByType v-s:Account;
   v-s:script """
 /* Available variables:
  * ticket = superuser ticket
@@ -92,55 +95,90 @@ cfg:Event_2
  */
 
 // First class event
-if (parent_script_id) {
-  // print("Not first class event. Exit.");
-  return;
-}
+if (parent_script_id) return;
 
-var doc_uri = document['@'],
-    owner_properties = ["v-s:owner", "v-s:author", "v-s:publisher", "v-s:creator"];
+const doc_uri = document['@'];
+const owner_properties = ['v-s:owner', 'v-s:author', 'v-s:publisher', 'v-s:creator'];
 
 owner_properties.map(function (property_uri) {
   if (document[property_uri]) {
-    document[property_uri].map(function(value) {
-      var owner_uri = value.data;
-      if (owner_uri && owner_uri !== "cfg:VedaSystem") {
-        var owner = get_individual(ticket, owner_uri);
+    document[property_uri].map(function (value) {
+      const owner_uri = value.data;
+      if (owner_uri && owner_uri !== 'cfg:VedaSystem') {
+        const owner = get_individual(ticket, owner_uri);
         if (owner) {
-          var owner_type = veda.Util.getUri(owner["rdf:type"]);
-          if (owner_type === "v-s:Person" || owner_type === "v-s:Position") {
-            var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + owner_uri.split(':').join('_') + "_event2";
-            addPermission(permission_uri, owner_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
-          } else if (owner_type === "v-s:Appointment") {
-            var position_uri = veda.Util.getUri(owner["v-s:occupation"]);
+          const owner_type = veda.Util.getUri(owner['rdf:type']);
+          if (owner_type === 'v-s:Person' || owner_type === 'v-s:Position') {
+            const permission_uri = 'd:right_' + doc_uri.split(':').join('_') + '_' + owner_uri.split(':').join('_') + '_event2';
+            addPermission(permission_uri, owner_uri, doc_uri, ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
+          } else if (owner_type === 'v-s:Appointment') {
+            const position_uri = veda.Util.getUri(owner['v-s:occupation']);
             if (position_uri) {
-              var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + position_uri.split(':').join('_') + "_event2";
-              addPermission(permission_uri, position_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
+              const permission_uri = 'd:right_' + doc_uri.split(':').join('_') + '_' + position_uri.split(':').join('_') + '_event2';
+              addPermission(permission_uri, position_uri, doc_uri, ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
             }
-            var person_uri = veda.Util.getUri(owner["v-s:employee"]);
+            const person_uri = veda.Util.getUri(owner['v-s:employee']);
             if (person_uri) {
-              var permission_uri = "d:right_" + doc_uri.split(':').join('_') + "_" + person_uri.split(':').join('_') + "_event2";
-              addPermission(permission_uri, person_uri, doc_uri, ["v-s:canRead", "v-s:canUpdate", "v-s:canDelete"]);
+              const permission_uri = 'd:right_' + doc_uri.split(':').join('_') + '_' + person_uri.split(':').join('_') + '_event2';
+              addPermission(permission_uri, person_uri, doc_uri, ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
             }
           }
         }
       }
-    })
+    });
   }
 });
 
-function addPermission(permission_uri, subject_uri, object_uri, rights) {
-  var permission = {
+function addPermission (permission_uri, subject_uri, object_uri, rights) {
+  const permission = {
     '@': permission_uri,
     'rdf:type': veda.Util.newUri('v-s:PermissionStatement'),
     'v-s:permissionObject': veda.Util.newUri(object_uri),
-    'v-s:permissionSubject': veda.Util.newUri(subject_uri)
+    'v-s:permissionSubject': veda.Util.newUri(subject_uri),
   };
   rights.map(function (right) {
     permission[right] = veda.Util.newBool(true);
   });
   put_individual(ticket, permission);
 }
+  """ ;
+.
+
+cfg:Event_2_1
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystemAppointment ;
+  rdfs:label "Скрипт выдает права чтения персоне на аккаунт по полю v-s:owner";
+  rdfs:comment "Скрипт выдает права чтения персоне на аккаунт по полю v-s:owner";
+  v-s:preventByType v-s:Version;
+  v-s:triggerByType v-s:Account;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * _event_id = id of the event to prevent cycles in triggers. Must be passed to every function that modifies DB.
+ * parent_script_id = id of the parent script that triggered this event.
+ * parent_document_id = id of the document that triggered this event.
+ * super_classes = super classes of the document.
+ */
+
+// First class event
+if (parent_script_id) return;
+
+if (!veda.Util.hasValue(document, 'v-s:owner')) return;
+const account_uri = document['@'];
+const person_uri = veda.Util.getUri(document['v-s:owner']);
+const permission_uri = 'd:right_' + account_uri.split(':').join('_') + '_' + person_uri.split(':').join('_') + '_event_2_1';
+const permission = {
+  '@': permission_uri,
+  'rdf:type': veda.Util.newUri('v-s:PermissionStatement'),
+  'v-s:permissionSubject': veda.Util.newUri(person_uri),
+  'v-s:permissionObject': veda.Util.newUri(account_uri),
+  'v-s:canRead': veda.Util.newBool(true),
+  'rdfs:comment' : veda.Util.newStr('создано автоматически в обработчике cfg:Event_2_1')
+};
+put_individual(ticket, permission);
   """ ;
 .
 
@@ -645,86 +683,81 @@ cfg:Event_15
   rdfs:comment "Скрипт обработки связей документов" ;
   v-s:triggerByType v-s:Link ;
   v-s:script """
+// First class event
+if (parent_script_id) return;
 
-  // First class event
-  if (parent_script_id) {
-    // print("Not first class event. Exit.");
-    return;
+const linkDeleted = veda.Util.hasValue( document, 'v-s:deleted', {data: true, type: 'Boolean'} );
+const linkUri = document['@'];
+const linkToUri = veda.Util.getUri(document['v-s:to']);
+const linkFromUri = veda.Util.getUri(document['v-s:from']);
+const linkTo = get_individual(ticket, linkToUri);
+const linkFrom = get_individual(ticket, linkFromUri);
+const rightsFrom = get_rights(ticket, linkFromUri, user_uri);
+const rightsTo = get_rights(ticket, linkToUri, user_uri);
+const canReadFrom = veda.Util.hasValue( rightsFrom, 'v-s:canRead', {data: true, type: 'Boolean'} );
+const canReadTo = veda.Util.hasValue( rightsTo, 'v-s:canRead', {data: true, type: 'Boolean'} );
+const isValidRights = true; // canReadFrom && canReadTo,
+let containsThisLink;
+const membershipToFromUri = 'd:link_membership_' + linkToUri.split(':').join('_') + '_' + linkFromUri.split(':').join('_');
+const membershipFromToUri = 'd:link_membership_' + linkFromUri.split(':').join('_') + '_' + linkToUri.split(':').join('_');
+let membershipToFrom;
+let membershipFromTo;
+
+remove_individual(ticket, membershipToFromUri, _event_id);
+remove_individual(ticket, membershipFromToUri, _event_id);
+
+if (!linkDeleted) {
+  const isToMemberOfFrom = veda.Util.hasValue( document, 'v-s:toMemberOfFrom', {data: true, type: 'Boolean'});
+  const isFromMemberOfTo = veda.Util.hasValue( document, 'v-s:fromMemberOfTo', {data: true, type: 'Boolean'});
+  const isMutual = veda.Util.hasValue( document, 'v-s:mutualMembership', {data: true, type: 'Boolean'});
+  if (isValidRights && (isToMemberOfFrom || isMutual)) {
+    membershipToFrom = {
+      '@': membershipToFromUri,
+      'rdf:type': veda.Util.newUri('v-s:Membership'),
+      'v-s:memberOf': veda.Util.newUri(linkFromUri),
+      'v-s:resource': veda.Util.newUri(linkToUri),
+      'rdfs:comment': veda.Util.newStr('создано cfg:Event_15'),
+      'v-s:canRead': veda.Util.newBool(true),
+    };
+    put_individual(ticket, membershipToFrom, _event_id);
   }
-
-  var linkDeleted = veda.Util.hasValue( document, "v-s:deleted", {data: true, type: "Boolean"} ),
-      linkUri = document["@"],
-      linkToUri = veda.Util.getUri(document["v-s:to"]),
-      linkFromUri = veda.Util.getUri(document["v-s:from"]),
-      linkTo = get_individual(ticket, linkToUri),
-      linkFrom = get_individual(ticket, linkFromUri),
-      rightsFrom = get_rights(ticket, linkFromUri, user_uri),
-      rightsTo = get_rights(ticket, linkToUri, user_uri),
-      canReadFrom = veda.Util.hasValue( rightsFrom, "v-s:canRead", {data: true, type: "Boolean"} ),
-      canReadTo = veda.Util.hasValue( rightsTo, "v-s:canRead", {data: true, type: "Boolean"} ),
-      isValidRights = canReadFrom && canReadTo,
-      containsThisLink,
-      mutualMembership = veda.Util.hasValue( document, "v-s:mutualMembership", {data: true, type: "Boolean"} ),
-      membershipToFromUri = "d:link_membership_" + linkToUri.split(":").join("_") + "_" + linkFromUri.split(":").join("_"),
-      membershipFromToUri = "d:link_membership_" + linkFromUri.split(":").join("_") + "_" + linkToUri.split(":").join("_"),
-      membershipToFrom,
-      membershipFromTo;
-
-  remove_individual(ticket, membershipToFromUri, _event_id);
-  remove_individual(ticket, membershipFromToUri, _event_id);
-
-  if (!linkDeleted) {
-    var isToMemberOfFrom = veda.Util.hasValue( document, "v-s:toMemberOfFrom", {data: true, type: "Boolean"});
-    var isFromMemberOfTo = veda.Util.hasValue( document, "v-s:fromMemberOfTo", {data: true, type: "Boolean"});
-    var isMutual = veda.Util.hasValue( document, "v-s:mutualMembership", {data: true, type: "Boolean"});
-    if (isValidRights && (isToMemberOfFrom || isMutual)) {
-      membershipToFrom = {
-        '@' : membershipToFromUri,
-        'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-        'v-s:memberOf' : veda.Util.newUri(linkFromUri),
-        'v-s:resource' : veda.Util.newUri(linkToUri),
-        'rdfs:comment' : veda.Util.newStr('создано cfg:Event_15'),
-        'v-s:canRead'  : veda.Util.newBool(true)
-      };
-      put_individual(ticket, membershipToFrom, _event_id);
-    }
-    if (isValidRights && (isFromMemberOfTo || isMutual)) {
-      membershipFromTo = {
-        '@' : membershipFromToUri,
-        'rdf:type'     : veda.Util.newUri('v-s:Membership'),
-        'v-s:memberOf' : veda.Util.newUri(linkToUri),
-        'v-s:resource' : veda.Util.newUri(linkFromUri),
-        'rdfs:comment' : veda.Util.newStr('создано cfg:Event_15'),
-        'v-s:canRead'  : veda.Util.newBool(true)
-      };
-      put_individual(ticket, membershipFromTo, _event_id);
-    }
+  if (isValidRights && (isFromMemberOfTo || isMutual)) {
+    membershipFromTo = {
+      '@': membershipFromToUri,
+      'rdf:type': veda.Util.newUri('v-s:Membership'),
+      'v-s:memberOf': veda.Util.newUri(linkToUri),
+      'v-s:resource': veda.Util.newUri(linkFromUri),
+      'rdfs:comment': veda.Util.newStr('создано cfg:Event_15'),
+      'v-s:canRead': veda.Util.newBool(true),
+    };
+    put_individual(ticket, membershipFromTo, _event_id);
   }
+}
 
-  if (linkTo) {
-    containsThisLink = veda.Util.hasValue(linkTo, "v-s:hasLink", { data: linkUri, type: "Uri" });
-    if (!containsThisLink && !linkDeleted) {
-      linkTo["v-s:hasLink"] = ( linkTo["v-s:hasLink"] || [] ).concat({type: "Uri", data: linkUri});
-      put_individual(ticket, linkTo, _event_id);
-    } else if (containsThisLink && linkDeleted) {
-      linkTo["v-s:hasLink"] = linkTo["v-s:hasLink"].filter(function (link) {
-        return link.data !== linkUri;
-      });
-      put_individual(ticket, linkTo, _event_id);
-    }
+if (linkTo) {
+  containsThisLink = veda.Util.hasValue(linkTo, 'v-s:hasLink', {data: linkUri, type: 'Uri'});
+  if (!containsThisLink && !linkDeleted) {
+    linkTo['v-s:hasLink'] = ( linkTo['v-s:hasLink'] || [] ).concat({type: 'Uri', data: linkUri});
+    put_individual(ticket, linkTo, _event_id);
+  } else if (containsThisLink && linkDeleted) {
+    linkTo['v-s:hasLink'] = linkTo['v-s:hasLink'].filter(function (link) {
+      return link.data !== linkUri;
+    });
+    put_individual(ticket, linkTo, _event_id);
   }
-  if (linkFrom) {
-    containsThisLink = veda.Util.hasValue(linkFrom, "v-s:hasLink", { data: linkUri, type: "Uri" });
-    if (!containsThisLink && !linkDeleted) {
-      linkFrom["v-s:hasLink"] = ( linkFrom["v-s:hasLink"] || [] ).concat({type: "Uri", data: linkUri});
-      put_individual(ticket, linkFrom, _event_id);
-    } else if (containsThisLink && linkDeleted) {
-      linkFrom["v-s:hasLink"] = linkFrom["v-s:hasLink"].filter(function (link) {
-        return link.data !== linkUri;
-      });
-      put_individual(ticket, linkFrom, _event_id);
-    }
+}
+if (linkFrom) {
+  containsThisLink = veda.Util.hasValue(linkFrom, 'v-s:hasLink', {data: linkUri, type: 'Uri'});
+  if (!containsThisLink && !linkDeleted) {
+    linkFrom['v-s:hasLink'] = ( linkFrom['v-s:hasLink'] || [] ).concat({type: 'Uri', data: linkUri});
+    put_individual(ticket, linkFrom, _event_id);
+  } else if (containsThisLink && linkDeleted) {
+    linkFrom['v-s:hasLink'] = linkFrom['v-s:hasLink'].filter(function (link) {
+      return link.data !== linkUri;
+    });
+    put_individual(ticket, linkFrom, _event_id);
   }
+}
   """ ;
 .
 
