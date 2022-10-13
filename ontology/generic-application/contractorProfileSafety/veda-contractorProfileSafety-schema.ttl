@@ -340,11 +340,11 @@ v-s:hasOtherCertificate
   rdfs:label "Other certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
 .
-v-s:hasСhemicallyCertificate
+v-s:hasGazFireRepairCertificate
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:EmployeeProfile ;
-  rdfs:label "Удостоверение/протокол по эксплуатации химически опасных производственных объектов"@ru ;
-  rdfs:label "Operation of chemically hazardous production facilities certificate"@en ;
+  rdfs:label "Удостоверение/протокол по эксплуатации газоопасных, огневых и ремонтных работ"@ru ;
+  rdfs:label "Operation of cgas hazardous, fire and repair certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
 .
 v-s:hasGasCertificate
@@ -354,20 +354,7 @@ v-s:hasGasCertificate
   rdfs:label "Operation of gas distribution and gas consumption networks certificate"@en ;
   rdfs:range v-s:CertificationDocument ;
 .
-v-s:hasLiftingGoodStructuresCertificate
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:EmployeeProfile ;
-  rdfs:label "Удостоверение/протокол по эксплуатации опасных производственных объектов, на которых используются подъемные сооружения, предназначенные для подъема и перемещения грузов"@ru ;
-  rdfs:label "Operation of hazardous production facilities that use lifting structures designed to lift and move goods certificate"@en ;
-  rdfs:range v-s:CertificationDocument ;
-.
-v-s:hasLiftingPeopleStructuresCertificate
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:EmployeeProfile ;
-  rdfs:label "Удостоверение/протокол по эксплуатации опасных производственных объектов, на которых используются подъемные сооружения, предназначенные для подъема и транспортировки людей"@ru ;
-  rdfs:label "Operation of hazardous production facilities that use lifting structures designed to lift and transport people certificate"@en ;
-  rdfs:range v-s:CertificationDocument ;
-.
+
 
 
 v-s:PS_ContractorProfileSafety_Files
