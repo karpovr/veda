@@ -63,7 +63,7 @@ impl App {
         for name in self.modules_start_order.iter() {
             //info!("start {:?}", module);
             let module = self.modules_info.get(name).unwrap();
-            match start_module(&self.tg, module).await {
+            match start_module(module).await {
                 Ok(child) => {
                     info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                     self.started_modules.push((module.name.to_owned(), child));
@@ -83,7 +83,7 @@ impl App {
             if is_ok_process(&mut sys, process.id()).0 {
                 success_started += 1;
             } else {
-                error!("failed to start, process = {}, name = {}", process.id(), name)
+                log_err_and_to_tg(&self.tg, &format!("failed to start, process = {}, name = {}", process.id(), name)).await;
             }
         }
 
@@ -115,7 +115,7 @@ impl App {
 
             if let Err(e) = self.get_modules_info() {
                 if e.kind() != ErrorKind::NotFound {
-                    error!("failed to read modules info");
+                    log_err_and_to_tg(&self.tg, "failed to read modules info").await;
                 }
             }
 
@@ -129,7 +129,7 @@ impl App {
                     prev_check_mstorage = now;
 
                     if !self.mstorage_watchdog_check() {
-                        error!("detected a problem in module MSTORAGE, restart all modules");
+                        log_err_and_to_tg(&self.tg, "detected a problem in module MSTORAGE, restart all modules").await;
                         false
                     } else {
                         true
@@ -160,25 +160,24 @@ impl App {
                     };
 
                     if exit_code != ModuleError::Fatal as i32 {
-                        let msg = format!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code);
-                        error!("{}", msg);
-                        send_msg_to_tg(&self.tg, &msg).await;
+                        log_err_and_to_tg(&self.tg, &format!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code)).await;
+
                         if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
                             warn!("@1 attempt to stop module, process = {}, name = {}", process.id(), name);
                         }
 
                         if let Some(module) = self.modules_info.get(name) {
-                            match start_module(&self.tg, module).await {
+                            match start_module(module).await {
                                 Ok(child) => {
                                     info!("{} restart module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                                     *process = child;
                                 },
                                 Err(e) => {
-                                    error!("failed to execute, name = {}, err = {:?}", module.exec_name, e);
+                                    log_err_and_to_tg(&self.tg, &format!("failed to execute, name = {}, err = {:?}", module.exec_name, e)).await;
                                 },
                             }
                         } else {
-                            error!("failed to find module, name = {}", name);
+                            log_err_and_to_tg(&self.tg, &format!("failed to find module, name = {}", name)).await;
                         }
                     }
                 }
@@ -202,13 +201,13 @@ impl App {
 
             for name in new_config_modules {
                 if let Some(module) = self.modules_info.get(&name) {
-                    match start_module(&self.tg, module).await {
+                    match start_module(module).await {
                         Ok(child) => {
                             info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
                             self.started_modules.push((module.name.to_owned(), child));
                         },
                         Err(e) => {
-                            error!("failed to execute, name = {}, err = {:?}", module.exec_name, e);
+                            log_err_and_to_tg(&self.tg, &format!("failed to execute, name = {}, err = {:?}", module.exec_name, e)).await;
                         },
                     }
                 }
@@ -305,7 +304,7 @@ impl App {
                 if let Some(m) = params.get("memory-limit") {
                     let elements: Vec<&str> = m.split(' ').collect();
                     if elements.len() == 2 {
-                        if let Ok(meml) = elements.get(0).unwrap_or(&"").parse::<i32>() {
+                        if let Ok(meml) = elements.first().unwrap_or(&"").parse::<i32>() {
                             let m = match elements.get(1).unwrap_or(&"").to_uppercase().as_str() {
                                 "GB" => 1024 * 1024,
                                 "MB" => 1024,
@@ -419,7 +418,7 @@ async fn main() {
 
     let started = app.start_modules().await;
     if started.is_err() {
-        error!("failed to start veda, err = {:?}", started.err());
+        send_msg_to_tg(&app.tg, &format!("failed to start veda, err = {:?}", &started.err())).await;
         return;
     }
 
@@ -446,6 +445,11 @@ fn is_ok_process(sys: &mut sysinfo::System, pid: u32) -> (bool, u64) {
     }
 }
 
+async fn log_err_and_to_tg(tg: &Option<TelegramDest>, text: &str) {
+    error!("{}", text);
+    send_msg_to_tg(tg, text).await;
+}
+
 async fn send_msg_to_tg(tg: &Option<TelegramDest>, text: &str) {
     if let Some(t) = tg {
         let bot = Bot::new(t.tg_notify_token.to_owned()).auto_send();
@@ -457,7 +461,7 @@ async fn send_msg_to_tg(tg: &Option<TelegramDest>, text: &str) {
     }
 }
 
-async fn start_module(tg: &Option<TelegramDest>, module: &VedaModule) -> io::Result<Child> {
+async fn start_module(module: &VedaModule) -> io::Result<Child> {
     let datetime: DateTime<Local> = Local::now();
 
     fs::create_dir_all("./logs").unwrap_or_default();
@@ -474,10 +478,7 @@ async fn start_module(tg: &Option<TelegramDest>, module: &VedaModule) -> io::Res
 
     match child {
         Ok(p) => {
-            let msg = format!("started successfully, module = {}, args = {:?}", module.exec_name.to_string(), &module.args);
-            info!("{}", msg);
-
-            send_msg_to_tg(tg, &msg).await;
+            info!("started successfully, module = {}, args = {:?}", module.exec_name.to_string(), &module.args);
 
             if let Ok(mut file) = File::create(".pids/__".to_owned() + &module.name + "-pid") {
                 if let Err(e) = file.write_all(format!("{}", p.id()).as_bytes()) {
