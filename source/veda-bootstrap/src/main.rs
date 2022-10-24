@@ -418,7 +418,7 @@ async fn main() {
 
     let started = app.start_modules().await;
     if started.is_err() {
-        send_msg_to_tg(&app.tg, &format!("failed to start veda, err = {:?}", &started.err())).await;
+        log_err_and_to_tg(&app.tg, &format!("failed to start veda, err = {:?}", &started.err())).await;
         return;
     }
 
@@ -447,7 +447,7 @@ fn is_ok_process(sys: &mut sysinfo::System, pid: u32) -> (bool, u64) {
 
 async fn log_err_and_to_tg(tg: &Option<TelegramDest>, text: &str) {
     error!("{}", text);
-    send_msg_to_tg(tg, text).await;
+    send_msg_to_tg(tg, &format!("ERROR: {}", text)).await;
 }
 
 async fn send_msg_to_tg(tg: &Option<TelegramDest>, text: &str) {
