@@ -1,6 +1,6 @@
 import BrowserUtil from '/js/browser/util.js';
 import CommonUtil from '/js/common/util.js';
-import {sanitize} from '../browser/dom_helpers.js';
+import {sanitize} from '/js/browser/dom_helpers.js';
 import $ from 'jquery';
 import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';

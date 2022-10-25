@@ -57,7 +57,7 @@ function sanitize (string) {
     '/': '&#x2F;',
   };
   const reg = /[&<>"'/]/gi;
-  return string.replace(reg, function (match) {
+  return String(string).replace(reg, function (match) {
     return map[match];
   });
 }

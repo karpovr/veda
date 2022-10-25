@@ -163,10 +163,6 @@ v-s:MainMenu
   v-s:menuItem v-s:Divider ;
   v-s:menuItem v-s:Create ;
   v-s:menuItem v-s:Find ;
-  v-s:menuItem v-s:Drafts ;
-  v-s:menuItem v-s:Divider ;
-  v-s:menuItem v-s:Graph ;
-  v-s:menuItem v-s:Tests ;
   v-s:menuItem v-s:Divider ;
   v-s:menuItem v-s:Administration ;
 .
@@ -204,24 +200,6 @@ v-s:Find
   rdfs:label "Найти"@ru ;
   rdfs:label "Find"@en ;
   v-s:objectLink v-fs:FulltextSearch ;
-.
-v-s:Drafts
-  rdf:type v-s:Menu ;
-  rdfs:label "Черновики"@ru ;
-  rdfs:label "Drafts"@en ;
-  v-s:staticLink "#/drafts"^^xsd:string ;
-.
-v-s:Graph
-  rdf:type v-s:Menu ;
-  rdfs:label "Граф"@ru ;
-  rdfs:label "Graph"@en ;
-  v-s:staticLink "#/graph"^^xsd:string ;
-.
-v-s:Tests
-  rdf:type v-s:Menu ;
-  rdfs:label "Тесты"@ru ;
-  rdfs:label "Tests"@en ;
-  v-s:staticLink "/tests"^^xsd:string ;
 .
 v-s:Administration
   rdf:type v-s:Menu ;

@@ -43,6 +43,7 @@ cfg:Event_1
   v-s:preventByType v-s:Appointment;
   v-s:preventByType v-s:Department;
   v-s:preventByType v-s:Organization;
+  v-s:preventByType v-s:OrgGroup;
   v-s:preventByType v-s:OrganizationUnit;
   rdfs:label "Скрипт помещает все индивиды в группу cfg:TTLResourcesGroup" ;
   rdfs:comment "Скрипт помещает все индивиды в группу cfg:TTLResourcesGroup" ;
@@ -408,6 +409,8 @@ cfg:Event_6
   v-s:triggerByType v-ui:ObjectPropertySpecification ;
   v-s:triggerByType v-ui:ClassTemplate ;
   v-s:triggerByType v-ui:ClassModel ;
+  v-s:triggerByType v-ui:TemplateSpecification ;
+  v-s:triggerByType v-s:ClassSpecification ;
   v-s:script """
 /* Available variables:
  * ticket = superuser ticket

@@ -12,6 +12,7 @@ import riot from '../common/lib/riot.js';
  * @return {App}
  */
 export default function App (manifest) {
+  riot.observable(this);
   this.ticket = this.ticket || '';
   this.ontology = {};
   this.manifest = manifest;
@@ -25,6 +26,4 @@ export default function App (manifest) {
       return this.user._init();
     });
   };
-
-  return riot.observable(this);
 }

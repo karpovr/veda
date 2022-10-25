@@ -230,7 +230,6 @@ function handleLoginError (error) {
   let okHandler = () => true;
 
   // Captcha
-
   const myCaptcha = new Captcha({
     el: '#captcha-input',
     requiredValue: '',
@@ -256,11 +255,9 @@ function handleLoginError (error) {
       }
     },
   });
-
   function captchaSubmit (e) {
     myCaptcha.validate();
   };
-
   document.getElementById('captcha-submit').addEventListener('click', captchaSubmit);
   document.getElementById('captcha-input').addEventListener('change', captchaSubmit);
 
@@ -544,50 +541,44 @@ delegateHandler(document.body, 'click', '#logout, .logout', function () {
 /**
  * Authentication flow
  */
-export default function Auth () {
-  // Init application
+export default async function auth () {
   const loadIndicator = document.getElementById('load-indicator');
   const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
 
-  Promise.resolve()
-    .then(() => {
-      // Check if ticket is valid
-      const ticket = storage.ticket;
-      const user_uri = storage.user_uri;
-      const end_time = ( new Date() < new Date(parseInt(storage.end_time)) ) && storage.end_time;
-      if (ticket && user_uri && end_time) {
-        return Backend.is_ticket_valid(ticket).catch(() => false);
+  // Check if ticket is valid
+  const ticket = storage.ticket;
+  const user_uri = storage.user_uri;
+  const end_time = (new Date() < new Date(parseInt(storage.end_time))) && storage.end_time;
+  let valid;
+  if (ticket && user_uri && end_time) {
+    try {
+      valid = await Backend.is_ticket_valid(ticket);
+    } catch (error) {
+      valid = false;
+    }
+  } else {
+    valid = false;
+  }
+
+  // Init application
+  if (valid) {
+    initWithCredentials({ticket, user_uri, end_time});
+  } else {
+    try {
+      const {ticket, user_uri, end_time} = await Backend.authenticate('guest', 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+      const authRequiredParam = await Backend.get_individual(ticket, 'cfg:AuthRequired');
+      const {'rdf:value': [{data: isAuthRequired}]} = authRequiredParam;
+      if (!isAuthRequired) {
+        initWithCredentials({ticket, user_uri, end_time});
       } else {
-        return false;
+        handleAuthError();
       }
-    })
-    .then((valid) => {
-      if (valid) {
-        initWithCredentials({
-          ticket: storage.ticket,
-          user_uri: storage.user_uri,
-          end_time: storage.end_time,
-        });
-      } else {
-        const authRequired = new IndividualModel('cfg:AuthRequired', true, false);
-        authRequired.load().then((authRequiredParam) => {
-          if ( authRequiredParam && authRequiredParam.hasValue('rdf:value', false) ) {
-            initWithCredentials({
-              ticket: '',
-              user_uri: 'cfg:Guest',
-              end_time: 0,
-            });
-          } else {
-            handleAuthError();
-          }
-        }).catch((error) => {
-          console.error('cfg:AuthRequired load failed');
-          handleAuthError();
-        });
-      }
-    })
-    .then(() => {
-      clearTimeout(loadIndicatorTimer);
-      hide(loadIndicator);
-    });
+    } catch (error) {
+      console.error('cfg:AuthRequired load failed');
+      handleAuthError();
+    }
+  }
+
+  clearTimeout(loadIndicatorTimer);
+  hide(loadIndicator);
 }
