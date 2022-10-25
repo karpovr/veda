@@ -24,6 +24,7 @@ test('testSimpleNet3', async (t) => {
     .click(Selector('.suggestions .suggestion').withText('Администратор4'))
     .dragToElement('.state-io-condition-input .ep', '.state-task')
     .dragToElement('.state-task .ep', '.glyphicon-stop')
+    .wait(1000)
     .click('button#workflow-save-button')
     .wait(3000)
     .click('.navbar-brand')
