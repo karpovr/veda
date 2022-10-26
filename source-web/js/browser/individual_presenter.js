@@ -381,14 +381,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
    * @return {Promise<void>}
    */
   function resetHandler (parent, acc) {
-    acc = acc || [];
-    acc = embedded.reduce((acc1, item) => typeof item.veda.reset === 'function' ? item.veda.reset(individual.id, acc1) : acc1, acc);
-    acc.push(individual.id);
-    if (parent) {
-      return acc;
-    }
-    const uris = CommonUtil.unique(acc);
-    return uris.reduce((p, item) => p.then(() => new IndividualModel(item).reset()), Promise.resolve())
+    return individual.resetAll()
       .then(switchToView)
       .catch(errorHandler);
   }
@@ -399,36 +392,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
    * @param {Array} acc for individuals uris
    * @return {Promise<void>}
    */
-  function saveHandler (parent, acc) {
-    acc = acc || [];
-    acc = embedded.reduce((acc1, item) => {
-      return typeof item.veda.save === 'function' ? item.veda.save(individual.id, acc1) : acc1;
-    }, acc);
-    if (parent !== individual.id) {
-      acc.push(individual.id);
-    }
-    if (parent) {
-      return acc;
-    }
-    individual.isSync(false);
-    const uris = CommonUtil.unique(acc);
-    const individuals_properties = uris.map((uri) => {
-      const embeddedIndividual = new IndividualModel(uri);
-      if (!embeddedIndividual.isSync()) {
-        return embeddedIndividual.properties;
-      }
-    }).filter(Boolean);
-    return Promise.all(individuals_properties.map((props0) => new IndividualModel(props0['@']).trigger('beforeSave')))
-      .then(() => Backend.put_individuals(veda.ticket, individuals_properties))
-      .then(() => {
-        individuals_properties.forEach((props1) => {
-          const embeddedIndividual = new IndividualModel(props1['@']);
-          embeddedIndividual.isNew(false);
-          embeddedIndividual.isSync(true);
-          embeddedIndividual.isLoaded(true);
-        });
-      })
-      .then(() => Promise.all(individuals_properties.map((props2) => new IndividualModel(props2['@']).trigger('afterSave'))))
+  function saveHandler () {
+    return individual.saveAll()
       .then(switchToView)
       .then(successHandler)
       .catch(errorHandler);

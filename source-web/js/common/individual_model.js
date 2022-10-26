@@ -392,7 +392,7 @@ proto.watch = function () {
   updateService.subscribe(this, [this.id, this.get('v-s:updateCounter')[0], updater]);
 };
 
-function updater(id, updateCounter) {
+function updater (id, updateCounter) {
   const individual = new IndividualModel(id);
   individual.reset();
 }
@@ -406,7 +406,7 @@ proto.unwatch = function () {
 };
 
 /**
- * Load individual specified by uri from database. If cache parameter (from constructor) is true, then try to load individual from browser cache first.
+ * Load individual specified by uri from backend.
  * @return {Promise<IndividualModel>}
  */
 proto.load = function () {
@@ -457,13 +457,12 @@ proto.load = function () {
 };
 
 /**
- * Save current individual to database
+ * Save current individual to backend
  * @param {boolean} isAtomic
  * @return {Promise<IndividualModel>}
  */
 proto.save = function (isAtomic) {
   if (isAtomic == undefined) isAtomic = true;
-  // Do not save individual to server if nothing changed
   if (this.isSync()) {
     return Promise.resolve(this);
   }
@@ -511,7 +510,49 @@ proto.save = function (isAtomic) {
 };
 
 /**
- * Reset current individual to database
+ * Save individual tree to backend
+ * @param {IndividualModel} parent
+ * @param {Array} acc
+ * @param {WeakSet} visited
+ * @return {Promise<IndividualModel>}
+ */
+proto.saveAll = function (parent, acc, visited) {
+  acc = acc || [];
+  visited = visited || new WeakSet();
+  const toBeSaved = this.isNew() || this.isLoaded() && !this.isSync();
+  return Promise.resolve()
+    .then(() => toBeSaved && this.trigger('beforeSave'))
+    .then(() => {
+      if (visited.has(this)) return;
+      visited.add(this);
+      if (toBeSaved) acc.push(this.properties);
+      let children = [];
+      for (const property in this.properties) {
+        if (property === '@') continue;
+        const values = this.get(property);
+        if (!(values[0] instanceof IndividualModel)) continue;
+        children = children.concat(values.map((value) => value.saveAll(this, acc, visited)));
+      }
+      return Promise.all(children);
+    })
+    .then(() => !parent && Promise.all(acc).then((acc) => acc.length && Backend.put_individuals(veda.ticket, acc)))
+    .then(() => !parent && acc.forEach((props) => {
+      const individual = new IndividualModel(props['@']);
+      individual.original = JSON.stringify(props);
+      individual.isNew(false);
+      individual.isSync(true);
+      individual.isLoaded(true);
+      individual.watch();
+      individual.trigger('afterSave');
+    }))
+    .catch((error) => {
+      console.error('Save individual failed', this.id);
+      throw error;
+    });
+};
+
+/**
+ * Reset current individual to backend state
  * @param {Boolean} forced
  * @return {Promise<IndividualModel>}
  */
@@ -521,7 +562,7 @@ proto.reset = function () {
   }
 
   /**
-   * Merge original from DB with local changes
+   * Merge original from backend with local changes
    * @param {Object} server_state
    * @return {void}
    */
@@ -556,7 +597,35 @@ proto.reset = function () {
 };
 
 /**
- * Mark current individual as deleted in database (set v-s:deleted = true)
+ * Reset individual tree to backend state
+ * @param {WeakSet} visited
+ * @return {Promise<IndividualModel>}
+ */
+proto.resetAll = function (visited) {
+  visited = visited || new WeakSet();
+  const toBeReset = this.isLoaded() && !this.isSync();
+  return Promise.resolve()
+    .then(() => {
+      if (visited.has(this)) return;
+      visited.add(this);
+      let children = [];
+      for (const property in this.properties) {
+        if (property === '@') continue;
+        const values = this.get(property);
+        if (!(values[0] instanceof IndividualModel)) continue;
+        children = children.concat(values.map((value) => value.resetAll(visited)));
+      }
+      return Promise.all(children);
+    })
+    .then(() => toBeReset && this.reset())
+    .catch((error) => {
+      console.error('Reset individual failed', this.id);
+      throw error;
+    });
+};
+
+/**
+ * Mark current individual as deleted in backend (set v-s:deleted = true)
  * @return {Promise<IndividualModel>}
  */
 proto.delete = function () {
@@ -587,7 +656,7 @@ proto.delete = function () {
 };
 
 /**
- * Remove individual from database
+ * Remove individual from backend
  * @return {Promise<IndividualModel>}
  */
 proto.remove = function () {
@@ -620,7 +689,7 @@ proto.remove = function () {
 };
 
 /**
- * Recover current individual in database (remove v-s:deleted property)
+ * Recover current individual in backend (remove v-s:deleted property)
  * @return {Promise<IndividualModel>}
  */
 proto.recover = function () {
