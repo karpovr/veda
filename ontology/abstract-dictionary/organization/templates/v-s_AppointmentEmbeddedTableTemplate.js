@@ -28,6 +28,7 @@ export const post = function (individual, template, container, mode, extra) {
     if (confirm('Вы уверены?')) {
       individual['rdf:type'] = individual['rdf:type'].concat('v-s:Deletable');
       individual['v-s:deleted'] = [true];
+      individual['v-s:dateTo'] = [new Date()];
       individual.save();
     }
   });
