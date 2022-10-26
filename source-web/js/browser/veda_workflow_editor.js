@@ -288,6 +288,7 @@ jsWorkflow.ready(() => {
       net.addValue('v-wf:consistsOf', flow); // Add new Flow to Net
       source.addValue('v-wf:hasFlow', flow); // Add new Flow to source
       info.connection.setData(flow.id);
+      info.connection.flow = flow;
     });
 
     const subNetViewButton = function (state, $state) {
@@ -733,6 +734,7 @@ jsWorkflow.ready(() => {
       if (stateElement!=='') {
         wdata.append(stateElement);
         const $state = $('#' + BrowserUtil.escape4$(state.id), template);
+        $state.state = state;
         bindStateEvents($state);
         if (mode=='edit') subNetViewButton(state, $state);
         executorMark(state, $state);
@@ -765,6 +767,7 @@ jsWorkflow.ready(() => {
         connector.addOverlay(['Label', {label: flow['rdfs:label'][0], location: 0.5, id: 'flowLabel'}]);
       }
       connector.setData(flow.id);
+      connector.flow = flow;
     };
 
     instance.deleteFlow = function (flow, source) {
@@ -968,35 +971,7 @@ jsWorkflow.ready(() => {
 
       /* NET MENU [BEGIN] */
       $('#workflow-save-button', template).on('click', function () {
-        if (net1.hasValue('v-wf:consistsOf')) {
-          net1['v-wf:consistsOf'].forEach((el) => {
-            const saveMapping = function (mapping, element) {
-              if (element.hasValue(mapping)) {
-                element[mapping].forEach((m) => {
-                  if (m.hasValue('v-wf:mapToVariable')) {
-                    m['v-wf:mapToVariable'].forEach((v) => {
-                      v.save();
-                    });
-                  }
-                  m.save();
-                });
-              }
-            };
-            saveMapping('v-wf:startingMapping', el);
-            saveMapping('v-wf:completedMapping', el);
-            saveMapping('v-wf:startingExecutorJournalMap', el);
-            saveMapping('v-wf:completedExecutorJournalMap', el);
-            saveMapping('v-wf:startingJournalMap', el);
-            saveMapping('v-wf:completedJournalMap', el);
-            if (el.hasValue('v-wf:executor')) {
-              el['v-wf:executor'].forEach((e) => {
-                e.save();
-              });
-            }
-            el.save();
-          });
-        }
-        net1.save();
+        net1.saveAll();
       });
 
       $('#workflow-export-ttl', template).on('click', function () {
