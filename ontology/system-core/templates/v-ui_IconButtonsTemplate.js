@@ -6,9 +6,9 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  template.on('click', '#edit, #save, #cancel, #delete', function (e) {
+  template.on('click', '#saveLink, #cancelLink, #deleteLink', function (e) {
     e.preventDefault();
-    const action = this.id;
+    const action = $(this).attr('data-action');
     if (action === 'delete') {
       const warning = new IndividualModel('v-s:AreYouSure');
       warning.load().then(function (warning) {
@@ -21,8 +21,8 @@ export const pre = function (individual, template, container, mode, extra) {
     }
   });
 
-  // var allButtons = "edit save cancel delete";
-  const defaultButtons = 'edit save cancel delete';
+  // var allButtons = "edit save cancel deleteLink";
+  const defaultButtons = 'saveLink cancelLink deleteLink';
   return individual.rights.then(function (rights) {
     const canUpdate = rights.hasValue('v-s:canUpdate', true);
     const canDelete = rights.hasValue('v-s:canDelete', true);
@@ -31,7 +31,7 @@ export const pre = function (individual, template, container, mode, extra) {
       if (!canUpdate && (id === 'save' || id === 'edit' || id === 'cancel')) {
         return;
       }
-      if (!canDelete && id === 'delete') {
+      if (!canDelete && id === 'deleteLink') {
         return;
       }
       $('#' + id, template).removeClass('rm');
@@ -49,9 +49,9 @@ export const post = function (individual, template, container, mode, extra) {
   closest.on('internal-validated', function (e) {
     const validation = e.detail;
     if (validation.state) {
-      $('.action#save', template).removeAttr('disabled');
+      $('.action#saveLink', template).removeAttr('disabled');
     } else {
-      $('.action#save', template).attr('disabled', 'disabled');
+      $('.action#saveLink', template).attr('disabled', 'disabled');
     }
     e.stopPropagation();
   });
@@ -60,8 +60,8 @@ export const post = function (individual, template, container, mode, extra) {
 export const html = `
   <span>
     <!--<button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>-->
-    <button title="v-s:Save" type="button" class="action btn btn-xs btn-success -view edit -search glyphicon glyphicon-ok" id="save"></button>
-    <button title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" id="cancel"></button>
-    <button title="v-s:Delete" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-remove" id="delete"></button>
+    <button title="v-s:Save" type="button" class="action btn btn-xs btn-success -view edit -search glyphicon glyphicon-ok" data-action="save" id="saveLink"></button>
+    <button title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" data-action="cancel" id="cancelLink"></button>
+    <button title="v-s:Delete" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-remove" data-action="delete" id="deleteLink"></button>
   </span>
 `;
