@@ -75,19 +75,20 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
 
     if cmd == IndvOp::Remove {
         if ctx.storage.remove(StorageId::Individuals, &id) {
-            info!("remove individual, id = {}", id);
+            info!("{}, {} id={}", op_id, cmd.as_string(), id);
         } else {
             error!("failed to remove individual, id = {}", id);
             return Err(PrepareError::Fatal);
         }
     } else {
         let mut raw1: Vec<u8> = Vec::new();
-        if let Err(e) = to_msgpack(&queue_element, &mut raw1) {
+        new_state.parse_all();
+        if let Err(e) = to_msgpack(&new_state, &mut raw1) {
             error!("failed to update individual, id = {}, error={:?}", new_state.get_id(), e);
             return Err(PrepareError::Fatal);
         }
 
-        if ctx.storage.put_kv_raw(StorageId::Individuals, &new_state.get_id(), raw1) {
+        if ctx.storage.put_kv_raw(StorageId::Individuals, new_state.get_id(), raw1) {
             info!("{}, {} id={}", op_id, cmd.as_string(), new_state.get_id());
         } else {
             error!("failed to update individual, id = {}", new_state.get_id());
@@ -118,7 +119,7 @@ pub fn get_storage_use_arg() -> VStorage {
             if url.scheme() == "file" {
                 let path = url.as_str().strip_prefix("file://").unwrap_or_default();
                 info!("lmdb={:?}", path);
-                let mut storage = VStorage::new_lmdb(url.path(), StorageMode::ReadWrite);
+                let mut storage = VStorage::new_lmdb(url.path(), StorageMode::ReadWrite, None);
                 info!("total count: {}", storage.count(StorageId::Individuals));
                 storage
             } else {
@@ -127,7 +128,7 @@ pub fn get_storage_use_arg() -> VStorage {
                 let user = url.username();
                 let pass = url.password().unwrap_or("123");
                 info!("Trying to connect to Tarantool, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
-                return VStorage::new_tt(format!("{}:{}", host, port), user, pass);
+                VStorage::new_tt(format!("{}:{}", host, port), user, pass)
             }
         },
         Err(e) => {
