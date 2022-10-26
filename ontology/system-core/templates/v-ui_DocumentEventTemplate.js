@@ -44,15 +44,18 @@ export const post = function (individual, template, container, mode, extra) {
       ) {
         const actor = individual['v-s:actor'][0];
         const doc = individual['v-s:onDocument'][0];
-        const isMemberPromise = veda.user.isMemberOf('v-s:FunctionProcessBreak_Group');
-        return Promise.all([doc.canDelete(), isMemberPromise]).then(function (results) {
+        const isMemberProcessBreak_Promise = veda.user.isMemberOf('v-s:FunctionProcessBreak_Group');
+        const isMemberOccupation_Promise = veda.user.isMemberOf(actor['v-s:occupation'][0].id);
+        return Promise.all([doc.canDelete(), isMemberProcessBreak_Promise, isMemberOccupation_Promise]).then(function (results) {
           const canDelete = results[0];
           const isProcessBreakMember = results[1];
+          const isOccupationMember = results[2];
+
           if (!actor) {
             console.error("Unexpected behavior: can't read v-s:actor from individual");
             return false;
           }
-          if (veda.appointment.id === actor.id || veda.appointment.id === 'cfg:AdministratorAppointment' || (canDelete && isProcessBreakMember)) {
+          if (veda.appointment.id === actor.id || veda.appointment.id === 'cfg:AdministratorAppointment' || isOccupationMember || (canDelete && isProcessBreakMember)) {
             $('.stop-process', template).show();
             $('.stop-process', template).on('click', function (e) {
               e.preventDefault();
