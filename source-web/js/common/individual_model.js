@@ -28,7 +28,7 @@ IndividualModel.cache = new WeakCache();
  * @param {boolean} cache Use cache true / false. If true or not set, then object will be return from cache. If false or individual not found in cache, then individual will be loaded from database.
  * @param {boolean} init individual with class model at load. If true or not set, then individual will be initialized with class specific model upon load.
  */
-function IndividualModel (uri, cache, init) {
+function IndividualModel (uri, cache = true, init = true) {
   // IndividualModel({...})
   if (typeof uri === 'object' && !uri['@']) {
     cache = uri.cache;
@@ -37,56 +37,47 @@ function IndividualModel (uri, cache, init) {
   }
 
   // Define Model data
-  this._ = {
-    cache: typeof cache === 'boolean' ? cache : cache || true,
-    init: typeof init !== 'undefined' ? init : true,
-    isNew: typeof uri === 'undefined',
-    isSync: false,
-    isLoaded: false,
-    isInited: false,
-    pending: {},
-    uri: uri,
-  };
+  this._ = {cache, init};
 
   if (typeof uri === 'object') {
     this.properties = {...uri};
     this.original = JSON.stringify(this.properties);
+    this.isNew(false);
     this.isLoaded(true);
     this.isSync(true);
-  } else {
+  } else if (typeof uri === 'string') {
     this.properties = {};
+    this.original = JSON.stringify(this.properties);
+    this.id = uri;
+    this.isNew(false);
+    this.isLoaded(false);
+    this.isSync(false);
+  } else if (typeof uri === 'undefined') {
+    this.properties = {};
+    this.original = JSON.stringify(this.properties);
+    this.id = Util.genUri();
+    this.isNew(true);
+    this.isLoaded(false);
+    this.isSync(false);
   }
 
-  if (this._.cache) {
-    let cached;
-    if (typeof uri === 'string') {
-      this.id = uri;
-      cached = IndividualModel.cache.get(this.id);
-    } else if (typeof uri === 'object') {
-      cached = IndividualModel.cache.get(this.id);
-      if (cached) {
+  if (cache) {
+    const cached = IndividualModel.cache.get(this.id);
+    if (cached) {
+      if (typeof uri === 'object') {
+        cached._ = this._;
         cached.properties = this.properties;
         cached.original = this.original;
       }
-    } else if (typeof uri === 'undefined') {
-      this.id = Util.genUri();
-    }
-    if (cached) {
       return cached;
     } else {
-      riot.observable(this);
-      this.on('rdf:type', this.init);
-      this.on('beforeSave', beforeSaveHandler);
       IndividualModel.cache.set(this.id, this);
-      return this;
     }
   }
 
   riot.observable(this);
-
   this.on('rdf:type', this.init);
   this.on('beforeSave', beforeSaveHandler);
-
   return this;
 }
 
@@ -416,29 +407,17 @@ proto.load = function () {
   return this.isLoading(
     this.trigger('beforeLoad')
       .then(() => {
-        if (this.isLoaded() && (veda.status === 'online' || veda.status === 'offline' || !veda.status)) {
+        if (this.isNew() || this.isLoaded() && (veda.status === 'online' || veda.status === 'offline' || !veda.status)) {
           return this;
         } else if (this.isLoaded() && veda.status === 'limited') {
           return this.reset();
         } else {
-          const uri = this._.uri;
-          if (typeof uri === 'string') {
-            return Backend.get_individual(veda.ticket, uri).then((individualJson) => {
-              this.isNew(false);
-              this.isSync(true);
-              this.isLoaded(true);
-              this.properties = individualJson;
-              this.original = JSON.stringify(individualJson);
-            });
-          } else if (typeof uri === 'object') {
-            this.isNew(false);
+          return Backend.get_individual(veda.ticket, this.id).then((data) => {
             this.isSync(true);
             this.isLoaded(true);
-          } else if (typeof uri === 'undefined') {
-            this.isNew(true);
-            this.isSync(false);
-            this.isLoaded(false);
-          }
+            this.properties = data;
+            this.original = JSON.stringify(data);
+          });
         }
       })
       .then(() => this.init())
@@ -666,12 +645,8 @@ proto.remove = function () {
   return this.isRemoving(
     this.trigger('beforeRemove')
       .then(() => {
-        if (this._.cache && IndividualModel.cache.get(this.id)) {
-          IndividualModel.cache.delete(this.id);
-        }
-        if (this.isNew()) {
-          return;
-        }
+        IndividualModel.cache.delete(this.id);
+        if (this.isNew()) return;
         return Backend.remove_individual(veda.ticket, this.id);
       })
       .then(() => this.trigger('afterRemove'))
@@ -1036,27 +1011,27 @@ proto.isLoaded = function (value) {
 
 proto.isPending = function (operation, value) {
   if (typeof value !== 'undefined') {
-    this._.pending[operation] = value;
+    this._[operation] = value;
   }
-  return this._.pending[operation];
+  return this._[operation];
 };
 proto.isLoading = function (value) {
-  return this.isPending('load', value);
+  return this.isPending('loading', value);
 };
 proto.isSaving = function (value) {
-  return this.isPending('save', value);
+  return this.isPending('saving', value);
 };
 proto.isResetting = function (value) {
-  return this.isPending('reset', value);
+  return this.isPending('resetting', value);
 };
 proto.isDeleting = function (value) {
-  return this.isPending('delete', value);
+  return this.isPending('deleting', value);
 };
 proto.isRemoving = function (value) {
-  return this.isPending('remove', value);
+  return this.isPending('removing', value);
 };
 proto.isRecovering = function (value) {
-  return this.isPending('recover', value);
+  return this.isPending('recovering', value);
 };
 
 /**
@@ -1157,7 +1132,7 @@ proto.hasChainValue = function (sought_value, ...args) {
 proto.prefetch = function (depth, ...allowed_props) {
   depth = depth || 1;
   return this.load().then(() => {
-    return prefetch.apply(this, [[], depth, [this.id]].concat(allowed_props) );
+    return prefetch([], depth, [this.id], ...allowed_props);
   });
 };
 
@@ -1171,43 +1146,28 @@ proto.prefetch = function (depth, ...allowed_props) {
  */
 function prefetch (result, depth, uris, ...allowed_props) {
   uris = Util.unique( uris );
-  const toGet = uris.filter((uri) => {
+  const getUris = uris.filter((uri) => {
     const cached = IndividualModel.cache.get(uri);
-    if ( cached && result.indexOf(cached) < 0 ) {
-      result.push(cached);
-    }
-    return !cached;
+    const loaded = cached && cached.isLoaded();
+    if (cached && loaded && result.indexOf(cached) < 0) result.push(cached);
+    return !cached || !loaded;
   });
-  return (toGet.length ? Backend.get_individuals(veda.ticket, toGet) : Promise.resolve([])).then((got) => {
-    const nextUris = [];
-    got.forEach((json) => {
-      if (json) {
-        const individual = new IndividualModel(json);
-        if ( result.indexOf(individual) < 0 ) {
-          result.push(individual);
-        }
-      }
+  return (getUris.length ? Backend.get_individuals(veda.ticket, getUris) : Promise.resolve([])).then((jsonList) => {
+    jsonList.forEach((json) => {
+      const individual = new IndividualModel(json);
+      if (result.indexOf(individual) < 0) result.push(individual);
     });
-    if (depth - 1 === 0) {
-      return result;
-    }
+    if (depth - 1 === 0) return result;
+    const nextUris = [];
     uris.forEach((uri) => {
       const individual = new IndividualModel(uri);
-      const data = individual.properties;
-      Object.keys(data).forEach((key) => {
-        if ( key === '@' || (allowed_props.length && allowed_props.indexOf(key) < 0) ) {
-          return;
-        }
-        data[key].forEach((value) => {
-          if (value.type === 'Uri') {
-            nextUris.push(value.data);
-          }
-        });
+      const props = individual.properties;
+      Object.keys(props).forEach((prop) => {
+        if (prop === '@' || (allowed_props.length && allowed_props.indexOf(prop) < 0)) return;
+        props[prop].forEach((value) => value.type === 'Uri' && nextUris.push(value.data));
       });
     });
-    if (!nextUris.length) {
-      return result;
-    }
-    return prefetch.apply(this, [result, depth-1, nextUris].concat(allowed_props) );
+    if (!nextUris.length) return result;
+    return prefetch(result, depth-1, nextUris, ...allowed_props);
   });
 }
