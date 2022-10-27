@@ -288,7 +288,6 @@ jsWorkflow.ready(() => {
       net.addValue('v-wf:consistsOf', flow); // Add new Flow to Net
       source.addValue('v-wf:hasFlow', flow); // Add new Flow to source
       info.connection.setData(flow.id);
-      info.connection.flow = flow;
     });
 
     const subNetViewButton = function (state, $state) {
@@ -734,7 +733,6 @@ jsWorkflow.ready(() => {
       if (stateElement!=='') {
         wdata.append(stateElement);
         const $state = $('#' + BrowserUtil.escape4$(state.id), template);
-        $state.state = state;
         bindStateEvents($state);
         if (mode=='edit') subNetViewButton(state, $state);
         executorMark(state, $state);
@@ -758,16 +756,17 @@ jsWorkflow.ready(() => {
     };
 
     instance.createFlow = function (state, flow) {
-      const connector = instance.connect({
-        source: state.id,
-        target: flow['v-wf:flowsInto'][0].id,
-        detachable: (mode=='edit'),
+      flow.load().then(() => {
+        const connector = instance.connect({
+          source: state.id,
+          target: flow['v-wf:flowsInto'][0].id,
+          detachable: (mode=='edit'),
+        });
+        if (flow.hasValue('rdfs:label')) {
+          connector.addOverlay(['Label', {label: flow['rdfs:label'][0], location: 0.5, id: 'flowLabel'}]);
+        }
+        connector.setData(flow.id);
       });
-      if (flow.hasValue('rdfs:label')) {
-        connector.addOverlay(['Label', {label: flow['rdfs:label'][0], location: 0.5, id: 'flowLabel'}]);
-      }
-      connector.setData(flow.id);
-      connector.flow = flow;
     };
 
     instance.deleteFlow = function (flow, source) {
@@ -804,40 +803,39 @@ jsWorkflow.ready(() => {
 
     /**
      * Create workflow Net by given Object (v-wf:Net individual).
-     * @param {IndividualModel} net1
-     * @return {IndividualModel} net
+     * @param {IndividualModel} net
+     * @return {Promise}
      */
-    instance.createNetView = function (net1) {
-      return net1.prefetch(Infinity, 'v-wf:consistsOf', 'v-wf:hasFlow', 'v-wf:executor').then((prefetched) => {
-        net1 = prefetched[0];
-        $('#workflow-net-name', template).text(net1['rdfs:label'][0]);
-        const netElements = prefetched.slice(1);
-        // Create states
-        let hasInput = false;
-        let hasOutput = false;
-        netElements.forEach((element) => {
-          if ( element.hasValue('rdf:type', 'v-wf:Task') || element.hasValue('rdf:type', 'v-wf:Condition') || element.hasValue('rdf:type', 'v-wf:InputCondition') || element.hasValue('rdf:type', 'v-wf:OutputCondition') ) {
-            instance.createState(element);
+    instance.createNetView = function (net) {
+      return net.prefetch(Infinity, 'v-wf:consistsOf', 'v-wf:hasFlow')
+        .then((netElements) => {
+          $('#workflow-net-name', template).text(net['rdfs:label'][0]);
+          netElements.shift();
+          // Create states
+          let hasInput = false;
+          let hasOutput = false;
+          netElements.forEach((element) => {
+            if ( element.hasValue('rdf:type', 'v-wf:Task') || element.hasValue('rdf:type', 'v-wf:Condition') || element.hasValue('rdf:type', 'v-wf:InputCondition') || element.hasValue('rdf:type', 'v-wf:OutputCondition') ) {
+              instance.createState(element);
+            }
+            hasInput = hasInput || element.hasValue('rdf:type', 'v-wf:InputCondition');
+            hasOutput = hasOutput || element.hasValue('rdf:type', 'v-wf:OutputCondition');
+          });
+          // For empty net
+          if (!hasInput) {
+            instance.createEmptyNetElement('input');
           }
-          hasInput = hasInput || element.hasValue('rdf:type', 'v-wf:InputCondition');
-          hasOutput = hasOutput || element.hasValue('rdf:type', 'v-wf:OutputCondition');
-        });
-        // For empty net
-        if (!hasInput) {
-          instance.createEmptyNetElement('input');
-        }
-        if (!hasOutput) {
-          instance.createEmptyNetElement('output');
-        }
-        netElements.forEach((element) => {
-          if ( element.hasValue('v-wf:hasFlow') ) {
-            element['v-wf:hasFlow'].forEach((flow) => {
-              instance.createFlow(element, flow);
-            });
+          if (!hasOutput) {
+            instance.createEmptyNetElement('output');
           }
+          netElements.forEach((element) => {
+            if ( element.hasValue('v-wf:hasFlow') ) {
+              element['v-wf:hasFlow'].forEach((flow) => {
+                instance.createFlow(element, flow);
+              });
+            }
+          });
         });
-        return net1;
-      });
     };
 
     /*
@@ -951,12 +949,13 @@ jsWorkflow.ready(() => {
         });
       });
     };
+
     let $contextMenu;
-    instance.createNetView(net).then((net1) => {
-      if (net1['currentScale']==1.0) {
+    instance.createNetView(net).then(() => {
+      if (net['currentScale']==1.0) {
         instance.optimizeView();
       } else {
-        instance.changeScale(net1['currentScale']);
+        instance.changeScale(net['currentScale']);
       }
 
       if (mode=='view') {
@@ -971,12 +970,12 @@ jsWorkflow.ready(() => {
 
       /* NET MENU [BEGIN] */
       $('#workflow-save-button', template).on('click', function () {
-        net1.saveAll();
+        net.saveAll();
       });
 
       $('#workflow-export-ttl', template).on('click', function () {
-        const list = [net1].concat(net1['v-wf:consistsOf']);
-        collectEntities(net1, list);
+        const list = [net].concat(net['v-wf:consistsOf']);
+        collectEntities(net, list);
         BrowserUtil.exportTTL(list);
       });
 
@@ -1015,7 +1014,7 @@ jsWorkflow.ready(() => {
       });
 
       $('.to-net-editor', template).on('click', function () {
-        riot.route('#/' + net1.id + '///edit');
+        riot.route('#/' + net.id + '///edit');
       });
 
       $('.copy-net-element', template).on('click', function () {
@@ -1028,7 +1027,7 @@ jsWorkflow.ready(() => {
                 clone['v-wf:locationY'] = [individual['v-wf:locationY'][0] + 50];
                 clone['v-wf:hasFlow'] = [];
                 instance.createState(clone);
-                net1['v-wf:consistsOf'] = net1['v-wf:consistsOf'].concat(clone);
+                net['v-wf:consistsOf'] = net['v-wf:consistsOf'].concat(clone);
               });
             }
           }
@@ -1037,19 +1036,19 @@ jsWorkflow.ready(() => {
 
       /* ZOOM [BEGIN] */
       const zoomIn = function () {
-        if (net1['currentScale']<1) {
-          return instance.changeScale(net1['currentScale'] + 0.1);
+        if (net['currentScale']<1) {
+          return instance.changeScale(net['currentScale'] + 0.1);
         }
-        if (net1['currentScale']<2) {
-          return instance.changeScale(net1['currentScale'] + 0.25);
+        if (net['currentScale']<2) {
+          return instance.changeScale(net['currentScale'] + 0.25);
         }
       };
       const zoomOut = function () {
-        if (net1['currentScale']>1) {
-          return instance.changeScale(net1['currentScale'] - 0.25);
+        if (net['currentScale']>1) {
+          return instance.changeScale(net['currentScale'] - 0.25);
         }
-        if (net1['currentScale']>0.2) {
-          return instance.changeScale(net1['currentScale'] - 0.1);
+        if (net['currentScale']>0.2) {
+          return instance.changeScale(net['currentScale'] - 0.1);
         }
       };
 
