@@ -136,6 +136,7 @@ proto.start = async function () {
     }
   }
 
+
   /**
    * Socket opened handler
    * @param {Event} event
