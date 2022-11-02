@@ -525,7 +525,7 @@ d:SafetyWorkAction_7_1
 d:SafetyWorkAction_7_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_7;
-  rdfs:label "Проверить ли исправное состояние стропов/СГП"^^xsd:string.
+  rdfs:label "Проверить исправное состояние стропов/СГП"^^xsd:string.
 d:SafetyWorkAction_7_3
   v-s:deleted true;
   a v-s:SafetyWorkAction;
