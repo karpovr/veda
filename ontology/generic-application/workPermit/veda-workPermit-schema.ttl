@@ -1098,7 +1098,7 @@ v-s:PS_date_ResultsOfMeasurementsOfHarmfulFactors
   rdfs:label "Specification for date for v-s:ResultsOfMeasurementsOfHarmfulFactors"@en ;
   v-ui:forClass v-s:ResultsOfMeasurementsOfHarmfulFactors ;
   v-ui:forProperty v-s:date ;
-  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "1"^^xsd:integer ;
 .
 v-s:hasHarmfulSubstance

@@ -166,3 +166,9 @@ d:2ws2rqbd2i7sp70ntmfsxga1mt
   v-s:shortLabel "C₁₀H₁₆"^^xsd:string;
   v-s:description "(300 мг/м³)"^^xsd:string;
 .
+d:ai5eqqglvbkn5eurdmt7pgq1xk
+  a v-s:HarmfulSubstance;
+  rdfs:label "Метан"^^xsd:string;
+  v-s:shortLabel "CH₄"^^xsd:string;
+  v-s:description "(7000 мг/м³)"^^xsd:string;
+.
