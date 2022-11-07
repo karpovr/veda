@@ -67,11 +67,9 @@ pub(crate) async fn get_individuals(
         if res_code == ResultCode::Ok {
             if !indv.any_exists("rdf:type", LIMITATA_COGNOSCI) {
                 res.push(indv.get_obj().as_json());
-            } else {
-                if let Ok(b) = check_user_in_group(&uinf.user_id, SUPER_USER_GROUP, Some(&az)).await {
-                    if b {
-                        res.push(indv.get_obj().as_json());
-                    }
+            } else if let Ok(b) = check_user_in_group(&uinf.user_id, SUPER_USER_GROUP, Some(&az)).await {
+                if b {
+                    res.push(indv.get_obj().as_json());
                 }
             }
         }
