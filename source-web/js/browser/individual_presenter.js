@@ -174,6 +174,7 @@ function errorPrinter (error, container) {
         div.innerHTML = msg;
         wrapper = div;
       }
+      wrapper.setAttribute('resource', sanitize(this.id));
       return container.appendChild(wrapper);
     });
 }

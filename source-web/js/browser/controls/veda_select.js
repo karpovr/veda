@@ -111,6 +111,8 @@ $.fn.veda_select = function (params) {
           opt.prop('selected', true);
         }
         return rendered;
+      }).catch((error) => {
+        console.log('Error rendering value', error);
       });
     });
     return Promise.all(optionsPromises);

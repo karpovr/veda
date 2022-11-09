@@ -92,6 +92,8 @@ $.fn.veda_checkbox = function (params) {
           hld.addClass('disabled');
           chk.attr('disabled', 'disabled');
         }
+      }).catch((error) => {
+        console.log('Error rendering value', error);
       });
     });
     return Promise.all(optionsPromises);

@@ -280,7 +280,7 @@ $.fn.veda_link = function ( options ) {
         timeout = setTimeout(() => {
           let value = e.target.value;
           if (value.indexOf('"') >= 0 || value.indexOf("'") >= 0) {
-            value = value.replaceAll('"', '').replaceAll("'", "");
+            value = value.replaceAll('"', '').replaceAll("'", '');
             fulltext.val(value);
           }
 
@@ -319,6 +319,8 @@ $.fn.veda_link = function ( options ) {
               tmpl.addClass('invalid');
             }
             return tmpl;
+          }).catch((error) => {
+            console.log('Error rendering value', error);
           });
         });
         Promise.all(promises).then((renderedList) => {
@@ -459,6 +461,9 @@ $.fn.veda_link = function ( options ) {
             if (inputValue != rendered) {
               fulltext.val(rendered);
             }
+          })
+          .catch((error) => {
+            console.log('Error rendering value', error);
           });
       } else {
         fulltext.val('');
