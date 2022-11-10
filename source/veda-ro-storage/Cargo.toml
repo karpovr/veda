@@ -8,5 +8,5 @@ edition = "2021"
 log = "0.4"
 nng = "1.0.0"
 
-v_common = { package = "v-common", version = "=0.4.24" }
+v_common = { package = "v-common", version = "=0.4.34" }
 #v_common = { package = "v-common", path = "../../../v-common" }

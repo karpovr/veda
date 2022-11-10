@@ -16,6 +16,6 @@ futures = "0.3.5"
 tokio = { version =  "1.8", features = ["rt-multi-thread", "macros"] }
 rust-ini = "0.16"
 
-v_common = { package = "v-common", version = "=0.4.24" }
+v_common = { package = "v-common", version = "=0.4.34" }
 #v_common = { package = "v-common", path = "../../../v-common" }
 
