@@ -85,6 +85,10 @@ if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] || [ $1 == "basic" ] |
     build_server_module "veda-ccus"
 fi
 
+if [ -z $1 ] || [ $1 == "ccus2" ] || [ $1 == "veda-ccus2" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
+    build_server_module "veda-ccus2"
+fi
+
 if [ -z $1 ] || [ $1 == "ontologist" ] || [ $1 == "veda-ontologist" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     build_server_module "veda-ontologist"
 fi
