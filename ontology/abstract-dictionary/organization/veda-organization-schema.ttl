@@ -394,6 +394,17 @@ v-s:subjectCode
   rdfs:label "Subject code"@en ;
   rdfs:range xsd:string ;
 .
+#-----Категория должности
+v-s:positionCategory
+  rdf:type owl:DatatypeProperty ;
+  rdfs:comment "Категория должности"@ru ;
+  rdfs:comment "Position category"@en ;
+  rdfs:domain v-s:Position ;
+  rdfs:domain v-s:Appointment ;
+  rdfs:label "Категория должности"@ru ;
+  rdfs:label "Position category"@en ;
+  rdfs:range xsd:string ;
+.
 
 #-----Комментарий
 #rdfs:comment

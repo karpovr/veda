@@ -148,6 +148,15 @@ export const html = `
           <veda-control property="v-s:origin" data-type="string" class="-view edit search"></veda-control>
         </div>
       </div>
+      <div class="row row-attribute notEditForUsers">
+        <div class="col-sm-3 col-xs-5">
+          <label about="v-s:positionCategory" property="rdfs:label"></label>
+        </div>
+        <div class="col-sm-9 col-xs-7">
+          <div property="v-s:positionCategory" class="view -edit -search"></div>
+          <veda-control property="v-s:positionCategory" data-type="string" class="-view edit search"></veda-control>
+        </div>
+      </div>
       <hr />
       <br />
       <!--Системные свойства-->
