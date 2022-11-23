@@ -2,6 +2,7 @@
 extern crate log;
 
 use std::env;
+use std::process::exit;
 use url::Url;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
@@ -42,6 +43,8 @@ fn main() -> Result<(), i32> {
             check_mode = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned().parse().unwrap();
         }
     }
+
+    info!("use CHECK MODE");
 
     let mut ctx = Context {
         storage: get_storage_use_url(&db_connection_url),
@@ -86,14 +89,23 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     let id = queue_element.get_first_literal("uri").unwrap_or_default();
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
 
+    let mut queue_indv_new_state = Individual::default();
+    get_inner_binobj_as_individual(queue_element, "new_state", &mut queue_indv_new_state);
+    queue_indv_new_state.parse_all();
+
     if ctx.check_mode {
-        if let Some(binobj_from_queue) = queue_element.get_first_binobj("new_state") {
-            let binobj_from_storage = ctx.storage.get_raw_value(StorageId::Individuals, &id);
-            if binobj_from_storage == binobj_from_queue {
-                info!("EQUALS, {}, id={}", op_id, id);
-            } else {
-                error!("DIFFERENT, {}, id={}", op_id, id);
-            }
+        let mut storage_indv = Individual::default();
+        ctx.storage.get_individual(&id, &mut storage_indv);
+        storage_indv.parse_all();
+
+        if storage_indv.compare(&mut queue_indv_new_state, vec![]) {
+            info!("EQUALS, {}, id={}", op_id, id);
+        } else {
+            error!("DIFFERENT, {}, id={}", op_id, id);
+
+            error!("FROM STORAGE = {:?}", storage_indv);
+            error!("FROM QUEUE = {:?}", queue_indv_new_state);
+            exit(0);
         }
     } else {
         if cmd == IndvOp::Remove {
@@ -104,20 +116,16 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
                 return Err(PrepareError::Fatal);
             }
         } else {
-            let mut new_state = Individual::default();
-            get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
-
             let mut raw1: Vec<u8> = Vec::new();
-            new_state.parse_all();
-            if let Err(e) = to_msgpack(&new_state, &mut raw1) {
-                error!("failed to update individual, id = {}, error={:?}", new_state.get_id(), e);
+            if let Err(e) = to_msgpack(&queue_indv_new_state, &mut raw1) {
+                error!("failed to update individual, id = {}, error={:?}", queue_indv_new_state.get_id(), e);
                 return Err(PrepareError::Fatal);
             }
 
-            if ctx.storage.put_kv_raw(StorageId::Individuals, new_state.get_id(), raw1) {
-                info!("{}, {} id={}", op_id, cmd.as_string(), new_state.get_id());
+            if ctx.storage.put_kv_raw(StorageId::Individuals, queue_indv_new_state.get_id(), raw1) {
+                info!("{}, {} id={}", op_id, cmd.as_string(), queue_indv_new_state.get_id());
             } else {
-                error!("failed to update individual, id = {}", new_state.get_id());
+                error!("failed to update individual, id = {}", queue_indv_new_state.get_id());
                 return Err(PrepareError::Fatal);
             }
         }
