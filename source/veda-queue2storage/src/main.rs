@@ -13,8 +13,9 @@ use v_common::v_api::api_client::IndvOp;
 use v_common::v_queue::consumer::Consumer;
 
 pub struct Context {
-    pub storage: VStorage,
-    pub module_info: ModuleInfo,
+    storage: VStorage,
+    module_info: ModuleInfo,
+    check_mode: bool,
 }
 
 fn main() -> Result<(), i32> {
@@ -29,9 +30,23 @@ fn main() -> Result<(), i32> {
         return Err(-1);
     }
 
+    let mut db_connection_url = "file://data/db_copy1".to_owned();
+    let mut check_mode = false;
+
+    let args: Vec<String> = env::args().collect();
+    for el in args.iter() {
+        if el.starts_with("--db_connection") {
+            db_connection_url = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
+        }
+        if el.starts_with("--check_mode") {
+            check_mode = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned().parse().unwrap();
+        }
+    }
+
     let mut ctx = Context {
-        storage: get_storage_use_arg(),
+        storage: get_storage_use_url(&db_connection_url),
         module_info: module_info.unwrap(),
+        check_mode,
     };
 
     let mut queue_consumer = Consumer::new("./data/queue", "queue2storage", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
@@ -70,29 +85,41 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
 
     let id = queue_element.get_first_literal("uri").unwrap_or_default();
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-    let mut new_state = Individual::default();
-    get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
 
-    if cmd == IndvOp::Remove {
-        if ctx.storage.remove(StorageId::Individuals, &id) {
-            info!("{}, {} id={}", op_id, cmd.as_string(), id);
-        } else {
-            error!("failed to remove individual, id = {}", id);
-            return Err(PrepareError::Fatal);
+    if ctx.check_mode {
+        if let Some(binobj_from_queue) = queue_element.get_first_binobj("new_state") {
+            let binobj_from_storage = ctx.storage.get_raw_value(StorageId::Individuals, &id);
+            if binobj_from_storage == binobj_from_queue {
+                info!("EQUALS, {}, id={}", op_id, id);
+            } else {
+                error!("DIFFERENT, {}, id={}", op_id, id);
+            }
         }
     } else {
-        let mut raw1: Vec<u8> = Vec::new();
-        new_state.parse_all();
-        if let Err(e) = to_msgpack(&new_state, &mut raw1) {
-            error!("failed to update individual, id = {}, error={:?}", new_state.get_id(), e);
-            return Err(PrepareError::Fatal);
-        }
-
-        if ctx.storage.put_kv_raw(StorageId::Individuals, new_state.get_id(), raw1) {
-            info!("{}, {} id={}", op_id, cmd.as_string(), new_state.get_id());
+        if cmd == IndvOp::Remove {
+            if ctx.storage.remove(StorageId::Individuals, &id) {
+                info!("{}, {} id={}", op_id, cmd.as_string(), id);
+            } else {
+                error!("failed to remove individual, id = {}", id);
+                return Err(PrepareError::Fatal);
+            }
         } else {
-            error!("failed to update individual, id = {}", new_state.get_id());
-            return Err(PrepareError::Fatal);
+            let mut new_state = Individual::default();
+            get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
+
+            let mut raw1: Vec<u8> = Vec::new();
+            new_state.parse_all();
+            if let Err(e) = to_msgpack(&new_state, &mut raw1) {
+                error!("failed to update individual, id = {}, error={:?}", new_state.get_id(), e);
+                return Err(PrepareError::Fatal);
+            }
+
+            if ctx.storage.put_kv_raw(StorageId::Individuals, new_state.get_id(), raw1) {
+                info!("{}, {} id={}", op_id, cmd.as_string(), new_state.get_id());
+            } else {
+                error!("failed to update individual, id = {}", new_state.get_id());
+                return Err(PrepareError::Fatal);
+            }
         }
     }
 
@@ -104,17 +131,8 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     Ok(true)
 }
 
-pub fn get_storage_use_arg() -> VStorage {
-    let mut db_connection = "file://data/db_copy1".to_owned();
-    let args: Vec<String> = env::args().collect();
-    for el in args.iter() {
-        if el.starts_with("--db_connection") {
-            db_connection = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
-            break;
-        }
-    }
-
-    match Url::parse(&db_connection) {
+pub fn get_storage_use_url(db_connection_url: &str) -> VStorage {
+    match Url::parse(db_connection_url) {
         Ok(url) => {
             if url.scheme() == "file" {
                 let path = url.as_str().strip_prefix("file://").unwrap_or_default();
@@ -132,7 +150,7 @@ pub fn get_storage_use_arg() -> VStorage {
             }
         },
         Err(e) => {
-            panic!("fail parse {}, err={}", db_connection, e);
+            panic!("fail parse {}, err={}", db_connection_url, e);
         },
     }
 }
