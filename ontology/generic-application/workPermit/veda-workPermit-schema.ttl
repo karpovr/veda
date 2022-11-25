@@ -867,7 +867,7 @@ v-s:PS_hasEnergyKind_WorkPermit
   v-ui:forClass v-s:WorkPermit ;
   v-ui:forProperty v-s:hasEnergyKind ;
   v-ui:minCardinality "0"^^xsd:integer ;
-  v-ui:maxCardinality "1"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
 .
 
 v-s:otherWorkingOperations
