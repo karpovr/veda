@@ -120,7 +120,7 @@ fn after_batch(_module: &mut Backend, _ctx: &mut Context, _prepared_batch_size: 
     Ok(false)
 }
 
-fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");
@@ -141,14 +141,14 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
         None
     };
 
-    if check_result.is_some() && !check_result.unwrap() && !ctx.check_err_id.contains(&id) {
-        info!("ADD TO LIST: {}", id);
+    if check_result.is_some() && !check_result.unwrap() && !ctx.check_err_id.contains(&id) && queue_indv_new_state.is_exists("rdf:type") {
+        info!("{}/{}, ADD TO LIST: {}", my_consumer.id, op_id, id);
         ctx.check_err_id.insert(id.to_owned());
         to_report(&ctx.check_err_id).expect("fail write report file");
     }
 
-    if cmd == IndvOp::Remove {
-        info!("REMOVE FROM LIST: {}", id);
+    if cmd == IndvOp::Remove && ctx.check_err_id.contains(&id) {
+        info!("{}/{}, REMOVE FROM LIST: {}", my_consumer.id, op_id, id);
         ctx.check_err_id.remove(&id);
         to_report(&ctx.check_err_id).expect("fail write report file");
     }
@@ -245,7 +245,6 @@ fn check(op_id: i64, id: &str, queue_indv_new_state: &mut Individual, ctx: &mut 
 }
 
 fn to_report(list: &HashSet<String>) -> Result<(), Box<dyn Error>> {
-    list.
     let mut wtr = csv::Writer::from_path("./check-report.csv")?;
 
     for el in list {
