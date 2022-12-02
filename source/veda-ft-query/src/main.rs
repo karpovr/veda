@@ -5,15 +5,21 @@ use futures::executor::block_on;
 use nng::options::{Options, RecvTimeout, SendTimeout};
 use nng::{Error, Message, Protocol, Socket};
 use serde_json::value::Value as JSONValue;
-use std::time::Duration;
+use std::process::exit;
+use std::time::{Duration, Instant};
 use std::{env, str};
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::common::load_onto;
+use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{init_log, Module};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::search::common::FTQuery;
 use v_common::v_api::obj::*;
+
+const TIMEOUT_INFO: u64 = 30;
+const TIMEOUT_RECV: u64 = 60;
+const TIMEOUT_SEND: u64 = 60;
 
 fn main() {
     init_log("FT_QUERY");
@@ -31,16 +37,26 @@ fn main() {
 
     let mut module = Backend::default();
 
+    let module_info = ModuleInfo::new("./data", "ft-query", true);
+    if module_info.is_err() {
+        error!("failed to start, err = {:?}", module_info.err());
+        exit(0);
+    }
+    let mut module_info = module_info.unwrap();
+
     if let Some(mut xr) = XapianReader::new("russian", &mut module.storage) {
         let mut count = 0;
+        let mut start = Instant::now();
+
         loop {
+            info!("init");
             let server = Socket::new(Protocol::Rep0).unwrap();
 
-            if let Err(e) = server.set_opt::<RecvTimeout>(Some(Duration::from_secs(30))) {
+            if let Err(e) = server.set_opt::<RecvTimeout>(Some(Duration::from_secs(TIMEOUT_RECV))) {
                 error!("failed to set recv timeout, url = {}, err = {}", query_url, e);
                 return;
             }
-            if let Err(e) = server.set_opt::<SendTimeout>(Some(Duration::from_secs(30))) {
+            if let Err(e) = server.set_opt::<SendTimeout>(Some(Duration::from_secs(TIMEOUT_SEND))) {
                 error!("failed to set send timeout, url = {}, err = {}", query_url, e);
                 return;
             }
@@ -50,12 +66,19 @@ fn main() {
                 return;
             }
 
-            info!("listen {}", query_url);
-
+            info!("start listen {}", query_url);
             loop {
+                if start.elapsed().as_secs() > TIMEOUT_INFO {
+                    if let Err(e) = module_info.put_info(count, count) {
+                        error!("failed to store info, err = {:?}", e);
+                    }
+                    start = Instant::now();
+                }
+
                 match server.recv() {
                     Ok(recv_msg) => {
                         count += 1;
+
                         let out_msg = if let Ok(s) = str::from_utf8(recv_msg.as_slice()) {
                             if s.len() > 2 {
                                 req_prepare(&mut module, s, &mut xr)
@@ -73,7 +96,7 @@ fn main() {
                     },
                     Err(e) => match e {
                         Error::TimedOut => {
-                            info!("count requests: {}", count);
+                            info!("receive timeout, total prepared requests: {}", count);
                             break;
                         },
                         _ => {
