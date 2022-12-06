@@ -13,11 +13,12 @@ use std::io::{BufRead, BufReader};
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::{Child, Command};
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 use std::{fs, io, process, thread, time};
 use sysinfo::{get_current_pid, ProcessExt, ProcessStatus, SystemExt};
 use teloxide::prelude::*;
 use teloxide::types::Recipient;
+use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
@@ -34,12 +35,14 @@ pub enum ModuleError {
 
 #[derive(Debug)]
 struct VedaModule {
-    name: String,
+    alias_name: String,
     exec_name: String,
+    module_name: String,
     args: Vec<String>,
     memory_limit: Option<u64>,
     order: u32,
-    //is_enabled: bool,
+    watchdog_timeout: Option<u64>,
+    module_info: Option<ModuleInfo>,
 }
 
 struct App {
@@ -49,7 +52,7 @@ struct App {
     modules_start_order: Vec<String>,
     started_modules: Vec<(String, Child)>,
     backend: Backend,
-    systicket: String,
+    sys_ticket: String,
     tg: Option<TelegramDest>,
 }
 
@@ -65,8 +68,8 @@ impl App {
             let module = self.modules_info.get(name).unwrap();
             match start_module(module).await {
                 Ok(child) => {
-                    info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
-                    self.started_modules.push((module.name.to_owned(), child));
+                    info!("pid = {}", child.id());
+                    self.started_modules.push((module.alias_name.to_owned(), child));
                 },
                 Err(e) => {
                     return Err(Error::new(ErrorKind::Other, format!("failed to execute {}, err = {:?}", module.exec_name, e)));
@@ -144,6 +147,7 @@ impl App {
             let mut sys = sysinfo::System::new();
             sys.refresh_processes();
             for (name, process) in self.started_modules.iter_mut() {
+                let mut need_check = true;
                 let (mut is_ok, memory) = is_ok_process(&mut sys, process.id());
 
                 if !mstorage_ready && signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
@@ -163,14 +167,15 @@ impl App {
                         log_err_and_to_tg(&self.tg, &format!("found dead module {} {}, exit code = {}, restart this", process.id(), name, exit_code)).await;
 
                         if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
-                            warn!("@1 attempt to stop module, process = {}, name = {}", process.id(), name);
+                            warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                         }
 
                         if let Some(module) = self.modules_info.get(name) {
                             match start_module(module).await {
                                 Ok(child) => {
-                                    info!("{} restart module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
+                                    info!("{} restart module {}, {}, {:?}", child.id(), module.alias_name, module.exec_name, module.args);
                                     *process = child;
+                                    need_check = false;
                                 },
                                 Err(e) => {
                                     log_err_and_to_tg(&self.tg, &format!("failed to execute, name = {}, err = {:?}", module.exec_name, e)).await;
@@ -181,12 +186,40 @@ impl App {
                         }
                     }
                 }
-                if let Some(module) = self.modules_info.get(name) {
-                    if let Some(memory_limit) = module.memory_limit {
-                        if memory > memory_limit {
-                            warn!("process = {}, memory = {} KiB, limit = {} KiB", name, memory, memory_limit);
-                            if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
-                                warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
+                if let Some(module) = self.modules_info.get_mut(name) {
+                    if need_check {
+                        if let Some(memory_limit) = module.memory_limit {
+                            if memory > memory_limit {
+                                warn!("process = {}, memory = {} KiB, limit = {} KiB", name, memory, memory_limit);
+                                if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
+                                    warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
+                                }
+                            }
+                        }
+
+                        if let Some(timeout) = module.watchdog_timeout {
+                            if module.module_info.is_none() {
+                                match ModuleInfo::new("./data", &module.module_name, false) {
+                                    Ok(m) => {
+                                        module.module_info = Some(m);
+                                    },
+                                    Err(e) => {
+                                        error!("fail open info file {}, err={:?}", module.module_name, e)
+                                    },
+                                }
+                            }
+
+                            if let Some(m) = &module.module_info {
+                                if let Ok(tm) = m.read_modified() {
+                                    if tm + Duration::from_secs(timeout) < SystemTime::now() {
+                                        let now: DateTime<Utc> = SystemTime::now().into();
+                                        let a: DateTime<Utc> = (tm + Duration::from_secs(timeout)).into();
+                                        warn!("watchdog: modified + timeout ={},  now={}", a.format("%d/%m/%Y %T"), now.format("%d/%m/%Y %T"));
+                                        if signal::kill(Pid::from_raw(process.id() as i32), Signal::SIGTERM).is_ok() {
+                                            warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -196,6 +229,7 @@ impl App {
                         warn!("attempt to stop module, process = {}, name = {}", process.id(), name);
                     }
                 }
+
                 new_config_modules.remove(name);
             }
 
@@ -203,8 +237,8 @@ impl App {
                 if let Some(module) = self.modules_info.get(&name) {
                     match start_module(module).await {
                         Ok(child) => {
-                            info!("{} start module {}, {}, {:?}", child.id(), module.name, module.exec_name, module.args);
-                            self.started_modules.push((module.name.to_owned(), child));
+                            info!("{} start module {}, {}, {:?}", child.id(), module.alias_name, module.exec_name, module.args);
+                            self.started_modules.push((module.alias_name.to_owned(), child));
                         },
                         Err(e) => {
                             log_err_and_to_tg(&self.tg, &format!("failed to execute, name = {}, err = {:?}", module.exec_name, e)).await;
@@ -218,7 +252,7 @@ impl App {
     }
 
     fn mstorage_watchdog_check(&mut self) -> bool {
-        if self.systicket.is_empty() {
+        if self.sys_ticket.is_empty() {
             while !self.backend.mstorage_api.connect() {
                 info!("waiting for main module start...");
                 thread::sleep(std::time::Duration::from_millis(100));
@@ -230,14 +264,14 @@ impl App {
                 thread::sleep(std::time::Duration::from_millis(100));
                 systicket = self.backend.get_sys_ticket_id();
             }
-            self.systicket = systicket.unwrap();
+            self.sys_ticket = systicket.unwrap();
         }
 
         let test_indv_id = "cfg:watchdog_test";
         let mut test_indv = Individual::default();
         test_indv.set_id(test_indv_id);
         test_indv.set_uri("rdf:type", "v-s:resource");
-        if self.backend.mstorage_api.update_use_param(&self.systicket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).is_err() {
+        if self.backend.mstorage_api.update_use_param(&self.sys_ticket, "", "", MSTORAGE_ID, IndvOp::Put, &test_indv).is_err() {
             error!("failed to store test individual, uri = {}", test_indv_id);
             return false;
         }
@@ -271,7 +305,7 @@ impl App {
                 while let Some(p) = file.lines().next() {
                     if let Ok(p) = p {
                         if p.starts_with('\t') || p.starts_with(' ') {
-                            info!("param = {}", p);
+                            //info!("param = {}", p);
                             if let Some(eq_pos) = p.find('=') {
                                 let nm: &str = p[0..eq_pos].trim();
                                 let vl: &str = p[eq_pos + 1..].trim();
@@ -285,12 +319,14 @@ impl App {
                 }
 
                 let mut module = VedaModule {
-                    name: line.to_string(),
+                    alias_name: line.to_string(),
                     args: Vec::new(),
                     memory_limit: None,
                     order,
-                    //is_enabled: true,
                     exec_name: String::new(),
+                    watchdog_timeout: None,
+                    module_info: None,
+                    module_name: String::new(),
                 };
                 order += 1;
 
@@ -312,7 +348,7 @@ impl App {
                             };
 
                             module.memory_limit = Some((meml * m) as u64);
-                            info!("{:?} Kb", module.memory_limit);
+                            //info!("{:?} Kb", module.memory_limit);
                         }
                     }
 
@@ -321,13 +357,27 @@ impl App {
                     }
                 }
 
-                let module_name = if let Some(m) = params.get("module") {
-                    "veda-".to_string() + m
+                if let Some(m) = params.get("watchdog-timeout") {
+                    let elements: Vec<&str> = m.split(' ').collect();
+                    if elements.len() == 1 {
+                        if let Ok(v) = elements.first().unwrap_or(&"").parse::<i32>() {
+                            module.watchdog_timeout = Some(v as u64);
+                            //info!("watchdog_timeout {:?} s", module.watchdog_timeout);
+                        }
+                    }
+
+                    if module.watchdog_timeout.is_none() {
+                        error!("failed to parse param [watchdog_timeout]");
+                    }
+                }
+
+                module.module_name = if let Some(m) = params.get("module") {
+                    m.to_owned()
                 } else {
-                    "veda-".to_string() + line.trim()
+                    line.trim().to_owned()
                 };
 
-                let module_path = self.app_dir.to_owned() + &module_name;
+                let module_path = format!("{}veda-{}", self.app_dir, module.module_name);
                 if Path::new(&module_path).exists() {
                     module.exec_name = module_path;
                     self.modules_info.insert(line, module);
@@ -345,7 +395,7 @@ impl App {
 
         self.modules_start_order.clear();
         for el in vmodules {
-            self.modules_start_order.push(el.name.to_owned());
+            self.modules_start_order.push(el.alias_name.to_owned());
         }
 
         Ok(())
@@ -379,7 +429,7 @@ async fn main() {
         modules_start_order: vec![],
         started_modules: vec![],
         backend: Default::default(),
-        systicket: "".to_string(),
+        sys_ticket: "".to_string(),
         tg: None,
     };
 
@@ -466,7 +516,7 @@ async fn start_module(module: &VedaModule) -> io::Result<Child> {
 
     fs::create_dir_all("./logs").unwrap_or_default();
 
-    let log_path = "./logs/veda-".to_owned() + &module.name + "-" + &datetime.format("%Y-%m-%d %H:%M:%S.%f").to_string() + ".log";
+    let log_path = "./logs/veda-".to_owned() + &module.alias_name + "-" + &datetime.format("%Y-%m-%d %H:%M:%S.%f").to_string() + ".log";
     let std_log_file = File::create(&log_path);
     let err_log_file = File::create(log_path);
 
@@ -478,14 +528,28 @@ async fn start_module(module: &VedaModule) -> io::Result<Child> {
 
     match child {
         Ok(p) => {
-            info!("started successfully, module = {}, args = {:?}", module.exec_name.to_string(), &module.args);
+            info!("START *** {}", module.module_name);
+            info!("module alias name = {}", module.alias_name);
+            info!("module exec path = {}", module.exec_name);
 
-            if let Ok(mut file) = File::create(".pids/__".to_owned() + &module.name + "-pid") {
+            if !&module.args.is_empty() {
+                info!("args = {:?}", &module.args);
+            }
+
+            if let Some(v) = &module.memory_limit {
+                info!("memory-limit = {} Kb", v);
+            }
+
+            if let Some(v) = &module.watchdog_timeout {
+                info!("watchdog_timeout = {} s", v);
+            }
+
+            if let Ok(mut file) = File::create(".pids/__".to_owned() + &module.alias_name + "-pid") {
                 if let Err(e) = file.write_all(format!("{}", p.id()).as_bytes()) {
-                    error!("failed to create pid file, module = {}, process = {}, err = {:?}", &module.name, p.id(), e);
+                    error!("failed to create pid file, module = {}, process = {}, err = {:?}", &module.alias_name, p.id(), e);
                 }
             }
-            if module.name == "mstorage" {
+            if module.alias_name == "mstorage" {
                 thread::sleep(time::Duration::from_millis(100));
             }
             Ok(p)

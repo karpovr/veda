@@ -16,6 +16,7 @@ ft-query
     module = ft-query
     args = --bind=tcp://127.0.0.1:8114
     memory-limit = 5 Gb
+    watchdog-timeout = 60
 
 #fanout-email
 
@@ -43,16 +44,18 @@ scripts-main
 
 ontologist
 
-ccus
+#ccus
+
+ccus2
 
 web-api
     module = web-api
     args = --http_port=8080 --use-direct-ft-query=true --workers=1
 
-#ft-query
-#    module = web-api
-#    args = --http_port=8080 --use-direct-ft-query=true
-#    memory-limit = 5 Gb
+
+#queue2storage
+#    module = queue2storage
+#    args = --db_connection=tcp://veda6:123456@127.0.0.1:3309 --check=is-exist --update=if-check-err
 
 input-onto
 
