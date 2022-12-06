@@ -81,6 +81,12 @@ v-s:ExtensionOfWorkPermitTemplate
   v-ui:template "v-s_ExtensionOfWorkPermitTemplate.js"
 .
 
+v-s:TS_ChangingBrigadeComposition
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:ChangingBrigadeCompositionTemplate;
+  v-ui:forClass v-s:ChangingBrigadeComposition
+.
 v-s:ChangingBrigadeCompositionTemplate
   rdf:type v-ui:ClassTemplate ;
   v-ui:forClass v-s:ChangingBrigadeComposition ;
