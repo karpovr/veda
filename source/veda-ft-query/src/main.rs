@@ -17,7 +17,7 @@ use v_common::onto::onto_index::OntoIndex;
 use v_common::search::common::FTQuery;
 use v_common::v_api::obj::*;
 
-const TIMEOUT_INFO: u64 = 30;
+const TIMEOUT_INFO: u64 = 10;
 const TIMEOUT_RECV: u64 = 60;
 const TIMEOUT_SEND: u64 = 60;
 
@@ -35,17 +35,20 @@ fn main() {
         }
     }
 
-    let mut module = Backend::default();
-
     let module_info = ModuleInfo::new("./data", "ft-query", true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", module_info.err());
         exit(0);
     }
     let mut module_info = module_info.unwrap();
+    let mut count = 0;
+    if let Err(e) = module_info.put_info(count, count) {
+        error!("failed to store info, err = {:?}", e);
+    }
+
+    let mut module = Backend::default();
 
     if let Some(mut xr) = XapianReader::new("russian", &mut module.storage) {
-        let mut count = 0;
         let mut start = Instant::now();
 
         loop {
