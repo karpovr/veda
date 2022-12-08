@@ -4,6 +4,7 @@ use log::{error, info, warn};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
+use std::thread::sleep;
 use std::time::{Duration, Instant};
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::parser::parse_raw;
@@ -18,12 +19,18 @@ pub struct QueuePrepare {
 
 impl QueuePrepare {
     pub fn new() -> Self {
-        let queue_consumer = Consumer::new("./data/queue", "CCUS2", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
-
-        QueuePrepare {
-            queue_consumer,
-            //total_prepared_count: 0,
+        let queue_name = "individuals-flow";
+        for _ in 0..5 {
+            if let Ok(queue_consumer) = Consumer::new("./data/queue", "CCUS2", "individuals-flow") {
+                return QueuePrepare {
+                    queue_consumer,
+                    //total_prepared_count: 0,
+                };
+            }
+            warn!("sleep, and then reopen queue ...");
+            sleep(Duration::from_secs(1));
         }
+        panic!("!!!!!!!!! FAIL OPEN QUEUE {} ", queue_name);
     }
 
     pub fn prepare_delta(&mut self, tx: &Sender<SMessage>) -> Option<HashMap<u32, HashMap<String, u64>>> {
