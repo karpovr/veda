@@ -15,7 +15,7 @@ use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 use v_common::module::module_impl::Module;
-use ws::{listen, CloseCode, Handler, Message, Result, Sender as WSSender};
+use ws::{CloseCode, Handler, Message, Result, Sender as WSSender, Settings};
 
 mod command;
 mod queue_prepare;
@@ -109,7 +109,14 @@ fn main() {
     let _server = thread::Builder::new()
         .name("server".to_owned())
         .spawn(move || {
-            listen(format!("127.0.0.1:{}", ccus_port), |out| Server::new(sdm_tx.clone(), out, &ww)).unwrap();
+            let ws = ws::Builder::new()
+                .with_settings(Settings {
+                    max_connections: 1000,
+                    ..Settings::default()
+                })
+                .build(|out| Server::new(sdm_tx.clone(), out, &ww))
+                .unwrap();
+            ws.listen(format!("127.0.0.1:{}", ccus_port)).unwrap();
         })
         .unwrap();
 
