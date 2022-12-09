@@ -6,7 +6,7 @@ import IndividualModel from '../common/individual_model.js';
 
 const cryptoPro = new CryptoPro();
 
-async function createSignatureFileIndividual (signature, name, parent) {
+async function createSignatureFileIndividual (signature, name, parent, thumbprint) {
   const uri = CommonUtil.guid();
   const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
   const fileIndividual = new IndividualModel();
@@ -22,7 +22,9 @@ async function createSignatureFileIndividual (signature, name, parent) {
   fileIndividual['v-s:canUpdate'] = true;
   fileIndividual['v-s:canDelete'] = true;
   fileIndividual['v-s:backwardProperty'] = 'v-s:digitalSignature';
-  fileIndividual['v-s:uid'] = [crypto.randomUUID()];
+  if (thumbprint != undefined) {
+    fileIndividual['v-s:signatureStamp'] = thumbprint;
+  }
   try {
     await uploadSignatureFile(signature, path, uri);
     await fileIndividual.save();
@@ -88,8 +90,9 @@ async function getValidCertificates () {
 async function signData (dataToSign, thumbprint, individual) {
   const certificate = await cryptoPro.certificateInfo(thumbprint);
   const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
-  const signatureFileIndividual = await createSignatureFileIndividual(signature, certificate.Name, individual);
+  const signatureFileIndividual = await createSignatureFileIndividual(signature, certificate.Name, individual, thumbprint);
   individual.addValue('v-s:digitalSignature', signatureFileIndividual);
+  return true;
 }
 
 const dialogTemplate = `
@@ -143,6 +146,10 @@ export default class Crypto {
     return this.instance;
   }
 
+  genUUID () {
+    return crypto.randomUUID();
+  }
+
   async init () {
     if (this.inited) return this.inited;
     this.inited = new Promise(async (resolve, reject) => {
@@ -159,6 +166,50 @@ export default class Crypto {
       resolve();
     });
     return this.inited;
+  }
+
+  async chooseYourStamp () {
+    const certificates = await spinnerDecorator(getValidCertificates)();
+    if (certificates.length > 1) {
+      const container = document.createElement('div');
+      container.innerHTML = dialogTemplate;
+      document.body.appendChild(container);
+      const dialog = container.querySelector('.certificate-dialog');
+      const select = container.querySelector('.certificate-select');
+      const submit = container.querySelector('.certificate-submit');
+      const cancel = container.querySelector('.certificate-cancel');
+      certificates.forEach((certificate) => {
+        const option = document.createElement('option');
+        option.value = certificate.id;
+        option.label = certificate.name;
+        select.appendChild(option);
+      });
+      select.addEventListener('change', () => {
+        submit.value = select.value;
+      });
+      return new Promise((resolve, reject) => {
+        dialog.addEventListener('close', async () => {
+          const thumbprint = dialog.returnValue;
+          if (!thumbprint) {
+            return reject(undefined);
+          }
+          document.body.removeChild(container);
+          resolve(thumbprint);
+        });
+        cancel.addEventListener('click', () => {
+          submit.value = '';
+          dialog.close();
+          reject(undefined);
+        });
+        submit.value = select.value;
+        dialog.returnValue = '';
+        dialog.showModal();
+      });
+    } else if (certificates.length === 1) {
+      return certificates[0].id;
+    } else {
+      alert('Ошибка: Действующие сертификаты электронной подписи не найдены.\nError: Valid signature certificates not found.');
+    }
   }
 
   async addSignature (fileIndividual) {
@@ -186,23 +237,91 @@ export default class Crypto {
       select.addEventListener('change', () => {
         submit.value = select.value;
       });
-      dialog.addEventListener('close', async () => {
-        const thumbprint = dialog.returnValue;
-        if (!thumbprint) {
-          return;
-        }
-        await spinnerDecorator(signData)(dataToSign, thumbprint, fileIndividual);
-        document.body.removeChild(container);
+      return new Promise((resolve, reject) => {
+        dialog.addEventListener('close', async () => {
+          const thumbprint = dialog.returnValue;
+          if (!thumbprint) {
+            return resolve(undefined);
+          }
+          document.body.removeChild(container);
+          await spinnerDecorator(signData)(dataToSign, thumbprint, fileIndividual);
+          resolve(thumbprint);
+        });
+        cancel.addEventListener('click', () => {
+          submit.value = '';
+          dialog.close();
+          resolve(undefined);
+        });
+        submit.value = select.value;
+        dialog.returnValue = '';
+        dialog.showModal();
       });
-      cancel.addEventListener('click', () => {
-        submit.value = '';
-        dialog.close();
-      });
-      submit.value = select.value;
-      dialog.returnValue = '';
-      dialog.showModal();
     } else if (certificates.length === 1) {
       await spinnerDecorator(signData)(dataToSign, certificates[0].id, fileIndividual);
+    } else {
+      alert('Ошибка: Действующие сертификаты электронной подписи не найдены.\nError: Valid signature certificates not found.');
+    }
+  }
+
+  async addBatchSignature (fileIndividuals) {
+    const dataArray = await fileIndividuals.reduce(async (acc, fileIndividual) => {
+      acc = await acc;
+      let dataToSign;
+      if (fileIndividual.file) {
+        dataToSign = await spinnerDecorator(readDataToSign)(fileIndividual.file);
+      } else {
+        dataToSign = await spinnerDecorator(getDataToSign)(`/files/${fileIndividual.id}`);
+      }
+      acc.push(dataToSign);
+      return acc;
+    }, Promise.resolve([]));
+    const certificates = await spinnerDecorator(getValidCertificates)();
+    if (certificates.length > 1) {
+      const container = document.createElement('div');
+      container.innerHTML = dialogTemplate;
+      document.body.appendChild(container);
+      const dialog = container.querySelector('.certificate-dialog');
+      const select = container.querySelector('.certificate-select');
+      const submit = container.querySelector('.certificate-submit');
+      const cancel = container.querySelector('.certificate-cancel');
+      certificates.forEach((certificate) => {
+        const option = document.createElement('option');
+        option.value = certificate.id;
+        option.label = certificate.name;
+        select.appendChild(option);
+      });
+      select.addEventListener('change', () => {
+        submit.value = select.value;
+      });
+      return new Promise((resolve, reject) => {
+        dialog.addEventListener('close', async () => {
+          const thumbprint = dialog.returnValue;
+          if (!thumbprint) {
+            return resolve(undefined);
+          }
+          document.body.removeChild(container);
+          await dataArray.reduce(async (acc, dataToSign, i) => {
+            await acc;
+            await spinnerDecorator(signData)(dataToSign, thumbprint, fileIndividuals[i]);
+            return true;
+          }, Promise.resolve());
+          resolve(thumbprint);
+        });
+        cancel.addEventListener('click', () => {
+          submit.value = '';
+          dialog.close();
+          resolve(undefined);
+        });
+        submit.value = select.value;
+        dialog.returnValue = '';
+        dialog.showModal();
+      });
+    } else if (certificates.length === 1) {
+      await dataArray.reduce(async (acc, dataToSign, i) => {
+        await acc;
+        await spinnerDecorator(signData)(dataToSign, certificates[0].id, fileIndividuals[i]);
+        return true;
+      }, Promise.resolve());
     } else {
       alert('Ошибка: Действующие сертификаты электронной подписи не найдены.\nError: Valid signature certificates not found.');
     }

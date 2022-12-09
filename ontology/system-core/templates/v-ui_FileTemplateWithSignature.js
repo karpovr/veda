@@ -3,24 +3,25 @@ import Crypto from '/js/browser/crypto.js';
 
 export const pre = async function (individual, template, container, mode, extra) {
   const $template = $(template);
+  const $container = $(container);
 
   const crypto = Crypto.getInstance();
   try {
     await crypto.init();
+    // await crypto.init.bind(crypto);
   } catch (error) {
+    console.log(error);
     $('.actions', $template).remove();
     return;
   }
 
   $('.add-signature', $template).click(async () => {
-    await crypto.addSignature(individual);
     if (!individual.hasValue('v-s:uid')) {
       individual['v-s:uid'] = [crypto.genUUID()];
       console.log(individual['v-s:uid']);
-      setTimeout(() => {
-        individual.save();
-      }, 500);
+      await individual.save();
     }
+    await crypto.addSignature(individual);
   });
 
   $('.verify-signature', $template).click(async () => {
@@ -40,6 +41,10 @@ export const pre = async function (individual, template, container, mode, extra)
       signatureView.addClass('signature-checked');
     }
   });
+
+  if ($container.data('with-btn') == 'false' || $container.data('with-btn') == false) {
+    $('.actions', $template).remove();
+  }
 };
 
 export const post = async function (individual, template, container, mode, extra) {
