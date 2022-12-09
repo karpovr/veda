@@ -4,7 +4,8 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  $('span.glyphicon', template).click(function () {
+  $('a.glyphicon', template).click(function (e) {
+    e.preventDefault();
     const self = $(this);
     self.toggleClass('glyphicon-chevron-left glyphicon-chevron-down');
     const parentHeader = self.closest('.section-header');
@@ -18,6 +19,6 @@ export const post = function (individual, template, container, mode, extra) {
 
 export const html = `
   <div class="pull-right">
-    <span class="glyphicon glyphicon-chevron-down"></span>
+    <a href="#" class="glyphicon glyphicon-chevron-down"></a>
   </div>
 `;
