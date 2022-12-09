@@ -41,7 +41,9 @@ test('testSimpleNet3', async (t) => {
     .click('button#save')
     .wait(3000)
     .click('button#toggle-actions')
+    .wait(1000)
     .click('div[rel="v-wf:isProcess"] span#label')
+    .wait(1000)
     .expect(red1).eql(1)
     .expect(green).eql(1);
 });
