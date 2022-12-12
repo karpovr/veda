@@ -142,7 +142,9 @@ impl SharedDataManager {
                                 counter: None,
                                 sessions: Some(sessions),
                             });
-                            d.out_ch.send(msg_s).expect("TODO: panic message");
+                            if let Err(e) = d.out_ch.send(msg_s) {
+                                error!("fail send to out channel, err={:?}", e);
+                            }
                         },
                         Cmd::Subscribe => {
                             let counter = srv.subscribe(&d.uri.unwrap(), d.counter.unwrap(), d.session_id.unwrap());
@@ -152,7 +154,9 @@ impl SharedDataManager {
                                 counter: Some(counter as u64),
                                 sessions: None,
                             });
-                            d.out_ch.send(msg_s).expect("TODO: panic message");
+                            if let Err(e) = d.out_ch.send(msg_s) {
+                                error!("fail send to out channel, err={:?}", e);
+                            }
                         },
                         Cmd::Unsubscribe => {
                             let el = srv.uri2sessions.entry(d.uri.unwrap()).or_default();
@@ -167,7 +171,7 @@ impl SharedDataManager {
                             for (uri, uss) in &mut srv.uri2sessions {
                                 if uss.sessions.contains(&d.session_id.unwrap()) {
                                     uss.sessions.remove(&d.session_id.unwrap());
-                                    info!("[{}]: REMOVE FROM URI={}", d.session_id.unwrap(), uri,);
+                                    debug!("[{}]: REMOVE FROM URI={}", d.session_id.unwrap(), uri,);
                                 }
 
                                 if let Some(b) = d.is_clear_unused {
@@ -181,7 +185,7 @@ impl SharedDataManager {
                                 if b {
                                     for uri in empty_uris {
                                         srv.uri2sessions.remove(&uri);
-                                        info!("REMOVE URI={}", uri,);
+                                        debug!("REMOVE URI={}", uri,);
                                     }
                                 }
                             }

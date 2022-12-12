@@ -19,9 +19,5 @@ time = "0.3.17"
 #evmap = "10.0.2"
 thiserror = "1.0.37"
 
-#mio = "0.6.14"
-#mio-extras = "2.0"
-#crossbeam = "0.8"
-
 v_common = { package = "v-common", version = "=0.4.34" }
 #v_common = { package = "v-common", path = "../../../v-common" }

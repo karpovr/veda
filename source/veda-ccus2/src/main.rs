@@ -98,7 +98,6 @@ fn main() {
     let c_sdm_tx = sdm_tx.clone();
     thread::spawn(move || SharedDataManager::run(sdm_rx));
 
-    //thread::spawn(move || QueuePrepare::run(c_sdm_tx));
     let mut qp = QueuePrepare::new();
 
     info!("ccus2 port = {:?}", ccus_port);
@@ -111,12 +110,12 @@ fn main() {
         .spawn(move || {
             let ws = ws::Builder::new()
                 .with_settings(Settings {
-                    max_connections: 1000,
+                    max_connections: 5000,
                     ..Settings::default()
                 })
                 .build(|out| Server::new(sdm_tx.clone(), out, &ww))
                 .unwrap();
-            ws.listen(format!("127.0.0.1:{}", ccus_port)).unwrap();
+            ws.listen(format!("0.0.0.0:{}", ccus_port)).unwrap();
         })
         .unwrap();
 
