@@ -929,7 +929,7 @@ v-s:isTechnicalExaminationCarriedOut_1gpm
 v-s:is1GpmBeenCheckedBeforeStarting
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Проведено ли техническое освидетельствование 1-го ГПМ?"@ru ;
+  rdfs:label "Проведена ли проверка ГПМ перед началом работ?"@ru ;
   rdfs:label "Has the 1st GPM been checked before starting work?"@en ;
   rdfs:range xsd:boolean ;
 .
@@ -964,7 +964,7 @@ v-s:isTechnicalExaminationCarriedOut_2gpm
 v-s:is2GpmBeenCheckedBeforeStarting
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Проведено ли техническое освидетельствование 2-го ГПМ?"@ru ;
+  rdfs:label "Проведена ли проверка ГПМ перед началом работ?"@ru ;
   rdfs:label "Has the 2nd GPM been checked before starting work?"@en ;
   rdfs:range xsd:boolean ;
 .
@@ -999,7 +999,7 @@ v-s:isTechnicalExaminationCarriedOut_3gpm
 v-s:is3GpmBeenCheckedBeforeStarting
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "Проведено ли техническое освидетельствование 3-го ГПМ?"@ru ;
+  rdfs:label "Проведена ли проверка ГПМ перед началом работ?"@ru ;
   rdfs:label "Has the 3rd GPM been checked before starting work?"@en ;
   rdfs:range xsd:boolean ;
 .
