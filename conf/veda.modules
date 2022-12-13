@@ -12,7 +12,7 @@ ft-indexer
     module = ft-indexer
     args = --max_batch_size=5000
 
-ft-query
+ft-query0
     module = ft-query
     args = --bind=tcp://127.0.0.1:8114
     memory-limit = 5 Gb

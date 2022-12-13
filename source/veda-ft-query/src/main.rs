@@ -18,12 +18,12 @@ use v_common::search::common::FTQuery;
 use v_common::v_api::obj::*;
 
 const TIMEOUT_INFO: u64 = 10;
-const TIMEOUT_RECV: u64 = 60;
+const TIMEOUT_RECV: u64 = 30;
 const TIMEOUT_SEND: u64 = 60;
 
 fn main() {
     init_log("FT_QUERY");
-
+    let mut module_name = "ft-query".to_owned();
     let mut query_url = Module::get_property("ft_query_service_url").expect("param [search_query_url] not found in veda.properties");
 
     let args: Vec<String> = env::args().collect();
@@ -31,11 +31,15 @@ fn main() {
         if el.starts_with("--bind") {
             let p: Vec<&str> = el.split('=').collect();
             query_url = p[1].to_owned().trim().to_owned();
-            info!("use arg bind = {}", query_url);
+            info!("use arg [bind] = {}", query_url);
+        } else if el.starts_with("--module-name") {
+            let p: Vec<&str> = el.split('=').collect();
+            module_name = p[1].to_owned().trim().to_owned();
+            info!("use arg [module-name] = {}", module_name);
         }
     }
 
-    let module_info = ModuleInfo::new("./data", "ft-query", true);
+    let module_info = ModuleInfo::new("./data", &module_name, true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", module_info.err());
         exit(0);

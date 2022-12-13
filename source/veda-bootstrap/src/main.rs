@@ -199,12 +199,12 @@ impl App {
 
                         if let Some(timeout) = module.watchdog_timeout {
                             if module.module_info.is_none() {
-                                match ModuleInfo::new("./data", &module.module_name, false) {
+                                match ModuleInfo::new("./data", &module.alias_name, false) {
                                     Ok(m) => {
                                         module.module_info = Some(m);
                                     },
                                     Err(e) => {
-                                        error!("fail open info file {}, err={:?}", module.module_name, e)
+                                        error!("fail open info file {}, err={:?}", module.alias_name, e)
                                     },
                                 }
                             }
@@ -520,16 +520,14 @@ async fn start_module(module: &VedaModule) -> io::Result<Child> {
     let std_log_file = File::create(&log_path);
     let err_log_file = File::create(log_path);
 
-    let child = if module.args.is_empty() {
-        Command::new(&module.exec_name).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).spawn()
-    } else {
-        Command::new(&module.exec_name).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).args(&module.args).spawn()
-    };
+    let mut args = module.args.clone();
+    args.push(format!("--module-name={}", module.alias_name));
+
+    let child = Command::new(&module.exec_name).stdout(std_log_file.unwrap()).stderr(err_log_file.unwrap()).args(&args).spawn();
 
     match child {
         Ok(p) => {
-            info!("START *** {}", module.module_name);
-            info!("module alias name = {}", module.alias_name);
+            info!("START *** {}", module.alias_name);
             info!("module exec path = {}", module.exec_name);
 
             if !&module.args.is_empty() {

@@ -97,10 +97,6 @@ if [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] || [ $1 == "all" ] ; 
     build_server_module "veda-geo-indexer"
 fi
 
-if [ $1 == "webserver" ] || [ $1 == "veda-webserver" ] ; then
-    build_server_module "veda-webserver"
-fi
-
 if [ -z $1 ] || [ $1 == "mstorage" ] || [ $1 == "veda-mstorage" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     build_server_module "veda-mstorage"
 fi
