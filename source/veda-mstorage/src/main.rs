@@ -296,17 +296,19 @@ fn operation_prepare(
             }
         } else {
             if !prev_state.is_empty() {
-                if let Some(is_deleted) = new_indv.get_first_bool("v-s:deleted") {
-                    if is_deleted
-                        && f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0)
-                            != Access::CanDelete as u8
-                    {
-                        error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
-                        return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
+                if let Some(new_is_deleted) = new_indv.get_first_bool("v-s:deleted") {
+                    if let Some(prev_is_deleted) = prev_indv.get_first_bool("v-s:deleted") {
+                        if !prev_is_deleted
+                            && new_is_deleted
+                            && f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0)
+                                != Access::CanDelete as u8
+                        {
+                            error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
+                            return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
+                        }
                     }
-                } else if f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0)
-                    != Access::CanUpdate as u8
-                {
+                }
+                if f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanUpdate as u8 {
                     error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
                     return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
