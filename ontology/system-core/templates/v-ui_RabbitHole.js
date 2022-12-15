@@ -27,7 +27,7 @@ export const pre = function (individual, template, container, mode, extra) {
 
   function travel (individual, text) {
     if (visited.indexOf(individual.id) >= 0) {
-      return Promise.resolve();
+      return Promise.resolve(text);
     } else {
       visited.push(individual.id);
     }
