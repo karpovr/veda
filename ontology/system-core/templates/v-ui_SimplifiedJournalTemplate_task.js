@@ -13,25 +13,29 @@ export const pre = function (individual, template, container, mode, extra) {
   } else if (individual.hasValue('v-wf:isEditable', false)) {
     $('.docflow-buttons', template).remove();
   } else {
-    veda.user.isMemberOf('cfg:SuperUser').then(function (isMemberSuperUser) {
+    const isDirectTask = individual.hasValue('v-wf:isDirectTask', true);
+    if (isDirectTask) {
       const currentEmployee = veda.appointment['v-s:employee'][0];
       const currentOcuppation = veda.appointment['v-s:occupation'][0];
       const targetEmployee = individual['v-wf:from'][0];
       const targetOccupation = individual['v-wf:from'][1];
       const canRevoke = currentEmployee === targetEmployee || currentOcuppation === targetOccupation;
-      const isDirectTask = individual.hasValue('v-wf:isDirectTask', true);
-      if (isDirectTask) {
-        if (canRevoke || isMemberSuperUser) {
+      const isMemberOccupation_Promise = veda.user.isMemberOf(targetOccupation.id);
+      const promises = [isMemberOccupation_Promise, veda.user.isMemberOf('cfg:SuperUser')];
+      Promise.all(promises).then(result => {
+        const isMemberOccupation = result[0];
+        const isMemberSuperUser = result[1];
+        if (canRevoke || isMemberSuperUser || isMemberOccupation) {
           $('.docflow-buttons', template).show();
           $('.redirect', template).click(takeDecision.bind(null, 'v-wf:DecisionRedirect', 'Перенаправлено'));
           $('.revoke', template).click(takeDecision.bind(null, 'v-wf:DecisionRevokeTask', 'Задача отозвана'));
         } else {
           $('.docflow-buttons', template).remove();
         }
-      } else {
-        $('.docflow-buttons', template).remove();
-      }
-    });
+      })
+    } else {
+      $('.docflow-buttons', template).remove();
+    }
   }
 
   // TODO: refactor this
