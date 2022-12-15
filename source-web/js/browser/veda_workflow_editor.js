@@ -444,7 +444,7 @@ jsWorkflow.ready(() => {
         },
       });
 
-      windows.on('click', function (e) {
+      windows.on('click', async function (e) {
         const _this = e.delegateTarget;
         const currentElement = $(_this);
         const alreadySelected = currentElement.hasClass('w_active');
@@ -469,7 +469,7 @@ jsWorkflow.ready(() => {
             return; // do nothing when click on already selected element
           }
 
-          const about = new IndividualModel(_this.id);
+          const about = await new IndividualModel(_this.id).load();
           const holder = $('<div>');
           if (about['rdf:type'][0].id == 'v-wf:Task') {
             about.present(holder, 'v-wf:TaskTemplateAsProperties', 'edit');
