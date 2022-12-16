@@ -303,13 +303,25 @@ fn operation_prepare(
                             && f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanDelete as u8, true, Some(&mut trace)).unwrap_or(0)
                                 != Access::CanDelete as u8
                         {
-                            error!("failed to update, Not Authorized, user = {}, request [can delete], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
+                            let types = new_indv.get_literals("rdf:type").unwrap_or_default();
+                            error!(
+                                "failed to update, Not Authorized, user = {}, request [can delete], uri = {}, types = {:?}",
+                                transaction.ticket.user_uri,
+                                &new_indv.get_id(),
+                                types
+                            );
                             return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                         }
                     }
                 }
                 if f_authorize(new_indv.get_id(), &transaction.ticket.user_uri, Access::CanUpdate as u8, true, Some(&mut trace)).unwrap_or(0) != Access::CanUpdate as u8 {
-                    error!("failed to update, Not Authorized, user = {}, request [can update], uri = {} ", transaction.ticket.user_uri, new_indv.get_id());
+                    let types = new_indv.get_literals("rdf:type").unwrap_or_default();
+                    error!(
+                        "failed to update, Not Authorized, user = {}, request [can update], uri = {}, types = {:?}",
+                        transaction.ticket.user_uri,
+                        new_indv.get_id(),
+                        types
+                    );
                     return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
             }
@@ -333,7 +345,12 @@ fn operation_prepare(
                         }
                     }
                 } else if cmd == IndvOp::Put {
-                    error!("failed to update, not found type for new individual, user = {}, id = {} ", transaction.ticket.user_uri, new_indv.get_id());
+                    error!(
+                        "failed to update, not found type for new individual, user = {}, id = {}, types = {:?}",
+                        transaction.ticket.user_uri,
+                        new_indv.get_id(),
+                        new_types
+                    );
                     return Response::new(new_indv.get_id(), ResultCode::NotAuthorized, -1, -1);
                 }
 
