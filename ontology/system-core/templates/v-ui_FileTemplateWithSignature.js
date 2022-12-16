@@ -105,7 +105,7 @@ export const html = `
         </ol>
       </div>
     </div>
-    <div class="actions panel-footer">
+    <div class="actions panel-footer" hidden>
       <button class="add-signature btn btn-success">Подписать</button>
       <button class="verify-signature btn btn-link view -edit -search">Проверить</button>
     </div>
