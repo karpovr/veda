@@ -303,7 +303,7 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
       .catch((error) => {
         const sendError = new IndividualModel('v-s:SendError');
         sendError.load().then(() => {
-          notify('danger', {name: sendError});
+          notify('danger', {name: sendError.toString()});
         });
         console.error('Save before send failed');
         throw error;
@@ -315,13 +315,13 @@ Util.send = function (individual, template, transformId, _modal, startFormTempla
         template.closest('.modal').modal('hide').remove();
         const sendSuccess = new IndividualModel('v-s:SendSuccess');
         sendSuccess.load().then(() => {
-          notify('success', {name: sendSuccess});
+          notify('success', {name: sendSuccess.toString()});
         });
       })
       .catch((error) => {
         const sendError = new IndividualModel('v-s:SendError');
         sendError.load().then(() => {
-          notify('danger', {name: sendError});
+          notify('danger', {name: sendError.toString()});
         });
         console.error('Send failed');
         throw error;
