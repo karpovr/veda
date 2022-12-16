@@ -1,5 +1,7 @@
 use crate::VQLHttpClient;
 use actix_web::{web, HttpMessage, HttpRequest};
+use chrono::Utc;
+use futures::lock::Mutex;
 use rusty_tarantool::tarantool::IteratorType;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
@@ -12,6 +14,7 @@ use v_common::onto::parser::parse_raw;
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache, TICKETS_SPACE_ID};
 use v_common::storage::common::{Storage, StorageId};
+use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) const LIMITATA_COGNOSCI: &[&str] = &["v-s:Credential", "v-s:Connection", "v-s:LinkedNode"];
@@ -49,17 +52,23 @@ pub struct UserInfo {
     pub user_id: String,
 }
 
-pub async fn get_user_info(in_ticket: Option<String>, req: &HttpRequest, ticket_cache: &web::Data<TicketCache>, db: &AStorage) -> Result<UserInfo, ResultCode> {
-    let ticket = if in_ticket.is_some() {
+pub async fn get_user_info(
+    in_ticket: Option<String>,
+    req: &HttpRequest,
+    ticket_cache: &web::Data<TicketCache>,
+    db: &AStorage,
+    mstorage: &web::Data<Mutex<MStorageClient>>,
+) -> Result<UserInfo, ResultCode> {
+    let ticket_id = if in_ticket.is_some() {
         in_ticket
     } else {
         get_ticket(req, &None)
     };
 
     let addr = extract_addr(req);
-    match check_ticket(&ticket, ticket_cache, &addr, db).await {
+    match check_ticket(&ticket_id, ticket_cache, &addr, db, &mstorage).await {
         Ok(user_id) => Ok(UserInfo {
-            ticket,
+            ticket: ticket_id,
             addr,
             user_id,
         }),
@@ -209,7 +218,14 @@ pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str
     log_w(start_time, &uinf.ticket, &uinf.addr, &uinf.user_id, operation, args, res)
 }
 
-pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &TicketCache, addr: &Option<IpAddr>, db: &AStorage) -> Result<String, ResultCode> {
+const UPDATE_USER_ACTIVITY_PERIOD: i64 = 60;
+pub(crate) async fn check_ticket(
+    w_ticket_id: &Option<String>,
+    ticket_cache: &TicketCache,
+    addr: &Option<IpAddr>,
+    db: &AStorage,
+    mstorage: &web::Data<Mutex<MStorageClient>>,
+) -> Result<String, ResultCode> {
     if w_ticket_id.is_none() {
         return Ok("cfg:Guest".to_owned());
     }
@@ -220,11 +236,22 @@ pub(crate) async fn check_ticket(w_ticket_id: &Option<String>, ticket_cache: &Ti
     }
 
     if let Some(cached_ticket) = ticket_cache.read.get(ticket_id) {
-        if let Some(t) = cached_ticket.get_one() {
-            if t.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
+        if let Some(ticket_obj) = cached_ticket.get_one() {
+            if ticket_obj.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
                 return Err(ResultCode::TicketNotFound);
             }
-            Ok(t.user_uri.clone())
+
+            let now = Utc::now().naive_utc().timestamp();
+            if now - ticket_obj.last_activity > UPDATE_USER_ACTIVITY_PERIOD {
+                let mut upd_ticket_obj = ticket_obj.clone();
+                upd_ticket_obj.last_activity = now;
+                let mut t = ticket_cache.write.lock().await;
+                t.update(ticket_id.to_owned(), upd_ticket_obj);
+                t.refresh();
+                info!("CHANGE ACTIVITY, USER={}", ticket_obj.user_uri);
+            }
+
+            Ok(ticket_obj.user_uri.clone())
         } else {
             Err(ResultCode::TicketNotFound)
         }

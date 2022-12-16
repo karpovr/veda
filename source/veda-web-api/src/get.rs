@@ -11,6 +11,7 @@ use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
 use v_common::storage::async_storage::{check_user_in_group, get_individual_from_db, AStorage, TicketCache};
+use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 use v_common::v_queue::record::Mode;
@@ -48,9 +49,10 @@ pub(crate) async fn get_individuals(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
+    mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individuals", "", res);
@@ -84,9 +86,10 @@ pub(crate) async fn get_individual(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
+    mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individual", "", res);

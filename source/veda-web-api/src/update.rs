@@ -19,13 +19,13 @@ pub(crate) async fn update(
     params: web::Query<TicketRequest>,
     cmd: IndvOp,
     data: web::Json<JSONValue>,
-    mstorage: web::Data<Mutex<MStorageClient>>,
     req: HttpRequest,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", action, "", res);
@@ -129,7 +129,7 @@ async fn put_individuals(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update("put_individuals", extract_addr(&req), params, IndvOp::Put, data, mstorage, req, ticket_cache, db).await
+    update("put_individuals", extract_addr(&req), params, IndvOp::Put, data, req, ticket_cache, db, mstorage).await
 }
 
 #[put("/put_individual")]
@@ -141,7 +141,7 @@ async fn put_individual(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update("put_individual", extract_addr(&req), params, IndvOp::Put, data, mstorage, req, ticket_cache, db).await
+    update("put_individual", extract_addr(&req), params, IndvOp::Put, data, req, ticket_cache, db, mstorage).await
 }
 
 #[put("/remove_individual")]
@@ -153,7 +153,7 @@ async fn remove_individual(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update("remove_individual", extract_addr(&req), params, IndvOp::Remove, data, mstorage, req, ticket_cache, db).await
+    update("remove_individual", extract_addr(&req), params, IndvOp::Remove, data, req, ticket_cache, db, mstorage).await
 }
 
 #[put("/add_to_individual")]
@@ -165,7 +165,7 @@ async fn add_to_individual(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update("add_to_individual", extract_addr(&req), params, IndvOp::AddTo, data, mstorage, req, ticket_cache, db).await
+    update("add_to_individual", extract_addr(&req), params, IndvOp::AddTo, data, req, ticket_cache, db, mstorage).await
 }
 
 #[put("/set_in_individual")]
@@ -177,7 +177,7 @@ async fn set_in_individual(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update("set_in_individual", extract_addr(&req), params, IndvOp::SetIn, data, mstorage, req, ticket_cache, db).await
+    update("set_in_individual", extract_addr(&req), params, IndvOp::SetIn, data, req, ticket_cache, db, mstorage).await
 }
 
 #[put("/remove_from_individual")]
@@ -189,5 +189,5 @@ async fn remove_from_individual(
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
 ) -> io::Result<HttpResponse> {
-    update("remove_from_individual", extract_addr(&req), params, IndvOp::RemoveFrom, data, mstorage, req, ticket_cache, db).await
+    update("remove_from_individual", extract_addr(&req), params, IndvOp::RemoveFrom, data, req, ticket_cache, db, mstorage).await
 }

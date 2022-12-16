@@ -17,6 +17,7 @@ use v_common::search::common::{load_prefixes, FTQuery, PrefixesCache, QueryResul
 use v_common::search::sparql_params::prepare_sparql_params;
 use v_common::search::sql_params::prepare_sql_with_params;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
+use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 pub(crate) struct QueryEndpoints {
@@ -34,8 +35,9 @@ pub(crate) async fn query_post(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
+    mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(get_ticket(&req, &params.ticket), &req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(get_ticket(&req, &params.ticket), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -55,8 +57,9 @@ pub(crate) async fn query_get(
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
+    mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(data.ticket.to_owned(), &req, &ticket_cache, &db).await {
+    let uinf = match get_user_info(data.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
