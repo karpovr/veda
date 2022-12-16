@@ -179,7 +179,7 @@ $.fn.veda_file = function ( options ) {
   const accept = this.attr('accept');
   const maxWidth = this.attr('data-max-width') || 2048;
   const targetRatio = this.attr('data-ratio');
-
+  const withUUID = this.attr('data-with-UUID');
   if (!isSingle) {
     fileInput.attr('multiple', 'multiple');
   }
@@ -257,6 +257,10 @@ $.fn.veda_file = function ( options ) {
       fileIndividual['v-s:backwardProperty'] = ['v-s:thumbnail'];
     } else {
       fileIndividual['v-s:backwardProperty'] = [rel_uri];
+      if (withUUID == 'true') {
+        fileIndividual['v-s:uid'] = [crypto.randomUUID()];
+        console.log(fileIndividual['v-s:uid'][0])
+      }
     }
     return new Promise((resolve, reject) => {
       // If file is image && !thumbnail
