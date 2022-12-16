@@ -17,7 +17,7 @@ use crate::auth::{authenticate_get, authenticate_post, get_membership, get_right
 use crate::common::{VQLClient, VQLClientConnectType, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
-use crate::query::{query_get, query_post};
+use crate::query::{query_get, query_post, QueryEndpoints};
 use crate::sparql_client::SparqlClient;
 use crate::update::*;
 use crate::vql_query_client::VQLHttpClient;
@@ -201,10 +201,12 @@ async fn main() -> std::io::Result<()> {
                 short2full_r: s2f_prefixes_cache_read,
                 short2full_w: Arc::new(Mutex::new(s2f_prefixes_cache_write)),
             })
-            .data(Mutex::new(SparqlClient::default()))
             .data(db)
-            .data(Mutex::new(ft_client))
-            .data(Mutex::new(ch))
+            .data(QueryEndpoints {
+                vql_client: Mutex::new(ft_client),
+                ch_client: Mutex::new(ch),
+                sparql_client: Mutex::new(SparqlClient::default()),
+            })
             .data(Mutex::new(LmdbAzContext::new(1000)))
             .data(Mutex::new(AuthClient::new(Module::get_property("auth_url").unwrap_or_default())))
             .data(Mutex::new(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default())))

@@ -19,13 +19,17 @@ use v_common::search::sql_params::prepare_sql_with_params;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
+pub(crate) struct QueryEndpoints {
+    pub vql_client: Mutex<VQLClient>,
+    pub ch_client: Mutex<CHClient>,
+    pub sparql_client: Mutex<SparqlClient>,
+}
+
 pub(crate) async fn query_post(
     req: HttpRequest,
     params: web::Query<QueryRequest>,
     data: web::Json<QueryRequest>,
-    vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
+    query_endpoints: web::Data<QueryEndpoints>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
@@ -37,7 +41,7 @@ pub(crate) async fn query_post(
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-    match query(uinf, &data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await {
+    match query(uinf, &data, query_endpoints, db, az, prefix_cache).await {
         Ok(res) => Ok(res),
         Err(_) => Ok(HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)),
     }
@@ -45,9 +49,7 @@ pub(crate) async fn query_post(
 
 pub(crate) async fn query_get(
     data: web::Query<QueryRequest>,
-    vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
+    query_endpoints: web::Data<QueryEndpoints>,
     ticket_cache: web::Data<TicketCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
@@ -60,7 +62,7 @@ pub(crate) async fn query_get(
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
-    match query(uinf, &data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await {
+    match query(uinf, &data, query_endpoints, db, az, prefix_cache).await {
         Ok(res) => Ok(res),
         Err(_) => Ok(HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)),
     }
@@ -69,9 +71,7 @@ pub(crate) async fn query_get(
 async fn query(
     uinf: UserInfo,
     data: &QueryRequest,
-    vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
+    query_endpoints: web::Data<QueryEndpoints>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
@@ -80,18 +80,16 @@ async fn query(
         return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()));
     }
     if data.stored_query.is_some() {
-        stored_query(uinf, data, vql_client, ch_client, sparql_client, db, az, prefix_cache).await
+        stored_query(uinf, data, query_endpoints, db, az, prefix_cache).await
     } else {
-        direct_query(uinf, data, vql_client, ch_client, sparql_client, db, prefix_cache).await
+        direct_query(uinf, data, query_endpoints, db, prefix_cache).await
     }
 }
 
 async fn stored_query(
     uinf: UserInfo,
     data: &QueryRequest,
-    _vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
+    query_endpoints: web::Data<QueryEndpoints>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
@@ -120,7 +118,7 @@ async fn stored_query(
                     "clickhouse" => {
                         if let Ok(sql) = prepare_sql_with_params(&query_string, &mut params, &source) {
                             warn!("{}", sql);
-                            let res = ch_client.lock().await.query_select_async(&sql, &format).await?;
+                            let res = query_endpoints.ch_client.lock().await.query_select_async(&sql, &format).await?;
                             log(Some(&start_time), &uinf, "stored_query", stored_query_id, ResultCode::Ok);
                             return Ok(HttpResponse::Ok().json(res));
                         }
@@ -132,7 +130,7 @@ async fn stored_query(
 
                         if let Ok(sparql) = prepare_sparql_params(&query_string, &mut params, &prefix_cache) {
                             warn!("{}", sparql);
-                            let res = sparql_client.lock().await.query_select(&uinf.user_id, sparql, &format, prefix_cache).await?;
+                            let res = query_endpoints.sparql_client.lock().await.query_select(&uinf.user_id, sparql, &format, prefix_cache).await?;
                             log(Some(&start_time), &uinf, "stored_query", stored_query_id, ResultCode::Ok);
                             return Ok(HttpResponse::Ok().json(res));
                         }
@@ -153,9 +151,7 @@ async fn stored_query(
 async fn direct_query(
     uinf: UserInfo,
     data: &QueryRequest,
-    vql_client: web::Data<Mutex<VQLClient>>,
-    ch_client: web::Data<Mutex<CHClient>>,
-    sparql_client: web::Data<Mutex<SparqlClient>>,
+    query_endpoints: web::Data<QueryEndpoints>,
     db: web::Data<AStorage>,
     prefix_cache: web::Data<PrefixesCache>,
 ) -> io::Result<HttpResponse> {
@@ -163,7 +159,7 @@ async fn direct_query(
     let ticket_id = uinf.ticket.clone().unwrap_or_default();
 
     if data.sparql.is_some() {
-        res = sparql_client.lock().await.query_select_ids(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
+        res = query_endpoints.sparql_client.lock().await.query_select_ids(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
         let mut req = FTQuery {
             ticket: "".to_owned(),
@@ -182,7 +178,7 @@ async fn direct_query(
             Ok(sql) => {
                 info!("{}", sql);
                 req.query = sql;
-                res = ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
+                res = query_endpoints.ch_client.lock().await.select_async(req, OptAuthorize::YES).await?;
             },
             Err(e) => {
                 error!("{:?}", e);
@@ -223,7 +219,7 @@ async fn direct_query(
             ResultCode::Ok,
         );
 
-        let mut vc = vql_client.lock().await;
+        let mut vc = query_endpoints.vql_client.lock().await;
 
         match vc.query_type {
             VQLClientConnectType::Direct => {
