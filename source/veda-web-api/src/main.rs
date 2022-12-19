@@ -14,7 +14,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use crate::auth::{authenticate_get, authenticate_post, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid, logout};
-use crate::common::{VQLClient, VQLClientConnectType, BASE_PATH};
+use crate::common::{UserContextCache, VQLClient, VQLClientConnectType, BASE_PATH};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
 use crate::query::{query_get, query_post, QueryEndpoints};
@@ -37,7 +37,7 @@ use v_common::module::module_impl::{init_log_with_params, Module};
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::PrefixesCache;
 use v_common::search::ft_client::FTClient;
-use v_common::storage::async_storage::{AStorage, TicketCache};
+use v_common::storage::async_storage::AStorage;
 use v_common::storage::common::StorageMode;
 use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
@@ -173,6 +173,7 @@ async fn main() -> std::io::Result<()> {
         let check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
         info!("PARAM [check_ticket_ip] = {}", check_ticket_ip);
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
+        let (user_activity_read, user_activity_write) = evmap::new();
         let (f2s_prefixes_cache_read, f2s_prefixes_cache_write) = evmap::new();
         let (s2f_prefixes_cache_read, s2f_prefixes_cache_write) = evmap::new();
 
@@ -189,11 +190,13 @@ async fn main() -> std::io::Result<()> {
                     .header("Cache-Control", "no-cache, no-store, must-revalidate, private"),
             )
             .app_data(json_cfg)
-            .data(TicketCache {
-                read: ticket_cache_read,
-                write: Arc::new(Mutex::new(ticket_cache_write)),
+            .data(UserContextCache {
+                read_tickets: ticket_cache_read,
+                write_tickets: Arc::new(Mutex::new(ticket_cache_write)),
                 check_ticket_ip,
                 are_external_users,
+                read_user_activity: user_activity_read,
+                write_user_activity: Arc::new(Mutex::new(user_activity_write)),
             })
             .data(PrefixesCache {
                 full2short_r: f2s_prefixes_cache_read,

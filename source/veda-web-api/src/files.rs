@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, get_ticket, get_user_info, log_w, UserInfo};
+use crate::common::{extract_addr, get_ticket, get_user_info, log_w, UserContextCache, UserInfo};
 use crate::common::{log, TicketRequest};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
@@ -19,7 +19,7 @@ use std::io::{ErrorKind, Read};
 use std::time::Instant;
 use uuid::Uuid;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
-use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
+use v_common::storage::async_storage::{get_individual_from_db, AStorage};
 use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext};
@@ -27,7 +27,7 @@ use v_common::v_authorization::common::{Access, AuthorizationContext};
 #[get("/files/{file_id}")]
 pub(crate) async fn load_file(
     params: web::Query<TicketRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
@@ -122,7 +122,7 @@ async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_st
 
 pub(crate) async fn save_file(
     mut payload: Multipart,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,

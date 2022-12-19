@@ -1,4 +1,6 @@
-use crate::common::{check_external_user, check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserInfo};
+use crate::common::{
+    check_external_user, check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserContextCache, UserInfo,
+};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
@@ -10,7 +12,7 @@ use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
-use v_common::storage::async_storage::{AStorage, TicketCache};
+use v_common::storage::async_storage::AStorage;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
@@ -19,7 +21,7 @@ use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACC
 pub(crate) async fn get_ticket_trusted(
     req: HttpRequest,
     params: web::Query<GetTicketTrustedRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
     mstorage: web::Data<Mutex<MStorageClient>>,
@@ -61,7 +63,7 @@ pub(crate) async fn get_ticket_trusted(
 #[get("/logout")]
 pub(crate) async fn logout(
     params: web::Query<TicketRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
     req: HttpRequest,
@@ -78,7 +80,7 @@ pub(crate) async fn logout(
         Ok(_user_uri) => {
             return match auth.lock().await.logout(&params.ticket, uinf.addr) {
                 Ok(r) => {
-                    let mut t = ticket_cache.write.lock().await;
+                    let mut t = ticket_cache.write_tickets.lock().await;
                     t.empty(params.ticket.clone().unwrap_or_default());
                     t.refresh();
 
@@ -101,7 +103,7 @@ pub(crate) async fn logout(
 #[get("/is_ticket_valid")]
 pub(crate) async fn is_ticket_valid(
     params: web::Query<TicketRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     tt: web::Data<AStorage>,
     req: HttpRequest,
     mstorage: web::Data<Mutex<MStorageClient>>,
@@ -123,7 +125,7 @@ pub(crate) async fn is_ticket_valid(
 pub(crate) async fn authenticate_post(
     data: web::Json<AuthenticateRequest>,
     auth: web::Data<Mutex<AuthClient>>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
@@ -133,7 +135,7 @@ pub(crate) async fn authenticate_post(
 pub(crate) async fn authenticate_get(
     params: web::Query<AuthenticateRequest>,
     auth: web::Data<Mutex<AuthClient>>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
@@ -145,7 +147,7 @@ async fn authenticate(
     password: &Option<String>,
     secret: &Option<String>,
     auth: web::Data<Mutex<AuthClient>>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     req: HttpRequest,
 ) -> io::Result<HttpResponse> {
@@ -181,7 +183,7 @@ async fn authenticate(
 #[get("/get_rights")]
 pub(crate) async fn get_rights(
     params: web::Query<TicketUriRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
@@ -223,7 +225,7 @@ pub(crate) async fn get_rights(
 #[get("/get_membership")]
 pub(crate) async fn get_membership(
     params: web::Query<TicketUriRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
@@ -273,7 +275,7 @@ pub(crate) async fn get_membership(
 #[get("/get_rights_origin")]
 pub(crate) async fn get_rights_origin(
     params: web::Query<TicketUriRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,

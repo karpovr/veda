@@ -1,4 +1,4 @@
-use crate::common::{get_ticket, QueryRequest, UserInfo, VQLClientConnectType};
+use crate::common::{get_ticket, QueryRequest, UserContextCache, UserInfo, VQLClientConnectType};
 use crate::common::{get_user_info, log};
 use crate::sparql_client::SparqlClient;
 use crate::VQLClient;
@@ -16,7 +16,7 @@ use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::{load_prefixes, FTQuery, PrefixesCache, QueryResult};
 use v_common::search::sparql_params::prepare_sparql_params;
 use v_common::search::sql_params::prepare_sql_with_params;
-use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache};
+use v_common::storage::async_storage::{get_individual_from_db, AStorage};
 use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
@@ -31,7 +31,7 @@ pub(crate) async fn query_post(
     params: web::Query<QueryRequest>,
     data: web::Json<QueryRequest>,
     query_endpoints: web::Data<QueryEndpoints>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
@@ -52,7 +52,7 @@ pub(crate) async fn query_post(
 pub(crate) async fn query_get(
     data: web::Query<QueryRequest>,
     query_endpoints: web::Data<QueryEndpoints>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,

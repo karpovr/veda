@@ -1,4 +1,6 @@
-use crate::common::{extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserInfo, BASE_PATH, LIMITATA_COGNOSCI};
+use crate::common::{
+    extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserContextCache, UserInfo, BASE_PATH, LIMITATA_COGNOSCI,
+};
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
@@ -10,7 +12,7 @@ use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
-use v_common::storage::async_storage::{check_user_in_group, get_individual_from_db, AStorage, TicketCache};
+use v_common::storage::async_storage::{check_user_in_group, get_individual_from_db, AStorage};
 use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
@@ -44,7 +46,7 @@ pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequ
 #[post("/get_individuals")]
 pub(crate) async fn get_individuals(
     params: web::Query<TicketRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     payload: web::Json<Uris>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
@@ -82,7 +84,7 @@ pub(crate) async fn get_individuals(
 #[get("/get_individual")]
 pub(crate) async fn get_individual(
     params: web::Query<TicketUriRequest>,
-    ticket_cache: web::Data<TicketCache>,
+    ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,

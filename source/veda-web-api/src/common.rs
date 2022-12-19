@@ -6,19 +6,29 @@ use rusty_tarantool::tarantool::IteratorType;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
+use std::sync::Arc;
 use std::time::Instant;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::ticket::Ticket;
 use v_common::onto::individual::Individual;
 use v_common::onto::parser::parse_raw;
 use v_common::search::ft_client::FTClient;
-use v_common::storage::async_storage::{get_individual_from_db, AStorage, TicketCache, TICKETS_SPACE_ID};
+use v_common::storage::async_storage::{get_individual_from_db, AStorage, TICKETS_SPACE_ID};
 use v_common::storage::common::{Storage, StorageId};
 use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) const LIMITATA_COGNOSCI: &[&str] = &["v-s:Credential", "v-s:Connection", "v-s:LinkedNode"];
 pub(crate) const BASE_PATH: &str = "./data";
+
+pub struct UserContextCache {
+    pub read_tickets: evmap::ReadHandle<String, Ticket>,
+    pub write_tickets: Arc<Mutex<evmap::WriteHandle<String, Ticket>>>,
+    pub check_ticket_ip: bool,
+    pub are_external_users: bool,
+    pub read_user_activity: evmap::ReadHandle<String, i64>,
+    pub write_user_activity: Arc<Mutex<evmap::WriteHandle<String, i64>>>,
+}
 
 pub(crate) enum VQLClientConnectType {
     Direct,
@@ -55,7 +65,7 @@ pub struct UserInfo {
 pub async fn get_user_info(
     in_ticket: Option<String>,
     req: &HttpRequest,
-    ticket_cache: &web::Data<TicketCache>,
+    ticket_cache: &web::Data<UserContextCache>,
     db: &AStorage,
     mstorage: &web::Data<Mutex<MStorageClient>>,
 ) -> Result<UserInfo, ResultCode> {
@@ -221,7 +231,7 @@ pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str
 const UPDATE_USER_ACTIVITY_PERIOD: i64 = 60;
 pub(crate) async fn check_ticket(
     w_ticket_id: &Option<String>,
-    ticket_cache: &TicketCache,
+    user_context_cache: &UserContextCache,
     addr: &Option<IpAddr>,
     db: &AStorage,
     mstorage: &web::Data<Mutex<MStorageClient>>,
@@ -235,22 +245,11 @@ pub(crate) async fn check_ticket(
         return Ok("cfg:Guest".to_owned());
     }
 
-    if let Some(cached_ticket) = ticket_cache.read.get(ticket_id) {
+    let user_id = if let Some(cached_ticket) = user_context_cache.read_tickets.get(ticket_id) {
         if let Some(ticket_obj) = cached_ticket.get_one() {
-            if ticket_obj.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
+            if ticket_obj.is_ticket_valid(addr, user_context_cache.check_ticket_ip) != ResultCode::Ok {
                 return Err(ResultCode::TicketNotFound);
             }
-
-            let now = Utc::now().naive_utc().timestamp();
-            if now - ticket_obj.last_activity > UPDATE_USER_ACTIVITY_PERIOD {
-                let mut upd_ticket_obj = ticket_obj.clone();
-                upd_ticket_obj.last_activity = now;
-                let mut t = ticket_cache.write.lock().await;
-                t.update(ticket_id.to_owned(), upd_ticket_obj);
-                t.refresh();
-                info!("CHANGE ACTIVITY, USER={}", ticket_obj.user_uri);
-            }
-
             Ok(ticket_obj.user_uri.clone())
         } else {
             Err(ResultCode::TicketNotFound)
@@ -258,22 +257,48 @@ pub(crate) async fn check_ticket(
     } else {
         let ticket_obj = read_ticket_obj(ticket_id, db).await?;
 
-        if ticket_obj.is_ticket_valid(addr, ticket_cache.check_ticket_ip) != ResultCode::Ok {
+        if ticket_obj.is_ticket_valid(addr, user_context_cache.check_ticket_ip) != ResultCode::Ok {
             return Err(ResultCode::TicketNotFound);
         }
 
         let user_uri = ticket_obj.user_uri.clone();
 
-        if ticket_cache.are_external_users {
+        if user_context_cache.are_external_users {
             check_external_user(&user_uri, db).await?;
         }
 
-        let mut t = ticket_cache.write.lock().await;
+        info!("@ upd cache ticket={}", ticket_obj.id);
+        let mut t = user_context_cache.write_tickets.lock().await;
         t.insert(ticket_id.to_owned(), ticket_obj);
-        //info!("ticket cache size = {}", t.len());
         t.refresh();
 
         Ok(user_uri)
+    };
+
+    match user_id {
+        Ok(user_id) => {
+            if user_id != "cfg:Guest" && user_id != "cfg:VedaSystem" {
+                if let Some(v_activity_time) = user_context_cache.read_user_activity.get(&user_id) {
+                    if let Some(activity_time) = v_activity_time.get_one() {
+                        let now = Utc::now().naive_utc().timestamp();
+                        //info!("@1, USER={}, prev={}, now={}", user_id, activity_time, now);
+                        if now - activity_time > UPDATE_USER_ACTIVITY_PERIOD {
+                            let mut t = user_context_cache.write_user_activity.lock().await;
+                            t.update(user_id.clone(), now);
+                            t.refresh();
+                            info!("CHANGE ACTIVITY, USER={}, prev={}, now={}", user_id, activity_time, now);
+                        }
+                    }
+                } else {
+                    let mut t = user_context_cache.write_user_activity.lock().await;
+                    t.insert(user_id.to_owned(), Utc::now().naive_utc().timestamp());
+                    t.refresh();
+                }
+            }
+
+            Ok(user_id)
+        },
+        Err(e) => Err(e),
     }
 }
 
