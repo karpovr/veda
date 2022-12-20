@@ -1,7 +1,7 @@
 use crate::cleaner::CleanerContext;
 use chrono::prelude::*;
+use chrono::Duration;
 use std::ops::Sub;
-use time::Duration;
 use v_v8::v_common::onto::individual::Individual;
 use v_v8::v_common::search::common::FTQuery;
 use v_v8::v_common::v_api::api_client::IndvOp;
