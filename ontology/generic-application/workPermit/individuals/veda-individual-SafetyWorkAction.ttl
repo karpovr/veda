@@ -272,7 +272,7 @@ d:SafetyWorkAction_1_3
 d:SafetyWorkAction_1_3_1
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
-  rdfs:label "работы вести в соответствии с ППР, ТК."^^xsd:string.
+  rdfs:label "работы вести в соответствии с ППР, ТК и инструкцией"^^xsd:string.
 d:SafetyWorkAction_1_3_2
   a v-s:SafetyWorkAction;
   v-s:parentUnit d:SafetyWorkAction_1_3;
