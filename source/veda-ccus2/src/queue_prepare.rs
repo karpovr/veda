@@ -121,7 +121,7 @@ fn prepare_queue_el(tx: &Sender<SMessage>, msg: &mut Individual, session2uris: &
     if let Some(uri_from_queue) = msg.get_first_literal("uri") {
         // найдем есть ли среди uri на которые есть подписки, uri из очереди
         let sessions = get_sessions(tx, &uri_from_queue).unwrap();
-        if !sessions.is_empty() {
+        //if !sessions.is_empty() {
             info!("FOUND CHANGES: uri={}, sessions={:?}", uri_from_queue, sessions);
 
             // берем u_counter
@@ -134,7 +134,7 @@ fn prepare_queue_el(tx: &Sender<SMessage>, msg: &mut Individual, session2uris: &
                 let urics = session2uris.entry(*session).or_default();
                 urics.insert(uri_from_queue.clone(), counter_from_queue);
             }
-        }
+        //}
     }
 
     Ok(())

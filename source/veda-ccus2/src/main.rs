@@ -121,18 +121,21 @@ fn main() {
 
     loop {
         if let Some(delta) = qp.prepare_delta(&c_sdm_tx) {
-            if let Ok(mut w) = wb.lock() {
-                for wsc in w.values_mut() {
+            if let Ok(mut chid_2_ws) = wb.lock() {
+
+                // send HEARTBEAT
+                for wsc in chid_2_ws.values_mut() {
                     if wsc.send_time.elapsed() > HEARTBEAT_TIME && wsc.ws.send("").is_ok() {
                         wsc.send_time = Instant::now();
                         //info!("<- [{}] HEARTBEAT", wsc.ws.connection_id());
                     }
                 }
 
-                for el in delta.iter() {
+                // send changes
+                for (ch_id, vals) in delta.iter() {
                     let mut changes = String::new();
 
-                    for (uri, counter) in el.1.iter() {
+                    for (uri, counter) in vals.iter() {
                         if !changes.is_empty() {
                             changes.push(',');
                         }
@@ -142,10 +145,12 @@ fn main() {
                         changes.push_str(&counter.to_string());
                     }
 
-                    if let Some(wsc) = w.get_mut(el.0) {
-                        if wsc.ws.send(changes.to_owned()).is_ok() {
-                            wsc.send_time = Instant::now();
-                            info!("<- [{}] '{}'. ", el.0, changes);
+                    if !changes.is_empty() {
+                        if let Some(wsc) = chid_2_ws.get_mut(ch_id) {
+                            if wsc.ws.send(changes.to_owned()).is_ok() {
+                                wsc.send_time = Instant::now();
+                                info!("<- [{}] '{}'. ", ch_id, changes);
+                            }
                         }
                     }
                 }
