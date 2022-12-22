@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use std::io::Error;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::module_impl::Module;
-use v_common::onto::*;
+use v_common::onto::{XSD_BOOLEAN, XSD_DATE_TIME, XSD_DECIMAL, XSD_DOUBLE, XSD_FLOAT, XSD_INT, XSD_INTEGER, XSD_LONG, XSD_NORMALIZED_STRING, XSD_STRING};
 use v_common::search::common::{get_short_prefix, split_full_prefix, PrefixesCache, QueryResult};
 use v_common::storage::async_storage::AStorage;
 use v_common::v_api::obj::ResultCode;
@@ -42,7 +42,7 @@ impl SparqlClient {
                         return qres;
                     }
                     let var = &v.head.vars[0];
-                    println!("vars:{:?}", var);
+                    debug!("vars:{var:?}");
 
                     qres.count = v.results.bindings.len() as i64;
                     for el in v.results.bindings {
@@ -51,7 +51,7 @@ impl SparqlClient {
                             if let Some(v) = r["value"].as_str() {
                                 let iri = split_full_prefix(v);
                                 let prefix = get_short_prefix(iri.0, &prefix_cache);
-                                let short_iri = format!("{}:{}", prefix, iri.1);
+                                let short_iri = format!("{prefix}:{}", iri.1);
 
                                 if self.az.authorize(&short_iri, user_uri, Access::CanRead as u8, true).unwrap_or(0) != Access::CanRead as u8 {
                                     qres.result.push(short_iri);
@@ -81,7 +81,7 @@ impl SparqlClient {
                 Ok(v) => {
                     let mut v_cols = vec![];
 
-                    for el in v.head.vars.iter() {
+                    for el in &v.head.vars {
                         v_cols.push(Value::String(el.to_owned()));
                     }
                     jres["cols"] = Value::Array(v_cols);
@@ -93,14 +93,14 @@ impl SparqlClient {
                         } else {
                             Value::Array(vec![])
                         };
-                        for var in v.head.vars.iter() {
+                        for var in &v.head.vars {
                             let r = &el[var];
                             if let (Some(r_type), Some(r_data), r_datatype) = (r.get("type"), r.get("value"), r.get("datatype")) {
                                 match (r_type.as_str(), r_data.as_str()) {
                                     (Some("uri"), Some(data)) => {
                                         let iri = split_full_prefix(data);
                                         let prefix = get_short_prefix(iri.0, &prefix_cache);
-                                        let short_iri = format!("{}:{}", prefix, iri.1);
+                                        let short_iri = format!("{prefix}:{}", iri.1);
 
                                         jrow[var] = json!(short_iri);
                                     },
@@ -119,10 +119,7 @@ impl SparqlClient {
                                                 Some(XSD_DATE_TIME) => {
                                                     jrow[var] = json!(data);
                                                 },
-                                                Some(XSD_FLOAT) | Some(XSD_DOUBLE) => {
-                                                    jrow[var] = json!(data.parse::<f64>().unwrap_or_default());
-                                                },
-                                                Some(XSD_DECIMAL) => {
+                                                Some(XSD_FLOAT) | Some(XSD_DOUBLE) | Some(XSD_DECIMAL) => {
                                                     jrow[var] = json!(data.parse::<f64>().unwrap_or_default());
                                                 },
                                                 _ => {},

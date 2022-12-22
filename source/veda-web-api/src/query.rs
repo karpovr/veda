@@ -59,7 +59,7 @@ pub(crate) async fn query_get(
     req: HttpRequest,
     mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(data.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(data.ticket.clone(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -147,7 +147,7 @@ async fn stored_query(
         }
     }
 
-    log(Some(&start_time), &uinf, "stored_query", &format!("{:?}", data), ResultCode::BadRequest);
+    log(Some(&start_time), &uinf, "stored_query", &format!("{data:?}"), ResultCode::BadRequest);
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
@@ -165,11 +165,11 @@ async fn direct_query(
         res = query_endpoints.sparql_client.lock().await.query_select_ids(&uinf.user_id, data.sparql.clone().unwrap(), db, prefix_cache).await;
     } else if data.sql.is_some() {
         let mut req = FTQuery {
-            ticket: "".to_owned(),
-            user: uinf.user_id.to_owned(),
+            ticket: String::new(),
+            user: uinf.user_id.clone(),
             query: data.sql.clone().unwrap_or_default(),
-            sort: "".to_string(),
-            databases: "".to_string(),
+            sort: String::new(),
+            databases: String::new(),
             reopen: false,
             top: data.top.unwrap_or_default(),
             limit: data.limit.unwrap_or_default(),
@@ -206,7 +206,7 @@ async fn direct_query(
             ctx.push(id.to_owned());
         }
 
-        req.user = uinf.user_id.to_owned();
+        req.user = uinf.user_id.clone();
 
         if !(req.query.contains("==") || req.query.contains("&&") || req.query.contains("||")) {
             req.query = "'*' == '".to_owned() + &req.query + "'";
@@ -255,11 +255,11 @@ async fn direct_query(
         }
     }
 
-    if res.result_code != ResultCode::Ok {
-        error!("{:?}", res.result_code);
-        Ok(HttpResponse::new(StatusCode::from_u16(res.result_code as u16).unwrap()))
-    } else {
+    if res.result_code == ResultCode::Ok {
         info!("Ok, count = {}, time(ms): query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
         Ok(HttpResponse::Ok().json(res))
+    } else {
+        error!("{:?}", res.result_code);
+        Ok(HttpResponse::new(StatusCode::from_u16(res.result_code as u16).unwrap()))
     }
 }

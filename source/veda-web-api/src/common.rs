@@ -76,14 +76,13 @@ pub async fn get_user_info(
     };
 
     let addr = extract_addr(req);
-    match check_ticket(&ticket_id, ticket_cache, &addr, db, &mstorage).await {
-        Ok(user_id) => Ok(UserInfo {
-            ticket: ticket_id,
-            addr,
-            user_id,
-        }),
-        Err(res) => Err(res),
-    }
+    let user_id = check_ticket(&ticket_id, ticket_cache, &addr, db, &mstorage).await?;
+
+    Ok(UserInfo {
+        ticket: ticket_id,
+        addr,
+        user_id,
+    })
 }
 
 #[derive(Serialize, Deserialize)]

@@ -19,7 +19,7 @@ use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
 use crate::query::{query_get, query_post, QueryEndpoints};
 use crate::sparql_client::SparqlClient;
-use crate::update::*;
+use crate::update::{add_to_individual, put_individual, put_individuals, remove_from_individual, remove_individual, set_in_individual};
 use crate::vql_query_client::VQLHttpClient;
 use actix_files::{Files, NamedFile};
 use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
@@ -93,7 +93,7 @@ async fn main() -> std::io::Result<()> {
                 let user = url.username();
                 let pass = url.password().unwrap_or("123");
                 info!("Trying to connect to Tarantool, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
-                tt_config = Some(ClientConfig::new(format!("{}:{}", host, port), user, pass).set_timeout_time_ms(2000).set_reconnect_time_ms(2000));
+                tt_config = Some(ClientConfig::new(format!("{host}:{port}"), user, pass).set_timeout_time_ms(2000).set_reconnect_time_ms(2000));
             },
             Err(e) => {
                 error!("fail parse {}, err={}", p, e);
@@ -109,7 +109,7 @@ async fn main() -> std::io::Result<()> {
     let mut workers = num_cpus::get();
 
     let args: Vec<String> = env::args().collect();
-    for el in args.iter() {
+    for el in &args {
         if el.starts_with("--http_port") {
             port = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
         }
@@ -164,7 +164,7 @@ async fn main() -> std::io::Result<()> {
                     ft_client.nng_client = Some(FTClient::new(url.to_string()));
                     ft_client.query_type = VQLClientConnectType::Nng;
                 } else {
-                    ft_client.http_client = Some(VQLHttpClient::new(url.to_string()));
+                    ft_client.http_client = Some(VQLHttpClient::new(url.as_str()));
                     ft_client.query_type = VQLClientConnectType::Http;
                 }
             }
@@ -243,7 +243,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/authenticate").route(web::get().to(authenticate_get)).route(web::post().to(authenticate_post)))
             .service(Files::new("/", "./public"))
     })
-    .bind(format!("0.0.0.0:{}", port))?
+    .bind(format!("0.0.0.0:{port}"))?
     .workers(workers)
     .run()
     .fuse();

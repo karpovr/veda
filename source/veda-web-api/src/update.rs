@@ -25,7 +25,7 @@ pub(crate) async fn update(
     mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", action, "", res);
@@ -99,7 +99,7 @@ pub(crate) async fn update(
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::TicketExpired as u16).unwrap()));
         }
 
-        let ticket = uinf.ticket.clone().unwrap_or_else(|| "".to_owned());
+        let ticket = uinf.ticket.clone().unwrap_or_else(|| String::new());
         return match ms.updates_use_param_with_addr((&ticket, uinf.addr), event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
                 log(Some(&start_time), &uinf, action, &ind_ids, r.result);
@@ -121,7 +121,7 @@ pub(crate) async fn update(
 }
 
 #[put("/put_individuals")]
-async fn put_individuals(
+pub(crate) async fn put_individuals(
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
@@ -133,7 +133,7 @@ async fn put_individuals(
 }
 
 #[put("/put_individual")]
-async fn put_individual(
+pub(crate) async fn put_individual(
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
     mstorage: web::Data<Mutex<MStorageClient>>,
@@ -145,7 +145,7 @@ async fn put_individual(
 }
 
 #[put("/remove_individual")]
-async fn remove_individual(
+pub(crate) async fn remove_individual(
     req: HttpRequest,
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
@@ -157,7 +157,7 @@ async fn remove_individual(
 }
 
 #[put("/add_to_individual")]
-async fn add_to_individual(
+pub(crate) async fn add_to_individual(
     req: HttpRequest,
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
@@ -169,7 +169,7 @@ async fn add_to_individual(
 }
 
 #[put("/set_in_individual")]
-async fn set_in_individual(
+pub(crate) async fn set_in_individual(
     req: HttpRequest,
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
@@ -181,7 +181,7 @@ async fn set_in_individual(
 }
 
 #[put("/remove_from_individual")]
-async fn remove_from_individual(
+pub(crate) async fn remove_from_individual(
     req: HttpRequest,
     params: web::Query<TicketRequest>,
     data: web::Json<JSONValue>,
