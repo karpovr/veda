@@ -81,7 +81,7 @@ impl<'a> Handler for Server<'a> {
 fn main() {
     let env_var = "RUST_LOG";
     match std::env::var_os(env_var) {
-        Some(val) => println!("use env var: {}: {:?}", env_var, val.to_str()),
+        Some(val) => println!("use env var: {env_var}: {:?}", val.to_str()),
         None => std::env::set_var(env_var, "info,actix_server=info,actix_web=info"),
     }
 
@@ -115,14 +115,13 @@ fn main() {
                 })
                 .build(|out| Server::new(sdm_tx.clone(), out, &ww))
                 .unwrap();
-            ws.listen(format!("0.0.0.0:{}", ccus_port)).unwrap();
+            ws.listen(format!("0.0.0.0:{ccus_port}")).unwrap();
         })
         .unwrap();
 
     loop {
         if let Some(delta) = qp.prepare_delta(&c_sdm_tx) {
             if let Ok(mut chid_2_ws) = wb.lock() {
-
                 // send HEARTBEAT
                 for wsc in chid_2_ws.values_mut() {
                     if wsc.send_time.elapsed() > HEARTBEAT_TIME && wsc.ws.send("").is_ok() {
@@ -132,7 +131,7 @@ fn main() {
                 }
 
                 // send changes
-                for (ch_id, vals) in delta.iter() {
+                for (ch_id, vals) in &delta {
                     let mut changes = String::new();
 
                     for (uri, counter) in vals.iter() {
@@ -147,7 +146,7 @@ fn main() {
 
                     if !changes.is_empty() {
                         if let Some(wsc) = chid_2_ws.get_mut(ch_id) {
-                            if wsc.ws.send(changes.to_owned()).is_ok() {
+                            if wsc.ws.send(changes.clone()).is_ok() {
                                 wsc.send_time = Instant::now();
                                 info!("<- [{}] '{}'. ", ch_id, changes);
                             }

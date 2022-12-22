@@ -30,15 +30,15 @@ enum Cmd {
 }
 
 pub struct OutData {
-    counter: Option<u64>,
+    counter: Option<i64>,
     sessions: Option<Vec<SessionId>>,
 }
 
 pub struct InData {
     cmd: Cmd,
     uri: Option<String>,
-    session_id: Option<u32>,
-    counter: Option<u64>,
+    session_id: Option<SessionId>,
+    counter: Option<i64>,
     is_clear_unused: Option<bool>,
     out_ch: Sender<SMessage>,
 }
@@ -50,7 +50,7 @@ pub enum SMessage {
 
 #[derive(Default)]
 pub struct SubscribeElement {
-    pub(crate) counter: u64,
+    pub(crate) counter: i64,
     pub(crate) sessions: HashSet<SessionId>,
 }
 
@@ -61,24 +61,25 @@ pub struct SharedDataManager {
 }
 
 impl SharedDataManager {
-    fn subscribe(&mut self, uri: &str, counter: u64, session_id: SessionId) -> u64 {
-        let mut storage_counter = 0;
-
-        if !self.uri2sessions.contains_key(uri) {
-            let mut indv = Individual::default();
-            self.storage.get_individual(uri, &mut indv);
-            let out_counter = indv.get_first_integer("v-s:updateCounter").unwrap_or_default();
-
-            if out_counter >= 0 {
-                info!("from storage: {}, {}", uri, out_counter);
-                storage_counter = out_counter as u64;
-            }
+    fn find_counter(&mut self, uri: &str) -> Option<i64> {
+        let mut indv = Individual::default();
+        self.storage.get_individual(uri, &mut indv);
+        if let Some(counter) = indv.get_first_integer("v-s:updateCounter") {
+            info!("read from storage: {}, {}", uri, counter);
+            return Some(counter);
         }
+        None
+    }
 
-        let new_counter = if storage_counter > 0 {
-            Some(storage_counter)
+    fn subscribe(&mut self, uri: &str, counter: i64, session_id: SessionId) -> i64 {
+        let new_counter = if let Some(v) = self.uri2sessions.get(uri) {
+            if v.sessions.is_empty() {
+                self.find_counter(uri)
+            } else {
+                None
+            }
         } else {
-            None
+            self.find_counter(uri)
         };
 
         let res = self.add_session_to_uri(uri, session_id, new_counter);
@@ -92,13 +93,13 @@ impl SharedDataManager {
         res.1
     }
 
-    pub fn add_session_to_uri(&mut self, uri: &str, session_id: SessionId, counter: Option<u64>) -> (bool, u64) {
+    pub fn add_session_to_uri(&mut self, uri: &str, session_id: SessionId, counter: Option<i64>) -> (bool, i64) {
         let el = self.uri2sessions.entry(uri.to_owned()).or_default();
-        let insert = if !el.sessions.contains(&session_id) {
+        let insert = if el.sessions.contains(&session_id) {
+            false
+        } else {
             el.sessions.insert(session_id);
             true
-        } else {
-            false
         };
 
         if let Some(v) = counter {
@@ -116,7 +117,7 @@ impl SharedDataManager {
         let mut srv = SharedDataManager {
             //total_prepared_count: 0,
             storage,
-            uri2sessions: Default::default(),
+            uri2sessions: HashMap::default(),
         };
 
         loop {
@@ -151,7 +152,7 @@ impl SharedDataManager {
 
                             let msg_s = SMessage::Out(OutData {
                                 //data: None,
-                                counter: Some(counter as u64),
+                                counter: Some(counter),
                                 sessions: None,
                             });
                             if let Err(e) = d.out_ch.send(msg_s) {
@@ -176,7 +177,7 @@ impl SharedDataManager {
 
                                 if let Some(b) = d.is_clear_unused {
                                     if b && uss.sessions.is_empty() {
-                                        empty_uris.push(uri.to_owned());
+                                        empty_uris.push(uri.clone());
                                     }
                                 }
                             }
@@ -200,7 +201,7 @@ impl SharedDataManager {
 
 // utils
 
-pub fn subscribe(tx: &Sender<SMessage>, uri: &str, counter: u64, session_id: SessionId) -> Result<u64, SharedDataManagerError> {
+pub fn subscribe(tx: &Sender<SMessage>, uri: &str, counter: i64, session_id: SessionId) -> Result<i64, SharedDataManagerError> {
     let (q_tx, q_rx): (Sender<SMessage>, Receiver<SMessage>) = mpsc::channel();
     let s_msg = SMessage::In(InData {
         cmd: Cmd::Subscribe,
@@ -245,7 +246,7 @@ pub fn unsubscribe_all(tx: &Sender<SMessage>, session_id: SessionId, is_clear_un
     Ok(())
 }
 
-pub fn update_counter(tx: &Sender<SMessage>, uri: &str, counter: Option<u64>) -> Result<(), SharedDataManagerError> {
+pub fn update_counter(tx: &Sender<SMessage>, uri: &str, counter: Option<i64>) -> Result<(), SharedDataManagerError> {
     let (q_tx, _q_rx): (Sender<SMessage>, Receiver<SMessage>) = mpsc::channel();
     let s_msg = SMessage::In(InData {
         cmd: Cmd::UpdateCounter,
@@ -259,7 +260,7 @@ pub fn update_counter(tx: &Sender<SMessage>, uri: &str, counter: Option<u64>) ->
     Ok(())
 }
 
-pub fn get_sessions(tx: &Sender<SMessage>, uri: &str) -> Result<Vec<u32>, SharedDataManagerError> {
+pub fn get_sessions(tx: &Sender<SMessage>, uri: &str) -> Result<Vec<SessionId>, SharedDataManagerError> {
     let (q_tx, q_rx): (Sender<SMessage>, Receiver<SMessage>) = mpsc::channel();
     let s_msg = SMessage::In(InData {
         cmd: Cmd::GetSessions,

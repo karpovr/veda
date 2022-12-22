@@ -1,4 +1,4 @@
-use crate::shared_data::{get_sessions, update_counter};
+use crate::shared_data::{get_sessions, update_counter, SessionId};
 use crate::SMessage;
 use log::{error, info, warn};
 use std::cmp::Ordering;
@@ -17,6 +17,8 @@ pub struct QueuePrepare {
     queue_consumer: Consumer,
 }
 
+type SessionsContext = HashMap<SessionId, HashMap<String, i64>>;
+
 impl QueuePrepare {
     pub fn new() -> Self {
         let queue_name = "individuals-flow";
@@ -30,10 +32,10 @@ impl QueuePrepare {
             warn!("sleep, and then reopen queue ...");
             sleep(Duration::from_secs(1));
         }
-        panic!("!!!!!!!!! FAIL OPEN QUEUE {} ", queue_name);
+        panic!("!!!!!!!!! FAIL OPEN QUEUE {queue_name}");
     }
 
-    pub fn prepare_delta(&mut self, tx: &Sender<SMessage>) -> Option<HashMap<u32, HashMap<String, u64>>> {
+    pub fn prepare_delta(&mut self, tx: &Sender<SMessage>) -> Option<SessionsContext> {
         let now = Instant::now();
 
         // READ QUEUE
@@ -47,10 +49,10 @@ impl QueuePrepare {
 
         match (self.queue_consumer.queue.count_pushed - self.queue_consumer.count_popped).cmp(&0) {
             Ordering::Greater => {
-                if self.queue_consumer.queue.id != self.queue_consumer.id {
-                    size_batch = 1;
-                } else {
+                if self.queue_consumer.queue.id == self.queue_consumer.id {
                     size_batch = self.queue_consumer.queue.count_pushed - self.queue_consumer.count_popped;
+                } else {
+                    size_batch = 1;
                 }
             },
             Ordering::Less => {},
@@ -68,7 +70,7 @@ impl QueuePrepare {
             info!("queue: batch size = {}", size_batch);
         }
 
-        let mut session2uris: HashMap<u32, HashMap<String, u64>> = HashMap::new();
+        let mut session2uris: SessionsContext = HashMap::new();
 
         for _it in 0..size_batch {
             // пробуем взять из очереди заголовок сообщения
@@ -110,7 +112,7 @@ impl QueuePrepare {
     }
 }
 
-fn prepare_queue_el(tx: &Sender<SMessage>, msg: &mut Individual, session2uris: &mut HashMap<u32, HashMap<String, u64>>) -> Result<(), i32> {
+fn prepare_queue_el(tx: &Sender<SMessage>, msg: &mut Individual, session2uris: &mut SessionsContext) -> Result<(), i32> {
     // запустим ленивый парсинг сообщения в Individual
     if parse_raw(msg).is_ok() {
     } else {
@@ -121,20 +123,20 @@ fn prepare_queue_el(tx: &Sender<SMessage>, msg: &mut Individual, session2uris: &
     if let Some(uri_from_queue) = msg.get_first_literal("uri") {
         // найдем есть ли среди uri на которые есть подписки, uri из очереди
         let sessions = get_sessions(tx, &uri_from_queue).unwrap();
-        //if !sessions.is_empty() {
+        if !sessions.is_empty() {
             info!("FOUND CHANGES: uri={}, sessions={:?}", uri_from_queue, sessions);
 
             // берем u_counter
-            let counter_from_queue = msg.get_first_integer("u_count").unwrap_or_default() as u64;
+            let counter_from_queue = msg.get_first_integer("u_count").unwrap_or_default();
             info!("uri={}, {}", uri_from_queue, counter_from_queue);
 
             update_counter(tx, &uri_from_queue, Some(counter_from_queue)).unwrap();
 
-            for session in sessions.iter() {
+            for session in &sessions {
                 let urics = session2uris.entry(*session).or_default();
                 urics.insert(uri_from_queue.clone(), counter_from_queue);
             }
-        //}
+        }
     }
 
     Ok(())
