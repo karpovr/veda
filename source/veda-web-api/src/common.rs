@@ -172,7 +172,7 @@ pub(crate) fn get_module_name(id: u64) -> &'static str {
 
 pub(crate) fn get_ticket(req: &HttpRequest, in_ticket: &Option<String>) -> Option<String> {
     if let Some(t) = in_ticket {
-        return Some(t.to_owned());
+        return Some(t.clone());
     } else if let Some(c) = req.cookie("ticket") {
         return Some(c.value().to_owned());
     }
@@ -190,7 +190,11 @@ pub(crate) fn extract_addr(req: &HttpRequest) -> Option<IpAddr> {
         }
     }
 
-    Some(req.peer_addr().unwrap().ip())
+    if let Some(v) = req.peer_addr() {
+        return Some(v.ip());
+    }
+
+    None
 }
 
 pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr: &Option<IpAddr>, user_id: &str, operation: &str, args: &str, res: ResultCode) {
@@ -212,19 +216,19 @@ pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr:
 
     if res == ResultCode::InternalServerError {
         if let Some(t) = start_time {
-            error!("{}, {}, action = {}, user = {}, {:?}, {:?}, time = {:.3} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_secs_f64() * 1000.0);
+            error!("{ip}, {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}, time = {:.3} ms", t.elapsed().as_secs_f64() * 1000.0);
         } else {
-            error!("{}, {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
+            error!("{ip}, {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}");
         }
     } else if let Some(t) = start_time {
-        info!("{},  {}, action = {}, user = {}, {:?}, {:?}, time = {:.3} ms", ip, ticket_id, operation, user_id, res, args, t.elapsed().as_secs_f64() * 1000.0);
+        info!("{ip},  {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}, time = {:.3} ms", t.elapsed().as_secs_f64() * 1000.0);
     } else {
-        info!("{},  {}, action = {}, user = {}, {:?}, {:?}", ip, ticket_id, operation, user_id, res, args);
+        info!("{ip},  {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}");
     }
 }
 
 pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str, args: &str, res: ResultCode) {
-    log_w(start_time, &uinf.ticket, &uinf.addr, &uinf.user_id, operation, args, res)
+    log_w(start_time, &uinf.ticket, &uinf.addr, &uinf.user_id, operation, args, res);
 }
 
 const UPDATE_USER_ACTIVITY_PERIOD: i64 = 60;
@@ -280,12 +284,12 @@ pub(crate) async fn check_ticket(
                 if let Some(v_activity_time) = user_context_cache.read_user_activity.get(&user_id) {
                     if let Some(activity_time) = v_activity_time.get_one() {
                         let now = Utc::now().naive_utc().timestamp();
-                        //info!("@1, USER={}, prev={}, now={}", user_id, activity_time, now);
+
                         if now - activity_time > UPDATE_USER_ACTIVITY_PERIOD {
                             let mut t = user_context_cache.write_user_activity.lock().await;
                             t.update(user_id.clone(), now);
                             t.refresh();
-                            info!("CHANGE ACTIVITY, USER={}, prev={}, now={}", user_id, activity_time, now);
+                            info!("CHANGE ACTIVITY, USER={user_id}, prev={activity_time}, now={now}");
                         }
                     }
                 } else {
@@ -337,19 +341,19 @@ pub(crate) async fn check_external_user(user_uri: &str, db: &AStorage) -> Result
         if res == ResultCode::Ok {
             if let Some(o) = user_indv.get_first_literal("v-s:origin") {
                 if o != "ExternalUser" {
-                    error!("user {} is not external", user_uri);
+                    error!("user {user_uri} is not external");
                     return Err(ResultCode::AuthenticationFailed);
                 }
             } else {
-                error!("user {} not content field [origin]", user_uri);
+                error!("user {user_uri} not content field [origin]");
                 return Err(ResultCode::AuthenticationFailed);
             }
         } else {
-            error!("fail read user {}, err={:?}", user_uri, res);
+            error!("fail read user {user_uri}, err={res:?}");
             return Err(ResultCode::AuthenticationFailed);
         }
     } else {
-        error!("fail read user {}", user_uri);
+        error!("fail read user {user_uri}");
         return Err(ResultCode::AuthenticationFailed);
     }
     Ok(())

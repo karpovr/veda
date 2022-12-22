@@ -30,7 +30,7 @@ pub(crate) async fn get_operation_state(params: web::Query<GetOperationStateRequ
     let uinf = UserInfo {
         ticket: None,
         addr: extract_addr(&req),
-        user_id: "".to_string(),
+        user_id: String::new(),
     };
     let module_name = get_module_name(params.module_id);
     if let Ok(mut module_info) = ModuleInfo::new(BASE_PATH, module_name, true) {
@@ -91,7 +91,7 @@ pub(crate) async fn get_individual(
     mstorage: web::Data<Mutex<MStorageClient>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, &mstorage).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individual", "", res);
@@ -107,7 +107,7 @@ pub(crate) async fn get_individual(
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()));
         }
     } else {
-        params.uri.to_owned()
+        params.uri.clone()
     };
 
     if id.contains(QUEUE_STATE_PREFIX) {
@@ -121,7 +121,7 @@ pub(crate) async fn get_individual(
                         individual.set_id(&id);
                         individual.add_uri("rdf:type", "v-s:AppInfo");
                         individual.add_datetime("v-s:created", now);
-                        individual.add_uri("srv:queue", &format!("srv:{}-{}", QUEUE_STATE_PREFIX, consumer_name));
+                        individual.add_uri("srv:queue", &format!("srv:{QUEUE_STATE_PREFIX}-{consumer_name}"));
                         individual.add_integer("srv:total_count", queue_consumer.queue.count_pushed as i64);
                         individual.add_integer("srv:current_count", queue_consumer.count_popped as i64);
 
@@ -132,7 +132,7 @@ pub(crate) async fn get_individual(
                 },
                 Err(e) => {
                     log(Some(&start_time), &uinf, "get_individual", &id, ResultCode::InternalServerError);
-                    error!("fail open consumer {}, err={:?}", consumer_name, e);
+                    error!("fail open consumer {consumer_name}, err={e:?}");
                 },
             }
         }

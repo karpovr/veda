@@ -29,12 +29,12 @@ impl Default for SparqlClient {
 
 impl SparqlClient {
     pub(crate) async fn query_select_ids(&mut self, user_uri: &str, query: String, _db: web::Data<AStorage>, prefix_cache: web::Data<PrefixesCache>) -> QueryResult {
-        let res =
+        let res_req =
             self.client.post(&self.point).header("Content-Type", "application/sparql-query").header("Accept", "application/sparql-results+json").send_body(query).await;
 
         let mut qres = QueryResult::default();
 
-        if let Ok(mut response) = res {
+        if let Ok(mut response) = res_req {
             match response.json::<SparqlResponse>().await {
                 Ok(v) => {
                     if v.head.vars.len() > 1 {
@@ -71,18 +71,18 @@ impl SparqlClient {
     }
 
     pub(crate) async fn query_select(&mut self, _user_uri: &str, query: String, format: &str, prefix_cache: web::Data<PrefixesCache>) -> Result<Value, Error> {
-        let res =
+        let res_req =
             self.client.post(&self.point).header("Content-Type", "application/sparql-query").header("Accept", "application/sparql-results+json").send_body(query).await;
 
         let mut jres = Value::default();
 
-        match res {
+        match res_req {
             Ok(mut response) => match response.json::<SparqlResponse>().await {
                 Ok(v) => {
                     let mut v_cols = vec![];
 
                     for el in &v.head.vars {
-                        v_cols.push(Value::String(el.to_owned()));
+                        v_cols.push(Value::String(el.clone()));
                     }
                     jres["cols"] = Value::Array(v_cols);
                     let mut jrows = vec![];
@@ -132,7 +132,7 @@ impl SparqlClient {
                                         error!("unknown type: {:?}", r_type.as_str());
                                     },
                                 }
-                                warn!("type={:?}, value={}", r_type, r_data);
+                                warn!("type={r_type:?}, value={r_data}");
                             }
                         }
                         jrows.push(jrow);

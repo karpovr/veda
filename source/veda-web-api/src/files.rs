@@ -97,7 +97,7 @@ pub(crate) async fn load_file(
 
             http_resp.headers_mut().insert(header::CONTENT_LENGTH, HeaderValue::from(50));
 
-            log(Some(&start_time), &uinf, "get_file", &format!("{}, size={}", file_id, size), ResultCode::Ok);
+            log(Some(&start_time), &uinf, "get_file", &format!("{file_id}, size={size}"), ResultCode::Ok);
             return Ok(http_resp);
         }
     }
@@ -107,7 +107,7 @@ pub(crate) async fn load_file(
 }
 
 async fn check_and_create_file(path: &str, file_name: &str, f: &mut Vec<async_std::fs::File>) -> io::Result<String> {
-    let full_path = format!("{}/{}", path, file_name);
+    let full_path = format!("{path}/{file_name}");
 
     if full_path.contains("..") {
         return Err(io::Error::new(ErrorKind::InvalidData, ""));
@@ -201,7 +201,7 @@ pub(crate) async fn save_file(
                         }
                     },
                     _ => {
-                        error!("unknown param [{}]", name);
+                        error!("unknown param [{name}]");
                     },
                 }
             }
@@ -213,11 +213,11 @@ pub(crate) async fn save_file(
         AsyncWriteExt::close(ff).await?;
     }
 
-    let tmp_file_path = format!("{}/{}", tmp_path, upload_tmp_id);
-    let dest_file_path = &format!("{}{}", base_path, path);
-    let file_full_name = format!("{}/{}", dest_file_path, sanitize_filename::sanitize(&uri));
+    let tmp_file_path = format!("{tmp_path}/{upload_tmp_id}");
+    let dest_file_path = &format!("{base_path}{path}");
+    let file_full_name = format!("{dest_file_path}/{}", sanitize_filename::sanitize(&uri));
     if file_full_name.contains("..") {
-        log(Some(&start_time), &uinf, "upload_file", &format!("incorrect path [{}]", file_full_name), ResultCode::Ok);
+        log(Some(&start_time), &uinf, "upload_file", &format!("incorrect path [{file_full_name}]"), ResultCode::Ok);
         return Ok(HttpResponse::InternalServerError().into());
     }
 
@@ -237,9 +237,9 @@ pub(crate) async fn save_file(
     } else if !path.is_empty() && !uri.is_empty() {
         if Path::new(&tmp_file_path).exists().await {
             async_std::fs::create_dir_all(&dest_file_path).await.unwrap();
-            debug!("ren file {} <- {}", file_full_name, tmp_file_path);
+            debug!("ren file {file_full_name} <- {tmp_file_path}");
             if let Err(e) = async_fs::rename(tmp_file_path.clone(), file_full_name.clone()).await {
-                warn!("fail rename, use copy, reason={}", e);
+                warn!("fail rename, use copy, reason={e}");
                 if let Err(e) = async_fs::copy(tmp_file_path.clone(), file_full_name.clone()).await {
                     error!("{:?}", e);
                     return Ok(HttpResponse::InternalServerError().into());
@@ -249,7 +249,7 @@ pub(crate) async fn save_file(
                 }
             }
         } else {
-            warn!("write empty file {}", file_full_name);
+            warn!("write empty file {file_full_name}");
             async_fs::write(file_full_name.clone(), "").await?;
         }
     }

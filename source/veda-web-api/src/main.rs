@@ -92,11 +92,11 @@ async fn main() -> std::io::Result<()> {
                 let port = url.port().unwrap_or(3309);
                 let user = url.username();
                 let pass = url.password().unwrap_or("123");
-                info!("Trying to connect to Tarantool, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
+                info!("Trying to connect to Tarantool, host: {host}, port: {port}, user: {user}");
                 tt_config = Some(ClientConfig::new(format!("{host}:{port}"), user, pass).set_timeout_time_ms(2000).set_reconnect_time_ms(2000));
             },
             Err(e) => {
-                error!("fail parse {}, err={}", p, e);
+                error!("fail parse {p}, err={e}");
                 return Ok(());
             },
         }
@@ -130,7 +130,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
-    info!("LISTEN {}", port);
+    info!("LISTEN {port}");
 
     let mut server_future = HttpServer::new(move || {
         let db = if let Some(cfg) = &tt_config {
@@ -171,7 +171,7 @@ async fn main() -> std::io::Result<()> {
         }
 
         let check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
-        info!("PARAM [check_ticket_ip] = {}", check_ticket_ip);
+        info!("PARAM [check_ticket_ip] = {check_ticket_ip}");
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
         let (user_activity_read, user_activity_write) = evmap::new();
         let (f2s_prefixes_cache_read, f2s_prefixes_cache_write) = evmap::new();

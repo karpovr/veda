@@ -30,7 +30,7 @@ pub(crate) async fn get_ticket_trusted(
     let uinf = UserInfo {
         ticket: None,
         addr: extract_addr(&req),
-        user_id: "".to_string(),
+        user_id: String::new(),
     };
 
     if let Err(e) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &uinf.addr, &tt, &mstorage).await {
@@ -73,7 +73,7 @@ pub(crate) async fn logout(
     let uinf = UserInfo {
         ticket: None,
         addr: extract_addr(&req),
-        user_id: "".to_string(),
+        user_id: String::new(),
     };
 
     match check_ticket(&params.ticket, &ticket_cache, &uinf.addr, &tt, &mstorage).await {
@@ -155,7 +155,7 @@ async fn authenticate(
     let mut uinf = UserInfo {
         ticket: None,
         addr: extract_addr(&req),
-        user_id: "".to_string(),
+        user_id: String::new(),
     };
     return match auth.lock().await.authenticate(login, password, extract_addr(&req), secret) {
         Ok(r) => {
@@ -242,11 +242,11 @@ pub(crate) async fn get_membership(
     };
 
     let mut acl_trace = Trace {
-        acl: &mut "".to_string(),
+        acl: &mut String::new(),
         is_acl: false,
-        group: &mut "".to_string(),
+        group: &mut String::new(),
         is_group: true,
-        info: &mut "".to_string(),
+        info: &mut String::new(),
         is_info: false,
         str_num: 0,
     };
@@ -292,11 +292,11 @@ pub(crate) async fn get_rights_origin(
     };
 
     let mut acl_trace = Trace {
-        acl: &mut "".to_string(),
+        acl: &mut String::new(),
         is_acl: true,
-        group: &mut "".to_string(),
+        group: &mut String::new(),
         is_group: false,
-        info: &mut "".to_string(),
+        info: &mut String::new(),
         is_info: true,
         str_num: 0,
     };
@@ -315,7 +315,7 @@ pub(crate) async fn get_rights_origin(
         & Access::CanRead as u8
         > 0
     {
-        let mut res = vec![];
+        let mut out_res = vec![];
 
         for el in acl_trace.acl.split('\n') {
             let n = el.trim();
@@ -330,7 +330,7 @@ pub(crate) async fn get_rights_origin(
                     indv.add_uri("v-s:permissionSubject", r[1].trim());
                     indv.add_bool(r[2].trim(), true);
                 }
-                res.push(indv.get_obj().as_json());
+                out_res.push(indv.get_obj().as_json());
             }
         }
 
@@ -339,10 +339,10 @@ pub(crate) async fn get_rights_origin(
         indv.add_uri("rdf:type", "v-s:PermissionStatement");
         indv.add_uri("v-s:permissionSubject", "?");
         indv.add_string("rdfs:comment", acl_trace.info, Lang::none());
-        res.push(indv.get_obj().as_json());
+        out_res.push(indv.get_obj().as_json());
 
         log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::Ok);
-        return Ok(HttpResponse::Ok().json(res));
+        return Ok(HttpResponse::Ok().json(out_res));
     }
 
     log(Some(&start_time), &uinf, "get_rights_origin", &params.uri, ResultCode::BadRequest);
