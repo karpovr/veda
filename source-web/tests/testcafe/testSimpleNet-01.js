@@ -13,6 +13,8 @@ test('testSimpleNet', async (t) => {
     .click('li[id="menu"] li[resource="v-s:Create"]')
     .typeText('veda-control.fulltext.dropdown', 'Сеть')
     .click('.suggestion[resource="v-wf:Net"]')
+    .click('.glyphicon-stop')
+    .click('.state-io-condition-input')
     .click('div#schema')
     .click('div#object-container div#props-col div#props table#taskTemplateProperties tbody tr td span[about="rdfs:label"]')
     .typeText('div#object-container div#props-col div#props table#taskTemplateProperties tbody tr td veda-control#VClabel input.form-control', timeStamp)
