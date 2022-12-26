@@ -135,6 +135,12 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    let (tx, rx) = mpsc::channel(100);
+    //thread::spawn(|| qqq(rx));
+    thread::spawn(move || {
+        System::new("user_activity_manager").block_on(user_activity_manager(rx));
+    });
+
     info!("LISTEN {port}");
 
     let mut server_future = HttpServer::new(move || {
@@ -183,12 +189,6 @@ async fn main() -> std::io::Result<()> {
 
         let json_cfg = web::JsonConfig::default().limit(5 * 1024 * 1024);
 
-        let (tx, rx) = mpsc::channel(100);
-        //thread::spawn(|| qqq(rx));
-        thread::spawn(move || {
-            System::new("user_activity_manager").block_on(user_activity_manager(rx));
-        });
-
         App::new()
             .wrap(middleware::Compress::default())
             .wrap(
@@ -200,7 +200,7 @@ async fn main() -> std::io::Result<()> {
                     .header("Cache-Control", "no-cache, no-store, must-revalidate, private"),
             )
             .app_data(json_cfg)
-            .data(Arc::new(Mutex::new(tx)))
+            .data(Arc::new(Mutex::new(tx.clone())))
             .data(UserContextCache {
                 read_tickets: ticket_cache_read,
                 write_tickets: Arc::new(Mutex::new(ticket_cache_write)),
