@@ -1,11 +1,13 @@
-use crate::common::{extract_addr, get_user_info, log, log_w, TicketRequest, UserContextCache};
+use crate::common::{extract_addr, get_user_info, log, log_w, TicketRequest, UserContextCache, UserId};
 use actix_web::http::StatusCode;
 use actix_web::{put, web, HttpRequest, HttpResponse};
+use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::io;
 use std::net::IpAddr;
+use std::sync::Arc;
 use std::time::Instant;
 use v_common::onto::individual::Individual;
 use v_common::onto::json2individual::parse_json_to_individual;
@@ -23,9 +25,10 @@ pub(crate) async fn update(
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", action, "", res);
@@ -128,8 +131,9 @@ pub(crate) async fn put_individuals(
     req: HttpRequest,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    update("put_individuals", extract_addr(&req), params, IndvOp::Put, data, req, ticket_cache, db, mstorage).await
+    update("put_individuals", extract_addr(&req), params, IndvOp::Put, data, req, ticket_cache, db, mstorage, activity_sender).await
 }
 
 #[put("/put_individual")]
@@ -140,8 +144,9 @@ pub(crate) async fn put_individual(
     req: HttpRequest,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    update("put_individual", extract_addr(&req), params, IndvOp::Put, data, req, ticket_cache, db, mstorage).await
+    update("put_individual", extract_addr(&req), params, IndvOp::Put, data, req, ticket_cache, db, mstorage, activity_sender).await
 }
 
 #[put("/remove_individual")]
@@ -152,8 +157,9 @@ pub(crate) async fn remove_individual(
     mstorage: web::Data<Mutex<MStorageClient>>,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    update("remove_individual", extract_addr(&req), params, IndvOp::Remove, data, req, ticket_cache, db, mstorage).await
+    update("remove_individual", extract_addr(&req), params, IndvOp::Remove, data, req, ticket_cache, db, mstorage, activity_sender).await
 }
 
 #[put("/add_to_individual")]
@@ -164,8 +170,9 @@ pub(crate) async fn add_to_individual(
     mstorage: web::Data<Mutex<MStorageClient>>,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    update("add_to_individual", extract_addr(&req), params, IndvOp::AddTo, data, req, ticket_cache, db, mstorage).await
+    update("add_to_individual", extract_addr(&req), params, IndvOp::AddTo, data, req, ticket_cache, db, mstorage, activity_sender).await
 }
 
 #[put("/set_in_individual")]
@@ -176,8 +183,9 @@ pub(crate) async fn set_in_individual(
     mstorage: web::Data<Mutex<MStorageClient>>,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    update("set_in_individual", extract_addr(&req), params, IndvOp::SetIn, data, req, ticket_cache, db, mstorage).await
+    update("set_in_individual", extract_addr(&req), params, IndvOp::SetIn, data, req, ticket_cache, db, mstorage, activity_sender).await
 }
 
 #[put("/remove_from_individual")]
@@ -188,6 +196,7 @@ pub(crate) async fn remove_from_individual(
     mstorage: web::Data<Mutex<MStorageClient>>,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    update("remove_from_individual", extract_addr(&req), params, IndvOp::RemoveFrom, data, req, ticket_cache, db, mstorage).await
+    update("remove_from_individual", extract_addr(&req), params, IndvOp::RemoveFrom, data, req, ticket_cache, db, mstorage, activity_sender).await
 }

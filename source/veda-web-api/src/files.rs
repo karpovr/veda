@@ -1,4 +1,4 @@
-use crate::common::{extract_addr, get_ticket, get_user_info, log_w, UserContextCache, UserInfo};
+use crate::common::{extract_addr, get_ticket, get_user_info, log_w, UserContextCache, UserId, UserInfo};
 use crate::common::{log, TicketRequest};
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
@@ -12,15 +12,16 @@ use async_std::io;
 use async_std::path::Path;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use filetime::FileTime;
+use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use futures::{AsyncWriteExt, StreamExt, TryStreamExt};
 use std::fs::File;
 use std::io::{ErrorKind, Read};
+use std::sync::Arc;
 use std::time::Instant;
 use uuid::Uuid;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage};
-use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext};
 
@@ -31,7 +32,7 @@ pub(crate) async fn load_file(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
@@ -43,7 +44,7 @@ pub(crate) async fn load_file(
     };
 
     if let Some(file_id) = path.strip_prefix("/files/") {
-        let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+        let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, activity_sender).await {
             Ok(u) => u,
             Err(res) => {
                 log(Some(&start_time), &UserInfo::default(), "get_file", file_id, res);
@@ -126,10 +127,10 @@ pub(crate) async fn save_file(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> ActixResult<impl Responder> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(None, &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(None, &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &get_ticket(&req, &None), &extract_addr(&req), "", "upload_file", "", res);

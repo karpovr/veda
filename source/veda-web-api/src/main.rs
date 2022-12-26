@@ -8,6 +8,7 @@ mod get;
 mod query;
 mod sparql_client;
 mod update;
+mod user_activity;
 mod vql_query_client;
 
 extern crate serde_derive;
@@ -20,9 +21,12 @@ use crate::get::{get_individual, get_individuals, get_operation_state};
 use crate::query::{query_get, query_post, QueryEndpoints};
 use crate::sparql_client::SparqlClient;
 use crate::update::{add_to_individual, put_individual, put_individuals, remove_from_individual, remove_individual, set_in_individual};
+use crate::user_activity::user_activity_manager;
 use crate::vql_query_client::VQLHttpClient;
 use actix_files::{Files, NamedFile};
+use actix_web::rt::System;
 use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
+use futures::channel::mpsc;
 use futures::lock::Mutex;
 use futures::{select, FutureExt};
 use rusty_tarantool::tarantool::ClientConfig;
@@ -30,6 +34,7 @@ use serde_derive::Deserialize;
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::thread;
 use url::Url;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::ft_xapian::xapian_reader::XapianReader;
@@ -173,11 +178,16 @@ async fn main() -> std::io::Result<()> {
         let check_ticket_ip = Module::get_property("check_ticket_ip").unwrap_or_default().parse::<bool>().unwrap_or(true);
         info!("PARAM [check_ticket_ip] = {check_ticket_ip}");
         let (ticket_cache_read, ticket_cache_write) = evmap::new();
-        let (user_activity_read, user_activity_write) = evmap::new();
         let (f2s_prefixes_cache_read, f2s_prefixes_cache_write) = evmap::new();
         let (s2f_prefixes_cache_read, s2f_prefixes_cache_write) = evmap::new();
 
         let json_cfg = web::JsonConfig::default().limit(5 * 1024 * 1024);
+
+        let (tx, rx) = mpsc::channel(100);
+        //thread::spawn(|| qqq(rx));
+        thread::spawn(move || {
+            System::new("user_activity_manager").block_on(user_activity_manager(rx));
+        });
 
         App::new()
             .wrap(middleware::Compress::default())
@@ -190,13 +200,12 @@ async fn main() -> std::io::Result<()> {
                     .header("Cache-Control", "no-cache, no-store, must-revalidate, private"),
             )
             .app_data(json_cfg)
+            .data(Arc::new(Mutex::new(tx)))
             .data(UserContextCache {
                 read_tickets: ticket_cache_read,
                 write_tickets: Arc::new(Mutex::new(ticket_cache_write)),
                 check_ticket_ip,
                 are_external_users,
-                read_user_activity: user_activity_read,
-                write_user_activity: Arc::new(Mutex::new(user_activity_write)),
             })
             .data(PrefixesCache {
                 full2short_r: f2s_prefixes_cache_read,

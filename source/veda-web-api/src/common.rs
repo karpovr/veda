@@ -1,7 +1,8 @@
 use crate::VQLHttpClient;
 use actix_web::{web, HttpMessage, HttpRequest};
-use chrono::Utc;
+use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
+use futures::SinkExt;
 use rusty_tarantool::tarantool::IteratorType;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
@@ -15,19 +16,18 @@ use v_common::onto::parser::parse_raw;
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TICKETS_SPACE_ID};
 use v_common::storage::common::{Storage, StorageId};
-use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) const LIMITATA_COGNOSCI: &[&str] = &["v-s:Credential", "v-s:Connection", "v-s:LinkedNode"];
 pub(crate) const BASE_PATH: &str = "./data";
+
+pub type UserId = String;
 
 pub struct UserContextCache {
     pub read_tickets: evmap::ReadHandle<String, Ticket>,
     pub write_tickets: Arc<Mutex<evmap::WriteHandle<String, Ticket>>>,
     pub check_ticket_ip: bool,
     pub are_external_users: bool,
-    pub read_user_activity: evmap::ReadHandle<String, i64>,
-    pub write_user_activity: Arc<Mutex<evmap::WriteHandle<String, i64>>>,
 }
 
 pub(crate) enum VQLClientConnectType {
@@ -67,7 +67,7 @@ pub async fn get_user_info(
     req: &HttpRequest,
     ticket_cache: &web::Data<UserContextCache>,
     db: &AStorage,
-    mstorage: &web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> Result<UserInfo, ResultCode> {
     let ticket_id = if in_ticket.is_some() {
         in_ticket
@@ -76,7 +76,7 @@ pub async fn get_user_info(
     };
 
     let addr = extract_addr(req);
-    let user_id = check_ticket(&ticket_id, ticket_cache, &addr, db, &mstorage).await?;
+    let user_id = check_ticket(&ticket_id, ticket_cache, &addr, db, activity_sender).await?;
 
     Ok(UserInfo {
         ticket: ticket_id,
@@ -231,13 +231,12 @@ pub(crate) fn log(start_time: Option<&Instant>, uinf: &UserInfo, operation: &str
     log_w(start_time, &uinf.ticket, &uinf.addr, &uinf.user_id, operation, args, res);
 }
 
-const UPDATE_USER_ACTIVITY_PERIOD: i64 = 60;
 pub(crate) async fn check_ticket(
     w_ticket_id: &Option<String>,
     user_context_cache: &UserContextCache,
     addr: &Option<IpAddr>,
     db: &AStorage,
-    mstorage: &web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> Result<String, ResultCode> {
     if w_ticket_id.is_none() {
         return Ok("cfg:Guest".to_owned());
@@ -270,7 +269,13 @@ pub(crate) async fn check_ticket(
             check_external_user(&user_uri, db).await?;
         }
 
-        info!("@ upd cache ticket={}", ticket_obj.id);
+        // send user activity activity
+        {
+            let mut sender = activity_sender.lock().await;
+            sender.send(user_uri.clone()).await.unwrap();
+        }
+
+        //info!("@ upd cache ticket={}", ticket_obj.id);
         let mut t = user_context_cache.write_tickets.lock().await;
         t.insert(ticket_id.to_owned(), ticket_obj);
         t.refresh();
@@ -278,31 +283,7 @@ pub(crate) async fn check_ticket(
         Ok(user_uri)
     };
 
-    match user_id {
-        Ok(user_id) => {
-            if user_id != "cfg:Guest" && user_id != "cfg:VedaSystem" {
-                if let Some(v_activity_time) = user_context_cache.read_user_activity.get(&user_id) {
-                    if let Some(activity_time) = v_activity_time.get_one() {
-                        let now = Utc::now().naive_utc().timestamp();
-
-                        if now - activity_time > UPDATE_USER_ACTIVITY_PERIOD {
-                            let mut t = user_context_cache.write_user_activity.lock().await;
-                            t.update(user_id.clone(), now);
-                            t.refresh();
-                            info!("CHANGE ACTIVITY, USER={user_id}, prev={activity_time}, now={now}");
-                        }
-                    }
-                } else {
-                    let mut t = user_context_cache.write_user_activity.lock().await;
-                    t.insert(user_id.to_owned(), Utc::now().naive_utc().timestamp());
-                    t.refresh();
-                }
-            }
-
-            Ok(user_id)
-        },
-        Err(e) => Err(e),
-    }
+    user_id
 }
 
 async fn read_ticket_obj(ticket_id: &str, db: &AStorage) -> Result<Ticket, ResultCode> {

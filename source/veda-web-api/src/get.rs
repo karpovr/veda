@@ -1,19 +1,21 @@
 use crate::common::{
-    extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserContextCache, UserInfo, BASE_PATH, LIMITATA_COGNOSCI,
+    extract_addr, get_module_name, log_w, GetOperationStateRequest, TicketRequest, TicketUriRequest, Uris, UserContextCache, UserId, UserInfo, BASE_PATH,
+    LIMITATA_COGNOSCI,
 };
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, post};
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::Utc;
+use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use std::io;
+use std::sync::Arc;
 use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::info::ModuleInfo;
 use v_common::onto::individual::Individual;
 use v_common::storage::async_storage::{check_user_in_group, get_individual_from_db, AStorage};
-use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 use v_common::v_queue::record::Mode;
@@ -51,10 +53,10 @@ pub(crate) async fn get_individuals(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individuals", "", res);
@@ -88,10 +90,10 @@ pub(crate) async fn get_individual(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_individual", "", res);

@@ -1,11 +1,13 @@
-use crate::common::{get_ticket, QueryRequest, UserContextCache, UserInfo, VQLClientConnectType};
+use crate::common::{get_ticket, QueryRequest, UserContextCache, UserId, UserInfo, VQLClientConnectType};
 use crate::common::{get_user_info, log};
 use crate::sparql_client::SparqlClient;
 use crate::VQLClient;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpRequest, HttpResponse};
+use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use std::io;
+use std::sync::Arc;
 use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::module::common::c_load_onto;
@@ -17,7 +19,6 @@ use v_common::search::common::{load_prefixes, FTQuery, PrefixesCache, QueryResul
 use v_common::search::sparql_params::prepare_sparql_params;
 use v_common::search::sql_params::prepare_sql_with_params;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage};
-use v_common::v_api::api_client::MStorageClient;
 use v_common::v_api::obj::{OptAuthorize, ResultCode};
 
 pub(crate) struct QueryEndpoints {
@@ -35,9 +36,9 @@ pub(crate) async fn query_post(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(get_ticket(&req, &params.ticket), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(get_ticket(&req, &params.ticket), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
@@ -57,9 +58,9 @@ pub(crate) async fn query_get(
     az: web::Data<Mutex<LmdbAzContext>>,
     prefix_cache: web::Data<PrefixesCache>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
-    let uinf = match get_user_info(data.ticket.clone(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(data.ticket.clone(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));

@@ -1,19 +1,22 @@
 use crate::common::{
-    check_external_user, check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserContextCache, UserInfo,
+    check_external_user, check_ticket, extract_addr, log_w, AuthenticateRequest, GetTicketTrustedRequest, TicketRequest, TicketUriRequest, UserContextCache, UserId,
+    UserInfo,
 };
 use crate::common::{get_user_info, log};
 use actix_web::http::StatusCode;
 use actix_web::{get, HttpRequest};
 use actix_web::{web, HttpResponse};
+use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use std::io;
 use std::net::IpAddr;
+use std::sync::Arc;
 use std::time::Instant;
 use v_common::az_impl::az_lmdb::LmdbAzContext;
 use v_common::onto::datatype::Lang;
 use v_common::onto::individual::Individual;
 use v_common::storage::async_storage::AStorage;
-use v_common::v_api::api_client::{AuthClient, MStorageClient};
+use v_common::v_api::api_client::AuthClient;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_authorization::common::{Access, AuthorizationContext, Trace, ACCESS_8_LIST, ACCESS_PREDICATE_LIST};
 
@@ -24,7 +27,7 @@ pub(crate) async fn get_ticket_trusted(
     ticket_cache: web::Data<UserContextCache>,
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
     let uinf = UserInfo {
@@ -33,7 +36,7 @@ pub(crate) async fn get_ticket_trusted(
         user_id: String::new(),
     };
 
-    if let Err(e) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &uinf.addr, &tt, &mstorage).await {
+    if let Err(e) = check_ticket(&Some(params.ticket.clone()), &ticket_cache, &uinf.addr, &tt, activity_sender).await {
         log(Some(&start_time), &uinf, "get_ticket_trusted", &format!("login={:?}, ip={:?}", params.login, params.ip), e);
         return Ok(HttpResponse::new(StatusCode::from_u16(e as u16).unwrap()));
     }
@@ -67,7 +70,7 @@ pub(crate) async fn logout(
     tt: web::Data<AStorage>,
     auth: web::Data<Mutex<AuthClient>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
     let uinf = UserInfo {
@@ -76,7 +79,7 @@ pub(crate) async fn logout(
         user_id: String::new(),
     };
 
-    match check_ticket(&params.ticket, &ticket_cache, &uinf.addr, &tt, &mstorage).await {
+    match check_ticket(&params.ticket, &ticket_cache, &uinf.addr, &tt, activity_sender).await {
         Ok(_user_uri) => {
             return match auth.lock().await.logout(&params.ticket, uinf.addr) {
                 Ok(r) => {
@@ -106,11 +109,11 @@ pub(crate) async fn is_ticket_valid(
     ticket_cache: web::Data<UserContextCache>,
     tt: web::Data<AStorage>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
-    match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt, &mstorage).await {
+    match check_ticket(&params.ticket, &ticket_cache, &extract_addr(&req), &tt, activity_sender).await {
         Ok(user_uri) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), &user_uri, "is_ticket_valid", "", ResultCode::Ok);
             Ok(HttpResponse::Ok().json(true))
@@ -187,11 +190,11 @@ pub(crate) async fn get_rights(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
-    let mut uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let mut uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights", "", res);
@@ -229,11 +232,11 @@ pub(crate) async fn get_membership(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_membership", "", res);
@@ -279,11 +282,11 @@ pub(crate) async fn get_rights_origin(
     db: web::Data<AStorage>,
     az: web::Data<Mutex<LmdbAzContext>>,
     req: HttpRequest,
-    mstorage: web::Data<Mutex<MStorageClient>>,
+    activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
 
-    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, &mstorage).await {
+    let uinf = match get_user_info(params.ticket.to_owned(), &req, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
             log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", "get_rights_origin", "", res);
