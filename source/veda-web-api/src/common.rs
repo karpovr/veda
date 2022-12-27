@@ -3,7 +3,7 @@ use actix_web::{web, HttpMessage, HttpRequest};
 use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use futures::SinkExt;
-use rusty_tarantool::tarantool::IteratorType;
+use rusty_tarantool::tarantool::{ClientConfig, IteratorType};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::net::IpAddr;
@@ -15,7 +15,8 @@ use v_common::onto::individual::Individual;
 use v_common::onto::parser::parse_raw;
 use v_common::search::ft_client::FTClient;
 use v_common::storage::async_storage::{get_individual_from_db, AStorage, TICKETS_SPACE_ID};
-use v_common::storage::common::{Storage, StorageId};
+use v_common::storage::common::{Storage, StorageId, StorageMode};
+use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::v_api::obj::ResultCode;
 
 pub(crate) const LIMITATA_COGNOSCI: &[&str] = &["v-s:Credential", "v-s:Connection", "v-s:LinkedNode"];
@@ -338,4 +339,18 @@ pub(crate) async fn check_external_user(user_uri: &str, db: &AStorage) -> Result
         return Err(ResultCode::AuthenticationFailed);
     }
     Ok(())
+}
+
+pub(crate) fn db_connector(tt_config: &Option<ClientConfig>) -> AStorage {
+    if let Some(cfg) = &tt_config {
+        AStorage {
+            tt: Some(cfg.clone().build()),
+            lmdb: None,
+        }
+    } else {
+        AStorage {
+            tt: None,
+            lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly, Some(1000)))),
+        }
+    }
 }

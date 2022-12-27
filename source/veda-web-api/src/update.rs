@@ -102,7 +102,7 @@ pub(crate) async fn update(
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::TicketExpired as u16).unwrap()));
         }
 
-        let ticket = uinf.ticket.clone().unwrap_or_else(|| String::new());
+        let ticket = uinf.ticket.clone().unwrap_or_else(String::new);
         return match ms.updates_use_param_with_addr((&ticket, uinf.addr), event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
                 log(Some(&start_time), &uinf, action, &ind_ids, r.result);

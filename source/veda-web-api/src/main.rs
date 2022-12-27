@@ -15,7 +15,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use crate::auth::{authenticate_get, authenticate_post, get_membership, get_rights, get_rights_origin, get_ticket_trusted, is_ticket_valid, logout};
-use crate::common::{UserContextCache, VQLClient, VQLClientConnectType, BASE_PATH};
+use crate::common::{db_connector, UserContextCache, VQLClient, VQLClientConnectType};
 use crate::files::{load_file, save_file};
 use crate::get::{get_individual, get_individuals, get_operation_state};
 use crate::query::{query_get, query_post, QueryEndpoints};
@@ -42,9 +42,6 @@ use v_common::module::module_impl::{init_log_with_params, Module};
 use v_common::search::clickhouse_client::CHClient;
 use v_common::search::common::PrefixesCache;
 use v_common::search::ft_client::FTClient;
-use v_common::storage::async_storage::AStorage;
-use v_common::storage::common::StorageMode;
-use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::v_api::api_client::{AuthClient, MStorageClient};
 
 #[head("/")]
@@ -136,25 +133,15 @@ async fn main() -> std::io::Result<()> {
     }
 
     let (tx, rx) = mpsc::channel(100);
-    //thread::spawn(|| qqq(rx));
+    let t_config = tt_config.clone();
     thread::spawn(move || {
-        System::new("user_activity_manager").block_on(user_activity_manager(rx));
+        System::new("user_activity_manager").block_on(user_activity_manager(rx, t_config));
     });
 
     info!("LISTEN {port}");
 
     let mut server_future = HttpServer::new(move || {
-        let db = if let Some(cfg) = &tt_config {
-            AStorage {
-                tt: Some(cfg.clone().build()),
-                lmdb: None,
-            }
-        } else {
-            AStorage {
-                tt: None,
-                lmdb: Some(Mutex::from(LMDBStorage::new(BASE_PATH, StorageMode::ReadOnly, Some(1000)))),
-            }
-        };
+        let db = db_connector(&tt_config);
 
         let mut ch = CHClient::new(Module::get_property("query_search_db").unwrap_or_default());
         ch.connect();
