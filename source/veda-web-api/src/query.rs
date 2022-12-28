@@ -152,6 +152,10 @@ async fn stored_query(
     Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::BadRequest as u16).unwrap()))
 }
 
+fn add_out_element(id: &str, ctx: &mut Vec<String>) {
+    ctx.push(id.to_owned());
+}
+
 async fn direct_query(
     uinf: UserInfo,
     data: &QueryRequest,
@@ -203,9 +207,6 @@ async fn direct_query(
         };
 
         let mut res_out_list = vec![];
-        fn add_out_element(id: &str, ctx: &mut Vec<String>) {
-            ctx.push(id.to_owned());
-        }
 
         req.user = uinf.user_id.clone();
 

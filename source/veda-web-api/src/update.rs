@@ -21,17 +21,17 @@ pub(crate) async fn update(
     params: web::Query<TicketRequest>,
     cmd: IndvOp,
     data: web::Json<JSONValue>,
-    req: HttpRequest,
+    request: HttpRequest,
     ticket_cache: web::Data<UserContextCache>,
     db: web::Data<AStorage>,
     mstorage: web::Data<Mutex<MStorageClient>>,
     activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>,
 ) -> io::Result<HttpResponse> {
     let start_time = Instant::now();
-    let uinf = match get_user_info(params.ticket.clone(), &req, &ticket_cache, &db, activity_sender).await {
+    let uinf = match get_user_info(params.ticket.clone(), &request, &ticket_cache, &db, activity_sender).await {
         Ok(u) => u,
         Err(res) => {
-            log_w(Some(&start_time), &params.ticket, &extract_addr(&req), "", action, "", res);
+            log_w(Some(&start_time), &params.ticket, &extract_addr(&request), "", action, "", res);
             return Ok(HttpResponse::new(StatusCode::from_u16(res as u16).unwrap()));
         },
     };
@@ -102,7 +102,7 @@ pub(crate) async fn update(
             return Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::TicketExpired as u16).unwrap()));
         }
 
-        let ticket = uinf.ticket.clone().unwrap_or_else(String::new);
+        let ticket = uinf.ticket.clone().unwrap_or_default();
         return match ms.updates_use_param_with_addr((&ticket, uinf.addr), event_id, src, assigned_subsystems, cmd, &inds) {
             Ok(r) => {
                 log(Some(&start_time), &uinf, action, &ind_ids, r.result);

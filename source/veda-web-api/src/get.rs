@@ -144,15 +144,15 @@ pub(crate) async fn get_individual(
     let (mut res, res_code) = get_individual_from_db(&id, &uinf.user_id, &db, Some(&az)).await?;
     log(Some(&start_time), &uinf, "get_individual", &id, res_code);
     if res_code == ResultCode::Ok {
-        return if !res.any_exists("rdf:type", LIMITATA_COGNOSCI) {
-            Ok(HttpResponse::Ok().json(res.get_obj().as_json()))
-        } else {
+        return if res.any_exists("rdf:type", LIMITATA_COGNOSCI) {
             if let Ok(b) = check_user_in_group(&uinf.user_id, SUPER_USER_GROUP, Some(&az)).await {
                 if b {
                     return Ok(HttpResponse::Ok().json(res.get_obj().as_json()));
                 }
             }
             Ok(HttpResponse::new(StatusCode::from_u16(ResultCode::NotAuthorized as u16).unwrap()))
+        } else {
+            Ok(HttpResponse::Ok().json(res.get_obj().as_json()))
         };
     }
 

@@ -14,7 +14,7 @@ const UPDATE_USER_ACTIVITY_PERIOD: i64 = 60;
 
 pub async fn user_activity_manager(mut rx: Receiver<UserId>, tt_config: Option<ClientConfig>) {
     let mut user_activity = HashMap::new();
-    let mut storage = db_connector(&tt_config);
+    let storage = db_connector(&tt_config);
     let mstorage_client = MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default());
 
     info!("START USER ACTIVITY MANAGER");
