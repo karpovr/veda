@@ -211,6 +211,7 @@ Workflow.prepare_work_order = function (ticket, document) {
         const is_appointment = CommonUtil.hasValue(executor, 'rdf:type', {data: 'v-s:Appointment', type: 'Uri'});
         const is_position = CommonUtil.hasValue(executor, 'rdf:type', {data: 'v-s:Position', type: 'Uri'});
         const is_codelet = CommonUtil.hasValue(executor, 'rdf:type', {data: 'v-s:Codelet', type: 'Uri'});
+        const is_person = CommonUtil.hasValue(executor, 'rdf:type', {data: 'v-s:Person', type: 'Uri'});
 
         if (is_codelet) {
           WorkflowUtil.mapToMessage(net_element['v-wf:startingMessageMap'], ticket, _process, work_item, _work_order, null, journal_uri, trace_journal_uri, 'v-wf:startingMessageMap');
@@ -227,7 +228,7 @@ Workflow.prepare_work_order = function (ticket, document) {
             put_individual(ticket, _work_order, _event_id);
           }
         // end [is codelet]
-        } else if ((is_appointment || is_position) && !f_useSubNet) {
+        } else if ((is_appointment || is_position || is_person) && !f_useSubNet) {
           const work_item_inVars = [];
           for (const f_inVar of f_inVars) {
             const indv = get_individual(ticket, f_inVar.data);
@@ -315,6 +316,8 @@ Workflow.prepare_work_order = function (ticket, document) {
             ServerUtil.traceToJournal(ticket, trace_journal_uri, 'v-wf:startDecisionTransform', 'transform_result=' + CommonUtil.toJson(transform_result));
           }
 
+	 	 //print ('transform_result=' + CommonUtil.toJson(transform_result))    
+
           const decisionFormList = [];
 
           if (transform_result) {
@@ -347,7 +350,7 @@ Workflow.prepare_work_order = function (ticket, document) {
                   ServerUtil.addRight(ticket, position[0].data, result['@'], ['v-s:canRead', 'v-s:canUpdate']);
                 }
               }
-              if (is_position) {
+              if (is_position || is_person) {
                 ServerUtil.addRight(ticket, executor['@'], result['@'], ['v-s:canRead', 'v-s:canUpdate']);
               }
 
