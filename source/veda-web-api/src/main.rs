@@ -132,7 +132,7 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
-    let (tx, rx) = mpsc::channel(100);
+    let (tx, rx) = mpsc::channel(1000);
     let t_config = tt_config.clone();
     thread::spawn(move || {
         System::new("user_activity_manager").block_on(user_activity_manager(rx, t_config));

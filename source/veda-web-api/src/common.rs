@@ -1,11 +1,13 @@
 use crate::VQLHttpClient;
 use actix_web::{web, HttpMessage, HttpRequest};
+use async_std::io;
 use futures::channel::mpsc::Sender;
 use futures::lock::Mutex;
 use futures::SinkExt;
 use rusty_tarantool::tarantool::{ClientConfig, IteratorType};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
+use std::io::{Error, ErrorKind};
 use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::Instant;
@@ -14,7 +16,7 @@ use v_common::module::ticket::Ticket;
 use v_common::onto::individual::Individual;
 use v_common::onto::parser::parse_raw;
 use v_common::search::ft_client::FTClient;
-use v_common::storage::async_storage::{get_individual_from_db, AStorage, TICKETS_SPACE_ID};
+use v_common::storage::async_storage::{get_individual_from_db, get_individual_use_storage_id, AStorage, TICKETS_SPACE_ID};
 use v_common::storage::common::{Storage, StorageId, StorageMode};
 use v_common::storage::lmdb_storage::LMDBStorage;
 use v_common::v_api::obj::ResultCode;
@@ -253,6 +255,7 @@ pub(crate) async fn check_ticket(
             if ticket_obj.is_ticket_valid(addr, user_context_cache.check_ticket_ip) != ResultCode::Ok {
                 return Err(ResultCode::TicketNotFound);
             }
+            send_user_activity(activity_sender, &ticket_obj.user_uri).await;
             Ok(ticket_obj.user_uri.clone())
         } else {
             Err(ResultCode::TicketNotFound)
@@ -270,11 +273,7 @@ pub(crate) async fn check_ticket(
             check_external_user(&user_uri, db).await?;
         }
 
-        // send user activity activity
-        {
-            let mut sender = activity_sender.lock().await;
-            sender.send(user_uri.clone()).await.unwrap();
-        }
+        send_user_activity(activity_sender, &user_uri).await;
 
         //info!("@ upd cache ticket={}", ticket_obj.id);
         let mut t = user_context_cache.write_tickets.lock().await;
@@ -285,6 +284,23 @@ pub(crate) async fn check_ticket(
     };
 
     user_id
+}
+
+async fn send_user_activity(activity_sender: web::Data<Arc<Mutex<Sender<UserId>>>>, user_id: &str) {
+    {
+        let mut sender = activity_sender.lock().await;
+        sender.send(user_id.to_string()).await.unwrap();
+    }
+}
+
+pub async fn read_system_ticket_id(db: &AStorage) -> io::Result<String> {
+    let (mut systicket_info, res_code) = get_individual_use_storage_id(StorageId::Tickets, "systicket", "", db, None).await?;
+    if res_code == ResultCode::Ok {
+        if let Some(v) = systicket_info.get_first_literal("v-s:resource") {
+            return Ok(v);
+        }
+    }
+    Err(Error::new(ErrorKind::Other, format!("fail read system ticket id, err={:?}", res_code)))
 }
 
 async fn read_ticket_obj(ticket_id: &str, db: &AStorage) -> Result<Ticket, ResultCode> {

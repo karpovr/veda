@@ -42,5 +42,5 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 urlencoding = "2.1.0"
 num_cpus = "1.13.1"
 
-v_common = { package = "v-common", version = "=0.4.38" }
+v_common = { package = "v-common", version = "=0.4.40" }
 #v_common = { package = "v-common", path = "../../../v-common" }
