@@ -11,5 +11,5 @@ log = "0.4"
 url = "2.1.1"
 csv = "1.1"
 
-v_common = { package = "v-common", version = "0.4.38" }
+v_common = { package = "v-common", version = "0.4.40" }
 #v_common = { package = "v-common", path = "../../../v-common" }

@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate log;
 
+use chrono::{TimeZone, Utc};
 use std::collections::HashSet;
 use std::env;
 use std::error::Error;
@@ -52,7 +53,7 @@ fn main() -> Result<(), i32> {
     let mut update_cmd = None;
 
     let args: Vec<String> = env::args().collect();
-    for el in args.iter() {
+    for el in &args {
         if el.starts_with("--db-connection") {
             db_connection_url = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
         }
@@ -87,7 +88,7 @@ fn main() -> Result<(), i32> {
     info!("UPDATE {:?}", update_cmd);
 
     let mut ctx = Context {
-        storage: get_storage_use_url(&db_connection_url, storage_mode),
+        storage: get_storage_with_url(&db_connection_url, storage_mode),
         module_info: module_info.unwrap(),
         check_cmd,
         check_err_id: Default::default(),
@@ -121,6 +122,13 @@ fn after_batch(_module: &mut Backend, _ctx: &mut Context, _prepared_batch_size: 
 }
 
 fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError> {
+    if let Some(assigned_subsystems) = queue_element.get_first_integer("assigned_subsystems") {
+        if assigned_subsystems != 0 {
+            warn!("skip queue message: assigned_subsystems != 0");
+            return Ok(true);
+        }
+    }
+
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");
@@ -130,6 +138,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
 
     let id = queue_element.get_first_literal("uri").unwrap_or_default();
     let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
+    let date = queue_element.get_first_datetime("date").unwrap_or_default();
 
     let mut queue_indv_new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut queue_indv_new_state);
@@ -173,7 +182,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
                 }
 
                 if ctx.storage.put_kv_raw(StorageId::Individuals, queue_indv_new_state.get_id(), raw1) {
-                    info!("{}, {} id={}", op_id, cmd.as_string(), queue_indv_new_state.get_id());
+                    info!("{op_id}, {} id={}, date={}", cmd.as_string(), queue_indv_new_state.get_id(), &Utc.timestamp(date, 0));
                 } else {
                     error!("failed to update individual, id = {}", queue_indv_new_state.get_id());
                     return Err(PrepareError::Fatal);
@@ -190,7 +199,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     Ok(true)
 }
 
-pub fn get_storage_use_url(db_connection_url: &str, storage_mode: StorageMode) -> VStorage {
+pub fn get_storage_with_url(db_connection_url: &str, storage_mode: StorageMode) -> VStorage {
     match Url::parse(db_connection_url) {
         Ok(url) => {
             if url.scheme() == "file" {
@@ -205,11 +214,11 @@ pub fn get_storage_use_url(db_connection_url: &str, storage_mode: StorageMode) -
                 let user = url.username();
                 let pass = url.password().unwrap_or("123");
                 info!("Trying to connect to Tarantool, host: {}, port: {}, user: {}, password: {}", host, port, user, pass);
-                VStorage::new_tt(format!("{}:{}", host, port), user, pass)
+                VStorage::new_tt(format!("{host}:{port}"), user, pass)
             }
         },
         Err(e) => {
-            panic!("fail parse {}, err={}", db_connection_url, e);
+            panic!("fail parse {db_connection_url}, err={e}")
         },
     }
 }
@@ -218,7 +227,7 @@ fn check(op_id: i64, id: &str, queue_indv_new_state: &mut Individual, ctx: &mut 
     if let Some(check_cmd) = &ctx.check_cmd {
         let mut storage_indv = Individual::default();
 
-        let exist = ctx.storage.get_individual(&id, &mut storage_indv);
+        let exist = ctx.storage.get_individual(id, &mut storage_indv);
 
         if *check_cmd == CheckCmd::IsExist && !exist {
             //error!("NOT FOUND, {}", id);
@@ -238,7 +247,7 @@ fn check(op_id: i64, id: &str, queue_indv_new_state: &mut Individual, ctx: &mut 
                 return Some(false);
             }
         }
-        return Some(true);
+        Some(true)
     } else {
         None
     }
@@ -248,7 +257,7 @@ fn to_report(list: &HashSet<String>) -> Result<(), Box<dyn Error>> {
     let mut wtr = csv::Writer::from_path("./check-report.csv")?;
 
     for el in list {
-        wtr.write_record(&[el])?;
+        wtr.write_record([el])?;
     }
     wtr.flush()?;
     Ok(())
