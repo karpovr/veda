@@ -16,12 +16,23 @@ const UPDATE_USER_ACTIVITY_PERIOD: i64 = 60;
 
 pub async fn user_activity_manager(mut rx: Receiver<UserId>, tt_config: Option<ClientConfig>) {
     let mut user_activity = HashMap::new();
-    let storage = db_connector(&tt_config);
-    let sys_ticket = read_system_ticket_id(&storage).await.expect("fail read system_ticket");
-    let mut mstorage_client = MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default());
+
+    let mut storage = AStorage {
+        tt: None,
+        lmdb: None,
+    };
+    let mut sys_ticket = String::new();
+    let mut mstorage_client = None;
 
     info!("START USER ACTIVITY MANAGER");
     while let Some(user_id) = rx.next().await {
+        if storage.lmdb.is_none() && storage.tt.is_none() {
+            info!("connect to database");
+            storage = db_connector(&tt_config);
+            sys_ticket = read_system_ticket_id(&storage).await.expect("fail read system_ticket");
+            mstorage_client = Some(MStorageClient::new(Module::get_property("main_module_url").unwrap_or_default()));
+        }
+
         debug!("Received user_id: {}", user_id);
         if user_id == "cfg:Guest" || user_id == "cfg:VedaSystem" {
             continue;
@@ -45,9 +56,15 @@ pub async fn user_activity_manager(mut rx: Receiver<UserId>, tt_config: Option<C
     }
 }
 
-async fn update_activity_into_storage(user_id: &str, now_time: i64, storage: &AStorage, mstorage_client: &mut MStorageClient, system_ticket: &str) -> io::Result<()> {
+async fn update_activity_into_storage(
+    user_id: &str,
+    now_time: i64,
+    storage: &AStorage,
+    mstorage_client: &mut Option<MStorageClient>,
+    system_ticket: &str,
+) -> io::Result<()> {
     info!("CHANGE ACTIVITY, USER={user_id}");
-
+    let mstorage_client = mstorage_client.as_mut().unwrap();
     let user_info_id = format!("{user_id}-userinfo");
 
     let (mut user, res_code) = get_individual_from_db(&user_info_id, user_id, storage, None).await?;
