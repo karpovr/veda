@@ -16,7 +16,7 @@ use v_common::storage::common::{StorageId, StorageMode, VStorage};
 use v_common::v_api::api_client::IndvOp;
 use v_common::v_queue::consumer::Consumer;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum CheckCmd {
     Compare,
     IsExist,
@@ -26,6 +26,7 @@ enum CheckCmd {
 enum UpdateCmd {
     IfCheckErr,
     Definitely,
+    ComparePrevState,
 }
 
 pub struct Context {
@@ -48,7 +49,7 @@ fn main() -> Result<(), i32> {
         return Err(-1);
     }
 
-    let mut db_connection_url = "file://data/db_copy1".to_owned();
+    let mut db_connection_url = "".to_owned();
     let mut check_cmd = None;
     let mut update_cmd = None;
 
@@ -60,6 +61,7 @@ fn main() -> Result<(), i32> {
         if el.starts_with("--update") {
             update_cmd = match el.split('=').collect::<Vec<&str>>()[1].to_owned().trim() {
                 "if-check-err" => Some(UpdateCmd::IfCheckErr),
+                "compare-prev-state" => Some(UpdateCmd::ComparePrevState),
                 _ => Some(UpdateCmd::Definitely),
             }
         }
@@ -145,7 +147,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     queue_indv_new_state.parse_all();
 
     let check_result = if cmd != IndvOp::Remove {
-        check(op_id, &id, &mut queue_indv_new_state, ctx)
+        check(op_id, &id, &mut queue_indv_new_state, ctx.check_cmd.clone(), ctx)
     } else {
         None
     };
@@ -164,9 +166,23 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
 
     if let Some(update_cmd) = &ctx.update_cmd {
         if *update_cmd == UpdateCmd::Definitely
+            || *update_cmd == UpdateCmd::ComparePrevState
             || *update_cmd == UpdateCmd::IfCheckErr && check_result.is_some() && !check_result.unwrap()
             || *update_cmd == UpdateCmd::IfCheckErr && ctx.check_err_id.contains(&id)
         {
+            if *update_cmd == UpdateCmd::ComparePrevState {
+                let mut queue_indv_prev_state = Individual::default();
+                get_inner_binobj_as_individual(queue_element, "prev_state", &mut queue_indv_prev_state);
+                queue_indv_prev_state.parse_all();
+
+                if let Some(res) = check(op_id, &id, &mut queue_indv_prev_state, Some(CheckCmd::Compare), ctx) {
+                    if !res {
+                        error!("prev state no equal, id = {}", id);
+                        return Err(PrepareError::Fatal);
+                    }
+                }
+            }
+
             if cmd == IndvOp::Remove {
                 if ctx.storage.remove(StorageId::Individuals, &id) {
                     info!("{}, {} id={}", op_id, cmd.as_string(), id);
@@ -181,8 +197,10 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
                     return Err(PrepareError::Fatal);
                 }
 
+                let new_counter = queue_indv_new_state.get_first_integer("v-s:updateCounter").unwrap_or(-1);
+
                 if ctx.storage.put_kv_raw(StorageId::Individuals, queue_indv_new_state.get_id(), raw1) {
-                    info!("{op_id}, {} id={}, date={}", cmd.as_string(), queue_indv_new_state.get_id(), &Utc.timestamp(date, 0));
+                    info!("{op_id}, {} id={}, counter={}, date={}", cmd.as_string(), queue_indv_new_state.get_id(), new_counter, &Utc.timestamp(date, 0));
                 } else {
                     error!("failed to update individual, id = {}", queue_indv_new_state.get_id());
                     return Err(PrepareError::Fatal);
@@ -223,8 +241,8 @@ pub fn get_storage_with_url(db_connection_url: &str, storage_mode: StorageMode) 
     }
 }
 
-fn check(op_id: i64, id: &str, queue_indv_new_state: &mut Individual, ctx: &mut Context) -> Option<bool> {
-    if let Some(check_cmd) = &ctx.check_cmd {
+fn check(op_id: i64, id: &str, queue_indv: &mut Individual, check_cmd: Option<CheckCmd>, ctx: &mut Context) -> Option<bool> {
+    if let Some(check_cmd) = &check_cmd {
         let mut storage_indv = Individual::default();
 
         let exist = ctx.storage.get_individual(id, &mut storage_indv);
@@ -237,13 +255,13 @@ fn check(op_id: i64, id: &str, queue_indv_new_state: &mut Individual, ctx: &mut 
         if *check_cmd == CheckCmd::Compare {
             storage_indv.parse_all();
 
-            if storage_indv.compare(queue_indv_new_state, vec![]) {
+            if storage_indv.compare(queue_indv, vec![]) {
                 info!("EQUALS, {}, id={}", op_id, id);
             } else {
                 error!("DIFFERENT, {}, id={}", op_id, id);
 
                 error!("FROM STORAGE = {:?}", storage_indv);
-                error!("FROM QUEUE = {:?}", queue_indv_new_state);
+                error!("FROM QUEUE = {:?}", queue_indv);
                 return Some(false);
             }
         }
