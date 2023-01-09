@@ -6,7 +6,7 @@ use reqwest::StatusCode;
 use std::collections::HashMap;
 use tokio::runtime::Runtime;
 use v_common::module::info::ModuleInfo;
-use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, Module, PrepareError, wait_load_ontology, wait_module};
+use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::Individual;
 use v_common::onto::individual2turtle::to_turtle_refs;
@@ -134,11 +134,13 @@ fn update(new_state: &Individual, ctx: &mut Context) -> Result<bool, PrepareErro
                 let sp = id.find(':').unwrap_or(0);
                 if sp > 0 && sp < 5 && !id.contains("//") {
                     error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_refs(&[new_state], &ctx.prefixes).unwrap()));
+                    return Err(PrepareError::Recoverable);
                 }
             }
         } else {
             ctx.skipped += 1;
             error!("fail send req to {}", url);
+            return Err(PrepareError::Fatal);
         }
     }
 
