@@ -62,6 +62,10 @@ export default function AppPresenter (manifest) {
   // Prevent empty links routing
   delegateHandler(document.body, 'click', '[href=\'\']', (event) => event.preventDefault());
 
+  veda.on("mainChanged", (mainUri) => {
+    veda.main = mainUri;
+  });
+
   // Router already installed flag
   let routerInstalled;
 
@@ -92,6 +96,7 @@ export default function AppPresenter (manifest) {
           return main.present(mainContainer).then(() => {
             clearTimeout(loadIndicatorTimer);
             loadIndicator.style.display = 'none';
+            veda.trigger('mainChanged', main.id);
           });
         }
       } else {
@@ -100,6 +105,7 @@ export default function AppPresenter (manifest) {
         return main.present(mainContainer).then(() => {
           clearTimeout(loadIndicatorTimer);
           loadIndicator.style.display = 'none';
+          veda.trigger('mainChanged', main.id);
         });
       }
       const tokens = decodeURI(hash).slice(2).split('/');
@@ -129,6 +135,7 @@ export default function AppPresenter (manifest) {
           if (!individual.scroll) {
             window.scrollTo(0, 0);
           }
+          if (containerEl.id === 'main') veda.trigger('mainChanged', uri);
         });
       } else {
         const mainContainer = document.getElementById('main');
@@ -136,6 +143,7 @@ export default function AppPresenter (manifest) {
         main.present(mainContainer).then(() => {
           clearTimeout(loadIndicatorTimer);
           loadIndicator.style.display = 'none';
+          veda.trigger('mainChanged', main.id);
         });
       }
     });

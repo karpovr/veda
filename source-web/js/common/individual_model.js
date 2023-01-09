@@ -498,7 +498,7 @@ proto.save = function (isAtomic) {
 proto.saveAll = function (parent, acc, visited) {
   acc = acc || [];
   visited = visited || new WeakSet();
-  const toBeSaved = this.isNew() || this.isLoaded() && !this.isSync();
+  const toBeSaved = this.isNew() || this.isLoaded() && !this.isSync() && !this.hasValue('rdf:type', 'rdfs:Class') && !this.hasValue('rdf:type', 'owl:Class');
   return Promise.resolve()
     .then(() => toBeSaved && this.trigger('beforeSave'))
     .then(() => {

@@ -2,7 +2,6 @@
 
 import veda from '../common/veda.js';
 import IndividualModel from '../common/individual_model.js';
-import Backend from '../common/backend.js';
 import BackendError from '../browser/backend_error.js';
 import CommonUtil from '../common/util.js';
 import BrowserUtil from '../browser/util.js';

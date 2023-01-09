@@ -14,7 +14,7 @@ function delegateHandler (el, event, delegateSelector, handler, useCapture) {
   return (() => el.removeEventListener(event, ancestorHandler, useCapture));
   /**
    * Event listener for ancestor element
-   * @param {Event} event - event
+   * @param {Event} e - event
    * @return {void}
    * @this Element
    */
@@ -62,4 +62,14 @@ function sanitize (string) {
   });
 }
 
-export {delegateHandler, clear, sanitize};
+function debounce (f, ms) {
+  let skip = false;
+  return function (...args) {
+    if (skip) return;
+    skip = true;
+    setTimeout(() => skip = false, ms);
+    return f(...args);
+  };
+}
+
+export {delegateHandler, clear, sanitize, debounce};
