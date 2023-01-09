@@ -25,7 +25,7 @@ use crate::user_activity::user_activity_manager;
 use crate::vql_query_client::VQLHttpClient;
 use actix_files::{Files, NamedFile};
 use actix_web::rt::System;
-use actix_web::{get, head, middleware, web, App, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{get, head, middleware, web, App, HttpResponse, HttpServer};
 use futures::channel::mpsc;
 use futures::lock::Mutex;
 use futures::{select, FutureExt};
@@ -221,10 +221,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/files").route(web::post().to(save_file)))
             .service(web::resource("/query").route(web::get().to(query_get)).route(web::post().to(query_post)))
             .service(web::resource("/authenticate").route(web::get().to(authenticate_get)).route(web::post().to(authenticate_post)))
-            .service(Files::new("/", "./public")
-		.redirect_to_slash_directory()
-		.index_file("index.html")
-	    )
+            .service(Files::new("/", "./public").redirect_to_slash_directory().index_file("index.html"))
     })
     .bind(format!("0.0.0.0:{port}"))?
     .workers(workers)
