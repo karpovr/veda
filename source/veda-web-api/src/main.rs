@@ -53,18 +53,6 @@ async fn head() -> std::io::Result<HttpResponse> {
 async fn ping() -> std::io::Result<HttpResponse> {
     return Ok(HttpResponse::Ok().content_type("text/plain").body("pong"));
 }
-async fn tests_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    NamedFile::open("public/tests.html".parse::<PathBuf>().unwrap())
-}
-async fn root_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    NamedFile::open("public/index.html".parse::<PathBuf>().unwrap())
-}
-async fn onto_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    NamedFile::open("public/ontology.json".parse::<PathBuf>().unwrap())
-}
-async fn manifest_doc(_req: HttpRequest) -> std::io::Result<NamedFile> {
-    NamedFile::open("public/manifest".parse::<PathBuf>().unwrap())
-}
 
 #[derive(Deserialize)]
 struct Info {
@@ -228,16 +216,15 @@ async fn main() -> std::io::Result<()> {
             .service(load_file)
             .service(ping)
             .service(head)
-            .service(web::resource("/apps/{app_name}").route(web::get().to(apps_doc)))
             .service(logout)
-            .route("/tests", web::get().to(tests_doc))
-            .route("/ontology.json", web::get().to(onto_doc))
-            .route("/manifest", web::get().to(manifest_doc))
-            .route("/", web::get().to(root_doc))
+            .service(web::resource("/apps/{app_name}").route(web::get().to(apps_doc)))
             .service(web::resource("/files").route(web::post().to(save_file)))
             .service(web::resource("/query").route(web::get().to(query_get)).route(web::post().to(query_post)))
             .service(web::resource("/authenticate").route(web::get().to(authenticate_get)).route(web::post().to(authenticate_post)))
-            .service(Files::new("/", "./public"))
+            .service(Files::new("/", "./public")
+		.redirect_to_slash_directory()
+		.index_file("index.html")
+	    )
     })
     .bind(format!("0.0.0.0:{port}"))?
     .workers(workers)
