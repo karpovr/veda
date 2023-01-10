@@ -72,4 +72,12 @@ function debounce (f, ms) {
   };
 }
 
-export {delegateHandler, clear, sanitize, debounce};
+function delay (f, ms) {
+  let wait;
+  return function (...args) {
+    clearTimeout(wait);
+    wait = setTimeout(f, ms, ...args);
+  };
+}
+
+export {delegateHandler, clear, sanitize, debounce, delay};

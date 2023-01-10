@@ -547,6 +547,11 @@ function processTemplate (individual, container, wrapper, templateMode) {
     node.setAttribute('style', style.replace('@', individual.id));
   });
 
+  wrapper.querySelectorAll('[value*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+    const style = node.getAttribute('value');
+    node.setAttribute('value', style.replace('@', individual.id));
+  });
+
   wrapper.querySelectorAll('[title]:not([rel] *):not([about] *)').forEach((node) => {
     const title = node.getAttribute('title');
     if ((/^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/).test(title) ) {
