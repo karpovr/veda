@@ -93,6 +93,11 @@ impl<'a> AuthWorkPlace<'a> {
 
     fn prepare_candidate_account(&mut self, account_id: &str, ticket: &mut Ticket) -> (bool, ResultCode) {
         if let Some(mut account) = self.backend.get_individual_s(account_id) {
+            if account.is_exists_bool("v-s:deleted", true) || account.is_exists_bool("v-s:disabled", true) {
+                error!("user deleted or disabled, user_id = {}", account.get_id());
+                return (false, ResultCode::Ok);
+            }
+
             account.parse_all();
 
             let user_id = account.get_first_literal("v-s:owner").unwrap_or_default();
@@ -220,10 +225,7 @@ impl<'a> AuthWorkPlace<'a> {
         self.credential.remove("v-s:SecretDateFrom");
 
         let res = self.backend.mstorage_api.update(self.sys_ticket, IndvOp::Put, self.credential);
-        if res.result != ResultCode::Ok {
-            error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
-            ResultCode::AuthenticationFailed
-        } else {
+        if res.result == ResultCode::Ok {
             let addr = if self.conf.check_ticket_ip {
                 self.ip
             } else {
@@ -234,6 +236,9 @@ impl<'a> AuthWorkPlace<'a> {
             self.user_stat.attempt_change_pass = 0;
             info!("updated password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::Ok
+        } else {
+            error!("failed to store new password, password = {}, user = {}", self.password, person.get_id());
+            ResultCode::AuthenticationFailed
         }
     }
 
@@ -263,12 +268,12 @@ impl<'a> AuthWorkPlace<'a> {
 
         match account.get_first_literal("v-s:usesCredential") {
             Some(uses_credential_uri) => {
-                if let Some(_credential) = self.backend.get_individual(&uses_credential_uri, self.credential) {
-                    _credential.parse_all();
-                    self.stored_password = _credential.get_first_literal("v-s:password").unwrap_or_default();
-                    self.stored_salt = _credential.get_first_literal("v-s:salt").unwrap_or_default();
-                    self.edited = _credential.get_first_datetime("v-s:dateFrom").unwrap_or_default();
-                    self.is_permanent = _credential.get_first_bool("v-s:isPermanent").unwrap_or(false);
+                if let Some(t_credential) = self.backend.get_individual(&uses_credential_uri, self.credential) {
+                    t_credential.parse_all();
+                    self.stored_password = t_credential.get_first_literal("v-s:password").unwrap_or_default();
+                    self.stored_salt = t_credential.get_first_literal("v-s:salt").unwrap_or_default();
+                    self.edited = t_credential.get_first_datetime("v-s:dateFrom").unwrap_or_default();
+                    self.is_permanent = t_credential.get_first_bool("v-s:isPermanent").unwrap_or(false);
                 } else {
                     error!("failed to read credential {}", uses_credential_uri);
                     create_new_credential(self.sys_ticket, self.backend, self.credential, account);
@@ -346,19 +351,19 @@ impl<'a> AuthWorkPlace<'a> {
                 user.parse_all();
                 let user_name = user.get_first_literal("rdfs:label").unwrap_or_else(|| user.get_id().to_string());
 
-                let map = MapBuilder::new().insert_str("app_name", &app_name).insert_str("secret_code", n_secret.clone()).insert_str("user_name", user_name).build();
+                let map = MapBuilder::new().insert_str("app_name", app_name).insert_str("secret_code", n_secret.clone()).insert_str("user_name", user_name).build();
 
                 let mut subject = vec![];
                 if let Ok(t) = mustache::compile_str(subject_t_str) {
                     if let Err(e) = t.render_data(&mut subject, &map) {
-                        error!("failed to render subject from template, err = {:?}", e)
+                        error!("failed to render subject from template, err = {:?}", e);
                     }
                 }
 
                 let mut body = vec![];
                 if let Ok(t) = mustache::compile_str(body_t_str) {
                     if let Err(e) = t.render_data(&mut body, &map) {
-                        error!("failed to render body from template, err = {:?}", e)
+                        error!("failed to render body from template, err = {:?}", e);
                     }
                 }
 
@@ -378,7 +383,7 @@ impl<'a> AuthWorkPlace<'a> {
                     error!("failed to store email with new secret, user = {}", account.get_id());
                     return ResultCode::AuthenticationFailed;
                 } else {
-                    info!("send {} new secret {} to mailbox {}, user={}", mail_with_secret.get_id(), n_secret, mailbox, account.get_id())
+                    info!("send {} new secret {} to mailbox {}, user={}", mail_with_secret.get_id(), n_secret, mailbox, account.get_id());
                 }
             } else {
                 error!("mailbox not found, user = {}", account.get_id());
