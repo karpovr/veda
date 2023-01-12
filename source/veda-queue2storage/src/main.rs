@@ -170,15 +170,17 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
             || *update_cmd == UpdateCmd::IfCheckErr && check_result.is_some() && !check_result.unwrap()
             || *update_cmd == UpdateCmd::IfCheckErr && ctx.check_err_id.contains(&id)
         {
-            if *update_cmd == UpdateCmd::ComparePrevState {
+            if *update_cmd == UpdateCmd::ComparePrevState && cmd != IndvOp::Remove {
                 let mut queue_indv_prev_state = Individual::default();
                 get_inner_binobj_as_individual(queue_element, "prev_state", &mut queue_indv_prev_state);
                 queue_indv_prev_state.parse_all();
 
-                if let Some(res) = check(op_id, &id, &mut queue_indv_prev_state, Some(CheckCmd::Compare), ctx) {
-                    if !res {
-                        error!("prev state no equal, id = {}", id);
-                        return Err(PrepareError::Fatal);
+                if !queue_indv_prev_state.is_empty() {
+                    if let Some(res) = check(op_id, &id, &mut queue_indv_prev_state, Some(CheckCmd::Compare), ctx) {
+                        if !res {
+                            error!("prev state no equal, id = {id}, cmd={:?}, op_id={op_id}, new_state={}", cmd, queue_indv_new_state.get_obj().as_json_str());
+                            return Err(PrepareError::Fatal);
+                        }
                     }
                 }
             }
@@ -187,7 +189,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
                 if ctx.storage.remove(StorageId::Individuals, &id) {
                     info!("{}, {} id={}", op_id, cmd.as_string(), id);
                 } else {
-                    error!("failed to remove individual, id = {}", id);
+                    error!("failed to remove individual, id = {id}, op_id={op_id}");
                     return Err(PrepareError::Fatal);
                 }
             } else {
@@ -200,7 +202,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
                 let new_counter = queue_indv_new_state.get_first_integer("v-s:updateCounter").unwrap_or(-1);
 
                 if ctx.storage.put_kv_raw(StorageId::Individuals, queue_indv_new_state.get_id(), raw1) {
-                    info!("{op_id}, {} id={}, counter={}, date={}", cmd.as_string(), queue_indv_new_state.get_id(), new_counter, &Utc.timestamp(date, 0));
+                    info!("op_id={op_id}, {} id={}, counter={new_counter}, date={}", cmd.as_string(), queue_indv_new_state.get_id(), &Utc.timestamp(date, 0));
                 } else {
                     error!("failed to update individual, id = {}", queue_indv_new_state.get_id());
                     return Err(PrepareError::Fatal);
@@ -260,8 +262,8 @@ fn check(op_id: i64, id: &str, queue_indv: &mut Individual, check_cmd: Option<Ch
             } else {
                 error!("DIFFERENT, {}, id={}", op_id, id);
 
-                error!("FROM STORAGE = {:?}", storage_indv);
-                error!("FROM QUEUE = {:?}", queue_indv);
+                error!("FROM STORAGE = {}", storage_indv.get_obj().as_json_str());
+                error!("FROM QUEUE = {}", queue_indv.get_obj().as_json_str());
                 return Some(false);
             }
         }
