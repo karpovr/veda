@@ -22,10 +22,11 @@ d:WorkKindInWorkPermit_1
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkPermitMainRisks ;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
+  rdfs:comment "1"^^xsd:string;
 .
 d:WorkKindInWorkPermit_2
   a v-s:WorkKindInWorkPermit;
-  rdfs:label "Газоопасные работы из утвержденного перечня по подразделению"^^xsd:string;
+  rdfs:label "Газоопасные работы по Правилам безопасного ведения газоопасных, огневых и ремонтных работ"^^xsd:string;
   v-s:hasWorkPermitForm d:WorkKindInWorkPermit_2 ;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_18;
@@ -35,10 +36,11 @@ d:WorkKindInWorkPermit_2
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_18;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_19;
+  rdfs:comment "2"^^xsd:string;
 .
 d:WorkKindInWorkPermit_3
   a v-s:WorkKindInWorkPermit;
-  rdfs:label "Газоопасные работы с природным газом"^^xsd:string;
+  rdfs:label "Газоопасные работы по Правилам безопасности сетей газораспределения и газопотребления"^^xsd:string;
   v-s:hasWorkPermitForm d:WorkKindInWorkPermit_3 ;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_17;
@@ -46,6 +48,7 @@ d:WorkKindInWorkPermit_3
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkPermitMainRisks ;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_17;
+  rdfs:comment "3"^^xsd:string;
 . 
 d:WorkKindInWorkPermit_4
   a v-s:WorkKindInWorkPermit;
@@ -55,6 +58,7 @@ d:WorkKindInWorkPermit_4
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkPermitMainRisks ;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
+  rdfs:comment "4"^^xsd:string;
 . 
 d:WorkKindInWorkPermit_5
   a v-s:WorkKindInWorkPermit;
@@ -64,6 +68,7 @@ d:WorkKindInWorkPermit_5
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkPermitMainRisks ;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
+  rdfs:comment "5"^^xsd:string;
 . 
 d:WorkKindInWorkPermit_6
   a v-s:WorkKindInWorkPermit;
@@ -77,6 +82,7 @@ d:WorkKindInWorkPermit_6
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_8;
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_8_dop;
+  rdfs:comment "6"^^xsd:string;
 . 
 d:WorkKindInWorkPermit_7
   a v-s:WorkKindInWorkPermit;
