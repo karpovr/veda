@@ -201,7 +201,7 @@ v-s:workPermit_tk_ppr_description
 v-s:workPermit_tk_ppr
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:WorkPermit ;
-  rdfs:label "ТК/ППР"@ru ;
+  rdfs:label "ТК/ППР, инструкция"@ru ;
   rdfs:label "WorkPermit TK and PPR"@en ;
   rdfs:range v-s:File ;
 .
