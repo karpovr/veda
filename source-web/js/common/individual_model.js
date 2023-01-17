@@ -765,6 +765,12 @@ function addSingleValue (property_uri, value) {
  * @return {IndividualModel}
  */
 proto.removeValue = function (property_uri, values, silently) {
+  if (!property_uri) {
+    return Object.keys(this.properties).filter((property) => property !== '@').reduce(
+      (p, property) => p.then(() => this.removeValue(property, values, silently)),
+      Promise.resolve(),
+    );
+  }
   if (!this.properties[property_uri] || !this.properties[property_uri].length || typeof values === 'undefined' || values === null) {
     return Promise.resolve(this);
   }

@@ -5,12 +5,12 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (individual.image) {
-    template.children().attr('src', individual.image.src);
+    template.attr('src', individual.image.src);
   } else {
-    template.children().attr('src', '/files/' + individual.id);
+    template.attr('src', '/files/' + individual.id);
   }
 };
 
 export const html = `
-  <div><img width="100%" /></div>
+<img width="100%" />
 `;

@@ -548,8 +548,13 @@ function processTemplate (individual, container, wrapper, templateMode) {
   });
 
   wrapper.querySelectorAll('[value*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
-    const style = node.getAttribute('value');
-    node.setAttribute('value', style.replace('@', individual.id));
+    const value = node.getAttribute('value');
+    node.setAttribute('value', value.replace('@', individual.id));
+  });
+
+  wrapper.querySelectorAll('[id*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
+    const id = node.getAttribute('id');
+    node.setAttribute('id', style.replace('@', individual.id));
   });
 
   wrapper.querySelectorAll('[title]:not([rel] *):not([about] *)').forEach((node) => {
