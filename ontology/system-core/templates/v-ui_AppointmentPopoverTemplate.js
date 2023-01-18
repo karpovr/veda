@@ -20,6 +20,9 @@ export const pre = function (individual, template, container, mode, extra) {
       if (!employee.hasValue('v-s:dateAbsenceTo')) {
         $('.absence-block', template).remove();
       }
+      if (!employee.hasValue('v-s:delegate')) {
+        $('.delegate-block', template).remove(); 
+      }
     });
   }
 };
@@ -53,14 +56,16 @@ export const html = `
               <small about="@" property="v-s:description"></small>
             </div>
           </div>
+          <hr class="no-margin" />
           <div class="absence-block">
-            <hr class="no-margin" />
             <div>
               <small>
                 <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
                 <span about="@" property="v-s:dateAbsenceTo"></span>
               </small>
             </div>
+          </div>
+          <div class="delegate-block">
             <div>
               <small>
                 <span about="v-s:delegate" property="rdfs:label"></span>
