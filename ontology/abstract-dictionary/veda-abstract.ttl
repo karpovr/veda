@@ -1660,6 +1660,13 @@ v-s:parentUnit
   owl:inverseOf v-s:childUnit ;
 .
 
+#-------------------------------------------------------------------- Для выдачи персональных прав --
+v-s:Personal
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:label "Для выдачи персональных прав"@ru ;
+  rdfs:label "For personal rights"@en ;
+.
 #--------------------------------------------------------------Узел-----
 sys:Node
   rdf:type owl:Class ;
