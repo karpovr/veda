@@ -83,6 +83,7 @@ cfg:Event_2
   rdfs:comment "Скрипт выдает права авторам (v-s:author), владельцам (v-s:owner), издателям (v-s:publisher) и создателям (v-s:creator)";
   v-s:preventByType v-s:Version;
   v-s:preventByType v-s:Account;
+  v-s:preventByType v-s:Personal;
   v-s:script """
 /* Available variables:
  * ticket = superuser ticket
@@ -180,6 +181,70 @@ const permission = {
   'rdfs:comment' : veda.Util.newStr('создано автоматически в обработчике cfg:Event_2_1')
 };
 put_individual(ticket, permission);
+  """ ;
+.
+
+cfg:Event_2_2
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystemAppointment ;
+  rdfs:label "Скрипт выдает права RUD персонам из автора (v-s:author), владельца (v-s:owner), издателя (v-s:publisher) и создателя (v-s:creator)";
+  rdfs:comment "Клон event_2, но только для класса v-s:Personal и с выдачей прав только на персону";
+  v-s:preventByType v-s:Version;
+  v-s:triggerByType v-s:Personal;
+  v-s:script """
+/* Available variables:
+ * ticket = superuser ticket
+ * document = captured document
+ * user_uri = user whose actions triggered event
+ * prev_state = previous state of the captured document
+ * _event_id = id of the event to prevent cycles in triggers. Must be passed to every function that modifies DB.
+ * parent_script_id = id of the parent script that triggered this event.
+ * parent_document_id = id of the document that triggered this event.
+ * super_classes = super classes of the document.
+ */
+
+// First class event
+//if (parent_script_id) return;
+
+const doc_uri = document['@'];
+const owner_properties = ['v-s:owner', 'v-s:author', 'v-s:publisher', 'v-s:creator'];
+
+owner_properties.map(function (property_uri) {
+  if (document[property_uri]) {
+    document[property_uri].map(function (value) {
+      const owner_uri = value.data;
+      if (owner_uri && owner_uri !== 'cfg:VedaSystem') {
+        const owner = get_individual(ticket, owner_uri);
+        if (owner) {
+          const owner_type = veda.Util.getUri(owner['rdf:type']);
+          if (owner_type === 'v-s:Person') {
+            const permission_uri = 'd:right_' + doc_uri.split(':').join('_') + '_' + owner_uri.split(':').join('_') + '_event2_2';
+            addPermission(permission_uri, owner_uri, doc_uri, ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
+          } else if (owner_type === 'v-s:Appointment') {
+            const person_uri = veda.Util.getUri(owner['v-s:employee']);
+            if (person_uri) {
+              const permission_uri = 'd:right_' + doc_uri.split(':').join('_') + '_' + person_uri.split(':').join('_') + '_event2';
+              addPermission(permission_uri, person_uri, doc_uri, ['v-s:canRead', 'v-s:canUpdate', 'v-s:canDelete']);
+            }
+          }
+        }
+      }
+    });
+  }
+});
+
+function addPermission (permission_uri, subject_uri, object_uri, rights) {
+  const permission = {
+    '@': permission_uri,
+    'rdf:type': veda.Util.newUri('v-s:PermissionStatement'),
+    'v-s:permissionObject': veda.Util.newUri(object_uri),
+    'v-s:permissionSubject': veda.Util.newUri(subject_uri),
+  };
+  rights.map(function (right) {
+    permission[right] = veda.Util.newBool(true);
+  });
+  put_individual(ticket, permission);
+}
   """ ;
 .
 
