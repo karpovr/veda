@@ -63,6 +63,9 @@ export const post = function (individual, template, container, mode, extra) {
     if (!individual['v-s:employee'][0].hasValue('v-s:dateAbsenceTo')) {
       $('.absenceBlock', template).remove();
     }
+    if (!individual['v-s:employee'][0].hasValue('v-s:delegate')) {
+      $('.delegateBlock', template).remove(); 
+    }
     trunc($('.for-trunc .label-template', template));
   } else {
     if (individual.hasValue('v-s:hasCommunicationMean')) {
@@ -154,12 +157,14 @@ export const html = `
           <div>
             <span about="v-s:AbsenceUntilBundle" property="rdfs:label"></span>
             <span about="@" property="v-s:dateAbsenceTo"></span>
-            <div about="@" rel="v-s:delegate">
-              <span>
-                <span about="v-s:delegate" property="rdfs:label"></span>
-                <span property="rdfs:label"></span>
-              </span>
-            </div>
+          </div>
+        </div>
+        <div class="delegateBlock" about="@" rel="v-s:employee">
+          <div about="@" rel="v-s:delegate">
+            <span>
+              <span about="v-s:delegate" property="rdfs:label"></span>
+              <span property="rdfs:label"></span>
+            </span>
           </div>
         </div>
       </div>
