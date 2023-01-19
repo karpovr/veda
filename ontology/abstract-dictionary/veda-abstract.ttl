@@ -1358,7 +1358,7 @@ v-s:prepayment
 .
 v-s:transactionDate
   rdf:type owl:DatatypeProperty ;
-  rdfs:label "Дата проводки"@ru ;
+  rdfs:label "Дата проводки / сверки"@ru ;
   rdfs:label "Transaction date"@en ;
   rdfs:range xsd:dateTime ;
   rdfs:domain v-s:Financial ;
