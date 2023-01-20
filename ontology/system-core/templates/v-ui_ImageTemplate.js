@@ -12,5 +12,5 @@ export const pre = function (individual, template, container, mode, extra) {
 };
 
 export const html = `
-<img width="100%" />
+<img width="100%" draggable="false" />
 `;
