@@ -44,9 +44,9 @@ scripts-main
 
 ontologist
 
-ccus
+#ccus
 
-#ccus2
+ccus2
 
 web-api
     module = web-api
