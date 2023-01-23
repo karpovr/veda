@@ -6,17 +6,15 @@ import UpdateService from '../browser/update_service.js';
 
 const styles = `
   #line-status {
-    position: absolute;
-    top: 0.7em;
-    right: 0.7em;
-    z-index: 1;
-    height: 0.7em;
-    width: 0.7em;
+    position: fixed;
+    top: 0;
+    z-index: 9999;
+    height: 3px;
+    width: 100%;
     background-color: lightgrey;
-    border-radius: 50%;
   }
   #line-status.online {
-    background-color: forestgreen;
+    background-color: transparent;
   }
   #line-status.offline {
     background-color: crimson;
