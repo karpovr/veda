@@ -80,4 +80,30 @@ function delay (f, ms) {
   };
 }
 
-export {delegateHandler, clear, sanitize, debounce, delay};
+function decorator (fn, pre, post, err) {
+  return async function (...args) {
+    try {
+      pre && typeof pre === 'function' && await pre.call(this, ...args);
+      const result = await fn.call(this, ...args);
+      post && typeof post === 'function' && await post.call(this, ...args);
+      return result;
+    } catch (error) {
+      err && typeof err === 'function' && await err.call(this, ...args);
+      throw error;
+    }
+  };
+}
+
+function showSpinner () {
+  document.getElementById('load-indicator').style.display = '';
+}
+
+function hideSpinner () {
+  document.getElementById('load-indicator').style.display = 'none';
+}
+
+function spinnerDecorator (fn) {
+  return decorator(fn, showSpinner, hideSpinner, hideSpinner);
+}
+
+export {delegateHandler, clear, sanitize, debounce, delay, decorator, spinnerDecorator};
