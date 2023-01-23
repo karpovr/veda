@@ -1,10 +1,9 @@
 // Codelets
 
 import Sha256 from '../common/lib/sha256.js';
-
 import ServerUtil from '../server/util.js';
-
 import WorkflowUtil from '../server/workflow_util.js';
+import Convert from "./convert.js";
 
 const Codelet = {};
 
@@ -381,7 +380,7 @@ Codelet.create_use_transformation = function (process, task) {
         if (transform) {
           const document = get_individual(task.ticket, ServerUtil.getUri(src_doc_id));
           if (document) {
-            const new_items = ServerUtil.transformation(task.ticket, document, transform, null, null, ServerUtil.newUri(process.src_data['@']));
+            const new_items = Convert.transformation(task.ticket, document, transform, null, null, ServerUtil.newUri(process.src_data['@']));
             for (const new_item of new_items) {
               put_individual(ticket, new_item, _event_id);
               new_items_uri.push(
