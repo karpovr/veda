@@ -106,4 +106,8 @@ function spinnerDecorator (fn) {
   return decorator(fn, showSpinner, hideSpinner, hideSpinner);
 }
 
-export {delegateHandler, clear, sanitize, debounce, delay, decorator, spinnerDecorator};
+async function timeout (ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export {delegateHandler, clear, sanitize, debounce, delay, decorator, spinnerDecorator, timeout};
