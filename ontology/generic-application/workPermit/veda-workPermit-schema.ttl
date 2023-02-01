@@ -1150,8 +1150,8 @@ v-s:ExtensionOfWorkPermit
   rdfs:label "Продление наряда-допуска"@ru ;
   rdfs:label "Extension of work permit"@en ;
 .
-#v-s:dateFrom - Дата и время начала работ
-#v-s:dateTo - Дата и время окончания работ
+#v-s:dateFromPlan - Дата и время начала работ
+#v-s:dateToPlan - Дата и время окончания работ
 #v-s:placeDescription - Наименование рабочего места
 #v-s:hasResultsOfMeasurementsOfHarmfulFactors - Результат анализа воздушной среды
 
@@ -1167,12 +1167,11 @@ v-s:PS_hasResultsOfMeasurementsOfHarmfulFactors_ExtensionOfWorkPermit
 v-s:PS_dates_ExtensionOfWorkPermit
   rdf:type v-ui:ObjectPropertySpecification ;
   v-ui:forClass v-s:ExtensionOfWorkPermit ;
-  v-ui:forProperty v-s:dateFrom ;
-  v-ui:forProperty v-s:dateTo ;
+  v-ui:forProperty v-s:dateToPlan ;
   v-ui:minCardinality "1"^^xsd:integer ;
   v-ui:maxCardinality "1"^^xsd:integer ;
-  rdfs:label "Спецификация dateFrom и dateTo для класса v-s:ExtensionOfWorkPermit"@ru ;
-  rdfs:label "Specification for dateFrom and dateTo for v-s:ExtensionOfWorkPermit"@en ;
+  rdfs:label "Спецификация dateToPlan для класса v-s:ExtensionOfWorkPermit"@ru ;
+  rdfs:label "Specification for dateToPlan for v-s:ExtensionOfWorkPermit"@en ;
 .
 
 

@@ -11,30 +11,31 @@ export const pre = function (individual, template, container, mode, extra) {
   template.on('validate', function () {
     const result = {};
     let dateState = false;
-    if (individual.hasValue('v-s:dateTo') && individual.hasValue('v-s:dateFrom')) {
-      if (individual['v-s:dateTo'][0] <= individual['v-s:dateFrom'][0]) {
-        result['v-s:dateTo'] = {
+    if (individual.hasValue('v-s:dateToPlan') && individual.hasValue('v-s:dateFromPlan')) {
+      if (individual['v-s:dateToPlan'][0] <= individual['v-s:dateFromPlan'][0]) {
+        result['v-s:dateToPlan'] = {
           state: false,
           cause: ['mnd-s:DateFromToPlan_Bundle'],
         };  
-      } else if ((individual['v-s:dateTo'][0] - individual['v-s:dateFrom'][0]) > (1000*60*60*24*7)) {
-        result['v-s:dateTo'] = {
+      } else if ((individual['v-s:dateToPlan'][0] - individual['v-s:dateFromPlan'][0]) > (1000*60*60*24*7)) {
+        result['v-s:dateToPlan'] = {
           state: false,
           cause: ['v-ui:maxCardinality'],
         };
       }
     }
-    if (individual.hasValue('v-s:dateFrom')) {
+/*    if (individual.hasValue('v-s:dateFromPlan')) {
       //смещение в 5 минут, так как поля со временем
       const shift = 1000 * 60 * 5;
-      const diff = individual['v-s:dateFrom'][0] - new Date();
+      const diff = individual['v-s:dateFromPlan'][0] - new Date();
       if (diff < -shift && individual.isNew()) {
-        result['v-s:dateFrom'] = {
+        result['v-s:dateFromPlam'] = {
           state: false,
           cause: ['v-ui:minCardinality'],
         };
       }
-    }
+   }
+ */  
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
@@ -86,20 +87,20 @@ export const html = `
       <br />
       <div class="row row-attribute">
         <div class="col-sm-3 col-xs-5">
-          <label about="v-s:dateFrom" property="rdfs:label"></label>
+          <label about="v-s:dateFromPlan" property="rdfs:label"></label>
         </div>
         <div class="col-sm-3 col-xs-3">
-            <div about="@" property="v-s:dateFrom" class="view -edit -search"></div>
-            <veda-control data-type="dateTime" property="v-s:dateFrom" class="-view edit search"></veda-control>
+            <div about="@" property="v-s:dateFromPlan" class="view edit -search"></div>
+            <veda-control data-type="dateTime" property="v-s:dateFromPlan" class="-view -edit search"></veda-control>
         </div>
       </div>
       <div class="row row-attribute">
         <div class="col-sm-3 col-xs-5">
-          <label about="v-s:dateTo" property="rdfs:label"></label>
+          <label about="v-s:dateToPlan" property="rdfs:label"></label>
         </div>
         <div class="col-sm-3 col-xs-3">
-            <div about="@" property="v-s:dateTo" class="view -edit -search"></div>
-            <veda-control data-type="dateTime" property="v-s:dateTo" class="-view edit search"></veda-control>
+            <div about="@" property="v-s:dateToPlan" class="view -edit -search"></div>
+            <veda-control data-type="dateTime" property="v-s:dateToPlan" class="-view edit search"></veda-control>
         </div>
       </div>
       <div class="row row-attribute">
