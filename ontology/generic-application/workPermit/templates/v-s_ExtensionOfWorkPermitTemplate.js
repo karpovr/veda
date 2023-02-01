@@ -8,7 +8,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
   
-  template.on('validate', function () {
+  template.on('validate', async function () {
     const result = {};
     let dateState = false;
     if (individual.hasValue('v-s:dateToPlan') && individual.hasValue('v-s:dateFromPlan')) {
@@ -17,11 +17,21 @@ export const pre = function (individual, template, container, mode, extra) {
           state: false,
           cause: ['mnd-s:DateFromToPlan_Bundle'],
         };  
-      } else if ((individual['v-s:dateToPlan'][0] - individual['v-s:dateFromPlan'][0]) > (1000*60*60*24*7)) {
-        result['v-s:dateToPlan'] = {
-          state: false,
-          cause: ['v-ui:maxCardinality'],
-        };
+      } else {
+        const workPermitForm = await individual.getPropertyChain('v-s:backwardTarget', 'v-s:hasWorkPermitForm');
+        if (workPermitForm.length > 0
+            && workPermitForm[0].id == 'd:WorkKindInWorkPermit_6'
+            && (individual['v-s:dateToPlan'][0] - individual['v-s:dateFromPlan'][0]) > (1000*60*60*12)) {
+          result['v-s:dateToPlan'] = {
+            state: false,
+            cause: ['v-ui:maxCardinality'],
+          };
+        } else if ((individual['v-s:dateToPlan'][0] - individual['v-s:dateFromPlan'][0]) > (1000*60*60*24*7)) {
+          result['v-s:dateToPlan'] = {
+            state: false,
+            cause: ['v-ui:maxCardinality'],
+          };
+        }
       }
     }
 /*    if (individual.hasValue('v-s:dateFromPlan')) {
