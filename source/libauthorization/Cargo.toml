@@ -11,7 +11,7 @@ path = "src/lib.rs"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-v_common = { package = "v-common", version = "=0.4.24" }
+v_common = { package = "v-common", version = "=0.4.43" }
 #v_common = { package = "v-common", path = "../../../v-common" }
 
 #[build-dependencies]
