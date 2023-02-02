@@ -62,7 +62,7 @@ impl IndexDocWorkplace {
         let slot_l1 = indexer.key2slot.get_slot_and_set_if_not_found(predicate);
 
         let l_data = oo.get_datetime();
-        let mut data = format!("{:?}", Utc.timestamp(l_data, 0));
+        let mut data = format!("{:?}", Utc.timestamp_opt(l_data, 0));
         data.truncate(data.len() - 1);
         self.doc.add_long(slot_l1, l_data)?;
 
