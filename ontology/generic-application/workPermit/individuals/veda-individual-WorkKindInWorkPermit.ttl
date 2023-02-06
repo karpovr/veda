@@ -331,7 +331,7 @@ d:WorkKindInWorkPermit_22
   v-s:hasRequiredFieldInWorkKind v-s:hasSafetyWorkAction_10;
 . 
 d:WorkKindInWorkPermit_23
-  a mnd-s:WorkKindInWorkPermit;
+  a v-s:WorkKindInWorkPermit;
   v-s:parentUnit d:WorkKindInWorkPermit_1;
   v-s:parentUnit d:WorkKindInWorkPermit_2;
   v-s:parentUnit d:WorkKindInWorkPermit_3;
