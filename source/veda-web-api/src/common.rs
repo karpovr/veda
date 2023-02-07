@@ -217,16 +217,28 @@ pub(crate) fn log_w(start_time: Option<&Instant>, ticket: &Option<String>, addr:
         "      ?"
     };
 
+    let action = if operation.is_empty() {
+        "".to_string()
+    } else {
+        format!("action = {operation}, ")
+    };
+
+    let res_str = if res == ResultCode::Zero {
+        "".to_string()
+    } else {
+        format!("{res:?}, ")
+    };
+
     if res == ResultCode::InternalServerError {
         if let Some(t) = start_time {
-            error!("{ip}, {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}, time = {:.3} ms", t.elapsed().as_secs_f64() * 1000.0);
+            error!("{ip}, {ticket_id}, {action}user = {user_id}, {res_str}{args}, time = {:.3} ms", t.elapsed().as_secs_f64() * 1000.0);
         } else {
-            error!("{ip}, {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}");
+            error!("{ip}, {ticket_id}, {action}user = {user_id}, {res_str}{args}");
         }
     } else if let Some(t) = start_time {
-        info!("{ip},  {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}, time = {:.3} ms", t.elapsed().as_secs_f64() * 1000.0);
+        info!("{ip},  {ticket_id}, {action}user = {user_id}, {res_str}{args}, time = {:.3} ms", t.elapsed().as_secs_f64() * 1000.0);
     } else {
-        info!("{ip},  {ticket_id}, action = {operation}, user = {user_id}, {res:?}, {args:?}");
+        info!("{ip},  {ticket_id}, {action}user = {user_id}, {res_str}{args}");
     }
 }
 

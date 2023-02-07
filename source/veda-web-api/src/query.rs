@@ -258,10 +258,18 @@ async fn direct_query(
     }
 
     if res.result_code == ResultCode::Ok {
-        info!("Ok, count = {}, time(ms): query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time);
+        log(
+            None,
+            &uinf,
+            "",
+            &format!("result: count = {}, time(ms): query = {}, authorize = {}, total = {}", res.count, res.query_time, res.authorize_time, res.total_time),
+            ResultCode::Ok,
+        );
+
         Ok(HttpResponse::Ok().json(res))
     } else {
-        error!("{:?}", res.result_code);
+        log(None, &uinf, "", "", res.result_code);
+
         Ok(HttpResponse::new(StatusCode::from_u16(res.result_code as u16).unwrap()))
     }
 }
