@@ -1,9 +1,155 @@
 import Util from "./util.js";
+import ServerUtil from '../server/util.js';
+import WorkflowUtil from "./workflow_util.js";
 
 const Convert = {};
 export default Convert;
 
 Convert.transformation = function (ticket, individuals, transform, executor, work_order, process) {
+    //print("@S1", transform['@']);
+    const tr_script_val = transform['v-wf:transformScript'];
+    if (tr_script_val) {
+        return Convert.transformation_script (ServerUtil.getStrings (tr_script_val), ticket, individuals, transform, executor, work_order, process);
+    }
+    return Convert.declarative_transformation (ticket, individuals, transform, executor, work_order, process);
+}
+
+Convert.transformation_script = function (tr_script, ticket, individuals, transform, executor, _work_order, process) {
+    try {
+        let work_order = ServerUtil.getUri(_work_order);
+
+        if (Array.isArray(individuals) !== true) {
+            individuals = [individuals];
+        }
+
+        let input_variables = {};
+        for (const idx in individuals) {
+            let indv = individuals[idx];
+
+            if (ServerUtil.hasValue(indv, 'rdf:type', ServerUtil.newUri('v-wf:Variable')[0])) {
+                input_variables[ServerUtil.getFirstValue(indv['v-wf:variableName'])] = indv['v-wf:variableValue'];
+            }
+        }
+
+        //print("variables=", ServerUtil.toJson(input_variables));
+        //print("ticket", ServerUtil.toJson(ticket));
+        //print("individuals", ServerUtil.toJson(individuals));
+        //print("transform", ServerUtil.toJson(transform));
+        //print("executor", ServerUtil.toJson(executor));
+        //print("work_order", ServerUtil.toJson(work_order));
+        //print("process", ServerUtil.toJson(process));
+
+        const out_data0 = [];
+        const setVariableValue = (() => {
+            return function (variableName, variableValue) {
+                const new_var = {
+                    '@': Util.genUri() + '-var',
+                    'rdf:type': ServerUtil.newUri('v-wf:Variable'),
+                    'v-wf:variableName': ServerUtil.newStr(variableName),
+                    'v-wf:variableValue': variableValue
+                };
+
+                out_data0.push(new_var);
+            };
+        })();
+
+        const setVarValueToIndv = (() => {
+            return function (variable_name, field_name, indv) {
+
+                let val = input_variables[variable_name];
+                if (val) {
+                    indv[field_name] = val;
+                }
+            };
+        })();
+
+        const getVariableValue = (() => {
+            return function (variable_name) {
+                return ServerUtil.getValues(input_variables[variable_name])[0];
+            };
+        })();
+
+        const getVariableValues = (() => {
+            return function (variable_name) {
+                return ServerUtil.getValues(input_variables[variable_name]);
+            };
+        })();
+
+        const getValueFromIndividual = (() => {
+            return function (fieldName) {
+                return individuals[0][fieldName];
+            };
+        })();
+
+        const getIndividualFromStorage = (() => {
+            return function (indv_id) {
+                return get_individual(ticket, indv_id);
+            };
+        })();
+
+        const getExecutor = (() => {
+            return function () {
+                return executor;
+            };
+        })();
+
+        const getWorkOrder = (() => {
+            return function () {
+                return work_order;
+            };
+        })();
+
+        const saveIndividual = (() => {
+            return function (val) {
+                out_data0.push(val);
+            };
+        })();
+
+        const newBool = ServerUtil.newBool;
+        const newStr = ServerUtil.newStr;
+        const newDate = ServerUtil.newDate;
+        const newUri = ServerUtil.newUri;
+        const getUri = ServerUtil.getUri;
+        const get_properties_chain = WorkflowUtil.get_properties_chain;
+
+        const newUriFromArray = (() => {
+            return function (vals) {
+                const res = [];
+                for (const i in vals) {
+                    if (vals[i]) {
+                        res.push({
+                            data: vals[i],
+                            type: 'Uri',
+                        });
+                    }
+                }
+                return res;
+            };
+        })();
+
+        tr_script = "f(); function f() {" + tr_script.toString() + "}";
+
+        //print("@R3 EVAL", tr_script);
+        eval(tr_script);
+
+        for (const key in out_data0) {
+            if (Object.hasOwnProperty.call(out_data0, key)) {
+                let indv = out_data0[key];
+                if (Object.hasOwnProperty.call(indv, '@') == false) {
+                    indv['@'] = Util.genUri() + '-tr';
+                }
+            }
+        }
+
+        //print("@R4 RES=", ServerUtil.toJson(out_data0));
+
+        return out_data0;
+    } catch (e) {
+        console.error('Script Transformation failed err=', e);
+    }
+}
+
+Convert.declarative_transformation = function (ticket, individuals, transform, executor, work_order, process) {
     try {
         const out_data0 = {};
 
@@ -25,7 +171,6 @@ Convert.transformation = function (ticket, individuals, transform, executor, wor
                 const rul = get_individual(ticket, rules[i].data);
                 if (!rul) {
                     print('not read rule [', Util.toJson(rul), ']');
-                    continue;
                 } else {
                     tmp_rules.push(rul);
                 }
