@@ -2,10 +2,13 @@
 extern crate log;
 
 use chrono::{TimeZone, Utc};
-use std::collections::HashSet;
-use std::env;
+use scan_fmt::scan_fmt;
+use std::collections::{HashMap, HashSet};
 use std::error::Error;
+use std::fs::OpenOptions;
+use std::io::{BufRead, BufReader, Seek, SeekFrom};
 use std::process::exit;
+use std::{env, io};
 use url::Url;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, init_log, Module, PrepareError};
@@ -35,6 +38,7 @@ pub struct Context {
     check_cmd: Option<CheckCmd>,
     check_err_id: HashSet<String>,
     update_cmd: Option<UpdateCmd>,
+    exclude_list: HashMap<i64, String>,
 }
 
 fn main() -> Result<(), i32> {
@@ -49,7 +53,7 @@ fn main() -> Result<(), i32> {
         return Err(-1);
     }
 
-    let mut db_connection_url = "".to_owned();
+    let mut db_connection_url = String::new();
     let mut check_cmd = None;
     let mut update_cmd = None;
 
@@ -93,8 +97,9 @@ fn main() -> Result<(), i32> {
         storage: get_storage_with_url(&db_connection_url, storage_mode),
         module_info: module_info.unwrap(),
         check_cmd,
-        check_err_id: Default::default(),
+        check_err_id: std::collections::HashSet::default(),
         update_cmd,
+        exclude_list: load_exclude_list().expect("fail load exclude list"),
     };
 
     let mut queue_consumer = Consumer::new("./data/queue", "queue2storage", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
@@ -147,14 +152,14 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     queue_indv_new_state.parse_all();
 
     let check_result = if cmd != IndvOp::Remove {
-        check(op_id, &id, &mut queue_indv_new_state, ctx.check_cmd.clone(), ctx)
+        check(op_id, &id, &mut queue_indv_new_state, &ctx.check_cmd.clone(), ctx)
     } else {
         None
     };
 
     if check_result.is_some() && !check_result.unwrap() && !ctx.check_err_id.contains(&id) && queue_indv_new_state.is_exists("rdf:type") {
         info!("{}/{}, ADD TO LIST: {}", my_consumer.id, op_id, id);
-        ctx.check_err_id.insert(id.to_owned());
+        ctx.check_err_id.insert(id.clone());
         to_report(&ctx.check_err_id).expect("fail write report file");
     }
 
@@ -170,18 +175,34 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
             || *update_cmd == UpdateCmd::IfCheckErr && check_result.is_some() && !check_result.unwrap()
             || *update_cmd == UpdateCmd::IfCheckErr && ctx.check_err_id.contains(&id)
         {
-            if *update_cmd == UpdateCmd::ComparePrevState && cmd != IndvOp::Remove {
+            let exclude = if let Some(v) = ctx.exclude_list.get(&op_id) {
+                if *v == id {
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+
+            if exclude {
+                warn!("exclude {op_id} {id}");
+            }
+
+            if *update_cmd == UpdateCmd::ComparePrevState && cmd != IndvOp::Remove && !exclude {
                 let mut queue_indv_prev_state = Individual::default();
                 get_inner_binobj_as_individual(queue_element, "prev_state", &mut queue_indv_prev_state);
                 queue_indv_prev_state.parse_all();
 
                 if !queue_indv_prev_state.is_empty() {
-                    if let Some(res) = check(op_id, &id, &mut queue_indv_prev_state, Some(CheckCmd::Compare), ctx) {
+                    if let Some(res) = check(op_id, &id, &mut queue_indv_prev_state, &Some(CheckCmd::Compare), ctx) {
                         if !res {
                             error!("prev state no equal, id = {id}, cmd={:?}, op_id={op_id}, new_state={}", cmd, queue_indv_new_state.get_obj().as_json_str());
                             return Err(PrepareError::Fatal);
                         }
                     }
+                } else {
+                    warn!("prev-state is empty {op_id} {id}");
                 }
             }
 
@@ -219,7 +240,7 @@ fn prepare(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     Ok(true)
 }
 
-pub fn get_storage_with_url(db_connection_url: &str, storage_mode: StorageMode) -> VStorage {
+fn get_storage_with_url(db_connection_url: &str, storage_mode: StorageMode) -> VStorage {
     match Url::parse(db_connection_url) {
         Ok(url) => {
             if url.scheme() == "file" {
@@ -243,7 +264,7 @@ pub fn get_storage_with_url(db_connection_url: &str, storage_mode: StorageMode) 
     }
 }
 
-fn check(op_id: i64, id: &str, queue_indv: &mut Individual, check_cmd: Option<CheckCmd>, ctx: &mut Context) -> Option<bool> {
+fn check(op_id: i64, id: &str, queue_indv: &mut Individual, check_cmd: &Option<CheckCmd>, ctx: &mut Context) -> Option<bool> {
     if let Some(check_cmd) = &check_cmd {
         let mut storage_indv = Individual::default();
 
@@ -281,4 +302,24 @@ fn to_report(list: &HashSet<String>) -> Result<(), Box<dyn Error>> {
     }
     wtr.flush()?;
     Ok(())
+}
+
+fn load_exclude_list() -> io::Result<HashMap<i64, String>> {
+    let mut out_data = HashMap::new();
+    let fname = "./queue2storage-exclude-list.txt";
+    if let Ok(mut ff) = OpenOptions::new().read(true).open(fname) {
+        ff.seek(SeekFrom::Start(0))?;
+
+        for line in BufReader::new(ff).lines().flatten() {
+            if let (Some(op_id), Some(individual_id)) = scan_fmt!(&line, "{},\"{}\"", i64, String) {
+                info!("EXCLUDE: {op_id} {individual_id}");
+                out_data.insert(op_id, individual_id);
+            } else {
+                error!("fail parse {}, line={}", fname, line);
+            }
+        }
+    } else {
+        warn!("not load {}", fname);
+    }
+    Ok(out_data)
 }
