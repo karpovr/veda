@@ -1,0 +1,69 @@
+s-wf:tr_actor_form_direct
+  rdf:type v-wf:Transform ;
+  v-wf:transformScript """
+  
+  	let executor = getExecutor();
+	let to = [];
+		
+	if ( getUri(get_properties_chain(to, [{$get: 'rdf:type'}], [executor])) === 'v-s:Appointment' ) {
+      		to.push (get_properties_chain(executor, [{$get: 'v-s:employee'}], [executor])[0]);
+      		to.push (get_properties_chain(executor, [{$get: 'v-s:occupation'}], [executor])[0]);
+    	} else {
+    		to = getExecutor();
+    	}
+		
+	let from = [];
+	let f_from = getVariableValue('from');
+	
+	if (f_from) {
+		let ii = getIndividualFromStorage (f_from);
+		if (ii) {
+			if (ii.hasOwnProperty('v-s:employee')) {
+				from.push (getUri(ii['v-s:employee']));
+			}
+		
+			if (ii.hasOwnProperty('v-s:occupation')) { 
+				from.push (getUri(ii['v-s:occupation']));
+			}
+		}
+	}
+	
+	let clvl = getVariableValue('coordinationLevel');
+	let level = '';
+	
+	if (clvl == 1) {
+		level = '1 уровень';
+	} else if (clvl == 2) {
+		level = '2 уровень';
+	} else if (clvl == 3) {
+		level = '3 уровень';
+	}
+			
+	let new_form = {
+	'rdf:type' : newUriFromArray (['v-wf:DecisionForm', getVariableValue('decision_form_type')]),
+	'v-wf:isCompleted' : newBool (false),
+	'v-wf:to' : to,
+	'v-wf:onWorkOrder' : newUri (getWorkOrder()),
+	'v-wf:from' : newUriFromArray (from),
+	'rdfs:label' : newUri(level), 
+	'v-s:created' : newDate (new Date()),
+	'v-wf:isDirectTask' : newBool (true),
+	};
+
+	setVarValueToIndv('setStatus', 'v-wf:isSetStatus', new_form);
+	setVarValueToIndv('docId', 'v-wf:onDocument', new_form);
+	setVarValueToIndv('redirect_from', 'v-wf:redirect_from_task', new_form);
+	setVarValueToIndv('actor_task_action', 'rdfs:label', new_form);
+	setVarValueToIndv('possible_decision', 'v-wf:possibleDecisionClass', new_form);
+	setVarValueToIndv('actor_task_date_to', 'v-wf:dateGiven', new_form);
+	setVarValueToIndv('actor_task_comment', 'v-s:description', new_form);
+	setVarValueToIndv('setAutoCompleted', 'v-wf:isAutoCompleted', new_form);
+	setVarValueToIndv('isEditable', 'v-wf:isEditable', new_form);
+
+	saveIndividual (new_form);
+	
+  """;
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Трансформация создания пользовательской формы ответа на задачу без управляющих кнопок"@ru ;
+.
+

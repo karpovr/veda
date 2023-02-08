@@ -1,0 +1,36 @@
+s-wf:complexRouteStartFormToNet
+  rdfs:label "Трансформация из формы комплексного маршрута в Сеть маршрута"^^xsd:string;
+  rdf:type v-wf:Transform ;
+  v-wf:transformRule s-wf:rul_transform1_complex ;
+  v-wf:transformRule s-wf:rul_transform2_complex ;
+  v-wf:transformRule s-wf:rul_transform3_complex ;
+  rdfs:isDefinedBy s-wf: ;
+.
+
+s-wf:rul_transform1_complex
+  rdf:type v-wf:Rule ;
+  rdfs:isDefinedBy s-wf: ;
+  v-wf:segregateElement "contentName('v-wf:processedDocument')" ;
+  v-wf:aggregate  "putUri ('rdf:type', 'v-wf:Variable')";
+  v-wf:aggregate  "putValue ('v-wf:variableValue')";
+  v-wf:aggregate  "putString ('v-wf:variableName', 'docId')";
+.
+
+s-wf:rul_transform2_complex
+  rdf:type v-wf:Rule ;
+  rdfs:isDefinedBy s-wf: ;
+  v-wf:segregateElement "contentName('v-s:creator')" ;
+  v-wf:aggregate  "putUri ('rdf:type', 'v-wf:Variable')";
+  v-wf:aggregate  "putValue ('v-wf:variableValue')";
+  v-wf:aggregate  "putString ('v-wf:variableName', 'initiator')";
+.
+
+s-wf:rul_transform3_complex
+  rdf:type v-wf:Rule ;
+  rdfs:isDefinedBy s-wf: ;
+  v-wf:segregateElement "contentName('@')" ;
+  v-wf:aggregate  "putUri ('rdf:type', 'v-wf:Variable')";
+  v-wf:aggregate  "putValue ('v-wf:variableValue')";
+  v-wf:aggregate  "putString ('v-wf:variableName', 'startForm_id')";
+.
+

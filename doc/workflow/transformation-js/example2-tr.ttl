@@ -1,0 +1,207 @@
+s-wf:tr_actor_form_direct
+  rdf:type v-wf:Transform ;
+  v-wf:transformRule s-wf:rul_tr_form_1 ;
+  v-wf:transformRule s-wf:rul_tr_form_1a ;
+  v-wf:transformRule s-wf:rul_tr_form_1b ;
+  v-wf:transformRule s-wf:rul_tr_form_a ;
+  v-wf:transformRule s-wf:rul_tr_form_2a ;
+  v-wf:transformRule s-wf:rul_tr_form_3 ;
+  v-wf:transformRule s-wf:rul_tr_form_4 ;
+  v-wf:transformRule s-wf:rul_tr_form_5 ;
+  v-wf:transformRule s-wf:rul_tr_form_6 ;
+  v-wf:transformRule s-wf:rul_tr_form_8 ;
+  v-wf:transformRule s-wf:rul_tr_form_9 ;
+  v-wf:transformRule s-wf:rul_tr_form_10 ;
+  v-wf:transformRule s-wf:rul_tr_form_11 ;
+  v-wf:transformRule s-wf:rul_tr_form_12 ;
+  v-wf:transformRule s-wf:rul_tr_form_13 ;
+  v-wf:transformRule s-wf:rul_tr_form_14 ;
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Трансформация создания пользовательской формы ответа на задачу с управляющими кнпоками"@ru ;
+.
+
+s-wf:rul_tr_form_1
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'docId')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putUri ('rdf:type', 'v-wf:DecisionForm')";
+# v-wf:aggregate  "putFieldOfIndividFromElement ('rdfs:label', 'rdfs:label')";
+  v-wf:aggregate  "putBoolean ('v-wf:isCompleted', false)";
+  v-wf:aggregate  "putValue ('v-wf:onDocument')";
+#  v-wf:aggregate  "putExecutor ('v-wf:to')";
+  v-wf:aggregate  """
+    if ( veda.Util.getUri(veda.Workflow.get_properties_chain(executor, [{$get: 'rdf:type'}], [executor])) === 'v-s:Appointment' ) {
+      putUri ('v-wf:to', veda.Util.getUri(veda.Workflow.get_properties_chain(executor, [{$get: 'v-s:employee'}], [executor])));
+    } else {
+      putExecutor ('v-wf:to');
+    }
+  """;
+  v-wf:aggregate  """
+    if ( veda.Util.getUri(veda.Workflow.get_properties_chain(executor, [{$get: 'rdf:type'}], [executor])) === 'v-s:Appointment' ) {
+      putUri ('v-wf:to', veda.Util.getUri(veda.Workflow.get_properties_chain(executor, [{$get: 'v-s:occupation'}], [executor])));
+    }
+  """;
+  v-wf:aggregate  "putWorkOrder ('v-wf:onWorkOrder')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Варианты ответа"@ru ;
+.
+
+s-wf:rul_tr_form_1a
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'decision_form_type')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('rdf:type')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Тип формы из переменной decision_form_type"@ru ;
+.
+
+s-wf:rul_tr_form_1b
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'redirect_from')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-wf:redirect_from_task')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Предыдущая задача из переменной redirect_from"@ru ;
+.
+
+s-wf:rul_tr_form_2
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'initiator')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValueFrom ('v-wf:from', ['v-s:employee'])";
+  v-wf:aggregate  "putValueFrom ('v-wf:from', ['v-s:occupation'])";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "От кого = инициатор"@ru ;
+.
+
+s-wf:rul_tr_form_2a
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'from')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValueFrom ('v-wf:from', ['v-s:employee'])";
+  v-wf:aggregate  "putValueFrom ('v-wf:from', ['v-s:occupation'])";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "от кого = from"@ru ;
+.
+
+s-wf:rul_tr_form_3
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'coordinationLevel')" ;
+  v-wf:segregateElement "elementContentStrValue('v-wf:variableValue', '1')" ;
+  v-wf:aggregate  "putString ('rdfs:label', '1 уровень')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Определение согласования 1 уровень"@ru ;
+.
+
+s-wf:rul_tr_form_4
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'coordinationLevel')" ;
+  v-wf:segregateElement "elementContentStrValue('v-wf:variableValue', '2')" ;
+  v-wf:aggregate  "putString ('rdfs:label', '2 уровень')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Определение согласования 2 уровень"@ru ;
+.
+
+s-wf:rul_tr_form_5
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'coordinationLevel')" ;
+  v-wf:segregateElement "elementContentStrValue('v-wf:variableValue', '3')" ;
+  v-wf:aggregate  "putString ('rdfs:label', '3 уровень')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Определение согласования 3 уровень"@ru ;
+.
+
+s-wf:rul_tr_form_6
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'possible_decision')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-wf:possibleDecisionClass')";
+  v-wf:grouping "1";
+  rdfs:label "Установить возможные варианты ответов"@ru ;
+  rdfs:isDefinedBy s-wf: ;
+.
+
+s-wf:rul_tr_form_a
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'actor_task_action')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putFrontValue ('rdfs:label')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить rdfs:label из переменной actor_task_action"@ru ;
+.
+
+s-wf:rul_tr_form_8
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'actor_task_date_to')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-wf:dateGiven')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить v-wf:dateGiven из переменной s-wf:var_actor_task_date_to"@ru ;
+.
+
+s-wf:rul_tr_form_9
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'actor_task_comment')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-s:description')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить v-s:description из переменной s-wf:var_actor_task_action"@ru ;
+.
+
+s-wf:rul_tr_form_10
+  rdf:type v-wf:Rule ;
+  v-wf:segregateElement "contentName('@')" ;
+  v-wf:aggregate "setDatetime ('v-s:created', new Date())" ;
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить дату выдачи задачи"@ru ;
+.
+
+s-wf:rul_tr_form_11
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'docId')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putBoolean ('v-wf:isDirectTask', true)";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить свойство для прямой задачи"@ru ;
+.
+s-wf:rul_tr_form_12
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'setStatus')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-wf:isSetStatus')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить v-wf:isSetStatus из переменной s-wf:var_set_status"@ru ;
+.
+s-wf:rul_tr_form_13
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'setAutoCompleted')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-wf:isAutoCompleted')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить v-wf:isAutoCompleted из переменной s-wf:var_set_autoCompleted"@ru ;
+.
+s-wf:rul_tr_form_14
+  rdf:type v-wf:Rule ;
+  v-wf:segregateObject "objectContentStrValue ('v-wf:variableName', 'isEditable')" ;
+  v-wf:segregateElement "contentName('v-wf:variableValue')" ;
+  v-wf:aggregate  "putValue ('v-wf:isEditable')";
+  v-wf:grouping "1";
+  rdfs:isDefinedBy s-wf: ;
+  rdfs:label "Установить v-wf:isEditable из переменной s-wf:var_isEditable"@ru ;
+.
+

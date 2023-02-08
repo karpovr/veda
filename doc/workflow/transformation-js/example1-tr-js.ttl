@@ -1,0 +1,11 @@
+s-wf:complexRouteStartFormToNet
+  rdfs:label "Трансформация из формы комплексного маршрута в Сеть маршрута"^^xsd:string;
+  rdf:type v-wf:Transform ;
+  v-wf:transformScript """
+    setVariableValue ('docId', getValueFromIndividual('v-wf:processedDocument'));
+    setVariableValue ('initiator', getValueFromIndividual('v-s:creator'));
+    setVariableValue ('startForm_id', newUri(getValueFromIndividual('@')));
+  """;
+  rdfs:isDefinedBy s-wf: ;
+.
+
