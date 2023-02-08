@@ -35,7 +35,7 @@
 
 
 ## II. System requirements
-  - OS - Ubuntu 18.04, 20.04, 22.04 LTS 64-Bit. For run on common Linux-based operating systems, use Veda-x86_64.AppImage
+  - OS - Ubuntu 18.04, 20.04, 22.04 LTS 64-Bit. For run on common Linux-based operating systems, use Veda-x86_64.AppImage.X.Y.Z
 
   - RAM - 1Gb
 
@@ -43,7 +43,7 @@
 
 ## III. How to install and run
 
-
+There are two ways to install the application. The first is to use a pre-built application, the second is to build the application from source code.
 
 **Installing a pre-built system**
 
@@ -90,7 +90,7 @@ $ ./control-start.sh
 
 At the first start, when the database is empty, it may take some time (about a minute), during which the platform ontology located in the ./ontology folder will be loaded to the database. Subsequent launches will take place without any delay, almost instantly. After the server side has started, you can go to the browser at http://localhost:8080.
 
-It is possible to check the operability of the platform components, for this, in the browser, go to the address http://localhost:8080/ tests. Normally, all tests should pass successfully. The server can be stopped with the command:
+The server can be stopped with the command:
 
 ```sh
 $ ./control-stop.sh
