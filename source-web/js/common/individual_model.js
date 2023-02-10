@@ -536,10 +536,6 @@ proto.saveAll = function (parent, acc, visited) {
  * @return {Promise<IndividualModel>}
  */
 proto.reset = function () {
-  if ( this.isResetting() && typeof window !== 'undefined' ) {
-    return this.isResetting();
-  }
-
   /**
    * Merge original from backend with local changes
    * @param {Object} server_state
@@ -558,21 +554,17 @@ proto.reset = function () {
     }));
   };
 
-  return this.isResetting(
-    this.trigger('beforeReset')
-      .then(() => !this.isNew() ? Backend.get_individual(veda.ticket, this.id, false).then(mergeServerState) : null)
-      .then(() => this.trigger('afterReset'))
-      .then(() => {
-        this.isResetting(false);
-        this.watch();
-        return this;
-      })
-      .catch((error) => {
-        console.error('Reset individual failed', this.id);
-        this.isResetting(false);
-        throw error;
-      }),
-  );
+  return this.trigger('beforeReset')
+    .then(() => !this.isNew() ? Backend.get_individual(veda.ticket, this.id, false).then(mergeServerState) : null)
+    .then(() => this.trigger('afterReset'))
+    .then(() => {
+      this.watch();
+      return this;
+    })
+    .catch((error) => {
+      console.error('Reset individual failed', this.id);
+      throw error;
+    });
 };
 
 /**
@@ -1026,9 +1018,6 @@ proto.isLoading = function (value) {
 };
 proto.isSaving = function (value) {
   return this.isPending('saving', value);
-};
-proto.isResetting = function (value) {
-  return this.isPending('resetting', value);
 };
 proto.isDeleting = function (value) {
   return this.isPending('deleting', value);
