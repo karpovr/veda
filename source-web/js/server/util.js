@@ -80,13 +80,13 @@ Util.removeFromGroup = function (ticket, group, resource) {
   return [new_membership, res];
 };
 
-Util.addRight = function (ticket, subj_uri, obj_uri, allow, deny) {
+Util.addRight = function (ticket, subj_uri, obj_uri, allow, deny, uri) {
   if (subj_uri === undefined || obj_uri === undefined) {
     console.error('Util.addRight: INVALID ARGS', 'subj_uri =', subj_uri, 'obj_uri =', obj_uri);
     return;
   }
 
-  const uri = Util.genUri() + '-r';
+  uri = uri || Util.genUri() + '-r';
 
   const permission = {
     '@': uri,
