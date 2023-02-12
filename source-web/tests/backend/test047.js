@@ -1,5 +1,5 @@
 export default ({test, assert, Backend, Helpers, Constants, Util}) => {
-  test.only(`#047 Check v-s:deleted on individual removal`, async () => {
+  test(`#047 Check v-s:deleted on individual removal`, async () => {
     const ticket_admin = await Helpers.get_admin_ticket();
 
     const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

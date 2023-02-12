@@ -374,6 +374,7 @@ fn operation_prepare(
     let mut prev_state_c1 = vec![];
     if cmd == IndvOp::Remove {
         new_indv.set_bool("v-s:deleted", true);
+        new_indv.set_resources("rdf:type", &prev_indv.get_resources("rdf:type").unwrap_or_default());
         prev_state_c1 = prev_state.clone();
     }
 
