@@ -373,13 +373,14 @@ fn operation_prepare(
 
     let mut prev_state_c1 = vec![];
     if cmd == IndvOp::Remove {
-        new_indv.set_bool("v-s:deleted", true);
-        new_indv.set_resources("rdf:type", &prev_indv.get_resources("rdf:type").unwrap_or_default());
+        prev_indv.set_bool("v-s:deleted", true);
         prev_state_c1 = prev_state.clone();
     }
 
-    if cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom {
-        indv_apply_cmd(&cmd, &mut prev_indv, new_indv);
+    if cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom || cmd == IndvOp::Remove {
+        if cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom {
+            indv_apply_cmd(&cmd, &mut prev_indv, new_indv);
+        }
         prev_indv.set_integer("v-s:updateCounter", upd_counter);
 
         if !add_to_transaction(IndvOp::Put, &cmd, &mut prev_indv, prev_state, upd_counter, transaction) {
