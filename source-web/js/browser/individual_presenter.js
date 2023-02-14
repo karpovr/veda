@@ -121,7 +121,7 @@ function successHandler (result) {
  */
 function errorHandler (error) {
   if (error instanceof BackendError) {
-    if (error.code === 472) return;
+    if (error.code === 472) throw error;
     const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
     errorIndividual.load().then(() => {
       const severity = String(errorIndividual['v-s:tag'][0]) || 'danger';
