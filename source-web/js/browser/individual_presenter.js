@@ -121,6 +121,7 @@ function successHandler (result) {
  */
 function errorHandler (error) {
   if (error instanceof BackendError) {
+    if (error.code === 472) return;
     const errorIndividual = new IndividualModel(`v-s:Error_${error.code}`);
     errorIndividual.load().then(() => {
       const severity = String(errorIndividual['v-s:tag'][0]) || 'danger';
@@ -153,11 +154,11 @@ function errorPrinter (error, container) {
   }
   return errorIndividual.load()
     .then(() => `
-      <span class="padding-sm bg-${sanitize(errorIndividual['v-s:tag'][0])} text-${sanitize(errorIndividual['v-s:tag'][0])}" title="${sanitize(this.id)}">
-        <strong>${sanitize(errorIndividual['v-s:errorCode'][0] || '')}</strong> ${sanitize(errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' '))}
+      <span class="padding-sm bg-${sanitize(errorIndividual['v-s:tag'][0])}" title="${sanitize(this.id)}">
+        <strong>${sanitize(errorIndividual['v-s:errorCode'][0].toString() || '')}</strong> ${sanitize(errorIndividual['v-s:errorMessage'].map(CommonUtil.formatValue).join(' '))}
       </span>`)
     .catch(() => `
-      <span class="padding-sm bg-danger text-danger" title="${sanitize(this.id)}">
+      <span class="padding-sm bg-danger" title="${sanitize(this.id)}">
         <strong>${sanitize(error.code)}</strong> ${sanitize(error.name)} ${sanitize(error.message)}>
       </span>`)
     .then((msg) => {
