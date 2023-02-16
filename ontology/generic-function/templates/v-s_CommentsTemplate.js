@@ -14,6 +14,7 @@ export const post = function (individual, template, container, mode, extra) {
     comment['rdf:type'] = [_class];
     comment['v-s:backwardTarget'] = [individual];
     comment['v-s:backwardProperty'] = [new IndividualModel('v-s:hasComment')];
+    comment['v-s:commentedResource'] = individual;
     comment['v-s:canRead'] = [true];
     comment.present(cntr, tmpl, 'edit');
     comment.one('afterSave beforeReset', function () {
@@ -25,13 +26,14 @@ export const post = function (individual, template, container, mode, extra) {
   template.on('click', '#reply.action', function (e) {
     e.preventDefault();
     const commentTemplate = $(this).closest('[resource]');
-    const targetComment = new IndividualModel(commentTemplate.attr('resource'));
+    const inReplyComment = new IndividualModel(commentTemplate.attr('resource'));
     const cntr = $('#new-reply', commentTemplate).first().empty();
     const tmpl = 'v-s:SingleCommentTemplate';
     const reply = new IndividualModel();
     reply['rdf:type'] = 'v-s:Comment';
-    reply['v-s:backwardTarget'] = targetComment;
+    reply['v-s:backwardTarget'] = inReplyComment;
     reply['v-s:backwardProperty'] = 'v-s:hasComment';
+    reply['v-s:commentedResource'] = individual;
     reply['v-s:canRead'] = true;
     reply.present(cntr, tmpl, 'edit');
     reply.one('afterSave beforeReset', function () {

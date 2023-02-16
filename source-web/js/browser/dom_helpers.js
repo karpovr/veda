@@ -106,8 +106,20 @@ function spinnerDecorator (fn) {
   return decorator(fn, showSpinner, hideSpinner, hideSpinner);
 }
 
+function showCursorSpinner () {
+  document.body.style.cursor = 'wait';
+}
+
+function hideCursorSpinner () {
+  document.body.style.cursor = 'default';
+}
+
+function cursorDecorator (fn) {
+  return decorator(fn, showCursorSpinner, hideCursorSpinner, hideCursorSpinner);
+}
+
 async function timeout (ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export {delegateHandler, clear, sanitize, debounce, delay, decorator, spinnerDecorator, timeout};
+export {delegateHandler, clear, sanitize, debounce, delay, decorator, spinnerDecorator, cursorDecorator, timeout};

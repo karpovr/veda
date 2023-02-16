@@ -385,7 +385,7 @@ proto.watch = function () {
 
 function updater (id, updateCounter) {
   const individual = new IndividualModel(id);
-  individual.reset();
+  individual.reset().catch(() => {});
 }
 
 /**

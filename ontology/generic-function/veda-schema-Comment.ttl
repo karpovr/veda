@@ -20,8 +20,16 @@ v-s:Comment
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Embedded ;
-  rdfs:label "Комментарий "@ru ;
+  rdfs:label "Комментарий"@ru ;
   rdfs:label "Comment"@en ;
+.
+
+v-s:commentedResource
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Комментируемый ресурс"@ru ;
+  rdfs:label "Commented resource"@en ;
+  rdfs:domain v-s:Comment ;
+  rdfs:range rdfs:Resource ;
 .
 
 #-- Спецификации --
