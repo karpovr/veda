@@ -40,6 +40,20 @@ impl<'a> Transaction<'a> {
         for el in self.queue.iter() {
             op_id += 1;
 
+            if el.indv_id.is_empty() {
+                warn!(
+                    "SKIP:{}, {} id={}:{}, ticket={}, event_id={}, src={}",
+                    op_id,
+                    el.original_cmd.as_string(),
+                    el.indv_id,
+                    el.update_counter,
+                    self.ticket.id,
+                    self.event_id.unwrap_or_default(),
+                    self.src.unwrap_or_default()
+                );
+                continue;
+            }
+
             if el.cmd == IndvOp::Remove {
                 if storage.remove(StorageId::Individuals, &el.indv_id) {
                     info!("remove individual, id = {}", el.indv_id);
@@ -49,10 +63,11 @@ impl<'a> Transaction<'a> {
                 }
             } else if storage.put_kv_raw(StorageId::Individuals, &el.indv_id, el.new_state.clone()) {
                 info!(
-                    "{}, {} id={}, ticket={}, event_id={}, src={}",
+                    "OK:{}, {} id={}:{}, ticket={}, event_id={}, src={}",
                     op_id,
                     el.original_cmd.as_string(),
                     el.indv_id,
+                    el.update_counter,
                     self.ticket.id,
                     self.event_id.unwrap_or_default(),
                     self.src.unwrap_or_default()

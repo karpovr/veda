@@ -273,6 +273,11 @@ fn operation_prepare(
         }
     }
 
+    if prev_indv.is_empty() && cmd == IndvOp::Remove {
+        warn!("remove not exists, uri = {}", new_indv.get_id());
+        return Response::new(new_indv.get_id(), ResultCode::Ok, -1, -1);
+    }
+        
     if prev_indv.is_empty() && (cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom) {
         error!("failed to update, cmd = {:?}, no prev_state, uri = {}", cmd, new_indv.get_id());
         return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);
