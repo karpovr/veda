@@ -11,8 +11,12 @@ export default function PrepareWorkOrder (ticket, document) {
         const _work_order = document;
 
         const f_executor = document['v-wf:executor'];
-        const executor = get_individual(ticket, ServerUtil.getUri(f_executor));
+        let executor = get_individual(ticket, ServerUtil.getUri(f_executor));
+
         if (f_executor && !executor) return;
+        if (executor && executor['@'] == "") {
+            executor = undefined;
+        }
 
         const f_forWorkItem = ServerUtil.getUri(document['v-wf:forWorkItem']);
         const work_item = get_individual(ticket, f_forWorkItem);
