@@ -1239,3 +1239,21 @@ v-s:functionOfmemberInOfBrigade
   rdfs:label "Function of member in of brigade"@en ;
   rdfs:range xsd:string ;
 .
+v-s:PS_memberOutOfBrigade_ChangingBrigadeComposition
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация memberOutOfBrigade для класса v-s:ChangingBrigadeComposition"@ru ;
+  rdfs:label "Specification for memberOutOfBrigade for v-s:ChangingBrigadeComposition"@en ;
+  v-ui:forClass v-s:ChangingBrigadeComposition ;
+  v-ui:forProperty v-s:memberOutOfBrigade ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
+v-s:PS_memberInOfBrigade_ChangingBrigadeComposition
+  rdf:type v-ui:ObjectPropertySpecification ;
+  rdfs:label "Спецификация memberInOfBrigade для класса v-s:ChangingBrigadeComposition"@ru ;
+  rdfs:label "Specification for memberInOfBrigade for v-s:ChangingBrigadeComposition"@en ;
+  v-ui:forClass v-s:ChangingBrigadeComposition ;
+  v-ui:forProperty v-s:memberInOfBrigade ;
+  v-ui:minCardinality "0"^^xsd:integer ;
+  v-ui:maxCardinality "100"^^xsd:integer ;
+.
