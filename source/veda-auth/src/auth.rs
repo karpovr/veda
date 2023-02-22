@@ -1,4 +1,4 @@
-use crate::common::{create_new_credential, get_candidate_users_of_login, remove_secret, set_password, AuthConf, UserStat, EMPTY_SHA256_HASH, N_ITER};
+use crate::common::{create_new_credential, create_new_ticket, get_candidate_users_of_login, remove_secret, set_password, AuthConf, UserStat, EMPTY_SHA256_HASH, N_ITER};
 use chrono::Utc;
 use data_encoding::HEXLOWER;
 use mustache::MapBuilder;
@@ -8,7 +8,6 @@ use std::num::NonZeroU32;
 use std::str::from_utf8;
 use uuid::Uuid;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module_impl::create_new_ticket;
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::Backend;
 use v_common::onto::datatype::Lang;
