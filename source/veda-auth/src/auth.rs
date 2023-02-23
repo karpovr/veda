@@ -25,6 +25,7 @@ pub(crate) struct AuthWorkPlace<'a> {
     pub sys_ticket: &'a str,
     pub xr: &'a mut XapianReader,
     pub backend: &'a mut Backend,
+    pub backup_storage: &'a mut VStorage,
     pub auth_data: &'a mut VStorage,
     pub user_stat: &'a mut UserStat,
     pub stored_password: String,
@@ -155,7 +156,7 @@ impl<'a> AuthWorkPlace<'a> {
                             "127.0.0.1"
                         };
 
-                        create_new_ticket(self.login, &user_id, addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
+                        create_new_ticket(self.login, &user_id, addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage, &mut self.backup_storage);
                         self.user_stat.wrong_count_login = 0;
                         self.user_stat.last_wrong_login_date = 0;
                         return (true, ResultCode::Ok);
@@ -231,7 +232,7 @@ impl<'a> AuthWorkPlace<'a> {
                 "127.0.0.1"
             };
 
-            create_new_ticket(self.login, person.get_id(), addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage);
+            create_new_ticket(self.login, person.get_id(), addr, self.conf.ticket_lifetime, ticket, &mut self.backend.storage, &mut self.backup_storage);
             self.user_stat.attempt_change_pass = 0;
             info!("updated password, password = {}, user = {}", self.password, person.get_id());
             ResultCode::Ok

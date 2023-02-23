@@ -66,15 +66,14 @@ impl Default for AuthConf {
     }
 }
 
-pub(crate) fn logout(_conf: &AuthConf, tr_ticket_id: Option<&str>, _ip: Option<&str>, backend: &mut Backend) -> Ticket {
+pub(crate) fn logout(_conf: &AuthConf, tr_ticket_id: Option<&str>, _ip: Option<&str>, backend: &mut Backend, backup_storage: &mut VStorage) -> Ticket {
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
     let mut ticket_obj = backend.get_ticket_from_db(tr_ticket_id);
     if ticket_obj.result == ResultCode::Ok {
         ticket_obj.end_time = Utc::now().timestamp();
 
-        let mut raw1: Vec<u8> = Vec::new();
-        if to_msgpack(&ticket_obj.to_individual(), &mut raw1).is_ok() && backend.storage.put_kv_raw(StorageId::Tickets, &ticket_obj.id, raw1) {
-            let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp(ticket_obj.end_time, 0));
+        if store(&ticket_obj.to_individual(), &mut backend.storage, backup_storage) {
+            let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp_opt(ticket_obj.end_time, 0));
             info!("logout: update ticket {}, user={}, addr={}, end={}", ticket_obj.id, ticket_obj.user_uri, ticket_obj.user_addr, end_time_str);
             ticket_obj.result = ResultCode::Ok;
         } else {
@@ -96,6 +95,7 @@ pub(crate) fn get_ticket_trusted(
     ip: Option<&str>,
     xr: &mut XapianReader,
     backend: &mut Backend,
+    backup_storage: &mut VStorage,
     auth_data: &mut VStorage,
 ) -> Ticket {
     let tr_ticket_id = tr_ticket_id.unwrap_or_default();
@@ -174,7 +174,7 @@ pub(crate) fn get_ticket_trusted(
                         } else {
                             "127.0.0.1"
                         };
-                        create_new_ticket(login, &check_user_id, addr, conf.ticket_lifetime, &mut ticket, &mut backend.storage);
+                        create_new_ticket(login, &check_user_id, addr, conf.ticket_lifetime, &mut ticket, &mut backend.storage, backup_storage);
                         info!("trusted authenticate, result ticket = {:?}", ticket);
 
                         return ticket;
@@ -345,7 +345,7 @@ pub(crate) fn read_auth_configuration(backend: &mut Backend) -> AuthConf {
     res
 }
 
-pub fn create_new_ticket(login: &str, user_id: &str, addr: &str, duration: i64, ticket: &mut Ticket, storage: &mut VStorage) {
+pub(crate) fn create_new_ticket(login: &str, user_id: &str, addr: &str, duration: i64, ticket: &mut Ticket, storage: &mut VStorage, backup_storage: &mut VStorage) {
     if addr.parse::<IpAddr>().is_err() {
         error!("fail create_new_ticket: invalid ip {}", addr);
         return;
@@ -377,31 +377,29 @@ pub fn create_new_ticket(login: &str, user_id: &str, addr: &str, duration: i64, 
 
     ticket_indv.add_string("ticket:duration", &duration.to_string(), Lang::none());
 
-    let mut raw1: Vec<u8> = Vec::new();
-    if to_msgpack(&ticket_indv, &mut raw1).is_ok() && storage.put_kv_raw(StorageId::Tickets, ticket_indv.get_id(), raw1) {
+    if store(&ticket_indv, storage, backup_storage) {
         ticket.update_from_individual(&mut ticket_indv);
         ticket.result = ResultCode::Ok;
         ticket.start_time = (TICKS_TO_UNIX_EPOCH + now.timestamp_millis()) * 10_000;
         ticket.end_time = ticket.start_time + duration as i64 * 10_000_000;
 
-        let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp((ticket.end_time / 10_000 - TICKS_TO_UNIX_EPOCH) / 1_000, 0));
+        let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp_opt((ticket.end_time / 10_000 - TICKS_TO_UNIX_EPOCH) / 1_000, 0));
         info!("create new ticket {}, login={}, user={}, addr={}, start={}, end={}", ticket.id, ticket.user_login, ticket.user_uri, addr, start_time_str, end_time_str);
     } else {
         error!("fail store ticket {:?}", ticket)
     }
 }
 
-pub fn create_sys_ticket(storage: &mut VStorage) -> Ticket {
+pub(crate) fn create_sys_ticket(storage: &mut VStorage, backup_storage: &mut VStorage) -> Ticket {
     let mut ticket = Ticket::default();
-    create_new_ticket("veda", "cfg:VedaSystem", "127.0.0.1", 90_000_000, &mut ticket, storage);
+    create_new_ticket("veda", "cfg:VedaSystem", "127.0.0.1", 90_000_000, &mut ticket, storage, backup_storage);
 
     if ticket.result == ResultCode::Ok {
         let mut sys_ticket_link = Individual::default();
         sys_ticket_link.set_id("systicket");
         sys_ticket_link.add_uri("rdf:type", "rdfs:Resource");
         sys_ticket_link.add_uri("v-s:resource", &ticket.id);
-        let mut raw1: Vec<u8> = Vec::new();
-        if to_msgpack(&sys_ticket_link, &mut raw1).is_ok() && storage.put_kv_raw(StorageId::Tickets, sys_ticket_link.get_id(), raw1) {
+        if store(&sys_ticket_link, storage, backup_storage) {
             return ticket;
         } else {
             error!("fail store system ticket link")
@@ -411,4 +409,21 @@ pub fn create_sys_ticket(storage: &mut VStorage) -> Ticket {
     }
 
     ticket
+}
+
+fn store(ticket_indv: &Individual, storage: &mut VStorage, backup_storage: &mut VStorage) -> bool {
+    let mut raw1: Vec<u8> = Vec::new();
+    if to_msgpack(ticket_indv, &mut raw1).is_ok() {
+        if !backup_storage.is_empty() {
+            if backup_storage.put_kv_raw(StorageId::Tickets, ticket_indv.get_id(), raw1.clone()) {
+                info!("success store {} to backup database", ticket_indv.get_id());
+            } else {
+                warn!("fail store {} to backup database", ticket_indv.get_id());
+            }
+        }
+        if storage.put_kv_raw(StorageId::Tickets, ticket_indv.get_id(), raw1) {
+            return true;
+        }
+    }
+    false
 }
