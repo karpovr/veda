@@ -73,7 +73,7 @@ pub(crate) fn logout(_conf: &AuthConf, tr_ticket_id: Option<&str>, _ip: Option<&
         ticket_obj.end_time = Utc::now().timestamp();
 
         if store(&ticket_obj.to_individual(), &mut backend.storage, backup_storage) {
-            let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp_opt(ticket_obj.end_time, 0));
+            let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp(ticket_obj.end_time, 0));
             info!("logout: update ticket {}, user={}, addr={}, end={}", ticket_obj.id, ticket_obj.user_uri, ticket_obj.user_addr, end_time_str);
             ticket_obj.result = ResultCode::Ok;
         } else {
@@ -383,7 +383,7 @@ pub(crate) fn create_new_ticket(login: &str, user_id: &str, addr: &str, duration
         ticket.start_time = (TICKS_TO_UNIX_EPOCH + now.timestamp_millis()) * 10_000;
         ticket.end_time = ticket.start_time + duration as i64 * 10_000_000;
 
-        let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp_opt((ticket.end_time / 10_000 - TICKS_TO_UNIX_EPOCH) / 1_000, 0));
+        let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp((ticket.end_time / 10_000 - TICKS_TO_UNIX_EPOCH) / 1_000, 0));
         info!("create new ticket {}, login={}, user={}, addr={}, start={}, end={}", ticket.id, ticket.user_login, ticket.user_uri, addr, start_time_str, end_time_str);
     } else {
         error!("fail store ticket {:?}", ticket)
