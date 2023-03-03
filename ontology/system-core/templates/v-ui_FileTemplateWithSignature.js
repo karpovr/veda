@@ -1,9 +1,20 @@
 import $ from 'jquery';
 import Crypto from '/js/browser/crypto.js';
 
-export const pre = async function (individual, template, container, mode, extra) {
+export const post = async function (individual, template, container, mode, extra) {
   const $template = $(template);
   const $container = $(container);
+
+  const fn = individual['v-s:fileName'][0];
+  const img = 'jpg|jpeg|gif|png|bmp|svg';
+  if (typeof fn === 'string' || fn instanceof String) {
+    const idx = fn.lastIndexOf('.');
+    const ext = fn.substr(idx + 1);
+    if (img.indexOf(ext.toLowerCase()) < 0) {
+      $('.thumbnail', template).remove();
+      $('.filename', template).css('width', '100%');
+    }
+  }
 
   setTimeout(async () => {
     const crypto = Crypto.getInstance();
@@ -46,36 +57,21 @@ export const pre = async function (individual, template, container, mode, extra)
     if ($container.data('with-btn') == 'false' || $container.data('with-btn') == false) {
       $('.actions', $template).remove();
     }
+
+    individual.on('v-s:digitalSignature', showSignature);
+    $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
+    showSignature();
+
+    function showSignature () {
+      if (!individual.hasValue('v-s:digitalSignature')) {
+        $('.signatures', $template).addClass('hidden');
+        $('.verify-signature', $template).addClass('hidden');
+      } else {
+        $('.signatures', $template).removeClass('hidden');
+        $('.verify-signature', $template).removeClass('hidden');
+      }
+    }
   });
-};
-
-export const post = async function (individual, template, container, mode, extra) {
-  const $template = $(template);
-
-  const fn = individual['v-s:fileName'][0];
-  const img = 'jpg|jpeg|gif|png|bmp|svg';
-  if (typeof fn === 'string' || fn instanceof String) {
-    const idx = fn.lastIndexOf('.');
-    const ext = fn.substr(idx + 1);
-    if (img.indexOf(ext.toLowerCase()) < 0) {
-      $('.thumbnail', template).remove();
-      $('.filename', template).css('width', '100%');
-    }
-  }
-
-  individual.on('v-s:digitalSignature', showSignature);
-  $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
-  showSignature();
-
-  function showSignature () {
-    if (!individual.hasValue('v-s:digitalSignature')) {
-      $('.signatures', $template).addClass('hidden');
-      $('.verify-signature', $template).addClass('hidden');
-    } else {
-      $('.signatures', $template).removeClass('hidden');
-      $('.verify-signature', $template).removeClass('hidden');
-    }
-  }
 };
 
 export const html = `
