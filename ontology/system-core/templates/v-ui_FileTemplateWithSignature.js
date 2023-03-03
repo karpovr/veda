@@ -16,6 +16,20 @@ export const post = async function (individual, template, container, mode, extra
     }
   }
 
+  individual.on('v-s:digitalSignature', showSignature);
+  $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
+  showSignature();
+
+  function showSignature () {
+    if (!individual.hasValue('v-s:digitalSignature')) {
+      $('.signatures', $template).addClass('hidden');
+      $('.verify-signature', $template).addClass('hidden');
+    } else {
+      $('.signatures', $template).removeClass('hidden');
+      $('.verify-signature', $template).removeClass('hidden');
+    }
+  }
+
   setTimeout(async () => {
     const crypto = Crypto.getInstance();
     try {
@@ -56,20 +70,6 @@ export const post = async function (individual, template, container, mode, extra
 
     if ($container.data('with-btn') == 'false' || $container.data('with-btn') == false) {
       $('.actions', $template).remove();
-    }
-
-    individual.on('v-s:digitalSignature', showSignature);
-    $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
-    showSignature();
-
-    function showSignature () {
-      if (!individual.hasValue('v-s:digitalSignature')) {
-        $('.signatures', $template).addClass('hidden');
-        $('.verify-signature', $template).addClass('hidden');
-      } else {
-        $('.signatures', $template).removeClass('hidden');
-        $('.verify-signature', $template).removeClass('hidden');
-      }
     }
   });
 };
