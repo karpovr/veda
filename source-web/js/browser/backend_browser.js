@@ -130,7 +130,8 @@ export default class BrowserBackend {
       );
   }
 
-  static async query (ticket, queryStr, sort, databases, top, limit, from, sql) {
+  static async query (ticket, queryStr, sort, databases, top, limit, from, sql, tries = 10) {
+    if (!tries) throw new BackendError(429);
     const arg = ticket;
     const isObj = typeof arg === 'object';
     const params = {
@@ -149,7 +150,7 @@ export default class BrowserBackend {
     };
     return call_server(params).catch((backendError) => {
       if (backendError.code === 999) {
-        return wait().then(() => BrowserBackend.query(ticket, queryStr, sort, databases, top, limit, from, sql));
+        return wait().then(() => BrowserBackend.query(ticket, queryStr, sort, databases, top, limit, from, sql, --tries));
       }
       throw backendError;
     });
