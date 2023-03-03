@@ -11,9 +11,11 @@ use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str;
+use std::thread::sleep;
+use std::time::Duration;
 use v_common::az_impl::common::f_authorize;
 use v_common::module::info::ModuleInfo;
-use v_common::module::module_impl::{create_sys_ticket, init_log, Module};
+use v_common::module::module_impl::{init_log, Module};
 use v_common::module::ticket::Ticket;
 use v_common::module::veda_backend::{get_storage_use_prop, indv_apply_cmd};
 use v_common::onto::individual::{Individual, RawObj};
@@ -57,10 +59,14 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut sys_ticket = Ticket::default();
-    if let Ok(ticket_id) = Module::get_sys_ticket_id_from_db(&mut primary_storage) {
-        get_ticket_from_db(&ticket_id, &mut sys_ticket, &mut primary_storage);
-    } else {
-        sys_ticket = create_sys_ticket(&mut primary_storage);
+    while sys_ticket.id.is_empty() {
+        if let Ok(ticket_id) = Module::get_sys_ticket_id_from_db(&mut primary_storage) {
+            get_ticket_from_db(&ticket_id, &mut sys_ticket, &mut primary_storage);
+            info!("found system ticket");
+        } else {
+            error!("system ticket not found, sleep and repeat...");
+            sleep(Duration::from_secs(1));
+        }
     }
 
     let param_name = "main_module_url";
@@ -277,7 +283,7 @@ fn operation_prepare(
         warn!("remove not exists, uri = {}", new_indv.get_id());
         return Response::new(new_indv.get_id(), ResultCode::Ok, -1, -1);
     }
-        
+
     if prev_indv.is_empty() && (cmd == IndvOp::AddTo || cmd == IndvOp::SetIn || cmd == IndvOp::RemoveFrom) {
         error!("failed to update, cmd = {:?}, no prev_state, uri = {}", cmd, new_indv.get_id());
         return Response::new(new_indv.get_id(), ResultCode::FailStore, -1, -1);

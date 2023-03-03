@@ -209,7 +209,7 @@ function parser (value) {
   }
 }
 
-const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
+const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_\.])*$/;
 const reg_date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 const reg_ml_string = /^(.*)\^([a-z]{2})$/ims;
 const reg_round_decimal = /^-?\d+([\.\,])0$/;
@@ -266,7 +266,7 @@ function serializer (value) {
       return {
         type: 'String',
         data: value.valueOf(),
-        lang: value.language || 'NONE',
+        ...value.language && {lang: value.language}
       };
     }
   }

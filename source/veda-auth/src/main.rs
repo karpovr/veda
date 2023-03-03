@@ -7,14 +7,14 @@ mod auth;
 mod common;
 
 use crate::auth::*;
-use crate::common::{get_ticket_trusted, logout, read_auth_configuration, AuthConf, UserStat};
+use crate::common::{create_sys_ticket, get_ticket_trusted, logout, read_auth_configuration, AuthConf, UserStat};
 use nng::{Message, Protocol, Socket};
 use serde_json::json;
 use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use v_common::ft_xapian::xapian_reader::XapianReader;
-use v_common::module::module_impl::{create_sys_ticket, init_log, Module};
-use v_common::module::veda_backend::Backend;
+use v_common::module::module_impl::{init_log, Module};
+use v_common::module::veda_backend::{Backend, get_storage_with_prop};
 use v_common::storage::common::{StorageMode, VStorage};
 
 fn main() -> std::io::Result<()> {
@@ -29,14 +29,14 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut backend = Backend::create(StorageMode::ReadWrite, false);
+    let mut backup_storage =  get_storage_with_prop (StorageMode::ReadWrite, "backup_db_connection", false);
     let mut auth_data = VStorage::new_lmdb("./data", StorageMode::ReadOnly, None);
 
     let systicket = if let Ok(t) = backend.get_sys_ticket_id() {
         t
     } else {
-        error!("failed to get systicket, create new");
-
-        create_sys_ticket(&mut backend.storage).id
+        error!("failed to get system ticket, create new");
+        create_sys_ticket(&mut backend.storage, &mut backup_storage).id
     };
 
     let mut suspicious: HashMap<String, UserStat> = HashMap::new();
@@ -46,7 +46,7 @@ fn main() -> std::io::Result<()> {
     if let Some(mut xr) = XapianReader::new("russian", &mut backend.storage) {
         loop {
             if let Ok(recv_msg) = server.recv() {
-                let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut backend, &mut suspicious, &mut auth_data);
+                let res = req_prepare(&conf, &recv_msg, &systicket, &mut xr, &mut backend, &mut backup_storage, &mut suspicious, &mut auth_data);
                 if let Err(e) = server.send(res) {
                     error!("failed to send, err = {:?}", e);
                 }
@@ -64,6 +64,7 @@ fn req_prepare(
     systicket: &str,
     xr: &mut XapianReader,
     backend: &mut Backend,
+    backup_storage: &mut VStorage,
     suspicious: &mut HashMap<String, UserStat>,
     auth_data: &mut VStorage,
 ) -> Message {
@@ -91,6 +92,7 @@ fn req_prepare(
                 sys_ticket: systicket,
                 xr,
                 backend,
+                backup_storage,
                 auth_data,
                 user_stat,
                 stored_password: "".to_owned(),
@@ -115,7 +117,7 @@ fn req_prepare(
             return Message::from(res.to_string().as_bytes());
         },
         "get_ticket_trusted" => {
-            let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), v["addr"].as_str(), xr, backend, auth_data);
+            let ticket = get_ticket_trusted(conf, v["ticket"].as_str(), v["login"].as_str(), v["addr"].as_str(), xr, backend, backup_storage, auth_data);
 
             let mut res = JSONValue::default();
             res["type"] = json!("ticket");
@@ -128,7 +130,7 @@ fn req_prepare(
             return Message::from(res.to_string().as_bytes());
         },
         "logout" => {
-            let ticket = logout(conf, v["ticket"].as_str(), v["addr"].as_str(), backend);
+            let ticket = logout(conf, v["ticket"].as_str(), v["addr"].as_str(), backend, backup_storage);
 
             let mut res = JSONValue::default();
             res["type"] = json!("ticket");
