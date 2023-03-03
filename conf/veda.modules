@@ -6,15 +6,15 @@ auth
 
 az-indexer
     module = az-indexer
-    args = --use_index_format_v2
+    args = --use_index_format_v2 --db-connection=db-conn-1
 
 ft-indexer
     module = ft-indexer
-    args = --max_batch_size=5000
+    args = --max_batch_size=5000 --db-connection=db-conn-1
 
 ft-query0
     module = ft-query
-    args = --bind=tcp://127.0.0.1:8114
+    args = --bind=tcp://127.0.0.1:8114 --db-connection=db-conn-1
     memory-limit = 5 Gb
     watchdog-timeout = 60
 
@@ -44,13 +44,13 @@ scripts-main
 
 ontologist
 
-#ccus
-
 ccus2
+    module = ccus2
+    args = --db-connection=db-conn-1
 
 web-api
     module = web-api
-    args = --http_port=8080 --use-direct-ft-query=true --workers=1
+    args = --http_port=8080 --use-direct-ft-query=true --workers=1 --db-connection=db-conn-1
 
 
 #queue2storage
