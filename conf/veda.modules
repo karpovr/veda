@@ -32,15 +32,15 @@ ft-query0
 
 scripts-lp
     module = scripts-v8
-    args = lp
+    args = lp --db-connection=db-conn-1
 
 scripts-lp1
     module = scripts-v8
-    args = lp1
+    args = lp1 --db-connection=db-conn-1
 
 scripts-main
     module = scripts-v8
-    args = main
+    args = main --db-connection=db-conn-1
 
 ontologist
 
