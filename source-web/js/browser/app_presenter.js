@@ -62,10 +62,6 @@ export default function AppPresenter (manifest) {
   // Prevent empty links routing
   delegateHandler(document.body, 'click', '[href=\'\']', (event) => event.preventDefault());
 
-  veda.on("mainChanged", (mainUri) => {
-    veda.main = mainUri;
-  });
-
   // Router already installed flag
   let routerInstalled;
 

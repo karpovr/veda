@@ -4,12 +4,10 @@ import veda from '../common/veda.js';
 
 if ('serviceWorker' in navigator) {
   const HTML = `
-    <div class="container margin-xl" id="install-app" style="display:none;">
-      <div class="well well-sm text-center no-margin bg-white">
-        Установить приложение на главный экран? Install the application on the main screen?
-        <button id="install-btn" class="btn btn-sm btn-primary margin-md margin-md-h">Установить / Install</button>
-        <button id="reject-install-btn" class="btn btn-sm btn-link" style="margin-left:0;padding-left:0;">Отказаться / Refuse</button>
-      </div>
+    <div class="container text-center" id="install-app" style="display:none; margin:0.75rem auto;">
+      Установить приложение на главный экран? Install the application on the main screen?
+      <button id="install-btn" class="btn btn-sm btn-primary margin-md margin-md-h">Установить / Install</button>
+      <button id="reject-install-btn" class="btn btn-sm btn-link" style="margin-left:0;padding-left:0;">Отказаться / Refuse</button>
     </div>
   `;
   const wrapper = document.createElement('div');
