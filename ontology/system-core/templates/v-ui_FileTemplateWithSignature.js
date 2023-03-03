@@ -5,46 +5,48 @@ export const pre = async function (individual, template, container, mode, extra)
   const $template = $(template);
   const $container = $(container);
 
-  const crypto = Crypto.getInstance();
-  try {
-    await crypto.init();
-    // await crypto.init.bind(crypto);
-  } catch (error) {
-    console.log(error);
-    $('.actions', $template).remove();
-    return;
-  }
-
-  $('.add-signature', $template).click(async () => {
-    if (!individual.hasValue('v-s:uid')) {
-      individual['v-s:uid'] = [crypto.genUUID()];
-      console.log(individual['v-s:uid']);
-      await individual.save();
+  setTimeout(() => {
+    const crypto = Crypto.getInstance();
+    try {
+      await crypto.init();
+      // await crypto.init.bind(crypto);
+    } catch (error) {
+      console.log(error);
+      $('.actions', $template).remove();
+      return;
     }
-    await crypto.addSignature(individual);
-  });
 
-  $('.verify-signature', $template).click(async () => {
-    for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
-      const signatureView = $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template).not('.signature-checked');
-      if (!signatureView.length) continue;
-      try {
-        await crypto.verifySignature(individual, signatureIndividual);
-        signatureView
-          .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
-          .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
-      } catch (error) {
-        signatureView
-          .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
-          .append(`<strong><small><i class="text-danger" title="${error}">Подпись не верна</i></small></strong>`);
+    $('.add-signature', $template).click(async () => {
+      if (!individual.hasValue('v-s:uid')) {
+        individual['v-s:uid'] = [crypto.genUUID()];
+        console.log(individual['v-s:uid']);
+        await individual.save();
       }
-      signatureView.addClass('signature-checked');
+      await crypto.addSignature(individual);
+    });
+
+    $('.verify-signature', $template).click(async () => {
+      for (const signatureIndividual of individual.get('v-s:digitalSignature')) {
+        const signatureView = $(`li[resource=${signatureIndividual.id.replace(':', '\\:')}]`, $template).not('.signature-checked');
+        if (!signatureView.length) continue;
+        try {
+          await crypto.verifySignature(individual, signatureIndividual);
+          signatureView
+            .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
+            .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
+        } catch (error) {
+          signatureView
+            .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
+            .append(`<strong><small><i class="text-danger" title="${error}">Подпись не верна</i></small></strong>`);
+        }
+        signatureView.addClass('signature-checked');
+      }
+    });
+
+    if ($container.data('with-btn') == 'false' || $container.data('with-btn') == false) {
+      $('.actions', $template).remove();
     }
   });
-
-  if ($container.data('with-btn') == 'false' || $container.data('with-btn') == false) {
-    $('.actions', $template).remove();
-  }
 };
 
 export const post = async function (individual, template, container, mode, extra) {
