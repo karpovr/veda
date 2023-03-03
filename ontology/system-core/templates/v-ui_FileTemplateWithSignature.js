@@ -5,7 +5,7 @@ export const pre = async function (individual, template, container, mode, extra)
   const $template = $(template);
   const $container = $(container);
 
-  setTimeout(() => {
+  setTimeout(async () => {
     const crypto = Crypto.getInstance();
     try {
       await crypto.init();
