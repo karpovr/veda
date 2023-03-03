@@ -7,8 +7,8 @@ edition = "2021"
 [dependencies]
 chrono = "0.4"
 log = "0.4"
-xapian-rusty = "=0.0.51"
+xapian-rusty = "=0.0.53"
 #xapian-rusty = { path = "../xapian-rusty" }
 
-v_common = { package = "v-common", version = "=0.4.43" }
+v_common = { package = "v-common", version = "=0.4.52" }
 #v_common = { package = "v-common", path = "../../../v-common" }
