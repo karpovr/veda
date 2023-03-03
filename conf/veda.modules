@@ -6,7 +6,7 @@ auth
 
 az-indexer
     module = az-indexer
-    args = --use_index_format_v2
+    args = --use_index_format_v2 --db-connection=db-conn-1
 
 ft-indexer
     module = ft-indexer
@@ -50,7 +50,7 @@ ccus2
 
 web-api
     module = web-api
-    args = --http_port=8080 --use-direct-ft-query=true --workers=1
+    args = --http_port=8080 --use-direct-ft-query=true --workers=1 --db-connection=db-conn-1
 
 
 #queue2storage
