@@ -13,5 +13,5 @@ anyhow = "1"
 futures = "0.3.25"
 tokio = { version = "1.24.1", default-features = false, features = ["macros", "rt-multi-thread", "time"] }
 
-v_common = { package = "v-common", version = "=0.4.52" }
+v_common = { package = "v-common", version = "=0.4.54" }
 #v_common = { package = "v-common", path = "../../../v-common" }

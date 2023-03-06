@@ -19,5 +19,5 @@ time = "0.3.17"
 #evmap = "10.0.2"
 thiserror = "1.0.37"
 
-v_common = { package = "v-common", version = "=0.4.52" }
+v_common = { package = "v-common", version = "=0.4.54" }
 #v_common = { package = "v-common", path = "../../../v-common" }

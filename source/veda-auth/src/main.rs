@@ -14,7 +14,7 @@ use serde_json::value::Value as JSONValue;
 use std::collections::HashMap;
 use v_common::ft_xapian::xapian_reader::XapianReader;
 use v_common::module::module_impl::{init_log, Module};
-use v_common::module::veda_backend::{Backend, get_storage_with_prop};
+use v_common::module::veda_backend::{get_storage_with_prop, Backend};
 use v_common::storage::common::{StorageMode, VStorage};
 
 fn main() -> std::io::Result<()> {
@@ -29,7 +29,8 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut backend = Backend::create(StorageMode::ReadWrite, false);
-    let mut backup_storage =  get_storage_with_prop (StorageMode::ReadWrite, "backup_db_connection", false);
+    let mut backup_storage = get_storage_with_prop(StorageMode::ReadWrite, "backup_db_connection");
+    info!("connect to AUTHORIZE DB...");
     let mut auth_data = VStorage::new_lmdb("./data", StorageMode::ReadOnly, None);
 
     let systicket = if let Ok(t) = backend.get_sys_ticket_id() {
