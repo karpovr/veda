@@ -19,7 +19,7 @@ export default function PrepareWorkOrder (ticket, document) {
         }
 
         const f_forWorkItem = ServerUtil.getUri(document['v-wf:forWorkItem']);
-        const work_item = get_individual(ticket, f_forWorkItem);
+        var work_item = get_individual(ticket, f_forWorkItem);
         if (!work_item) return;
 
         const forProcess = work_item['v-wf:forProcess'];
@@ -264,6 +264,7 @@ export default function PrepareWorkOrder (ticket, document) {
         // найдем маппинг множественных результатов
         const wosResultsMapping = net_element['v-wf:wosResultsMapping'];
 
+        work_item = get_individual(ticket, f_forWorkItem);
         const workOrderList = work_item['v-wf:workOrderList'];
         // проверяем есть ли результаты рабочих заданий
         if (workOrderList) {
