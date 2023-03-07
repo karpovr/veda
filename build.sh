@@ -81,10 +81,6 @@ if [ -z $1 ] || [ $1 == "input-onto" ] || [ $1 == "veda-input-onto" ] || [ $1 ==
     build_server_module "veda-input-onto"
 fi
 
-if [ -z $1 ] || [ $1 == "ccus" ] || [ $1 == "veda-ccus" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    build_server_module "veda-ccus"
-fi
-
 if [ -z $1 ] || [ $1 == "ccus2" ] || [ $1 == "veda-ccus2" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     build_server_module "veda-ccus2"
 fi
