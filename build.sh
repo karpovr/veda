@@ -48,11 +48,14 @@ fi
 
 export CARGO_TARGET_DIR=$HOME/target
 
+if [ $1 == "libvqueueinfo2c" ] || [ $1 == "all" ] ; then
     build_module "libvqueueinfo2c"
 
     cp $CARGO_TARGET_DIR/release/libvqueueinfo2c.so ./source/lib64/libvqueueinfo2c.so
     cp $CARGO_TARGET_DIR/release/libvqueueinfo2c.a ./source/lib64/libvqueueinfo2c.a
     cp $CARGO_TARGET_DIR/release/libvqueueinfo2c.so $VEDA_BIN/lib
+
+fi
 
 if [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] || [ $1 == "all" ] ; then
     build_module "veda-geo-indexer"
