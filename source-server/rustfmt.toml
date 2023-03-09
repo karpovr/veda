@@ -1,0 +1,7 @@
+edition = "2018"
+#https://github.com/rust-lang/rustfmt/blob/master/Configurations.md
+max_width = 170
+use_small_heuristics = "Off"
+fn_single_line = true
+wrap_comments = true
+match_block_trailing_comma = true
