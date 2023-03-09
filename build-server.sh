@@ -46,12 +46,6 @@ fi
 
 export CARGO_TARGET_DIR=$HOME/target
 
-    mkdir $VEDA_BIN/lib
-    cd $BUILD_PATH
-    cp $CARGO_TARGET_DIR/release/libauthorization.so ./source/lib64/libauthorization.so
-    cp $CARGO_TARGET_DIR/release/libauthorization.a ./source/lib64/libauthorization.a
-    cp $CARGO_TARGET_DIR/release/libauthorization.so $VEDA_BIN/lib
-
 if [ -z $1 ] || [ $1 == "bootstrap" ] || [ $1 == "veda" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     build_server_module "veda-bootstrap"
     cp $CARGO_TARGET_DIR/release/veda-bootstrap $VEDA_BIN/veda

@@ -60,7 +60,7 @@ cargo -V
 
 ### LIB NANOMSG ###
 
-sudo libtool --mode=install install -c $INSTALL_PATH/source/lib64/libxapianm/libxapianm.la /usr/local/lib/libxapianm.la
+sudo libtool --mode=install install -c $INSTALL_PATH/source-server/lib64/libxapianm/libxapianm.la /usr/local/lib/libxapianm.la
 sudo ldconfig
 
 ldd --version
