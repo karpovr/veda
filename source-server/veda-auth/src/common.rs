@@ -381,7 +381,7 @@ pub(crate) fn create_new_ticket(login: &str, user_id: &str, addr: &str, duration
         ticket.update_from_individual(&mut ticket_indv);
         ticket.result = ResultCode::Ok;
         ticket.start_time = (TICKS_TO_UNIX_EPOCH + now.timestamp_millis()) * 10_000;
-        ticket.end_time = ticket.start_time + duration as i64 * 10_000_000;
+        ticket.end_time = ticket.start_time + duration * 10_000_000;
 
         let end_time_str = format!("{:?}", NaiveDateTime::from_timestamp((ticket.end_time / 10_000 - TICKS_TO_UNIX_EPOCH) / 1_000, 0));
         info!("create new ticket {}, login={}, user={}, addr={}, start={}, end={}", ticket.id, ticket.user_login, ticket.user_uri, addr, start_time_str, end_time_str);

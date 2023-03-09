@@ -191,7 +191,7 @@ fn store_hash_list(new_hashes_set: &FileHash, path_files_hashes: &str) {
 }
 
 fn get_hash_of_file(file_path: &str) -> io::Result<String> {
-    let mut rfile = File::open(&file_path)?;
+    let mut rfile = File::open(file_path)?;
     let mut hasher = Md5::new();
     io::copy(&mut rfile, &mut hasher)?;
     Ok(hex::encode(hasher.result()).to_uppercase())
