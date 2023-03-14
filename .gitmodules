@@ -1,3 +1,4 @@
 [submodule "source-server"]
 	path = source-server
 	url = https://github.com/semantic-machines/veda-server.git
+	branch = master
