@@ -1,6 +1,11 @@
 #!/bin/bash
 # скрипт устанавливает среду для последующей компиляции, берет исходники зависимостей из github, но не собирает
 
+cd source-server
+git submodule update
+./control-install.sh
+cd $PWD
+
 ./tools/install-repo-libs.sh
 
 INSTALL_PATH=$PWD

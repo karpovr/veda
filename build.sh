@@ -1,5 +1,3 @@
-./build-server.sh
-
 build_module () {
     BUILD_PATH=$PWD
     VEDA_BIN=$BUILD_PATH/bin
