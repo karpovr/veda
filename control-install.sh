@@ -1,14 +1,14 @@
 #!/bin/bash
 # скрипт устанавливает среду для последующей компиляции, берет исходники зависимостей из github, но не собирает
 
-cd source-server
+INSTALL_PATH=$PWD
+
+cd ./source-server
 git submodule update
 ./control-install.sh
-cd $PWD
+cd $INSTALL_PATH
 
 ./tools/install-repo-libs.sh
-
-INSTALL_PATH=$PWD
 
 # Get other dependencies
 LIB_NAME[5]="libglib2.0-dev"
@@ -62,11 +62,3 @@ fi
 whereis rustc
 rustc -V
 cargo -V
-
-### LIB NANOMSG ###
-
-sudo libtool --mode=install install -c $INSTALL_PATH/source-server/lib64/libxapianm/libxapianm.la /usr/local/lib/libxapianm.la
-sudo ldconfig
-
-ldd --version
-ls /usr/local/lib
