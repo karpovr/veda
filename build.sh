@@ -46,6 +46,7 @@ fi
 
 export CARGO_TARGET_DIR=$HOME/target
 
+git submodule init
 git submodule update
 cd ./source-server
 ./build.sh

@@ -3,9 +3,9 @@
 
 INSTALL_PATH=$PWD
 
-mkdir ./source-server
-cd ./source-server
+git submodule init
 git submodule update
+cd ./source-server
 ./control-install.sh
 cd $INSTALL_PATH
 
