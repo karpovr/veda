@@ -48,6 +48,13 @@ fi
 
 export CARGO_TARGET_DIR=$HOME/target
 
+cd source-server
+git submodule update
+./build.sh
+cd $BUILD_PATH
+cp ./source-server/bin/* ./bin
+
+
 if [ $1 == "libvqueueinfo2c" ] || [ $1 == "all" ] ; then
     build_module "libvqueueinfo2c"
 
