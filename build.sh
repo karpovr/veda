@@ -99,16 +99,8 @@ if [ $1 == "tools" ] || [ $1 == "veda-tools" ] || [ $1 == "all" ]; then
     build_module "veda-tools"
 fi
 
-if [ -z $1 ] || [ $1 == "scripts-v8" ] || [ $1 == "veda-scripts-v8" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    build_module "veda-scripts-v8"
-fi
-
 if [ -z $1 ] || [ $1 == "sparql-indexer" ] || [ $1 == "sparql-ft-indexer" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
     build_module "veda-sparql-indexer"
-fi
-
-if [ -z $1 ] || [ $1 == "ft-query" ] || [ $1 == "veda-ft-query" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    build_module "veda-ft-query"
 fi
 
 if [ -z $1 ] || [ $1 == "queue2storage" ] || [ $1 == "veda-queue2storage" ] || [ $1 == "all" ]; then
