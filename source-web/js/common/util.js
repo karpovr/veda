@@ -668,12 +668,12 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
       let where = '';
       const visited = visited || {};
       buildQuery(individual, undefined, type_index);
-      let query = from ? 'SELECT id FROM ' + from : '';
+      let query = from ? 'SELECT t1.id FROM ' + from : '';
       query = query && where ? query + ' WHERE ' + where : query;
       const group = groupBy(sort);
       query = query && group ? query + ' GROUP BY ' + group : query;
       const order = orderBy(sort);
-      query = query ? query + ' HAVING sum(sign) > 0' : query;
+      query = query ? query + ' HAVING sum(t1.sign) > 0' : query;
       query = query && order ? query + ' ORDER BY ' + order : query;
       return query;
 
@@ -683,7 +683,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
        * @return {string}
        */
       function groupBy (sortStr) {
-        const by = 'id';
+        const by = 't1.id';
         let props;
         if (typeof sortStr === 'string' || sortStr instanceof String) {
           props = sortStr.replace(/'(.+?)'\s+(\w+)/gi, function (match, property_uri) {
@@ -705,7 +705,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
               byClause = byClause + '_str';
               break;
             }
-            return byClause;
+            return 't1.' + byClause;
           });
         }
         return props ? by + ', ' + props : by;
@@ -738,7 +738,7 @@ Util.queryFromIndividualTT_JOIN = function (individual, sort, withDeleted) {
               clause = by + '_str ' + dir;
               break;
             }
-            return clause;
+            return 't1.' + clause;
           });
         }
       }

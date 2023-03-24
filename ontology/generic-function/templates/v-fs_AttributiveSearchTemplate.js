@@ -35,7 +35,7 @@ export const post = function (individual, template, container, mode, extra) {
               </x:ExcelWorkbook>
             </xml>
           <![endif]-->
-          <meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>
+          <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8"/>
           <style>
             td.text { mso-number-format:"@"; }
             td.number { mso-number-format:General; }
@@ -63,7 +63,7 @@ export const post = function (individual, template, container, mode, extra) {
         const tags = /<\/?(a|span|p|div|button) ?.*?>/gi;
         // Numbers with decimal point
         const decimal = /([^\d\.\:]+\d+)\.(\d+[^\d\.\:]+)/gi;
-        ctx.table = ctx.table.replace(tags, ' ').replace(decimal, '$1,$2');
+        ctx.table = ctx.table.replace(tags, ' ');//.replace(decimal, '$1,$2');
       }
       const formatted = format(template, ctx);
       const blob = new Blob([formatted], {type: 'application/vnd.ms-excel;charset=utf-8'});
@@ -94,7 +94,7 @@ export const post = function (individual, template, container, mode, extra) {
     resultTable.find('.hidden').remove();
 
     const filesEls = $("[typeof='v-s:File']", resultTable);
-    
+
     const B_in_GB = 1024 * 1024 * 1024;
     // file size in B
     let sumSize = 0;
