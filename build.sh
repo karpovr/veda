@@ -67,10 +67,6 @@ if [ $1 == "geo-indexer" ] || [ $1 == "veda-geo-indexer" ] || [ $1 == "all" ] ; 
     build_module "veda-geo-indexer"
 fi
 
-if [ -z $1 ] || [ $1 == "queue2ids" ] || [ $1 == "veda-queue2ids" ] || [ $1 == "basic" ] || [ $1 == "all" ]; then
-    build_module "veda-queue2ids"
-fi
-
 if [ -z $1 ] || [ $1 == "ro-storage" ] || [ $1 == "veda-ro-storage" ] || [ $1 == "basic" ] || [ $1 == "all" ] ; then
     build_module "veda-ro-storage"
 fi
