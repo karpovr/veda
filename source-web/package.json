@@ -72,7 +72,7 @@
     "symbol-es6": "^0.1.2",
     "systemjs": "^6.7.1",
     "systemjs-plugin-css": "^0.1.37",
-    "vis-network": "^8.5.2"
+    "vis-network": "^9.1.6"
   },
   "scripts": {
     "test": "npm run test-backend && npm run test-frontend",
