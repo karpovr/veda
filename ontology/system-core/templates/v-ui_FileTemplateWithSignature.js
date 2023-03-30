@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Crypto from '/js/browser/crypto.js';
 
-export const post = async function (individual, template, container, mode, extra) {
+export const pre = async function (individual, template, container, mode, extra) {
   const $template = $(template);
   const $container = $(container);
 
@@ -11,10 +11,15 @@ export const post = async function (individual, template, container, mode, extra
     const idx = fn.lastIndexOf('.');
     const ext = fn.substr(idx + 1);
     if (img.indexOf(ext.toLowerCase()) < 0) {
-      $('.thumbnail', template).remove();
-      $('.filename', template).css('width', '100%');
+      $('.thumbnail', $template).remove();
+      $('.filename', $template).css('width', '100%');
     }
   }
+};
+
+export const post = async function (individual, template, container, mode, extra) {
+  const $template = $(template);
+  const $container = $(container);
 
   individual.on('v-s:digitalSignature', showSignature);
   $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));

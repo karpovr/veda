@@ -259,7 +259,7 @@ $.fn.veda_file = function ( options ) {
       fileIndividual['v-s:backwardProperty'] = [rel_uri];
       if (withUUID == 'true') {
         fileIndividual['v-s:uid'] = [crypto.randomUUID()];
-        console.log(fileIndividual['v-s:uid'][0])
+        console.log(fileIndividual['v-s:uid'][0]);
       }
     }
     return new Promise((resolve, reject) => {
@@ -294,7 +294,7 @@ $.fn.veda_file = function ( options ) {
     }).then(() => {
       return uploadFile({file, path, uri, progress});
     }).then(() => {
-      return fileIndividual.save();
+      return isThumbnail ? fileIndividual.save() : fileIndividual;
     }).catch((error) => {
       notify('danger', error);
     });
