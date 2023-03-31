@@ -1225,6 +1225,19 @@ v-s:functionOfmemberOutOfBrigade
 .
 #v-s:reason - Причина изменений
 #v-s:date - Дата и время изменения
+
+#v-s:responsibleOrganization
+mnd-s:PS_responsibleOrganization_ChangingBrigadeComposition
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:ChangingBrigadeComposition ;
+  v-ui:forProperty v-s:responsibleOrganization ;
+  v-ui:maxCardinality 100 ;
+  v-ui:minCardinality 1 ;
+  v-ui:queryPrefix "('rdf:type' === 'v-s:Organization' && 'v-s:hasContractorProfileSafety.isExists' == true)"^^xsd:string ;
+  rdfs:label "Спецификация к свойству v-s:responsibleOrganization для класса v-s:ChangingBrigadeComposition"@ru ;
+  rdfs:label "Spec for property v-s:responsibleOrganization for class v-s:ChangingBrigadeComposition"@en ;
+.
+
 v-s:memberInOfBrigade
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ChangingBrigadeComposition ;

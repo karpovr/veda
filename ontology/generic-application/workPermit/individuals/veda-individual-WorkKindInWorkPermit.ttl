@@ -278,7 +278,7 @@ d:WorkKindInWorkPermit_19
   v-s:parentUnit d:WorkKindInWorkPermit_3;
   v-s:parentUnit d:WorkKindInWorkPermit_4;
   v-s:parentUnit d:WorkKindInWorkPermit_5;
-  rdfs:label "Работы с использование грузоподъемного механизма (таль, домкрат)"^^xsd:string;
+  rdfs:label "Работы с использование грузоподъемного механизма (таль, домкрат, ГПМ до 10т)"^^xsd:string;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_1_3;
   v-s:hasVisibleFieldInWorkKind v-s:hasSafetyWorkAction_7;  
   v-s:hasRequiredFieldInWorkKind v-s:hasWorkingOperations ;
