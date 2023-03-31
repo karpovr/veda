@@ -176,6 +176,8 @@ export const pre = function (individual, template, container, mode, extra) {
                 if (!children.length) {
                   tmpl.find('.expand').remove();
                   tmpl.find('.select-deep').remove();
+                  const spacer = tmpl.find('.spacer');
+                  spacer.css('margin-left', 16 * (parentLvl + 2) + 2 + 'px');
                 } else if (expandLevel) {
                   expandRow.call(tmpl.find('.expand'), undefined, expandLevel - 1);
                 }
