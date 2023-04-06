@@ -382,6 +382,7 @@ $.fn.veda_link = function ( options ) {
           fulltextMenu.hide();
           $(document).off('click', clickOutsideMenuHandler);
           $(document).off('keydown', arrowHandler);
+          fulltext.focus();
         } else {
           selected = selected.filter((value) => {
             return value !== suggestion;
@@ -394,6 +395,7 @@ $.fn.veda_link = function ( options ) {
           fulltextMenu.hide();
           $(document).off('click', clickOutsideMenuHandler);
           $(document).off('keydown', arrowHandler);
+          fulltext.focus();
         } else {
           selected.push(suggestion);
         }
@@ -401,7 +403,6 @@ $.fn.veda_link = function ( options ) {
       dblTimeout = setTimeout(() => {
         dblTimeout = undefined;
       }, 300);
-      fulltext.focus();
     };
 
     const dblclickHandler = function (e) {
