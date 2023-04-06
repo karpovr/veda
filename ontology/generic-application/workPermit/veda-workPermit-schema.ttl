@@ -1206,6 +1206,8 @@ v-s:ChangingBrigadeComposition
   rdf:type owl:Class ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  v-s:labelPattern "{@.v-s:backwardTarget.v-s:registrationNumberAdd} - {@.v-s:backwardTarget.v-s:date}" ;
   rdfs:label "Изменение состава бригады"@ru ;
   rdfs:label "Changing brigade composition"@en ;
 .
