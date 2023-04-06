@@ -443,7 +443,15 @@ position_uris.map(function (position_uri) {
   }
 
   if ( updateAllowed ) {
-    put_individual(ticket, appointment, _event_id);
+    if (veda.Util.hasValue(appointment, 'v-s:deleted')) {
+      const deletedValue = appointment['v-s:deleted'];
+      delete appointment['v-s:deleted'];
+      put_individual(ticket, appointment, _event_id);
+      appointment['v-s:deleted'] = deletedValue;
+      put_individual(ticket, appointment, _event_id);
+    } else {
+      put_individual(ticket, appointment, _event_id);
+    }
     print("[cfg:Event_Delegation] appointment saved =", JSON.stringify(appointment));
   }
 
