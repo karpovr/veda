@@ -169,7 +169,7 @@ v-s:PS_workPermit_brigade_WorkPermit
   v-ui:forClass v-s:WorkPermit ;
   v-ui:forProperty v-s:workPermit_brigade ;
   v-ui:forProperty v-s:workPermit_actualBrigade ;
-  v-ui:minCardinality "1"^^xsd:integer ;
+  v-ui:minCardinality "0"^^xsd:integer ;
   v-ui:maxCardinality "100"^^xsd:integer ;
 .
 v-s:workPermit_actualBrigade
