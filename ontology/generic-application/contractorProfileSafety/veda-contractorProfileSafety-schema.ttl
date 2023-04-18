@@ -238,7 +238,7 @@ v-s:hasLiftDriverCertificate
 v-s:hasFireTechnicalMinimumCertificate
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:EmployeeProfile ;
-  rdfs:label "Обучение по дополнительным профессиональным программам в области пожарной безопасности"@ru ;
+  rdfs:label "Обучение по ДПП в области пожарной безопасности"@ru ;
   rdfs:label "Training in additional professional programs in the field of fire safety"@en ;
   rdfs:range v-s:CertificationDocument ;
 .
