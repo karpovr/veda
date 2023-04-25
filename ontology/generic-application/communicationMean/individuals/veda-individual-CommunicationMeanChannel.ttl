@@ -57,15 +57,15 @@ d:fpxx0hw2gyea8z1dcjc6mxtlg2
   a v-s:CommunicationMeanChannel;
   rdfs:label "Мобильный телефон"@ru;
   rdfs:label "Mobile phone"@en;
-  v-s:shortLabel "моб. тел."@ru;
-  v-s:shortLabel "mob. ph."@en;
+  v-s:shortLabel "раб."@ru;
+  v-s:shortLabel "work"@en;
 .
 d:zhercrddg5yotsbbzr33cfoqfc
   a v-s:CommunicationMeanChannel;
   rdfs:label "Личный телефон"@ru;
   rdfs:label "Personal phone"@en;
-  v-s:shortLabel "лич. тел."@ru;
-  v-s:shortLabel "pers. ph."@en;
+  v-s:shortLabel "лич."@ru;
+  v-s:shortLabel "pers."@en;
 .
 d:ghk8nfvsh6ne8mdi0dhvv19c79
   a v-s:CommunicationMeanChannel;
