@@ -13,6 +13,10 @@ export const pre = function (individual, template, container, mode, extra) {
 export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
+  let isContactManager = false;
+  veda.user.isMemberOf('cfg:ContactManagerGroup').then(function (isMember) {
+    isContactManager = isMember || veda.appointment.id == 'cfg:AdministratorAppointment';
+  });
 
   $('section .section-header', template).click(function () {
     const self = $(this);
@@ -27,6 +31,9 @@ export const post = function (individual, template, container, mode, extra) {
     });
     return Promise.all(promises).then(function (templates) {
       templates.forEach(function (tmpl) {
+        if (isContactManager) {
+          $('.zoom.hidden', tmpl).removeClass('hidden');
+        }
         $('tbody', container).append(tmpl);
       });
     });

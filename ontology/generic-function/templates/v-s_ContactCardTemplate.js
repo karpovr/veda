@@ -96,7 +96,7 @@ export const post = function (individual, template, container, mode, extra) {
     });
 
     return Promise.all(commMeansPromises).then(function (commMeans) {
-      commMeans.forEach(function (commMean) {
+      commMeans.forEach(async function (commMean) {
         if (commMean.hasValue('v-s:hasCommunicationMeanChannel', 'd:o3q2gagyvfwh430io88vvb8vel')) {
           let phones = commMean['v-s:description'][0];
           if (phones.indexOf(',') > 0) {
@@ -120,9 +120,15 @@ export const post = function (individual, template, container, mode, extra) {
           } else {
             phones = [phones];
           }
+          const phoneRow = $('<div></div>');
+          const commMeanChannel = await commMean.getPropertyChain('v-s:hasCommunicationMeanChannel', 'v-s:shortLabel');
+          if (commMeanChannel.length > 0) {
+            phoneRow.append(commMeanChannel[0]);
+          }
           phones.forEach(function (phone) {
-            $('.other-phone', template).append("<div><a href='tel:" + phone + "'>" + phone + '</a></div>');
+            phoneRow.append("<a class='margin-xs-h' href='tel:" + phone + "'>" + phone + '</a>');
           });
+          $('.other-phone', template).append(phoneRow);
         }
       });
     });
@@ -177,9 +183,9 @@ export const html = `
     </td>
     <td>
       <div class="communication-container row">
-        <div class="work-phone col-lg-3 col-md-12"></div>
-        <div class="email col-lg-6 col-md-12" style="overflow-x: hidden;"></div>
-        <div class="other-phone col-lg-3 col-md-12"></div>
+        <div class="work-phone col-lg-2 col-md-12"></div>
+        <div class="email col-lg-5 col-md-12" style="overflow-x: hidden;"></div>
+        <div class="other-phone col-lg-5 col-md-12"></div>
       </div>
     </td>
     <td width="20px">

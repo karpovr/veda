@@ -291,7 +291,7 @@ export const post = function (individual, template, container, mode, extra) {
 
     const selectPart = 'SELECT DISTINCT id ';
     const wherePart = "WHERE v_s_parentUnit_str=['" + parentUri + "'] AND v_s_deleted_int=[0]";
-    const endingPart = " group by id, rdfs_label_str having sum(sign) > 0 order by arraySort(x -> endsWith(x, '@en'), rdfs_label_str) asc";
+    const endingPart = " group by id, rdfs_label_str having sum(sign) > 0 order by arraySort(x -> endsWith(lowerUTF8(x), '@en'), rdfs_label_str) asc";
     const queryDepartments = selectPart + 'FROM veda_tt.`v-s:Department` ' + wherePart + endingPart;
     let queryAppointment =
       selectPart +
@@ -360,23 +360,34 @@ export const post = function (individual, template, container, mode, extra) {
       loadIndicator.show();
       return getChildren(new IndividualModel(parentUri), true)
         .then(function (childrenUris) {
-          const promises = childrenUris.map(function (childUri) {
-            const child = new IndividualModel(childUri);
-            return getRowTemplate(child).then(function (tmpl) {
-              if (tmpl == null) {
-                return Promise.resolve(null);
-              }
-              return child.present(rootElement.children('.children'), tmpl);
-            });
-          });
-          return Promise.all(promises);
+          return childrenUris.reduce(async (acc, cur) => {
+            acc = await acc;
+            const child = new IndividualModel(cur);
+            const tmpl = await getRowTemplate(child);
+            if (tmpl == null) return acc;
+            await child.present(rootElement.children('.children'), tmpl);
+            return ++acc;
+          }, Promise.resolve(0));
+          // const promises = childrenUris.map(function (childUri) {
+          //   const child = new IndividualModel(childUri);
+          //   return getRowTemplate(child).then(function (tmpl) {
+          //     if (tmpl == null) {
+          //       return [child, Promise.resolve(null)];
+          //     } else {
+          //       return [child, tmpl];
+          //     }
+          //     return child.present(rootElement.children('.children'), tmpl);
+          //   });
+          // });
+          // return Promise.all(promises);
         })
         .then(function (result) {
           loadIndicator.hide();
-          result = result.filter(function (item) {
-            return item != null;
-          });
-          return result.length;
+          // result = result.filter(function (item) {
+          //   return item != null;
+          // });
+          // return result.length;
+          return result;
         });
     }
   }
@@ -527,7 +538,7 @@ export const post = function (individual, template, container, mode, extra) {
   function genQueryStringArray (searchText, findDeleted, findInParentOrg) {
     const selectPart = 'SELECT DISTINCT target.id';
     const endingPart =
-      " GROUP BY target.id, target.rdfs_label_str, target.version HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(x, '@en'), target.rdfs_label_str) asc";
+      " GROUP BY target.id, target.rdfs_label_str, target.version HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(lowerUTF8(x), '@en'), target.rdfs_label_str) asc";
     let basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0]';
     const orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]';
     const conditionForOrg = ' and org.`v_s_actualContacts_int`[1]=1';
@@ -934,9 +945,9 @@ export const html = `
         cursor: col-resize;
         background-color: #ddd;
       }
-      .result-table thead {
+      /*.result-table thead {
         background-color: #f5f5f5;
-      }
+      }*/
 
       .section-header > span.glyphicon {
         margin-right: 5%;
@@ -1071,6 +1082,20 @@ export const html = `
       </h5>
       <div class="section-content">
         <table class="table result-table">
+          <thead>
+            <th></th>
+            <th><span about="rdfs:label" property="rdfs:label"></span></th>
+            <th></th>
+            <th>
+              <div class="row">
+                <div about="d:o3q2gagyvfwh430io88vvb8vel" property="rdfs:label" class="col-lg-2 col-md-12"></div>
+                <div about="d:a1iwni0b54fvcz41vuts08bxqsh" property="rdfs:label" class="col-lg-5 col-md-12" style="overflow-x: hidden;"></div>
+                <div about="d:fpxx0hw2gyea8z1dcjc6mxtlg2" property="rdfs:label" class="other-phone col-lg-5 col-md-12"></div>  
+              </div>
+              <!-- <span about="v-s:ContactsBundle" property="rdfs:label"></span> -->
+            </th>
+            <th></th>
+          </thead>
           <tbody></tbody>
         </table>
         <div class="result-info-container">
@@ -1108,7 +1133,14 @@ export const html = `
               <thead>
                 <th></th>
                 <th><span about="rdfs:label" property="rdfs:label"></span></th>
-                <th><span about="v-s:ContactsBundle" property="rdfs:label"></span></th>
+                <th>
+                  <div class="row">
+                    <div about="d:o3q2gagyvfwh430io88vvb8vel" property="rdfs:label" class="col-lg-2 col-md-12"></div>
+                    <div about="d:a1iwni0b54fvcz41vuts08bxqsh" property="rdfs:label" class="col-lg-5 col-md-12" style="overflow-x: hidden;"></div>
+                    <div about="d:fpxx0hw2gyea8z1dcjc6mxtlg2" property="rdfs:label" class="other-phone col-lg-5 col-md-12"></div>  
+                  </div>
+                  <!-- <span about="v-s:ContactsBundle" property="rdfs:label"></span> -->
+                </th>
                 <th></th>
               </thead>
               <tbody></tbody>
