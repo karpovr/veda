@@ -631,6 +631,27 @@ v-s:latitude
   rdfs:range xsd:decimal ;
   rdfs:domain v-s:Spatial ;
 .
+v-s:shelving
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Стеллаж"@ru ;
+  rdfs:label "Shelving"@en ;
+  rdfs:range xsd:string ;
+  rdfs:domain v-s:Spatial ;
+.
+v-s:shelf
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Полка"@ru ;
+  rdfs:label "Shelf"@en ;
+  rdfs:range xsd:string ;
+  rdfs:domain v-s:Spatial ;
+.
+v-s:folder
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Папка"@ru ;
+  rdfs:label "Folder"@en ;
+  rdfs:range xsd:string ;
+  rdfs:domain v-s:Spatial ;
+.
 
 #------------------------------------------------------------- Контрактная сущность --
 v-s:Contractual
@@ -1115,6 +1136,13 @@ v-s:hasRegistrationRecord
   rdfs:range v-s:RegistrationRecord ;
   rdfs:label "Регистрационная запись"@ru ;
   rdfs:label "Registration record"@en ;
+  rdfs:domain v-s:Registered ;
+.
+v-s:archiveNumber
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Архивный номер"@ru ;
+  rdfs:label "Archive number"@en ;
+  rdfs:range xsd:string ;
   rdfs:domain v-s:Registered ;
 .
 
