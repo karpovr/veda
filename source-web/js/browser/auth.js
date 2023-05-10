@@ -76,7 +76,7 @@ delegateHandler(loginForm, 'touchstart', '.show-password', function (e) {
 function submitLoginPassword (event) {
   event.preventDefault();
   const passwordInput = loginForm.querySelector('#password');
-  const login = loginForm.querySelector('#login').value;
+  const login = loginForm.querySelector('#login').value.trim();
   const password = passwordInput.value;
   const hash = Sha256.hash(password);
 
@@ -165,7 +165,7 @@ function validateNewPassword () {
 
 loginForm.querySelector('#submit-new-password').addEventListener('click', function (e) {
   e.preventDefault();
-  const login = loginForm.querySelector('#login').value;
+  const login = loginForm.querySelector('#login').value.trim();
   const password = loginForm.querySelector('#new-password').value;
   const secret = loginForm.querySelector('#secret').value;
   const hash = Sha256.hash(password);
