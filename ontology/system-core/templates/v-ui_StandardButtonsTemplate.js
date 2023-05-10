@@ -219,11 +219,15 @@ export const post = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function hideButtonsForDeleted () {
+  async function hideButtonsForDeleted () {
     if (individual.hasValue('v-s:deleted', true)) {
       template.find(':not(#delete, #recover, #refresh, #toggle-actions)').addClass('hidden');
       $('#delete', template).addClass('hidden');
-      $('#recover', template).removeClass('hidden');
+      // #recover not have .rm for autoremove on canUpdate==false
+      const canUpdate = await individual.canUpdate();
+      if (canUpdate) {
+        $('#recover', template).removeClass('hidden');
+      }
     } else {
       template.find(':not(#delete, #recover, #refresh, #toggle-actions)').removeClass('hidden');
       $('#delete', template).removeClass('hidden');
