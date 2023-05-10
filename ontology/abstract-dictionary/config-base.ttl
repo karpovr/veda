@@ -1183,11 +1183,21 @@ for (var i = 0; i < types.length; i++) {
         if (isDeletingAction) {
           var add_to_value = {
             "@": propValues[valueInd].data,
-            "rdf:type": veda.Util.newUri("v-s:Deletable"),
-            "v-s:deleted": veda.Util.newBool(isDeletingAction)
+            "rdf:type": veda.Util.newUri("v-s:Deletable")
           };
-          print("      add 'deletable' for value: ", propValues[valueInd].data);
           add_to_individual(veda.ticket, add_to_value);
+          print("      add 'deletable' for value: ", propValues[valueInd].data);
+          var set_to_value = {
+            "@": propValues[valueInd].data,
+            "v-s:deleted": veda.Util.newBool(isDeletingAction),
+            "v-s:edited": veda.Util.newDate(new Date())
+          };
+          print("      set 'deleted' & 'edited' for value: ", propValues[valueInd].data);
+          if (veda.Util.hasValue(document, 'v-s:archived', { data: true, type: "Boolean" })) {
+            set_to_value['v-s:archived'] = veda.Util.newBool(true);
+            print("      set 'archived' for value: ", propValues[valueInd].data);
+          }
+          set_in_individual(veda.ticket, set_to_value);
         } else {
           var set_in_value = {
             "@": propValues[valueInd].data,
@@ -1208,6 +1218,9 @@ if (isDeletingAction == false) {
     "rdf:type": veda.Util.newUri("v-s:Deletable"),
     "v-s:deleted": veda.Util.newBool(isDeletingAction)
   };
+  if (veda.Util.hasValue(document, 'v-s:archived', { data: true, type: "Boolean" })) {
+    remove_from_doc['v-s:archived'] = veda.Util.newBool(true);
+  }
   remove_from_individual(veda.ticket, remove_from_doc);
 }
 """ ;
