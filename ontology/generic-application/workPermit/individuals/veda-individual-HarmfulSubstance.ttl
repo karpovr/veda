@@ -158,7 +158,7 @@ d:mmjhm617l9zxvvgd0dt95zg3dv
   a v-s:HarmfulSubstance;
   rdfs:label "диоксид хлора"^^xsd:string;
   v-s:shortLabel "ClO₂"^^xsd:string;
-  v-s:description "(1 мг/м³)"^^xsd:string;
+  v-s:description "(0,1 мг/м³)"^^xsd:string;
 .
 d:2ws2rqbd2i7sp70ntmfsxga1mt
   a v-s:HarmfulSubstance;
@@ -171,4 +171,10 @@ d:ai5eqqglvbkn5eurdmt7pgq1xk
   rdfs:label "Метан"^^xsd:string;
   v-s:shortLabel "CH₄"^^xsd:string;
   v-s:description "(7000 мг/м³)"^^xsd:string;
+.
+d:lnt8xmfq6idixyuw4muyeomuhx
+  a v-s:HarmfulSubstance;
+  rdfs:label "Водород"^^xsd:string;
+  v-s:shortLabel "H₂"^^xsd:string;
+  v-s:description "(0,4%)"^^xsd:string;
 .

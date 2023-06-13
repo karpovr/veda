@@ -1104,7 +1104,7 @@ v-s:PS_date_ResultsOfMeasurementsOfHarmfulFactors
 v-s:hasHarmfulSubstance
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:ResultsOfMeasurementsOfHarmfulFactors ;
-  rdfs:label "Вредное вещество"@ru ;
+  rdfs:label "Измеряемое вещество"@ru ;
   rdfs:label "Harmful Substance"@en ;
   rdfs:range v-s:HarmfulSubstance ;
 .
