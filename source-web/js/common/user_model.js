@@ -26,7 +26,7 @@ proto.getLanguage = function () {
 };
 
 proto._init = function () {
-  return this.load()
+  return this.reset()
     .then(this.initAspect.bind(this))
     .then(this.initAppointment.bind(this))
     .then(this.initPreferences.bind(this))
@@ -44,7 +44,7 @@ proto._init = function () {
 proto.initAspect = function () {
   const aspect_id = this.id + '_aspect';
   const aspect = this.hasValue('v-s:hasAspect') ? this['v-s:hasAspect'][0] : new IndividualModel(aspect_id);
-  return aspect.load()
+  return aspect.reset()
     .catch((error) => {
       console.error('Personal aspect load failed');
       const newAspect = new IndividualModel(aspect_id);
@@ -78,20 +78,20 @@ proto.initAppointment = function () {
   const setAppointment = () => {
     const appointment = this.hasValue('v-s:defaultAppointment') && this['v-s:defaultAppointment'][0];
     if (appointment) {
-      appointment.load().then(() => {
+      appointment.reset().then(() => {
         veda.appointment = appointment;
       });
     }
     this.save();
   };
   this.on('v-s:defaultAppointment', setAppointment);
-  return veda.appointment.load();
+  return veda.appointment.reset();
 };
 
 proto.initPreferences = function () {
   const preferences_id = this.id + '_pref';
   const preferences = this.hasValue('v-ui:hasPrefences') ? this['v-ui:hasPrefences'][0] : new IndividualModel(preferences_id);
-  return preferences.load()
+  return preferences.reset()
     .catch((error) => {
       console.error('Personal preferences load failed');
       const newPreferences = new IndividualModel(preferences_id);
