@@ -19,9 +19,11 @@ use v_common::v_queue::consumer::Consumer;
 
 pub struct Context {
     onto: Onto,
+    classes_indvs: HashMap<String, Individual>,
     pool: mysql::Pool,
     tables: HashMap<String, bool>,
     module_info: ModuleInfo,
+    fanout_id: Option<i64>,
 }
 
 fn main() {
@@ -31,8 +33,20 @@ fn main() {
         wait_module("fulltext_indexer", wait_load_ontology());
     }
 
-    let mut queue_consumer = Consumer::new("./data/queue", "fanout_sql", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
-    let module_info = ModuleInfo::new("./data", "fanout_sql", true);
+    let fanout_id = if let Some(m) = Module::get_property("id") {
+        Some(m.parse::<i64>().expect(&format!("invalid value {} in parameter [id]", m)))
+    } else {
+        None
+    };
+
+    let consumer_name = if let Some(priority) = fanout_id {
+        format!("fanout_sql_{}", priority)
+    } else {
+        "fanout_sql".to_string()
+    };
+
+    let mut queue_consumer = Consumer::new("./data/queue", &consumer_name, "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
+    let module_info = ModuleInfo::new("./data", &consumer_name, true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", module_info.err());
         process::exit(101);
@@ -50,11 +64,17 @@ fn main() {
         Ok(tables) => tables,
     };
 
+    if let Some(id) = fanout_id {
+        warn!("A FILTER TYPE WITH v-s:exportPrioritySQL = {}", id);
+    }
+
     let mut ctx = Context {
         onto: Onto::default(),
+        classes_indvs: Default::default(),
         pool,
         tables,
         module_info: module_info.unwrap(),
+        fanout_id,
     };
 
     load_onto(&mut backend.storage, &mut ctx.onto);
@@ -78,6 +98,23 @@ fn before_bath(_module: &mut Backend, _ctx: &mut Context, _size_batch: u32) -> O
 }
 fn void(_module: &mut Backend, _ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     Ok(false)
+}
+
+fn get_priority(backend: &mut Backend, ctx: &mut Context, class_name: &str) -> Option<i64> {
+    if let Some(ci) = ctx.classes_indvs.get_mut(class_name) {
+        if let Some(n) = ci.get_first_integer("v-s:exportPrioritySQL") {
+            return Some(n);
+        }
+    } else {
+        let mut indv0 = Default::default();
+        if backend.storage.get_individual(class_name, &mut indv0) {
+            let n = indv0.get_first_integer("v-s:exportPrioritySQL");
+            ctx.classes_indvs.insert(class_name.to_string(), indv0);
+            return n;
+        }
+    }
+
+    None
 }
 
 fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
@@ -110,7 +147,16 @@ fn process(_module: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     if let Some(classes) = new_state.get_literals("rdf:type") {
         for class in &classes {
             if ctx.onto.is_some_entered(class, &["v-s:Exportable"]) {
-                return export(&mut new_state, &mut prev_state, &classes, is_new, ctx);
+                let priority = get_priority(_module, ctx, class);
+                if let Some(fid) = ctx.fanout_id {
+                    if priority.unwrap_or(99999) == fid {
+                        return export(&mut new_state, &mut prev_state, &classes, is_new, ctx);
+                    }
+                } else {
+                    if priority.is_none() {
+                        return export(&mut new_state, &mut prev_state, &classes, is_new, ctx);
+                    }
+                }
             }
         }
     }
@@ -250,7 +296,7 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
 
     match transaction.commit() {
         Ok(_) => {
-            info!("Ok, uri = {}", uri);
+            info!("Ok, uri = {}, types={:?}", uri, types);
             Ok(true)
         },
         Err(e) => {
