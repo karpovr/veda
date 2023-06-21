@@ -55,7 +55,7 @@ web-api
 
 #queue2storage
 #    module = queue2storage
-#    args = --db_connection=tcp://veda6:123456@127.0.0.1:3309 --check=is-exist --update=if-check-err
+#    args = --db-connection=db-conn-1 --dest-db-connection=tcp://veda6:123456@127.0.0.1:3309 --check=is-exist --update=if-check-err
 
 input-onto
 

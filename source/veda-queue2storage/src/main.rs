@@ -59,7 +59,7 @@ fn main() -> Result<(), i32> {
 
     let args: Vec<String> = env::args().collect();
     for el in &args {
-        if el.starts_with("--db-connection") {
+        if el.starts_with("--dest-db-connection") {
             db_connection_url = el.split('=').collect::<Vec<&str>>()[1].to_owned().trim().to_owned();
         }
         if el.starts_with("--update") {
@@ -259,7 +259,9 @@ fn get_storage_with_url(db_connection_url: &str, storage_mode: StorageMode) -> V
             }
         },
         Err(e) => {
-            panic!("fail parse {db_connection_url}, err={e}")
+            let et = format!("fail parse {db_connection_url}, err={e}");
+            error!("{et}");
+            panic!("{et}");
         },
     }
 }
