@@ -180,6 +180,8 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
         is_deleted = new_state.is_exists_bool("v-s:deleted", true);
     }
 
+    let is_exist_predicate_deleted = new_state.is_exists("v-s:deleted") || prev_state.is_exists("v-s:deleted");
+
     let is_version = types.contains(&&"v-s:Version".to_owned());
     if is_version {
         info!("skip version: {}", uri);
@@ -207,22 +209,27 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
     // Remove previous item from DB
     if !is_new {
         prev_state.get_predicates().iter().for_each(|predicate| {
-            prev_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
-                if resource.order == 0 {
-                    let mut predicate = predicate.to_lowercase();
-                    predicate.truncate(64);
-                    // Check or create table before delete
-                    if check_create_predicate_table(&mut ctx.tables, &predicate, resource, &mut transaction).is_err() {
-                        error!("failed to to create table, export aborted, property = {}, uri = {}", predicate, uri);
-                        tr_error = true;
+            let nsr = new_state.get_resources(predicate);
+            let psr = prev_state.get_resources(predicate);
+
+            if is_exist_predicate_deleted || !compare_resources(&nsr, &psr) {
+                psr.unwrap().iter().for_each(|resource| {
+                    if resource.order == 0 {
+                        let mut predicate = predicate.to_lowercase();
+                        predicate.truncate(64);
+                        // Check or create table before delete
+                        if check_create_predicate_table(&mut ctx.tables, &predicate, resource, &mut transaction).is_err() {
+                            error!("failed to to create table, export aborted, property = {}, uri = {}", predicate, uri);
+                            tr_error = true;
+                        }
+                        let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", predicate, uri);
+                        if let Err(e) = transaction.query(query) {
+                            error!("failed to delete individual, uri = {}, property table = {}, err = {:?}", uri, predicate, e);
+                            tr_error = true;
+                        }
                     }
-                    let query = format!("DELETE FROM `{}` WHERE doc_id = '{}'", predicate, uri);
-                    if let Err(e) = transaction.query(query) {
-                        error!("failed to delete individual, uri = {}, property table = {}, err = {:?}", uri, predicate, e);
-                        tr_error = true;
-                    }
-                }
-            });
+                });
+            }
         });
     }
 
@@ -238,46 +245,51 @@ fn export(new_state: &mut Individual, prev_state: &mut Individual, in_types: &[S
 
     types.iter().for_each(|class| {
         new_state.get_predicates().iter().for_each(|predicate| {
-            new_state.get_resources(predicate).unwrap().iter().for_each(|resource| {
-                let mut predicate = predicate.to_lowercase();
-                predicate.truncate(64);
-                // Check or create table before insert
-                if resource.order == 0 && check_create_predicate_table(&mut ctx.tables, &predicate, resource, &mut transaction).is_err() {
-                    error!("failed to create table, export aborted, property = {}, uri = {}", predicate, uri);
-                    tr_error = true;
-                }
+            let nsr = new_state.get_resources(predicate);
+            let psr = prev_state.get_resources(predicate);
 
-                let uri = new_state.get_id();
-                let value = match &resource.value {
-                    Value::Bool(true) => String::from("1"),
-                    Value::Bool(_) => String::from("0"),
-                    Value::Int(int_value) => int_value.to_string(),
-                    Value::Str(str_value, _lang) => format!("'{}'", str_value.replace('\'', "''").replace('\\', r#"\\"#)),
-                    Value::Uri(uri_value) => format!("'{}'", uri_value.replace('\'', "''").replace('\\', r#"\\"#)),
-                    Value::Num(_m, _e) => resource.get_float().to_string(),
-                    Value::Datetime(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(*timestamp, 0)),
-                    _ => String::from("NULL"),
-                };
+            if is_exist_predicate_deleted || !compare_resources(&nsr, &psr) {
+                nsr.unwrap().iter().for_each(|resource| {
+                    let mut predicate = predicate.to_lowercase();
+                    predicate.truncate(64);
+                    // Check or create table before insert
+                    if resource.order == 0 && check_create_predicate_table(&mut ctx.tables, &predicate, resource, &mut transaction).is_err() {
+                        error!("failed to create table, export aborted, property = {}, uri = {}", predicate, uri);
+                        tr_error = true;
+                    }
 
-                if value == "'v-s:Deletable'" {
-                    return;
-                }
+                    let uri = new_state.get_id();
+                    let value = match &resource.value {
+                        Value::Bool(true) => String::from("1"),
+                        Value::Bool(_) => String::from("0"),
+                        Value::Int(int_value) => int_value.to_string(),
+                        Value::Str(str_value, _lang) => format!("'{}'", str_value.replace('\'', "''").replace('\\', r#"\\"#)),
+                        Value::Uri(uri_value) => format!("'{}'", uri_value.replace('\'', "''").replace('\\', r#"\\"#)),
+                        Value::Num(_m, _e) => resource.get_float().to_string(),
+                        Value::Datetime(timestamp) => format!("'{}'", NaiveDateTime::from_timestamp(*timestamp, 0)),
+                        _ => String::from("NULL"),
+                    };
 
-                let lang = if resource.get_lang().is_some() {
-                    format!("'{}'", &resource.get_lang().to_string().to_uppercase())
-                } else {
-                    String::from("'NO'")
-                };
-                let query = format!(
-                    "INSERT INTO `{}` (doc_id, doc_type, created, value, lang, deleted) VALUES ('{}', '{}', {}, {}, {}, {})",
-                    predicate, uri, class, created, value, lang, deleted
-                );
-                //info!("Query: {}", query);
-                if let Err(e) = transaction.query(query) {
-                    error!("failed to insert individual, uri = {}, property table = {}, err = {:?}", uri, predicate, e);
-                    tr_error = true;
-                }
-            });
+                    if value == "'v-s:Deletable'" {
+                        return;
+                    }
+
+                    let lang = if resource.get_lang().is_some() {
+                        format!("'{}'", &resource.get_lang().to_string().to_uppercase())
+                    } else {
+                        String::from("'NO'")
+                    };
+                    let query = format!(
+                        "INSERT INTO `{}` (doc_id, doc_type, created, value, lang, deleted) VALUES ('{}', '{}', {}, {}, {}, {})",
+                        predicate, uri, class, created, value, lang, deleted
+                    );
+                    //info!("Query: {}", query);
+                    if let Err(e) = transaction.query(query) {
+                        error!("failed to insert individual, uri = {}, property table = {}, err = {:?}", uri, predicate, e);
+                        tr_error = true;
+                    }
+                });
+            }
         });
     });
 
@@ -411,5 +423,13 @@ fn connect_to_mysql(backend: &mut Backend, tries: i64, timeout: u64) -> Result<m
     } else {
         error!("failed to find configuration to connect to mysql");
         Err("failed to find configuration to connect to mysql")
+    }
+}
+
+fn compare_resources(opt1: &Option<Vec<Resource>>, opt2: &Option<Vec<Resource>>) -> bool {
+    match (opt1, opt2) {
+        (Some(vec1), Some(vec2)) => vec1 == vec2,
+        (None, None) => true,
+        _ => false,
     }
 }
