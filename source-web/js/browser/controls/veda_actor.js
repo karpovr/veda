@@ -309,6 +309,9 @@ $.fn.veda_actor = function ( options ) {
           tmpl = '<span about=\'@\' rel=\'v-s:parentUnit\' data-template=\'v-ui:LabelTemplate\'></span>';
         } else {
           tmpl = '<span about=\'@\' property=\'rdfs:label\'></span>';
+          if (result.hasValue('v-s:parentOrganization') && !result.hasValue('v-s:parentOrganization', 'd:org_RU1121003135')) {
+            tmpl = '<div><span about=\'@\' rel=\'v-s:parentOrganization\' data-template=\'v-ui:LabelTemplate\'></span> | ' + tmpl + '</div>';
+          }
         }
         return result.present(cont, tmpl).then(() => cont);
       });
