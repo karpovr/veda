@@ -41,7 +41,7 @@ export const post = function (individual, template, container, mode, extra) {
           trigger: 'click',
           placement: 'auto bottom',
           html: true,
-          container,
+          container: $('div#main'),
           content: cntr,
         })
         .click();

@@ -711,7 +711,7 @@ export const html = `
           </small>
         </h4>
       </div>
-      <div class="search-result table-responsive noSwipe"></div>
+      <div class="search-result table-responsive responsive-wrapper noSwipe"></div>
       <div class="not-found alert alert-warning no-margin hidden">
         <strong about="v-fs:Empty" property="rdfs:label"></strong> <span about="v-fs:NothingFound" property="rdfs:label"></span>
       </div>
