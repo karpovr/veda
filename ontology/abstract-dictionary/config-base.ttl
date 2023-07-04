@@ -1160,6 +1160,9 @@ cfg:Event_Document_Deleting_Restoring
   v-s:script """
 var types = document["rdf:type"];
 //print("***document_deleting");
+if (parent_script_id == "cfg:CommentHandler") {
+  return;
+}
 var isDeletingAction = veda.Util.hasValue(document, "v-s:deleted")? document["v-s:deleted"][0].data : undefined;
 print("document[v-s:deleted]=", isDeletingAction);
 for (var i = 0; i < types.length; i++) {
