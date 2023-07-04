@@ -55,7 +55,8 @@ export const post = function (individual, template, container, mode, extra) {
             console.error("Unexpected behavior: can't read v-s:actor from individual");
             return false;
           }
-          if (veda.appointment.id === actor.id || veda.appointment.id === 'cfg:AdministratorAppointment' || isOccupationMember || (canDelete && isProcessBreakMember)) {
+          const employeeId = actor.hasValue('v-s:employee') ? actor['v-s:employee'][0].id : "empty";
+          if (veda.appointment.id === actor.id || veda.user.id == employeeId || veda.appointment.id === 'cfg:AdministratorAppointment' || isOccupationMember || (canDelete && isProcessBreakMember)) {
             $('.stop-process', template).show();
             $('.stop-process', template).on('click', function (e) {
               e.preventDefault();
