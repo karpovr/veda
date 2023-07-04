@@ -237,6 +237,7 @@ function renderTemplate (individual, container, templateString, name, mode, extr
         } else {
           const wrapper = wrap(templateModule.html);
           const template = wrapper.firstElementChild;
+          template.setAttribute('data-mode', mode);
           const pre_result = pre ? pre.call(individual, individual, template, container, mode, extra) : undefined;
           return Promise.resolve(pre_result)
             .then(() => processTemplate(individual, container, wrapper, mode))
@@ -1081,6 +1082,7 @@ function renderRelationValue ({about, isAbout, rel_uri, value, relContainer, rel
         about.removeValue(rel_uri, value);
         if ( value.is('v-s:Embedded') && value.hasValue('v-s:parent', about) && !value.isNew() ) {
           value.set('v-s:deleted', true);
+          about.removedObjs.push(value);
         }
       });
       btnRemove.addEventListener('mouseenter', () => rendered.forEach((item) => item.classList.add('red-outline')));

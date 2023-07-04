@@ -38,7 +38,7 @@ function IndividualModel (uri, cache = true, init = true) {
 
   // Define Model data
   this._ = {cache, init};
-
+  this.removedObjs = [];
   if (typeof uri === 'object') {
     this.properties = {...uri};
     this.original = JSON.stringify(this.properties);
@@ -511,6 +511,11 @@ proto.saveAll = function (parent, acc, visited) {
         const values = this.get(property);
         if (!(values[0] instanceof IndividualModel)) continue;
         children = children.concat(values.map((value) => value.saveAll(this, acc, visited)));
+      }
+      for (let i = 0; i < this.removedObjs.length; i++) {
+        const value = this.removedObjs[i];
+        if (!(value instanceof IndividualModel)) continue;
+        children = children.concat(value.saveAll(this, acc, visited));
       }
       return Promise.all(children);
     })
