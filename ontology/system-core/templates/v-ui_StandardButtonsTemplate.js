@@ -48,7 +48,7 @@ export const pre = function (individual, template, container, mode, extra) {
 
   template.on('click', '#edit, #save, #cancel, #delete, #recover, #destroy', function (e) {
     e.preventDefault();
-    const action = this.id;
+    const action = $(this).attr('data-action');
     if (action === 'destroy') {
       const warning = new IndividualModel('v-s:AreYouSure');
       warning.load().then(function (warning) {
@@ -303,17 +303,17 @@ export const post = function (individual, template, container, mode, extra) {
 
 export const html = `
   <span>
-    <button type="button" class="btn btn-success view -edit -search hidden glyphicon glyphicon-refresh" id="refresh"></button>
-    <button type="submit" class="rm hidden action btn btn-warning view edit -search" id="send" about="v-s:Send" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-primary view -edit -search" id="edit" about="v-s:Edit" property="rdfs:label"></button>
-    <button type="submit" class="rm hidden action btn btn-success -view edit -search" id="save" about="v-s:Save" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-default -view edit -search" id="cancel" about="v-s:Cancel" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-link view -edit -search" id="delete" about="v-s:Delete" property="rdfs:label"></button>
-    <button type="button" class="hidden action btn btn-primary view -edit -search" id="recover" about="v-s:Recover" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-danger view edit -search" id="destroy" about="v-s:Destroy" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="rights" about="v-s:Rights" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="files" about="v-fs:FilesRegistry" property="rdfs:label"></button>
+    <button type="button" class="btn btn-success view -edit -search hidden glyphicon glyphicon-refresh" id="refresh" data-action="refresh"></button>
+    <button type="submit" class="rm hidden action btn btn-warning view edit -search" id="send" data-action="send" about="v-s:Send" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-primary view -edit -search" id="edit" data-action="edit" about="v-s:Edit" property="rdfs:label"></button>
+    <button type="submit" class="rm hidden action btn btn-success -view edit -search" id="save" data-action="save" about="v-s:Save" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-default -view edit -search" id="cancel" data-action="kancel" about="v-s:Cancel" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-link view -edit -search" id="delete" data-action="delete" about="v-s:Delete" property="rdfs:label"></button>
+    <button type="button" class="hidden action btn btn-primary view -edit -search" id="recover" data-action="recover" about="v-s:Recover" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-danger view edit -search" id="destroy" data-action="destroy" about="v-s:Destroy" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="journal" data-action="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="rights" data-action="rights" about="v-s:Rights" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="files" data-action="files" about="v-fs:FilesRegistry" property="rdfs:label"></button>
     <div class="rm hidden action btn-group dropup view -edit -search" id="task">
       <button class="action btn btn-warning btn-block dropdown-toggle" id="task-button" data-toggle="dropdown">
         <span about="v-s:SendTask" property="rdfs:label"> </span>

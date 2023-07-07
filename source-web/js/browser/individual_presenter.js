@@ -347,7 +347,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
   function callMethod (event) {
     event.stopPropagation();
     const type = event.type;
-    if (type === 'cancel') {
+    if (type === 'kancel') { // To distinguish from standard event
       resetHandler();
     } else if (type === 'save') {
       saveHandler();
@@ -367,7 +367,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
   function removeMethods (event) {
     delete event.target.veda;
   }
-  template.addEventListener('cancel', callMethod);
+  template.addEventListener('kancel', callMethod);
   template.addEventListener('save', callMethod);
   template.addEventListener('delete', callMethod);
   template.addEventListener('recover', callMethod);

@@ -61,7 +61,7 @@ export const html = `
   <span>
     <!--<button title="v-s:Edit" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-pencil" id="edit"></button>-->
     <button title="v-s:Save" type="button" class="action btn btn-xs btn-success -view edit -search glyphicon glyphicon-ok" data-action="save" id="saveLink"></button>
-    <button title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" data-action="cancel" id="cancelLink"></button>
+    <button title="v-s:Cancel" type="button" class="action btn btn-xs btn-default -view edit -search glyphicon glyphicon-repeat" data-action="kancel" id="cancelLink"></button>
     <button title="v-s:Delete" type="button" class="action btn btn-xs btn-default view -edit -search glyphicon glyphicon-remove" data-action="delete" id="deleteLink"></button>
   </span>
 `;

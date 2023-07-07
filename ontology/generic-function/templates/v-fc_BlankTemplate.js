@@ -23,7 +23,7 @@ export const post = function (individual, template, container, mode, extra) {
       const object_template = self.get('v-fc:targetTemplate')[0];
       object.present(objectContainer, object_template, 'edit').then(function (objectTemplate) {
         objectTemplate = $(objectTemplate);
-        objectTemplate.one('cancel', cancelHandler);
+        objectTemplate.one('kancel', cancelHandler);
         object.one('afterSave', saveHandler);
         objectTemplate.one('remove', function () {
           object.off('afterSave', saveHandler);
