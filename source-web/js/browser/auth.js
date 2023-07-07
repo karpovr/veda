@@ -473,15 +473,23 @@ function handleAuthError () {
 }
 
 // Activity handler
-let lastActivity = Date.now();
+localStorage.lastActivity = Date.now();
 const activityHandler = () => {
-  lastActivity = Date.now();
+  localStorage.lastActivity = Date.now();
 };
 document.body.addEventListener('keyup', activityHandler);
 document.body.addEventListener('click', activityHandler);
 
+const bc = new BroadcastChannel('auth_channel');
+bc.onmessage = (event) => {
+  console.log('Auth message received');
+  handleAuthSuccess(event.data, true);
+};
+
 // Check & refresh credentials
-function handleAuthSuccess (authResult) {
+let refreshInterval;
+function handleAuthSuccess (authResult, isBroadcast = false) {
+  if (!isBroadcast) bc.postMessage(authResult);
   veda.user_uri = storage.user_uri = authResult.user_uri;
   veda.ticket = storage.ticket = authResult.ticket;
   veda.end_time = storage.end_time = authResult.end_time;
@@ -495,7 +503,9 @@ function handleAuthSuccess (authResult) {
     const mm = Math.floor((lifetime % (1000 * 60 * 60)) / 1000 / 60);
     const ss = Math.floor((lifetime % (1000 * 60)) / 1000);
     console.log(`Ticket will expire in ${hh < 10 ? '0' + hh : hh}:${mm < 10 ? '0' + mm : mm}:${ss < 10 ? '0' + ss : ss}`);
-    const refreshInterval = setInterval(() => {
+
+    clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
       const expired = expires <= Date.now();
       const almostExpired = expires - lifetime * 0.1 <= Date.now() && !expired;
       const expiresSoon = expires - lifetime * 0.2 <= Date.now() && !expired;
@@ -503,7 +513,7 @@ function handleAuthSuccess (authResult) {
         clearInterval(refreshInterval);
         console.log('Ticket expired, re-login.');
         handleAuthError();
-      } else if (expiresSoon && granted < lastActivity) {
+      } else if (expiresSoon && granted < Number(localStorage.lastActivity)) {
         clearInterval(refreshInterval);
         console.log('Refresh ticket in background.');
         Backend.get_ticket_trusted(veda.ticket).then(handleAuthSuccess).catch(handleAuthError);
