@@ -54,6 +54,15 @@ v-s:Exportable
   rdfs:label "Выгружаемая сущность"@ru ;
   rdfs:label "Exportable thing"@en ;
 .
+v-s:exportPrioritySQL
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain rdfs:Class ;
+  rdfs:label "Приоритет выгрузки"@ru ;
+  rdfs:label "Export priority"@en ;
+  rdfs:comment "Приоритет выгрузки используется сервером при чтении очереди для определения порядка выгрузки индивидов класса в базу данных"@ru ;
+  rdfs:comment "Export proprity is used by server when reading queue to determine class individuals export sequence to DB"@en ;
+  rdfs:range xsd:integer ;
+.
 ### ------------------------------------------------------
 v-s:Embedded
   rdf:type owl:Class ;
