@@ -16,10 +16,8 @@ export const pre = function (individual, template, container, mode, extra) {
 
   if (folder === 'v-ft:Inbox' || folder === 'v-ft:Completed') {
     $('.to', template).remove();
-    $('.advanced_from', template).remove();
   } else {
     $('.from', template).remove();
-    $('.advanced_to', template).remove();
   }
 };
 
@@ -93,14 +91,6 @@ export const html = `
             <veda-control property="v-s:created" data-type="date"></veda-control>
             <div property="v-s:created"></div>
           </div>
-        </div>
-        <div class="col-md-4 advanced_from">
-          <em about="v-wf:from" property="rdfs:label"></em>
-          <veda-control property="v-wf:from" data-single="true" data-delegated="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
-        </div>
-        <div class="col-md-4 advanced_to">
-          <em about="v-wf:to" property="rdfs:label"></em>
-          <veda-control property="v-wf:to" data-single="true" data-delegated="true" data-actor-type="v-s:Person v-s:Position" data-type="actor"></veda-control>
         </div>
       </div>
     </div>
