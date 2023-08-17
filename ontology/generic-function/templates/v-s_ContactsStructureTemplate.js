@@ -539,7 +539,7 @@ export const post = function (individual, template, container, mode, extra) {
     const selectPart = 'SELECT DISTINCT target.id';
     const endingPart =
       " GROUP BY target.id, target.rdfs_label_str, target.version HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(lowerUTF8(x), '@en'), target.rdfs_label_str) asc";
-    let basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0] and cm.v_s_deleted_int =[0] ';
+    let basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0] ';
     const orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]';
     const conditionForOrg = ' and org.`v_s_actualContacts_int`[1]=1';
     if (findInParentOrg) {
@@ -591,6 +591,9 @@ export const post = function (individual, template, container, mode, extra) {
       },
       ['', '', '', ''],
     );
+    if (isCommMeanJoinAdded) {
+      basicWherePart += ' AND cm.v_s_deleted_int = [0]';
+    }
     organizationQuery = findInParentOrg ?
       null :
       organizationQuery +
