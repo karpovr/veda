@@ -71,7 +71,7 @@ v-s:OrganizationsWithLimitedClassTypes
 .
 v-s:OrganizationsWithoutLimitedClassTypes
   rdf:type v-s:Group ;
-  rdfs:label "Группа компаний особо вовлеченных" ;
+  rdfs:label "Компании без ограничения к просмотру документов" ;
 .
 v-s:OrganizationsFromContacts
   rdf:type v-s:Group ;
