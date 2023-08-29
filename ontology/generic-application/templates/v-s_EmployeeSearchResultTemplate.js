@@ -10,6 +10,7 @@ export const html = `
         <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
         <th><span about="rdfs:label" property="rdfs:label"></span></th>
         <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
+        <th><span about="v-s:login" property="rdfs:label"></span></th>
       </tr>
     </thead>
 
@@ -20,6 +21,7 @@ export const html = `
         <td property="v-s:created"></td>
         <td property="rdfs:label"></td>
         <td rel="v-s:parentOrganization" data-template="v-ui:LabelTemplate"></td>
+        <td rel="v-s:hasAccount" data-template="v-ui:LabelTemplate"></td>
       </tr>
     </tbody>
   </table>
