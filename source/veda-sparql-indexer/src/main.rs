@@ -1,3 +1,11 @@
+/*
+ This code is a SPARQL data indexer.
+ It listens to a queue, retrieves individual data entries, converts them to the Turtle format, and then indexes them into a SPARQL storage system.
+ The indexer has a mode activated with the --read-ids-only command-line argument.
+ When this mode is enabled, the indexer reads only from the "ids" queue, focusing on processing individual IDs.
+ Otherwise, it reads from the "individuals-flow" queue, processing complete individual data entries.
+*/
+
 #[macro_use]
 extern crate log;
 
@@ -15,6 +23,7 @@ use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
 use v_common::v_queue::consumer::Consumer;
 
+// Define the context structure for the application
 pub struct Context {
     rt: Runtime,
     pub client: reqwest::Client,
@@ -26,25 +35,32 @@ pub struct Context {
     pub read_ids_only: bool,
 }
 
+// Main function
 fn main() -> Result<()> {
+    // Initialize logging
     init_log("SPARQL_INDEXER");
 
+    // Check if the "input-onto" module is loaded
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
         wait_module("input-onto", wait_load_ontology());
     }
 
+    // Collect command line arguments
     let args: Vec<String> = env::args().collect();
     let read_ids_only = args.contains(&"--read-ids-only".to_string());
 
+    // Initialize module and backend
     let mut module = Module::default();
     let mut backend = Backend::create(StorageMode::ReadOnly, false);
 
+    // Initialize module information
     let module_info = ModuleInfo::new("./data", "sparql_indexer", true);
     if module_info.is_err() {
         error!("failed to start, err = {:?}", module_info.err());
         return Ok(());
     }
 
+    // Load ontology index and initialize prefixes
     let onto_index = OntoIndex::load();
     let mut prefixes = HashMap::new();
 
@@ -65,6 +81,7 @@ fn main() -> Result<()> {
         }
     }
 
+    // Initialize the application context
     let mut ctx = Context {
         rt: Runtime::new().unwrap(),
         store_point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "store", "default"),
@@ -76,6 +93,7 @@ fn main() -> Result<()> {
         read_ids_only,
     };
 
+    // Set up the queue consumer
     let (queue_path, queue_name) = if read_ids_only {
         ("./data/ids", "ids")
     } else {
@@ -86,6 +104,7 @@ fn main() -> Result<()> {
 
     info!("open queue {}/{}", queue_path, queue_name);
 
+    // Listen to the queue and process messages
     module.max_batch_size = Some(10000);
     if read_ids_only {
         module.listen_queue_raw(
@@ -111,19 +130,23 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+// Heartbeat function to keep the application alive
 fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
     Ok(())
 }
 
+// Function to be called before processing a batch
 fn before_batch(_module: &mut Backend, _ctx: &mut Context, _size_batch: u32) -> Option<u32> {
     None
 }
 
+// Function to be called after processing a batch
 fn after_batch(_module: &mut Backend, ctx: &mut Context, _prepared_batch_size: u32) -> Result<bool, PrepareError> {
     info!("stored:{}, skipped: {}", ctx.stored, ctx.skipped);
     Ok(false)
 }
 
+// Function to prepare and process an element by its ID
 fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let binding = String::from_utf8_lossy(queue_element.data.as_slice());
     let (id, _type) = binding.split_once(',').ok_or_else(|| {
@@ -142,6 +165,7 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
     Ok(true)
 }
 
+// Function to prepare and process an individual element
 fn prepare_element_indv(_backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
@@ -163,6 +187,7 @@ fn prepare_element_indv(_backend: &mut Backend, ctx: &mut Context, queue_element
     Ok(true)
 }
 
+// Function to update the state of an individual
 fn update(new_state: &Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
     let id = new_state.get_id().to_owned();
     if let Ok(tt) = to_turtle_refs(&[new_state], &ctx.prefixes) {
