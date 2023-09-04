@@ -4,11 +4,12 @@ extern crate log;
 use anyhow::Result;
 use reqwest::StatusCode;
 use std::collections::HashMap;
+use std::env;
 use tokio::runtime::Runtime;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
-use v_common::onto::individual::Individual;
+use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::individual2turtle::to_turtle_refs;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
@@ -22,6 +23,7 @@ pub struct Context {
     pub prefixes: HashMap<String, String>,
     pub stored: u64,
     pub skipped: u64,
+    pub read_ids_only: bool,
 }
 
 fn main() -> Result<()> {
@@ -30,6 +32,9 @@ fn main() -> Result<()> {
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
         wait_module("input-onto", wait_load_ontology());
     }
+
+    let args: Vec<String> = env::args().collect();
+    let read_ids_only = args.contains(&"--read-ids-only".to_string());
 
     let mut module = Module::default();
     let mut backend = Backend::create(StorageMode::ReadOnly, false);
@@ -68,20 +73,41 @@ fn main() -> Result<()> {
         prefixes,
         stored: 0,
         skipped: 0,
+        read_ids_only,
     };
 
-    let mut queue_consumer = Consumer::new("./data/queue", "sparql-indexer", "individuals-flow").expect("!!!!!!!!! FAIL QUEUE");
+    let (queue_path, queue_name) = if read_ids_only {
+        ("./data/ids", "ids")
+    } else {
+        ("./data/queue", "individuals-flow")
+    };
+
+    let mut queue_consumer = Consumer::new(queue_path, "sparql-indexer", queue_name).expect(&format!("!!!!!!!!! FAIL OPEN QUEUE {}", queue_path));
+
+    info!("open queue {}/{}", queue_path, queue_name);
 
     module.max_batch_size = Some(10000);
-    module.listen_queue(
-        &mut queue_consumer,
-        &mut ctx,
-        &mut (before_batch as fn(&mut Backend, &mut Context, batch_size: u32) -> Option<u32>),
-        &mut (prepare as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
-        &mut (after_batch as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
-        &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
-        &mut backend,
-    );
+    if read_ids_only {
+        module.listen_queue_raw(
+            &mut queue_consumer,
+            &mut ctx,
+            &mut (before_batch as fn(&mut Backend, &mut Context, batch_size: u32) -> Option<u32>),
+            &mut (prepare_element_id as fn(&mut Backend, &mut Context, &RawObj, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+            &mut backend,
+        );
+    } else {
+        module.listen_queue(
+            &mut queue_consumer,
+            &mut ctx,
+            &mut (before_batch as fn(&mut Backend, &mut Context, batch_size: u32) -> Option<u32>),
+            &mut (prepare_element_indv as fn(&mut Backend, &mut Context, &mut Individual, my_consumer: &Consumer) -> Result<bool, PrepareError>),
+            &mut (after_batch as fn(&mut Backend, &mut Context, prepared_batch_size: u32) -> Result<bool, PrepareError>),
+            &mut (heartbeat as fn(&mut Backend, &mut Context) -> Result<(), PrepareError>),
+            &mut backend,
+        );
+    }
     Ok(())
 }
 
@@ -98,7 +124,25 @@ fn after_batch(_module: &mut Backend, ctx: &mut Context, _prepared_batch_size: u
     Ok(false)
 }
 
-fn prepare(_backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+    let binding = String::from_utf8_lossy(queue_element.data.as_slice());
+    let (id, _type) = binding.split_once(',').ok_or_else(|| {
+        error!("Failed to extract ID: {}", binding);
+        PrepareError::Recoverable
+    })?;
+
+    let mut indv = Individual::default();
+    if backend.storage.get_individual(&id, &mut indv) {
+        indv.parse_all();
+        update(&indv, ctx)?;
+    } else {
+        error!("failed to read individual {}", id);
+    }
+
+    Ok(true)
+}
+
+fn prepare_element_indv(_backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");
