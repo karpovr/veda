@@ -62,24 +62,6 @@ fn main() -> Result<()> {
 
     // Load ontology index and initialize prefixes
     let onto_index = OntoIndex::load();
-    let mut prefixes = HashMap::new();
-
-    for id in onto_index.data.keys() {
-        let mut rindv: Individual = Individual::default();
-        if backend.storage.get_individual(id, &mut rindv) {
-            rindv.parse_all();
-
-            if rindv.any_exists("rdf:type", &["owl:Ontology"]) {
-                if let Some(full_url) = rindv.get_first_literal("v-s:fullUrl") {
-                    debug!("prefix : {} -> {}", rindv.get_id(), full_url);
-                    let short_prefix = rindv.get_id().trim_end_matches(':');
-                    prefixes.insert(short_prefix.to_owned(), full_url);
-                }
-            }
-        } else {
-            error!("failed to read individual {}", id);
-        }
-    }
 
     // Initialize the application context
     let mut ctx = Context {
@@ -87,11 +69,22 @@ fn main() -> Result<()> {
         store_point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "store", "default"),
         client: reqwest::Client::new(),
         module_info: module_info.unwrap(),
-        prefixes,
+        prefixes: HashMap::new(),
         stored: 0,
         skipped: 0,
         read_ids_only,
     };
+
+    for id in onto_index.data.keys() {
+        let mut rindv: Individual = Individual::default();
+        if backend.storage.get_individual(id, &mut rindv) {
+            rindv.parse_all();
+
+            update_prefix(&mut ctx, &mut rindv);
+        } else {
+            error!("failed to read individual {}", id);
+        }
+    }
 
     // Set up the queue consumer
     let (queue_path, queue_name) = if read_ids_only {
@@ -130,6 +123,16 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+fn update_prefix(ctx: &mut Context, rindv: &mut Individual) {
+    if rindv.any_exists("rdf:type", &["owl:Ontology"]) {
+        if let Some(full_url) = rindv.get_first_literal("v-s:fullUrl") {
+            debug!("prefix : {} -> {}", rindv.get_id(), full_url);
+            let short_prefix = rindv.get_id().trim_end_matches(':');
+            ctx.prefixes.insert(short_prefix.to_owned(), full_url);
+        }
+    }
+}
+
 // Heartbeat function to keep the application alive
 fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
     Ok(())
@@ -157,7 +160,7 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
     let mut indv = Individual::default();
     if backend.storage.get_individual(&id, &mut indv) {
         indv.parse_all();
-        update(&indv, ctx)?;
+        update(&mut indv, ctx)?;
     } else {
         error!("failed to read individual {}", id);
     }
@@ -173,22 +176,19 @@ fn prepare_element_indv(_backend: &mut Backend, ctx: &mut Context, queue_element
         return Ok(true);
     }
 
-    //let op_id = queue_element.get_first_integer("op_id").unwrap_or_default();
-
-    //let mut prev_state = Individual::default();
-    //get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state);
-
     let mut new_state = Individual::default();
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
     new_state.parse_all();
 
-    update(&new_state, ctx)?;
+    update(&mut new_state, ctx)?;
 
     Ok(true)
 }
 
 // Function to update the state of an individual
-fn update(new_state: &Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
+fn update(new_state: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
+    update_prefix(ctx, new_state);
+
     let id = new_state.get_id().to_owned();
     if let Ok(tt) = to_turtle_refs(&[new_state], &ctx.prefixes) {
         //info!("{}", String::from_utf8_lossy(&tt));
