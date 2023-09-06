@@ -9,19 +9,24 @@
 #[macro_use]
 extern crate log;
 
+use crate::common::{is_exportable, load_map_of_types, update_prefix};
 use anyhow::Result;
 use reqwest::StatusCode;
 use std::collections::HashMap;
 use std::env;
 use tokio::runtime::Runtime;
+use v_common::module::common::load_onto;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::{Individual, RawObj};
 use v_common::onto::individual2turtle::to_turtle_refs;
+use v_common::onto::onto_impl::Onto;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
 use v_common::v_queue::consumer::Consumer;
+
+mod common;
 
 // Define the context structure for the application
 pub struct Context {
@@ -32,7 +37,9 @@ pub struct Context {
     pub prefixes: HashMap<String, String>,
     pub stored: u64,
     pub skipped: u64,
-    pub read_ids_only: bool,
+    pub read_from_ids: bool,
+    pub queue_ids_map_types: HashMap<u16, String>,
+    pub onto: Onto,
 }
 
 // Main function
@@ -72,8 +79,11 @@ fn main() -> Result<()> {
         prefixes: HashMap::new(),
         stored: 0,
         skipped: 0,
-        read_ids_only,
+        read_from_ids: read_ids_only,
+        queue_ids_map_types: Default::default(),
+        onto: Onto::default(),
     };
+    load_onto(&mut backend.storage, &mut ctx.onto);
 
     for id in onto_index.data.keys() {
         let mut rindv: Individual = Individual::default();
@@ -100,6 +110,9 @@ fn main() -> Result<()> {
     // Listen to the queue and process messages
     module.max_batch_size = Some(10000);
     if read_ids_only {
+        let base_path = "./data";
+        ctx.queue_ids_map_types = load_map_of_types(&format!("{}/ids/map-rdf-types.bin", base_path)).unwrap_or_default();
+
         module.listen_queue_raw(
             &mut queue_consumer,
             &mut ctx,
@@ -123,16 +136,6 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn update_prefix(ctx: &mut Context, rindv: &mut Individual) {
-    if rindv.any_exists("rdf:type", &["owl:Ontology"]) {
-        if let Some(full_url) = rindv.get_first_literal("v-s:fullUrl") {
-            debug!("prefix : {} -> {}", rindv.get_id(), full_url);
-            let short_prefix = rindv.get_id().trim_end_matches(':');
-            ctx.prefixes.insert(short_prefix.to_owned(), full_url);
-        }
-    }
-}
-
 // Heartbeat function to keep the application alive
 fn heartbeat(_module: &mut Backend, _ctx: &mut Context) -> Result<(), PrepareError> {
     Ok(())
@@ -152,15 +155,30 @@ fn after_batch(_module: &mut Backend, ctx: &mut Context, _prepared_batch_size: u
 // Function to prepare and process an element by its ID
 fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let binding = String::from_utf8_lossy(queue_element.data.as_slice());
-    let (id, _type) = binding.split_once(',').ok_or_else(|| {
+    let (id, num_indv_type) = binding.split_once(',').ok_or_else(|| {
         error!("Failed to extract ID: {}", binding);
         PrepareError::Recoverable
     })?;
 
     let mut indv = Individual::default();
+    let mut indv_types: Option<Vec<String>> = num_indv_type.parse().ok().and_then(|n: u16| ctx.queue_ids_map_types.get(&n)).map(|v| vec![v.clone()]);
+
+    if indv_types.is_some() && !is_exportable(indv_types.clone(), ctx) {
+        ctx.skipped += 1;
+        return Ok(true);
+    }
+
     if backend.storage.get_individual(&id, &mut indv) {
         indv.parse_all();
-        update(&mut indv, ctx)?;
+
+        if indv_types.is_none() {
+            indv_types = indv.get_literals("rdf:type");
+            if indv_types.is_some() && !is_exportable(indv_types, ctx) {
+                return Ok(true);
+            }
+        }
+
+        update(&mut indv, backend, ctx)?;
     } else {
         error!("failed to read individual {}", id);
     }
@@ -169,7 +187,7 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
 }
 
 // Function to prepare and process an individual element
-fn prepare_element_indv(_backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
+fn prepare_element_indv(backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individual, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let cmd = get_cmd(queue_element);
     if cmd.is_none() {
         error!("skip queue message: cmd is none");
@@ -180,17 +198,24 @@ fn prepare_element_indv(_backend: &mut Backend, ctx: &mut Context, queue_element
     get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
     new_state.parse_all();
 
-    update(&mut new_state, ctx)?;
+    if !is_exportable(new_state.get_literals("rdf:type"), ctx) {
+        ctx.skipped += 1;
+        return Ok(true);
+    }
+
+    update(&mut new_state, backend, ctx)?;
 
     Ok(true)
 }
 
 // Function to update the state of an individual
-fn update(new_state: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
-    update_prefix(ctx, new_state);
+fn update(indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> Result<bool, PrepareError> {
+    if update_prefix(ctx, indv) {
+        load_onto(&mut backend.storage, &mut ctx.onto);
+    }
 
-    let id = new_state.get_id().to_owned();
-    if let Ok(tt) = to_turtle_refs(&[new_state], &ctx.prefixes) {
+    let id = indv.get_id().to_owned();
+    if let Ok(tt) = to_turtle_refs(&[indv], &ctx.prefixes) {
         //info!("{}", String::from_utf8_lossy(&tt));
 
         let url = &ctx.store_point;
@@ -202,7 +227,7 @@ fn update(new_state: &mut Individual, ctx: &mut Context) -> Result<bool, Prepare
                 ctx.skipped += 1;
                 let sp = id.find(':').unwrap_or(0);
                 if sp > 0 && sp < 5 && !id.contains("//") {
-                    error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_refs(&[new_state], &ctx.prefixes).unwrap()));
+                    error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_refs(&[indv], &ctx.prefixes).unwrap()));
                     return Err(PrepareError::Recoverable);
                 }
             }
