@@ -110,8 +110,7 @@ fn main() -> Result<()> {
     // Listen to the queue and process messages
     module.max_batch_size = Some(10000);
     if read_ids_only {
-        let base_path = "./data";
-        ctx.queue_ids_map_types = load_map_of_types(&format!("{}/ids/map-rdf-types.bin", base_path)).unwrap_or_default();
+        ctx.queue_ids_map_types = load_map_of_types("./data/ids").unwrap_or_default();
 
         module.listen_queue_raw(
             &mut queue_consumer,
@@ -155,13 +154,27 @@ fn after_batch(_module: &mut Backend, ctx: &mut Context, _prepared_batch_size: u
 // Function to prepare and process an element by its ID
 fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &RawObj, _my_consumer: &Consumer) -> Result<bool, PrepareError> {
     let binding = String::from_utf8_lossy(queue_element.data.as_slice());
-    let (id, num_indv_type) = binding.split_once(',').ok_or_else(|| {
+    let (id, num_indv_types_str) = binding.split_once(',').ok_or_else(|| {
         error!("Failed to extract ID: {}", binding);
         PrepareError::Recoverable
     })?;
 
     let mut indv = Individual::default();
-    let mut indv_types: Option<Vec<String>> = num_indv_type.parse().ok().and_then(|n: u16| ctx.queue_ids_map_types.get(&n)).map(|v| vec![v.clone()]);
+
+    // Split the string with numbers into a vector of strings
+    let num_indv_types: Vec<&str> = num_indv_types_str.split(',').collect();
+
+    // Convert each string into a number and then look up the corresponding type
+    let indv_types_vec: Vec<String> =
+        num_indv_types.iter().filter_map(|&num_str| u16::from_str_radix(num_str.trim(), 16).ok().and_then(|n: u16| ctx.queue_ids_map_types.get(&n).cloned())).collect();
+
+    let mut indv_types = if indv_types_vec.is_empty() {
+        None
+    } else {
+        Some(indv_types_vec)
+    };
+
+    //info!("num_indv_types_str={}, indv_types={:?}", num_indv_types_str, indv_types);
 
     if indv_types.is_some() && !is_exportable(indv_types.clone(), ctx) {
         ctx.skipped += 1;
@@ -210,6 +223,12 @@ fn prepare_element_indv(backend: &mut Backend, ctx: &mut Context, queue_element:
 
 // Function to update the state of an individual
 fn update(indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> Result<bool, PrepareError> {
+    let is_deleted = indv.is_exists_bool("v-s:deleted", true);
+    if is_deleted {
+        ctx.skipped += 1;
+        return Ok(true);
+    }
+
     if update_prefix(ctx, indv) {
         load_onto(&mut backend.storage, &mut ctx.onto);
     }

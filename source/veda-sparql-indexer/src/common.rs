@@ -1,10 +1,10 @@
+use crate::Context;
 use bincode::deserialize_from;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use v_common::onto::individual::Individual;
-use crate::Context;
 
 pub fn load_map_of_types(path: &str) -> Result<HashMap<u16, String>, Error> {
     let map_file_name = format!("{}/map-rdf-types.bin", path);
