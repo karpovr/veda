@@ -104,48 +104,81 @@ export const pre = function (individual, template, container, mode, extra) {
   $('#rights', template).on('click', function () {
     BrowserUtil.showRights(individual);
   });
-  $('#files', template).click(function (e) {
+  $('#files', template).click(async function (e) {
     e.preventDefault();
     const docTemplate = template.parent().closest('[resource]');
-
     const fileLinks = $("a:has(>span[property='v-s:fileName'])", docTemplate);
 
-    let filesPromises;
+    const filesObj = {
+      default: [],
+      signed: []
+    };
 
-    if (fileLinks.length) {
-      filesPromises = fileLinks.map(function () {
-        const link = $(this);
-        const fileName = link.text().trim();
-        const fileUrl = link.attr('href');
-        return filePromise(fileUrl, fileName);
-      });
-    } else {
-      filesPromises = [];
+    for (let i = 0; i < fileLinks.length; i++) {
+      const uri = $(fileLinks.get(i)).closest('[resource]').attr('resource');
+      const fileIndivid = await new veda.IndividualModel(uri).load();
+      if (fileIndivid.hasValue('v-s:digitalSignature')) {
+        filesObj.signed.push(fileIndivid);
+      } else if (!fileIndivid.hasValue('v-s:backwardProperty', 'v-s:digitalSignature')){
+        filesObj.default.push(fileIndivid);
+      }
     }
 
-    Promise.all(filesPromises)
-      .then(function (files) {
+    const filesPromisesDefault = filesObj.default.map(function (fileIndivid) {
+      const fileName = fileIndivid.hasValue('v-s:fileName') ? fileIndivid['v-s:fileName'][0] : 'unknown';
+      const fileUrl = `/files/${fileIndivid.id}`;
+      return filePromise(fileUrl, fileName);
+    });
+
+    let filePromisesSigned = filesObj.signed.map((fileIndivid) => {
+      const signsPromises = fileIndivid['v-s:digitalSignature'].map(sign => {
+        return sign.load().then(loaded => {
+          const fileName = loaded.hasValue('v-s:fileName') ? loaded['v-s:fileName'][0] : 'unknown';
+          const fileUrl = `/files/${loaded.id}`;
+          return filePromise(fileUrl, fileName);
+        });
+      });
+      const fileName = fileIndivid.hasValue('v-s:fileName') ? fileIndivid['v-s:fileName'][0] : 'unknown';
+      const fileUrl = `/files/${fileIndivid.id}`;
+      return Promise.all([filePromise(fileUrl, fileName)].concat(signsPromises));
+    });
+
+    const allPromises = [Promise.all(filesPromisesDefault)].concat(filePromisesSigned);
+    if (allPromises.length == 0) {
+      toggleSpin(btn);
+      return;
+    }
+
+    return Promise.all(allPromises)
+      .then(function (allFiles) {
         import('jszip').then(function (module) {
           const JSZip = module.default;
           const zip = new JSZip();
-          const folder = zip.folder('files');
+          //const folder = zip.folder('files');
           const unique = {};
-          files.forEach(function (file) {
-            let name = file.name;
-            let i = 1;
-            while (unique[name]) {
-              name = file.name.replace(/(.*?).([^.]*)$/, '$1 (' + i + ').$2');
-              if (name === file.name) {
-                name = file.name + ' (' + i + ')';
-              }
-              i++;
+          let folderForSigned;
+          allFiles.forEach((files, ind) => {
+            if (ind > 0) {
+              folderForSigned = zip.folder(files[0].name);
             }
-            file.name = name;
-            unique[file.name] = true;
-            $('[href=' + BrowserUtil.escape4$(file.url) + ']', docTemplate)
-              .attr('href', '/files/' + file.name)
-              .text(file.name);
-            folder.file(file.name, file);
+            files.forEach(function (file) {
+              let name = file.name;
+              let i = 1;
+              while (unique[name]) {
+                name = file.name.replace(/(.*?).([^.]*)$/, '$1 (' + i + ').$2');
+                if (name === file.name) {
+                  name = file.name + ' (' + i + ')';
+                }
+                i++;
+              }
+              file.name = name;
+              unique[file.name] = true;
+              if (ind == 0) {
+                zip.file(file.name, file);
+              } else {
+                folderForSigned.file(file.name, file);
+              }
+            });
           });
           zip.generateAsync({type: 'blob'}).then(function (content) {
             import('filesaver').then(function (module) {
