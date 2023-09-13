@@ -292,17 +292,17 @@ export const post = function (individual, template, container, mode, extra) {
     const selectPart = 'SELECT DISTINCT id ';
     const wherePart = "WHERE v_s_parentUnit_str=['" + parentUri + "'] AND v_s_deleted_int=[0]";
     const endingPart = " group by id, rdfs_label_str having sum(sign) > 0 order by arraySort(x -> endsWith(lowerUTF8(x), '@en'), rdfs_label_str) asc";
-    const queryDepartments = selectPart + 'FROM veda_tt.`v-s:Department` ' + wherePart + endingPart;
+    const queryDepartments = selectPart + 'FROM veda_tt.`v-s:Department` FINAL ' + wherePart + endingPart;
     let queryAppointment =
       selectPart +
-      'FROM veda_tt.`v-s:Appointment` ' +
+      'FROM veda_tt.`v-s:Appointment` FINAL ' +
       "WHERE v_s_parentUnit_str=['" +
       parentUri +
       "'] AND v_s_deleted_int=[0] AND v_s_official_int=[1] AND NOT(lowerUTF8(arrayStringConcat(v_s_origin_str, '')) LIKE '%group%')" +
       endingPart;
     let queryPositions =
       selectPart +
-      'FROM veda_tt.`v-s:Position` ' +
+      'FROM veda_tt.`v-s:Position` FINAL ' +
       "WHERE v_s_parentUnit_str=['" +
       parentUri +
       "'] AND v_s_deleted_int=[0] AND lowerUTF8(arrayStringConcat(v_s_origin_str, ' ')) LIKE '%group%'" +
