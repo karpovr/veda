@@ -36,11 +36,11 @@ export const html = `
       <div class="col-sm-6">
         <em about="v-wf:from" property="rdfs:label"></em>
         <div about="@" property="v-wf:from" class="-view edit -search"></div>
-        <div property="v-wf:from" class="view -edit search"></div>
+        <div about="@" rel="v-wf:from" data-template="v-ui:LabelTemplate" class="view -edit search"></div>
         <veda-control data-type="string" property="v-wf:from" class="-view -edit search"></veda-control>
         <em about="v-wf:to" property="rdfs:label"></em>
         <div about="@" property="v-wf:to" class="-view edit -search"></div>
-        <div property="v-wf:to" class="view -edit search"></div>
+        <div about="@" rel="v-wf:to" data-template="v-ui:LabelTemplate" class="view -edit search"></div>
         <veda-control data-type="string" property="v-wf:to" class="-view -edit search"></veda-control>
         <em about="v-s:senderMailbox" property="rdfs:label"></em>
         <div about="@" property="v-s:senderMailbox" class="-view edit -search"></div>
