@@ -1,7 +1,6 @@
 // BPMN utils
 
 import veda from '../common/veda.js';
-
 import ServerUtil from '../server/util.js';
 
 const BPMN = {};

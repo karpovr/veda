@@ -1,7 +1,6 @@
 // Listen and display online/offline status
 
 import veda from '../common/veda.js';
-
 import UpdateService from '../browser/update_service.js';
 
 const styles = `

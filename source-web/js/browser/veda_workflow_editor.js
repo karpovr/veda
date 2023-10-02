@@ -7,13 +7,9 @@
  */
 
 import 'jsplumb';
-
 import $ from 'jquery';
-
 import riot from '../common/lib/riot.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import BrowserUtil from '../browser/util.js';
 
 const jsWorkflow = {};

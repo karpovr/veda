@@ -1,9 +1,7 @@
 // WorkflowUtil engine utilities
 
 import CommonUtil from '../common/util.js';
-
 import ServerUtil from '../server/util.js';
-
 import mustache from 'mustache';
 
 const WorkflowUtil = {};

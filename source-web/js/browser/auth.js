@@ -1,23 +1,20 @@
-// Authentication
+/**
+ * @module Authentication
+ */
 
 import veda from '../common/veda.js';
-
 import Backend from '../common/backend.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import Sha256 from '../common/lib/sha256.js';
-
 import {delegateHandler, clear} from '../browser/dom_helpers.js';
-
 import Captcha from 'captcha';
 
 /**
- * Authenticate user using ntlm provider
- * @param {String} path
- * @param {String} login
- * @param {String} password
- * @return {Promise<Object>}
+ * Authenticate user using NTLM provider
+ * @param {string} path - The path to the NTLM provider
+ * @param {string} login - The user's login
+ * @param {string} password - The user's password
+ * @return {Promise<Object>} - A promise that resolves to the authentication result
  */
 function ntlmAuth (path, login, password) {
   return new Promise((resolve, reject) => {
@@ -69,8 +66,8 @@ delegateHandler(loginForm, 'touchstart', '.show-password', function (e) {
 });
 
 /**
- * Submit credentials handler
- * @param {Event} event
+ * Handles the submit event for login form
+ * @param {Event} event - The submit event
  * @return {void}
  */
 function submitLoginPassword (event) {
@@ -398,8 +395,8 @@ function handleLoginError (error) {
 }
 
 /**
- * Login success handler
- * @param {Object} authResult
+ * Handles login success
+ * @param {Object} authResult - The authentication result
  * @return {void}
  */
 function handleLoginSuccess (authResult) {
@@ -438,6 +435,10 @@ function delTicketCookie () {
   setTicketCookie(null, 0);
 }
 
+/**
+ * Handles authentication errors
+ * @return {void}
+ */
 function handleAuthError () {
   const appContainer = document.getElementById('app');
   clear(appContainer);
@@ -488,6 +489,13 @@ bc.onmessage = (event) => {
 
 // Check & refresh credentials
 let refreshInterval;
+
+/**
+ * Handles authentication success
+ * @param {Object} authResult - The authentication result
+ * @param {boolean} [isBroadcast=false] - Indicates if the authentication result is from a broadcast message
+ * @return {void}
+ */
 function handleAuthSuccess (authResult, isBroadcast = false) {
   if (!isBroadcast) bc.postMessage(authResult);
   veda.user_uri = storage.user_uri = authResult.user_uri;
@@ -522,7 +530,11 @@ function handleAuthSuccess (authResult, isBroadcast = false) {
   }
 }
 
-// Initialize application with provided credentials
+/**
+ * Initializes the application with the provided authentication result
+ * @param {Object} authResult - The authentication result
+ * @return {void}
+ */
 function initWithCredentials (authResult) {
   hide(loginForm);
   handleAuthSuccess(authResult);
@@ -549,7 +561,8 @@ delegateHandler(document.body, 'click', '#logout, .logout', function () {
 });
 
 /**
- * Authentication flow
+ * Initializes the authentication flow
+ * @return {Promise<void>}
  */
 export default async function auth () {
   const loadIndicator = document.getElementById('load-indicator');

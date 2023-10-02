@@ -1,36 +1,38 @@
-// Individual model
+/**
+ * Individual Model
+ * @module IndividualModel
+ */
 
 import veda from '../common/veda.js';
-
 import riot from '../common/lib/riot.js';
-
 import Backend from '../common/backend.js';
-
 import UpdateService from '../browser/update_service.js';
-
 import WeakCache from '../common/weak_cache.js';
-
 import Util from '../common/util.js';
 
 export default IndividualModel;
 
+// Create an instance of UpdateService if running in a browser
 let updateService;
 if (typeof window !== 'undefined') {
   updateService = new UpdateService();
   updateService.start();
 }
 
+// Create a weak cache for IndividualModel instances
 IndividualModel.cache = new WeakCache();
 
 /**
+ * Represents an individual in the system.
+ *
  * @constructor
- * @param {string} uri URI of individual. If not specified, then id of individual will be generated automatically.
- * @param {boolean} cache Use cache true / false. If true or not set, then object will be return from cache. If false or individual not found in cache, then individual will be loaded from database.
- * @param {boolean} init individual with class model at load. If true or not set, then individual will be initialized with class specific model upon load.
+ * @param {string|object|undefined} uri - The URI of the individual or an object with additional parameters.
+ * @param {boolean} [cache=true] - Indicates if the individual should be cached.
+ * @param {boolean} [init=true] - Indicates if the individual should be initialized with the class specific model upon load.
  */
 function IndividualModel (uri, cache = true, init = true) {
-  // IndividualModel({...})
   if (typeof uri === 'object' && !uri['@']) {
+    // Parse parameters if uri is passed as an object
     cache = uri.cache;
     init = uri.init;
     uri = uri.uri;
@@ -39,13 +41,16 @@ function IndividualModel (uri, cache = true, init = true) {
   // Define Model data
   this._ = {cache, init};
   this.removedObjs = [];
+
   if (typeof uri === 'object') {
+    // Initialize model with uri object parameters
     this.properties = {...uri};
     this.original = JSON.stringify(this.properties);
     this.isNew(false);
     this.isLoaded(true);
     this.isSync(true);
   } else if (typeof uri === 'string') {
+    // Initialize model with URI
     this.properties = {};
     this.original = JSON.stringify(this.properties);
     this.id = uri;
@@ -53,6 +58,7 @@ function IndividualModel (uri, cache = true, init = true) {
     this.isLoaded(false);
     this.isSync(false);
   } else if (typeof uri === 'undefined') {
+    // Generate a new URI if uri is not specified
     this.properties = {};
     this.original = JSON.stringify(this.properties);
     this.id = Util.genUri();
@@ -65,6 +71,7 @@ function IndividualModel (uri, cache = true, init = true) {
     const cached = IndividualModel.cache.get(this.id);
     if (cached) {
       if (typeof uri === 'object') {
+        // Use a cached model if possible
         cached._ = this._;
         cached.properties = this.properties;
         cached.original = this.original;
@@ -266,7 +273,7 @@ function serializer (value) {
       return {
         type: 'String',
         data: value.valueOf(),
-        ...value.language && {lang: value.language}
+        ...value.language && {lang: value.language},
       };
     }
   }

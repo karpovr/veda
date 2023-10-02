@@ -3,7 +3,7 @@
 import Sha256 from '../common/lib/sha256.js';
 import ServerUtil from '../server/util.js';
 import WorkflowUtil from '../server/workflow_util.js';
-import Convert from "./convert.js";
+import Convert from './convert.js';
 
 const Codelet = {};
 

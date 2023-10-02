@@ -1,16 +1,12 @@
 // Listen to client notifications
 
 import veda from '../common/veda.js';
-
 import Util from '../browser/util.js';
-
 import {timeout} from '../browser/dom_helpers.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import Backend from '../common/backend.js';
-
 import UpdateService from '../browser/update_service.js';
+
 const updateService = new UpdateService();
 
 veda.one('started', () => {

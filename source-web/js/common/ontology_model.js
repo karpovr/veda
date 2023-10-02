@@ -1,11 +1,8 @@
 // Ontology model
 
 import veda from '../common/veda.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import Backend from '../common/backend.js';
-
 import Util from '../common/util.js';
 
 export default Ontology;

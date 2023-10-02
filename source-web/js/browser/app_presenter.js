@@ -1,32 +1,27 @@
-// Application presenter
+/**
+ * Application presenter module
+ * @module AppPresenter
+ */
 
 import '../browser/check_browser.js';
-
 import '../browser/notification_listener.js';
-
 import '../browser/line_status_listener.js';
-
 import '../browser/show_ttl.js';
-
 import veda from '../common/veda.js';
-
 import riot from '../common/lib/riot.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import notify from '../browser/notify.js';
-
 import Util from '../common/util.js';
-
 import {delegateHandler, clear} from '../browser/dom_helpers.js';
 
 /**
  * Application presenter
- * @param {Object} manifest
+ * @param {Object} manifest - The manifest object for the application
  */
 export default function AppPresenter (manifest) {
   /**
    * Localize resources on the page on language change
+   * @return {void}
    */
   veda.on('language:changed', () => {
     const resourcesNodes = document.querySelectorAll('[resource], [about]');
@@ -48,8 +43,8 @@ export default function AppPresenter (manifest) {
 
   /**
    * Call router when anchor link is clicked
-   * @param {Event} event
-   * @this {Element}
+   * @param {Event} event - The click event
+   * @this {Element} - The clicked element
    * @return {void}
    */
   function anchorHandler (event) {
@@ -62,12 +57,12 @@ export default function AppPresenter (manifest) {
   // Prevent empty links routing
   delegateHandler(document.body, 'click', '[href=\'\']', (event) => event.preventDefault());
 
-  // Router already installed flag
+  // Router installed flag
   let routerInstalled;
 
   /**
    * Install router
-   * @param {Individual} main - Default individual to route if no hash is present
+   * @param {Individual} main - The default individual to route if no hash is present
    * @return {void}
    */
   function installRouter (main) {
@@ -77,7 +72,11 @@ export default function AppPresenter (manifest) {
 
     routerInstalled = true;
 
-    // Router function
+    /**
+     * Router function
+     * @param {string} hash - The route hash
+     * @return {void}
+     */
     riot.route((hash) => {
       const loadIndicator = document.getElementById('load-indicator');
       const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
@@ -104,6 +103,7 @@ export default function AppPresenter (manifest) {
           veda.trigger('mainChanged', main.id);
         });
       }
+
       const tokens = decodeURI(hash).slice(2).split('/');
       const uri = tokens[0];
       const container = tokens[1] || '#main';
@@ -147,8 +147,8 @@ export default function AppPresenter (manifest) {
 
   /**
    * Parse extra params in hash
-   * @param {string} value
-   * @return {Individual|Date|string|number|null}
+   * @param {string} value - The value to parse
+   * @return {Individual|Date|string|number|boolean|null} - The parsed value
    */
   function parse (value) {
     if (!Number.isNaN(parseFloat(value.split(' ').join('').split(',').join('.')))) {
@@ -170,7 +170,6 @@ export default function AppPresenter (manifest) {
 
     return value || null;
   }
-
 
   let starting = false;
 

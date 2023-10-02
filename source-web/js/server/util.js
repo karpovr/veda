@@ -1,11 +1,8 @@
 // Utilities
 
 import veda from '../common/veda.js';
-
 import Sha256 from '../common/lib/sha256.js';
-
 import Mustache from 'mustache';
-
 import {addWorkingDays, isHoliday} from '../server/holidays_calendar.js';
 
 const Util = {};

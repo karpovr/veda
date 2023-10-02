@@ -1,7 +1,6 @@
 // User model
 
 import veda from '../common/veda.js';
-
 import IndividualModel from '../common/individual_model.js';
 
 export default User;

@@ -1,7 +1,12 @@
-// Backend error class
-
+/**
+ * A custom error class for backend errors.
+ */
 export default class BackendError extends Error {
-  constructor (code) {
+  /**
+   * Creates a new instance of BackendError.
+   * @param {number} code - The error code associated with the backend error.
+   */
+  constructor(code) {
     const message = typeof code !== 'undefined' ? `${BackendError.#errorCodes[code]}` : undefined;
     super(message);
     this.name = 'BackendError';
@@ -9,10 +14,17 @@ export default class BackendError extends Error {
     this.message = message;
   }
 
-  toString () {
+  /**
+   * String representation of the BackendError.
+   * @returns {string} The string representation of the BackendError.
+   */
+  toString() {
     return `${this.name} ${this.code}: ${this.message}`;
   }
 
+  /**
+   * The mapping of error codes to error messages.
+   */
   static #errorCodes = {
     0: 'Server unavailable',
     400: 'Bad request',

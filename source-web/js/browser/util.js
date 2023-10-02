@@ -1,15 +1,10 @@
 // Utilities
 
 import veda from '../common/veda.js';
-
 import IndividualModel from '../common/individual_model.js';
-
 import Backend from '../common/backend.js';
-
 import notify from '../browser/notify.js';
-
 import riot from '../common/lib/riot.js';
-
 import CommonUtil from '../common/util.js';
 
 const Util = {};

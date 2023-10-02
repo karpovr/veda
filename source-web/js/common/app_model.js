@@ -1,9 +1,7 @@
 // Application model
 
 import Ontology from '../common/ontology_model.js';
-
 import User from '../common/user_model.js';
-
 import riot from '../common/lib/riot.js';
 
 /**
