@@ -486,12 +486,12 @@ $.fn.veda_actor = function ( options ) {
    * @param {Array} values
    * @return {void}
    */
-  function setValue (values) {
+  async function setValue (values) {
     if ( complex ) {
-      individual.clearValue(rel_uri);
-      individual.clearValue(rel_uri + '.v-s:employee');
-      individual.clearValue(rel_uri + '.v-s:occupation');
-      individual.clearValue(rel_uri + '.v-s:parentUnit');
+      await individual.clearValue(rel_uri);
+      await individual.clearValue(rel_uri + '.v-s:employee');
+      await individual.clearValue(rel_uri + '.v-s:occupation');
+      await individual.clearValue(rel_uri + '.v-s:parentUnit');
       if (chosenActorType === 'v-s:Appointment') {
         individual.set(rel_uri, values);
       } else if (chosenActorType === 'v-s:Person') {
@@ -526,7 +526,7 @@ $.fn.veda_actor = function ( options ) {
         });
       }
     } else {
-      individual.clearValue(rel_uri);
+      await individual.clearValue(rel_uri);
       if (chosenActorType === 'v-s:Appointment') {
         individual.set(rel_uri, values);
       } else if (chosenActorType === 'v-s:Person') {
