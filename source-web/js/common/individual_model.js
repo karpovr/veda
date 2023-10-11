@@ -3,6 +3,7 @@
  * @module IndividualModel
  */
 
+
 import veda from '../common/veda.js';
 import riot from '../common/lib/riot.js';
 import Backend from '../common/backend.js';
