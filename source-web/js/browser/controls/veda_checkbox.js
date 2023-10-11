@@ -16,6 +16,7 @@ $.fn.veda_checkbox = function (params) {
   const spec = opts.spec;
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : (new IndividualModel(property_uri))['rdfs:range'];
+  const queryPattern = this.attr('data-query-pattern') ?? (spec && spec.hasValue('v-ui:queryPattern') ? spec['v-ui:queryPattern'][0].toString() : undefined);
   const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
@@ -52,7 +53,7 @@ $.fn.veda_checkbox = function (params) {
     } else if (queryPrefix) {
       return interpolate(queryPrefix, individual)
         .then((prefix) => {
-          return ftQuery(prefix, undefined, sort, withDeleted);
+          return ftQuery(prefix, undefined, sort, withDeleted, queryPattern);
         })
         .then(renderOptions)
         .catch((error) => {

@@ -19,6 +19,7 @@ $.fn.veda_link = function ( options ) {
   const rel_uri = opts.property_uri;
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : new IndividualModel(rel_uri)['rdfs:range'];
+  const queryPattern = this.attr('data-query-pattern') ?? (spec && spec.hasValue('v-ui:queryPattern') ? spec['v-ui:queryPattern'][0].toString() : undefined);
   let queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
@@ -257,7 +258,7 @@ $.fn.veda_link = function ( options ) {
           queryPrefix = self.attr('data-query-prefix');
         }
         interpolate(queryPrefix, individual).then((prefix) => {
-          ftQuery(prefix, value, sort, withDeleted)
+          ftQuery(prefix, value, sort, withDeleted, queryPattern)
             .then(renderResults)
             .catch((error) => {
               console.error('Fulltext query failed');

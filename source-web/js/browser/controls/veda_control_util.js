@@ -12,16 +12,18 @@ export {ftQuery, renderValue, interpolate};
 
 /**
  * Perform full text search query
- * @param {string} prefix
- * @param {string} input
- * @param {string} sort
- * @param {Boolean} withDeleted
- * @return {Promise}
+ * @param {string} prefix - The prefix for the query.
+ * @param {string} input - The input text to search for.
+ * @param {string} sort - The sorting order of the results.
+ * @param {boolean} withDeleted - Specifies if deleted items should be included in the search results.
+ * @param {string} queryPattern - The query pattern with '{}' as a placeholder for user input.
+ * @return {Promise} - A promise that resolves to the search results.
  */
-function ftQuery (prefix, input, sort, withDeleted) {
+function ftQuery (prefix, input, sort, withDeleted, queryPattern = "'*'=='{}'") {
   input = input ? input.trim() : '';
   let queryString = '';
-  if ( input ) {
+
+  if (input) {
     const lines = input.split('\n').filter(Boolean);
     const lineQueries = lines.map((line) => {
       const special = line && line.indexOf('==') > 0 ? line : false;
@@ -30,11 +32,12 @@ function ftQuery (prefix, input, sort, withDeleted) {
       }
       const words = line.trim().replace(/[-*\s'"]+/g, ' ').split(' ').filter(Boolean);
       return words.map((word) => {
-        return '\'*\' == \'' + word + '*\'';
+        return queryPattern.replaceAll('{}', word + '*');
       }).join(' && ');
     });
     queryString = lineQueries.filter(Boolean).join(' || ');
   }
+
   if (prefix) {
     queryString = queryString ? '(' + prefix + ') && (' + queryString + ')' : '(' + prefix + ')';
   }

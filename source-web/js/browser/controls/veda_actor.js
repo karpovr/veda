@@ -15,6 +15,7 @@ $.fn.veda_actor = function ( options ) {
   const rel_uri = opts.property_uri;
   const spec = opts.spec;
   const placeholder = this.attr('data-placeholder') || ( spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : new IndividualModel('v-s:StartTypingBundle') );
+  const queryPattern = this.attr('data-query-pattern') ?? (spec && spec.hasValue('v-ui:queryPattern') ? spec['v-ui:queryPattern'][0].toString() : undefined);
   const specQueryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0].toString() : undefined);
   let queryPrefix;
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
@@ -276,9 +277,9 @@ $.fn.veda_actor = function ( options ) {
 
     const ftQueryPromise = interpolate(queryPrefix, individual).then((prefix) => {
       if (onlyDeleted) {
-        return ftQuery(prefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted);
+        return ftQuery(prefix + ' && \'v-s:deleted\'==\'true\'', value, sort, withDeleted, queryPattern);
       } else {
-        return ftQuery(prefix, value, sort, withDeleted);
+        return ftQuery(prefix, value, sort, withDeleted, queryPattern);
       }
     });
 

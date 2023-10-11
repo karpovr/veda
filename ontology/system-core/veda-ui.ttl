@@ -258,6 +258,13 @@ v-ui:queryPrefix
   rdfs:label "Query prefix"@en ;
   rdfs:range xsd:string ;
 .
+v-ui:queryPattern
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-ui:ObjectPropertySpecification ;
+  rdfs:label "Шаблон запроса"@ru ;
+  rdfs:label "Query pattern"@en ;
+  rdfs:range xsd:string ;
+.
 v-ui:sort
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-ui:ObjectPropertySpecification ;
