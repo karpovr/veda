@@ -1,11 +1,13 @@
 #!/bin/bash
 
+# Reading Telegram settings from the veda.properties file
+TELEGRAM_BOT_TOKEN=$(grep "tg_notify_token" ./veda.properties | cut -d'=' -f2 | tr -d ' "')
+TELEGRAM_CHAT_ID=$(grep "tg_notify_chat_id" ./veda.properties | cut -d'=' -f2 | tr -d ' ')
+
 # Configuration variables
 WAIT_INTERVAL=10
 CHECK_INTERVAL=20
 FORCE_STOP_CHECK_INTERVAL=5
-TELEGRAM_BOT_TOKEN="your-telegram-bot-token"
-TELEGRAM_CHAT_ID="your-telegram-chat-id"
 
 target=".pids/"
 
@@ -149,3 +151,4 @@ fi
 ps aux | grep veda
 
 exit 0
+
