@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Reading Telegram settings from the veda.properties file
+# Reading Telegram settings and stand name from the veda.properties file
 TELEGRAM_BOT_TOKEN=$(grep "tg_notify_token" ./veda.properties | cut -d'=' -f2 | tr -d ' "')
 TELEGRAM_CHAT_ID=$(grep "tg_notify_chat_id" ./veda.properties | cut -d'=' -f2 | tr -d ' ')
+STAND_NAME=$(grep "name" ./veda.properties | cut -d'=' -f2 | tr -d ' "')
 
 # Configuration variables
 WAIT_INTERVAL=10
@@ -23,7 +24,7 @@ fi
 
 # Function to send messages to Telegram
 send_telegram_message() {
-    local message="$1"
+    local message="Stand: $STAND_NAME. $1"
     curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
         -d chat_id="$TELEGRAM_CHAT_ID" \
         -d text="$message" \
