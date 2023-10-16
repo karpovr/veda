@@ -39,7 +39,6 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
     .then(() => {
       if (container.id == 'main') {
         document.title = this.toString();
-        console.log(this.id, this.toString());
       }
       if (template) {
         return getTemplate(template);
@@ -734,7 +733,6 @@ function processTemplate (individual, container, wrapper, templateMode) {
               reverseButton = document.createElement('a');
               reverseButton.classList.add('reverse', 'badge', 'margin-sm-h');
             }
-            //reverseButton.textContent = `${reverseSort? '↓' : '↑'}`;
             reverseButton.textContent = '↓ ↑';
             reverseButton.addEventListener('click', (e) => {
               e.stopPropagation();
