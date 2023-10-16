@@ -37,6 +37,10 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
 
   return this.load()
     .then(() => {
+      if (container.id == 'main') {
+        document.title = this.toString();
+        console.log(this.id, this.toString());
+      }
       if (template) {
         return getTemplate(template);
       } else {
@@ -664,11 +668,12 @@ function processTemplate (individual, container, wrapper, templateMode) {
       let prev_rendered = {};
       let curr_rendered = {};
       let sort_required = false;
+      let reverseSort = false;
 
       const propertyModifiedHandler = function (propertyValues, limit_param) {
         curr_rendered = {};
         limit = limit_param || limit;
-
+        if (reverseSort) propertyValues.reverse();
         return Promise.all(
           propertyValues.map((value, i) => {
             if (i >= limit) {
@@ -708,6 +713,8 @@ function processTemplate (individual, container, wrapper, templateMode) {
             relContainer.append(...list);
           }
           if (limit < propertyValues.length && more) {
+            const badgeContainer = document.createElement('div');
+            badgeContainer.style.display = 'flex';
             let moreButton = relContainer.querySelector('a.more');
             if (!moreButton) {
               moreButton = document.createElement('a');
@@ -716,11 +723,31 @@ function processTemplate (individual, container, wrapper, templateMode) {
             moreButton.textContent = `↓ ${propertyValues.length - limit}`;
             moreButton.addEventListener('click', (e) => {
               e.stopPropagation();
-              const countDisplayed = relContainer.children.length - 1; // last children is .more button
+              const countDisplayed = relContainer.children.length - 1; // 1 last children is .badge container
               about.trigger(rel_uri, about.get(rel_uri), countDisplayed + 10);
               e.target.remove();
             });
-            relContainer.append(moreButton);
+            badgeContainer.append(moreButton);
+
+            let reverseButton = relContainer.querySelector('a.reverse');
+            if (!reverseButton) {
+              reverseButton = document.createElement('a');
+              reverseButton.classList.add('reverse', 'badge', 'margin-sm-h');
+            }
+            //reverseButton.textContent = `${reverseSort? '↓' : '↑'}`;
+            reverseButton.textContent = '↓ ↑';
+            reverseButton.addEventListener('click', (e) => {
+              e.stopPropagation();
+              prev_rendered = {};
+              reverseSort = !reverseSort;
+              const countDisplayed = relContainer.children.length - 1; // 1 last children is .badge container
+              Array.from(relContainer.children).map((node) => relContainer.removeChild(node));
+              about.trigger(rel_uri, about.get(rel_uri), countDisplayed);
+              e.target.remove();
+            });
+            badgeContainer.append(reverseButton);
+
+            relContainer.append(badgeContainer);
           }
           prev_rendered = {...curr_rendered};
           template.dispatchEvent(new Event('internal-validate'), {bubbles: true});
