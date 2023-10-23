@@ -5,13 +5,7 @@ export const pre = function (individual, template, container, mode, extra) {
   container = $(container);
   template.on('validate', function () {
     const result = {};
-    if (!individual.hasValue('v-s:login')) {
-      result['v-s:login'] = {
-        state: false,
-        cause: ['v-ui:minCardinality'],
-      };
-    }
-    
+
     if (individual.hasValue('v-s:dateToPlan') && individual.hasValue('v-s:hasPeriod')) {
       const dateToPlan = individual['v-s:dateToPlan'][0];
       const period = individual['v-s:hasPeriod'][0].id;
@@ -44,10 +38,9 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       }
     }
-
-
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
+
   $('.action', template).click(function (e) {
     e.preventDefault();
     template[0].dispatchEvent(new Event(this.id));
