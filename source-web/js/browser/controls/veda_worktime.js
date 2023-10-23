@@ -45,6 +45,13 @@ $.fn.veda_worktime = function ( options ) {
   fillPseudoInput(mainInput.val());
   pseudoInputs.change(fillMainInput);
   this.on('view edit search', function (e) {
+    if (e.type == 'view') {
+      pseudoInputs.attr('disabled', 'disabled');
+      summaryText.attr('disabled', 'disabled');
+    } else {
+      pseudoInputs.removeAttr('disabled');
+      summaryText.removeAttr('disabled');
+    }
     e.stopPropagation();
   });
   return this;
