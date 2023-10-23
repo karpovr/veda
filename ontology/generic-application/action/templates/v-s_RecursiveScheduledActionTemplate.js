@@ -23,6 +23,10 @@ export const pre = function (individual, template, container, mode, extra) {
     }
   });
 
+  if (individual.hasValue('v-s:hasStatus', 'v-s:StatusProcessed')) {
+    $('#edit-ScheduledAction', template).remove();
+  }
+
   $('.action', template).click(function (e) {
     e.preventDefault();
     const that = this;
