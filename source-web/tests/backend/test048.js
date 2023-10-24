@@ -26,7 +26,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     assert(await Backend.wait_module(Constants.m_scripts, res.op_id));
 
     const url = `http://localhost/webdav/${ticket}/${test_file_individual_uri}/test.txt`;
-    const editedContent = Math.floor(999 * Math.random() + 100).toString();
+    const editedContent = Math.floor(900 * Math.random() + 100).toString();
 
     // Эмулируем серию запросов WebDAV
     await propfindRequest(url);
