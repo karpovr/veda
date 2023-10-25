@@ -11,7 +11,7 @@ import CommonUtil from '../../js/common/util.js';
 const Util = {...ServerUtil, ...CommonUtil};
 
 const test = baretest('Backend tests');
-const re = /^test.*\.js$/;
+const re = /^test\d+\.js$/;
 
 (async function () {
   const files = (await readdir('./tests/backend')).filter((f) => re.test(f));
