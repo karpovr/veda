@@ -1,6 +1,7 @@
 export default [
   {
     'request': {
+      'id': 1,
       'method': 'OPTIONS',
       'path': '/',
     },
@@ -14,6 +15,7 @@ export default [
   },
   {
     'request': {
+      'id': 2,
       'method': 'HEAD',
       'path': '/test.docx',
     },
@@ -31,6 +33,7 @@ export default [
   },
   {
     'request': {
+      'id': 3,
       'method': 'OPTIONS',
       'path': '',
       'headers': {
@@ -47,6 +50,7 @@ export default [
   },
   {
     'request': {
+      'id': 4,
       'method': 'PROPFIND',
       'path': '',
       'headers': {
@@ -63,6 +67,7 @@ export default [
   },
   {
     'request': {
+      'id': 5,
       'method': 'PROPFIND',
       'path': '/test.docx',
       'headers': {
@@ -79,6 +84,7 @@ export default [
   },
   {
     'request': {
+      'id': 6,
       'method': 'LOCK',
       'path': '/test.docx',
       'headers': {
@@ -100,6 +106,7 @@ export default [
   },
   {
     'request': {
+      'id': 7,
       'method': 'HEAD',
       'path': '/test.docx',
     },
@@ -117,6 +124,7 @@ export default [
   },
   {
     'request': {
+      'id': 8,
       'method': 'LOCK',
       'path': '/test.docx',
       'headers': {
@@ -137,6 +145,7 @@ export default [
   },
   {
     'request': {
+      'id': 9,
       'method': 'HEAD',
       'path': '/test.docx',
     },
@@ -154,6 +163,7 @@ export default [
   },
   {
     'request': {
+      'id': 10,
       'method': 'PUT',
       'path': '/test.docx',
       'body': '111',
@@ -164,6 +174,7 @@ export default [
   },
   {
     'request': {
+      'id': 11,
       'method': 'PROPPATCH',
       'path': '/test.docx',
       'headers': {
@@ -184,6 +195,7 @@ export default [
   },
   {
     'request': {
+      'id': 12,
       'method': 'HEAD',
       'path': '/test.docx',
     },
@@ -201,6 +213,7 @@ export default [
   },
   {
     'request': {
+      'id': 13,
       'method': 'UNLOCK',
       'path': '/test.docx',
       'headers': {

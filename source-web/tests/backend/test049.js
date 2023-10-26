@@ -32,11 +32,34 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
     await requests.reduce(async (p, {request, response}) => {
       await p;
       const result = await fetch(`${base}${request.path}`, request);
-      assert(result.status.toString() === response.status.toString());
+      try {
+        assert(result.status.toString() === response.status.toString());
+      } catch (error) {
+        console.error('Response status does not match ethalon:', result.status, '(fetched)', '!==', response.status, '(ethalon)');
+        console.error('Ethalon request:', request);
+        console.error('Ethalon response:', response);
+        throw error;
+      }
       for (const [key, value] of Object.entries(response.headers ?? {})) {
-        assert(result.headers.has(key));
+        try {
+          assert(result.headers.has(key));
+        } catch (error) {
+          console.error('Ethalon header is absent in fetched response:', key);
+          console.error('Ethalon request:', request);
+          console.error('Ethalon response:', response);
+          console.error('Fetched response headers:', ...result.headers);
+          throw error;
+        }
         if (value) {
-          assert(result.headers.get(key) === value);
+          try {
+            assert(result.headers.get(key) === value);
+          } catch (error) {
+            console.error('Ethalon header value differs from fetched response:', key, ':', value, '!==', key, ':', result.headers.get(key));
+            console.error('Ethalon request:', request);
+            console.error('Ethalon response:', response);
+            console.error('Fetched response headers:', ...result.headers);
+            throw error;
+          }
         }
       }
     }, Promise.resolve());
