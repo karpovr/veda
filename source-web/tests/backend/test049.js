@@ -33,7 +33,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
       await p;
       const result = await fetch(`${base}${request.path}`, request);
       assert(result.status.toString() === response.status.toString());
-      for (const [key, value] of Object.entries(response.headers)) {
+      for (const [key, value] of Object.entries(response.headers ?? {})) {
         assert(result.headers.has(key));
         if (value) {
           assert(result.headers.get(key) === value);

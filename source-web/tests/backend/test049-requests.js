@@ -160,7 +160,6 @@ export default [
     },
     'response': {
       'status': '201',
-      'headers': {},
     },
   },
   {
@@ -212,7 +211,6 @@ export default [
     },
     'response': {
       'status': '200',
-      'headers': {},
     },
   },
 ];
