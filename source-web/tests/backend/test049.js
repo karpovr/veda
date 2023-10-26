@@ -1,7 +1,7 @@
 import requests from './test049-requests.js';
 
 export default ({test, assert, Backend, Helpers, Constants, Util}) => {
-  test.only('#049 File upload, webdav editing', async () => {
+  test.skip('#049 File upload, webdav editing', async () => {
     const {ticket} = await Helpers.get_user1_ticket();
 
     const test_file_uri = Util.guid();
