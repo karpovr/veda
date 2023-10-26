@@ -33,34 +33,30 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
       await p;
       const result = await fetch(`${base}${request.path}`, request);
       try {
-        assert(result.status.toString() === response.status.toString());
-      } catch (error) {
-        console.error('Response status does not match ethalon:', result.status, '(fetched)', '!==', response.status, '(ethalon)');
-        console.error('Ethalon request:', request);
-        console.error('Ethalon response:', response);
-        throw error;
-      }
-      for (const [key, value] of Object.entries(response.headers ?? {})) {
         try {
-          assert(result.headers.has(key));
-        } catch (error) {
-          console.error('Ethalon header is absent in fetched response:', key);
-          console.error('Ethalon request:', request);
-          console.error('Ethalon response:', response);
-          console.error('Fetched response headers:', ...result.headers);
-          throw error;
+          assert(result.status.toString() === response.status.toString());
+        } catch (e) {
+          throw Error(`Response status does not match ethalon: ${result.status} (fetched) !== ${response.status} (ethalon)`);
         }
-        if (value) {
+        for (const [key, value] of Object.entries(response.headers ?? {})) {
           try {
-            assert(result.headers.get(key) === value);
-          } catch (error) {
-            console.error('Ethalon header value differs from fetched response:', key, ':', value, '!==', key, ':', result.headers.get(key));
-            console.error('Ethalon request:', request);
-            console.error('Ethalon response:', response);
-            console.error('Fetched response headers:', ...result.headers);
-            throw error;
+            assert(result.headers.has(key));
+          } catch (e) {
+            throw Error(`Ethalon header is absent in fetched response: '${key}'`);
+          }
+          if (value) {
+            try {
+              assert(result.headers.get(key) === value);
+            } catch (e) {
+              throw Error(`Ethalon header value differs from fetched response: (${key}: ${value}) !== (${key}: ${result.headers.get(key)})`);
+            }
           }
         }
+      } catch (error) {
+        console.error(error);
+        console.info('Ethalon request:', request);
+        console.info('Ethalon response:', response);
+        console.info('Fetched response headers:', Object.fromEntries([...result.headers]));
       }
     }, Promise.resolve());
   });
