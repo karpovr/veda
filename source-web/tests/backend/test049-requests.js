@@ -25,7 +25,7 @@ export default [
         'last-modified': '',
         'etag': '',
         'content-type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document; charset=UTF-8',
-        'content-disposition': '',
+        'content-disposition': 'inline; filename="test.docx"',
         'accept-ranges': 'bytes',
         'content-length': '',
       },
