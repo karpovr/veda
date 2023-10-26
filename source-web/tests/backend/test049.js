@@ -57,6 +57,7 @@ export default ({test, assert, Backend, Helpers, Constants, Util}) => {
         console.info('Ethalon request:', request);
         console.info('Ethalon response:', response);
         console.info('Fetched response headers:', Object.fromEntries([...result.headers]));
+        throw error;
       }
     }, Promise.resolve());
   });
