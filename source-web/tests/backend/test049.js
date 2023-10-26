@@ -51,7 +51,7 @@ async function uploadFile (ticket, path, uri, content) {
     formData += `--${boundary}\r\nContent-Disposition: form-data; name="content"\r\n\r\ndata:text/plain;base64,${Buffer.from(content).toString('base64')}\r\n`;
     formData += `--${boundary}--\r\n`;
 
-    const response = await fetch('http://localhost/files', {
+    const response = await fetch(`${location.origin}/files`, {
       method: 'POST',
       body: formData,
       headers: {
