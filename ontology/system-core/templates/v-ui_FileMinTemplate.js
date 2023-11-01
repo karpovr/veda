@@ -2,18 +2,6 @@ export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
-  function newHandler () {
-    if (individual.isNew()) {
-      $('a', template).removeAttr('href').addClass('disabled');
-    } else {
-      $('a', template).attr('href', `/files/${individual.id}`).removeClass('disabled');;
-      $('sup', template).remove();
-    }
-  }
-  individual.one('afterSave', newHandler);
-  template.one('remove', () => individual.off('afterSave', newHandler));
-  newHandler();
-
   if (individual.hasValue('v-s:valid', false)) {
     $('a', template).addClass('invalid');
   }
@@ -21,7 +9,34 @@ export const pre = function (individual, template, container, mode, extra) {
   const idx = fn.lastIndexOf('.');
   const ext = fn.substr(idx + 1);
   $('.label', template).text(ext);
+
+  const editLink = $('a.edit-link', template);
+  const base = `${location.origin}/webdav/${veda.ticket}`;
+  if ('docx|odt'.includes(ext)) {
+    editLink.attr('href', `ms-word:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+  } else if ('xlsx|ods'.includes(ext)) {
+    editLink.attr('href', `ms-excel:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+  } else if ('pptx|odp'.includes(ext)) {
+    editLink.attr('href', `ms-powerpoint:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+  } else {
+    editLink.remove();
+  }
+
+  function newHandler () {
+    if (individual.isNew()) {
+      $('a', template).addClass('disabled');
+      $('a.edit-link', template).addClass('hidden');
+    } else {
+      $('a', template).removeClass('disabled');
+      $('a.edit-link', template).removeClass('hidden');
+      $('sup', template).remove();
+    }
+  }
+  individual.one('afterSave', newHandler);
+  template.one('remove', () => individual.off('afterSave', newHandler));
+  newHandler();
 };
+
 export const html = `
   <div>
     <style scoped>
@@ -32,6 +47,7 @@ export const html = `
     </style>
     <span class="label label-primary"></span>
     <sup class="text-success">new</sup>
-    <a class="disabled"><span about="@" property="v-s:fileName"></span></a>
+    <a class="disabled download-link" href="/files/@"><span about="@" property="v-s:fileName"></span></a>
+    <a href="#" class="edit-link margin-sm-h"><span class="fa fa-lg fa-pencil-square-o"></span></a>
   </div>
 `;
