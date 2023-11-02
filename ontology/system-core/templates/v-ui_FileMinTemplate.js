@@ -1,4 +1,4 @@
-export const pre = function (individual, template, container, mode, extra) {
+export const pre = async function (individual, template, container, mode, extra) {
   template = $(template);
   container = $(container);
 
@@ -11,13 +11,17 @@ export const pre = function (individual, template, container, mode, extra) {
   $('.label', template).text(ext);
 
   const editLink = $('a.edit-link', template);
-  const base = `${location.origin}/webdav/${veda.ticket}`;
-  if ('docx|odt'.includes(ext)) {
-    editLink.attr('href', `ms-word:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
-  } else if ('xlsx|ods'.includes(ext)) {
-    editLink.attr('href', `ms-excel:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
-  } else if ('pptx|odp'.includes(ext)) {
-    editLink.attr('href', `ms-powerpoint:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+  if (await individual.canUpdate()) {
+    const base = `${location.origin}/webdav/${veda.ticket}`;
+    if ('docx|odt'.includes(ext)) {
+      editLink.attr('href', `ms-word:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+    } else if ('xlsx|ods'.includes(ext)) {
+      editLink.attr('href', `ms-excel:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+    } else if ('pptx|odp'.includes(ext)) {
+      editLink.attr('href', `ms-powerpoint:ofe|u|${base}/${individual.id.replace(':', '_')}/${fn}`);
+    } else {
+      editLink.remove();
+    }
   } else {
     editLink.remove();
   }
@@ -38,7 +42,7 @@ export const pre = function (individual, template, container, mode, extra) {
 };
 
 export const html = `
-  <div>
+  <div class="margin-sm">
     <style scoped>
       a.disabled {
         color: inherit;
@@ -48,6 +52,6 @@ export const html = `
     <span class="label label-primary"></span>
     <sup class="text-success">new</sup>
     <a class="disabled download-link" href="/files/@"><span about="@" property="v-s:fileName"></span></a>
-    <a href="#" class="edit-link margin-sm-h"><span class="fa fa-lg fa-pencil-square-o"></span></a>
+    <a href="#" class="edit-link" title="v-s:Edit"><span class="margin-md-h glyphicon glyphicon-edit"></span></a>
   </div>
 `;
