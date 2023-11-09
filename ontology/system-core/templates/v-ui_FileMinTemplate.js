@@ -26,6 +26,19 @@ export const pre = async function (individual, template, container, mode, extra)
     editLink.remove();
   }
 
+  async function lockHandler () {
+    if (individual.hasValue('v-s:lockedDateTo') && Date.now() < individual['v-s:lockedDateTo'][0]) {
+      $('a.edit-link', template).addClass('hide');
+      $('.locked', template).removeClass('hide');
+    } else {
+      $('a.edit-link', template).removeClass('hide');
+      $('.locked', template).addClass('hide');
+    }
+  }
+  individual.on('v-s:lockedDateTo', lockHandler);
+  template.one('remove', () => individual.off('v-s:lockedDateTo', lockHandler));
+  lockHandler();
+
   function newHandler () {
     if (individual.isNew()) {
       $('a', template).addClass('disabled');
@@ -52,6 +65,7 @@ export const html = `
     <span class="label label-primary"></span>
     <sup class="text-success">new</sup>
     <a class="disabled download-link" href="/files/@"><span about="@" property="v-s:fileName"></span></a>
-    <a href="#" class="edit-link" title="v-s:Edit"><span class="margin-md-h glyphicon glyphicon-edit"></span></a>
+    <small><a href="#" class="edit-link" title="v-s:Edit"><span class="margin-md-h glyphicon glyphicon-edit"></span></a></small>
+    <small class="locked"><a title="v-s:Locked"><span class="margin-md-h glyphicon glyphicon-lock"></span></a><span about="@" rel="v-s:lockedBy" data-template="v-ui:LabelTemplate"></small>
   </div>
 `;
