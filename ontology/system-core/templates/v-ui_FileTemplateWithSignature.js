@@ -90,7 +90,7 @@ export const html = `
         <div class="filename pull-left" style="width:77%;display:inline-block;">
           <div about="@" data-template="v-ui:FileMinTemplate"></div>
           <i class="view -edit -search">
-            <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small about="@" property="v-s:created"></small>
+            <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> <small about="@" property="v-s:created"></small>
           </i>
         </div>
       </div>
@@ -103,7 +103,7 @@ export const html = `
             <a href="/files/@">
               <span about="@" property="v-s:fileName"></span>
             </a>
-            <i class="view -edit -search"> <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small>, <small about="@" property="v-s:created"></small> </i>
+            <i class="view -edit -search"> <small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> <small about="@" property="v-s:created"></small> </i>
           </li>
         </ol>
       </div>

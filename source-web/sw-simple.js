@@ -259,8 +259,6 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(handleAPIPost(event));
   } else if (isAPI && METHOD === 'PUT') {
     event.respondWith(handleAPIPut(event));
-  } else if (isFILES && METHOD === 'GET') {
-    event.respondWith(handleFetch(event, FILES));
   } else if (isSTATIC && METHOD === 'GET' && !isEXTENSION) {
     event.respondWith(handleFetch(event, STATIC));
   }
