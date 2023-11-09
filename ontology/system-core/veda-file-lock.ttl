@@ -1,0 +1,45 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+
+<http://semantic-machines.com/veda/veda-file-lock>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Блокировка файлов"@ru ;
+  rdfs:label "Veda system ontology. File locks"@en ;
+#  owl:versionInfo "3.4" ;
+  v-s:loadPriority 8 ;
+.
+
+v-s:lockedDateTo
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:File ;
+  rdfs:label "Дата окончания блокировки"@ru ;
+  rdfs:label "Lock end date"@en ;
+  rdfs:range xsd:dateTime ;
+.
+v-s:lockedBy
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:File ;
+  rdfs:label "Заблокирован (кем)"@ru ;
+  rdfs:label "Locked by"@en ;
+  rdfs:range v-s:Person ;
+.
+v-s:lockId
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:File ;
+  rdfs:label "Id блокировки"@ru ;
+  rdfs:label "Lock id"@en ;
+  rdfs:range xsd:string ;
+.
+v-s:Locked
+  rdf:type rdfs:Resource ;
+  rdfs:label "Файл заблокирован (редактируется)"@ru ;
+  rdfs:label "File is locked (being edited)"@en ;
+.
