@@ -98,5 +98,6 @@ export const html = `
         <li rel="v-s:onDocument" data-template="v-ui:ClassNameLabelLinkTemplate"></li>
       </ol>
     </div>
+    <div about="@" data-template="v-s:FavoritesTemplate" data-embedded="true"></div>
   </div>
 `;
