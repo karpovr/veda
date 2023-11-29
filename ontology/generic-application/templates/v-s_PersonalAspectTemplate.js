@@ -89,7 +89,7 @@ export const html = `
         </div>
       </div>
     </div>
-    <div class="sheet">
+    <!--div class="sheet">
       <h4 class="text-center" style="text-transform: uppercase">
         <i class="fa fa-star text-muted margin-md-h"></i><span about="v-s:Favorites" property="rdfs:label"></span>
       </h4>
@@ -97,7 +97,7 @@ export const html = `
       <ol rel="v-s:hasFavorite" class="columns-3">
         <li rel="v-s:onDocument" data-template="v-ui:ClassNameLabelLinkTemplate"></li>
       </ol>
-    </div>
-    <div about="@" data-template="v-s:FavoritesTemplate" data-embedded="true"></div>
+    </div-->
+    <div class="sheet" about="@" data-template="v-s:FavoritesTemplate"></div>
   </div>
 `;

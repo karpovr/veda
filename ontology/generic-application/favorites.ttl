@@ -25,12 +25,20 @@ v-s:hasFavorite
   rdfs:label "Favorite"@en ;
 .
 
-v-s:hasFolder
+v-s:hasFavoriteFolder
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:Aspect ;
   rdfs:range v-s:Folder ;
-  rdfs:label "Папка"@ru ;
-  rdfs:label "Folder"@en ;
+  rdfs:label "Папка избранного"@ru ;
+  rdfs:label "Favorites folder"@en ;
+.
+
+v-s:chosenFavoriteFolder
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:Folder ;
+  rdfs:label "Выбранная папка избранного"@ru ;
+  rdfs:label "Chosen favorites folder"@en ;
 .
 
 v-s:FavoritesTemplate
