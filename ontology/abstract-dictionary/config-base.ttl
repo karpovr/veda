@@ -539,11 +539,11 @@ cfg:Event_9
  * super_classes = super classes of the document.
  */
 
-// First class event
-//if (parent_script_id) {
-//  print("Not first class event. Exit.");
-//  return;
-//}
+//First class event
+if (parent_script_id) {
+ print("Not first class event. Exit.");
+ return;
+}
 
 var doc_uri = document["@"],
   parent_uri = veda.Util.getUri( document["v-s:parent"] ),
