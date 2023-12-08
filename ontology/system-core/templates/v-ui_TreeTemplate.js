@@ -311,9 +311,10 @@ export const pre = function (individual, template, container, mode, extra) {
   }
 
   // Render tree
-  root.forEach(function (root, index, roots) {
-    renderRows([root.id], undefined, typeof expandLevel !== 'undefined' ? expandLevel : roots.length === 1 ? 1 : 0);
-  });
+  // root.forEach(function (root, index, roots) {
+  //   renderRows([root.id], undefined, typeof expandLevel !== 'undefined' ? expandLevel : roots.length === 1 ? 1 : 0);
+  // });
+  renderRows(root.map(r => {return r.id;}), undefined, typeof expandLevel !== 'undefined' ? expandLevel : root.length === 1 ? 1 : 0);
 
   function getChildren (acc, root, goDeeper) {
     return new Promise(function (resolve, reject) {

@@ -4,6 +4,7 @@ export const html = `
       <span about="v-s:CommunicationMean" property="rdfs:label"></span>
       <small about="@" property="rdfs:label"></small>
     </h2>
+    <span about="@" data-template="v-ui:RabbitHole" class="view -edit -search"></span>
     <div class="panel panel-default">
       <div class="panel-body">
         <div class="row">

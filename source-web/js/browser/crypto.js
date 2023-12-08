@@ -10,20 +10,21 @@ async function createSignatureFileIndividual (signature, name, parent, thumbprin
   const uri = CommonUtil.guid();
   const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
   const fileIndividual = new IndividualModel();
-  fileIndividual['rdf:type'] = 'v-s:File';
-  fileIndividual['v-s:fileName'] = name + '.sig';
-  fileIndividual['rdfs:label'] = name + '.sig';
-  fileIndividual['v-s:fileSize'] = signature.length;
-  fileIndividual['v-s:fileUri'] = uri;
-  fileIndividual['v-s:filePath'] = path;
-  fileIndividual['v-s:parent'] = parent;
-  fileIndividual['v-s:backwardTarget'] = parent;
-  fileIndividual['v-s:canRead'] = true;
-  fileIndividual['v-s:canUpdate'] = true;
-  fileIndividual['v-s:canDelete'] = true;
-  fileIndividual['v-s:backwardProperty'] = 'v-s:digitalSignature';
+  fileIndividual['rdf:type'] = ['v-s:File'];
+  fileIndividual['v-s:fileName'] = [name + '.sig'];
+  fileIndividual['rdfs:label'] = [name + '.sig'];
+  fileIndividual['v-s:fileSize'] = [signature.length];
+  fileIndividual['v-s:fileUri'] = [uri];
+  fileIndividual['v-s:filePath'] = [path];
+  fileIndividual['v-s:parent'] = [parent];
+  fileIndividual['v-s:backwardTarget'] = [parent];
+  fileIndividual['v-s:canRead'] = [true];
+  fileIndividual['v-s:canUpdate'] = [true];
+  fileIndividual['v-s:canDelete'] = [true];
+  fileIndividual['v-s:backwardProperty'] = ['v-s:digitalSignature'];
+  fileIndividual['v-s:backwardPrepend'] = [true];
   if (thumbprint != undefined) {
-    fileIndividual['v-s:signatureStamp'] = thumbprint;
+    fileIndividual['v-s:signatureStamp'] = [thumbprint];
   }
   try {
     await uploadSignatureFile(signature, path, uri);
@@ -91,7 +92,8 @@ async function signData (dataToSign, thumbprint, individual) {
   const certificate = await cryptoPro.certificateInfo(thumbprint);
   const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
   const signatureFileIndividual = await createSignatureFileIndividual(signature, certificate.Name, individual, thumbprint);
-  individual.addValue('v-s:digitalSignature', signatureFileIndividual);
+  //using backwardPrepend
+  individual['v-s:digitalSignature'] = [signatureFileIndividual].concat(individual['v-s:digitalSignature']);
   return true;
 }
 

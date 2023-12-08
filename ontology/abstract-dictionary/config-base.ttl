@@ -539,11 +539,11 @@ cfg:Event_9
  * super_classes = super classes of the document.
  */
 
-// First class event
-//if (parent_script_id) {
-//  print("Not first class event. Exit.");
-//  return;
-//}
+//First class event
+if (parent_script_id) {
+ print("Not first class event. Exit.");
+ return;
+}
 
 var doc_uri = document["@"],
   parent_uri = veda.Util.getUri( document["v-s:parent"] ),
@@ -941,6 +941,7 @@ cfg:Event_16
       canUpdate = document["v-s:canUpdate"],
       canDelete = document["v-s:canDelete"],
       isDeleted = veda.Util.hasValue(document, "v-s:deleted", { data: true, type: "Boolean" }),
+      isPrepend = veda.Util.hasValue(document, "v-s:backwardPrepend", { data: true, type: "Boolean" }),
       forceUpdate = veda.Util.hasValue(document, "v-s:backwardForceUpdate", { data: true, type: "Boolean" });
 
   var prevBackwardTargetUris = prev_state == undefined ? [] : veda.Util.getUris(prev_state["v-s:backwardTarget"]);
@@ -1043,8 +1044,12 @@ cfg:Event_16
       if ( !alreadyThere ) {
         // backwardTarget[backwardPropertyUri] = backwardTarget[backwardPropertyUri] || [];
         // backwardTarget[backwardPropertyUri].push({type: "Uri", data: backwardLinkUri});
-        set_to_backward[backwardPropertyUri] = backwardTarget[backwardPropertyUri] || [];
-        set_to_backward[backwardPropertyUri].push({type: "Uri", data: backwardLinkUri});
+        const existingValues = backwardTarget[backwardPropertyUri] || [];
+        if (isPrepend) {
+          set_to_backward[backwardPropertyUri] = [{type: "Uri", data: backwardLinkUri}].concat(existingValues);
+        } else {
+          set_to_backward[backwardPropertyUri] = existingValues.concat([{type: "Uri", data: backwardLinkUri}]);
+        }
         isChanged = true;
       }
 
