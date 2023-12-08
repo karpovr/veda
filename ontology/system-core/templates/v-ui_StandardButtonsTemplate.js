@@ -75,9 +75,9 @@ export const pre = function (individual, template, container, mode, extra) {
       template.parent().closest('[resource]')[0].dispatchEvent(new Event(action));
     }
   });
-  $('#cancel', template).on('click', function () {
-    template.closest('.modal').modal('hide').remove();
-  });
+  // $('#cancel', template).on('click', function () {
+  //   template.closest('.modal').modal('hide').remove();
+  // });
   $('#journal', template).on('click', function (e) {
     e.preventDefault();
     const journal_uri = individual.id + 'j';

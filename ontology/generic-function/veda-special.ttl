@@ -47,6 +47,13 @@ v-s:backwardForceUpdate
   rdfs:label "force update"@en ;
   rdfs:range xsd:boolean ;
 .
+v-s:backwardPrepend
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:BackwardLink ;
+  rdfs:label "Установить значение первым по порядку в свойстве"@ru ;
+  rdfs:label "Set the value first in order in the property"@en ;
+  rdfs:range xsd:boolean ;
+.
 # ------------------------------------------------------------
 v-s:Exportable
   rdf:type owl:Class ;
