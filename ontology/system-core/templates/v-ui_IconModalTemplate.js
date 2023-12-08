@@ -66,9 +66,12 @@ export const post = function (individual, template, container, mode, extra) {
         $('.actions', tmpl).remove();
       }
     });
-    individual.one('afterSave', function () {
+
+    function removeModal () {
       modal.modal('hide').remove();
-    });
+    }
+    individual.one('afterSave afterReset', removeModal);
+    template.one('remove', () => individual.off('afterSave afterReset', removeModal));
   });
 };
 
