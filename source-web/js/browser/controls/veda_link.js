@@ -172,6 +172,40 @@ $.fn.veda_link = function ( options ) {
     tree.remove();
   }
 
+  // Predefined lists feature
+  const list = $('.list', control);
+  if ( this.hasClass('list') ) {
+    const modal = $('#confirm-modal-template').html();
+    const tmpl = 'v-s:ChooseDistributionListTemplate';
+    list.on('click keydown', function (e) {
+      if (e.type !== 'click' && e.which !== 13 && e.which !== 32) {
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      const $modal = $(modal);
+      const cntr = $('.modal-body', $modal);
+      $modal.on('hidden.bs.modal', () => $modal.remove());
+      $modal.modal();
+      $('body').append($modal);
+      veda.user.aspect.present(cntr, tmpl).then(() => {
+        $('.modal-footer > .ok', $modal).on('click', async () => {
+          const current = individual[rel_uri];
+          let list = veda.user.aspect['v-s:chosenDistributionList'][0];
+          list = list?.['v-s:hasItem'] ?? [];
+          list.forEach((item) => {
+            const index = current.indexOf(item);
+            if (index >= 0) current.splice(index, 1);
+          });
+          current.push(...list);
+          await individual.set(rel_uri, current);
+        });
+      });
+    });
+  } else {
+    list.remove();
+  }
+
   // Fulltext search feature
   let selected = [];
   const fulltext = $('.fulltext', control);
@@ -594,6 +628,9 @@ const defaults = {
   <div class="input-group">
     <div class="input-group-addon btn btn-default tree" tabindex="0">
       <i class="fa fa-sitemap"></i>
+    </div>
+    <div class="input-group-addon btn btn-default list" tabindex="0">
+      <i class="fa fa-bars"></i>
     </div>
     <textarea rows="1" class="form-control fulltext"></textarea>
     <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
