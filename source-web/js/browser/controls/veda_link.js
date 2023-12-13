@@ -629,9 +629,6 @@ const defaults = {
     <div class="input-group-addon btn btn-default tree" tabindex="0">
       <i class="fa fa-sitemap"></i>
     </div>
-    <div class="input-group-addon btn btn-default list" tabindex="0">
-      <i class="fa fa-bars"></i>
-    </div>
     <textarea rows="1" class="form-control fulltext"></textarea>
     <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
     <div class="input-group-addon btn btn-default dropdown" tabindex="0">
@@ -639,6 +636,9 @@ const defaults = {
     </div>
     <div class="input-group-addon btn btn-default create" tabindex="0">
       <i class="glyphicon glyphicon-plus"></i>
+    </div>
+    <div class="input-group-addon btn btn-default list" tabindex="0">
+      <i class="fa fa-bars"></i>
     </div>
   </div>
   <div class="fulltext-menu">
