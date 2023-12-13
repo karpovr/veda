@@ -188,7 +188,11 @@ $.fn.veda_link = function ( options ) {
       $modal.on('hidden.bs.modal', () => $modal.remove());
       $modal.modal();
       $('body').append($modal);
-      veda.user.aspect.present(cntr, tmpl).then(() => {
+      const extra = {
+        target: individual,
+        rel: rel_uri,
+      };
+      veda.user.aspect.present(cntr, tmpl, undefined, extra).then(() => {
         $('.modal-footer > .ok', $modal).on('click', async () => {
           const current = individual[rel_uri];
           let list = veda.user.aspect['v-s:chosenDistributionList'][0];

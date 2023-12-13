@@ -46,9 +46,11 @@ export const pre = async function (individual, template, container, mode, extra)
 export const post = async function (individual, template, container, mode, extra) {
   const select = template.querySelector('.select-list');
   template.querySelector('button.create').addEventListener('click', () => {
+    const {target, rel} = extra;
     const distributionList = new IndividualModel;
     distributionList['rdf:type'] = 'v-s:DistributionList';
     distributionList['rdfs:label'] = 'Новый список';
+    distributionList['v-s:hasItem'] = target[rel].slice();
     editList(distributionList);
   });
   template.querySelector('button.edit').addEventListener('click', () => {
