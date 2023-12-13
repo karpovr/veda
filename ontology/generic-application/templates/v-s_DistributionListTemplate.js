@@ -4,6 +4,7 @@ export const html = `
   <veda-control data-type="string" property="rdfs:label"></veda-control>
   <em about="v-s:hasItem" property="rdfs:label"></em>
   <div rel="v-s:hasItem" data-template="v-ui:LabelTemplate"></div>
-  <veda-control data-type="actor" property="v-s:hasItem" data-actor-type="v-s:Appointment"></veda-control>
+  <!--veda-control data-type="actor" property="v-s:hasItem" data-actor-type="v-s:Appointment v-s:Position"></veda-control-->
+  <veda-control data-type="link" rel="v-s:hasItem" class="fulltext"></veda-control>
 </div>
 `;

@@ -1,5 +1,5 @@
 import IndividualModel from '/js/common/individual_model.js';
-import {delegateHandler, clear} from '/js/browser/dom_helpers.js';
+import {clear} from '/js/browser/dom_helpers.js';
 import CommonUtil from '/js/common/util.js';
 
 export const pre = async function (individual, template, container, mode, extra) {
@@ -95,21 +95,11 @@ export const html = `
     <i class="fa fa-bars text-muted margin-md-h"></i><span about="v-s:DistributionList" property="rdfs:label"></span>
   </h4>
   <em>Выберите список</em>
-  <div class="form-inline">
-    <select class="select-list form-control"></select>
+  <select class="select-list form-control"></select>
+  <div class="margin-md">
     <button class="btn btn-default edit" about="v-s:Edit" property="rdfs:label"></button>
     <button class="btn btn-link delete" about="v-s:Delete" property="rdfs:label"></button>
     <button class="btn btn-success create" about="v-s:Create" property="rdfs:label"></button>
   </div>
-</div>
-`;
-
-const distributionListTemplate = `
-<div>
-  <em about="rdfs:label" property="rdfs:label"></em>
-  <veda-control data-type="string" property="rdfs:label"></veda-control>
-  <em about="v-s:hasItem" property="rdfs:label"></em>
-  <div rel="v-s:hasItem" data-template="v-ui:LabelTemplate"></div>
-  <veda-control data-type="actor" property="v-s:hasItem" data-actor-type="v-s:Appointment"></veda-control>
 </div>
 `;
