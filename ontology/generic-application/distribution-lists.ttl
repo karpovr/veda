@@ -68,13 +68,14 @@ v-s:PS_hasItem_DistributionList
   v-ui:forProperty v-s:hasItem ;
   v-ui:minCardinality 0 ;
   v-ui:maxCardinality 400 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:employee.v-s:hasAccount.isExists'=='true' && 'v-s:official'=='true') || ('rdf:type'=='v-s:Position' && 'v-s:origin'=='Role')" ;
   rdfs:label "Спецификация свойства v-s:hasItem для класса v-s:DistributionList"@ru ;
   rdfs:label "v-s:hasItem property specification for v-s:DistributionList class"@en ;
 .
 
 ################### Rights
 
-v-s:Permission_Folder_AllUsersGroup_C
+v-s:Permission_DistributionList_AllUsersGroup_C
   rdf:type v-s:PermissionStatement ;
   v-s:permissionObject v-s:DistributionList ;
   v-s:permissionSubject cfg:AllUsersGroup ;
