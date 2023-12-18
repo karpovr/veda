@@ -16,7 +16,6 @@
 #  owl:versionInfo "1.1" ;
   v-s:loadPriority 9 ;
 .
-
 v-s:hasFavorite
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:Aspect ;
@@ -24,7 +23,6 @@ v-s:hasFavorite
   rdfs:label "Избранное"@ru ;
   rdfs:label "Favorite"@en ;
 .
-
 v-s:hasFavoriteFolder
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:Aspect ;
@@ -32,7 +30,6 @@ v-s:hasFavoriteFolder
   rdfs:label "Папка избранного"@ru ;
   rdfs:label "Favorites folder"@en ;
 .
-
 v-s:chosenFavoriteFolder
   rdf:type owl:ObjectProperty ;
   rdfs:domain v-s:Aspect ;
@@ -40,7 +37,6 @@ v-s:chosenFavoriteFolder
   rdfs:label "Выбранная папка избранного"@ru ;
   rdfs:label "Chosen favorites folder"@en ;
 .
-
 v-s:FavoritesTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон отображения избранного"@ru ;
@@ -48,19 +44,19 @@ v-s:FavoritesTemplate
   v-ui:forClass v-s:Aspect ;
   v-ui:template "v-s_FavoritesTemplate.js";
 .
-
-v-s:Folder
-  rdf:type owl:Class ;
-  rdfs:label "Папка"@ru ;
-  rdfs:label "Folder"@en ;
+v-s:FavoriteFolderTreeTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения дерева папок"@ru ;
+  rdfs:label "Favorite folder tree template"@en ;
+  v-ui:forClass v-s:Folder ;
+  v-ui:template "v-s_FavoriteFolderTreeTemplate.js";
 .
-
-v-s:hasItem
-  rdf:type owl:ObjectProperty ;
-  rdfs:domain v-s:Folder ;
-  rdfs:range rdfs:Resource ;
-  rdfs:label "Элемент"@ru ;
-  rdfs:label "Item"@en ;
+v-s:FavoriteFolderTreeItemTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения единицы дерева папок"@ru ;
+  rdfs:label "Favorite folder tree item template"@en ;
+  v-ui:forClass v-s:Folder ;
+  v-ui:template "v-s_FavoriteFolderTreeItemTemplate.js";
 .
 
 ################### Rights
