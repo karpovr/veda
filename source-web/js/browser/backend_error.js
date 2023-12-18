@@ -6,12 +6,13 @@ export default class BackendError extends Error {
    * Creates a new instance of BackendError.
    * @param {number} code - The error code associated with the backend error.
    */
-  constructor(code) {
+  constructor(code, response) {
     const message = typeof code !== 'undefined' ? `${BackendError.#errorCodes[code]}` : undefined;
     super(message);
     this.name = 'BackendError';
     this.code = code;
     this.message = message;
+    this.response = response;
   }
 
   /**
@@ -27,36 +28,37 @@ export default class BackendError extends Error {
    */
   static #errorCodes = {
     0: 'Server unavailable',
-    400: 'Bad request',
+    303: 'See Other',
+    400: 'Bad Request',
     403: 'Forbidden',
-    404: 'Not found',
-    422: 'Unprocessable entity',
+    404: 'Not Found',
+    422: 'Unprocessable Entity',
     423: 'Locked',
-    429: 'Too many requests',
-    430: 'Too many password change fails',
-    463: 'Password change is not allowed',
-    464: 'Secret expired',
-    465: 'Empty password',
-    466: 'New password is equal to old',
-    467: 'Invalid password',
-    468: 'Invalid secret',
-    469: 'Password expired',
-    470: 'Ticket not found',
-    471: 'Ticket expired',
-    472: 'Not authorized',
-    473: 'Authentication failed',
-    474: 'Not ready',
-    475: 'Fail open transaction',
-    476: 'Fail commit',
-    477: 'Fail store',
-    500: 'Internal server error',
-    501: 'Not implemented',
-    503: 'Service unavailable',
-    904: 'Invalid identifier',
-    999: 'Database modified error',
-    1021: 'Disk full',
-    1022: 'Duplicate key',
-    1118: 'Size too large',
-    4000: 'Connect error',
+    429: 'Too Many Requests',
+    430: 'Too Many Password Change Fails',
+    463: 'Password Change Is Not Allowed',
+    464: 'Secret Expired',
+    465: 'Empty Password',
+    466: 'New Password Is Equal To Old',
+    467: 'Invalid Password',
+    468: 'Invalid Secret',
+    469: 'Password Expired',
+    470: 'Ticket Not Found',
+    471: 'Ticket Expired',
+    472: 'Not Authorized',
+    473: 'Authentication Failed',
+    474: 'Not Ready',
+    475: 'Fail Open Transaction',
+    476: 'Fail Commit',
+    477: 'Fail Store',
+    500: 'Internal Server Error',
+    501: 'Not Implemented',
+    503: 'Service Unavailable',
+    904: 'Invalid Identifier',
+    999: 'Database Modified Error',
+    1021: 'Disk Full',
+    1022: 'Duplicate Key',
+    1118: 'Size Too Large',
+    4000: 'Connect Error',
   }
 }

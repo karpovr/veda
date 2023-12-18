@@ -91,7 +91,11 @@ function submitLoginPassword (event) {
     })
     .catch((error) => {
       console.error('NTLM auth failed');
-      return Backend.authenticate(login, hash);
+      return Backend.authenticate({
+        login,
+        password: hash,
+        href: `${window.location.origin}${window.location.pathname}${window.location.hash ? `?hash=${encodeURIComponent(window.location.hash)}` : ''}`,
+      });
     })
     .then(handleLoginSuccess)
     .catch(handleLoginError);
@@ -269,6 +273,9 @@ function handleLoginError (error) {
       hide(ok);
     };
     break;
+  case 303: // See Other
+    const href = error?.response?.headers?.get('Location');
+    window.location.href = href;
   case 423: // Password change is allowed once a day
     show(frequentPassChangeWarning);
     show(ok);
@@ -416,23 +423,17 @@ function handleLoginSuccess (authResult) {
   initWithCredentials(authResult);
 }
 
-/**
- * Set ticket cookie
- * @param {string} ticket
- * @param {number} expires
- * @return {void}
- */
-function setTicketCookie (ticket, expires) {
-  const cookie = 'ticket=' + ticket + '; expires=' + new Date(parseInt(expires)).toGMTString() + '; samesite=strict; path=/;' + (window.location.protocol === 'https:' ? 'secure;' : '');
-  document.cookie = cookie;
+function getCookie (name) {
+  const cookies = new Map(document.cookie.split('; ').map((v)=>v.split(/=(.*)/s).map(decodeURIComponent)));
+  return cookies.get(name);
 }
 
-/**
- * Delete ticket cookie
- * @return {void}
- */
-function delTicketCookie () {
-  setTicketCookie(null, 0);
+function setCookie (name, value, expires) {
+  document.cookie = 'name=' + value + '; expires=' + new Date(parseInt(expires)).toGMTString() + '; samesite=strict; path=/;' + (window.location.protocol === 'https:' ? 'secure;' : '');
+}
+
+function delCookie (name) {
+  setCookie(name, null, 0);
 }
 
 /**
@@ -443,14 +444,14 @@ function handleAuthError () {
   const appContainer = document.getElementById('app');
   clear(appContainer);
 
-  delete storage.ticket;
-  delete storage.user_uri;
-  delete storage.end_time;
-  delTicketCookie();
+  storage.removeItem('ticket');
+  storage.removeItem('user_uri');
+  storage.removeItem('end_time');
+  delCookie('ticket');
 
-  if (storage.logout) {
+  if (storage.getItem('logout')) {
     show(loginForm);
-    delete storage.logout;
+    storage.removeItem('logout');
     return;
   }
 
@@ -498,10 +499,13 @@ let refreshInterval;
  */
 function handleAuthSuccess (authResult, isBroadcast = false) {
   if (!isBroadcast) bc.postMessage(authResult);
-  veda.user_uri = storage.user_uri = authResult.user_uri;
-  veda.ticket = storage.ticket = authResult.ticket;
-  veda.end_time = storage.end_time = authResult.end_time;
-  setTicketCookie(veda.ticket, veda.end_time);
+  veda.ticket = authResult.ticket;
+  storage.setItem('ticket', veda.ticket);
+  veda.user_uri = authResult.user_uri;
+  storage.setItem('user_uri', veda.user_uri);
+  veda.end_time = authResult.end_time;
+  storage.setItem('end_time', veda.end_time);
+  setCookie('ticket', veda.ticket, veda.end_time);
   // Re-login on ticket expiration
   if ( veda.end_time ) {
     const granted = Date.now();
@@ -552,11 +556,11 @@ function initWithCredentials (authResult) {
 // Logout handler
 delegateHandler(document.body, 'click', '#logout, .logout', function () {
   Backend.logout(veda.ticket).catch((error) => console.log('Logout failed', error));
-  delete storage.ticket;
-  delete storage.user_uri;
-  delete storage.end_time;
-  delTicketCookie();
-  storage.logout = true;
+  storage.removeItem('ticket');
+  storage.removeItem('user_uri');
+  storage.removeItem('end_time');
+  delCookie('ticket');
+  storage.setItem('logout', true);
   window.location.reload();
 });
 
@@ -568,10 +572,18 @@ export default async function auth () {
   const loadIndicator = document.getElementById('load-indicator');
   const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
 
+  // Try to get auth result from cookie
+  let auth = getCookie('auth');
+  if (auth) {
+    auth = JSON.parse(atob(auth));
+    Object.entries(auth).forEach(([key, value]) => storage.setItem(key, value));
+    delCookie('auth');
+  }
+
   // Check if ticket is valid
-  const ticket = storage.ticket;
-  const user_uri = storage.user_uri;
-  const end_time = (new Date() < new Date(parseInt(storage.end_time))) && storage.end_time;
+  const ticket = storage.getItem('ticket');
+  const user_uri = storage.getItem('user_uri');
+  const end_time = (new Date() < new Date(parseInt(storage.getItem('end_time')))) && storage.getItem('end_time');
   let valid;
   if (ticket && user_uri && end_time) {
     try {
