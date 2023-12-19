@@ -23,43 +23,7 @@ export const pre = async function (individual, template, container, mode, extra)
         return title.toString();
       },
     })
-    .click(async function (e) {
-      e.preventDefault();
-      const current = await getCurrent(location.hash);
-      if (!current) return;
-      // Create default favorites folder
-      if (!veda.user.aspect.hasValue('v-s:hasFavoriteFolder')) {
-        const folder = new IndividualModel();
-        folder['rdf:type'] = 'v-s:Folder';
-        folder['rdfs:label'] = ['Избранное^ru', 'Favorites^en'];
-        await folder.save();
-        await veda.user.aspect.addValue('v-s:hasFavoriteFolder', folder);
-        await veda.user.aspect.save();
-      }
-      const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
-      const favoritesFolder = veda.user.aspect['v-s:hasFavoriteFolder'][0];
-      try {
-        if (await isFavorite(subscriptionId, favoritesFolder)) {
-          const subscription = new IndividualModel(subscriptionId);
-          await removeFavorite(subscription, favoritesFolder);
-          await subscription.remove();
-        } else {
-          const subscription = new IndividualModel();
-          subscription.id = subscriptionId;
-          subscription['rdf:type'] = [new IndividualModel('v-s:Subscription')];
-          subscription['v-s:onDocument'] = [current];
-          subscription['v-s:creator'] = [veda.user];
-          await subscription.save();
-          await favoritesFolder.addValue('v-s:hasItem', subscription);
-          await favoritesFolder.save();
-        }
-        await indicateFavorite();
-      } catch (error) {
-        console.error('Update user aspect failed', error);
-        alert('Ошибка добаления избранного: ' + error.message);
-      }
-    })
-    .click(() => subscriptionDialog());
+    .click(showSubscriptionDialog);
 
   async function indicateFavorite () {
     const current = await getCurrent(location.hash);
@@ -77,6 +41,87 @@ export const pre = async function (individual, template, container, mode, extra)
       template.hide();
     }
   }
+
+  async function showSubscriptionDialog (e) {
+    e.preventDefault();
+
+    const current = await getCurrent(location.hash);
+    if (!current) return;
+
+    await createDefaultFavoritesFolder();
+
+    const favoritesFolder = veda.user.aspect['v-s:hasFavoriteFolder'][0];
+    const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
+
+    const container = document.createElement('div');
+    container.innerHTML = dialogTemplate;
+    document.body.appendChild(container);
+    const dialog = container.querySelector('.dialog');
+    const select = container.querySelector('.select-folder');
+    const submit = container.querySelector('.submit-folder');
+    const cancel = container.querySelector('.cancel-folder');
+    const remove = container.querySelector('.remove-favorite');
+    const folders = await getFavoriteFolders(veda.user.aspect['v-s:hasFavoriteFolder'][0]);
+    for (const folder of folders) {
+      const option = document.createElement('option');
+      option.value = folder.id;
+      option.label = folder['rdfs:label'].map(CommonUtil.formatValue).filter(Boolean);
+      if (folder.hasValue('v-s:hasItem', subscriptionId)) option.selected = true;
+      select.appendChild(option);
+    }
+    select.addEventListener('change', () => submit.value = select.value);
+    dialog.addEventListener('close', async () => {
+      if (!submit.value) {
+        await indicateFavorite();
+        document.body.removeChild(container);
+        return;
+      }
+      await removeFavorite(subscriptionId, favoritesFolder);
+      const folderId = dialog.returnValue;
+      const folder = new IndividualModel(folderId);
+      const subscription = new IndividualModel();
+      subscription.id = subscriptionId;
+      subscription['rdf:type'] = 'v-s:Subscription';
+      subscription['v-s:onDocument'] = current;
+      subscription['v-s:creator'] = veda.user;
+      await subscription.save();
+      await folder.addValue('v-s:hasItem', subscription);
+      await folder.save();
+      await indicateFavorite();
+      document.body.removeChild(container);
+    });
+    dialog.addEventListener('cancel', (event) => event.preventDefault());
+    cancel.addEventListener('click', () => {
+      submit.value = '';
+      dialog.close();
+    });
+    remove.addEventListener('click', async () => {
+      if (await isFavorite(subscriptionId, favoritesFolder)) {
+        const subscription = new IndividualModel(subscriptionId);
+        await removeFavorite(subscription, favoritesFolder);
+        await subscription.remove();
+      }
+      submit.value = '';
+      dialog.close();
+    });
+    submit.value = select.value;
+    dialog.returnValue = '';
+    dialog.showModal();
+  }
+
+  const dialogTemplate = `
+    <dialog class="dialog" style="border: 2px solid gray; border-radius: 0.5em; min-width:30em;">
+      <form class="form clearfix" method="dialog">
+        <div class="form-group">
+          <label>Выберите папку</label>
+          <select class="select-folder form-control"></select>
+        </div>
+        <button type="submit" class="submit-folder btn btn-primary">Ok</button>
+        <button type="button" class="remove-favorite btn btn-link" about="v-s:Delete" property="rdfs:label">Удалить</button>
+        <button type="button" class="cancel-folder btn btn-default pull-right" about="v-s:Cancel" property="rdfs:label">Отмена</button>
+      </form>
+    </dialog>
+  `;
 };
 
 async function getCurrent (hash) {
@@ -121,52 +166,16 @@ async function getFavoriteFolders (folder, folders = []) {
   return folders;
 }
 
+async function createDefaultFavoritesFolder () {
+  if (veda.user.aspect.hasValue('v-s:hasFavoriteFolder')) return;
+  const folder = new IndividualModel();
+  folder['rdf:type'] = 'v-s:Folder';
+  folder['rdfs:label'] = ['Избранное^ru', 'Favorites^en'];
+  await folder.save();
+  await veda.user.aspect.addValue('v-s:hasFavoriteFolder', folder);
+  await veda.user.aspect.save();
+}
+
 export const html = `
   <a href="#" class="fa fa-lg" style="display:none;"></a>
 `;
-
-const dialogTemplate = `
-  <dialog class="dialog" style="border: 2px solid gray; border-radius: 0.5em; min-width:30em;">
-    <form class="form clearfix" method="dialog">
-      <div class="form-group">
-        <label>Выберите папку</label>
-        <select class="select-folder form-control"></select>
-      </div>
-      <button type="submit" class="submit-folder btn btn-primary">Ok</button>
-      <button type="button" class="delete-favorite btn btn-link" about="v-s:Delete" property="rdfs:label">Удалить</button>
-      <button type="button" class="cancel-folder btn btn-default pull-right" about="v-s:Cancel" property="rdfs:label">Отмена</button>
-    </form>
-  </dialog>
-`;
-
-async function subscriptionDialog (subscription) {
-  const container = document.createElement('div');
-  container.innerHTML = dialogTemplate;
-  document.body.appendChild(container);
-  const dialog = container.querySelector('.dialog');
-  const select = container.querySelector('.select-folder');
-  const submit = container.querySelector('.submit-folder');
-  const cancel = container.querySelector('.cancel-folder');
-  const folders = await getFavoriteFolders(veda.user.aspect['v-s:hasFavoriteFolder'][0]);
-  for (const folder of folders) {
-    const option = document.createElement('option');
-    option.value = folder.id;
-    option.label = folder['rdfs:label'].map(CommonUtil.formatValue).filter(Boolean);
-    select.appendChild(option);
-  }
-  select.addEventListener('change', () => submit.value = select.value);
-  dialog.addEventListener('close', async () => {
-    const folder = dialog.returnValue;
-    document.body.removeChild(container);
-    // payload
-  });
-  dialog.addEventListener('cancel', (event) => event.preventDefault());
-  cancel.addEventListener('click', () => {
-    submit.value = '';
-    dialog.close();
-  });
-  submit.value = select.value;
-  dialog.returnValue = '';
-  dialog.showModal();
-}
-
