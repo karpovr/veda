@@ -47,6 +47,7 @@ export default function AppPresenter (manifest) {
    * @this {Element} - The clicked element
    * @return {void}
    */
+
   function anchorHandler (event) {
     event.preventDefault();
     const hash = this.getAttribute('href');
@@ -177,6 +178,11 @@ export default function AppPresenter (manifest) {
   veda.on('started', () => {
     if (starting === true) return;
     starting = true;
+
+    // Restore hash from query params after redirect
+    const url = new URL(window.location.href);
+    const hash = url.searchParams.get('hash');
+    if (hash) window.location = new URL(window.location.origin + window.location.pathname + hash);
 
     const loadIndicator = document.getElementById('load-indicator');
     loadIndicator.style.display = '';

@@ -92,6 +92,7 @@ export default class BrowserBackend {
    * @param {string|object} login - The login or an object with the "login" property.
    * @param {string} password - The password of the user.
    * @param {string} secret - The secret associated with the user.
+   * @param {string} href - Redirect href.
    * @return {Promise<object>} A Promise that resolves to the server response.
    *
    * The server response object will have the following properties:
@@ -99,7 +100,7 @@ export default class BrowserBackend {
    * - user_uri: The URI of the authenticated user.
    * - end_time: The adjusted end time of the ticket in milliseconds since January 1, 1970 (UNIX timestamp).
    */
-  static async authenticate (login, password, secret) {
+  static async authenticate (login, password, secret, href) {
     const arg = login;
     const isObj = typeof arg === 'object';
     const params = {
@@ -109,6 +110,7 @@ export default class BrowserBackend {
         'login': isObj ? arg.login : login,
         'password': isObj ? arg.password : password,
         'secret': isObj ? arg.secret : secret,
+        'href': isObj ? arg.href : href,
       },
     };
     return call_server(params).then(adjustTicket);
@@ -592,9 +594,9 @@ async function call_server (params) {
     }),
   });
   if (response.ok) {
-    return response.json();
+    return await response.json();
   }
-  throw new BackendError(response.status);
+  throw new BackendError(response.status, response);
 }
 
 /**
