@@ -1015,6 +1015,15 @@ v-wf:PsStartForm_setAutoCompleted
   rdfs:label "Permission to edit specification for v-wf:StartForm_setAutoCompleted"@en ;
 .
 
+v-wf:StartForm_isAutoinstruction
+  rdf:type rdf:Property ;
+  rdfs:label "Признак автопоручения"@ru ;
+  rdfs:label "Set isAutoinstruction"@en ;
+  rdfs:domain v-wf:StartForm ;
+  rdfs:range xsd:boolean ;
+  rdfs:isDefinedBy v-wf: ;
+.
+
 v-wf:permission_on_start_from
   rdf:type v-s:PermissionStatement ;
   v-s:canCreate "true"^^xsd:boolean ;
@@ -1343,6 +1352,16 @@ v-wf:isEditable
   rdfs:isDefinedBy v-wf: ;
   rdfs:label "Задача редактируемая"@ru ;
   rdfs:label "Task is editable"@en ;
+  rdfs:domain v-wf:WorkItem ;
+  rdfs:domain v-wf:Process ;
+  rdfs:domain v-wf:DecisionForm ;
+  rdfs:range xsd:boolean ;
+.
+v-wf:isAutoinstruction
+  rdf:type rdf:Property ;
+  rdfs:isDefinedBy v-wf: ;
+  rdfs:label "Задача сети автопоручений"@ru ;
+  rdfs:label "Task is autoinstruction"@en ;
   rdfs:domain v-wf:WorkItem ;
   rdfs:domain v-wf:Process ;
   rdfs:domain v-wf:DecisionForm ;
