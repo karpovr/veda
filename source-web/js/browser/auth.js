@@ -429,7 +429,7 @@ function getCookie (name) {
 }
 
 function setCookie (name, value, expires) {
-  document.cookie = 'name=' + value + '; expires=' + new Date(parseInt(expires)).toGMTString() + '; samesite=strict; path=/;' + (window.location.protocol === 'https:' ? 'secure;' : '');
+  document.cookie = `${name}=${value}; expires=${new Date(parseInt(expires)).toGMTString()}; samesite=strict; path=/; ${window.location.protocol === 'https:' ? 'secure;' : ''}`;
 }
 
 function delCookie (name) {
