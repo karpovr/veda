@@ -56,22 +56,22 @@ export const pre = async function (individual, template, container, mode, extra)
     }
   }, true);
 
-  const arrow = template.querySelector('.arrow');
-  function showHideArrow () {
+  const folderState = template.querySelector('.folder-state');
+  function showHideFolderState () {
     if (individual.hasValue('v-s:hasFolder')) {
-      arrow.classList.remove('hide');
+      folderState.classList.remove('hide');
     } else {
-      arrow.classList.add('hide');
+      folderState.classList.add('hide');
     }
   }
-  individual.on('v-s:hasFolder', showHideArrow);
-  template.addEventListener('remove', () => individual.off('v-s:hasFolder', showHideArrow));
-  showHideArrow();
+  individual.on('v-s:hasFolder', showHideFolderState);
+  template.addEventListener('remove', () => individual.off('v-s:hasFolder', showHideFolderState));
+  showHideFolderState();
 
   const subFolder = template.querySelector('.sub-folder');
-  arrow.addEventListener('click', () => {
-    arrow.classList.toggle('arrow-right');
-    arrow.classList.toggle('arrow-down');
+  folderState.addEventListener('click', () => {
+    folderState.classList.toggle('folder-state-closed');
+    folderState.classList.toggle('folder-state-opened');
     subFolder.classList.toggle('hide');
   });
 };
@@ -114,7 +114,7 @@ export const html = `
         background-color:#eee;
         cursor: pointer;
       }
-      .folders-tree .arrow-right, .folders-tree .arrow-down {
+      .folders-tree .folder-state-closed, .folders-tree .folder-state-opened {
         border-radius:2em;
         cursor: pointer;
         width: 2em;
@@ -123,19 +123,19 @@ export const html = `
         left: -2em;
         color: black;
       }
-      .folders-tree .arrow-right::before, .folders-tree .arrow-down::before {
+      .folders-tree .folder-state-closed::before, .folders-tree .folder-state-opened::before {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
       }
-      .folders-tree .arrow-down::before {
+      .folders-tree .folder-state-opened::before {
         content: "▼";
       }
-      .folders-tree .arrow-right::before {
+      .folders-tree .folder-state-closed::before {
         content: "►";
       }
-      .folders-tree .arrow-right:hover, .folders-tree .arrow-down:hover {
+      .folders-tree .folder-state:hover {
         background-color:#eee;
       }
       .folders-tree .folder-actions {
@@ -155,7 +155,7 @@ export const html = `
       }
     </style>
     <div class="folder">
-      <div class="arrow arrow-down"></div>
+      <div class="folder-state folder-state-opened"></div>
       <div class="folder-name droppable" about="@" data-template="v-ui:LabelTemplate"></div>
       <div class="dropdown">
         <div class="folder-actions dropdown-toggle" data-toggle="dropdown">

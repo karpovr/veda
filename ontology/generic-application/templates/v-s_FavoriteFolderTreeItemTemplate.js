@@ -1,20 +1,20 @@
 export const pre = async function (individual, template, container, mode, extra) {
-  const arrow = template.querySelector('.arrow');
-  function showHideArrow () {
+  const folderState = template.querySelector('.folder-state');
+  function showHideFolderState () {
     if (individual.hasValue('v-s:hasFolder')) {
-      arrow.classList.remove('hide');
+      folderState.classList.remove('hide');
     } else {
-      arrow.classList.add('hide');
+      folderState.classList.add('hide');
     }
   }
-  individual.on('v-s:hasFolder', showHideArrow);
-  template.addEventListener('remove', () => individual.off('v-s:hasFolder', showHideArrow));
-  showHideArrow();
+  individual.on('v-s:hasFolder', showHideFolderState);
+  template.addEventListener('remove', () => individual.off('v-s:hasFolder', showHideFolderState));
+  showHideFolderState();
 
   const subFolder = template.querySelector('.sub-folder');
-  arrow.addEventListener('click', () => {
-    arrow.classList.toggle('arrow-right');
-    arrow.classList.toggle('arrow-down');
+  folderState.addEventListener('click', () => {
+    folderState.classList.toggle('folder-state-closed');
+    folderState.classList.toggle('folder-state-opened');
     subFolder.classList.toggle('hide');
   });
 };
@@ -22,7 +22,7 @@ export const pre = async function (individual, template, container, mode, extra)
 export const html = `
   <li>
     <div class="folder">
-      <div class="arrow arrow-down"></div>
+      <div class="folder-state folder-state-opened"></div>
       <div class="folder-name droppable" about="@" data-template="v-ui:LabelTemplate"></div>
       <div class="dropdown">
         <div class="folder-actions dropdown-toggle" data-toggle="dropdown">

@@ -126,15 +126,15 @@ export const html = `
 `;
 
 const dialogTemplate = `
-  <dialog class="dialog" style="border: 2px solid gray; border-radius: 0.5em; min-width:20em;">
-    <form class="form" method="dialog">
+  <dialog class="dialog" style="border: 2px solid gray; border-radius: 0.5em; min-width:30em;">
+    <form class="form clearfix" method="dialog">
       <div class="form-group">
         <label>Выберите папку</label>
         <select class="select-folder form-control"></select>
       </div>
-      <veda-control data-type="link" rel="v-s:itemOf" data-tree-root=""></veda-control>
       <button type="submit" class="submit-folder btn btn-primary">Ok</button>
-      <button type="button" class="cancel-folder btn btn-default">Удалить</button>
+      <button type="button" class="delete-favorite btn btn-link" about="v-s:Delete" property="rdfs:label">Удалить</button>
+      <button type="button" class="cancel-folder btn btn-default pull-right" about="v-s:Cancel" property="rdfs:label">Отмена</button>
     </form>
   </dialog>
 `;
