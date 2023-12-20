@@ -379,7 +379,8 @@ paths:
                   type: boolean
                   description: Optional flag to prepare events.
                 assigned_subsystems:
-                  type: byte
+                  type: integer
+                  format: byte
                   description: Optional byte value for assigned subsystems.
                 event_id:
                   type: string
@@ -408,6 +409,7 @@ paths:
           description: Custom error indicating a specific failure in processing the individual.
         '500':
           description: General server error indicating that the request could not be processed.
+
 
   /put_individuals:
     put:
@@ -438,7 +440,8 @@ paths:
                   type: boolean
                   description: Optional flag to prepare events.
                 assigned_subsystems:
-                  type: byte
+                  type: integer
+                  format: byte
                   description: Optional byte value for assigned subsystems.
                 event_id:
                   type: string
@@ -493,7 +496,8 @@ paths:
                   type: boolean
                   description: Optional flag to prepare events.
                 assigned_subsystems:
-                  type: byte
+                  type: integer
+                  format: byte
                   description: Optional byte value for assigned subsystems.
                 event_id:
                   type: string
@@ -554,7 +558,8 @@ paths:
                   type: boolean
                   description: Optional flag to prepare events.
                 assigned_subsystems:
-                  type: byte
+                  type: integer
+                  format: byte
                   description: Optional byte value for assigned subsystems.
                 event_id:
                   type: string
@@ -615,7 +620,8 @@ paths:
                   type: boolean
                   description: Optional flag to prepare events.
                 assigned_subsystems:
-                  type: byte
+                  type: integer
+                  format: byte
                   description: Optional byte value for assigned subsystems.
                 event_id:
                   type: string
@@ -676,7 +682,8 @@ paths:
                   type: boolean
                   description: Optional flag to prepare events.
                 assigned_subsystems:
-                  type: byte
+                  type: integer
+                  format: byte
                   description: Optional byte value for assigned subsystems.
                 event_id:
                   type: string
