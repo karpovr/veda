@@ -921,7 +921,7 @@ paths:
         description: The operation ID for which the state is being queried.
         schema:
           type: integer
-          format: int64 
+          format: int64 # Long integer type
           example: 12374976
       responses:
         '200':
@@ -929,7 +929,8 @@ paths:
           content:
             text/plain:
               schema:
-                type: integer
+                type: integer # Long integer type for the response
+                format: int64
                 example: 12374978
         '500':
           description: General server error indicating that the request could not be processed.
