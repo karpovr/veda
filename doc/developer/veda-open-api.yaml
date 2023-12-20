@@ -164,8 +164,6 @@ paths:
         '500':
           description: Server error indicating failure to retrieve the individuals.
 
-  # Existing paths...
-
   # Get access rights for a specific URI.
   /get_rights:
     get:
@@ -232,4 +230,126 @@ paths:
                 type: boolean   # Example of expected response type, replace as necessary.
         '500':
           description: Server error indicating failure to retrieve the operation state.
+
+  # Update or insert information about a specific individual.
+  /put_individual:
+    put:
+      summary: Put information for an individual.
+      description: Updates an existing individual or creates a new individual entity with the provided data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Individual entity data to be updated or inserted.
+      responses:
+        '200':
+          description: Individual was successfully updated or inserted.
+        '473':
+          description: Custom error response for validation or access errors.
+        '500':
+          description: Server error indicating failure to update or insert the individual.
+
+  # Update or insert information for multiple individuals at once.
+  /put_individuals:
+    put:
+      summary: Put information for multiple individuals.
+      description: Updates existing individuals or creates new individual entities with the provided list of data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+              description: An array of individual entity data to be updated or inserted.
+      responses:
+        '200':
+          description: Individuals were successfully updated or inserted.
+        '400':
+          description: Bad request with potential validation errors.
+        '500':
+          description: Server error indicating failure to update or insert individuals.
+
+  # Remove a specific individual by their URI.
+  /remove_individual:
+    put:
+      summary: Remove an individual by URI.
+      description: Deletes a specific individual entity given its URI.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Contains the URI of the individual to be removed.
+      responses:
+        '200':
+          description: The individual was successfully removed.
+        '473':
+          description: Custom error response for non-existing individuals or access errors.
+        '500':
+          description: Server error indicating failure to remove the individual.
+
+  # Remove a specific property or field from an individual's data.
+  /remove_from_individual:
+    put:
+      summary: Remove a field from an individual's data.
+      description: Deletes a specified field from an individual's data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Contains the URI and field data of the individual to be removed.
+      responses:
+        '200':
+          description: Field was successfully removed from the individual's data.
+        '473':
+          description: Custom error response for validation or access errors.
+        '500':
+          description: Server error indicating failure to remove the field.
+
+  # Set or replace a specific field in an individual's data.
+  /set_in_individual:
+    put:
+      summary: Set a field in an individual's data.
+      description: Sets or replaces a specific field in the data for an individual.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Contains the field data to be set in the individual's data.
+      responses:
+        '200':
+          description: Field was successfully set or replaced in the individual's data.
+        '473':
+          description: Custom error response indicating failure to set the field.
+        '500':
+          description: Server error.
+
+  # Add a field to an individual's data.
+  /add_to_individual:
+    put:
+      summary: Add a field to an individual's data.
+      description: Adds a new field to the data for an individual.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Contains the field data to be added to the individual's data.
+      responses:
+        '200':
+          description: Field was successfully added to the individual's data.
+        '473':
+          description: Custom error response indicating failure to add the field.
+        '500':
+          description: Server error.
 
