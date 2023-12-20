@@ -25,13 +25,20 @@ export const post = async function (individual, template, container, mode, extra
   $template.one('remove', () => individual.off('v-s:digitalSignature', showSignature));
   showSignature();
 
-  function showSignature () {
+  async function showSignature () {
     if (!individual.hasValue('v-s:digitalSignature')) {
       $('.signatures', $template).addClass('hidden');
       $('.verify-signature', $template).addClass('hidden');
     } else {
       $('.signatures', $template).removeClass('hidden');
       $('.verify-signature', $template).removeClass('hidden');
+      for (let i=0; individual['v-s:digitalSignature'].length; i++) {
+        const signFile = await individual['v-s:digitalSignature'][i].load();
+        if (signFile.hasValue('v-s:creator',veda.appointment.id)) {
+          $('.add-signature', $template).addClass('hidden');
+          break;
+        }
+      }
     }
   }
 
@@ -97,7 +104,7 @@ export const html = `
       <div class="signatures">
         <hr class="margin-sm"/>
         <strong about="v-s:digitalSignature" property="rdfs:label" class="view edit search"></strong>
-        <div rel="v-s:digitalSignature" data-template="v-ui:FileMinTemplate" class="-view edit search"></div>
+        <div about="@" rel="v-s:digitalSignature" data-template="v-ui:FileMinTemplate" class="-view edit search"></div>
         <ol rel="v-s:digitalSignature" class="view -edit -search" style="padding-inline-start: 0em; margin-inline-start: 1em;">
           <li class="margin-sm signature">
             <a href="/files/@">
