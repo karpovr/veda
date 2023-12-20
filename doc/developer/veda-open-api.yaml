@@ -1,85 +1,98 @@
 openapi: '3.0.0'
 info:
-  title: Veda Platform API
-  version: '1.0.0'
-  description: API specification for the Veda platform.
+  title: Veda Platform HTTP Interface
+  version: '1.0'
+  description: API for interacting with the Veda platform services.
 
 servers:
-  - url: 'http://example.com'  # The base path for the API endpoints.
+  - url: 'http://example.com/api'  # Replace with your actual API base path
 
 paths:
 
  # Authentication endpoint to retrieve user ticket (session).
   /authenticate:
     get:
-      summary: Authenticate a user and retrieve a session ticket.
+      summary: Authenticate a user
+      description: Authenticates the user using login and password and returns authentication details.
       parameters:
         - name: login
           in: query
           required: true
           schema:
             type: string
-          description: User's login name.
+          description: Login of the user.
         - name: password
           in: query
           required: true
           schema:
             type: string
-          description: User's password (hashed).
+          description: Hashed password of the user.
         - name: secret
           in: query
           schema:
             type: string
-          description: An optional shared secret for extra security.
+          description: Optional secret for additional security.
       responses:
         '200':
-          description: Successful authentication with ticket information.
+          description: Authentication was successful and user info is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  end_time:
+                    type: integer
+                  id:
+                    type: string
+                  result:
+                    type: integer
+                  user_uri:
+                    type: string
         '472':
-          description: Custom application error.
+          description: Custom application error code indicating failure.
         '500':
-          description: Server error indicating failure in the authentication process.
+          description: Server error.
 
   # Check if the provided ticket is still valid.
   /is_ticket_valid:
     get:
-      summary: Check the validity of the user's session ticket.
+      summary: Check ticket validity
+      description: Validates if the provided ticket is still active and valid.
       parameters:
         - name: ticket
           in: query
           required: true
           schema:
             type: string
-          description: The session ticket of the user.
       responses:
         '200':
-          description: A boolean value indicating the validity of the ticket.
+          description: Ticket is confirmed to be valid.
         '472':
-          description: Custom application error.
+          description: Ticket is invalid or expired.
         '500':
-          description: Server error.
+          description: Server error while validating ticket.
 
   # Get a ticket trusted for use by another user, based on an existing ticket.
   /get_ticket_trusted:
     get:
-      summary: Get a session ticket for a different user based on an existing ticket.
+      summary: Get ticket for another user by a trusted source
+      description: Obtains a ticket for another user using an existing trusted ticket.
       parameters:
         - name: ticket
           in: query
           required: true
           schema:
             type: string
-          description: The existing session ticket.
         - name: login
           in: query
           required: true
           schema:
             type: string
-          description: The login name of the user for whom the new ticket is being requested.
       responses:
         '200':
-          description: Returns a ticket for the specified user.
+          description: Successfully retrieved a ticket for another user.
         '473':
-          description: Custom application error with sample content provided.
+          description: Failure in obtaining ticket due to permissions or other issues.
         '500':
           description: Server error.
 
@@ -131,131 +144,66 @@ paths:
           description: Custom application error.
         '500':
           description: Server error.
-  
-  # Retrieve a specific individual's data by their URI.
-  /get_individual:
-    get:
-      summary: Retrieve data for a specific individual by URI.
-      description: Fetches all available information about an individual entity given its URI.
-      parameters:
-        # ... existing parameters ...
-      responses:
-        '200':
-          description: Successfully retrieved individual data.
-        '472':
-          description: Custom error response for non-existing individuals or access errors.
-        '500':
-          description: Server error indicating failure to retrieve the individual.
-  
+
   # Retrieve multiple individuals' data by a list of URIs.
   /get_individuals:
     post:
-      summary: Retrieve data for multiple individuals by a list of URIs.
-      description: Fetches all available information for a list of individual entities.
+      summary: Get more individuals
+      description: Retrieve multiple individuals' data by their URIs.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              properties:
+                ticket:
+                  type: string
+                  description: The session ticket for authentication.
+                uris:
+                  type: array
+                  items:
+                    type: string
+                  description: A list of URIs identifying the individuals to be fetched.
+                reopen:
+                  type: boolean
+                  description: An optional flag to reopen the resources.
       responses:
         '200':
-          description: Successfully retrieved multiple individuals' data.
-        '500':
-          description: Server error indicating failure to retrieve the individuals.
-
-  # Get access rights for a specific URI.
-  /get_rights:
-    get:
-      summary: Retrieve access rights for a given URI.
-      description: Returns the access rights of the user over a specified resource.
-      parameters:
-        # ... existing parameters ...
-      responses:
-        '200':
-          description: Successfully retrieved access rights.
-        '500':
-          description: Server error indicating failure to retrieve the access rights.
-
-  # Get the origin of access rights for a specific URI.
-  /get_rights_origin:
-    get:
-      summary: Retrieve the origin of access rights for a given URI.
-      description: Provides detailed information about why a user has specific access rights to a resource.
-      parameters:
-        # ... existing parameters ...
-      responses:
-        '200':
-          description: Successfully retrieved access rights' origin information.
-        '500':
-          description: Server error indicating failure to retrieve the origins of access rights.
-      
-  # Get the membership information related to a specific URI.
-  /get_membership:
-    get:
-      summary: Retrieve membership information for a given URI.
-      description: Returns all membership information associated with a particular resource or user.
-      parameters:
-        # ... existing parameters ...
-      responses:
-        '200':
-          description: Successfully retrieved membership information.
-        '500':
-          description: Server error indicating failure to retrieve the membership information.
-
-  # Retrieve the current state of an operation given its operation ID.
-  /get_operation_state:
-    get:
-      summary: Retrieve the current state of an operation.
-      description: Obtains the current state or result of a long-running or asynchronous operation.
-      parameters:
-        - name: module_id
-          in: query
-          description: The identifier of the module processing the operation.
-          required: true
-          schema:
-            type: integer
-        - name: wait_op_id
-          in: query
-          description: The operation ID to wait for completion.
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Successfully retrieved the state of the operation.
+          description: List of individuals with their data.
           content:
             application/json:
               schema:
-                type: boolean   # Example of expected response type, replace as necessary.
+                type: array
+                items:
+                  type: object
         '500':
-          description: Server error indicating failure to retrieve the operation state.
+          description: Server error.
 
   # Update or insert information about a specific individual.
   /put_individual:
     put:
-      summary: Put information for an individual.
-      description: Updates an existing individual or creates a new individual entity with the provided data.
+      summary: Put one individual
+      description: Create or update data for a single individual.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              description: Individual entity data to be updated or inserted.
+              description: The data of the individual to be created or updated.
       responses:
         '200':
-          description: Individual was successfully updated or inserted.
+          description: Individual has been successfully put.
         '473':
-          description: Custom error response for validation or access errors.
+          description: Custom error code indicating failure to put the individual.
         '500':
-          description: Server error indicating failure to update or insert the individual.
+          description: Server error.
 
-  # Update or insert information for multiple individuals at once.
   /put_individuals:
     put:
-      summary: Put information for multiple individuals.
-      description: Updates existing individuals or creates new individual entities with the provided list of data.
+      summary: Put multiple individuals
+      description: Create or update data for multiple individuals.
       requestBody:
         required: true
         content:
@@ -264,92 +212,173 @@ paths:
               type: array
               items:
                 type: object
-              description: An array of individual entity data to be updated or inserted.
+              description: An array of individuals to be created or updated.
       responses:
         '200':
-          description: Individuals were successfully updated or inserted.
+          description: Individuals have been successfully put.
         '400':
-          description: Bad request with potential validation errors.
+          description: Bad request due to invalid data format or content.
         '500':
-          description: Server error indicating failure to update or insert individuals.
+          description: Server error.
 
-  # Remove a specific individual by their URI.
   /remove_individual:
     put:
-      summary: Remove an individual by URI.
-      description: Deletes a specific individual entity given its URI.
+      summary: Remove one individual
+      description: Remove an individual by URI.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              description: Contains the URI of the individual to be removed.
+              description: Data representing the individual to remove.
       responses:
         '200':
-          description: The individual was successfully removed.
+          description: Individual has been successfully removed.
         '473':
-          description: Custom error response for non-existing individuals or access errors.
+          description: Custom error code indicating failure to remove the individual.
         '500':
-          description: Server error indicating failure to remove the individual.
+          description: Server error. 
 
-  # Remove a specific property or field from an individual's data.
   /remove_from_individual:
     put:
-      summary: Remove a field from an individual's data.
-      description: Deletes a specified field from an individual's data.
+      summary: Remove field from individual
+      description: Remove a field from an individual's data by URI and field details.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              description: Contains the URI and field data of the individual to be removed.
+              description: Data representing the field to remove from the individual.
       responses:
         '200':
-          description: Field was successfully removed from the individual's data.
+          description: Field has been successfully removed from the individual.
         '473':
-          description: Custom error response for validation or access errors.
+          description: Custom error code indicating failure.
         '500':
-          description: Server error indicating failure to remove the field.
+          description: Server error. 
 
-  # Set or replace a specific field in an individual's data.
   /set_in_individual:
     put:
-      summary: Set a field in an individual's data.
-      description: Sets or replaces a specific field in the data for an individual.
+      summary: Set field into individual
+      description: Set or replace a field for an individual by URI and the new field data.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              description: Contains the field data to be set in the individual's data.
+              description: Data representing the field to set or replace in the individual.
       responses:
         '200':
-          description: Field was successfully set or replaced in the individual's data.
+          description: Field set or replaced successfully in the individual.
         '473':
-          description: Custom error response indicating failure to set the field.
+          description: Custom error indicating failure to set the field.
         '500':
           description: Server error.
 
   # Add a field to an individual's data.
   /add_to_individual:
     put:
-      summary: Add a field to an individual's data.
-      description: Adds a new field to the data for an individual.
+      summary: Add field into individual
+      description: Add a new field to an individual's data by URI and new field details.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              description: Contains the field data to be added to the individual's data.
+              description: Data representing the new field to add to the individual.
       responses:
         '200':
-          description: Field was successfully added to the individual's data.
+          description: Field added successfully to the individual.
         '473':
-          description: Custom error response indicating failure to add the field.
+          description: Custom error indicating failure to add the field.
+        '500':
+          description: Server error.
+
+  /get_rights:
+    get:
+      summary: Get access rights on uri
+      description: Retrieve the access rights a user has for a particular URI.
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: uri
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the access rights.
+        '500':
+          description: Server error.
+
+  /get_rights_origin:
+    get:
+      summary: Get origin of access rights on uri
+      description: Retrieve the origin of access rights given to a user for a particular URI.
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: uri
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the origin of the access rights.
+        '500':
+          description: Server error.
+
+  /get_membership:
+    get:
+      summary: Get membership of uri
+      description: Retrieve the membership details related to a specific URI.
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: uri
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the membership details.
+        '500':
+          description: Server error.
+
+  /get_operation_state:
+    get:
+      summary: Get operation state
+      description: Retrieve the state of an asynchronous operation.
+      parameters:
+        - name: module_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: wait_op_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved the operation state.
         '500':
           description: Server error.
 
