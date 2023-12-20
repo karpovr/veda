@@ -72,6 +72,7 @@ export const post = async function (individual, template, container, mode, extra
             .prepend('<i class="glyphicon glyphicon-ok-circle text-success"></i>')
             .append('<strong><small><i class="text-success">Подпись верна</i></small></strong>');
         } catch (error) {
+          console.log(error);
           signatureView
             .prepend('<i class="glyphicon glyphicon-remove-circle text-danger"></i>')
             .append(`<strong><small><i class="text-danger" title="${error}">Подпись не верна</i></small></strong>`);
@@ -82,6 +83,9 @@ export const post = async function (individual, template, container, mode, extra
 
     if ($container.data('with-btn') == 'false' || $container.data('with-btn') == false) {
       $('.actions', $template).remove();
+    }
+    if ($container.data('with-btn') == 'true' || $container.data('with-btn') == true) {
+      $('.actions', $template).removeAttr('hidden');
     }
   });
 };
