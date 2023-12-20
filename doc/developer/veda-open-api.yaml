@@ -1,0 +1,235 @@
+openapi: '3.0.0'
+info:
+  title: Veda Platform API
+  version: '1.0.0'
+  description: API specification for the Veda platform.
+
+servers:
+  - url: 'http://example.com'  # The base path for the API endpoints.
+
+paths:
+
+ # Authentication endpoint to retrieve user ticket (session).
+  /authenticate:
+    get:
+      summary: Authenticate a user and retrieve a session ticket.
+      parameters:
+        - name: login
+          in: query
+          required: true
+          schema:
+            type: string
+          description: User's login name.
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+          description: User's password (hashed).
+        - name: secret
+          in: query
+          schema:
+            type: string
+          description: An optional shared secret for extra security.
+      responses:
+        '200':
+          description: Successful authentication with ticket information.
+        '472':
+          description: Custom application error.
+        '500':
+          description: Server error indicating failure in the authentication process.
+
+  # Check if the provided ticket is still valid.
+  /is_ticket_valid:
+    get:
+      summary: Check the validity of the user's session ticket.
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The session ticket of the user.
+      responses:
+        '200':
+          description: A boolean value indicating the validity of the ticket.
+        '472':
+          description: Custom application error.
+        '500':
+          description: Server error.
+
+  # Get a ticket trusted for use by another user, based on an existing ticket.
+  /get_ticket_trusted:
+    get:
+      summary: Get a session ticket for a different user based on an existing ticket.
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The existing session ticket.
+        - name: login
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The login name of the user for whom the new ticket is being requested.
+      responses:
+        '200':
+          description: Returns a ticket for the specified user.
+        '473':
+          description: Custom application error with sample content provided.
+        '500':
+          description: Server error.
+
+  # Execute a full text search query against the stored data.
+  /query:
+    post:
+      summary: Execute a full text search query.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            description: Includes the search query and other optional parameters.
+      responses:
+        '200':
+          description: Query results, possibly empty if no entities are found.
+        '400':
+          description: Bad request with sample content error.
+        '500':
+          description: Server error.
+
+  # Retrieve information about a specific individual by URI.
+  /get_individual:
+    get:
+      summary: Retrieve all data related to a single individual by its URI.
+      parameters:
+        - name: ticket
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The session ticket of the user.
+        - name: uri
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The unique identifier (URI) of the individual.
+        - name: reopen
+          in: query
+          schema:
+            type: boolean
+          description: An optional flag to indicate if the request should reopen the data.
+      responses:
+        '200':
+          description: The detailed information of the individual entity.
+        '473':
+          description: Custom application error.
+        '500':
+          description: Server error.
+  
+  # Retrieve a specific individual's data by their URI.
+  /get_individual:
+    get:
+      summary: Retrieve data for a specific individual by URI.
+      description: Fetches all available information about an individual entity given its URI.
+      parameters:
+        # ... existing parameters ...
+      responses:
+        '200':
+          description: Successfully retrieved individual data.
+        '472':
+          description: Custom error response for non-existing individuals or access errors.
+        '500':
+          description: Server error indicating failure to retrieve the individual.
+  
+  # Retrieve multiple individuals' data by a list of URIs.
+  /get_individuals:
+    post:
+      summary: Retrieve data for multiple individuals by a list of URIs.
+      description: Fetches all available information for a list of individual entities.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successfully retrieved multiple individuals' data.
+        '500':
+          description: Server error indicating failure to retrieve the individuals.
+
+  # Existing paths...
+
+  # Get access rights for a specific URI.
+  /get_rights:
+    get:
+      summary: Retrieve access rights for a given URI.
+      description: Returns the access rights of the user over a specified resource.
+      parameters:
+        # ... existing parameters ...
+      responses:
+        '200':
+          description: Successfully retrieved access rights.
+        '500':
+          description: Server error indicating failure to retrieve the access rights.
+
+  # Get the origin of access rights for a specific URI.
+  /get_rights_origin:
+    get:
+      summary: Retrieve the origin of access rights for a given URI.
+      description: Provides detailed information about why a user has specific access rights to a resource.
+      parameters:
+        # ... existing parameters ...
+      responses:
+        '200':
+          description: Successfully retrieved access rights' origin information.
+        '500':
+          description: Server error indicating failure to retrieve the origins of access rights.
+      
+  # Get the membership information related to a specific URI.
+  /get_membership:
+    get:
+      summary: Retrieve membership information for a given URI.
+      description: Returns all membership information associated with a particular resource or user.
+      parameters:
+        # ... existing parameters ...
+      responses:
+        '200':
+          description: Successfully retrieved membership information.
+        '500':
+          description: Server error indicating failure to retrieve the membership information.
+
+  # Retrieve the current state of an operation given its operation ID.
+  /get_operation_state:
+    get:
+      summary: Retrieve the current state of an operation.
+      description: Obtains the current state or result of a long-running or asynchronous operation.
+      parameters:
+        - name: module_id
+          in: query
+          description: The identifier of the module processing the operation.
+          required: true
+          schema:
+            type: integer
+        - name: wait_op_id
+          in: query
+          description: The operation ID to wait for completion.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved the state of the operation.
+          content:
+            application/json:
+              schema:
+                type: boolean   # Example of expected response type, replace as necessary.
+        '500':
+          description: Server error indicating failure to retrieve the operation state.
+
