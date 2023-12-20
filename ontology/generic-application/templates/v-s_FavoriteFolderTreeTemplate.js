@@ -164,7 +164,6 @@ export const html = `
         <ul class="dropdown-menu">
           <li><a class="create" href="#">Создать папку</a></li>
           <li><a class="rename" href="#">Переименовать</a></li>
-          <li><a class="delete" href="#">Удалить</a></li>
         </ul>
       </div>
     </div>
