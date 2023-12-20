@@ -920,7 +920,8 @@ paths:
         required: true
         description: The operation ID for which the state is being queried.
         schema:
-          type: long
+          type: integer
+          format: int64 
           example: 12374976
       responses:
         '200':
