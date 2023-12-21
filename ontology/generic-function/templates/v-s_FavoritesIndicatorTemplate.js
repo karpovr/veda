@@ -25,8 +25,8 @@ export const pre = async function (individual, template, container, mode, extra)
           template.find('.tooltip-inner').text(title.toString());
           return title.toString();
         } catch (error) {
-          console.error('Error loading tooltip title:', error);
-          return 'Error';
+          console.error('Ошибка загрузки подсказки:', error);
+          return 'Ошибка загрузки подсказки';
         }
       },
     })
@@ -44,7 +44,7 @@ export const pre = async function (individual, template, container, mode, extra)
         template.toggleClass('fa-star', isFavoriteFolder).toggleClass('fa-star-o', !isFavoriteFolder);
       }
     } catch (error) {
-      console.error('Error indicating favorite:', error);
+      console.error('Произошла ошибка при индикации избранного:', error);
     }
   }
 
@@ -102,7 +102,7 @@ export const pre = async function (individual, template, container, mode, extra)
 
           addFolderDialog.close();
         } catch (error) {
-          console.error('Error creating folder:', error);
+          console.error('Произошла ошибка при создании папки:', error);
           alert('Произошла ошибка при создании папки. Пожалуйста, попробуйте еще раз.');
         }
       });
@@ -142,7 +142,7 @@ export const pre = async function (individual, template, container, mode, extra)
           await indicateFavorite();
           document.body.removeChild(container);
         } catch (error) {
-          console.error('Error saving favorite:', error);
+          console.error('Ошибка сохранения избранного:', error);
           alert('Произошла ошибка при сохранении избранного. Пожалуйста, попробуйте еще раз.');
         }
       });
@@ -166,7 +166,7 @@ export const pre = async function (individual, template, container, mode, extra)
           submit.value = '';
           dialog.close();
         } catch (error) {
-          console.error('Error removing favorite:', error);
+          console.error('Ошибка удаления избранного:', error);
           alert('Произошла ошибка при удалении избранного. Пожалуйста, попробуйте еще раз.');
         }
       });
@@ -175,7 +175,7 @@ export const pre = async function (individual, template, container, mode, extra)
       dialog.returnValue = '';
       dialog.showModal();
     } catch (error) {
-      console.error('Error displaying subscription dialog:', error);
+      console.error('Ошибка отображения диалога подписки:', error);
       alert('Произошла ошибка при отображении диалога подписки. Пожалуйста, попробуйте еще раз.');
     }
   }
