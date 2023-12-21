@@ -1,39 +1,3 @@
-import $ from 'jquery';
-
-export const post = function (individual, template, container, mode, extra) {
-  template = $(template);
-  container = $(container);
-
-  let subscriptions = individual['v-s:hasFavorite'];
-  const subscribeDiff = [];
-  function favoriteHandler () {
-    if (individual['v-s:hasFavorite'].length < subscriptions.length) {
-      subscriptions.forEach(function (subscribe) {
-        const isExist = individual['v-s:hasFavorite'].some(function (f) {
-          return f.id == subscribe.id;
-        });
-        if (!isExist) subscribeDiff.push(subscribe);
-      });
-    }
-    subscriptions = individual['v-s:hasFavorite'];
-  }
-
-  function saveHandler () {
-    if (subscribeDiff.length > 0) {
-      subscribeDiff.forEach(function (subscribe) {
-        subscribe.remove();
-      });
-    }
-  }
-
-  individual.on('beforeSave', saveHandler);
-  individual.on('v-s:hasFavorite', favoriteHandler);
-  template.one('remove', function () {
-    individual.off('v-s:hasFavorite', favoriteHandler);
-    individual.off('beforeSave', saveHandler);
-  });
-};
-
 export const html = `
   <div class="container">
     <ul class="nav nav-right" role="tablist">
@@ -89,15 +53,6 @@ export const html = `
         </div>
       </div>
     </div>
-    <!--div class="sheet">
-      <h4 class="text-center" style="text-transform: uppercase">
-        <i class="fa fa-star text-muted margin-md-h"></i><span about="v-s:Favorites" property="rdfs:label"></span>
-      </h4>
-      <hr class="margin-lg" />
-      <ol rel="v-s:hasFavorite" class="columns-3">
-        <li rel="v-s:onDocument" data-template="v-ui:ClassNameLabelLinkTemplate"></li>
-      </ol>
-    </div-->
     <div class="sheet" about="@" data-template="v-s:FavoritesTemplate"></div>
   </div>
 `;
