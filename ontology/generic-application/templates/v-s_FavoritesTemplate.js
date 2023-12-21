@@ -160,6 +160,11 @@ export const html = `
   <h4 class="text-center" style="text-transform: uppercase">
     <i class="fa fa-star text-muted margin-md-h"></i><span about="v-s:Favorites" property="rdfs:label"></span>
   </h4>
+  <ol rel="v-s:hasFavorite" class="columns-3 no-margin">
+    <li draggable="true">
+      <div rel="v-s:onDocument" data-template="v-ui:ClassNameLabelLinkTemplate"></div>
+    </li>
+  </ol>
   <hr class="margin-lg" />
   <div class="row">
     <div class="col-lg-4 col-12">
