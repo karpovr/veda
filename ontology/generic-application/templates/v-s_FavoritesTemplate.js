@@ -1,7 +1,26 @@
 import IndividualModel from '/js/common/individual_model.js';
 import {delegateHandler, clear} from '/js/browser/dom_helpers.js';
 
+async function createDefaultFavoritesFolder () {
+  try {
+    if (veda.user.aspect.hasValue('v-s:hasFavoriteFolder')) return;
+
+    const folder = new IndividualModel();
+    folder['rdf:type'] = 'v-s:Folder';
+    folder['rdfs:label'] = ['Избранное^ru', 'Favorites^en'];
+
+    await folder.save();
+    await veda.user.aspect.addValue('v-s:hasFavoriteFolder', folder);
+    await veda.user.aspect.save();
+  } catch (error) {
+    console.error('Ошибка при создании папки Избранное:', error);
+    alert('Произошла ошибка при создании папки Избранное. Пожалуйста, попробуйте еще раз.');
+  }
+}
+
 export const pre = async function (individual, template, container, mode, extra) {
+  await createDefaultFavoritesFolder();
+
   setDragDrop(template);
 
   delegateHandler(template, 'click', '.content .delete', async function (e) {
