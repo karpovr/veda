@@ -17,11 +17,11 @@ export default IndividualPresenter;
 
 /**
  * Individual presenter method for IndividualModel class
- * @param {Element} container - container to render individual to
- * @param {IndividualModel|string} template - template to render individual with
- * @param {string} mode - view | edit | search
- * @param {Object} extra - extra parameters to pass ro template
- * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
+ * @param {Element|string|jQuery} container - Container element or selector for rendering the individual
+ * @param {IndividualModel|string} template - Template individual or URI of the template to render the individual with
+ * @param {string} mode - Mode for rendering: 'view' | 'edit' | 'search'
+ * @param {Object} extra - Extra parameters to pass to the template
+ * @param {Boolean} toAppend - Flag defining whether to append or replace the container's content with the rendered template
  * @return {Promise}
  */
 function IndividualPresenter (container, template, mode, extra, toAppend) {
@@ -68,9 +68,9 @@ function IndividualPresenter (container, template, mode, extra, toAppend) {
 }
 
 /**
- * Get template string
- * @param {IndividualModel|string|HTMLElement} template
- * @return {Promise<{name, template}>}
+ * Load the template associated with the individual.
+ * @param {IndividualModel|string|HTMLElement} template - Template individual, URI, or HTML element
+ * @return {Promise<{name, template}>} - Promise that resolves with the template name and string
  */
 function getTemplate (template) {
   const reg_uri = /^[a-z][a-z-0-9]*:([a-zA-Z0-9-_])*$/;
@@ -100,14 +100,14 @@ function getTemplate (template) {
       templateString: template.outerHTML,
     };
   }
-  const generic = new IndividualModel('v-ui:generic');
+  const generic = new IndividualModel('v-ui:ResourceTemplate');
   return getTemplate(generic);
 }
 
 /**
- * Show success message
- * @param {Promise} result
- * @return {void}
+ * Handle success response.
+ * @param {Promise} result - Result promise
+ * @return {Promise} - Resolved result promise
  */
 function successHandler (result) {
   const successMsg = new IndividualModel('v-s:SuccessBundle');
@@ -118,9 +118,9 @@ function successHandler (result) {
 }
 
 /**
- * Show error message
- * @param {Error} error to handle
- * @throw {Error}
+ * Handle error response.
+ * @param {Error} error - Error to handle
+ * @throw {Error} - Thrown error
  */
 function errorHandler (error) {
   if (error instanceof BackendError) {
@@ -139,11 +139,10 @@ function errorHandler (error) {
 }
 
 /**
- * Print error message in coontainer
- * @param {Error} error to print
- * @param {Object} container for error
- * @this {IndividualModel}
- * @return {HTMLElement}
+ * Print error message in container.
+ * @param {Error} error - Error to print
+ * @param {Object} container - Container for error
+ * @return {HTMLElement} - Error message element
  */
 function errorPrinter (error, container) {
   console.error(`Presenter failed: ${this.id}`);
@@ -183,9 +182,9 @@ function errorPrinter (error, container) {
 }
 
 /**
- * Wrap template
- * @param {String} html
- * @return {HTMLElement}
+ * Wrap the template with a wrapper element.
+ * @param {String} html - Template HTML string
+ * @return {HTMLElement} - Wrapped template element
  */
 function wrap (html) {
   html = html.trim();
@@ -214,13 +213,13 @@ function wrap (html) {
 
 /**
  * Render template
- * @param {IndividualModel} individual - individual to render
- * @param {Element} container - container to render individual to
- * @param {IndividualModel|string} templateString - template string to render individual with
- * @param {string} name - name of template for sourceURL
- * @param {string} mode - view | edit | search
- * @param {Object} extra - extra parameters to pass ro template
- * @param {Boolean} toAppend - flag defining either to append or replace the container's content with rendered template
+ * @param {IndividualModel} individual - Individual to render
+ * @param {Element} container - Container element to render the individual to
+ * @param {IndividualModel|string} templateString - Template string or template individual to render the individual with
+ * @param {string} name - Name of the template for sourceURL
+ * @param {string} mode - Mode for rendering: 'view' | 'edit' | 'search'
+ * @param {Object} extra - Extra parameters to pass to the template
+ * @param {Boolean} toAppend - Flag defining whether to append or replace the container's content with the rendered template
  * @return {Promise}
  */
 function renderTemplate (individual, container, templateString, name, mode, extra, toAppend) {

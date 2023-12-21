@@ -1,0 +1,69 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix v-ft: <http://semantic-machines.com/veda/veda-function-tasks/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+<http://semantic-machines.com/veda/veda-aspect>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология аспекта системы Веда. Избранное"@ru ;
+  rdfs:label "Veda system aspect ontology. Favorites"@en ;
+#  owl:versionInfo "1.1" ;
+  v-s:loadPriority 9 ;
+.
+v-s:hasFavorite
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range rdfs:Resource ;
+  rdfs:label "Избранное"@ru ;
+  rdfs:label "Favorite"@en ;
+.
+v-s:hasFavoriteFolder
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:Folder ;
+  rdfs:label "Папка избранного"@ru ;
+  rdfs:label "Favorites folder"@en ;
+.
+v-s:chosenFavoriteFolder
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:Folder ;
+  rdfs:label "Выбранная папка избранного"@ru ;
+  rdfs:label "Chosen favorites folder"@en ;
+.
+v-s:FavoritesTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения избранного"@ru ;
+  rdfs:label "Favorites template"@en ;
+  v-ui:forClass v-s:Aspect ;
+  v-ui:template "v-s_FavoritesTemplate.js";
+.
+v-s:FavoriteFolderTreeTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения дерева папок"@ru ;
+  rdfs:label "Favorite folder tree template"@en ;
+  v-ui:forClass v-s:Folder ;
+  v-ui:template "v-s_FavoriteFolderTreeTemplate.js";
+.
+v-s:FavoriteFolderTreeItemTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения единицы дерева папок"@ru ;
+  rdfs:label "Favorite folder tree item template"@en ;
+  v-ui:forClass v-s:Folder ;
+  v-ui:template "v-s_FavoriteFolderTreeItemTemplate.js";
+.
+
+################### Rights
+
+v-s:Permission_Folder_AllUsersGroup_C
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:Folder ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:canCreate true ;
+.

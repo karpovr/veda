@@ -1,0 +1,83 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix v-ft: <http://semantic-machines.com/veda/veda-function-tasks/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix td: <http://semantic-machines.com/veda/test-data/> .
+
+<http://semantic-machines.com/veda/veda-distribution-list>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология аспекта системы Веда. Список рассылки"@ru ;
+  rdfs:label "Veda system aspect ontology. Distribution list"@en ;
+#  owl:versionInfo "1.1" ;
+  v-s:loadPriority 9 ;
+.
+v-s:DistributionList
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:List ;
+  rdfs:label "Список рассылки"@ru ;
+  rdfs:label "Distribution list"@en ;
+.
+v-s:hasDistributionList
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:DistributionList ;
+  rdfs:label "Список рассылки"@ru ;
+  rdfs:label "Distribution list"@en ;
+.
+v-s:chosenDistributionList
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-s:Aspect ;
+  rdfs:range v-s:DistributionList ;
+  rdfs:label "Выбранный список рассылки"@ru ;
+  rdfs:label "Chosen distribution list"@en ;
+.
+v-s:DistributionListTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон отображения списка рассылки"@ru ;
+  rdfs:label "Distribution list template"@en ;
+  v-ui:forClass v-s:DistributionList ;
+  v-ui:template "v-s_DistributionListTemplate.js" ;
+.
+v-s:ChooseDistributionListTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон выбора списка рассылки"@ru ;
+  rdfs:label "Choose distribution list template"@en ;
+  v-ui:forClass v-s:Aspect ;
+  v-ui:template "v-s_ChooseDistributionListTemplate.js" ;
+.
+
+v-s:PS_chosenDistributionList_PersonalAspect
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:PersonalAspect ;
+  v-ui:forProperty v-s:chosenDistributionList ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 1 ;
+  v-ui:queryPrefix "'rdf:type'==='v-s:DistributionList' && 'v-s:creator' == {{veda.appointment.id}}" ;
+  rdfs:label "Спецификация свойства v-s:chosenDistributionList для класса v-s:PersonalAspect"@ru ;
+  rdfs:label "v-s:chosenDistributionList property specification for v-s:PersonalAspect class"@en ;
+.
+v-s:PS_hasItem_DistributionList
+  rdf:type v-ui:ObjectPropertySpecification ;
+  v-ui:forClass v-s:DistributionList ;
+  v-ui:forProperty v-s:hasItem ;
+  v-ui:minCardinality 0 ;
+  v-ui:maxCardinality 400 ;
+  v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' && 'v-s:employee.v-s:hasAccount.isExists'=='true' && 'v-s:official'=='true') || ('rdf:type'=='v-s:Position' && 'v-s:origin'=='Role')" ;
+  rdfs:label "Спецификация свойства v-s:hasItem для класса v-s:DistributionList"@ru ;
+  rdfs:label "v-s:hasItem property specification for v-s:DistributionList class"@en ;
+.
+
+################### Rights
+
+v-s:Permission_DistributionList_AllUsersGroup_C
+  rdf:type v-s:PermissionStatement ;
+  v-s:permissionObject v-s:DistributionList ;
+  v-s:permissionSubject cfg:AllUsersGroup ;
+  v-s:canCreate true ;
+.
