@@ -410,10 +410,10 @@ function handleLoginSuccess (authResult) {
   const enterLoginPassword = loginForm.querySelector('#enter-login-password');
 
   const alerts = loginForm.querySelectorAll('.alert');
-  Array.prototype.forEach.call(alerts, (alert) => hide(alert));
+  alerts.forEach((alert) => hide(alert));
 
   const inputs = loginForm.querySelectorAll('input:not(#login)');
-  Array.prototype.forEach.call(inputs, (input) => input.value = '');
+  inputs.forEach((input) => input.value = '');
 
   const ok = loginForm.querySelector('.btn.ok');
   hide(ok);
@@ -530,7 +530,7 @@ function handleAuthSuccess (authResult, isBroadcast = false) {
         console.log('Refresh ticket in background.');
         Backend.get_ticket_trusted(veda.ticket).then(handleAuthSuccess).catch(handleAuthError);
       }
-    }, 10000);
+    }, Math.ceil(lifetime / 10 || 10000));
   }
 }
 
