@@ -174,11 +174,11 @@ export const html = `
   <hr class="margin-lg" />
   <div class="row">
     <div class="col-lg-4 col-12">
-      <div class="folders-list sheet">
+      <div class="folders-list">
         <ul style="margin:0;" class="folders-tree" about="@" rel="v-s:hasFavoriteFolder" data-template="v-s:FavoriteFolderTreeTemplate"></ul>
       </div>
     </div>
-    <div class="col-lg-8 col-12 sheet">
+    <div class="col-lg-8 col-12">
       <div class="content"></div>
       <i class="text-muted margin-xl-h"><small>Избранные документы можно перемещать по спискам, используя перетаскивание</small></i>
     </div>
