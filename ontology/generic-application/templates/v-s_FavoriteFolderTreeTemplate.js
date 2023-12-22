@@ -93,6 +93,7 @@ export const html = `
     <style scoped>
       .folders-tree ul.sub-folder {
         padding-top:0.5em;
+        padding-bottom:0.5em;
         padding-left:2em;
       }
       .folders-tree ul.sub-folder:empty {

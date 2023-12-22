@@ -188,8 +188,8 @@ export const pre = async function (individual, template, container, mode, extra)
           <select class="select-folder form-control"></select>
         </div>
         <button type="submit" class="submit-folder btn btn-primary">Ok</button>
+        <button type="button" class="cancel-folder btn btn-default" about="v-s:Cancel" property="rdfs:label">Отмена</button>
         <button type="button" class="remove-favorite btn btn-link" about="v-s:Delete" property="rdfs:label">Удалить</button>
-        <button type="button" class="cancel-folder btn btn-default pull-right" about="v-s:Cancel" property="rdfs:label">Отмена</button>
         <button type="button" class="add-folder-button btn btn-default pull-right margin-sm-h">Создать папку</button>
       </form>
 
