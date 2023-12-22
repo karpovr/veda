@@ -100,7 +100,7 @@ function getTemplate (template) {
       templateString: template.outerHTML,
     };
   }
-  const generic = new IndividualModel('v-ui:ResourceTemplate');
+  const generic = new IndividualModel('v-ui:generic');
   return getTemplate(generic);
 }
 
@@ -558,7 +558,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
 
   wrapper.querySelectorAll('[id*=\'@\']:not([rel] *):not([about] *)').forEach((node) => {
     const id = node.getAttribute('id');
-    node.setAttribute('id', style.replace('@', individual.id));
+    node.setAttribute('id', id.replace('@', individual.id));
   });
 
   wrapper.querySelectorAll('[title]:not([rel] *):not([about] *)').forEach((node) => {
