@@ -45,6 +45,12 @@ v-s:LayoutTemplate_search
   rdfs:label "Layout template"@en ;
   v-ui:template "v-s_LayoutTemplate_search.js" ;
 .
+v-s:LayoutTemplate_favorites
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон макета - Избранное"@ru ;
+  rdfs:label "Layout template - Favorites"@en ;
+  v-ui:template "v-s_LayoutTemplate_favorites.js" ;
+.
 
 ### MENU ###
 

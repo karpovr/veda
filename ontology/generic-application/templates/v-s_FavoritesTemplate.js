@@ -88,6 +88,7 @@ function setDragDrop (template) {
 
   delegateHandler(template, 'dragenter', '.droppable', dragenterHandler);
   delegateHandler(template, 'dragover', '.droppable', dragenterHandler);
+  delegateHandler(template, 'dragleave', '.droppable', dragleaveHandler);
 
   delegateHandler(template, 'dragend', '[resource][draggable="true"]', dragendHandler);
   delegateHandler(template, 'drop', '.droppable', dragendHandler);
@@ -96,11 +97,16 @@ function setDragDrop (template) {
   function dragenterHandler (e) {
     if (e.dataTransfer.types.includes('veda/uri')) {
       e.preventDefault();
+      this.style.outline = '2px solid #888';
     }
   }
 
+  function dragleaveHandler (e) {
+    this.style.outline = '2px solid #eee';
+  }
+
   function dragstartHandler (e) {
-    [...template.querySelectorAll('.droppable')].forEach((droppable) => droppable.style.outline='2px solid #eee');
+    [...template.querySelectorAll('.droppable')].forEach((droppable) => droppable.style.outline = '2px solid #eee');
     const resource = this.getAttribute('resource');
     const relEl = this.closest('[rel]');
     if (relEl) {

@@ -36,12 +36,12 @@ v-s:Blanks
 .
 v-s:AddToFavorites
   rdf:type v-s:Bundle ;
-  rdfs:label "Добавить избранное"@ru ;
+  rdfs:label "Добавить в избранное"@ru ;
   rdfs:label "Add favorite"@en ;
 .
 v-s:RemoveFromFavorites
   rdf:type v-s:Bundle ;
-  rdfs:label "Удалить избранное"@ru ;
+  rdfs:label "Удалить из избранного"@ru ;
   rdfs:label "Remove favorite"@en ;
 .
 v-s:UISettingsBundle
