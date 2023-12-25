@@ -37,3 +37,11 @@ v-s:hasDecreeKind
   rdfs:range v-s:DecreeKind ;
   rdfs:domain v-s:Decree ;
 .
+
+v-s:hasDecreeTheme
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Тема документа"@ru ;
+  rdfs:label "Decree theme"@en ;
+  rdfs:range v-s:DecreeTheme ;
+  rdfs:domain v-s:Decree ;
+.
