@@ -7,8 +7,8 @@ async function createDefaultFavoritesFolder () {
     if (veda.user.aspect.hasValue('v-s:hasFavoriteFolder')) return;
 
     const defaultFavoritesFolder = new IndividualModel();
-    folder['rdf:type'] = 'v-s:Folder';
-    folder['rdfs:label'] = ['Избранное^ru', 'Favorites^en'];
+    defaultFavoritesFolder['rdf:type'] = 'v-s:Folder';
+    defaultFavoritesFolder['rdfs:label'] = ['Избранное^ru', 'Favorites^en'];
     await defaultFavoritesFolder.save();
 
     await veda.user.aspect.addValue('v-s:hasFavoriteFolder', defaultFavoritesFolder);
