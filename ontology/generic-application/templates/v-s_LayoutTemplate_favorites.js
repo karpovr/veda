@@ -45,7 +45,6 @@ async function showFavoritesDialog (e) {
 const dialogTemplate = `
   <dialog class="dialog" style="border:2px solid gray;border-radius:0.5em;min-width:20em;">
     <div class="favorites"></div>
-    <br>
     <button type="button" class="cancel btn btn-default">Отмена</button>
   </dialog>
 `;

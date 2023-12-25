@@ -34,7 +34,7 @@ export const pre = async function (individual, template, container, mode, extra)
 
   async function indicateFavorite () {
     try {
-      const current = await getCurrent(location.hash);
+      const current = await getCurrent();
       if (!current) return;
       const isJournaling = await current.is('v-s:Journaling');
       template.toggle(isJournaling);
@@ -52,7 +52,7 @@ export const pre = async function (individual, template, container, mode, extra)
     try {
       e.preventDefault();
 
-      const current = await getCurrent(location.hash);
+      const current = await getCurrent();
       if (!current) return;
 
       await createDefaultFavoritesFolder();
@@ -214,15 +214,20 @@ export const pre = async function (individual, template, container, mode, extra)
   `;
 };
 
-async function getCurrent (hash) {
+async function getCurrent () {
+  const hash = window.location.hash;
   const current_uri = hash ? decodeURI(hash).slice(2).split('/')[0] : '';
   const re = /^(\w|-)+:.*?$/;
   if (!re.test(current_uri)) return;
   let current = new IndividualModel(current_uri);
-  await current.load();
-  const isTask = current.hasValue('rdf:type', 'v-wf:DecisionForm');
-  if (isTask) current = current['v-wf:onDocument'][0];
-  return current;
+  try {
+    await current.load();
+    const isTask = current.hasValue('rdf:type', 'v-wf:DecisionForm');
+    if (isTask) current = current['v-wf:onDocument'][0];
+    return current;
+  } catch (error) {
+    console.log('Error loading current individual', error);
+  }
 }
 
 async function isFavorite (favorite, folder) {

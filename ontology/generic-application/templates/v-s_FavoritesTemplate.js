@@ -1,5 +1,6 @@
 import IndividualModel from '/js/common/individual_model.js';
 import {delegateHandler, clear} from '/js/browser/dom_helpers.js';
+import Sha256 from 'sha256';
 
 async function createDefaultFavoritesFolder () {
   try {
@@ -25,16 +26,16 @@ export const pre = async function (individual, template, container, mode, extra)
 
   delegateHandler(template, 'click', '.content .delete', async function (e) {
     e.preventDefault();
-    const parentUri = (this.closest('.folder-content') ?? this.closest('.favorites-list')).getAttribute('resource');
-    const parent = new IndividualModel(parentUri);
+    const folderUri = this.closest('[typeof="v-s:Folder"]').getAttribute('resource');
+    const folder = new IndividualModel(folderUri);
     const resourceUri = this.closest('[resource]').getAttribute('resource');
     const resource = new IndividualModel(resourceUri);
     try {
-      await parent.removeValue(undefined, resource);
-      await parent.save();
+      await folder.removeValue('v-s:hasItem', resource);
+      await folder.save();
       await resource.remove();
     } catch (error) {
-      console.log(error);
+      console.log('Ошибка удаления объекта:', error);
       alert('Ошибка удаления объекта: ' + error.message);
     }
   }, true);
@@ -42,9 +43,52 @@ export const pre = async function (individual, template, container, mode, extra)
   delegateHandler(template, 'click', '.folder-name', async function (e) {
     const folderUri = this.getAttribute('about');
     individual['v-s:chosenFavoriteFolder'] = folderUri;
-    await individual.save();
+    try {
+      await individual.save();
+    } catch (error) {
+      console.log('Ошибка выбора папки:', error);
+      alert('Произошла ошибка при выборе папки. Пожалуйста, попробуйте еще раз.');
+    }
+  }, true);
+
+  delegateHandler(template, 'click', '.add-current', async function (e) {
+    try {
+      const current = await getCurrent();
+      if (!current) return;
+
+      const folderUri = this.closest('[resource]').getAttribute('resource');
+      const folder = new IndividualModel(folderUri);
+      await folder.load();
+
+      const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
+      const subscription = new IndividualModel();
+      subscription.id = subscriptionId;
+      subscription['rdf:type'] = 'v-s:Subscription';
+      subscription['v-s:onDocument'] = current;
+      subscription['v-s:creator'] = veda.user;
+      await subscription.save();
+      await folder.addValue('v-s:hasItem', subscription);
+      await folder.save();
+    } catch (error) {
+      console.log('Ошибка при добавлении объекта в папку:', error);
+      alert('Произошла ошибка при добавлении объекта в папку. Пожалуйста, попробуйте еще раз.');
+    }
   }, true);
 };
+
+async function getCurrent () {
+  const hash = window.location.hash;
+  const current_uri = hash ? decodeURI(hash).slice(2).split('/')[0] : '';
+  const re = /^(\w|-)+:.*?$/;
+  if (!re.test(current_uri)) return;
+  const current = new IndividualModel(current_uri);
+  try {
+    await current.load();
+    return current;
+  } catch (error) {
+    console.log('Error loading current individual', error);
+  }
+}
 
 export const post = async function (individual, template, container, mode, extra) {
   const contentsEl = template.querySelector('.content');
@@ -66,40 +110,44 @@ export const post = async function (individual, template, container, mode, extra
 };
 
 const folderTemplate = `
-  <ol rel="v-s:hasItem" class="folder-content">
-    <li class="padding-md" style="border-bottom:1px dotted #eee;" draggable="true">
-      <style scoped>
-        .item-actions {
-          cursor: pointer;
-          width:2em;
-          height:2em;
-          border-radius:2em;
-        }
-        .item-actions > span {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-        .item-actions:hover {
-          background-color:#eee;
-        }
-      </style>
-      <div style="display:flex;">
-        <div style="flex:auto;" about="@" rel="v-s:onDocument">
-          <a style="display:block;" href="#/@" about="@" data-template="v-ui:ClassNameLabelTemplate" draggable="false"></a>
-        </div>
-        <div class="dropdown pull-right">
-          <div class="item-actions dropdown-toggle" data-toggle="dropdown">
-            <span class="glyphicon glyphicon-option-vertical"></span>
+  <div>
+    <ol rel="v-s:hasItem" class="folder-content">
+      <li class="padding-md" style="border-bottom:1px dotted #eee;" draggable="true">
+        <style scoped>
+          .item-actions {
+            cursor: pointer;
+            width:2em;
+            height:2em;
+            border-radius:2em;
+          }
+          .item-actions > span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+          .item-actions:hover {
+            background-color:#eee;
+          }
+        </style>
+        <div style="display:flex;">
+          <div style="flex:auto;" about="@" rel="v-s:onDocument">
+            <a style="display:block;" href="#/@" about="@" data-template="v-ui:ClassNameLabelTemplate" draggable="false"></a>
           </div>
-          <ul class="dropdown-menu">
-            <li><a class="delete" href="#" about="v-s:Delete" property="rdfs:label"></a></li>
-          </ul>
+          <div class="dropdown pull-right">
+            <div class="item-actions dropdown-toggle" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-option-vertical"></span>
+            </div>
+            <ul class="dropdown-menu">
+              <li><a class="delete" href="#" about="v-s:Delete" property="rdfs:label"></a></li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </li>
-  </ol>
+      </li>
+    </ol>
+    <div><i class="text-muted margin-xl-h"><small>Избранные документы можно перемещать по папкам, используя перетаскивание</small></i></div>
+    <button class="add-current btn btn-default margin-xl-h margin-md">Добавить текущий объект</button>
+  <div>
 `;
 
 function setDragDrop (template) {
@@ -199,7 +247,6 @@ export const html = `
     </div>
     <div class="col-lg-8 col-12">
       <div class="content"></div>
-      <i class="text-muted margin-xl-h"><small>Избранные документы можно перемещать по спискам, используя перетаскивание</small></i>
     </div>
   </div>
 </div>
