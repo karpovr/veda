@@ -1,3 +1,21 @@
+(() => {
+  const btn = document.createElement('button');
+  btn.textContent = 'test';
+  btn.style = `
+    background-color:red;
+    color:white;
+    border:2px solid darkred;
+    font-weight:bold;
+    border-radius:0.5em;
+  `;
+  document.body.prepend(btn);
+  btn.addEventListener('click', async () => {
+    const response = await fetch('/href');
+    const href = await response.text();
+    window.location.href = href;
+  });
+})();
+
 /**
  * @module Authentication
  */
@@ -274,9 +292,9 @@ function handleLoginError (error) {
     };
     break;
   case 303: // See Other
-    error?.response?.text()
+    error.response.text()
       .then((href) => window.location.href = href)
-      .catch((error) => console.log('Redirection error:', error));
+      .catch((error) => console.log('Redirect error:', error));
   case 423: // Password change is allowed once a day
     show(frequentPassChangeWarning);
     show(ok);
