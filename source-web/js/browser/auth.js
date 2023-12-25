@@ -274,8 +274,9 @@ function handleLoginError (error) {
     };
     break;
   case 303: // See Other
-    const href = error?.response?.headers?.get('Location');
-    window.location.href = href;
+    error?.response?.text()
+      .then((href) => window.location.href = href)
+      .catch((error) => console.log('Redirection error:', error));
   case 423: // Password change is allowed once a day
     show(frequentPassChangeWarning);
     show(ok);
