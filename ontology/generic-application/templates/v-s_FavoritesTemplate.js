@@ -6,12 +6,12 @@ async function createDefaultFavoritesFolder () {
   try {
     if (veda.user.aspect.hasValue('v-s:hasFavoriteFolder')) return;
 
-    const folder = new IndividualModel();
+    const defaultFavoritesFolder = new IndividualModel();
     folder['rdf:type'] = 'v-s:Folder';
     folder['rdfs:label'] = ['Избранное^ru', 'Favorites^en'];
+    await defaultFavoritesFolder.save();
 
-    await folder.save();
-    await veda.user.aspect.addValue('v-s:hasFavoriteFolder', folder);
+    await veda.user.aspect.addValue('v-s:hasFavoriteFolder', defaultFavoritesFolder);
     await veda.user.aspect.save();
   } catch (error) {
     console.error('Ошибка при создании папки Избранное:', error);
@@ -51,22 +51,26 @@ export const pre = async function (individual, template, container, mode, extra)
     }
   }, true);
 
-  delegateHandler(template, 'click', '.add-current', async function (e) {
+  delegateHandler(template, 'click', '.add-current', async function () {
     try {
       const current = await getCurrent();
       if (!current) return;
+
+      const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
+
+      const defaultFavoritesFolder = veda.user.aspect['v-s:hasFavoriteFolder'][0];
+      await removeFavorite(subscriptionId, defaultFavoritesFolder);
 
       const folderUri = this.closest('[resource]').getAttribute('resource');
       const folder = new IndividualModel(folderUri);
       await folder.load();
 
-      const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
-      const subscription = new IndividualModel();
-      subscription.id = subscriptionId;
+      const subscription = new IndividualModel(subscriptionId);
       subscription['rdf:type'] = 'v-s:Subscription';
       subscription['v-s:onDocument'] = current;
       subscription['v-s:creator'] = veda.user;
       await subscription.save();
+
       await folder.addValue('v-s:hasItem', subscription);
       await folder.save();
     } catch (error) {
@@ -87,6 +91,15 @@ async function getCurrent () {
     return current;
   } catch (error) {
     console.log('Error loading current individual', error);
+  }
+}
+
+async function removeFavorite (favorite, folder) {
+  await folder.load();
+  await folder.removeValue('v-s:hasItem', favorite);
+  await folder.save();
+  for (const childFolder of folder['v-s:hasFolder']) {
+    await removeFavorite(favorite, childFolder);
   }
 }
 
@@ -146,7 +159,7 @@ const folderTemplate = `
       </li>
     </ol>
     <div><i class="text-muted margin-xl-h"><small>Избранные документы можно перемещать по папкам, используя перетаскивание</small></i></div>
-    <button class="add-current btn btn-default margin-xl-h margin-md">Добавить текущий объект</button>
+    <!--button class="add-current btn btn-default margin-xl-h margin-md">Добавить текущий объект</button-->
   <div>
 `;
 

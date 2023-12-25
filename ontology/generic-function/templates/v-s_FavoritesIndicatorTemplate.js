@@ -40,8 +40,14 @@ export const pre = async function (individual, template, container, mode, extra)
       template.toggle(isJournaling);
       if (isJournaling) {
         const subscriptionId = 'd:' + Sha256.hash(veda.user_uri + current.id).substr(0, 32);
-        const isFavoriteFolder = await isFavorite(subscriptionId, veda.user.aspect['v-s:hasFavoriteFolder'][0]);
-        template.toggleClass('fa-star', isFavoriteFolder).toggleClass('fa-star-o', !isFavoriteFolder);
+        const isFavoriteDocument = await isFavorite(subscriptionId, veda.user.aspect['v-s:hasFavoriteFolder'][0]);
+        template.toggleClass('fa-star', isFavoriteDocument).toggleClass('fa-star-o', !isFavoriteDocument);
+
+        // const subscription = new IndividualModel(subscriptionId);
+        // subscription.on('beforeSave afterSave beforeReset afterReset beforeRemove afterRemove', indicateFavorite);
+        // template.one('remove', () => {
+        //   subscription.off('beforeSave afterSave beforeReset afterReset beforeRemove afterRemove', indicateFavorite);
+        // });
       }
     } catch (error) {
       console.error('Произошла ошибка при индикации избранного:', error);
@@ -147,8 +153,9 @@ export const pre = async function (individual, template, container, mode, extra)
         }
       });
 
-      dialog.addEventListener('cancel', (event) => {
-        event.preventDefault();
+      dialog.addEventListener('cancel', () => {
+        submit.value = '';
+        dialog.close();
       });
 
       cancel.addEventListener('click', () => {
@@ -198,7 +205,7 @@ export const pre = async function (individual, template, container, mode, extra)
         <form class="add-folder-form">
           <div class="form-group">
             <label>Наименование</label>
-            <input type="text" class="add-folder-name-input form-control" required>
+            <input type="text" class="add-folder-name-input form-control" value="Новая папка" required>
           </div>
           <div class="form-group">
             <label>Родительская папка</label>
