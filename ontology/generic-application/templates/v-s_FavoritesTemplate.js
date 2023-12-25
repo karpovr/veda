@@ -68,14 +68,33 @@ export const post = async function (individual, template, container, mode, extra
 const folderTemplate = `
   <ol rel="v-s:hasItem" class="folder-content">
     <li class="padding-md" style="border-bottom:1px dotted #eee;" draggable="true">
+      <style scoped>
+        .item-actions {
+          cursor: pointer;
+          width:2em;
+          height:2em;
+          border-radius:2em;
+        }
+        .item-actions > span {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+        .item-actions:hover {
+          background-color:#eee;
+        }
+      </style>
       <div style="display:flex;">
         <div style="flex:auto;" about="@" rel="v-s:onDocument">
           <a style="display:block;" href="#/@" about="@" data-template="v-ui:ClassNameLabelTemplate" draggable="false"></a>
         </div>
         <div class="dropdown pull-right">
-          <a href="" style="text-decoration:none; color:dimgray;" class="options pull-right glyphicon glyphicon-option-vertical dropdown-toggle" data-toggle="dropdown"></a>
+          <div class="item-actions dropdown-toggle" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-option-vertical"></span>
+          </div>
           <ul class="dropdown-menu">
-            <li><a class="delete" href="#">Удалить</a></li>
+            <li><a class="delete" href="#" about="v-s:Delete" property="rdfs:label"></a></li>
           </ul>
         </div>
       </div>
