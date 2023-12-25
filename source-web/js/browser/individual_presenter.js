@@ -723,7 +723,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
               e.stopPropagation();
               const countDisplayed = relContainer.children.length - 1; // 1 last children is .badge container
               about.trigger(rel_uri, about.get(rel_uri), countDisplayed + 10);
-              e.target.remove();
+              badgeContainer.remove();
             });
             badgeContainer.append(moreButton);
 
@@ -740,7 +740,7 @@ function processTemplate (individual, container, wrapper, templateMode) {
               const countDisplayed = relContainer.children.length - 1; // 1 last children is .badge container
               Array.from(relContainer.children).map((node) => relContainer.removeChild(node));
               about.trigger(rel_uri, about.get(rel_uri), countDisplayed);
-              e.target.remove();
+              badgeContainer.remove();
             });
             badgeContainer.append(reverseButton);
 
