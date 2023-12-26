@@ -565,14 +565,6 @@ delegateHandler(document.body, 'click', '#logout, .logout', function () {
   window.location.reload();
 });
 
-function adjustTicket (result) {
-  return {
-    ticket: result.id,
-    user_uri: result.user_uri,
-    end_time: Math.floor((result.end_time - 621355968000000000) / 10000),
-  };
-}
-
 /**
  * Initializes the authentication flow
  * @return {Promise<void>}
@@ -585,7 +577,7 @@ export default async function auth () {
   try {
     let authResult = getCookie('auth');
     if (authResult) {
-      authResult = adjustTicket(JSON.parse(atob(authResult)));
+      authResult = JSON.parse(atob(authResult));
       Object.entries(authResult).forEach(([key, value]) => storage.setItem(key, value));
       delCookie('auth');
     }
