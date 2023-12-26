@@ -565,11 +565,11 @@ delegateHandler(document.body, 'click', '#logout, .logout', function () {
   window.location.reload();
 });
 
-function adjustTicket (result) {
+function adjustTicket ({id, user_uri, end_time}) {
   return {
-    ticket: result.id,
-    user_uri: result.user_uri,
-    end_time: result.end_time,
+    ticket: id,
+    user_uri,
+    end_time,
   };
 }
 
