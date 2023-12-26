@@ -597,7 +597,7 @@ export default async function auth () {
   // Check if ticket is valid
   const ticket = storage.getItem('ticket');
   const user_uri = storage.getItem('user_uri');
-  const end_time = (new Date() < new Date(parseInt(storage.getItem('end_time')))) && storage.getItem('end_time');
+  const end_time = Date.now() < parseInt(storage.getItem('end_time'));
   let valid;
   if (ticket && user_uri && end_time) {
     try {
