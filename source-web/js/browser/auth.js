@@ -6,7 +6,7 @@ import veda from '../common/veda.js';
 import Backend from '../common/backend.js';
 import IndividualModel from '../common/individual_model.js';
 import Sha256 from '../common/lib/sha256.js';
-import {delegateHandler, clear} from '../browser/dom_helpers.js';
+import {delegateHandler, clear, spinnerDecorator} from '../browser/dom_helpers.js';
 import Captcha from 'captcha';
 
 /**
@@ -540,19 +540,12 @@ function handleAuthSuccess (authResult, isBroadcast = false) {
  * @param {Object} authResult - The authentication result
  * @return {void}
  */
-function initWithCredentials (authResult) {
+const initWithCredentials = spinnerDecorator(async function (authResult) {
   hide(loginForm);
   handleAuthSuccess(authResult);
-
-  const loadIndicator = document.getElementById('load-indicator');
-  const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
-
-  veda.init(veda.user_uri).then(() => {
-    clearTimeout(loadIndicatorTimer);
-    hide(loadIndicator);
-    veda.trigger('started');
-  });
-}
+  await veda.init(veda.user_uri);
+  veda.trigger('started');
+});
 
 // Logout handler
 delegateHandler(document.body, 'click', '#logout, .logout', function () {
@@ -577,10 +570,7 @@ function adjustTicket ({id, user_uri, end_time}) {
  * Initializes the authentication flow
  * @return {Promise<void>}
  */
-export default async function auth () {
-  const loadIndicator = document.getElementById('load-indicator');
-  const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
-
+export default spinnerDecorator(async function auth () {
   // Try to get auth result from cookie
   try {
     let authResult = getCookie('auth');
@@ -597,37 +587,21 @@ export default async function auth () {
   // Check if ticket is valid
   const ticket = storage.getItem('ticket');
   const user_uri = storage.getItem('user_uri');
-  const end_time = Date.now() < parseInt(storage.getItem('end_time'));
-  let valid;
-  if (ticket && user_uri && end_time) {
-    try {
-      valid = await Backend.is_ticket_valid(ticket);
-    } catch (error) {
-      valid = false;
-    }
-  } else {
-    valid = false;
-  }
-
-  // Init application
-  if (valid) {
-    initWithCredentials({ticket, user_uri, end_time});
-  } else {
-    try {
+  const end_time = parseInt(storage.getItem('end_time'));
+  try {
+    if (ticket && user_uri && Date.now() < end_time && await Backend.is_ticket_valid(ticket)) {
+      await initWithCredentials({ticket, user_uri, end_time});
+    } else {
       const {ticket, user_uri, end_time} = await Backend.authenticate('guest', 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
       const authRequiredParam = await Backend.get_individual(ticket, 'cfg:AuthRequired');
       const {'rdf:value': [{data: isAuthRequired}]} = authRequiredParam;
-      if (!isAuthRequired) {
-        initWithCredentials({ticket, user_uri, end_time});
-      } else {
+      if (isAuthRequired) {
         handleAuthError();
+      } else {
+        await initWithCredentials({ticket, user_uri, end_time});
       }
-    } catch (error) {
-      console.error('cfg:AuthRequired load failed');
-      handleAuthError();
     }
+  } catch (error) {
+    handleAuthError();
   }
-
-  clearTimeout(loadIndicatorTimer);
-  hide(loadIndicator);
-}
+});

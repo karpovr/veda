@@ -10,9 +10,8 @@ import '../browser/show_ttl.js';
 import veda from '../common/veda.js';
 import riot from '../common/lib/riot.js';
 import IndividualModel from '../common/individual_model.js';
-import notify from '../browser/notify.js';
 import Util from '../common/util.js';
-import {delegateHandler, clear} from '../browser/dom_helpers.js';
+import {delegateHandler, clear, spinnerDecorator} from '../browser/dom_helpers.js';
 
 /**
  * Application presenter
@@ -78,10 +77,7 @@ export default function AppPresenter (manifest) {
      * @param {string} hash - The route hash
      * @return {void}
      */
-    riot.route((hash) => {
-      const loadIndicator = document.getElementById('load-indicator');
-      const loadIndicatorTimer = setTimeout(() => loadIndicator.style.display = '', 250);
-
+    riot.route(spinnerDecorator(async (hash) => {
       if (typeof hash === 'string') {
         const hash_index = hash.indexOf('#');
         if (hash_index >= 0) {
@@ -89,20 +85,18 @@ export default function AppPresenter (manifest) {
         } else {
           const mainContainer = document.getElementById('main');
           clear(mainContainer);
-          return main.present(mainContainer).then(() => {
-            clearTimeout(loadIndicatorTimer);
-            loadIndicator.style.display = 'none';
-            veda.trigger('mainChanged', main.id);
-          });
+          await main.present(mainContainer);
+
+          // TODO: remove
+          veda.trigger('mainChanged', main.id);
         }
       } else {
         const mainContainer = document.getElementById('main');
         clear(mainContainer);
-        return main.present(mainContainer).then(() => {
-          clearTimeout(loadIndicatorTimer);
-          loadIndicator.style.display = 'none';
-          veda.trigger('mainChanged', main.id);
-        });
+        await main.present(mainContainer);
+
+        // TODO: remove
+        veda.trigger('mainChanged', main.id);
       }
 
       const tokens = decodeURI(hash).slice(2).split('/');
@@ -126,24 +120,24 @@ export default function AppPresenter (manifest) {
         const individual = new IndividualModel(uri);
         const containerEl = document.querySelector(container);
         clear(containerEl);
-        individual.present(containerEl, template, mode, extra).then(() => {
-          clearTimeout(loadIndicatorTimer);
-          loadIndicator.style.display = 'none';
-          if (!individual.scroll) {
-            window.scrollTo(0, 0);
-          }
-          if (containerEl.id === 'main') veda.trigger('mainChanged', uri);
-        });
+        await individual.present(containerEl, template, mode, extra);
+        if (!individual.scroll) {
+          window.scrollTo(0, 0);
+        }
+
+        // TODO: remove
+        if (containerEl.id === 'main') {
+          veda.trigger('mainChanged', uri);
+        }
       } else {
         const mainContainer = document.getElementById('main');
         clear(mainContainer);
-        main.present(mainContainer).then(() => {
-          clearTimeout(loadIndicatorTimer);
-          loadIndicator.style.display = 'none';
-          veda.trigger('mainChanged', main.id);
-        });
+        await main.present(mainContainer);
+
+        // TODO: remove
+        veda.trigger('mainChanged', main.id);
       }
-    });
+    }));
   }
 
   /**
@@ -175,7 +169,7 @@ export default function AppPresenter (manifest) {
   let starting = false;
 
   // Triggered in auth
-  veda.on('started', () => {
+  veda.on('started', spinnerDecorator(async () => {
     if (starting === true) return;
     starting = true;
 
@@ -184,9 +178,6 @@ export default function AppPresenter (manifest) {
     const hash = url.searchParams.get('hash');
     if (hash) window.location = new URL(window.location.origin + window.location.pathname + hash);
 
-    const loadIndicator = document.getElementById('load-indicator');
-    loadIndicator.style.display = '';
-
     const layout_uri = manifest.veda_layout;
     const main_uri = manifest.veda_main;
     const {start_url} = manifest;
@@ -194,31 +185,22 @@ export default function AppPresenter (manifest) {
     clear(appContainer);
     if (layout_uri && main_uri && start_url) {
       const layout = new IndividualModel(layout_uri);
-      layout.present(appContainer)
-        .then(() => new IndividualModel(main_uri).load())
-        .then(installRouter)
-        .catch((error) => {
-          notify('danger', error);
-        })
-        .then(() => riot.route(window.location.hash || start_url))
-        .then(() => starting = false);
+      await layout.present(appContainer);
+      const main = new IndividualModel(main_uri);
+      installRouter(main);
+      riot.route(window.location.hash || start_url);
     } else {
       console.log('Incomplete layout params in manifest');
       const layout_param_uri = veda.user.hasValue('v-s:origin', 'ExternalUser') ? 'cfg:LayoutExternal' : 'cfg:Layout';
-      const layout_param = new IndividualModel(layout_param_uri);
+      const layout_param = await new IndividualModel(layout_param_uri).load();
+      const layout = layout_param['rdf:value'][0];
+      await layout.present(appContainer);
       const main_param_uri = veda.user.hasValue('v-s:origin', 'ExternalUser') ? 'cfg:MainExternal' : 'cfg:Main';
-      const main_param = new IndividualModel(main_param_uri);
-      layout_param.load()
-        .then(() => layout_param['rdf:value'][0].load())
-        .then((layout) => layout.present(appContainer))
-        .then(() => main_param.load())
-        .then(() => main_param['rdf:value'][0].load())
-        .then(installRouter)
-        .catch((error) => {
-          notify('danger', error);
-        })
-        .then(() => riot.route(window.location.hash))
-        .then(() => starting = false);
+      const main_param = await new IndividualModel(main_param_uri).load();
+      const main = main_param['rdf:value'][0];
+      installRouter(main);
+      riot.route(window.location.hash);
     }
-  });
+    starting = false;
+  }));
 }

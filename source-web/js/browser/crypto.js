@@ -3,6 +3,7 @@
 import {CryptoPro} from 'ruscryptojs';
 import CommonUtil from '../common/util.js';
 import IndividualModel from '../common/individual_model.js';
+import {spinnerDecorator} from '../browser/dom_helpers.js';
 
 const cryptoPro = new CryptoPro();
 
@@ -92,7 +93,7 @@ async function signData (dataToSign, thumbprint, individual) {
   const certificate = await cryptoPro.certificateInfo(thumbprint);
   const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
   const signatureFileIndividual = await createSignatureFileIndividual(signature, certificate.Name, individual, thumbprint);
-  //using backwardPrepend
+  // using backwardPrepend
   individual['v-s:digitalSignature'] = [signatureFileIndividual].concat(individual['v-s:digitalSignature']);
   return true;
 }
@@ -109,32 +110,6 @@ const dialogTemplate = `
     </form>
   </dialog>
 `;
-
-function decorator (fn, pre, post, err) {
-  return async function (...args) {
-    try {
-      pre && typeof pre === 'function' && await pre.call(this, ...args);
-      const result = await fn.call(this, ...args);
-      post && typeof post === 'function' && await post.call(this, ...args);
-      return result;
-    } catch (error) {
-      err && typeof err === 'function' && await err.call(this, ...args);
-      throw error;
-    }
-  };
-}
-
-function showSpinner () {
-  document.getElementById('load-indicator').style.display = '';
-}
-
-function hideSpinner () {
-  document.getElementById('load-indicator').style.display = 'none';
-}
-
-function spinnerDecorator (fn) {
-  return decorator(fn, showSpinner, hideSpinner, hideSpinner);
-}
 
 export default class Crypto {
   constructor () {
