@@ -28,11 +28,14 @@ async function showFavoritesDialog (e) {
   container.innerHTML = dialogTemplate;
   document.body.appendChild(container);
   const dialog = container.querySelector('.dialog');
-  const favorites = container.querySelector('.favorites');
-  const cancel = container.querySelector('.cancel');
-
-  dialog.addEventListener('close', () => clear(favorites));
+  const favorites = dialog.querySelector('.favorites');
+  const cancel = dialog.querySelector('.cancel');
+  dialog.addEventListener('close', () => {
+    clear(favorites);
+    container.remove();
+  });
   cancel.addEventListener('click', () => dialog.close());
+
   try {
     await veda.user.aspect.present(favorites, 'v-s:FavoritesTemplate');
     dialog.showModal();
@@ -43,9 +46,10 @@ async function showFavoritesDialog (e) {
 }
 
 const dialogTemplate = `
-  <dialog class="dialog" style="border:2px solid gray;border-radius:0.5em;min-width:20em;">
-    <div class="favorites"></div>
-    <br>
-    <button type="button" class="cancel btn btn-default">Отмена</button>
+  <dialog class="dialog" style="border:2px solid gray;border-radius:0.5em;min-width:20em;height:100%;display:flex;flex-direction:column;">
+    <div class="favorites" style="flex-grow:1;margin-bottom:1em;"></div>
+    <div>
+      <button type="button" class="cancel btn btn-default">Отмена</button>
+    </div>
   </dialog>
 `;
