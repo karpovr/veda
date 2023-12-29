@@ -39,6 +39,7 @@ async function showFavoritesDialog (e) {
   try {
     await veda.user.aspect.present(favorites, 'v-s:FavoritesTemplate');
     dialog.showModal();
+    dialog.querySelector('.cancel').focus();
   } catch (error) {
     console.log('Error displaying favorites:', error);
     alert('Ошибка открытия диалогового окна. Пожалуйста, попробуйте еще раз.');

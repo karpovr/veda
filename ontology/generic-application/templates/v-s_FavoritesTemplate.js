@@ -125,7 +125,7 @@ export const post = async function (individual, template, container, mode, extra
 const folderTemplate = `
   <div>
     <ol rel="v-s:hasItem" class="folder-content">
-      <li class="padding-md" style="border-bottom:1px dotted #eee;" draggable="true">
+      <li class="padding-sm" style="border-bottom:1px dotted #eee;" draggable="true">
         <style scoped>
           .item-actions {
             cursor: pointer;
@@ -134,7 +134,6 @@ const folderTemplate = `
             border-radius:2em;
           }
           .item-actions > span {
-            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -144,8 +143,8 @@ const folderTemplate = `
           }
         </style>
         <div style="display:flex;">
-          <div style="flex:auto;" about="@" rel="v-s:onDocument">
-            <a style="display:block;" href="#/@" about="@" data-template="v-ui:ClassNameLabelTemplate" draggable="false"></a>
+          <div style="flex-grow:1;" about="@" rel="v-s:onDocument">
+            <a href="#/@" about="@" data-template="v-ui:ClassNameLabelTemplate" draggable="false"></a>
           </div>
           <div class="dropdown pull-right">
             <div class="item-actions dropdown-toggle" data-toggle="dropdown">
