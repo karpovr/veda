@@ -124,17 +124,13 @@ function decorator (fn, pre, post, err) {
  * Show the loading spinner
  * @return {void}
  */
-function showSpinner () {
-  document.getElementById('load-indicator').style.display = '';
-}
+const showSpinner = debounce(() => document.getElementById('load-indicator').style.display = '', 250);
 
 /**
  * Hide the loading spinner
  * @return {void}
  */
-function hideSpinner () {
-  document.getElementById('load-indicator').style.display = 'none';
-}
+const hideSpinner = delay(() => document.getElementById('load-indicator').style.display = 'none', 250);
 
 /**
  * Create a decorator function that shows and hides a loading spinner before and after the decorated function execution
