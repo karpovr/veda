@@ -38,39 +38,12 @@ function ntlmAuth (path, login, password) {
 
 const storage = window.localStorage;
 
-// Login invitation
-const loginForm = document.getElementById('login-form');
-
-loginForm.querySelector('#submit-login-password').addEventListener('click', submitLoginPassword);
-
-delegateHandler(loginForm, 'keyup', '#login, #password', function (e) {
-  if (e.key === 'Enter') {
-    submitLoginPassword(e);
-  }
-});
-
-delegateHandler(loginForm, 'mousedown', '.show-password', function (e) {
-  const passwords = loginForm.querySelectorAll('.password');
-  passwords.forEach((input) => input.type = 'text');
-  document.addEventListener('mouseup', function () {
-    passwords.forEach((input) => input.type = 'password');
-  }, {once: true});
-});
-
-delegateHandler(loginForm, 'touchstart', '.show-password', function (e) {
-  const passwords = loginForm.querySelectorAll('.password');
-  passwords.forEach((input) => input.type = 'text');
-  document.addEventListener('touchend', function () {
-    passwords.forEach((input) => input.type = 'password');
-  }, {once: true});
-});
-
 /**
  * Handles the submit event for login form
  * @param {Event} event - The submit event
  * @return {void}
  */
-function submitLoginPassword (event) {
+const submitLoginPassword = spinnerDecorator(function (event) {
   event.preventDefault();
   const passwordInput = loginForm.querySelector('#password');
   const login = loginForm.querySelector('#login').value.trim();
@@ -99,7 +72,34 @@ function submitLoginPassword (event) {
     })
     .then(handleLoginSuccess)
     .catch(handleLoginError);
-}
+});
+
+// Login invitation
+const loginForm = document.getElementById('login-form');
+
+loginForm.querySelector('#submit-login-password').addEventListener('click', submitLoginPassword);
+
+delegateHandler(loginForm, 'keyup', '#login, #password', function (e) {
+  if (e.key === 'Enter') {
+    submitLoginPassword(e);
+  }
+});
+
+delegateHandler(loginForm, 'mousedown', '.show-password', function (e) {
+  const passwords = loginForm.querySelectorAll('.password');
+  passwords.forEach((input) => input.type = 'text');
+  document.addEventListener('mouseup', function () {
+    passwords.forEach((input) => input.type = 'password');
+  }, {once: true});
+});
+
+delegateHandler(loginForm, 'touchstart', '.show-password', function (e) {
+  const passwords = loginForm.querySelectorAll('.password');
+  passwords.forEach((input) => input.type = 'text');
+  document.addEventListener('touchend', function () {
+    passwords.forEach((input) => input.type = 'password');
+  }, {once: true});
+});
 
 delegateHandler(loginForm, 'input', '#new-password, #confirm-new-password, #secret', validateNewPassword);
 
@@ -164,33 +164,33 @@ function validateNewPassword () {
   }
 }
 
-loginForm.querySelector('#submit-new-password').addEventListener('click', function (e) {
+loginForm.querySelector('#submit-new-password').addEventListener('click', spinnerDecorator(function (e) {
   e.preventDefault();
   const login = loginForm.querySelector('#login').value.trim();
   const password = loginForm.querySelector('#new-password').value;
   const secret = loginForm.querySelector('#secret').value;
   const hash = Sha256.hash(password);
 
-  Backend.authenticate(login, hash, secret)
+  return Backend.authenticate(login, hash, secret)
     .then(handleLoginSuccess)
     .catch(handleLoginError)
     .then(() => {
       loginForm.querySelector('#new-password').value = '';
       loginForm.querySelector('#confirm-new-password').value = '';
     });
-});
+}));
 
 let changePasswordPressed;
-loginForm.querySelector('#change-password').addEventListener('click', function (e) {
+loginForm.querySelector('#change-password').addEventListener('click', spinnerDecorator(function (e) {
   e.preventDefault();
   changePasswordPressed = true;
   const login = loginForm.querySelector('#login').value;
   const secret = '?';
 
-  Backend.authenticate(login, undefined, secret)
+  return Backend.authenticate(login, undefined, secret)
     .then(handleLoginSuccess)
     .catch(handleLoginError);
-});
+}));
 
 /**
  * Login error handler
@@ -221,10 +221,10 @@ function handleLoginError (error) {
   const secretRequestInfo = loginForm.querySelector('#secret-request-info');
 
   const alerts = loginForm.querySelectorAll('.alert');
-  Array.prototype.forEach.call(alerts, (alert) => hide(alert));
+  alerts.forEach((alert) => hide(alert));
 
   const inputs = loginForm.querySelectorAll('input:not(#login)');
-  Array.prototype.forEach.call(inputs, (input) => input.value = '');
+  inputs.forEach((input) => input.value = '');
 
   const ok = loginForm.querySelector('.btn.ok');
   hide(ok);
@@ -248,7 +248,7 @@ function handleLoginError (error) {
     },
     callback: function (response, $captchaInputElement, numberOfTries) {
       if (response === 'success') {
-        Array.prototype.forEach.call(loginForm.querySelectorAll('.alert, .fieldset'), (item) => hide(item));
+        loginForm.querySelectorAll('.alert, .fieldset').forEach((item) => hide(item));
         show(enterLoginPassword);
       }
       if (response === 'error') {
@@ -277,6 +277,7 @@ function handleLoginError (error) {
     error.response.text()
       .then((href) => window.location.href = href)
       .catch((error) => console.log('Redirect error:', error));
+    break;
   case 423: // Password change is allowed once a day
     show(frequentPassChangeWarning);
     show(ok);
@@ -409,17 +410,11 @@ function handleLoginError (error) {
  */
 function handleLoginSuccess (authResult) {
   const enterLoginPassword = loginForm.querySelector('#enter-login-password');
-
-  const alerts = loginForm.querySelectorAll('.alert');
-  alerts.forEach((alert) => hide(alert));
-
-  const inputs = loginForm.querySelectorAll('input:not(#login)');
-  inputs.forEach((input) => input.value = '');
-
-  const ok = loginForm.querySelector('.btn.ok');
-  hide(ok);
-
   show(enterLoginPassword);
+
+  loginForm.querySelectorAll('.alert').forEach((alert) => hide(alert));
+  loginForm.querySelectorAll('input:not(#login)').forEach((input) => input.value = '');
+  hide(loginForm.querySelector('.btn.ok'));
 
   initWithCredentials(authResult);
 }
@@ -441,7 +436,7 @@ function delCookie (name) {
  * Handles authentication errors
  * @return {void}
  */
-function handleAuthError () {
+const handleAuthError = spinnerDecorator(function () {
   const appContainer = document.getElementById('app');
   clear(appContainer);
 
@@ -458,10 +453,10 @@ function handleAuthError () {
 
   // Auto login using NTLM
   const ntlmProvider = new IndividualModel('cfg:NTLMAuthProvider', true, false);
-  ntlmProvider.load().then(() => {
+  return ntlmProvider.load().then(() => {
     const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
     if (path) {
-      ntlmAuth(path)
+      return ntlmAuth(path)
         .then((authResult) => initWithCredentials(authResult))
         .catch((err) => {
           console.error('NTLM auth failed');
@@ -473,7 +468,7 @@ function handleAuthError () {
   }).catch((error) => {
     show(loginForm);
   });
-}
+});
 
 // Activity handler
 localStorage.lastActivity = Date.now();
@@ -548,15 +543,15 @@ const initWithCredentials = spinnerDecorator(async function (authResult) {
 });
 
 // Logout handler
-delegateHandler(document.body, 'click', '#logout, .logout', function () {
-  Backend.logout(veda.ticket).catch((error) => console.log('Logout failed', error));
+delegateHandler(document.body, 'click', '#logout, .logout', spinnerDecorator(async function () {
+  await Backend.logout(veda.ticket).catch((error) => console.log('Logout failed', error));
   storage.removeItem('ticket');
   storage.removeItem('user_uri');
   storage.removeItem('end_time');
   delCookie('ticket');
   storage.setItem('logout', true);
   window.location.reload();
-});
+}));
 
 function adjustTicket ({id, user_uri, end_time}) {
   return {
