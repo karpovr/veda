@@ -4,6 +4,7 @@ import {CryptoPro} from 'ruscryptojs';
 import CommonUtil from '../common/util.js';
 import IndividualModel from '../common/individual_model.js';
 import {spinnerDecorator} from '../browser/dom_helpers.js';
+import Sha256 from '../common/lib/sha256.js';
 
 const cryptoPro = new CryptoPro();
 
@@ -11,6 +12,15 @@ async function createSignatureFileIndividual (signature, name, parent, thumbprin
   const uri = CommonUtil.guid();
   const path = '/' + new Date().toISOString().substring(0, 10).split('-').join('/');
   const fileIndividual = new IndividualModel();
+  if (thumbprint != undefined) {
+    const hashId = Sha256.hash(`${parent.id}_${thumbprint}`).substring(24);
+    fileIndividual.id = `d:${hashId}`;
+    fileIndividual['v-s:signatureStamp'] = [thumbprint];
+  } else {
+    console.log('use signature.length & name for uri');
+    const hashId = Sha256.hash(`${parent.id}_${signature.length}_${name}`).substring(24);
+    fileIndividual.id = `d:${hashId}`;
+  }
   fileIndividual['rdf:type'] = ['v-s:File'];
   fileIndividual['v-s:fileName'] = [name + '.sig'];
   fileIndividual['rdfs:label'] = [name + '.sig'];
@@ -23,10 +33,6 @@ async function createSignatureFileIndividual (signature, name, parent, thumbprin
   fileIndividual['v-s:canUpdate'] = [true];
   fileIndividual['v-s:canDelete'] = [true];
   fileIndividual['v-s:backwardProperty'] = ['v-s:digitalSignature'];
-  fileIndividual['v-s:backwardPrepend'] = [true];
-  if (thumbprint != undefined) {
-    fileIndividual['v-s:signatureStamp'] = [thumbprint];
-  }
   try {
     await uploadSignatureFile(signature, path, uri);
     await fileIndividual.save();
@@ -93,8 +99,7 @@ async function signData (dataToSign, thumbprint, individual) {
   const certificate = await cryptoPro.certificateInfo(thumbprint);
   const signature = await cryptoPro.signData(dataToSign, certificate.Thumbprint);
   const signatureFileIndividual = await createSignatureFileIndividual(signature, certificate.Name, individual, thumbprint);
-  // using backwardPrepend
-  individual['v-s:digitalSignature'] = [signatureFileIndividual].concat(individual['v-s:digitalSignature']);
+  individual.addValue('v-s:digitalSignature', signatureFileIndividual);
   return true;
 }
 
