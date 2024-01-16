@@ -10,6 +10,7 @@
 extern crate log;
 
 use crate::common::{is_exportable, load_map_of_types, update_prefix};
+use crate::update::update;
 use anyhow::Result;
 use reqwest::StatusCode;
 use std::collections::HashMap;
@@ -20,13 +21,14 @@ use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_info_of_module, get_inner_binobj_as_individual, init_log, wait_load_ontology, wait_module, Module, PrepareError};
 use v_common::module::veda_backend::Backend;
 use v_common::onto::individual::{Individual, RawObj};
-use v_common::onto::individual2turtle::to_turtle_refs;
+use v_common::onto::individual2turtle::to_turtle_with_counter_refs;
 use v_common::onto::onto_impl::Onto;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
 use v_common::v_queue::consumer::Consumer;
 
 mod common;
+mod update;
 
 // Define the context structure for the application
 pub struct Context {
@@ -34,6 +36,7 @@ pub struct Context {
     pub client: reqwest::Client,
     pub module_info: ModuleInfo,
     pub store_point: String,
+    pub update_point: String,
     pub prefixes: HashMap<String, String>,
     pub stored: u64,
     pub skipped: u64,
@@ -74,6 +77,7 @@ fn main() -> Result<()> {
     let mut ctx = Context {
         rt: Runtime::new().unwrap(),
         store_point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "store", "default"),
+        update_point: format!("{}/{}", Module::get_property("sparql_db").unwrap_or_default(), "update"),
         client: reqwest::Client::new(),
         module_info: module_info.unwrap(),
         prefixes: HashMap::new(),
@@ -191,7 +195,7 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
             }
         }
 
-        update(&mut indv, backend, ctx)?;
+        insert(&mut indv, ctx)?;
     } else {
         error!("failed to read individual {}", id);
     }
@@ -208,34 +212,34 @@ fn prepare_element_indv(backend: &mut Backend, ctx: &mut Context, queue_element:
     }
 
     let mut new_state = Individual::default();
-    get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state);
-    new_state.parse_all();
+    if get_inner_binobj_as_individual(queue_element, "new_state", &mut new_state) {
+        new_state.parse_all();
+    }
 
     if !is_exportable(new_state.get_literals("rdf:type"), ctx) {
         ctx.skipped += 1;
         return Ok(true);
     }
 
-    update(&mut new_state, backend, ctx)?;
+    if update_prefix(ctx, &mut new_state) {
+        load_onto(&mut backend.storage, &mut ctx.onto);
+    }
+
+    let mut prev_state = Individual::default();
+    if get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state) {
+        prev_state.parse_all();
+        update(&mut prev_state, &mut new_state, ctx)?;
+    } else {
+        insert(&mut new_state, ctx)?;
+    }
 
     Ok(true)
 }
 
-// Function to update the state of an individual
-fn update(indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> Result<bool, PrepareError> {
-    let is_deleted = indv.is_exists_bool("v-s:deleted", true);
-    if is_deleted {
-        ctx.skipped += 1;
-        return Ok(true);
-    }
-
-    if update_prefix(ctx, indv) {
-        load_onto(&mut backend.storage, &mut ctx.onto);
-    }
-
+fn insert(indv: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
     let id = indv.get_id().to_owned();
-    if let Ok(tt) = to_turtle_refs(&[indv], &ctx.prefixes) {
-        //info!("{}", String::from_utf8_lossy(&tt));
+    if let Ok(tt) = to_turtle_with_counter_refs(&[indv], &ctx.prefixes) {
+        info!("{}", String::from_utf8_lossy(&tt));
 
         let url = &ctx.store_point;
 
@@ -246,7 +250,7 @@ fn update(indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> Re
                 ctx.skipped += 1;
                 let sp = id.find(':').unwrap_or(0);
                 if sp > 0 && sp < 5 && !id.contains("//") {
-                    error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_refs(&[indv], &ctx.prefixes).unwrap()));
+                    error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_with_counter_refs(&[indv], &ctx.prefixes).unwrap()));
                     return Err(PrepareError::Recoverable);
                 }
             }
