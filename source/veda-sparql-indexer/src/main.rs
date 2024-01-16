@@ -10,7 +10,7 @@
 extern crate log;
 
 use crate::common::{is_exportable, load_map_of_types, update_prefix};
-use crate::update::update;
+use crate::update::update_individual_states;
 use anyhow::Result;
 use reqwest::StatusCode;
 use std::collections::HashMap;
@@ -195,7 +195,7 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
             }
         }
 
-        insert(&mut indv, ctx)?;
+        insert_individual_states(&mut indv, ctx)?;
     } else {
         error!("failed to read individual {}", id);
     }
@@ -228,15 +228,15 @@ fn prepare_element_indv(backend: &mut Backend, ctx: &mut Context, queue_element:
     let mut prev_state = Individual::default();
     if get_inner_binobj_as_individual(queue_element, "prev_state", &mut prev_state) {
         prev_state.parse_all();
-        update(&mut prev_state, &mut new_state, ctx)?;
+        update_individual_states(&mut prev_state, &mut new_state, ctx)?;
     } else {
-        insert(&mut new_state, ctx)?;
+        insert_individual_states(&mut new_state, ctx)?;
     }
 
     Ok(true)
 }
 
-fn insert(indv: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
+fn insert_individual_states(indv: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
     let id = indv.get_id().to_owned();
     if let Ok(tt) = to_turtle_with_counter_refs(&[indv], &ctx.prefixes) {
         info!("{}", String::from_utf8_lossy(&tt));
