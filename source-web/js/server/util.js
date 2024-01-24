@@ -439,3 +439,41 @@ Util.set_field_to_document = function (field_name, value, doc_id) {
   set_in_document[field_name] = value;
   set_in_individual(ticket, set_in_document, _event_id);
 };
+
+Util.getChief = function (appointmentUri, curAppointment) {
+  if (curAppointment == undefined) curAppointment = appointmentUri;
+  const appointment = get_individual(ticket, appointmentUri);
+  if (appointment == undefined) return [];
+  if (
+    veda.Util.hasValue(appointment, 'v-s:hasChief') &&
+    !veda.Util.hasValue(appointment, 'v-s:hasChief', {data: curAppointment, type: 'Uri'})
+  ) {
+    return appointment['v-s:hasChief'];
+  } else {
+    if (veda.Util.hasValue(appointment, 'v-s:parentUnit')) {
+      const parentUnit = appointment['v-s:parentUnit'][0].data;
+      return getChief(parentUnit, curAppointment);
+    } else {
+      return [];
+    }
+  }
+};
+
+Util.getFieldChief = function (appointmentUri, curAppointment) {
+  if (curAppointment == undefined) curAppointment = appointmentUri;
+  const appointment = get_individual(ticket, appointmentUri);
+  if (appointment == undefined) return [];
+  if (
+    veda.Util.hasValue(appointment, 'v-s:hasFieldChief') &&
+    !veda.Util.hasValue(appointment, 'v-s:hasFieldChief', {data: curAppointment, type: 'Uri'})
+  ) {
+    return appointment['v-s:hasFieldChief'];
+  } else {
+    if (veda.Util.hasValue(appointment, 'v-s:parentUnit')) {
+      const parentUnit = appointment['v-s:parentUnit'][0].data;
+      return getFieldChief(parentUnit, curAppointment);
+    } else {
+      return [];
+    }
+  }
+};
