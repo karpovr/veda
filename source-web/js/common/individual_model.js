@@ -938,7 +938,7 @@ proto.init = function (forced) {
     return Promise.all( types_promises )
       .then((types) => {
         const models_promises = [];
-        types.map((type) => {
+        types.forEach((type) => {
           if ( type.hasValue('v-ui:hasModel') ) {
             models_promises.push( type.get('v-ui:hasModel')[0].load() );
           }
