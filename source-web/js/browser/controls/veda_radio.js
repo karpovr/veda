@@ -69,7 +69,7 @@ $.fn.veda_radio = function (params) {
    */
   function renderOptions (options) {
     self.empty();
-    options.forEach((value, index) => {
+    return Promise.all(options.map((value, index) => {
       if (index >= 100) {
         return;
       }
@@ -96,7 +96,7 @@ $.fn.veda_radio = function (params) {
       }).catch((error) => {
         console.log('Error rendering value', error);
       });
-    });
+    }));
   }
 
   /**
