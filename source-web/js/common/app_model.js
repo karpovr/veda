@@ -24,4 +24,9 @@ export default function App (manifest) {
       return this.user._init();
     });
   };
+
+  // Trigger update event
+  this.update = function () {
+    return this.trigger('update');
+  };
 }
