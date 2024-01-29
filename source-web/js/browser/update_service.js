@@ -1,5 +1,4 @@
 /**
- * Client in-memory cache update service singleton constructor.
  * This module is responsible for automatically updating individual data in the user's browser
  * when changes occur on the server side.
  * @module UpdateService
@@ -57,7 +56,7 @@ export default class UpdateService {
     let pingInterval;
 
     try {
-      const addressCfg = await Backend.get_individual('', 'cfg:ClientUpdateServiceAddress', false);
+      const addressCfg = await Backend.get_individual(undefined, 'cfg:ClientUpdateServiceAddress', false);
       this.address = addressCfg['rdf:value'] && addressCfg['rdf:value'][0].data;
       this.url = new URL(this.address);
     } catch (error) {
