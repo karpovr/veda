@@ -445,12 +445,12 @@ Util.getChief = function (appointmentUri, curAppointment) {
   const appointment = get_individual(ticket, appointmentUri);
   if (appointment == undefined) return [];
   if (
-    veda.Util.hasValue(appointment, 'v-s:hasChief') &&
-    !veda.Util.hasValue(appointment, 'v-s:hasChief', {data: curAppointment, type: 'Uri'})
+    Util.hasValue(appointment, 'v-s:hasChief') &&
+    !Util.hasValue(appointment, 'v-s:hasChief', {data: curAppointment, type: 'Uri'})
   ) {
     return appointment['v-s:hasChief'];
   } else {
-    if (veda.Util.hasValue(appointment, 'v-s:parentUnit')) {
+    if (Util.hasValue(appointment, 'v-s:parentUnit')) {
       const parentUnit = appointment['v-s:parentUnit'][0].data;
       return getChief(parentUnit, curAppointment);
     } else {
@@ -464,12 +464,12 @@ Util.getFieldChief = function (appointmentUri, curAppointment) {
   const appointment = get_individual(ticket, appointmentUri);
   if (appointment == undefined) return [];
   if (
-    veda.Util.hasValue(appointment, 'v-s:hasFieldChief') &&
-    !veda.Util.hasValue(appointment, 'v-s:hasFieldChief', {data: curAppointment, type: 'Uri'})
+    Util.hasValue(appointment, 'v-s:hasFieldChief') &&
+    !Util.hasValue(appointment, 'v-s:hasFieldChief', {data: curAppointment, type: 'Uri'})
   ) {
     return appointment['v-s:hasFieldChief'];
   } else {
-    if (veda.Util.hasValue(appointment, 'v-s:parentUnit')) {
+    if (Util.hasValue(appointment, 'v-s:parentUnit')) {
       const parentUnit = appointment['v-s:parentUnit'][0].data;
       return getFieldChief(parentUnit, curAppointment);
     } else {
