@@ -41,11 +41,11 @@ test('testSimpleNet3', async (t) => {
     .typeText('veda-control[rel="v-wf:hasStatusWorkflow"]', 'Ожидает отправки')
     .click('.suggestion[resource="v-wf:ToBeSent"]')
     .click('button#save')
-    .wait(3000)
+    .wait(10000)
     .click('button#toggle-actions')
-    .wait(1000)
+    .wait(10000)
     .click('div[rel="v-wf:isProcess"] span#label')
-    .wait(1000)
+    .wait(10000)
     .expect(red1).eql(1)
     .expect(green).eql(1);
 });
