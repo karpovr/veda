@@ -408,7 +408,7 @@ function handleLoginError (error) {
  * @param {Object} authResult - The authentication result
  * @return {void}
  */
-function handleLoginSuccess (authResult) {
+async function handleLoginSuccess (authResult) {
   const enterLoginPassword = loginForm.querySelector('#enter-login-password');
   show(enterLoginPassword);
 
@@ -416,7 +416,7 @@ function handleLoginSuccess (authResult) {
   loginForm.querySelectorAll('input:not(#login)').forEach((input) => input.value = '');
   hide(loginForm.querySelector('.btn.ok'));
 
-  initWithCredentials(authResult);
+  await initWithCredentials(authResult);
 }
 
 function getCookie (name) {
@@ -457,7 +457,7 @@ const handleAuthError = spinnerDecorator(function () {
     const path = !ntlmProvider.hasValue('v-s:deleted', true) && ntlmProvider.hasValue('rdf:value') && ntlmProvider.get('rdf:value')[0];
     if (path) {
       return ntlmAuth(path)
-        .then((authResult) => initWithCredentials(authResult))
+        .then(initWithCredentials)
         .catch((err) => {
           console.error('NTLM auth failed');
           show(loginForm);

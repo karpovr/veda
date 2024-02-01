@@ -286,6 +286,7 @@ export default class BrowserBackend {
    * }
    */
   static async get_individual (ticket, uri, cache = true) {
+    if (uri === 'cfg:VedaSystem_aspect') throw new Error();
     const arg = ticket;
     const isObj = typeof arg === 'object';
     const params = {
