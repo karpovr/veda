@@ -43,7 +43,6 @@ proto._init = function () {
     })
     .catch((error) => {
       console.error('User init failed', error);
-      alert('Ошибка запуска приложения. Пожалуйста, попробуйте еще раз.');
       throw error;
     });
 };

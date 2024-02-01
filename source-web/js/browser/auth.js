@@ -197,7 +197,9 @@ loginForm.querySelector('#change-password').addEventListener('click', spinnerDec
  * @param {Error} error
  * @return {void}
  */
-function handleLoginError (error) {
+async function handleLoginError (error) {
+  await handleAuthError();
+
   const enterLoginPassword = loginForm.querySelector('#enter-login-password');
   hide(enterLoginPassword);
   const enterNewPassword = loginForm.querySelector('#enter-new-password');
@@ -215,7 +217,7 @@ function handleLoginError (error) {
   const loginFailedError = loginForm.querySelector('#login-failed-error');
   const authLockedError = loginForm.querySelector('#auth-locked-error');
   const passChangeLockedError = loginForm.querySelector('#pass-change-locked-error');
-  const unavailableError = loginForm.querySelector('#unavailable-error');
+  const otherError = loginForm.querySelector('#other-error');
   const networkError = loginForm.querySelector('#network-error');
 
   const secretRequestInfo = loginForm.querySelector('#secret-request-info');
@@ -390,10 +392,10 @@ function handleLoginError (error) {
     hide(enterLoginPassword);
     break;
   default:
-    show(unavailableError);
+    show(otherError);
     show(ok);
     okHandler = function () {
-      hide(unavailableError);
+      hide(otherError);
       show(enterLoginPassword);
       ok.removeEventListener('click', okHandler);
       hide(ok);
@@ -536,9 +538,9 @@ function handleAuthSuccess (authResult, isBroadcast = false) {
  * @return {void}
  */
 const initWithCredentials = spinnerDecorator(async function (authResult) {
-  hide(loginForm);
   handleAuthSuccess(authResult);
   await veda.init(veda.user_uri);
+  hide(loginForm);
   veda.trigger('started');
 });
 
