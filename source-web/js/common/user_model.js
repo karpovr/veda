@@ -5,6 +5,12 @@ import IndividualModel from '../common/individual_model.js';
 
 export default User;
 
+function timeout (ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 /**
  * Application user
  * @param {string} uri
@@ -26,32 +32,39 @@ proto.getLanguage = function () {
 
 proto._init = function () {
   return this.reset()
-    .then(this.initAspect.bind(this))
-    .then(this.initAppointment.bind(this))
-    .then(this.initPreferences.bind(this))
-    .then(this.initLanguage.bind(this))
+    .then(() => this.initAspect())
+    .then(() => this.initAppointment())
+    .then(() => this.initPreferences())
+    .then((preferences) => this.initLanguage(preferences))
     .then(() => {
       if ( this.id !== 'cfg:Guest' ) {
         return this.save();
       }
     })
     .catch((error) => {
-      console.error('User init failed');
+      console.error('User init failed', error);
+      throw error;
     });
 };
 
-proto.initAspect = function () {
+proto.initAspect = function (tries = 3) {
+  if (tries <= 0) throw new Error('Personal aspect init failed');
   const aspect_id = this.id + '_aspect';
   const aspect = this.hasValue('v-s:hasAspect') ? this['v-s:hasAspect'][0] : new IndividualModel(aspect_id);
   return aspect.reset()
     .catch((error) => {
-      console.error('Personal aspect load failed');
-      const newAspect = new IndividualModel(aspect_id);
-      newAspect['rdf:type'] = 'v-s:PersonalAspect';
-      newAspect['v-s:owner'] = this;
-      newAspect['rdfs:label'] = 'PersonalAspect_' + this.id;
-      newAspect['rdfs:comment'] = 'Create new aspect due to aspect load error\n' + error.stack;
-      return this.id !== 'cfg:Guest' ? newAspect.save() : newAspect;
+      if (error.code === 404) {
+        console.error('Personal aspect does not exist, create a new one.');
+        const newAspect = new IndividualModel(aspect_id);
+        newAspect['rdf:type'] = 'v-s:PersonalAspect';
+        newAspect['v-s:owner'] = this;
+        newAspect['rdfs:label'] = 'PersonalAspect_' + this.id;
+        newAspect['rdfs:comment'] = 'Create new aspect due to aspect load error\n' + error.stack;
+        return this.id !== 'cfg:Guest' ? newAspect.save() : newAspect;
+      } else {
+        console.error('Personal aspect load failed', error);
+        return timeout(1000).then(this.initAspect.bind(this, --tries));
+      }
     })
     .catch((error) => {
       console.error('Personal aspect save failed');
