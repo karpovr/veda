@@ -59,7 +59,7 @@ proto.initAspect = function (tries = 5) {
         newAspect['rdf:type'] = 'v-s:PersonalAspect';
         newAspect['v-s:owner'] = this;
         newAspect['rdfs:label'] = 'PersonalAspect_' + this.id;
-        newAspect['rdfs:comment'] = 'Create new aspect due to aspect load error';
+        newAspect['rdfs:comment'] = `Create new aspect due to aspect load error. ${error}`;
         return this.id !== 'cfg:Guest' ? newAspect.save() : newAspect;
       } else {
         console.error('Personal aspect load failed', error);
