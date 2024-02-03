@@ -40,10 +40,12 @@ pub fn is_exportable(in_classes: Option<Vec<String>>, ctx: &mut Context) -> bool
 pub fn update_prefix(ctx: &mut Context, rindv: &mut Individual) -> bool {
     if rindv.any_exists("rdf:type", &["owl:Ontology"]) {
         if let Some(full_url) = rindv.get_first_literal("v-s:fullUrl") {
-            warn!("prefix : {} -> {}", rindv.get_id(), full_url);
-            let short_prefix = rindv.get_id().trim_end_matches(':');
-            ctx.prefixes.insert(short_prefix.to_owned(), full_url);
-            return true;
+            if full_url.len() > 5 {
+                warn!("prefix : {} -> {}", rindv.get_id(), full_url);
+                let short_prefix = rindv.get_id().trim_end_matches(':');
+                ctx.prefixes.insert(short_prefix.to_owned(), full_url);
+                return true;
+            }
         }
     }
     false

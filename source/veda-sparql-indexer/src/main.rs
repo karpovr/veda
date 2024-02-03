@@ -25,6 +25,7 @@ use v_common::onto::individual2turtle::to_turtle_with_counter_refs;
 use v_common::onto::onto_impl::Onto;
 use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
+use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 
 mod common;
@@ -91,7 +92,7 @@ fn main() -> Result<()> {
 
     for id in onto_index.data.keys() {
         let mut rindv: Individual = Individual::default();
-        if backend.storage.get_individual(id, &mut rindv) {
+        if backend.storage.get_individual(id, &mut rindv) == ResultCode::Ok {
             rindv.parse_all();
 
             update_prefix(&mut ctx, &mut rindv);
@@ -185,7 +186,8 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
         return Ok(true);
     }
 
-    if backend.storage.get_individual(&id, &mut indv) {
+    let res = backend.storage.get_individual(&id, &mut indv);
+    if res == ResultCode::Ok {
         indv.parse_all();
 
         if indv_types.is_none() {
@@ -196,8 +198,9 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
         }
 
         insert_individual_states(&mut indv, ctx)?;
-    } else {
+    } else if res == ResultCode::NotReady {
         error!("failed to read individual {}", id);
+        return Ok(false);
     }
 
     Ok(true)
@@ -239,12 +242,13 @@ fn prepare_element_indv(backend: &mut Backend, ctx: &mut Context, queue_element:
 fn insert_individual_states(indv: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
     let id = indv.get_id().to_owned();
     if let Ok(tt) = to_turtle_with_counter_refs(&[indv], &ctx.prefixes) {
-        info!("{}", String::from_utf8_lossy(&tt));
+        //info!("{}", String::from_utf8_lossy(&tt));
 
         let url = &ctx.store_point;
 
         if let Ok(res) = ctx.rt.block_on(ctx.client.post(url).body(tt).header("Content-Type", "text/turtle").send()) {
             if res.status() == StatusCode::CREATED || res.status() == StatusCode::NO_CONTENT {
+                info!("insert: {}", indv.get_id());
                 ctx.stored += 1;
             } else {
                 ctx.skipped += 1;

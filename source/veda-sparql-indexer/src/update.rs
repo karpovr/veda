@@ -19,7 +19,10 @@ pub fn update_individual_states(previous_individual: &mut Individual, current_in
 
     // Send the SPARQL update queries to the update endpoint.
     let update_endpoint_url = &update_context.update_point;
-    if let Ok(response) = update_context.rt.block_on(update_context.client.post(update_endpoint_url).body(combined_sparql_queries).header("Content-Type", "application/sparql-update").send()) {
+    if let Ok(response) = update_context
+        .rt
+        .block_on(update_context.client.post(update_endpoint_url).body(combined_sparql_queries).header("Content-Type", "application/sparql-update").send())
+    {
         // Check the response status to ensure the update was successful.
         if response.status() == StatusCode::CREATED || response.status() == StatusCode::NO_CONTENT {
         } else {
