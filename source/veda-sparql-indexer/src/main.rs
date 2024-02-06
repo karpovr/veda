@@ -186,7 +186,7 @@ fn prepare_element_id(backend: &mut Backend, ctx: &mut Context, queue_element: &
         return Ok(true);
     }
 
-    let res = backend.storage.get_individual(&id, &mut indv);
+    let res = backend.storage.get_individual(id, &mut indv);
     if res == ResultCode::Ok {
         indv.parse_all();
 
