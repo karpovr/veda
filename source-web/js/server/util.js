@@ -452,7 +452,7 @@ Util.getChief = function (appointmentUri, curAppointment) {
   } else {
     if (Util.hasValue(appointment, 'v-s:parentUnit')) {
       const parentUnit = appointment['v-s:parentUnit'][0].data;
-      return getChief(parentUnit, curAppointment);
+      return Util.getChief(parentUnit, curAppointment);
     } else {
       return [];
     }
@@ -471,7 +471,7 @@ Util.getFieldChief = function (appointmentUri, curAppointment) {
   } else {
     if (Util.hasValue(appointment, 'v-s:parentUnit')) {
       const parentUnit = appointment['v-s:parentUnit'][0].data;
-      return getFieldChief(parentUnit, curAppointment);
+      return Util.getFieldChief(parentUnit, curAppointment);
     } else {
       return [];
     }
