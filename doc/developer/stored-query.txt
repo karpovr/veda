@@ -3,12 +3,12 @@ I) Назначение - предоставить единый интерфей
 1) База данных MySQL
 2) База данных ClickHouse
 3) Xapian
-4) Графовая база данных
+4) Графовая база данных Oxigraph
 
-названия доступных источников данных - ["clickhouse", "mysql", "xapian", "graphql"]
+названия доступных источников данных - ["clickhouse", "mysql", "xapian", "oxigraph"]
 
 Конечные точки подключения должны описываться индивидами типа v-s:Query
-Пример:
+Пример 1:
 
 v-s:Query1
   rdf:type v-s:Query ;
@@ -17,6 +17,25 @@ v-s:Query1
 SELECT id, version, sign, rdfs_label_str as label FROM veda_tt."v-s:Person" WHERE version = {v-s:param1}
 """ ;
   v-s:resultFormat "rows"|"cols"|"full"
+.
+
+Пример 2:
+
+v-s:Query2
+  rdf:type v-s:Query ;
+  v-s:source "oxigraph" ;
+  v-s:queryString """
+PREFIX v-s: <http://semantic-machines.com/veda/veda-schema/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT *
+WHERE {
+        ?app v-s:employee ?person .
+        ?person v-s:hasAccount ?account .
+        ?account rdfs:label ?label .
+        ?account v-s:author {v-s:param1} .
+      }
+""" ;
+  v-s:resultFormat "full" ;
 .
 
 Этот индивид описывает источник данных и сам запрос, содержащий подстановочные переменные. 
@@ -89,7 +108,7 @@ POST /query?ticket=_ticket,
 
 II) Авторизация.
 Предикат сохраненного v-s:authorizationLevel задает уровень авторизации результатов и может принимать 3 значения:
- - "query". В этом случае модуль проверяет только права пользователя на чтение по отношению к индивиду запроса.
+ - "query". В этом случае модуль проверяет только права пользователя на чтение по отношению к индивиду запроса, этот уровень применяется по умолчанию.
  - "row-column". В этом случае модуль запросов исключает из результатов целые строки или столбцы (в зависимости от выбранного представления результатов), содержащие URI, не прошедшие авторизацию на чтение.
  - "cell". В этом случае модуль в результатах запроса заменяет URI индивидов, не прошедших авторизацию на чтение, строкой NotAuthorized.
 
