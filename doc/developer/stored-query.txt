@@ -45,11 +45,13 @@ WHERE {
 
 POST /query?ticket=_ticket,
 {
-  "stored_query": "v-s:Query1",
-  "params": {
     "@": _someRandomId,
     "rdf:type": [{
       "data":"v-s:QueryParams",
+      "type":"Uri"
+    }],
+    "v-s:storedQuery": [{
+      "data":"v-s:Query2",
       "type":"Uri"
     }],
     "v-s:param1": [{
@@ -59,8 +61,7 @@ POST /query?ticket=_ticket,
     "v-s:resultFormat": [{
       "data":"rows"|"cols"|"full",
       "type":"String"
-    }],
-  }
+    }]
 }
 
 Результат исполнения запроса должен возвращаться в виде JSON объекта и содержать столбцы указанные в запросе с учетом параметра форматирования результатов ("v-s:resultFormat" = rows|cols).
