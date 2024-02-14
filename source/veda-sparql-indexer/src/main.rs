@@ -5,6 +5,8 @@
  When this mode is enabled, the indexer reads only from the "ids" queue, focusing on processing individual IDs.
  Otherwise, it reads from the "individuals-flow" queue, processing complete individual data entries.
 */
+#[macro_use]
+extern crate version;
 
 #[macro_use]
 extern crate log;
@@ -48,8 +50,10 @@ pub struct Context {
 
 // Main function
 fn main() -> Result<()> {
+    let module_name = "SPARQL_INDEXER";
     // Initialize logging
-    init_log("SPARQL_INDEXER");
+    init_log(module_name);
+    info!("{} {}", module_name, version!());
 
     // Check if the "input-onto" module is loaded
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
@@ -109,8 +113,7 @@ fn main() -> Result<()> {
     };
 
     let mut queue_consumer = Consumer::new(queue_path, "sparql-indexer", queue_name).expect(&format!("!!!!!!!!! FAIL OPEN QUEUE {}", queue_path));
-
-    info!("open queue {}/{}", queue_path, queue_name);
+    info!("open queue {}/{}, part:{}", queue_path, queue_name, queue_consumer.id);
 
     // Listen to the queue and process messages
     module.max_batch_size = Some(10000);
