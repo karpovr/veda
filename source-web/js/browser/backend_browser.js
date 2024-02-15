@@ -262,6 +262,24 @@ export default class BrowserBackend {
   }
 
   /**
+   * Perform a stored query using the provided parameters.
+   * @param {string|object} ticket - The ticket or an object with the "ticket" property.
+   * @param {object} data - The query parameters.
+   * @return {Promise<object>} A Promise that resolves to the server response for the query operation.
+   */
+  static async stored_query (ticket, data) {
+    const arg = ticket;
+    const isObj = typeof arg === 'object';
+    const params = {
+      method: 'POST',
+      url: '/stored_query',
+      ticket: isObj ? arg.ticket : ticket,
+      data: isObj ? arg.data : data,
+    };
+    return call_server(params);
+  }
+
+  /**
    * Get the an individual object with the specified URI.
    * @param {string|object} ticket - The ticket or an object with the "ticket" property.
    * @param {string} uri - The URI of the individual to retrieve information for.
