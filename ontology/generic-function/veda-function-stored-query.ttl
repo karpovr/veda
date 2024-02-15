@@ -1,0 +1,71 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+
+<http://semantic-machines.com/veda/veda-function-search>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Веда. Функция 'Сохраненный запрос'"@ru ;
+  rdfs:label "Veda system ontologyю. 'Stored query' function"@en ;
+#  owl:versionInfo "0.2" ;
+  v-s:loadPriority 9 ;
+.
+
+########## STORED QUERY ###########
+
+v-s:Query
+  rdf:type owl:Class ;
+  rdfs:subClassOf rdfs:Resource ;
+  rdfs:label "Запрос"@ru ;
+  rdfs:label "Query"@en ;
+.
+v-s:queryString
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Строка запроса"@ru ;
+  rdfs:label "Query string"@en ;
+  rdfs:domain v-s:Query ;
+  rdfs:range xsd:string ;
+.
+v-s:resultFormat
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Формат представления результатов"@ru ;
+  rdfs:label "Result presentation format"@en ;
+  rdfs:comment "Возможные значения: cols|rows|full"@ru ;
+  rdfs:comment "Possible values: cols|rows|full"@en ;
+  rdfs:domain v-s:Query ;
+  rdfs:range xsd:string ;
+.
+v-s:source
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Источник"@ru ;
+  rdfs:label "Source"@en ;
+  rdfs:comment "Возможные значения: oxigraph|clickhouse|mysql|xapian"@ru ;
+  rdfs:comment "Possible values: oxigraph|clickhouse|mysql|xapian"@en ;
+  rdfs:domain v-s:Query ;
+  rdfs:range xsd:string ;
+.
+v-s:authorizationLevel
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Уровень авторизации"@ru ;
+  rdfs:label "Authorization level"@en ;
+  rdfs:comment "Возможные значения: query|row-column|cell"@ru ;
+  rdfs:comment "Possible values: query|row-column|cell"@en ;
+  rdfs:domain v-s:Query ;
+  rdfs:range xsd:string ;
+.
+v-s:QueryParams
+  rdf:type owl:Class ;
+  rdfs:subClassOf rdfs:Resource ;
+  rdfs:label "Параметры запроса"@ru ;
+  rdfs:label "Query parameters"@en ;
+.
+v-s:storedQuery
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Сохраненный запрос"@ru ;
+  rdfs:label "Stored query"@en ;
+  rdfs:domain v-s:QueryParams ;
+  rdfs:range v-s:Query ;
+.
