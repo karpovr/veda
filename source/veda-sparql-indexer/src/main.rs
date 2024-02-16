@@ -29,6 +29,7 @@ use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
+use git_version::git_version;
 
 mod common;
 mod update;
@@ -53,7 +54,7 @@ fn main() -> Result<()> {
     let module_name = "SPARQL_INDEXER";
     // Initialize logging
     init_log(module_name);
-    info!("{} {}", module_name, version!());
+    info!("{} {} {}", module_name, version!(), git_version!());
 
     // Check if the "input-onto" module is loaded
     if get_info_of_module("input-onto").unwrap_or((0, 0)).0 == 0 {
@@ -113,7 +114,7 @@ fn main() -> Result<()> {
     };
 
     let mut queue_consumer = Consumer::new(queue_path, "sparql-indexer", queue_name).expect(&format!("!!!!!!!!! FAIL OPEN QUEUE {}", queue_path));
-    info!("open queue {}/{}, part:{}", queue_path, queue_name, queue_consumer.id);
+    info!("open queue {}/{}, part:{}, pos:{}", queue_path, queue_name, queue_consumer.id, queue_consumer.count_popped);
 
     // Listen to the queue and process messages
     module.max_batch_size = Some(10000);
