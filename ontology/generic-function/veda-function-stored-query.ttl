@@ -71,7 +71,7 @@ v-s:storedQuery
 .
 v-s:NotAuthorized
   rdf:type rdfs:Resource ;
-  rdfs:label "Не авторизовано"@ru ;
+  rdfs:label "Не авторизован"@ru ;
   rdfs:label "Not authorized"@en ;
   rdfs:comment "Означает, что uri в результатах выборки не авторизован"@ru ;
   rdfs:comment "Means that the uri in the query results is not authorized"@en ;
