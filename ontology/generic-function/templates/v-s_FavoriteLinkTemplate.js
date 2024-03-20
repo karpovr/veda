@@ -1,22 +1,24 @@
 import IndividualModel from '/js/common/individual_model.js';
 
-export const pre = function (individual, template, container, mode, extra) {
+export const pre = async function (individual, template, container, mode, extra) {
 
   const subscriptionPath = individual.hasValue('v-s:subscriptionPath') ? individual['v-s:subscriptionPath'][0] : '/';
 
-  try {
-    template.querySelector('a.label-template').setAttribute('href', `${subscriptionPath}#/@`);
-    if (!individual.hasValue('rdfs:label')) {
-      const spanLabel = template.querySelector('#label');
-      spanLabel.removeAttribute('about');
-      spanLabel.removeAttribute('property');
-      spanLabel.textContent = individual.id;
+  template.querySelector('a.label-template').setAttribute('href', `${subscriptionPath}#/@`);
+  if (individual.hasValue('v-s:onDocument')) {
+    try {
+      const doc = await individual['v-s:onDocument'][0].load();
+      if (!doc.hasValue('rdfs:label')) {
+        const spanLabel = template.querySelector('#label');
+        spanLabel.removeAttribute('about');
+        spanLabel.removeAttribute('property');
+        spanLabel.textContent = individual.id;
+      }
+    } catch (error) {
+      console.log(error);
+      alert('Ошибка загрузки объекта: ' + error.message);
     }
-  } catch (exp) {
-    console.log(exp);
-    alert('123');
   }
-
 };
 
 export const html = `
