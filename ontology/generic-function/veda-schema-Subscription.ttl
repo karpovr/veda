@@ -51,6 +51,14 @@ v-s:prevSubscription
   rdfs:range v-s:Subscription ;
 .
 
+v-s:subscriptionPath
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-s:Subscription ;
+  rdfs:label "Путь подписки к разделу"@ru ;
+  rdfs:label "Subscription path"@en ;
+  rdfs:range xsd:string ;
+.
+
 v-s:Subscription_permission
   rdf:type v-s:PermissionStatement ;
   v-s:permissionObject v-s:Subscription ;
@@ -76,6 +84,13 @@ v-s:FavoritesIndicatorTemplate
   rdfs:label "Шаблон индикатора избранных"@ru ;
   rdfs:label "Favorites indicator template"@en ;
   v-ui:template "v-s_FavoritesIndicatorTemplate.js" ;
+.
+v-s:FavoriteLinkTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон ссылки избранного"@ru ;
+  rdfs:label "Favorite link template"@en ;
+  v-ui:forClass v-s:Subscription ;
+  v-ui:template "v-s_FavoriteLinkTemplate.js";
 .
 
 v-s:SubscriptionSave_Event
