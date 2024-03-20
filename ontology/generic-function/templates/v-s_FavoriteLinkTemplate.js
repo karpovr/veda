@@ -1,9 +1,9 @@
 import IndividualModel from '/js/common/individual_model.js';
 
 export const pre = function (individual, template, container, mode, extra) {
-  
+
   const subscriptionPath = individual.hasValue('v-s:subscriptionPath') ? individual['v-s:subscriptionPath'][0] : '/';
-  
+
   try {
     template.querySelector('a.label-template').setAttribute('href', `${subscriptionPath}#/@`);
     if (!individual.hasValue('rdfs:label')) {
@@ -16,7 +16,7 @@ export const pre = function (individual, template, container, mode, extra) {
     console.log(exp);
     alert('123');
   }
-  
+
 };
 
 export const html = `
