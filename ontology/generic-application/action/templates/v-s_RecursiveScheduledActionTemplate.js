@@ -42,6 +42,16 @@ export const pre = function (individual, template, container, mode, extra) {
       template[0].dispatchEvent(new Event(that.id));
     }
   });
+  async function updateResponsible () {
+    if (individual.hasValue('v-s:linkedObject') && individual.hasValue('v-s:propertyInDocument')) {
+      const subDoc = await individual["v-s:linkedObject"][0].load();
+      const cntr = $('#calculatedResponsible', template);
+      let responsibles = subDoc[individual['v-s:propertyInDocument'][0].id];
+      cntr.empty();
+      responsibles.forEach(resp => { resp.present(cntr, "v-ui:LabelTemplate", "view")});
+    }
+  }
+  updateResponsible();
 };
 
 export const post = function (individual, template, container, mode, extra) {
@@ -84,12 +94,16 @@ export const html = `
         <div property="v-s:description" class="view -edit -search"></div>
         <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <em about="v-s:responsible" property="rdfs:label"></em>
             <div rel="v-s:responsible" data-template="v-ui:LabelTemplate"></div>
             <veda-control data-type="link" rel="v-s:responsible" class="-view edit -search fulltext"></veda-control>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
+            <em about="v-s:CalculatedResponsibleBundle" property="rdfs:label"></em>
+            <div id="calculatedResponsible"></div>
+          </div>
+          <div class="col-md-4">
             <em about="v-s:controller" property="rdfs:label"></em>
             <div rel="v-s:controller" data-template="v-ui:LabelTemplate"></div>
             <veda-control data-type="link" rel="v-s:controller" class="-view edit -search fulltext"></veda-control>

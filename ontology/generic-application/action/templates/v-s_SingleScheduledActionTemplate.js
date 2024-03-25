@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import IndividualModel from '/js/common/individual_model.js';
 
 export const pre = function (individual, template, container, mode, extra) {
   template = $(template);
@@ -38,6 +39,27 @@ export const pre = function (individual, template, container, mode, extra) {
         }
       }
     }
+
+    if (individual.hasValue("v-s:propertyInDocument")) {
+      result["v-s:responsible"] = {
+        state: true
+      }
+    }
+
+    if (individual.hasValue("v-s:responsible")) {
+      result["v-s:propertyInDocument"] = {
+        state: true
+      };
+
+      result["v-s:type"] = {
+        state: true
+      };
+      
+      result["v-s:linkedObject"] = {
+        state: true
+      };
+    }
+
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
@@ -47,18 +69,94 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 };
 
+export const post = function (individual, template, container, mode, extra) {
+  individual.on('v-s:linkedObject', uploadResponsibleProps);
+  individual.on('v-s:propertyInDocument', updateResponsible);
+  individual.on('propertyModified', handler)
+  updateResponsible();
+  async function uploadResponsibleProps () {
+    if (!individual.hasValue("v-s:linkedObject")) return;
+    const linkedDoc = await individual["v-s:linkedObject"][0].load();
+    let propList = await getDocumentResponsibleProps(linkedDoc);
+
+    const queryPrefix = propList.map( item => `'@' == '${item}'`).join("||");
+    $('#propertyInDocumentControl', template).attr('data-query-prefix', queryPrefix);
+  }
+
+  async function updateResponsible () {
+    const cntr = $('#calculatedResponsible', template);
+    if (individual.hasValue('v-s:linkedObject') && individual.hasValue('v-s:propertyInDocument')) {
+      const subDoc = await individual["v-s:linkedObject"][0].load();
+      let responsibles = subDoc[individual['v-s:propertyInDocument'][0].id];
+      cntr.empty();
+      responsibles.forEach(resp => { resp.present(cntr, "v-ui:LabelTemplate", "view")});
+    } else {
+      cntr.empty();
+    }
+  }
+
+  async function getDocumentResponsibleProps (document) {
+    await document.load();
+    if (!document instanceof IndividualModel) return;
+    let propList = [];
+
+    for (let prop in document.toJson() ) {
+      if (prop == "@" || prop == "v-s:creator" || prop == "v-s:lastEditor") continue;
+      if ( document[prop][0] instanceof IndividualModel) {
+        const subDoc = await document[prop][0].load();
+        if ((subDoc.hasValue("rdf:type", "v-s:Position") || subDoc.hasValue("rdf:type", "v-s:Appointment")) && ! subDoc.hasValue("v-s:deleted", true)) {
+          propList.push(prop);
+        }
+      }
+    }
+    return propList
+  }
+
+  async function handler (propertyUri) {
+    if (propertyUri == "v-s:type") {
+      individual["v-s:linkedObject"] = [];
+    }
+    if (propertyUri == "v-s:linkedObject") {
+      individual['v-s:propertyInDocument'] = [];
+    }
+  }
+}
+
 export const html = `
   <div class="panel panel-default" style="margin-top: 20px">
     <div class="panel-body">
       <em about="v-s:description" property="rdfs:label"></em>
       <div property="v-s:description" class="view -edit -search"></div>
       <veda-control data-type="text" rows="1" property="v-s:description" class="-view edit -search"></veda-control>
-      <div class="row">
-        <div class="col-md-5">
+      <div class="row" style="margin-top: 15px;">
+        <div class="col-md-6">
+          <div class="panel panel-default panel-body" id="calculatedResponsibleContainer">
+            <span about="v-s:ResponsibleSelectSingleBundle" property="rdfs:label"></span>
           <em about="v-s:responsible" property="rdfs:label"></em>
-          <div rel="v-s:responsible" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
+          <div rel="v-s:responsible" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
           <veda-control data-type="link" rel="v-s:responsible" class="-view edit -search fulltext"></veda-control>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="panel panel-default panel-body" id="calculatedResponsibleContainer">
+            <span about="v-s:ResponsibleSelectFromDocBundle" property="rdfs:label"></span>
+          <em about="v-s:LinkedDocTypeBundle" property="rdfs:label"></em>
+          <div rel="v-s:type" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
+          <veda-control data-type="link" rel="v-s:type" data-query-prefix="'rdfs:subClassOf'==='v-s:UserSearchableDocument'" class="dropdown -view edit -search fulltext"></veda-control>
 
+          <em about="v-s:linkedObject" property="rdfs:label"></em>
+          <div rel="v-s:linkedObject" data-template="v-ui:LabelTemplate"  class="view -edit -search"></div>
+          <veda-control data-type="link" rel="v-s:linkedObject" data-query-prefix="'rdf:type'=='{@.v-s:type.id}'" class="dropdown -view edit -search fulltext"></veda-control>
+
+          <em about="v-s:propertyInDocument" property="rdfs:label"></em>
+          <div rel="v-s:propertyInDocument" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
+          <veda-control data-type="link" id="propertyInDocumentControl" rel="v-s:propertyInDocument" data-dynamic-query-prefix="true" class="dropdown -view edit -search fulltext"></veda-control>
+
+          <em about="v-s:CalculatedResponsibleBundle" property="rdfs:label" class="view edit -search"></em>
+          <div id="calculatedResponsible"></div>
+          </div>
+        </div> 
+        <div class="col-md-12">
           <em about="v-s:controller" property="rdfs:label"></em>
           <div rel="v-s:controller" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
           <veda-control data-type="link" rel="v-s:controller" class="-view edit -search fulltext"></veda-control>

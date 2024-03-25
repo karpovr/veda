@@ -46,6 +46,31 @@ v-s:AddScheduledAction
   rdfs:label "Добавить"@ru ;
   rdfs:label "Add"@en ;
 .
+v-s:LinkedDocTypeBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Tип связанного документа"@ru ;
+  rdfs:label "Linked document type"@en ;
+.
+v-s:CalculatedResponsibleBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Исполнитель из документа"@ru ;
+  rdfs:label "Responsible from document"@en ;
+.
+v-s:ResponsibleSelectBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Выберите ответственное лицо или укажите документ и поле, в котором он введен."@ru ;
+  rdfs:label "Select the responsible person or indicate the document and the field in which it is registered."@en ;
+.
+v-s:ResponsibleSelectSingleBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Выберите ответственное лицо"@ru ;
+  rdfs:label "Select the responsible person"@en ;
+.
+v-s:ResponsibleSelectFromDocBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "или укажите документ и поле, в котором он введен"@ru ;
+  rdfs:label "or indicate the document and the field in which it is registered"@en ;
+.
 
 # ------------------------------------------------------------ КЛАССЫ --
 
@@ -162,6 +187,40 @@ v-s:ScheduledAction
     rdfs:label "Спецификация свойства v-s:dateToPlan для класса v-s:ScheduledAction"@ru ;
     rdfs:label "v-s:dateToPlan property specification for v-s:ScheduledAction class"@en ;
   .
+
+# v-s:type
+  v-s:PsTypeForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:type ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация свойства v-s:type для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:type property specification for v-s:ScheduledAction class"@en ;
+  .
+  
+# v-s:linkedObject
+  v-s:PsLinkedObjectForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:linkedObject ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация свойства v-s:linkedObject для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:linkedObject property specification for v-s:ScheduledAction class"@en ;
+  .
+
+# v-s:propertyInDocument
+  v-s:PsPropertyInDocumentForScheduledAction
+    rdf:type v-ui:PropertySpecification ;
+    v-ui:forClass v-s:ScheduledAction;
+    v-ui:forProperty v-s:propertyInDocument ;
+    v-ui:minCardinality 1 ;
+    v-ui:maxCardinality 1 ;
+    rdfs:label "Спецификация свойства v-s:propertyInDocument для класса v-s:ScheduledAction"@ru ;
+    rdfs:label "v-s:propertyInDocument property specification for v-s:ScheduledAction class"@en ;
+  .
+
 # v-s:scriptHandlered
 v-s:hasPeriod
   rdf:type owl:ObjectProperty ;
@@ -310,8 +369,10 @@ for (var i=0; i<result.length; i++){
     continue;
   }
   if (!veda.Util.hasValue(individ, "v-s:responsible")) {
-    print('Skip, because not found responsible: ',result[i]);
-    continue;
+    if (!(veda.Util.hasValue(individ, "v-s:linkedObject") && veda.Util.hasValue(individ, "v-s:propertyInDocument"))) {
+      print('Skip, because not found responsible: ',result[i]);
+      continue;
+    }
   }
   //print('dateToPlan=', individ['v-s:dateToPlan']);
   var deadline = new Date(individ['v-s:dateToPlan'][0].data);
@@ -368,26 +429,48 @@ for (var i=0; i<result.length; i++){
       "v-wf:hasStatusWorkflow" : veda.Util.newUri("v-wf:ToBeSent"),
       "v-wf:fromShedulerScript" : veda.Util.newBool(true),
       "v-s:creator" : veda.Util.newUri ('cfg:VedaSystemAppointment'),
-      "v-s:dateTo" : individ['v-s:dateToPlan']
+      "v-s:dateTo" : individ['v-s:dateToPlan'],
+      "v-s:responsible": []
     };
     if (veda.Util.hasValue(individ, "v-s:description")){
       startForm['rdfs:comment'] = individ['v-s:description'];
     }
-    var responible = get_individual(veda.ticket, individ["v-s:responsible"][0].data);
-    if (veda.Util.hasValue(responible, "v-s:deleted", { data: true, type: "Boolean" })) {
-      if (veda.Util.hasValue(individ, "v-s:controller")) {
+
+    // build responsibles list
+    var responsibles = [];
+    if (veda.Util.hasValue(individ, "v-s:responsible")) {
+      responsibles.push(individ["v-s:responsible"]);
+    }
+    if (veda.Util.hasValue(individ, "v-s:linkedObject") && veda.Util.hasValue(individ, "v-s:propertyInDocument")) {
+      var docProperty = individ["v-s:propertyInDocument"][0].data;
+      var subDoc = get_individual(veda.ticket, individ["v-s:linkedObject"][0].data);
+      if (veda.Util.hasValue(subDoc, docProperty)) {
+        responsibles.push(...subDoc[docProperty]);
+      }
+    }
+
+    //add valid responsibles to startForm
+    var UnvalidCount = 0;
+    for (var responsible of responsibles) {
+      var responsibleObj = get_individual(veda.ticket, responsible.data);
+      if (veda.Util.hasValue(responsibleObj, "v-s:deleted", { data: true, type: "Boolean" })) {
+        UnvalidCount++;
+      } else {
+        startForm["v-s:responsible"] = startForm["v-s:responsible"].concat(responsible);
+      }
+    }
+
+    //if found 0 valid responsibles send form to controller or creator
+    if (UnvalidCount == responsibles.length) {
+      if (veda.Util.hasValue(individ, 'v-s:controller')) {
         startForm["v-s:responsible"] = individ['v-s:controller'];
       } else {
         startForm["v-s:responsible"] = individ['v-s:creator'];
       }
       var comment = "В запланированном событии "+individ["rdfs:label"][0].data+" ответственный не актуален";
-      startForm['rdfs:comment'] = veda.Util.newStr(comment);
-    } else {
-      startForm["v-s:responsible"] = individ['v-s:responsible'];
+      startForm['rdfs:comment'] = veda.Util.newStr(comment);  
     }
-    if (veda.Util.hasValue(individ, "v-s:controller")) {
-      startForm['v-s:controller'] = individ['v-s:controller'];
-    }
+
     put_individual(veda.ticket, startForm, _event_id);
     set_in_document['v-s:dateToFact'] = veda.Util.newDate(new Date());
     print("Created: ", uri, ". For document:", result[i]);
