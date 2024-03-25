@@ -143,9 +143,7 @@ const folderTemplate = `
           }
         </style>
         <div style="display:flex;">
-          <div style="flex-grow:1;" about="@" rel="v-s:onDocument">
-            <a href="#/@" about="@" data-template="v-ui:ClassNameLabelTemplate" draggable="false"></a>
-          </div>
+          <div style="flex-grow:1;" about="@" data-template="v-s:FavoriteLinkTemplate"></div>
           <div class="dropdown pull-right">
             <div class="item-actions dropdown-toggle" data-toggle="dropdown">
               <span class="glyphicon glyphicon-option-vertical"></span>

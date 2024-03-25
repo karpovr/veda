@@ -19,10 +19,11 @@ mkdir .pids
 mkdir logs
 mkdir data
 mkdir data/tarantool
+mkdir data/oxigraph
 mkdir data/xapian-info
 
-# start oxygraph server
-#/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/oxy-pid --background --startas /bin/bash -- -c "exec oxigraph_server --location ./data/oxygraph serve 2>./logs/oxygraph-stderr.log >./logs/oxygraph-stdout.log 2>&1"
+# start oxigraph server
+/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/oxy-pid --background --startas /bin/bash -- -c "exec ./oxigraph serve --location ./data/oxigraph -b 127.0.0.1:7878 2>./logs/oxigraph-stderr.log >./logs/oxigraph-stdout.log 2>&1"
 
 # start tarantool server
 /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/tt-pid --background --startas /bin/bash -- -c "exec tarantool ./source-server/source/init_tarantool.lua 2>./logs/tarantool-stderr.log  >./logs/tarantool-stdout.log 2>&1"

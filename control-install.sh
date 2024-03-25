@@ -63,3 +63,5 @@ fi
 whereis rustc
 rustc -V
 cargo -V
+
+./tools/install-oxigraph.sh

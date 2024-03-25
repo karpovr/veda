@@ -34,6 +34,9 @@ async function showFavoritesDialog (e) {
     clear(favorites);
     container.remove();
   });
+  dialog.addEventListener('click', function (e) {
+    e.target === this && this.close();
+  });
   cancel.addEventListener('click', () => dialog.close());
 
   try {
