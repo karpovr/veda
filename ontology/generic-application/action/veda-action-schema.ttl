@@ -141,6 +141,17 @@ v-s:ScheduledAction
     rdfs:label "Спецификация свойства v-s:responsible для класса v-s:ScheduledAction"@ru ;
     rdfs:label "v-s:responsible property specification for v-s:ScheduledAction class"@en ;
   .
+#выбор ответственного на основе предиката в документе
+#v-s:type - класс документа
+#v-s:linkedObject - ссылка на документ
+#поле в документе
+  v-s:propertyInDocument
+    rdf:type owl:ObjectProperty ;
+    rdfs:label "Поле в документе"@ru ;
+    rdfs:label "Property in document"@en ;
+    rdfs:domain v-s:ScheduledAction ;
+    rdfs:range rdf:Property ;
+  .
 # v-s:controller
   v-s:PscontrollerForScheduledAction
     rdf:type v-ui:PropertySpecification ;
