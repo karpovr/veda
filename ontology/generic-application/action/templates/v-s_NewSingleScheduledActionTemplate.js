@@ -81,8 +81,8 @@ export const post = function (individual, template, container, mode, extra) {
     if (!individual.hasValue("v-s:linkedObject")) return;
     const linkedDoc = await individual["v-s:linkedObject"][0].load();
     let propList = await getDocumentResponsibleProps(linkedDoc);
-
-    const queryPrefix = propList.map( item => `'@' == '${item}'`).join("||");
+    if (propList.length == 0) return;
+    const queryPrefix = "(" + propList.map( item => `'@' == '${item}'`).join("||") + " ) && 'rdf:type' == 'owl:ObjectProperty'";
     $('#propertyInDocumentControl', template).attr('data-query-prefix', queryPrefix);
   }
 
@@ -226,7 +226,7 @@ export const html = `
           </div>
           <div class="col-sm-9 col-xs-7">
             <div rel="v-s:propertyInDocument" data-template="v-ui:LabelTemplate" class="view -edit -search"></div>
-            <veda-control data-type="link" id="propertyInDocumentControl" rel="v-s:propertyInDocument" data-dynamic-query-prefix="true" class="dropdown -view edit -search fulltext"></veda-control>  
+            <veda-control data-type="link" data-query-prefix="'@' == '11111111'" id="propertyInDocumentControl" rel="v-s:propertyInDocument" data-dynamic-query-prefix="true" class="dropdown -view edit -search fulltext"></veda-control>  
           </div>
         </div>
         <div class="row row-attribute">
