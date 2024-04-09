@@ -104,12 +104,16 @@ export const post = function (individual, template, container, mode, extra) {
     let propList = [];
 
     for (let prop in document.toJson() ) {
-      if (prop == "@" || prop == "v-s:creator" || prop == "v-s:lastEditor") continue;
-      if ( document[prop][0] instanceof IndividualModel) {
-        const subDoc = await document[prop][0].load();
-        if ((subDoc.hasValue("rdf:type", "v-s:Position") || subDoc.hasValue("rdf:type", "v-s:Appointment")) && ! subDoc.hasValue("v-s:deleted", true)) {
-          propList.push(prop);
+      try {
+        if (prop == "@" || prop == "v-s:creator" || prop == "v-s:lastEditor") continue;
+        if ( document[prop][0] instanceof IndividualModel) {
+          const subDoc = await document[prop][0].load();
+          if ((subDoc.hasValue("rdf:type", "v-s:Position") || subDoc.hasValue("rdf:type", "v-s:Appointment")) && ! subDoc.hasValue("v-s:deleted", true)) {
+            propList.push(prop);
+          }
         }
+      } catch (error) {
+        console.log(error)
       }
     }
     return propList
