@@ -1,0 +1,216 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+
+<http://semantic-machines.com/veda/veda-passRequest-schema/>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Досье сотрдуника. Схема."@ru ;
+  rdfs:label "Veda system ontology. DossierHR. Schema."@en ;
+  v-s:loadPriority 11 ;
+.
+
+# ------------------------------------------------------------ КЛАССЫ --
+
+#-----------------------------------------------------------Комплект Анкет КР
+v-s:SetOfPersonnelReserveForm
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:label "Комплект Анкет КР"@ru ;
+  rdfs:label "SetOfPersonnelReserve"@en ;
+  v-s:labelPattern "{@.v-s:dateFrom}" ;
+.
+#Анкета КР 
+  v-s:hasProcessPersonnelReserveForm
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Анкета КР"@ru ;
+  rdfs:label "Process Personnel Reserve Form"@en ;
+  rdfs:range v-s:ProcessPersonnelReserveForm ;
+  rdfs:domain v-s:SetOfPersonnelReserveForm ;
+.
+
+#------------------------------------------------------ Анкета КР --
+
+v-s:ProcessPersonnelReserveForm
+  rdf:type owl:Class ;
+  rdfs:label "Анкета КР"@ru ;
+  rdfs:label "Process Personnel Reserve Form"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+.
+#План Преемственности
+  v-s:hasContinuityPlan
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "План Преемственности"@ru ;
+  rdfs:label "ContinuityPlan"@en ;
+  rdfs:range v-s:ContinuityPlan ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+
+#------------------------------------------------------ План Преемственности --
+
+v-s:ContinuityPlan
+  rdf:type owl:Class ;
+  rdfs:label "План Преемственности"@ru ;
+  rdfs:label "ContinuityPlan"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+.
+###----------------------------------Досье сотрудника---------------------
+v-s:DossierHR
+  rdf:type owl:Class ;
+  rdfs:label "Досье сотрудника"@ru ;
+  rdfs:label "EmployeeDossier"@en ;
+.
+# Сотрудник
+v-s:DossierHREmployee
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Сотрудник"@ru ;
+  rdfs:label "Employee"@en ;
+  rdfs:range v-s:Appointment ;
+  rdfs:domain v-s:DossierHR ;
+.
+v-s:PS_DossierHREmployee_DossierHR
+ rdf:type v-ui:PropertySpecification ;
+ v-ui:forClass v-s:DossierHR ;
+ v-ui:forProperty v-s:DossierHREmployee ;
+ rdfs:label "Спецификация свойства v-s:DossierHREmployee для класса v-s:DossierHR"@ru ;
+ rdfs:label "v-s:DossierHREmployee property specification for v-s:DossierHR class"@en ;
+.
+
+
+###----------------------------------Образование---------------------
+v-s:Education
+  rdf:type owl:Class ;
+  rdfs:label "Образование"@ru ;
+  rdfs:label "Education"@en ;
+.
+# Уровень образования
+v-s:LevelOfEducation 
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Уровень образования"@ru ;
+  rdfs:label "LevelOfEducation"@en ;
+  rdfs:domain v-s:Education ;
+.
+v-s:PS_LevelOfEducation_Education
+ rdf:type v-ui:PropertySpecification ;
+ v-ui:forClass v-s:Education ;
+ v-ui:forProperty v-s:LevelOfEducation  ;
+ rdfs:label "Спецификация свойства v-s:LevelOfEducation  для класса v-s:Education"@ru ;
+ rdfs:label "v-s:LevelOfEducation  property specification for v-s:Education class"@en ;
+.
+# Учебное заведение
+v-s:EducationalInstitution
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Учебное заведение"@ru ;
+  rdfs:label "EducationalInstitution"@en ;
+  rdfs:domain v-s:Education ;
+.
+v-s:PS_EducationalInstitution_Education
+ rdf:type v-ui:PropertySpecification ;
+ v-ui:forClass v-s:Education ;
+ v-ui:forProperty v-s:LevelOfEducation  ;
+ rdfs:label "Спецификация свойства v-s:LevelOfEducation  для класса v-s:Education"@ru ;
+ rdfs:label "v-s:LevelOfEducation  property specification for v-s:Education class"@en ;
+.
+
+# Специальность
+v-s:Specialty
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Специальность"@ru ;
+  rdfs:label "Specialty"@en ;
+  rdfs:domain v-s:Education ;
+.
+v-s:PS_Specialty_Education
+ rdf:type v-ui:PropertySpecification ;
+ v-ui:forClass v-s:Education ;
+ v-ui:forProperty v-s:Specialty  ;
+ rdfs:label "Спецификация свойства v-s:Specialty  для класса v-s:Education"@ru ;
+ rdfs:label "v-s:Specialty  property specification for v-s:Education class"@en ;
+.
+
+# Год окончания
+#v-s:year
+
+
+###----------------------------------Уровень знания языка---------------------
+v-s:LanguageProficiency
+  rdf:type owl:Class ;
+  rdfs:label "Уровень знания языка"@ru ;
+  rdfs:label "LanguageProficiency"@en ;
+.
+# Язык
+v-s:Language
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Язык"@ru ;
+  rdfs:label "Language"@en ;
+  rdfs:domain v-s:LanguageProficiency ;
+.
+v-s:PS_Language_LanguageProficiency
+ rdf:type v-ui:PropertySpecification ;
+ v-ui:forClass v-s:LanguageProficiency ;
+ v-ui:forProperty v-s:Language  ;
+ rdfs:label "Спецификация свойства v-s:Language  для класса v-s:LanguageProficiency"@ru ;
+ rdfs:label "v-s:Language  property specification for v-s:LanguageProficiency class"@en ;
+.
+# Уровень знания языка
+v-s:LanguageLevel
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Уровень знания языка"@ru ;
+  rdfs:label "LanguageLevel"@en ;
+  rdfs:domain v-s:LanguageProficiency ;
+.
+v-s:PS_LanguageLevel_LanguageProficiency
+ rdf:type v-ui:PropertySpecification ;
+ v-ui:forClass v-s:LanguageProficiency ;
+ v-ui:forProperty v-s:LanguageLevel  ;
+ rdfs:label "Спецификация свойства v-s:LanguageLevel  для класса v-s:LanguageProficiency"@ru ;
+ rdfs:label "v-s:LanguageLevel  property specification for v-s:LanguageProficiency class"@en ;
+.
+
+###----------------------------------Трудовой опыт---------------------
+
+v-s:WorkExperience
+  rdf:type owl:Class ;
+  rdfs:label "Трудовой опыт"@ru ;
+  rdfs:label "WorkExperience"@en ;
+.
+# Год
+#v-s:year
+
+# Должность?
+# Стаж в должности?
+
+
+###----------------------------------Результаты тестирования---------------------
+v-s:TestResult
+  rdf:type owl:Class ;
+  rdfs:label "Результаты тестирования"@ru ;
+  rdfs:label "Test Result"@en ;
+.
+# Год
+#v-s:year
+
+# Классификатор тестов 
+v-s:TestClassifier 
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Классификатор тестов "@ru ;
+  rdfs:label "Test Classifier "@en ;
+  rdfs:domain v-s:TestResult ;
+.
+
+# Информация об оценке
+v-s:Appraisal
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Информация об оценке"@ru ;
+  rdfs:label "Appraisal "@en ;
+  rdfs:domain v-s:TestResult ;
+.
+
+# Вложение
+#v-s:attachment
