@@ -51,6 +51,15 @@ v-s:ProcessPersonnelReserveForm
   rdfs:domain v-s:ProcessPersonnelReserveForm ;
 .
 
+#Кадровый резерв
+  v-s:hasPersonnelReserve
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Кадровый резерв"@ru ;
+  rdfs:label "Personnel Reserve"@en ;
+  rdfs:range v-s:PersonnelReserve ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
 
 #------------------------------------------------------ План Преемственности --
 
@@ -61,27 +70,45 @@ v-s:ContinuityPlan
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
 .
-###----------------------------------Досье сотрудника---------------------
-v-s:DossierHR
+
+
+#------------------------------------------------------ Элемент Кадрового резерва  --
+
+v-s:PersonnelReserve
   rdf:type owl:Class ;
-  rdfs:label "Досье сотрудника"@ru ;
-  rdfs:label "EmployeeDossier"@en ;
+  rdfs:label "Кадровый резерв"@ru ;
+  rdfs:label "Personnel Reserve"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
 .
-# Сотрудник
-v-s:DossierHREmployee
+#-----Досье сотрудника
+  v-s:hasHREmployeeProfile
   rdf:type owl:ObjectProperty ;
+  rdfs:label "Досье сотрудника"@ru ;
+  rdfs:label "HR Employee Profile"@en ;
+  rdfs:range v-s:HREmployeeProfile ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+#----Уровень эффективности кандидата 
+#v-s:hasCandidateEffectiveness
+
+
+
+###----------------------------------Досье сотрудника---------------------
+
+
+#-----Досье сотрудника
+
+v-s:HREmployeeProfile
+  rdf:type owl:Class ;
   rdfs:label "Сотрудник"@ru ;
-  rdfs:label "Employee"@en ;
-  rdfs:range v-s:Appointment ;
-  rdfs:domain v-s:DossierHR ;
+  rdfs:label "EmployeeDossier"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
 .
-v-s:PS_DossierHREmployee_DossierHR
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:DossierHR ;
- v-ui:forProperty v-s:DossierHREmployee ;
- rdfs:label "Спецификация свойства v-s:DossierHREmployee для класса v-s:DossierHR"@ru ;
- rdfs:label "v-s:DossierHREmployee property specification for v-s:DossierHR class"@en ;
-.
+
+
 
 
 ###----------------------------------Образование---------------------
