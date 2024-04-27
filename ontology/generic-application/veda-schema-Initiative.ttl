@@ -377,9 +377,23 @@ v-s:hasTotalPlanYearEffect
   rdfs:range xsd:decimal ;
   rdfs:domain v-s:EffectList ;
 .
+v-s:hasTotalPlanYearEffectRub
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Итоговый плановый годовой эффект, тыс.руб"@ru ;
+  rdfs:label "Total plan year effect"@en ;
+  rdfs:range xsd:decimal ;
+  rdfs:domain v-s:EffectList ;
+.
 v-s:hasTotalPlanOnceEffect
   rdf:type owl:DatatypeProperty ;
   rdfs:label "Итоговый плановый разовый эффект"@ru ;
+  rdfs:label "Total plan once effect"@en ;
+  rdfs:range xsd:decimal ;
+  rdfs:domain v-s:EffectList ;
+.
+v-s:hasTotalPlanOnceEffectRub
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "Итоговый плановый разовый эффект, тыс.руб"@ru ;
   rdfs:label "Total plan once effect"@en ;
   rdfs:range xsd:decimal ;
   rdfs:domain v-s:EffectList ;
