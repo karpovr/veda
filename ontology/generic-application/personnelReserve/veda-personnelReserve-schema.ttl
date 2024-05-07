@@ -41,6 +41,7 @@ v-s:ProcessPersonnelReserveForm
   rdfs:label "Process Personnel Reserve Form"@en ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
+  v-s:labelPattern "{@.rdf:type.rdfs:label} {@.v-s:title}" ;
 .
 #План Преемственности
   v-s:hasContinuityPlan
@@ -48,6 +49,15 @@ v-s:ProcessPersonnelReserveForm
   rdfs:label "План Преемственности"@ru ;
   rdfs:label "ContinuityPlan"@en ;
   rdfs:range v-s:ContinuityPlan ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+#Кадровый резерв
+  v-s:hasPersonnelReserve
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Кадровый резерв"@ru ;
+  rdfs:label "Personnel Reserve"@en ;
+  rdfs:range v-s:PersonnelReserve ;
   rdfs:domain v-s:ProcessPersonnelReserveForm ;
 .
 
@@ -61,156 +71,225 @@ v-s:ContinuityPlan
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
 .
+
+
+#------------------------------------------------------ Элемент Кадрового резерва  --
+
+v-s:PersonnelReserve
+  rdf:type owl:Class ;
+  rdfs:label "Кадровый резерв"@ru ;
+  rdfs:label "Personnel Reserve"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+.
+#-----Досье сотрудника
+  v-s:hasHREmployeeProfile
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Досье сотрудника"@ru ;
+  rdfs:label "HR Employee Profile"@en ;
+  rdfs:range v-s:HREmployeeProfile ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+#-----Рекомендации
+  v-s:hasRecommendations
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Рекомендации"@ru ;
+  rdfs:label "Recommendations"@en ;
+  rdfs:range v-s:Recommendations ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+#----Уровень эффективности кандидата 
+#v-s:hasCandidateEffectiveness
+
+
+
 ###----------------------------------Досье сотрудника---------------------
-v-s:DossierHR
+
+
+#-----Досье сотрудника
+
+v-s:HREmployeeProfile
   rdf:type owl:Class ;
   rdfs:label "Досье сотрудника"@ru ;
   rdfs:label "EmployeeDossier"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
 .
-# Сотрудник
-v-s:DossierHREmployee
+#-----Образование
+  v-s:hasEducationExperience
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Сотрудник"@ru ;
-  rdfs:label "Employee"@en ;
-  rdfs:range v-s:Appointment ;
-  rdfs:domain v-s:DossierHR ;
-.
-v-s:PS_DossierHREmployee_DossierHR
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:DossierHR ;
- v-ui:forProperty v-s:DossierHREmployee ;
- rdfs:label "Спецификация свойства v-s:DossierHREmployee для класса v-s:DossierHR"@ru ;
- rdfs:label "v-s:DossierHREmployee property specification for v-s:DossierHR class"@en ;
-.
-
-
-###----------------------------------Образование---------------------
-v-s:Education
-  rdf:type owl:Class ;
   rdfs:label "Образование"@ru ;
-  rdfs:label "Education"@en ;
+  rdfs:label " "@en ;
+  rdfs:range v-s:EducationExperience ;
+  rdfs:domain v-s:HREmployeeProfile ;
 .
-# Уровень образования
-v-s:LevelOfEducation 
+###---Уровень знания языка----
+  v-s:hasLanguageExperience
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Уровень образования"@ru ;
-  rdfs:label "LevelOfEducation"@en ;
-  rdfs:domain v-s:Education ;
+  rdfs:label "Уровень знания языка"@ru ;
+  rdfs:label "Language Experience"@en ;
+  rdfs:range v-s:LanguageExperience ;
+  rdfs:domain v-s:HREmployeeProfile ;
 .
-v-s:PS_LevelOfEducation_Education
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:Education ;
- v-ui:forProperty v-s:LevelOfEducation  ;
- rdfs:label "Спецификация свойства v-s:LevelOfEducation  для класса v-s:Education"@ru ;
- rdfs:label "v-s:LevelOfEducation  property specification for v-s:Education class"@en ;
+###---Трудовой опыт----
+  v-s:hasWorkExperience
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Трудовой опыт"@ru ;
+  rdfs:label "WorkExperience"@en ;
+  rdfs:range v-s:WorkExperience ;
+  rdfs:domain v-s:HREmployeeProfile ;
 .
+ ###---Результаты тестирования---
+
+  v-s:hasTestResultExperience
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Результаты тестирования"@ru ;
+  rdfs:label "Test Result Experience"@en ;
+  rdfs:range v-s:TestResultExperience ;
+  rdfs:domain v-s:HREmployeeProfile ;
+.
+
+
+
+
+###----------------------------------Профессиональный опыт---------------------
+
+v-s:ProfessionalExperience
+  rdf:type owl:Class ;
+  rdfs:label "Профессиональный опыт"@ru ;
+  rdfs:label "Professional Experience"@en ;
+.
+###-----образования
+v-s:EducationExperience
+  rdf:type owl:Class ;
+  rdfs:label "Образования"@ru ;
+  rdfs:label " "@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
+.
+
+# Уровень образования
+#v-s:hasEducationLevel
+
+
+#--Ученая степень
+#---v-s:hasAcademicDegree
+
+
 # Учебное заведение
 v-s:EducationalInstitution
   rdf:type owl:ObjectProperty ;
   rdfs:label "Учебное заведение"@ru ;
   rdfs:label "EducationalInstitution"@en ;
-  rdfs:domain v-s:Education ;
+  rdfs:domain v-s:EducationExperience ;
 .
-v-s:PS_EducationalInstitution_Education
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:Education ;
- v-ui:forProperty v-s:LevelOfEducation  ;
- rdfs:label "Спецификация свойства v-s:LevelOfEducation  для класса v-s:Education"@ru ;
- rdfs:label "v-s:LevelOfEducation  property specification for v-s:Education class"@en ;
+  v-s:hasEducationalInstitution
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Учебное заведение"@ru ;
+  rdfs:label "EducationalInstitution"@en ;
+  rdfs:range v-s:EducationalInstitution ;
+  rdfs:domain v-s:EducationExperience ;
 .
+
 
 # Специальность
 v-s:Specialty
   rdf:type owl:ObjectProperty ;
   rdfs:label "Специальность"@ru ;
   rdfs:label "Specialty"@en ;
-  rdfs:domain v-s:Education ;
+  rdfs:domain v-s:EducationExperience ;
 .
-v-s:PS_Specialty_Education
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:Education ;
- v-ui:forProperty v-s:Specialty  ;
- rdfs:label "Спецификация свойства v-s:Specialty  для класса v-s:Education"@ru ;
- rdfs:label "v-s:Specialty  property specification for v-s:Education class"@en ;
+  v-s:hasSpecialty
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Учебное заведение"@ru ;
+  rdfs:label "EducationalInstitution"@en ;
+  rdfs:range v-s:Specialty ;
+  rdfs:domain v-s:EducationExperience ;
 .
 
 # Год окончания
 #v-s:year
 
 
-###----------------------------------Уровень знания языка---------------------
-v-s:LanguageProficiency
+###---Уровень знания языка----
+v-s:LanguageExperience
   rdf:type owl:Class ;
   rdfs:label "Уровень знания языка"@ru ;
-  rdfs:label "LanguageProficiency"@en ;
+  rdfs:label "Language Experience"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
 .
 # Язык
-v-s:Language
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Язык"@ru ;
-  rdfs:label "Language"@en ;
-  rdfs:domain v-s:LanguageProficiency ;
-.
-v-s:PS_Language_LanguageProficiency
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:LanguageProficiency ;
- v-ui:forProperty v-s:Language  ;
- rdfs:label "Спецификация свойства v-s:Language  для класса v-s:LanguageProficiency"@ru ;
- rdfs:label "v-s:Language  property specification for v-s:LanguageProficiency class"@en ;
-.
-# Уровень знания языка
-v-s:LanguageLevel
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Уровень знания языка"@ru ;
-  rdfs:label "LanguageLevel"@en ;
-  rdfs:domain v-s:LanguageProficiency ;
-.
-v-s:PS_LanguageLevel_LanguageProficiency
- rdf:type v-ui:PropertySpecification ;
- v-ui:forClass v-s:LanguageProficiency ;
- v-ui:forProperty v-s:LanguageLevel  ;
- rdfs:label "Спецификация свойства v-s:LanguageLevel  для класса v-s:LanguageProficiency"@ru ;
- rdfs:label "v-s:LanguageLevel  property specification for v-s:LanguageProficiency class"@en ;
-.
+#--v-s:hasLanguage
 
-###----------------------------------Трудовой опыт---------------------
+
+# Уровень знания языка
+#--v-s:hasLanguageLevel
+
+###---Трудовой опыт----
 
 v-s:WorkExperience
   rdf:type owl:Class ;
   rdfs:label "Трудовой опыт"@ru ;
   rdfs:label "WorkExperience"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
 .
-# Год
-#v-s:year
-
-# Должность?
-# Стаж в должности?
+#-c
+#-по 
+#-Должность
 
 
-###----------------------------------Результаты тестирования---------------------
-v-s:TestResult
+
+###---Результаты тестирования---
+v-s:TestResultExperience
   rdf:type owl:Class ;
   rdfs:label "Результаты тестирования"@ru ;
   rdfs:label "Test Result"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
 .
 # Год
 #v-s:year
 
 # Классификатор тестов 
-v-s:TestClassifier 
-  rdf:type owl:ObjectProperty ;
-  rdfs:label "Классификатор тестов "@ru ;
-  rdfs:label "Test Classifier "@en ;
-  rdfs:domain v-s:TestResult ;
-.
+#v-s:hasTestClassifier
 
 # Информация об оценке
 v-s:Appraisal
   rdf:type owl:ObjectProperty ;
   rdfs:label "Информация об оценке"@ru ;
   rdfs:label "Appraisal "@en ;
-  rdfs:domain v-s:TestResult ;
+  rdfs:domain v-s:TestResultExperience ;
+.
+v-s:hasAppraisal
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Информация об оценке"@ru ;
+  rdfs:label "Appraisal"@en ;
+  rdfs:range v-s:Appraisal ;
+  rdfs:domain v-s:TestResultExperience ;
 .
 
 # Вложение
 #v-s:attachment
+
+###---Рекомендации---
+v-s:Recommendations
+  rdf:type owl:Class ;
+  rdfs:label "Рекоменадции"@ru ;
+  rdfs:label "Recommendations"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
+.
+#-----Вид цели развития 
+
+
+#-----Описание цели
+#-----v-s:description
