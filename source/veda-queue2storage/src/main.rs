@@ -17,6 +17,7 @@ use v_common::onto::individual::Individual;
 use v_common::onto::individual2msgpack::to_msgpack;
 use v_common::storage::common::{StorageId, StorageMode, VStorage};
 use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -270,7 +271,7 @@ fn check(op_id: i64, id: &str, queue_indv: &mut Individual, check_cmd: &Option<C
     if let Some(check_cmd) = &check_cmd {
         let mut storage_indv = Individual::default();
 
-        let exist = ctx.storage.get_individual(id, &mut storage_indv);
+        let exist = ctx.storage.get_individual(id, &mut storage_indv) == ResultCode::Ok;
 
         if *check_cmd == CheckCmd::IsExist && !exist {
             //error!("NOT FOUND, {}", id);
