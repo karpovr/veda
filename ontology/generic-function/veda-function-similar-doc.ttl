@@ -1,0 +1,91 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-fs: <http://semantic-machines.com/veda/veda-function-search/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://semantic-machines.com/veda/veda-function-similar-doc>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология функции схожих документов"@ru ;
+  rdfs:label "SimilarDoc function ontology"@en ;
+  v-s:loadPriority 9 ;
+.
+
+# ------------------------------------------------------------ КЛАССЫ --
+
+# ----------------------------------------------------------- v-s:SimilarDoc --
+v-s:SimilarDoc
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Exportable ;
+  rdfs:subClassOf v-s:Link ;
+  rdfs:label "Связь похожих документов"@ru ;
+  rdfs:label "Link between similar documents"@en ;
+.
+#v-s:from
+#v-s:PSFromToForLink
+#v-s:to
+#v-s:mutualMembership
+#v-s:toMemberOfFrom
+#v-s:fromMemberOfTo
+#v-s:type
+#v-s:PS_type
+
+v-s:hasSimilarDoc
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Похожие документы"@ru ;
+  rdfs:label "Similar documents"@en ;
+  rdfs:range v-s:SimilarDoc ;
+  rdfs:domain v-s:Thing ;
+.
+
+# ------------------------------------------------------------ ШАБЛОНЫ --
+
+# ------------------------------------------------------------ v-s:SimilarDoc --
+v-s:TS_SimilarDoc
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:SimilarDocTemplate;
+  rdfs:label "Шаблон по умолчанию для v-s:SimilarDoc "@ru, "Default template for v-s:SimilarDoc "@en;
+  v-ui:forClass v-s:SimilarDoc
+.
+v-s:CS_SimilarDoc
+  rdf:type v-s:ClassSpecification ;
+  rdfs:label "Спецификация класса v-s:SimilarDoc "@ru, "Class specification v-s:SimilarDoc "@en;
+  v-ui:forClass v-s:SimilarDoc ;
+  v-s:shelfLife 9999;
+  v-ui:defaultTemplate v-s:SimilarDocTemplate;
+  v-s:loadPriority 15 ;
+.
+v-s:SimilarDocsListTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для управлениями произвольными связями похожего документа"@ru ;
+  rdfs:label "Template to manage generic document links"@en ;
+  rdfs:comment "Список"@ru ;
+  rdfs:comment "List"@en ;
+  v-ui:template "v-s_SimilarDocsListTemplate.js" ;
+.
+v-s:SimilarDocsListTemplate_inline
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для управлениями произвольными связями похожего документа"@ru ;
+  rdfs:label "Template to manage generic document links"@en ;
+  rdfs:comment "Список"@ru ;
+  rdfs:comment "List"@en ;
+  v-ui:template "v-s_SimilarDocsListTemplate_inline.js" ;
+.
+v-s:SimilarDocsTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для отображения связей документа"@ru ;
+  rdfs:label "Template to view document links"@en ;
+  v-ui:template "v-s_SimilarDocsTemplate.js" ;
+.
+v-s:SimilarDocTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для отображения связи"@ru ;
+  rdfs:label "Template to view SimilarDoc"@en ;
+  v-ui:forClass v-s:SimilarDoc ;
+  v-ui:template "v-s_SimilarDocTemplate.js" ;
+.

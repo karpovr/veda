@@ -29,14 +29,16 @@ export const pre = function (individual, template, container, mode, extra) {
     const enabledButtons = (container.data('buttons') || defaultButtons).split(' ');
     enabledButtons.forEach(function (id) {
       if (!canUpdate && (id === 'save' || id === 'edit' || id === 'cancel')) {
+        $('#' + id, template).remove();
         return;
       }
       if (!canDelete && id === 'deleteLink') {
+        $('#' + id, template).remove();
         return;
       }
-      $('#' + id, template).removeClass('rm');
+      // $('#' + id, template).removeClass('rm');
     });
-    $('.rm', template).remove();
+    // $('.rm', template).remove();
   });
 };
 
