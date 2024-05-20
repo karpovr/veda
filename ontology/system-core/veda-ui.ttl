@@ -602,6 +602,18 @@ v-ui:LabelLinkTemplate
   rdfs:label "Template with label & link"@en ;
   v-ui:template "v-ui_LabelLinkTemplate.js" ;
 .
+v-ui:LabelWithStatusTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон с меткой и статусом"@ru ;
+  rdfs:label "Template with label & status"@en ;
+  v-ui:template "v-ui_LabelWithStatusTemplate.js" ;
+.
+v-ui:LabelLinkWithStatusTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон ссылка с меткой и статусом"@ru ;
+  rdfs:label "Template link with label & status"@en ;
+  v-ui:template "v-ui_LabelLinkWithStatusTemplate.js" ;
+.
 v-ui:IconModalTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон с меткой и ссылкой"@ru ;
