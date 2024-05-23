@@ -57,7 +57,7 @@ v-s:isResponsibleForWorkOfIncreasedDanger
 .
 v-s:attachDocumentsForWorkOfIncreasedDanger
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Распорядительный документ о назначении лиц, ответственных за организацию и проведение работ повышенной опасности, выполняемых по наряду-допуску на территории АО «Монди СЛПК»."@ru ;
+  rdfs:label "Распорядительный документ о назначении лиц, ответственных за организацию и проведение работ повышенной опасности, выполняемых по наряду-допуску на территории АО «СЛПК»."@ru ;
   rdfs:label "Disposal documents for work of increased danger"@en ;
   rdfs:range v-s:ContractorProfileFile;
   rdfs:domain v-s:ContractorProfileSafety;
