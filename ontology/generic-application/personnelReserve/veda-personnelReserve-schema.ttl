@@ -77,6 +77,7 @@ v-s:ContinuityPlan
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:UserSearchableDocument;
+  v-s:labelPattern "{@.v-s:year} {@.v-s:responsibleDepartment.rdfs:label} {@.v-s:occupation.rdfs:label}" ;
 .
 
 
@@ -90,6 +91,7 @@ v-s:PersonnelReserve
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:UserSearchableDocument;
+  v-s:labelPattern "{@.v-s:year} {@.v-s:hasHREmployeeProfile.rdfs:label}" ;
 .
 #-----Досье сотрудника
   v-s:hasHREmployeeProfile
