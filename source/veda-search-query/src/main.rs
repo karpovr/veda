@@ -15,8 +15,8 @@ use v_common::v_api::obj::*;
 fn main() {
     init_log("SEARCH_QUERY");
 
-    let query_search_db = Module::get_property("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
-    let query_url = Module::get_property("search_query_url").expect("param [search_query_url] not found in veda.properties");
+    let query_search_db = Module::get_property::<String>("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
+    let query_url = Module::get_property::<String>("search_query_url").expect("param [search_query_url] not found in veda.properties");
 
     let mut backend = Backend::default();
     let mut ch_client = CHClient::new(query_search_db);

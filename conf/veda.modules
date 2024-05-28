@@ -67,3 +67,6 @@ input-onto
 
 #sparql-indexer
 
+stat-collector
+    module = stat-collector
+    args = tcp://127.0.0.1:40899 10000 hour

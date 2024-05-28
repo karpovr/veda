@@ -15,6 +15,7 @@ use v_common::onto::individual::Individual;
 use v_common::onto::onto_impl::Onto;
 use v_common::onto::resource::{Resource, Value};
 use v_common::v_api::api_client::IndvOp;
+use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
 
 pub struct Context {
@@ -33,7 +34,7 @@ fn main() {
         wait_module("fulltext_indexer", wait_load_ontology());
     }
 
-    let fanout_id = if let Some(m) = Module::get_property("id") {
+    let fanout_id = if let Some(m) = Module::get_property::<String>("id") {
         Some(m.parse::<i64>().expect(&format!("invalid value {} in parameter [id]", m)))
     } else {
         None
@@ -107,7 +108,7 @@ fn get_priority(backend: &mut Backend, ctx: &mut Context, class_name: &str) -> O
         }
     } else {
         let mut indv0 = Default::default();
-        if backend.storage.get_individual(class_name, &mut indv0) {
+        if backend.storage.get_individual(class_name, &mut indv0) == ResultCode::Ok{
             let n = indv0.get_first_integer("v-s:exportPrioritySQL");
             ctx.classes_indvs.insert(class_name.to_string(), indv0);
             return n;
@@ -386,7 +387,7 @@ fn connect_to_mysql(backend: &mut Backend, tries: i64, timeout: u64) -> Result<m
         if let Some(v) = node.get_literals("v-s:push_individual_by_event") {
             for el in v {
                 let mut connection = Individual::default();
-                if backend.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:deleted", true) {
+                if backend.storage.get_individual(&el, &mut connection) == ResultCode::Ok && !connection.is_exists_bool("v-s:deleted", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
                         if transport == "mysql" {
                             info!("found configuration to connect to MySQL: {}", connection.get_id());

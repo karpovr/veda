@@ -53,7 +53,7 @@ pub fn clean_invalid_permissionstatement(ctx: &mut CleanerContext) {
 
                     pos += 1;
                     let mut indv: Individual = Individual::default();
-                    if ctx.backend.storage.get_individual(id, &mut indv) {
+                    if ctx.backend.storage.get_individual(id, &mut indv) == ResultCode::Ok {
                         if !(indv.is_exists("v-s:canRead") || indv.is_exists("v-s:canCreate") || indv.is_exists("v-s:canUpdate") || indv.is_exists("v-s:canDelete")) {
                             info!("not found rights field");
                             collected.push(indv);

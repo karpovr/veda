@@ -22,7 +22,7 @@ use v_common::v_api::obj::ResultCode;
 fn main() -> std::io::Result<()> {
     init_log("RO_STORAGE");
 
-    let ro_storage_url = Module::get_property("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
+    let ro_storage_url = Module::get_property::<String>("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
     let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
     info!("total count: {}", storage.count(StorageId::Individuals));

@@ -112,7 +112,7 @@ pub fn queue_to_veda(queue_path: String, part_id: Option<u32>, check_counter: bo
             if !new_state.is_empty() {
                 let mut indv_from_db = Individual::default();
                 if check_counter {
-                    if backend.storage.get_individual(new_state.get_id(), &mut indv_from_db) {
+                    if backend.storage.get_individual(new_state.get_id(), &mut indv_from_db) == ResultCode::Ok{
                         let db_indv_counter = new_state.get_first_integer("v-s:updateCounter").unwrap_or(0);
                         let queue_indv_counter = indv_from_db.get_first_integer("v-s:updateCounter").unwrap_or(0);
 

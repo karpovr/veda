@@ -82,8 +82,8 @@ fn main() -> Result<()> {
     // Initialize the application context
     let mut ctx = Context {
         rt: Runtime::new().unwrap(),
-        store_point: format!("{}/{}?{}", Module::get_property("sparql_db").unwrap_or_default(), "store", "default"),
-        update_point: format!("{}/{}", Module::get_property("sparql_db").unwrap_or_default(), "update"),
+        store_point: format!("{}/{}?{}", Module::get_property::<String>("sparql_db").unwrap_or_default(), "store", "default"),
+        update_point: format!("{}/{}", Module::get_property::<String>("sparql_db").unwrap_or_default(), "update"),
         client: reqwest::Client::new(),
         module_info: module_info.unwrap(),
         prefixes: HashMap::new(),
