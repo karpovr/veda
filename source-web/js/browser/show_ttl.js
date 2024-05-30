@@ -11,7 +11,7 @@ import {delegateHandler} from '../browser/dom_helpers.js';
 function specialTemplateHandler (event) {
   const uri = this.getAttribute('resource') || this.getAttribute('about');
   const hash = `#/${uri}`;
-  if (event.altKey && event.ctrlKey) {
+  if (event.altKey && event.ctrlKey || event.metaKey && event.ctrlKey) {
     event.preventDefault();
     event.stopPropagation();
     riot.route(`${hash}//v-ui:ttl`);
