@@ -42,7 +42,7 @@ function removeOutline (event) {
  * @this Element
  */
 function outline (event) {
-  if (event.altKey && event.ctrlKey) {
+  if (event.altKey && event.ctrlKey || event.metaKey && event.ctrlKey) {
     event.stopPropagation();
     if (outlined) {
       outlined.classList.remove('gray-outline');
@@ -57,7 +57,7 @@ function outline (event) {
 }
 
 document.body.addEventListener('keydown', (event) => {
-  if (event.altKey && event.ctrlKey) {
+  if (event.altKey && event.ctrlKey || event.metaKey && event.ctrlKey) {
     delegateHandler(document.body, 'mouseover', '[resource], [about]', outline);
   }
 });
