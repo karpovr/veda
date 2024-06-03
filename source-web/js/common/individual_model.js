@@ -1058,7 +1058,7 @@ proto.toString = function () {
   if (this.hasValue('rdfs:label')) {
     return this.get('rdfs:label').map(Util.formatValue).join(' ');
   } else if (this.hasValue('rdf:type')) {
-    return this.get('rdf:type')[0].toString() + ': ' + this.id;
+    return this.get('rdf:type')[0].toString();
   } else {
     return this.id;
   }
