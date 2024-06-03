@@ -50,7 +50,7 @@ ccus2
 
 web-api
     module = web-api
-    args = --http_port=8080 --use-direct-ft-query=true --workers=1 --db-connection=db-conn-1
+    args = --http_port=8080 --use-direct-ft-query=true --workers=1 --db-connection=db-conn-1 --use_authorization_cache=false --stat_mode=full
 
 
 #queue2storage
