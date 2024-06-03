@@ -325,6 +325,7 @@ $.fn.veda_file = function ( options ) {
         } else {
           individual.addValue(rel_uri, fileIndividuals);
         }
+        fileInput[0].dispatchEvent(new CustomEvent('fileAttached'));
       })
       .catch((error) => {
         console.error('Files individuals save failed');

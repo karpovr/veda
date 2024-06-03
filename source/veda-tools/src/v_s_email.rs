@@ -31,7 +31,7 @@ pub fn clean_email(ctx: &mut CleanerContext) {
     if res.result_code == ResultCode::Ok {
         for id in res.result.iter() {
             let mut rindv: Individual = Individual::default();
-            if ctx.backend.storage.get_individual(id, &mut rindv) {
+            if ctx.backend.storage.get_individual(id, &mut rindv) == ResultCode::Ok{
                 if !rindv.is_exists("v-s:creator") {
                     info!(
                         "remove {}, created = {}, id = {}",

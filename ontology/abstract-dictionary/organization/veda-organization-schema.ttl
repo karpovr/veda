@@ -159,6 +159,15 @@ v-s:taxRegistrationNumber
   rdfs:domain v-s:Organization ;
 .
 
+#-----ОКПО
+v-s:okpo
+  rdf:type owl:DatatypeProperty ;
+  rdfs:label "ОКПО"@ru ;
+  rdfs:label "OKPO"@en ;
+  rdfs:range xsd:string ;
+  rdfs:domain v-s:Organization ;
+.
+
 #------Юридический адрес
 #v-s:legalAddress
 

@@ -406,7 +406,7 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
             for el in v {
                 let mut connection = Individual::default();
 
-                if module.storage.get_individual(&el, &mut connection) && !connection.is_exists_bool("v-s:delete", true) {
+                if module.storage.get_individual(&el, &mut connection) == ResultCode::Ok && !connection.is_exists_bool("v-s:delete", true) {
                     if let Some(transport) = connection.get_first_literal("v-s:transport") {
                         if transport == "smtp" {
                             info!("found connection configuration for smtp server, uri = {}", connection.get_id());

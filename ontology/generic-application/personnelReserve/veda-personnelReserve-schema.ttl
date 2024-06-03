@@ -1,0 +1,266 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+
+
+<http://semantic-machines.com/veda/veda-passRequest-schema/>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Досье сотрдуника. Схема."@ru ;
+  rdfs:label "Veda system ontology. DossierHR. Schema."@en ;
+  v-s:loadPriority 11 ;
+.
+
+# ------------------------------------------------------------ КЛАССЫ --
+
+#-----------------------------------------------------------Комплект Анкет КР
+v-s:SetOfPersonnelReserveForm
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:UserSearchableDocument;
+  rdfs:label "Комплект Анкет КР"@ru ;
+  rdfs:label "SetOfPersonnelReserve"@en ;
+  v-s:labelPattern "{@.v-s:year}" ;
+.
+#Анкета КР 
+  v-s:hasProcessPersonnelReserveForm
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Анкета КР"@ru ;
+  rdfs:label "Process Personnel Reserve Form"@en ;
+  rdfs:range v-s:ProcessPersonnelReserveForm ;
+  rdfs:domain v-s:SetOfPersonnelReserveForm ;
+.
+
+#------------------------------------------------------ Анкета КР --
+
+v-s:ProcessPersonnelReserveForm
+  rdf:type owl:Class ;
+  rdfs:label "Анкета КР"@ru ;
+  rdfs:label "Process Personnel Reserve Form"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:UserSearchableDocument;
+  v-s:labelPattern "{@.v-s:year} {@.v-s:responsibleDepartment.rdfs:label}" ;
+  
+.
+#План Преемственности
+  v-s:hasContinuityPlan
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "План Преемственности"@ru ;
+  rdfs:label "ContinuityPlan"@en ;
+  rdfs:range v-s:ContinuityPlan ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+# Элемент КР
+  v-s:hasPersonnelReserve
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Элемент КР"@ru ;
+  rdfs:label "Personnel Reserve"@en ;
+  rdfs:range v-s:PersonnelReserve ;
+  rdfs:domain v-s:ProcessPersonnelReserveForm ;
+.
+
+
+#------------------------------------------------------ План Преемственности --
+
+v-s:ContinuityPlan
+  rdf:type owl:Class ;
+  rdfs:label "План Преемственности"@ru ;
+  rdfs:label "ContinuityPlan"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:UserSearchableDocument;
+  v-s:labelPattern "{@.v-s:year} {@.v-s:responsibleDepartment.rdfs:label} {@.v-s:occupation.rdfs:label}" ;
+.
+
+
+#------------------------------------------------------ Элемент Кадрового резерва  --
+
+v-s:PersonnelReserve
+  rdf:type owl:Class ;
+  rdfs:label "Элемент КР"@ru ;
+  rdfs:label "Personnel Reserve"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:UserSearchableDocument;
+  v-s:labelPattern "{@.v-s:year} {@.v-s:hasHREmployeeProfile.rdfs:label}" ;
+.
+#-----Досье сотрудника
+  v-s:hasHREmployeeProfile
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Досье сотрудника"@ru ;
+  rdfs:label "HR Employee Profile"@en ;
+  rdfs:range v-s:HREmployeeProfile ;
+  rdfs:domain v-s:PersonnelReserve ;
+.
+###---Рекомендация---
+v-s:hasRecommendation
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Рекомндация"@ru ;
+  rdfs:label "Recommendations"@en ;
+  rdfs:range v-s:Recommendation ;
+  rdfs:domain v-s:PersonnelReserve ;
+.
+
+#----Уровень эффективности кандидата 
+#v-s:hasCandidateEffectiveness
+v-s:hasCandidateEffectiveness
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Уровень эффективности/потенциал кандидата"@ru ;
+  rdfs:label "Candidate Effectiveness"@en ;
+  rdfs:range v-s:CandidateEffectiveness ;
+  rdfs:domain v-s:PersonnelReserve ;
+.
+
+
+
+###----------------------------------Досье сотрудника---------------------
+
+
+#-----Досье сотрудника
+v-s:HREmployeeProfile
+  rdf:type owl:Class ;
+  rdfs:label "Сотрудник"@ru ;
+  rdfs:label "EmployeeDossier"@en ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:UserSearchableDocument;
+.
+#-----Образование
+ v-s:hasEducationExperience
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Образование"@ru ;
+  rdfs:label "Education Experience"@en ;
+  rdfs:range v-s:EducationExperience ;
+  rdfs:domain v-s:HREmployeeProfile ;
+.
+
+
+
+
+
+###----------------------------------Профессиональный опыт---------------------
+
+v-s:ProfessionalExperience
+  rdf:type owl:Class ;
+  rdfs:label "Профессиональный опыт"@ru ;
+  rdfs:label "Professional Experience"@en ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:BackwardLink ;
+.
+###---Рекомендация---
+v-s:Recommendation
+  rdf:type owl:Class ;
+  rdfs:label "Рекомендация"@ru ;
+  rdfs:label "Recommendation"@en ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience;
+.
+
+###-----образования
+v-s:EducationExperience
+  rdf:type owl:Class ;
+  rdfs:label "Образование"@ru ;
+  rdfs:label "Education"@en ;
+  rdfs:subClassOf v-s:Labeled ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
+.
+
+# Уровень образования
+#--v-s:hasEducationLevel
+v-s:hasEducationLevel
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Уровень образования"@ru ;
+  rdfs:label "Educational Level"@en ;
+  rdfs:range v-s:EducationLevel ;
+  rdfs:domain v-s:EducationExperience ;
+.
+
+#--Ученая степень
+#---v-s:hasAcademicDegree
+v-s:hasAcademicDegree
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Ученая степень"@ru ;
+  rdfs:label "Academic Degree"@en ;
+  rdfs:range v-s:AcademicDegree ;
+  rdfs:domain v-s:EducationExperience ;
+.
+
+
+# Учебное заведение
+#v-s:placeDescription
+
+# Специальность
+#v-s:description
+
+# Год окончания
+#v-s:year
+
+
+###---Уровень знания языка----
+v-s:LanguageProficiency
+  rdf:type owl:Class ;
+  rdfs:label "Уровень знания языка"@ru ;
+  rdfs:label "Language Proficiency"@en ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
+.
+# Язык
+#--v-s:hasLanguage
+v-s:hasLanguage
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Язык"@ru ;
+  rdfs:label "Language"@en ;
+  rdfs:range v-s:Language ;
+  rdfs:domain v-s:LanguageProficiency ;
+.
+
+# Уровень знания языка
+#--v-s:hasLanguageLevel
+v-s:hasLanguageLevel
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Уровень языка"@ru ;
+  rdfs:label "Language Level"@en ;
+  rdfs:range v-s:LanguageLevel ;
+  rdfs:domain v-s:LanguageProficiency ;
+.
+
+###---Трудовой опыт----
+
+v-s:WorkExperience
+  rdf:type owl:Class ;
+  rdfs:label "Трудовой опыт"@ru ;
+  rdfs:label "WorkExperience"@en ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
+.
+#-c
+#-по 
+#-Должность
+
+
+
+###---Результаты тестирования---
+v-s:TestResult
+  rdf:type owl:Class ;
+  rdfs:label "Результаты тестирования"@ru ;
+  rdfs:label "Test Result"@en ;
+  rdfs:subClassOf v-s:ProfessionalExperience ;
+.
+# Год
+#v-s:year
+
+# Классификатор тестов 
+
+# Информация об оценке
+#v-s:description
+
+# Вложение
+#v-s:attachment

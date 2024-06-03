@@ -39,6 +39,7 @@
     "ws": "^8.8.1"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "ace-builds": "^1.4.12",
     "anymatch": "^3.1.2",
     "autosize": "^4.0.2",
@@ -46,6 +47,11 @@
     "bootstrap": "^3.4.1",
     "bootstrap-contextmenu": "^1.0.0",
     "bowser": "^2.11.0",
+    "bpmn-js": "^17.1.0",
+    "bpmn-js-properties-panel": "^5.13.0",
+    "bpmn-moddle": "^9.0.1",
+    "camunda-bpmn-moddle": "^7.0.1",
+    "chart.js": "^4.4.1",
     "chokidar": "^3.5.2",
     "construct-style-sheets-polyfill": "^2.4.16",
     "core-js": "^3.14.0",

@@ -32,7 +32,7 @@ fn main() -> Result<(), i32> {
         .filter(None, LevelFilter::Info)
         .init();
 
-    let redis_addr = if let Some(p) = Module::get_property("redis_addr") {
+    let redis_addr = if let Some(p) = Module::get_property::<String>("redis_addr") {
         "redis://".to_owned() + &p.to_owned() + "/"
     } else {
         warn!("param [redis_addr] not found in veda.properties");

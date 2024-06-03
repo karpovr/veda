@@ -36,7 +36,7 @@ fn prepare<'a>(js_runtime: &'a mut JsRuntime, path_to_query: &str, path_to_js: &
     let mut backend = Backend::default();
     let mut veda_client = MStorageClient::new(Module::get_property("main_module_url").unwrap());
 
-    let query_search_db = Module::get_property("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
+    let query_search_db = Module::get_property::<String>("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
     let mut ch_client = CHClient::new(query_search_db.to_owned());
 
     let ticket_id = &backend.get_sys_ticket_id().unwrap();

@@ -53,7 +53,7 @@ pub fn clean(modules: Option<String>, operations: Option<String>, report: Option
         return;
     }
 
-    let query_search_db = Module::get_property("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
+    let query_search_db = Module::get_property::<String>("query_search_db").expect("param [query_search_db_url] not found in veda.properties");
 
     let mut backend = Backend::default();
 

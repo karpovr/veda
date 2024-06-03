@@ -6,7 +6,7 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-import {interpolate, ftQuery, renderValue} from './veda_control_util.js';
+import {interpolate, ftQuery, renderValue, convertToCyrillic} from './veda_control_util.js';
 
 $.fn.veda_link = function ( options ) {
   const self = this;
@@ -300,6 +300,10 @@ $.fn.veda_link = function ( options ) {
           queryPrefix = queryPrefixDefault;
         }
         interpolate(queryPrefix, individual).then((prefix) => {
+          if (value) {
+            const converted = convertToCyrillic(value);
+            if (converted != value) value += '\n' + converted;
+          }
           ftQuery(prefix, value, sort, withDeleted, queryPattern)
             .then(renderResults)
             .catch((error) => {

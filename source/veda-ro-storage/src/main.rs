@@ -8,6 +8,7 @@ use v_common::module::module_impl::Module;
 use v_common::module::veda_backend::get_storage_use_prop;
 use v_common::onto::individual::Individual;
 use v_common::storage::common::{StorageId, StorageMode, VStorage};
+use v_common::v_api::obj::ResultCode;
 
 /**
  * storage service
@@ -21,7 +22,7 @@ use v_common::storage::common::{StorageId, StorageMode, VStorage};
 fn main() -> std::io::Result<()> {
     init_log("RO_STORAGE");
 
-    let ro_storage_url = Module::get_property("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
+    let ro_storage_url = Module::get_property::<String>("ro_storage_url").expect("param [ro_storage_url] not found in veda.properties");
     let mut storage = get_storage_use_prop(StorageMode::ReadOnly);
 
     info!("total count: {}", storage.count(StorageId::Individuals));
@@ -70,7 +71,7 @@ fn req_prepare(request: &Message, storage: &mut VStorage) -> Message {
             match rel[0] {
                 "T" | "I" => {
                     let mut indv = Individual::default();
-                    if storage.get_individual_from_db(db_id, rel[1], &mut indv) {
+                    if storage.get_individual_from_db(db_id, rel[1], &mut indv) == ResultCode::Ok {
                         indv.parse_all();
                         return Message::from(indv.get_obj().as_json().to_string().as_bytes());
                     } else {
@@ -79,7 +80,7 @@ fn req_prepare(request: &Message, storage: &mut VStorage) -> Message {
                 }
                 "F" => {
                     let mut indv = Individual::default();
-                    if storage.get_individual_from_db(StorageId::Individuals, rel[1], &mut indv) {
+                    if storage.get_individual_from_db(StorageId::Individuals, rel[1], &mut indv) == ResultCode::Ok {
                         if let Some(ffs) = filters {
                             for f in ffs {
                                 indv.get_literals(f);

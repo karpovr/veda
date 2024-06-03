@@ -749,6 +749,7 @@ cfg:Event_15
   v-s:author cfg:VedaSystemAppointment ;
   rdfs:label "Скрипт обработки связей документов" ;
   rdfs:comment "Скрипт обработки связей документов" ;
+  v-s:preventByType v-s:SimilarDoc;
   v-s:triggerByType v-s:Link ;
   v-s:script """
 // First class event
@@ -1423,4 +1424,88 @@ put_individual(ticket, scriptInfo, _event_id);
 
 print("[cfg:Event_EstimatedExternalAccount_Delete] ************************** END **************************");
 """ ;
+.
+cfg:Event_SimilarDoc
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystemAppointment ;
+  rdfs:label "Скрипт обработки связей документов" ;
+  rdfs:comment "Скрипт обработки связей документов" ;
+  v-s:triggerByType v-s:SimilarDoc ;
+  v-s:script """
+// First class event
+if (parent_script_id) return;
+
+const similarDocDeleted = veda.Util.hasValue( document, 'v-s:deleted', {data: true, type: 'Boolean'} );
+const similarDocUri = document['@'];
+const similarDocToUri = veda.Util.getUri(document['v-s:to']);
+const similarDocFromUri = veda.Util.getUri(document['v-s:from']);
+const similarDocTo = get_individual(ticket, similarDocToUri);
+const similarDocFrom = get_individual(ticket, similarDocFromUri);
+const rightsFrom = get_rights(ticket, similarDocFromUri, user_uri);
+const rightsTo = get_rights(ticket, similarDocToUri, user_uri);
+const canReadFrom = veda.Util.hasValue( rightsFrom, 'v-s:canRead', {data: true, type: 'Boolean'} );
+const canReadTo = veda.Util.hasValue( rightsTo, 'v-s:canRead', {data: true, type: 'Boolean'} );
+const isValidRights = true; // canReadFrom && canReadTo,
+let containsThisSimilarDoc;
+const membershipToFromUri = 'd:similarDoc_membership_' + similarDocToUri.split(':').join('_') + '_' + similarDocFromUri.split(':').join('_');
+const membershipFromToUri = 'd:similarDoc_membership_' + similarDocFromUri.split(':').join('_') + '_' + similarDocToUri.split(':').join('_');
+let membershipToFrom;
+let membershipFromTo;
+
+remove_individual(ticket, membershipToFromUri, _event_id);
+remove_individual(ticket, membershipFromToUri, _event_id);
+
+if (!similarDocDeleted) {
+  const isToMemberOfFrom = veda.Util.hasValue( document, 'v-s:toMemberOfFrom', {data: true, type: 'Boolean'});
+  const isFromMemberOfTo = veda.Util.hasValue( document, 'v-s:fromMemberOfTo', {data: true, type: 'Boolean'});
+  const isMutual = veda.Util.hasValue( document, 'v-s:mutualMembership', {data: true, type: 'Boolean'});
+  if (isValidRights && (isToMemberOfFrom || isMutual)) {
+    membershipToFrom = {
+      '@': membershipToFromUri,
+      'rdf:type': veda.Util.newUri('v-s:Membership'),
+      'v-s:memberOf': veda.Util.newUri(similarDocFromUri),
+      'v-s:resource': veda.Util.newUri(similarDocToUri),
+      'rdfs:comment': veda.Util.newStr('создано cfg:Event_15'),
+      'v-s:canRead': veda.Util.newBool(true),
+    };
+    put_individual(ticket, membershipToFrom, _event_id);
+  }
+  if (isValidRights && (isFromMemberOfTo || isMutual)) {
+    membershipFromTo = {
+      '@': membershipFromToUri,
+      'rdf:type': veda.Util.newUri('v-s:Membership'),
+      'v-s:memberOf': veda.Util.newUri(similarDocToUri),
+      'v-s:resource': veda.Util.newUri(similarDocFromUri),
+      'rdfs:comment': veda.Util.newStr('создано cfg:Event_15'),
+      'v-s:canRead': veda.Util.newBool(true),
+    };
+    put_individual(ticket, membershipFromTo, _event_id);
+  }
+}
+
+if (similarDocTo) {
+  containsThisSimilarDoc = veda.Util.hasValue(similarDocTo, 'v-s:hasSimilarDoc', {data: similarDocUri, type: 'Uri'});
+  if (!containsThisSimilarDoc && !similarDocDeleted) {
+    similarDocTo['v-s:hasSimilarDoc'] = ( similarDocTo['v-s:hasSimilarDoc'] || [] ).concat({type: 'Uri', data: similarDocUri});
+    put_individual(ticket, similarDocTo, _event_id);
+  } else if (containsThisSimilarDoc && similarDocDeleted) {
+    similarDocTo['v-s:hasSimilarDoc'] = similarDocTo['v-s:hasSimilarDoc'].filter(function (similarDoc) {
+      return similarDoc.data !== similarDocUri;
+    });
+    put_individual(ticket, similarDocTo, _event_id);
+  }
+}
+if (similarDocFrom) {
+  containsThisSimilarDoc = veda.Util.hasValue(similarDocFrom, 'v-s:hasSimilarDoc', {data: similarDocUri, type: 'Uri'});
+  if (!containsThisSimilarDoc && !similarDocDeleted) {
+    similarDocFrom['v-s:hasSimilarDoc'] = ( similarDocFrom['v-s:hasSimilarDoc'] || [] ).concat({type: 'Uri', data: similarDocUri});
+    put_individual(ticket, similarDocFrom, _event_id);
+  } else if (containsThisSimilarDoc && similarDocDeleted) {
+    similarDocFrom['v-s:hasSimilarDoc'] = similarDocFrom['v-s:hasSimilarDoc'].filter(function (similarDoc) {
+      return similarDoc.data !== similarDocUri;
+    });
+    put_individual(ticket, similarDocFrom, _event_id);
+  }
+}
+  """ ;
 .

@@ -478,6 +478,7 @@ export const post = function (individual, template, container, mode, extra) {
     let searchText = $('#searchText input', template).val();
     if (!searchText) return;
     searchText = searchText.trim();
+
     setSearchHelperObjToDefault();
     loadIndicator.show();
 
@@ -557,7 +558,6 @@ export const post = function (individual, template, container, mode, extra) {
     const queryParts = searchText.split(' ').reduce(
       function (qParts, sText) {
         sText = sText.toLowerCase();
-
         const isPhoneSearch = sText.match('^' + String.fromCharCode(92) + '+?[' + String.fromCharCode(92) + 'd-' + String.fromCharCode(92) + 's]*$') != null;
         const isEmailSearch = sText.match('^.*@{1}') != null;
         if (isPhoneSearch || isEmailSearch) {
@@ -582,10 +582,18 @@ export const post = function (individual, template, container, mode, extra) {
             return part + " AND (lowerUTF8(cm.v_s_description_str[1]) LIKE '%" + sText + "%' OR lowerUTF8(cm.rdfs_comment_str[1]) LIKE '%" + sText + "%')";
           });
         } else {
-          qParts[0] += " AND lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%" + sText + "%'";
-          qParts[1] += " AND lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%" + sText + "%'";
-          qParts[2] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,per.v_s_middleName_str), ' ')) LIKE '%" + sText + "%'";
-          qParts[3] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,target.rdfs_comment_str), ' ')) LIKE '%" + sText + "%'";
+          const converted = convertToCyrillic(sText);
+          if (converted != sText) {
+            qParts[0] += ` AND (lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%${sText}%' OR lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%${converted}%')`;
+            qParts[1] += ` AND (lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%${sText}%' OR lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%${converted}%')`;
+            qParts[2] += ` AND (lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,per.v_s_middleName_str), ' ')) LIKE '%${sText}%' OR lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,per.v_s_middleName_str), ' ')) LIKE '%${converted}%')`;
+            qParts[3] += ` AND (lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,target.rdfs_comment_str), ' ')) LIKE '%${sText}%' OR lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,target.rdfs_comment_str), ' ')) LIKE '%${converted}%')`;
+          } else {
+            qParts[0] += " AND lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%" + sText + "%'";
+            qParts[1] += " AND lowerUTF8(arrayStringConcat(arrayConcat(rdfs_label_str,v_s_title_str, v_s_shortLabel_str), ' ')) LIKE '%" + sText + "%'";
+            qParts[2] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,per.v_s_middleName_str), ' ')) LIKE '%" + sText + "%'";
+            qParts[3] += " AND lowerUTF8(arrayStringConcat(arrayConcat(target.rdfs_label_str,target.rdfs_comment_str), ' ')) LIKE '%" + sText + "%'";
+          }
         }
         return qParts;
       },
@@ -613,6 +621,16 @@ export const post = function (individual, template, container, mode, extra) {
       basicWherePart + queryParts[3] + " AND lowerUTF8(arrayStringConcat(target.v_s_origin_str, ' ')) LIKE '%group%'" + conditionForOrg + endingPart;
     return [organizationQuery, departmentQuery, appointmentQuery, specialPositionQuery];
   }
+
+  function convertToCyrillic (text) {
+
+    const cyrillic = 'йцукенгшщзхъфывапролджэячсмитьбюё';
+    const latin = 'qwertyuiop[]asdfghjkl;\'zxcvbnm,.\`';
+    return text.toLowerCase().split('').map(char => {
+      const index = latin.indexOf(char);
+      return index >= 0 ? cyrillic[index] : char;
+    }).join('');
+  };
 
   function presentSearchResult (objType, container, items) {
     const promises = items.map(function (item) {

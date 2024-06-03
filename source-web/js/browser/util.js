@@ -170,6 +170,72 @@ Util.createReport = function (report, params) {
 };
 
 /**
+ * Create specified report
+ * @param {string} report - uri of report to create
+ * @param {Object} params - dataObj: parameters to pass to report, fileName: name to created file
+ * @return {file}
+ */
+Util.createReportToFile = function (report, params) {
+  if (typeof report === 'string' || report instanceof String) {
+    report = new IndividualModel(report);
+  }
+  const jasperServerCfg = new IndividualModel('cfg:jasperServerAddress');
+  return Promise.all([report.load(), jasperServerCfg.load()]).then((loaded) => {
+    const reportIndividual = loaded[0];
+    const jasperServerCfgIndividual = loaded[1];
+    const jasperServerAddress = jasperServerCfgIndividual['rdf:value'][0];
+
+    const {dataObj} = params;
+
+    const form = document.createElement('form');
+    form.setAttribute('method', 'post');
+    form.setAttribute('action', jasperServerAddress + 'flow.html?_flowId=viewReportFlow&reportUnit=' + encodeURIComponent(reportIndividual['v-s:reportPath'][0]) + '&output=' + encodeURIComponent(reportIndividual['v-s:reportFormat'][0]) + '&documentId=' + encodeURIComponent(dataObj.id) + '&ticket=' + veda.ticket);
+    form.setAttribute('target', 'Report');
+    
+    Object.getOwnPropertyNames(dataObj.properties).forEach((key) => {
+      if ( key !== '@' && dataObj.hasValue(key) ) {
+        const hiddenField = document.createElement('input');
+        hiddenField.setAttribute('type', 'hidden');
+        hiddenField.setAttribute('name', key.replace(':', '_').replace('-', '_'));
+        const value = dataObj.get(key).map((item) => {
+          if (item instanceof IndividualModel) {
+            return item.id;
+          } else if (item instanceof Date) {
+            return item.toISOString();
+          } else {
+            return item;
+          }
+        }).join(',');
+        hiddenField.setAttribute('value', value);
+        form.appendChild(hiddenField);
+      }
+    });
+    // Set client timezone parameter
+    const tz = (new Date()).getTimezoneOffset();
+    const tzField = document.createElement('input');
+    tzField.setAttribute('type', 'hidden');
+    tzField.setAttribute('name', 'timezone');
+    tzField.setAttribute('value', tz);
+    form.appendChild(tzField);
+    const formData = new FormData(form);
+    const url = form.getAttribute('action');
+    return fetch(url, {
+      method: 'POST',
+      body: formData
+    }).then(res => {
+      return res.blob();
+    }).then(blob => {
+      const file = new File([blob], params.fileName);
+      console.log(file);
+      return file;
+    }).catch((error) => {
+      console.error('Create report file failed', this.id);
+      throw error;
+    });;
+  });
+};
+
+/**
  * Show user's rights for individual
  * @param {IndividualModel} individual - authorization subject
  */

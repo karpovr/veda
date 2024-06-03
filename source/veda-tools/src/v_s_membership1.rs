@@ -40,7 +40,7 @@ pub fn remove_membership1(ctx: &mut CleanerContext) {
                 }
 
                 let mut indv: Individual = Individual::default();
-                if ctx.backend.storage.get_individual(id, &mut indv) {
+                if ctx.backend.storage.get_individual(id, &mut indv) == ResultCode::Ok{
                     if &indv.get_first_literal("rdfs:comment").unwrap_or_default() == "выдан cfg:Event_5"
                         && &indv.get_first_literal("v-s:memberOf").unwrap_or_default() == "cfg:AllUsersGroup"
                     {

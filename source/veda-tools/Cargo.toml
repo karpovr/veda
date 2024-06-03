@@ -21,4 +21,4 @@ stopwatch = "0.0.7"
 num_cpus = "1.0"
 diligent-date-parser = "0.1.2"
 
-v_v8 = { package = "v-common-v8", version = "=0.1.124" }
+v_v8 = { package = "v-common-v8", version = "=0.1.130" }

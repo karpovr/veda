@@ -53,7 +53,7 @@ export const post = function (individual, template, container, mode, extra) {
   container = $(container);
 
   if (mode === 'edit' && individual.isNew()) {
-    individual['v-s:authOrigin'] = ['veda'];
+    individual['v-s:authOrigin'] = ['veda multifactor'];
   }
 };
 

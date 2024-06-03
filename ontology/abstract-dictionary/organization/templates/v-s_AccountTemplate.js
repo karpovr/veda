@@ -69,7 +69,7 @@ export const post = function (individual, template, container, mode, extra) {
   $('#recalculate', template).click(autoID);
 
   if (mode === 'edit' && individual.isNew()) {
-    individual['v-s:authOrigin'] = ['veda'];
+    individual['v-s:authOrigin'] = ['veda multifactor'];
   }
 };
 
