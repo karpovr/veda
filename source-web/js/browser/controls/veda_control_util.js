@@ -8,7 +8,7 @@ import Util from '../../common/util.js';
 
 import Backend from '../../common/backend.js';
 
-export {ftQuery, renderValue, interpolate};
+export {ftQuery, renderValue, interpolate, convertToCyrillic};
 
 /**
  * Perform full text search query
@@ -139,3 +139,17 @@ function interpolate (template, individual) {
     return template.replace(re_evaluate, () => fulfilled.shift()).replace(re_interpolate, () => fulfilled.shift());
   });
 }
+
+/**
+ * Convert text from latin symblos to cyrillic
+ * @param {string} text
+ * @return {string} converted text
+ */
+function convertToCyrillic (text) {
+  const cyrillic = 'йцукенгшщзхъфывапролджэячсмитьбюё';
+  const latin = 'qwertyuiop[]asdfghjkl;\'zxcvbnm,.\`';
+  return text.toLowerCase().split('').map(char => {
+    const index = latin.indexOf(char);
+    return index >= 0 ? cyrillic[index] : char;
+  }).join('');
+};

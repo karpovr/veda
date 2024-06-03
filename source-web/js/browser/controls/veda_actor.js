@@ -6,7 +6,7 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-import {interpolate, ftQuery} from './veda_control_util.js';
+import {interpolate, ftQuery, convertToCyrillic} from './veda_control_util.js';
 
 $.fn.veda_actor = function ( options ) {
   const opts = {...defaults, ...options};
@@ -261,6 +261,10 @@ $.fn.veda_actor = function ( options ) {
    * @return {void}
    */
   function performSearch (value) {
+    if (value) {
+      const converted = convertToCyrillic(value);
+      if (converted != value) value += '\n' + converted;
+    }
     if ( chosenActorType === 'v-s:Appointment' || chosenActorType === 'v-s:Person' || chosenActorType === 'v-s:Position' ) {
       if ( fullName ) {
         value = value.trim().split('\n').map((line) => {
