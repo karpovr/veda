@@ -71,6 +71,6 @@ export const html = `
     <td>
       <i><small about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate"></small> <small about="@" property="v-s:created"></small></i>
     </td>
-    <td><div class="pull-right" about="@" data-template="v-ui:IconButtonsTemplate" data-embedded="true"></div></td>
+    <td><div class="pull-right" about="@" data-template="v-ui:StandardButtonsTemplate" data-embedded="true" data-buttons="save cancel delete"></div></td>
   </tr>
 `;
