@@ -22,14 +22,14 @@ v-s:SetOfPersonnelReserveForm
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:UserSearchableDocument;
-  rdfs:label "Комплект Анкет КР"@ru ;
+  rdfs:label "Цикл кадрового резерва"@ru ;
   rdfs:label "SetOfPersonnelReserve"@en ;
   v-s:labelPattern "{@.v-s:year}" ;
 .
 #Анкета КР 
   v-s:hasProcessPersonnelReserveForm
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Анкета КР"@ru ;
+  rdfs:label "Подразделение"@ru ;
   rdfs:label "Process Personnel Reserve Form"@en ;
   rdfs:range v-s:ProcessPersonnelReserveForm ;
   rdfs:domain v-s:SetOfPersonnelReserveForm ;
@@ -39,7 +39,7 @@ v-s:SetOfPersonnelReserveForm
 
 v-s:ProcessPersonnelReserveForm
   rdf:type owl:Class ;
-  rdfs:label "Анкета КР"@ru ;
+  rdfs:label "Подразделение"@ru ;
   rdfs:label "Process Personnel Reserve Form"@en ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
@@ -57,10 +57,10 @@ v-s:ProcessPersonnelReserveForm
   rdfs:domain v-s:ProcessPersonnelReserveForm ;
 .
 
-# Элемент КР
+# Карточка сотрудника
   v-s:hasPersonnelReserve
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Элемент КР"@ru ;
+  rdfs:label "Карточка сотрудника"@ru ;
   rdfs:label "Personnel Reserve"@en ;
   rdfs:range v-s:PersonnelReserve ;
   rdfs:domain v-s:ProcessPersonnelReserveForm ;
@@ -81,11 +81,11 @@ v-s:ContinuityPlan
 .
 
 
-#------------------------------------------------------ Элемент Кадрового резерва  --
+#------------------------------------------------------ Карточка сотрудника  --
 
 v-s:PersonnelReserve
   rdf:type owl:Class ;
-  rdfs:label "Элемент КР"@ru ;
+  rdfs:label "Карточка сотрудника"@ru ;
   rdfs:label "Personnel Reserve"@en ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
@@ -93,10 +93,10 @@ v-s:PersonnelReserve
   rdfs:subClassOf v-s:UserSearchableDocument;
   v-s:labelPattern "{@.v-s:year} {@.v-s:hasHREmployeeProfile.rdfs:label}" ;
 .
-#-----Досье сотрудника
+#-----Профиль сотрудника
   v-s:hasHREmployeeProfile
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Досье сотрудника"@ru ;
+  rdfs:label "Профиль сотрудника"@ru ;
   rdfs:label "HR Employee Profile"@en ;
   rdfs:range v-s:HREmployeeProfile ;
   rdfs:domain v-s:PersonnelReserve ;
@@ -122,13 +122,13 @@ v-s:hasCandidateEffectiveness
 
 
 
-###----------------------------------Досье сотрудника---------------------
+###----------------------------------Профиль сотрудника---------------------
 
 
 #-----Досье сотрудника
 v-s:HREmployeeProfile
   rdf:type owl:Class ;
-  rdfs:label "Сотрудник"@ru ;
+  rdfs:label "Профиль сотрудника"@ru ;
   rdfs:label "EmployeeDossier"@en ;
   rdfs:subClassOf v-s:BackwardLink ;
   rdfs:subClassOf v-s:Labeled ;
