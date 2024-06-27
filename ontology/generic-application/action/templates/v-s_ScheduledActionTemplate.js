@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import veda from '/js/common/veda.js';
 import IndividualModel from '/js/common/individual_model.js';
 
 export const post = function (individual, template, container, mode, extra) {
@@ -12,6 +13,9 @@ export const post = function (individual, template, container, mode, extra) {
     const cntr = $('#new-ScheduledAction', template).empty();
     const tmpl = 'v-s:SingleScheduledActionTemplate';
     ScheduledAction['rdf:type'] = [_class];
+    ScheduledAction['v-s:controller'] = [veda.appointment];
+    ScheduledAction['v-s:type'] = [individual['rdf:type'][0]];
+    ScheduledAction['v-s:linkedObject'] = [individual];
     ScheduledAction['v-s:backwardTarget'] = [individual];
     ScheduledAction['v-s:backwardProperty'] = [new IndividualModel('v-s:hasScheduledAction')];
     ScheduledAction['v-s:canRead'] = [true];
@@ -62,6 +66,8 @@ export const html = `
     <h3 about="v-s:ScheduledActionsBundle" property="rdfs:label"></h3>
     <div about="@" rel="v-s:hasScheduledAction" data-template="v-s:RecursiveScheduledActionTemplate"></div>
     <div id="new-ScheduledAction"></div>
-    <button class="margin-sm btn btn-success" id="add-ScheduledAction" about="v-s:AddScheduledAction" property="rdfs:label"></button>
+    <div>
+      <button class="pull-right margin-sm btn btn-success" id="add-ScheduledAction" about="v-s:AddScheduledAction" property="rdfs:label"></button>
+    </div>
   </div>
 `;

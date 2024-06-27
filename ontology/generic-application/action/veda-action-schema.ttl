@@ -182,7 +182,7 @@ v-s:ScheduledAction
     rdf:type v-ui:PropertySpecification ;
     v-ui:forClass v-s:ScheduledAction;
     v-ui:forProperty v-s:controller ;
-    v-ui:minCardinality 0 ;
+    v-ui:minCardinality 1 ;
     v-ui:maxCardinality 1 ;
     v-ui:queryPrefix "('rdf:type'=='v-s:Appointment' )  && ('v-s:employee.v-s:hasAccount.isExists'=='true') && ('v-s:origin'=='sap hr' || 'v-s:origin'=='Group') || ('rdf:type'=='v-s:Position') && ( 'v-s:origin'=='Role')"^^xsd:string;
     rdfs:label "Спецификация свойства v-s:controller для класса v-s:ScheduledAction"@ru ;
@@ -430,6 +430,7 @@ for (var i=0; i<result.length; i++){
 
     var uri = veda.Util.genUri() + "-tr";
     //print(veda.Util.toJson(individ['v-s:description']));
+    var creator =  individ['v-s:controller'] ? individ['v-s:controller'] : veda.Util.newUri ('cfg:VedaSystemAppointment');
     var startForm = {
       "@" : uri,
       "rdf:type" : veda.Util.newUri("v-df:InstructionRouteStartForm"),
@@ -439,7 +440,8 @@ for (var i=0; i<result.length; i++){
       "v-wf:useTransformation" : veda.Util.newUri("v-df:InstructionRouteStartFormToNet"),
       "v-wf:hasStatusWorkflow" : veda.Util.newUri("v-wf:ToBeSent"),
       "v-wf:fromShedulerScript" : veda.Util.newBool(true),
-      "v-s:creator" : veda.Util.newUri ('cfg:VedaSystemAppointment'),
+      "v-s:creator" : creator ,
+      "v-s:controller": individ['v-s:controller'] ,
       "v-s:dateTo" : individ['v-s:dateToPlan'],
       "v-s:responsible": []
     };
