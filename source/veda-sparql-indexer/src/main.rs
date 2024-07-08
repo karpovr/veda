@@ -14,6 +14,7 @@ extern crate log;
 use crate::common::{is_exportable, load_map_of_types, update_prefix};
 use crate::update::update_individual_states;
 use anyhow::Result;
+use git_version::git_version;
 use reqwest::StatusCode;
 use std::collections::HashMap;
 use std::env;
@@ -29,7 +30,6 @@ use v_common::onto::onto_index::OntoIndex;
 use v_common::storage::common::StorageMode;
 use v_common::v_api::obj::ResultCode;
 use v_common::v_queue::consumer::Consumer;
-use git_version::git_version;
 
 mod common;
 mod update;
@@ -246,26 +246,29 @@ fn prepare_element_indv(backend: &mut Backend, ctx: &mut Context, queue_element:
 fn insert_individual_states(indv: &mut Individual, ctx: &mut Context) -> Result<bool, PrepareError> {
     let id = indv.get_id().to_owned();
     if let Ok(tt) = to_turtle_with_counter_refs(&[indv], &ctx.prefixes) {
-        //info!("{}", String::from_utf8_lossy(&tt));
+        info!("{}", String::from_utf8_lossy(&tt));
 
         let url = &ctx.store_point;
 
-        if let Ok(res) = ctx.rt.block_on(ctx.client.post(url).body(tt).header("Content-Type", "text/turtle").send()) {
-            if res.status() == StatusCode::CREATED || res.status() == StatusCode::NO_CONTENT {
-                info!("insert: {}", indv.get_id());
-                ctx.stored += 1;
-            } else {
-                ctx.skipped += 1;
-                let sp = id.find(':').unwrap_or(0);
-                if sp > 0 && sp < 5 && !id.contains("//") {
-                    error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_with_counter_refs(&[indv], &ctx.prefixes).unwrap()));
-                    return Err(PrepareError::Recoverable);
+        match ctx.rt.block_on(ctx.client.post(url).body(tt).header("Content-Type", "text/turtle").send()) {
+            Ok(res) => {
+                if res.status() == StatusCode::CREATED || res.status() == StatusCode::NO_CONTENT {
+                    info!("insert: {}", indv.get_id());
+                    ctx.stored += 1;
+                } else {
+                    ctx.skipped += 1;
+                    let sp = id.find(':').unwrap_or(0);
+                    if sp > 0 && sp < 5 && !id.contains("//") {
+                        error!("Result: {}, {}", res.status(), String::from_utf8_lossy(&to_turtle_with_counter_refs(&[indv], &ctx.prefixes).unwrap()));
+                        return Err(PrepareError::Recoverable);
+                    }
                 }
-            }
-        } else {
-            ctx.skipped += 1;
-            error!("fail send req to {}", url);
-            return Err(PrepareError::Fatal);
+            },
+            Err(e) => {
+                ctx.skipped += 1;
+                error!("fail send req to {}, err={:?}", url, e);
+                return Err(PrepareError::Fatal);
+            },
         }
     }
 
