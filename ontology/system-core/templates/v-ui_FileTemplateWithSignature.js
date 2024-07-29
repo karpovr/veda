@@ -32,7 +32,7 @@ export const post = async function (individual, template, container, mode, extra
     } else {
       $('.signatures', $template).removeClass('hidden');
       $('.verify-signature', $template).removeClass('hidden');
-      for (let i=0; individual['v-s:digitalSignature'].length; i++) {
+      for (let i=0; i < individual['v-s:digitalSignature'].length; i++) {
         const signFile = await individual['v-s:digitalSignature'][i].load();
         if (signFile.hasValue('v-s:creator',veda.appointment.id)) {
           $('.add-signature', $template).addClass('hidden');
