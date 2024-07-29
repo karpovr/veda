@@ -240,6 +240,13 @@ v-s:WorkExperience
   rdfs:label "Трудовой опыт"@ru ;
   rdfs:label "WorkExperience"@en ;
   rdfs:subClassOf v-s:ProfessionalExperience ;
+. 
+v-s:hasWorkExperience
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Трудовой опыт"@ru ;
+  rdfs:label "WorkExperience"@en ;
+  rdfs:range v-s:WorkExperience ;
+  rdfs:domain v-s:ProfessionalExperience ;
 .
 #-c
 #-по 
