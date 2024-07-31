@@ -1,6 +1,7 @@
 // Controls index
 
 import './veda_actor.js';
+import './veda_augmented_text.js';
 import './veda_boolean.js';
 import './veda_boolean_radio.js';
 import './veda_checkbox.js';
