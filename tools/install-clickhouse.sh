@@ -11,7 +11,5 @@ sudo apt-get install -y clickhouse-server clickhouse-client
 
 sudo cp -v ./tools/clickhouse/users.xml /etc/clickhouse-server/users.xml
 
-sudo service clickhouse-server restart
-
 sudo service clickhouse-server start
-clickhouse-client # or "clickhouse-client --password" if you've set up a password.
+#clickhouse-client # or "clickhouse-client --password" if you've set up a password.

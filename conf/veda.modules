@@ -1,4 +1,6 @@
 mstorage
+    module = mstorage
+    args = --use_authorization_cache=false
 
 #ro-storage
 
