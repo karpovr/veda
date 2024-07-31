@@ -21,7 +21,7 @@ async function createSignatureFileIndividual (signature, name, parent, thumbprin
     const hashId = Sha256.hash(`${parent.id}_${signature.length}_${name}`).substring(24);
     fileIndividual.id = `d:${hashId}`;
   }
-  fileIndividual['rdf:type'] = ['v-s:File'];
+  fileIndividual['rdf:type'] = ['v-s:SignatureFile'];
   fileIndividual['v-s:fileName'] = [name + '.sig'];
   fileIndividual['rdfs:label'] = [name + '.sig'];
   fileIndividual['v-s:fileSize'] = [signature.length];
@@ -83,6 +83,7 @@ async function getValidCertificates () {
     certificates = await cryptoPro.listCertificates();
     certificates = (await Promise.all(certificates.map(async (certificate) => {
       const certificateInfo = await cryptoPro.certificateInfo(certificate.id);
+      certificate.formattedName = `${certificateInfo.Name}; C ${certificateInfo.ValidFromDate.toLocaleDateString()} по ${certificateInfo.ValidToDate.toLocaleDateString()}; Выдано ${certificateInfo.Issuer.CN}`;
       return certificateInfo.IsValid ? certificate : undefined;
     }))).filter(Boolean).sort((a, b) => a.name > b.name ? 1 : -1);
   } catch (error) {
@@ -163,7 +164,7 @@ export default class Crypto {
       certificates.forEach((certificate) => {
         const option = document.createElement('option');
         option.value = certificate.id;
-        option.label = certificate.name;
+        option.label = certificate.formattedName;
         select.appendChild(option);
       });
       select.addEventListener('change', () => {
@@ -213,7 +214,7 @@ export default class Crypto {
       certificates.forEach((certificate) => {
         const option = document.createElement('option');
         option.value = certificate.id;
-        option.label = certificate.name;
+        option.label = certificate.formattedName;
         select.appendChild(option);
       });
       select.addEventListener('change', () => {
@@ -269,7 +270,7 @@ export default class Crypto {
       certificates.forEach((certificate) => {
         const option = document.createElement('option');
         option.value = certificate.id;
-        option.label = certificate.name;
+        option.label = certificate.formattedName;
         select.appendChild(option);
       });
       select.addEventListener('change', () => {
