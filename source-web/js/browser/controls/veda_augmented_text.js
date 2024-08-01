@@ -149,6 +149,8 @@ $.fn.veda_augmentedText = function (options) {
               const recognizedText = await decoratedRecognizeAudioFile.call(micButton, audioBlob);
               const currentValue = opts.individual.get(opts.property_uri).join('\n');
               opts.individual.set(opts.property_uri, currentValue + ' ' + recognizedText);
+              // Очищаем массив
+              audioChunks.splice(0, audioChunks.length);
             } catch (error) {
               console.error('Ошибка распознавания аудио:', error);
             }
