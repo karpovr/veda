@@ -3,6 +3,7 @@ import veda_literal from './veda_literal.js';
 import notify from '../../browser/notify.js';
 import {decorator} from '../../browser/dom_helpers.js';
 
+// Function to recognize audio file
 async function recognizeAudioFile (file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -15,17 +16,19 @@ async function recognizeAudioFile (file) {
     });
 
     if (!response.ok) {
-      throw new Error((await response.text()) || response.status);
+      const errorText = await response.text();
+      throw new Error(errorText || response.status);
     }
 
     const recognizedText = await response.text();
     return recognizedText;
   } catch (error) {
-    console.error('Ошибка распознавания аудио:', error);
+    console.error('Audio recognition error:', error);
     throw error;
   }
 }
 
+// Function to augment text
 async function augmentText (text, type, property) {
   try {
     const response = await fetch('/augment_text', {
@@ -38,32 +41,37 @@ async function augmentText (text, type, property) {
     });
 
     if (!response.ok) {
-      throw new Error((await response.text()) || response.status);
+      const errorText = await response.text();
+      throw new Error(errorText || response.status);
     }
 
     const augmentedText = await response.text();
     return augmentedText;
   } catch (error) {
-    console.error('Ошибка улучшения текста:', error);
+    console.error('Text augmentation error:', error);
     throw error;
   }
 }
 
+// Function to show spinner on the button
 function showSpinner (button) {
   button.find('i').addClass('fa-spinner fa-spin').removeClass('fa-microphone fa-magic fa-stop');
   button.prop('disabled', true);
 }
 
+// Function to hide spinner on the button
 function hideSpinner (button, iconClass) {
   button.find('i').removeClass('fa-spinner fa-spin').addClass(iconClass);
   button.prop('disabled', false);
 }
 
+// Function to handle errors uniformly
 async function handleError (error, button, errorIconClass) {
   hideSpinner(button, errorIconClass);
-  notify('danger', 'Произошла ошибка: ' + error);
+  notify('danger', 'Error occurred: ' + error);
 }
 
+// Decorate functions with pre and post conditions including error handling
 const decoratedRecognizeAudioFile = decorator(
   recognizeAudioFile,
   function pre () {
@@ -109,20 +117,22 @@ $.fn.veda_augmentedText = function (options) {
   const micButton = controlsContainer.find('.fa-microphone').closest('.btn');
   const augmentButton = controlsContainer.find('.fa-magic').closest('.btn');
 
+  // Array to store audio chunks
   let mediaRecorder;
   const audioChunks = [];
 
+  // Request access to microphone
   async function requestMicrophoneAccess () {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
       return stream;
     } catch (error) {
-      notify('danger', 'Доступ к микрофону запрещен: ' + error.message);
+      notify('danger', 'Microphone access denied: ' + error.message);
       throw error;
     }
   }
 
-  // Обработчик для кнопки микрофона
+  // Handler for the microphone button
   micButton.click(async function () {
     if (micButton.find('i').hasClass('fa-microphone')) {
       try {
@@ -149,28 +159,29 @@ $.fn.veda_augmentedText = function (options) {
               const recognizedText = (await decoratedRecognizeAudioFile.call(micButton, audioBlob)).trim();
               const currentValue = opts.individual.get(opts.property_uri).join('\n');
               opts.individual.set(opts.property_uri, currentValue ? currentValue + ' ' + recognizedText : recognizedText);
-              // Очищаем массив
+
+              // Clear audio chunks array
               audioChunks.splice(0, audioChunks.length);
             } catch (error) {
-              console.error('Ошибка распознавания аудио:', error);
+              console.error('Audio recognition error:', error);
             }
           };
         });
       } catch (error) {
         micButton.prop('disabled', false);
-        console.error('Ошибка записи аудио:', error);
+        console.error('Audio recording error:', error);
       }
     }
   });
 
-  // Обработчик для кнопки улучшения текста
+  // Handler for the text augmentation button
   augmentButton.click(async function () {
     const currentText = opts.individual.get(opts.property_uri).join(' ');
     try {
       const augmentedText = await decoratedAugmentText.call(augmentButton, currentText, opts.individual['rdf:type'][0].id, opts.property_uri);
       opts.individual.set(opts.property_uri, augmentedText);
     } catch (error) {
-      console.error('Ошибка улучшения текста:', error);
+      console.error('Text augmentation error:', error);
     }
   });
 
