@@ -26,14 +26,14 @@ async function recognizeAudioFile (file) {
   }
 }
 
-async function augmentText (text) {
+async function augmentText (text, type, property) {
   try {
     const response = await fetch('/augment_text', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({text}),
+      body: JSON.stringify({text, type, property}),
       credentials: 'include',
     });
 
@@ -165,7 +165,7 @@ $.fn.veda_augmentedText = function (options) {
   augmentButton.click(async function () {
     const currentText = opts.individual.get(opts.property_uri).join(' ');
     try {
-      const augmentedText = await decoratedAugmentText.call(augmentButton, currentText);
+      const augmentedText = await decoratedAugmentText.call(augmentButton, currentText, opts.individual['rdf:type'][0].id, opts.property_uri);
       opts.individual.set(opts.property_uri, augmentedText);
     } catch (error) {
       console.error('Ошибка улучшения текста:', error);
