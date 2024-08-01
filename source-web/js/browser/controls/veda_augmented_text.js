@@ -146,9 +146,9 @@ $.fn.veda_augmentedText = function (options) {
           mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
             try {
-              const recognizedText = await decoratedRecognizeAudioFile.call(micButton, audioBlob);
+              const recognizedText = (await decoratedRecognizeAudioFile.call(micButton, audioBlob)).trim();
               const currentValue = opts.individual.get(opts.property_uri).join('\n');
-              opts.individual.set(opts.property_uri, currentValue + ' ' + recognizedText);
+              opts.individual.set(opts.property_uri, currentValue ? currentValue + ' ' + recognizedText : recognizedText);
               // Очищаем массив
               audioChunks.splice(0, audioChunks.length);
             } catch (error) {
