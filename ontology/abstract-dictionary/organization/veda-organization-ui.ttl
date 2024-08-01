@@ -217,6 +217,19 @@ v-s:OrganizationUnitModel
     });
   };
 
+  this.getDirectChiefs = async function (depth = 10, result = []) {
+    await this.load();
+    if (depth <= 0) return result;
+    if (this.hasValue('v-s:hasChiefDetail')) {
+      if (result.indexOf(this['v-s:hasChiefDetail'][0]) == -1) {
+        result.push(this['v-s:hasChiefDetail'][0]);
+      }
+    }
+    if (this.hasValue('v-s:parentUnit')) {
+      return await this.getDirectChiefs.call(this["v-s:parentUnit"][0], --depth, result);
+    } else return result;
+  }
+
   /**
    * @method
    * @param unit {String/veda.IndividualModel} Super unit uri or individual.
