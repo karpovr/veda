@@ -114,7 +114,7 @@ function decorator (fn, pre, post, err) {
       if (post && typeof post === 'function') await post.call(this, ...args);
       return result;
     } catch (error) {
-      if (err && typeof err === 'function') await err.call(this, ...args);
+      if (err && typeof err === 'function') await err.call(this, error, ...args);
       throw error;
     }
   };

@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import veda_literal from './veda_literal.js';
 import notify from '../../browser/notify.js';
+import {decorator} from '../../browser/dom_helpers.js';
 
 async function recognizeAudioFile (file) {
   const formData = new FormData();
@@ -25,14 +26,14 @@ async function recognizeAudioFile (file) {
   }
 }
 
-async function augmentText (text, type, property) {
+async function augmentText (text) {
   try {
     const response = await fetch('/augment_text', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({text, type, property}),
+      body: JSON.stringify({text}),
       credentials: 'include',
     });
 
@@ -47,6 +48,47 @@ async function augmentText (text, type, property) {
     throw error;
   }
 }
+
+function showSpinner (button) {
+  button.find('i').addClass('fa-spinner fa-spin').removeClass('fa-microphone fa-magic fa-stop');
+  button.prop('disabled', true);
+}
+
+function hideSpinner (button, iconClass) {
+  button.find('i').removeClass('fa-spinner fa-spin').addClass(iconClass);
+  button.prop('disabled', false);
+}
+
+async function handleError (error, button, errorIconClass) {
+  hideSpinner(button, errorIconClass);
+  notify('danger', 'Произошла ошибка: ' + error);
+}
+
+const decoratedRecognizeAudioFile = decorator(
+  recognizeAudioFile,
+  function pre () {
+    showSpinner(this);
+  },
+  function post () {
+    hideSpinner(this, 'fa-microphone');
+  },
+  function err (error) {
+    handleError(error, this, 'fa-microphone');
+  },
+);
+
+const decoratedAugmentText = decorator(
+  augmentText,
+  function pre () {
+    showSpinner(this);
+  },
+  function post () {
+    hideSpinner(this, 'fa-magic');
+  },
+  function err (error) {
+    handleError(error, this, 'fa-magic');
+  },
+);
 
 $.fn.veda_augmentedText = function (options) {
   const opts = {...defaults, ...options};
@@ -68,7 +110,7 @@ $.fn.veda_augmentedText = function (options) {
   const augmentButton = controlsContainer.find('.fa-magic').closest('.btn');
 
   let mediaRecorder;
-  let audioChunks = [];
+  const audioChunks = [];
 
   async function requestMicrophoneAccess () {
     try {
@@ -80,7 +122,8 @@ $.fn.veda_augmentedText = function (options) {
     }
   }
 
-  micButton.click(async () => {
+  // Обработчик для кнопки микрофона
+  micButton.click(async function () {
     if (micButton.find('i').hasClass('fa-microphone')) {
       try {
         micButton.prop('disabled', true);
@@ -96,23 +139,21 @@ $.fn.veda_augmentedText = function (options) {
         micButton.find('i').removeClass('fa-microphone').addClass('fa-stop');
         micButton.prop('disabled', false);
 
-        micButton.one('click', () => {
+        micButton.one('click', async function () {
           mediaRecorder.stop();
-        });
+          micButton.prop('disabled', true);
 
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
-          micButton.find('i').removeClass('fa-stop').addClass('fa-spinner fa-spin');
-          try {
-            const recognizedText = await recognizeAudioFile(audioBlob);
-            const currentValue = opts.individual.get(opts.property_uri).join(' ').trim();
-            opts.individual.set(opts.property_uri, currentValue ? currentValue + ' ' + recognizedText : recognizedText);
-          } catch (error) {
-            notify('danger', 'Ошибка распознавания аудио: ' + error);
-          }
-          micButton.find('i').removeClass('fa-spinner fa-spin').addClass('fa-microphone');
-          audioChunks = [];
-        };
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+            try {
+              const recognizedText = await decoratedRecognizeAudioFile.call(micButton, audioBlob);
+              const currentValue = opts.individual.get(opts.property_uri).join('\n');
+              opts.individual.set(opts.property_uri, currentValue + ' ' + recognizedText);
+            } catch (error) {
+              console.error('Ошибка распознавания аудио:', error);
+            }
+          };
+        });
       } catch (error) {
         micButton.prop('disabled', false);
         console.error('Ошибка записи аудио:', error);
@@ -120,16 +161,15 @@ $.fn.veda_augmentedText = function (options) {
     }
   });
 
-  augmentButton.click(async () => {
-    augmentButton.find('i').addClass('fa-spinner fa-spin');
+  // Обработчик для кнопки улучшения текста
+  augmentButton.click(async function () {
+    const currentText = opts.individual.get(opts.property_uri).join(' ');
     try {
-      const currentText = opts.individual.get(opts.property_uri).join(' ').trim();
-      const augmentedText = await augmentText(currentText, opts.individual['rdf:type'][0].id, opts.property_uri);
+      const augmentedText = await decoratedAugmentText.call(augmentButton, currentText);
       opts.individual.set(opts.property_uri, augmentedText);
     } catch (error) {
-      notify('danger', 'Ошибка улучшения текста: ' + error);
+      console.error('Ошибка улучшения текста:', error);
     }
-    augmentButton.find('i').removeClass('fa-spinner fa-spin');
   });
 
   controlsContainer.find('textarea').replaceWith(control);
