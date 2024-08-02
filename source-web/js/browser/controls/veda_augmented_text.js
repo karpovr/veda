@@ -111,7 +111,7 @@ $.fn.veda_augmentedText = function (options) {
         <div class="cancel-button btn btn-link hidden">
           <i class="fa fa-times"></i>
         </div>
-        <canvas class="audio-visualization hidden" width="64" height="32" style="margin: 0 15px 0 0;"></canvas>
+        <canvas class="audio-visualization hidden" width="24" height="32" style="margin: 0 15px 0 0;"></canvas>
         <span class="recording-timer hidden">0.0</span>
         <div class="approve-button btn btn-link hidden">
           <i class="fa fa-check"></i>
@@ -169,7 +169,7 @@ $.fn.veda_augmentedText = function (options) {
     const maxFrequency = 3000; // Максимальная частота голоса в Гц
     const minBin = Math.floor(minFrequency / (sampleRate / analyser.fftSize));
     const maxBin = Math.ceil(maxFrequency / (sampleRate / analyser.fftSize));
-    const numBars = 8;
+    const numBars = 5;
 
     // Вычисляем ширину столбиков и расстояния между ними
     const barWidth = canvas.width / (numBars + (numBars - 1) * 0.38);
