@@ -1,79 +1,71 @@
 // Boolean control
 
 import $ from 'jquery';
-
 import Util from '../../common/util.js';
 
-$.fn.veda_boolean = function ( options ) {
-  const opts = {...defaults, ...options};
-  const control = $( opts.template );
-  const individual = opts.individual;
-  const property_uri = opts.property_uri;
-  const spec = opts.spec;
+const defaults = {
+  template: '<input type="checkbox" />',
+};
 
+$.fn.veda_boolean = function (options) {
+  const opts = {...defaults, ...options};
+  const control = $(opts.template);
+  const {individual, property_uri, spec} = opts;
+
+  // Handle tabindex transfer
   const tabindex = this.attr('tabindex');
   if (tabindex) {
     this.removeAttr('tabindex');
     control.attr('tabindex', tabindex);
   }
 
-  const handler = function (doc_property_uri) {
+  const updateControl = () => {
     if (individual.hasValue(property_uri)) {
-      if (individual.get(property_uri)[0] === true) {
-        control.prop('checked', true).prop('readonly', false).prop('indeterminate', false);
-      } else {
-        control.prop('checked', false).prop('readonly', false).prop('indeterminate', false);
-      }
+      const value = individual.get(property_uri)[0];
+      control.prop('checked', value).prop('readonly', false).prop('indeterminate', false);
     } else {
       control.prop('readonly', true).prop('indeterminate', true);
     }
   };
-  handler();
 
-  individual.on(property_uri, handler);
-  this.one('remove', function () {
-    individual.off(property_uri, handler);
-  });
+  updateControl();
+
+  individual.on(property_uri, updateControl);
+  this.one('remove', () => individual.off(property_uri, updateControl));
 
   control.click(() => {
-    if ( control.prop('readonly') ) {
+    const isChecked = control.prop('checked');
+    const isReadonly = control.prop('readonly');
+
+    if (isReadonly) {
       individual.set(property_uri, [false]);
-    } else if ( !control.prop('checked') ) {
-      individual.set(property_uri, []);
     } else {
-      individual.set(property_uri, [true]);
+      individual.set(property_uri, isChecked ? [true] : []);
     }
   });
 
-  if ( control.closest('.checkbox.disabled').length ) {
-    control.attr('disabled', 'disabled');
+  // Disable control if in a disabled checkbox context
+  if (control.closest('.checkbox.disabled').length) {
+    control.prop('disabled', 'disabled');
   }
 
-  this.on('view edit search', function (e) {
+  this.on('view edit search', (e) => {
     e.stopPropagation();
-    if (e.type === 'view') {
-      control.attr('disabled', 'disabled');
-    } else {
-      if ( control.closest('.checkbox.disabled').length ) {
-        control.attr('disabled', 'disabled');
-      } else {
-        control.removeAttr('disabled');
-      }
-      if (spec && spec.hasValue('v-ui:tooltip')) {
-        control.parents('label').tooltip({
-          title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
-          placement: 'bottom',
-          container: control,
-          trigger: 'hover',
-          animation: false,
-        });
-      }
+    const isView = e.type === 'view';
+
+    control.prop('disabled', isView || control.closest('.checkbox.disabled').length);
+
+    if (!isView && spec?.hasValue('v-ui:tooltip')) {
+      control.parents('label').tooltip({
+        title: spec['v-ui:tooltip'].map(Util.formatValue).join(' '),
+        placement: 'bottom',
+        container: control,
+        trigger: 'hover',
+        animation: false,
+      });
     }
   });
+
   this.append(control);
   return this;
-};
-
-const defaults = {
-  template: `<input type="checkbox" />`,
 };
