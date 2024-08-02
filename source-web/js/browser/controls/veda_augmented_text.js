@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import veda_literal from './veda_literal.js';
 import notify from '../../browser/notify.js';
-import {decorator} from '../../browser/dom_helpers.js';
+import {decorator, timeout} from '../../browser/dom_helpers.js';
 
 // Асинхронная функция для распознавания аудиофайла
 async function recognizeAudioFile (file) {
@@ -108,12 +108,12 @@ $.fn.veda_augmentedText = function (options) {
     <div style="position:relative">
       <textarea class="form-control"></textarea>
       <div style="position:absolute;right:10px;bottom:0px;display:flex;align-items:center;">
-        <div class="cancel-button btn btn-link hidden">
+        <div class="cancel-button btn btn-link hidden" style="padding:6px">
           <i class="fa fa-times"></i>
         </div>
-        <canvas class="audio-visualization hidden" width="24" height="24" style="margin: 0 15px 0 0;"></canvas>
+        <canvas class="audio-visualization hidden" width="16" height="24" style="margin: 0 6px 0 0;"></canvas>
         <span class="recording-timer hidden">0.0</span>
-        <div class="approve-button btn btn-link hidden">
+        <div class="approve-button btn btn-link hidden" style="padding:6px">
           <i class="fa fa-check"></i>
         </div>
         <div class="btn btn-link mic-button" style="padding:6px">
@@ -169,11 +169,11 @@ $.fn.veda_augmentedText = function (options) {
     const maxFrequency = 3000; // Максимальная частота голоса в Гц
     const minBin = Math.floor(minFrequency / (sampleRate / analyser.fftSize));
     const maxBin = Math.ceil(maxFrequency / (sampleRate / analyser.fftSize));
-    const numBars = 5;
+    const numBars = 4;
 
     // Вычисляем ширину столбиков и расстояния между ними
-    const barWidth = canvas.width / (numBars + (numBars - 1) * 0.38);
-    const barSpacing = barWidth * 0.38;
+    const barWidth = canvas.width / (numBars + (numBars - 1) * 0.62);
+    const barSpacing = barWidth * 0.62;
     const halfHeight = canvas.height / 2;
 
     async function draw () {
@@ -253,7 +253,8 @@ $.fn.veda_augmentedText = function (options) {
     if (micButton.find('i').hasClass('fa-microphone')) {
       try {
         micButton.prop('disabled', true);
-        audioChunks = []; // Очистка массива аудио чанков перед началом новой записи
+        augmentButton.addClass('hidden');
+        audioChunks = [];
         const stream = await requestMicrophoneAccess();
         mediaRecorder = new MediaRecorder(stream);
 
@@ -266,7 +267,6 @@ $.fn.veda_augmentedText = function (options) {
 
         mediaRecorder.start();
 
-        // Показать кнопки approve и cancel, и визуализацию
         micButton.addClass('hidden');
         approveButton.removeClass('hidden');
         cancelButton.removeClass('hidden');
@@ -275,6 +275,8 @@ $.fn.veda_augmentedText = function (options) {
 
         micButton.prop('disabled', false);
       } catch (error) {
+        // обратная смена свойств кнопки и отображение элементов управления
+        augmentButton.removeClass('hidden');
         micButton.prop('disabled', false);
         console.error('Ошибка записи аудио:', error);
       }
@@ -302,19 +304,19 @@ $.fn.veda_augmentedText = function (options) {
 
     try {
       const result = await decoratedRecognizeAudioFile.call(micButton, new Blob(audioChunks, {type: 'audio/wav'}));
+      const trimmed = result.trim();
       const currentValue = opts.individual.get(opts.property_uri).join('\n');
       opts.individual.set(
         opts.property_uri,
-        (currentValue ? currentValue + '\n' + result : result).trim(),
+        currentValue ? currentValue + '\n' + trimmed : trimmed,
       );
     } catch (error) {
       console.error('Ошибка распознавания аудио:', error);
     } finally {
-      // Очистка массива аудио чанков
       audioChunks = [];
-      // Сброс состояния кнопок
       micButton.find('i').removeClass('fa-spinner fa-spin').addClass('fa-microphone');
       micButton.prop('disabled', false);
+      augmentButton.removeClass('hidden');
     }
   });
 
@@ -335,6 +337,7 @@ $.fn.veda_augmentedText = function (options) {
     micButton.prop('disabled', false);
 
     micButton.removeClass('hidden');
+    augmentButton.removeClass('hidden'); // Показать кнопку аугментации
     approveButton.addClass('hidden');
     cancelButton.addClass('hidden');
     recordingTimer.addClass('hidden');
@@ -343,12 +346,16 @@ $.fn.veda_augmentedText = function (options) {
 
   // Обработчик для кнопки улучшения текста
   augmentButton.click(async function () {
+    micButton.addClass('hidden'); // Скрыть кнопку микрофона перед отправкой запроса
+
     const currentText = opts.individual.get(opts.property_uri).join(' ');
     try {
       const augmentedText = await decoratedAugmentText.call(augmentButton, currentText, opts.individual['rdf:type'][0].id, opts.property_uri);
       opts.individual.set(opts.property_uri, augmentedText);
     } catch (error) {
       console.error('Ошибка улучшения текста:', error);
+    } finally {
+      micButton.removeClass('hidden'); // Показать кнопку микрофона после завершения запроса
     }
   });
 
@@ -370,7 +377,7 @@ $.fn.veda_augmentedText = function (options) {
 };
 
 const defaults = {
-  template: '<textarea class="form-control" rows="1" style="padding-right:64px;min-height:34px;max-height:200px;"></textarea>',
+  template: '<textarea class="form-control" rows="1" style="padding-right:96px;min-height:34px;max-height:200px;"></textarea>',
   parser: function (input) {
     return input ? String(input) : null;
   },
