@@ -111,7 +111,7 @@ $.fn.veda_augmentedText = function (options) {
         <div class="cancel-button btn btn-link hidden">
           <i class="fa fa-times"></i>
         </div>
-        <canvas class="audio-visualization hidden" width="24" height="32" style="margin: 0 15px 0 0;"></canvas>
+        <canvas class="audio-visualization hidden" width="24" height="24" style="margin: 0 15px 0 0;"></canvas>
         <span class="recording-timer hidden">0.0</span>
         <div class="approve-button btn btn-link hidden">
           <i class="fa fa-check"></i>
