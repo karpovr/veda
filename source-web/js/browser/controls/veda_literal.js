@@ -68,6 +68,8 @@ function veda_literal (options) {
         } catch (ex) {
           field.value = value;
           console.log('selectionStart/End error:', property_uri, value, typeof value);
+        } finally {
+          input.change();
         }
       }
     }

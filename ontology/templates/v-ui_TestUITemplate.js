@@ -35,7 +35,7 @@ export const html = `
     <veda-control property="v-ui:testString" data-type="select" class="-view edit search"></veda-control>
     <veda-control property="v-ui:testString" data-type="checkbox" class="view edit search"></veda-control>
     <veda-control property="v-ui:testString" data-type="radio" class="view edit search"></veda-control>
-    <veda-control property="v-ui:testString" data-type="augmentedText" class="view edit search"></veda-control>
+    <veda-control property="v-s:title" data-type="augmentedText" class="view edit search"></veda-control>
     <hr />
     <em about="v-ui:testInteger" property="rdfs:label"></em>
     <div property="v-ui:testInteger"></div>
