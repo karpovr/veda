@@ -246,6 +246,7 @@ $.fn.veda_augmentedText = function (options) {
     return new Promise((resolve) => {
       mediaRecorder.onstop = resolve;
       mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
     });
   }
 
