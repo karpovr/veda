@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import veda_literal from './veda_literal.js';
 import notify from '../../browser/notify.js';
-import {decorator, timeout} from '../../browser/dom_helpers.js';
+import {decorator} from '../../browser/dom_helpers.js';
 
 // Асинхронная функция для распознавания аудиофайла
-async function recognizeAudioFile (file) {
+async function recognizeAudioFile (file, fn) {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -20,8 +20,19 @@ async function recognizeAudioFile (file) {
       throw new Error(errorText || response.status);
     }
 
-    const recognizedText = await response.text();
-    return recognizedText;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let resultText = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      const decoded = decoder.decode(value, {stream: true});
+      fn(decoded);
+      resultText += decoded;
+    }
+
+    return resultText;
   } catch (error) {
     console.error('Ошибка распознавания аудио:', error);
     throw error;
@@ -29,7 +40,7 @@ async function recognizeAudioFile (file) {
 }
 
 // Асинхронная функция для улучшения текста
-async function augmentText (text, type, property) {
+async function augmentText (text, type, property, fn) {
   try {
     const response = await fetch('/augment_text', {
       method: 'POST',
@@ -45,8 +56,19 @@ async function augmentText (text, type, property) {
       throw new Error(errorText || response.status);
     }
 
-    const augmentedText = await response.text();
-    return augmentedText;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let resultText = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      const decoded = decoder.decode(value, {stream: true});
+      fn(decoded);
+      resultText += decoded;
+    }
+
+    return resultText;
   } catch (error) {
     console.error('Ошибка улучшения текста:', error);
     throw error;
@@ -304,13 +326,19 @@ $.fn.veda_augmentedText = function (options) {
     micButton.removeClass('hidden');
 
     try {
-      const result = await decoratedRecognizeAudioFile.call(micButton, new Blob(audioChunks, {type: 'audio/wav'}));
-      const trimmed = result.trim();
-      const currentValue = opts.individual.get(opts.property_uri).join('\n');
-      opts.individual.set(
-        opts.property_uri,
-        currentValue ? currentValue + '\n' + trimmed : trimmed,
-      );
+      await decoratedRecognizeAudioFile.call(micButton, new Blob(audioChunks, {type: 'audio/wav'}), (textChunk) => {
+        const trimmed = textChunk.trim();
+        const currentValue = opts.individual.get(opts.property_uri)[0];
+        let value;
+        if (!currentValue) {
+          value = trimmed;
+        } else if (currentValue.endsWith('\n')) {
+          value = currentValue + trimmed;
+        } else {
+          value = currentValue + ' ' + trimmed;
+        }
+        opts.individual.set(opts.property_uri, value);
+      });
     } catch (error) {
       console.error('Ошибка распознавания аудио:', error);
     } finally {
@@ -351,8 +379,10 @@ $.fn.veda_augmentedText = function (options) {
 
     const currentText = opts.individual.get(opts.property_uri).join(' ');
     try {
-      const augmentedText = await decoratedAugmentText.call(augmentButton, currentText, opts.individual['rdf:type'][0].id, opts.property_uri);
-      opts.individual.set(opts.property_uri, augmentedText);
+      await decoratedAugmentText.call(augmentButton, currentText, opts.individual['rdf:type'][0].id, opts.property_uri, (textChunk) => {
+        const currentValue = opts.individual.get(opts.property_uri)[0] ?? '';
+        opts.individual.set(opts.property_uri, currentValue + textChunk);
+      });
     } catch (error) {
       console.error('Ошибка улучшения текста:', error);
     } finally {

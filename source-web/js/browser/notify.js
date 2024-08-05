@@ -5,7 +5,7 @@ export default notify;
 
 const styles = `
   #notifications {
-    max-width: 50%;
+    max-width: 95%;
     max-height: 50%;
     position: fixed;
     bottom: 10px;
@@ -16,6 +16,9 @@ const styles = `
   #notifications > * {
     display: block;
     white-space: nowrap;
+  }
+  #notifications .alert {
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
