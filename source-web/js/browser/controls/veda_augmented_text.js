@@ -45,6 +45,10 @@ async function augmentText (text, type, property, fn) {
     const response = await fetch('/augment_text', {
       method: 'POST',
       headers: {
+        'Accept': 'text/event-stream',
+        'Accept-Encoding': 'identity',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({text, type, property}),
@@ -63,9 +67,28 @@ async function augmentText (text, type, property, fn) {
     while (true) {
       const {done, value} = await reader.read();
       if (done) break;
-      const decoded = decoder.decode(value, {stream: true});
-      fn(decoded);
-      resultText += decoded;
+
+      if (value && value.byteLength > 0) {
+        const chunk = decoder.decode(value, {stream: true});
+
+        chunk.split('\n').forEach((line) => {
+          const matches = line.match(/^data: (.*)$/);
+          if (matches) {
+            const jsonString = matches[1];
+            try {
+              const parsedChunk = JSON.parse(jsonString);
+              console.log('Часть полученного текста:', parsedChunk.content);
+              fn(parsedChunk.content);
+              resultText += parsedChunk.content;
+              if (parsedChunk.stop) {
+                console.log('Конечный ответ получен.');
+              }
+            } catch (e) {
+              console.error('Ошибка парсинга JSON:', e, 'в строке:', jsonString);
+            }
+          }
+        });
+      }
     }
 
     return resultText;
@@ -378,10 +401,14 @@ $.fn.veda_augmentedText = function (options) {
     micButton.addClass('hidden'); // Скрыть кнопку микрофона перед отправкой запроса
 
     const currentText = opts.individual.get(opts.property_uri).join(' ');
+    if (currentText) {
+      opts.individual.set(opts.property_uri, currentText + '\n---\n');
+    }
     try {
       await decoratedAugmentText.call(augmentButton, currentText, opts.individual['rdf:type'][0].id, opts.property_uri, (textChunk) => {
         const currentValue = opts.individual.get(opts.property_uri)[0] ?? '';
         opts.individual.set(opts.property_uri, currentValue + textChunk);
+        control.trigger('augment');
       });
     } catch (error) {
       console.error('Ошибка улучшения текста:', error);
@@ -392,7 +419,7 @@ $.fn.veda_augmentedText = function (options) {
 
   controlsContainer.find('textarea').replaceWith(control);
 
-  control.on('input change', function () {
+  control.on('input change focus', function () {
     this.style.height = 'auto';
     if (this.scrollHeight > 200) {
       this.style.height = '200px';
@@ -401,6 +428,8 @@ $.fn.veda_augmentedText = function (options) {
       this.style.height = `${this.scrollHeight}px`;
       this.style.overflowY = 'hidden';
     }
+  }).on('augment', function () {
+    this.scrollTop = this.scrollHeight;
   });
 
   this.append(controlsContainer);
