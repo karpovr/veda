@@ -161,11 +161,11 @@ $.fn.veda_augmentedText = function (options) {
         <div class="approve-button btn btn-link hidden" style="padding:6px">
           <i class="fa fa-check"></i>
         </div>
-        <div class="btn btn-link mic-button" style="padding:6px">
+        <div class="btn btn-link mic-button" style="padding:6px" title="[Ии] Записать аудио и распознать текст">
           <i class="fa fa-microphone"></i>
         </div>
         <div class="btn btn-link" style="padding:6px">
-          <i class="fa fa-magic"></i>
+          <i class="fa fa-magic" title="[Ии] Улучшить текст"></i>
         </div>
       </div>
     </div>
