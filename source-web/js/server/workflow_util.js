@@ -1,5 +1,6 @@
 // WorkflowUtil engine utilities
 
+import veda from '../common/veda.js';
 import CommonUtil from '../common/util.js';
 import ServerUtil from '../server/util.js';
 import mustache from 'mustache';
@@ -112,6 +113,25 @@ WorkflowUtil.WorkItemResult = function (_work_item_result) {
     return count_agreed === this.work_item_result.length;
   };
 
+  this.is_all_executors_taken_decision_subclassOf = function (var_name, value) {
+    if (!value || value.length < 1) {
+      return false;
+    }
+    const decisionClassUri = value[0].data;
+
+    let count_taken = 0;
+    for (const item of this.work_item_result) {
+      const wirv = item?.[var_name];
+      const itemDecisionClassUri = wirv?.[0]?.data;
+      const itemDecisionSuperClassesUris = veda.ontology.classTree[itemDecisionClassUri].superClasses;
+      if (itemDecisionClassUri && (itemDecisionClassUri === decisionClassUri || itemDecisionSuperClassesUris.indexOf(decisionClassUri) >= 0)) {
+        count_taken++;
+      }
+    }
+
+    return count_taken === this.work_item_result.length;
+  };
+
   this.is_some_executor_taken_decision = function (var_name, value) {
     if (!value || value.length < 1) {
       return false;
@@ -121,6 +141,24 @@ WorkflowUtil.WorkItemResult = function (_work_item_result) {
       const wirv = item[var_name];
 
       if (wirv && wirv.length > 0 && wirv[0].data == value[0].data && wirv[0].type == value[0].type) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  this.is_some_executor_taken_decision_subclassOf = function (var_name, value) {
+    if (!value || value.length < 1) {
+      return false;
+    }
+    const decisionClassUri = value[0].data;
+
+    for (const item of this.work_item_result) {
+      const wirv = item?.[var_name];
+      const itemDecisionClassUri = wirv?.[0]?.data;
+      const itemDecisionSuperClassesUris = veda.ontology.classTree[itemDecisionClassUri].superClasses;
+      if (itemDecisionClassUri && (itemDecisionClassUri === decisionClassUri || itemDecisionSuperClassesUris.indexOf(decisionClassUri) >= 0)) {
         return true;
       }
     }
