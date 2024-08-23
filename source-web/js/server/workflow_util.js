@@ -113,7 +113,7 @@ WorkflowUtil.WorkItemResult = function (_work_item_result) {
     return count_agreed === this.work_item_result.length;
   };
 
-  this.is_all_executors_taken_decision_subclassOf = function (var_name, value) {
+  this.is_all_executors_taken_decision_subClassOf = function (var_name, value) {
     if (!value || value.length < 1) {
       return false;
     }
@@ -148,7 +148,7 @@ WorkflowUtil.WorkItemResult = function (_work_item_result) {
     return false;
   };
 
-  this.is_some_executor_taken_decision_subclassOf = function (var_name, value) {
+  this.is_some_executor_taken_decision_subClassOf = function (var_name, value) {
     if (!value || value.length < 1) {
       return false;
     }
