@@ -47,7 +47,7 @@ for i in "${LIB_NAME[@]}"; do
 
 done
 
-sudo apt-get install build-essential
+sudo apt-get install build-essential gdb
 
 ### RUST LANG ###
 
