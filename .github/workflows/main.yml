@@ -60,7 +60,7 @@ jobs:
       - name: Test
         run: |
           ./control-start.sh
-          sleep 180
+          sleep 200
           tail -n +1 ./data/tarantool/tarantool.log
           tail -n +1 ./logs/*.log
           cd ./source-web && npm test

@@ -23,10 +23,12 @@ mkdir data/oxigraph
 mkdir data/xapian-info
 
 # start oxigraph server
-/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/oxigraph-pid --background --startas /bin/bash -- -c "exec ./oxigraph serve --location ./data/oxigraph -b 127.0.0.1:7878 2>./logs/oxigraph-stderr.log >./logs/oxigraph-stdout.log 2>&1"
+#/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/oxigraph-pid --background --startas /bin/bash -- -c "exec ./oxigraph serve --location ./data/oxigraph -b 127.0.0.1:7878 2>./logs/oxigraph-stderr.log >./logs/oxigraph-stdout.log 2>&1"
 
 # start tarantool server
 /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/tt-pid --background --startas /bin/bash -- -c "exec tarantool ./source-server/source/init_tarantool.lua 2>./logs/tarantool-stderr.log  >./logs/tarantool-stdout.log 2>&1"
+
+sleep 10
 
 #export RUST_LOG="debug,actix_server=info,actix_web=info"
 #export RUST_BACKTRACE=1
