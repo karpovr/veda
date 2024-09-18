@@ -21,6 +21,7 @@ mkdir data
 mkdir data/tarantool
 mkdir data/oxigraph
 mkdir data/xapian-info
+mkdir data/acl-indexes
 
 # start oxigraph server
 #/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/oxigraph-pid --background --startas /bin/bash -- -c "exec ./oxigraph serve --location ./data/oxigraph -b 127.0.0.1:7878 2>./logs/oxigraph-stderr.log >./logs/oxigraph-stdout.log 2>&1"
