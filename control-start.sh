@@ -34,5 +34,7 @@ sleep 10
 #export RUST_LOG="debug,actix_server=info,actix_web=info"
 #export RUST_BACKTRACE=1
 export AUTH_URL=tcp://127.0.0.1:8113
-LD_LIBRARY_PATH=./bin/lib /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
+#LD_LIBRARY_PATH=./bin/lib /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
+LD_LIBRARY_PATH=./bin/lib ./bin/veda-mstorage
+
 exit 0
