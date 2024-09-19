@@ -48,15 +48,16 @@ export AUTH_URL=tcp://127.0.0.1:8113
 ./bin/veda-mstorage
 if [ $? -eq 139 ]; then
     echo "Segmentation fault detected. Searching for core dump..."
+    ls ./
 
-    # Ищем последний созданный core-файл
-    CORE_FILE=$(ls -t $COREDUMP_DIR/core.* | head -n 1)
+    # Поиск core-файлов без расширения
+    CORE_FILE=$(find $COREDUMP_DIR -name "core" 2>/dev/null)
     if [ -f "$CORE_FILE" ]; then
         echo "Core file found: $CORE_FILE"
         gdb ./bin/veda-mstorage "$CORE_FILE" -ex "bt"
     else
-        echo "Core file not found."
+        echo "Core file not found. Attempting to search in default locations."
+        find / -name "core" -print 2>/dev/null
     fi
 fi
-
 exit 0
