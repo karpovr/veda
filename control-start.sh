@@ -35,15 +35,13 @@ sleep 10
 # Установка переменной LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=./bin/lib
 
- # Устанавливаем путь для core-файлов
+# Устанавливаем путь для core-файлов
 export COREDUMP_DIR=$GITHUB_WORKSPACE/corefiles
 mkdir -p $COREDUMP_DIR
 
 #export RUST_LOG="debug,actix_server=info,actix_web=info"
 #export RUST_BACKTRACE=1
 export AUTH_URL=tcp://127.0.0.1:8113
-#/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
-/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda-az-indexer --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
+/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
 
-./bin/veda-mstorage
 exit 0
