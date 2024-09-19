@@ -1,66 +1,76 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # Install
       - name: Install
         run: |
           sudo apt-get clean
           sudo apt-get update
-          sudo apt-get install dpkg
-          sudo apt-get install firefox
+          sudo apt-get install -y dpkg firefox
           npm install -g testcafe
-          # wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          # sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
           ./tools/install-tarantool.sh
           ./control-install.sh
           source $HOME/.cargo/env
 
-      # Print versions
       - name: Print versions
         run: |
           node --version
           testcafe --version
           rustc -V
 
-      # Build
       - name: Build
         run: |
           source $HOME/.cargo/env
           export CARGO_TARGET_DIR=$HOME/target
           ./build.sh
 
-      # Test
+      - name: Set up core dump configuration
+        run: |
+          # Создаем директорию для core dumps
+          export COREDUMP_DIR=$GITHUB_WORKSPACE/corefiles
+          mkdir -p $COREDUMP_DIR
+          # Включаем создание core dumps
+          ulimit -c unlimited
+          # Устанавливаем шаблон для имени core dump
+          echo "kernel.core_pattern=${COREDUMP_DIR}/core.%e.%t.%p.%s" | sudo tee /etc/sysctl.d/60-core-pattern.conf
+          sudo sysctl --system
+
       - name: Test
         run: |
+          # Запускаем скрипт
           ./control-start.sh
           sleep 200
+
+          # Проверяем наличие core dump файлов
+          echo "Checking for core dumps..."
+          CORE_FILES=$(find $COREDUMP_DIR -name "core.*" 2>/dev/null)
+          if [ -n "$CORE_FILES" ]; then
+              echo "Core files found:"
+              echo "$CORE_FILES"
+              for FILE in $CORE_FILES; do
+                  echo "Processing file: $FILE"
+                  gdb ./bin/veda-mstorage "$FILE" -ex "bt"
+              done
+          else
+              echo "No core files found."
+          fi
+
+          # Выводим логи
           tail -n +1 ./data/tarantool/tarantool.log
           tail -n +1 ./logs/*.log
           cd ./source-web && npm test
