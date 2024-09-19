@@ -46,4 +46,4 @@ export AUTH_URL=tcp://127.0.0.1:8113
 /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda-auth --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
 
 ./bin/veda-mstorage
-#exit 0
+exit 0
