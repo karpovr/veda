@@ -14,7 +14,6 @@ fi
 export APPDIR=$PWD/bin
 VEDA_ID=A1
 
-ulimit -c unlimited
 mkdir .pids
 mkdir logs
 mkdir data
@@ -22,6 +21,8 @@ mkdir data/tarantool
 mkdir data/oxigraph
 mkdir data/xapian-info
 mkdir data/acl-indexes
+
+ulimit -c unlimited
 
 # start oxigraph server
 #/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/oxigraph-pid --background --startas /bin/bash -- -c "exec ./oxigraph serve --location ./data/oxigraph -b 127.0.0.1:7878 2>./logs/oxigraph-stderr.log >./logs/oxigraph-stdout.log 2>&1"
@@ -34,9 +35,9 @@ sleep 10
 # Установка переменной LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=./bin/lib
 
-# Узнаем текущий путь для сохранения core-файлов
-CORE_PATTERN=$(cat /proc/sys/kernel/core_pattern)
-echo "Current core dump pattern: $CORE_PATTERN"
+ # Устанавливаем путь для core-файлов
+export COREDUMP_DIR=$GITHUB_WORKSPACE/corefiles
+mkdir -p $COREDUMP_DIR
 
 #export RUST_LOG="debug,actix_server=info,actix_web=info"
 #export RUST_BACKTRACE=1
@@ -45,26 +46,16 @@ export AUTH_URL=tcp://127.0.0.1:8113
 /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda-auth --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
 
 ./bin/veda-mstorage
-if [ $? -eq 139 ]; then  # Код выхода 139 соответствует Segmentation fault
-    echo "Segmentation fault detected. Running GDB..."
+if [ $? -eq 139 ]; then
+    echo "Segmentation fault detected. Searching for core dump..."
 
-    # Путь к core-файлу на основе шаблона
-    CORE_DIR=$(dirname "$CORE_PATTERN")
-    if [[ $CORE_PATTERN == /* ]]; then
-        CORE_FILE_PATTERN=$CORE_PATTERN
-    else
-        CORE_FILE_PATTERN="$PWD/$CORE_PATTERN"
-    fi
-
-    # Подставляем значения переменных в шаблон core-файла
-    CORE_FILE=$(echo $CORE_FILE_PATTERN | sed "s/%e/veda-mstorage/" | sed "s/%p/$$/" | sed "s/%t/$(date +%s)/")
-
-    # Проверяем, существует ли core-файл
+    # Ищем последний созданный core-файл
+    CORE_FILE=$(ls -t $COREDUMP_DIR/core.* | head -n 1)
     if [ -f "$CORE_FILE" ]; then
-        # Запуск GDB для анализа core-файла
+        echo "Core file found: $CORE_FILE"
         gdb ./bin/veda-mstorage "$CORE_FILE" -ex "bt"
     else
-        echo "Core file not found: $CORE_FILE"
+        echo "Core file not found."
     fi
 fi
 
