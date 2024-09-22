@@ -9,7 +9,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
+    container:
+      image: "ghcr.io/ubuntu:20.04-20240714.1.1"
 
     steps:
       - uses: actions/checkout@v3
