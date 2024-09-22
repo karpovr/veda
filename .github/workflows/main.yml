@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    container:
+      image: docker.io/library/ubuntu:20.04  # Публичный образ Ubuntu 20.04 из Docker Hub
 
     steps:
 
