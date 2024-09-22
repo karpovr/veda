@@ -4,11 +4,12 @@ mstorage
 
 #ro-storage
 
-auth
-
 az-indexer
     module = az-indexer
     args = --use_index_format_v2 --db-connection=db-conn-1
+
+auth
+
 
 ft-indexer
     module = ft-indexer
