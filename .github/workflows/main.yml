@@ -58,13 +58,13 @@ jobs:
 
           # Проверяем наличие core dump файлов
           echo "Checking for core dumps..."
-          CORE_FILES=$(find $COREDUMP_DIR -name "core.veda-mstorage*" 2>/dev/null)
+          CORE_FILES=$(find $COREDUMP_DIR -name "core.veda-az-indexer*" 2>/dev/null)
           if [ -n "$CORE_FILES" ]; then
               echo "Core files found:"
               echo "$CORE_FILES"
               for FILE in $CORE_FILES; do
                   echo "Processing file: $FILE"
-                  gdb ./bin/veda-mstorage "$FILE" -ex "bt"
+                  gdb ./bin/veda-az-indexer "$FILE" -ex "bt"
               done
           else
               echo "No core files found."
