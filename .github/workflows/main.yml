@@ -12,6 +12,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
     - name: Set up environment
       run: |
         sudo apt-get update
@@ -104,12 +110,6 @@ jobs:
           xz-utils=5.2.4-1ubuntu1.1 \
           zip=3.0-11build1 \
           zsync=0.6.2-3ubuntu1
-
-
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
 
       - name: Install
         run: |
