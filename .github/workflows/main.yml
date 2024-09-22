@@ -18,10 +18,13 @@ jobs:
         with:
           node-version: '20'
 
-    - name: Set up environment
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
+      - name: Install
+        run: |
+          sudo apt-get clean
+          sudo apt-get update
+          sudo apt-get install -y dpkg firefox
+
+          sudo apt-get install -y \
           acl=2.2.53-6 \
           aria2=1.35.0-1build1 \
           autoconf=2.69-11.1 \
@@ -111,11 +114,6 @@ jobs:
           zip=3.0-11build1 \
           zsync=0.6.2-3ubuntu1
 
-      - name: Install
-        run: |
-          sudo apt-get clean
-          sudo apt-get update
-          sudo apt-get install -y dpkg firefox
           npm install -g testcafe
           ./tools/install-tarantool.sh
           ./control-install.sh
