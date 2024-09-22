@@ -22,11 +22,11 @@ jobs:
 
       - name: Install
         run: |
-          sudo apt-get clean
-          sudo apt-get update
-          sudo apt-get upgrade -y
-          sudo apt-get install -y dpkg firefox
+          apt-get clean
+          apt-get update
+          apt-get upgrade -y
           apt-get install -y sudo
+          apt-get install -y dpkg firefox
           npm install -g testcafe
           ./tools/install-tarantool.sh
           ./control-install.sh
