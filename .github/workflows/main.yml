@@ -28,6 +28,7 @@ jobs:
           apt-get update
           apt-get upgrade -y
           apt-get install -y sudo
+          apt-get install -y git
           apt-get install -y dpkg firefox
           npm install -g testcafe
           ./tools/install-tarantool.sh
