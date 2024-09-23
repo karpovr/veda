@@ -40,7 +40,6 @@ jobs:
 
       - name: Build
         run: |
-          source $HOME/.cargo/env
           export CARGO_TARGET_DIR=$HOME/target
           ./build.sh
 
