@@ -42,7 +42,8 @@ sudo apt-get install -y build-essential gdb
 if [ "$1" = "force" ] || ! command -v rustc >/dev/null; then
     echo "--- INSTALLING RUST ---"
     curl https://sh.rustup.rs -sSf | sh -s -- -y
-    source $HOME/.cargo/env
+    #source $HOME/.cargo/env
+    . $HOME/.cargo/env
 else
     echo "--- UPDATING RUST ---"
     rustup update stable
