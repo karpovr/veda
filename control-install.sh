@@ -49,6 +49,8 @@ else
     rustup update stable
 fi
 
+rustup default 1.75
+
 # Проверка версий rustc и cargo
 whereis rustc
 rustc -V
