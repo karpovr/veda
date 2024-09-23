@@ -60,6 +60,11 @@ v-s:ManualBundle
   rdfs:label "Инструкции"@ru ;
   rdfs:label "User manuals"@en ;
 .
+v-s:UsefulLinksBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Полезные ссылки"@ru ;
+  rdfs:label "Useful links"@en ;
+.
 v-s:ApplicationSmallCardTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон для приложения"@ru ;
@@ -72,4 +77,11 @@ v-s:ApplicationTemplate
   rdfs:label "Template for Application class"@en ;
   v-ui:forClass v-s:Application ;
   v-ui:template "v-s_ApplicationTemplate.js" ;
+.
+v-s:ApplicationShortTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для класса Приложение"@ru ;
+  rdfs:label "Template for Application class"@en ;
+  v-ui:forClass v-s:Application ;
+  v-ui:template "v-s_ApplicationShortTemplate.js" ;
 .
