@@ -15,6 +15,11 @@ jobs:
 
     steps:
 
+      - name: Install Git
+        run: |
+          apt-get update
+          apt-get install -y git
+
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -28,7 +33,6 @@ jobs:
           apt-get update
           apt-get upgrade -y
           apt-get install -y sudo
-          apt-get install -y git
           apt-get install -y dpkg firefox
           npm install -g testcafe
           ./tools/install-tarantool.sh
