@@ -5,6 +5,7 @@ echo "=== Starting setup script ==="
 
 INSTALL_PATH=$PWD
 echo "Install path: $INSTALL_PATH"
+ls $INSTALL_PATH
 
 echo "=== Initializing and updating git submodules ==="
 git submodule init
