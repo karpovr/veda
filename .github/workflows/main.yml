@@ -27,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
+          fetch-depth: 0
 
       - name: Set up non-interactive apt
         run: |
