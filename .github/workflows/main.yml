@@ -30,7 +30,7 @@ jobs:
           npm install -g testcafe
           ./tools/install-tarantool.sh
           ./control-install.sh
-          source $HOME/.cargo/env
+          . $HOME/.cargo/env
 
       - name: Print versions
         run: |
