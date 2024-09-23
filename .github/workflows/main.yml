@@ -28,6 +28,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Set up non-interactive apt
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+          ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+          echo "Etc/UTC" > /etc/timezone
+
       - name: Install
         run: |
           echo '*** Install ***'
