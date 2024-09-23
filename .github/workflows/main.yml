@@ -25,6 +25,18 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Set up git
+        run: |
+          git config --global --add safe.directory /__w/veda/veda
+          git config --global user.email "ci@example.com"
+          git config --global user.name "CI"
+
+      - name: Verify git status
+        run: |
+          git status
+          git rev-parse HEAD
+
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
