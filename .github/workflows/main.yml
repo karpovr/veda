@@ -50,25 +50,14 @@ jobs:
 
       - name: Install
         run: |
-          echo '*** Install ***'
-          ls
-          echo '*** Install 1 ***'
           apt-get clean
-          echo '*** Install 2 ***'
           apt-get update
-          echo '*** Install 3 ***'
           apt-get upgrade -y
-          echo '*** Install 4 ***'
           apt-get install -y sudo
-          echo '*** Install 5 ***'
           apt-get install -y dpkg firefox
-          echo '*** Install 6 ***'
           npm install -g testcafe
-          echo '*** Install 7 ***'
           ./tools/install-tarantool.sh
-          echo '*** Install 8 ***'
           ./control-install.sh
-          echo '*** Install 9 ***'
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Print versions
