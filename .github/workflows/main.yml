@@ -29,6 +29,7 @@ jobs:
 
       - name: Install
         run: |
+          ls
           apt-get clean
           apt-get update
           apt-get upgrade -y
