@@ -100,20 +100,29 @@ jobs:
           echo "Free disk space: $(df -h)"
           echo "Free memory: $(free -m)"
 
-      - name: Test
-        run: |
+
+       - name: Set up user for tests
+         run: |
+         sudo useradd testuser
+         sudo chown -R testuser:testuser /github/home
+         sudo -u testuser bash -c 'echo "Running as $(whoami)"'
+
+       - name: Run Veda
+         run: |
           # Запускаем скрипт
           ./control-start.sh
           sleep 240
 
+      - name: Run tests
+        run: |
           cd ./source-web
-          TESTCAFE_DEBUG=true npm run test-backend
+          sudo -u testuser bash -c 'TESTCAFE_DEBUG=true npm run test-backend'
           echo "Backend tests completed"
-          TESTCAFE_DEBUG=true npm run test-frontend
+          sudo -u testuser bash -c 'TESTCAFE_DEBUG=true npm run test-frontend'
           echo "Frontend tests completed"
           cd ..
 
-      - name: Final
+      - name: Print logs
         run: |
           # Выводим логи
           tail -n +1 ./data/tarantool/tarantool.log
