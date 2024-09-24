@@ -113,4 +113,8 @@ jobs:
           # Выводим логи
           tail -n +1 ./data/tarantool/tarantool.log
           tail -n +1 ./logs/*.log
-          cd ./source-web && npm test
+          cd ./source-web
+          npm run test-backend
+          echo "Backend tests completed"
+          TESTCAFE_DEBUG=true npm run test-frontend
+          echo "Frontend tests completed"
