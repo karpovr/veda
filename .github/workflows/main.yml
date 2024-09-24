@@ -94,27 +94,17 @@ jobs:
         run: |
           # Запускаем скрипт
           ./control-start.sh
-          sleep 200
+          sleep 240
 
-          # Проверяем наличие core dump файлов
-          echo "Checking for core dumps..."
-          CORE_FILES=$(find $COREDUMP_DIR -name "core.veda-az-indexer*" 2>/dev/null)
-          if [ -n "$CORE_FILES" ]; then
-              echo "Core files found:"
-              echo "$CORE_FILES"
-              for FILE in $CORE_FILES; do
-                  echo "Processing file: $FILE"
-                  gdb ./bin/veda-az-indexer "$FILE" -ex "bt"
-              done
-          else
-              echo "No core files found."
-          fi
-
-          # Выводим логи
-          tail -n +1 ./data/tarantool/tarantool.log
-          tail -n +1 ./logs/*.log
           cd ./source-web
-          npm run test-backend
+          TESTCAFE_DEBUG=true npm run test-backend
           echo "Backend tests completed"
           TESTCAFE_DEBUG=true npm run test-frontend
           echo "Frontend tests completed"
+          cd ..
+
+      - name: Final
+        run: |
+          # Выводим логи
+          tail -n +1 ./data/tarantool/tarantool.log
+          tail -n +1 ./logs/*.log
