@@ -55,8 +55,8 @@ jobs:
           apt-get upgrade -y
           apt-get install -y sudo
           apt-get install -y dpkg
-          npm install -g testcafe
           sudo npm install -g npm
+          sudo npm install -g testcafe
           ./tools/install-tarantool.sh
           ./control-install.sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
