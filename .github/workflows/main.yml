@@ -60,8 +60,6 @@ jobs:
           ./tools/install-tarantool.sh
           ./control-install.sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          echo "export PATH=$PATH:/usr/local/bin" | sudo tee -a /etc/profile
-          source /etc/profile
 
       - name: Install latest Firefox
         run: |
