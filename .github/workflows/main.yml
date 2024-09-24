@@ -101,13 +101,6 @@ jobs:
           echo "Free disk space: $(df -h)"
           echo "Free memory: $(free -m)"
 
-
-      - name: Set up user for tests
-        run: |
-          sudo useradd testuser
-          sudo chown -R testuser:testuser /github/home
-          sudo -u testuser bash -c 'echo "Running as $(whoami)"'
-
       - name: Run Veda
         run: |
           # Запускаем скрипт
@@ -117,9 +110,9 @@ jobs:
       - name: Run tests
         run: |
           cd ./source-web
-          sudo -u testuser bash -c 'TESTCAFE_DEBUG=true npm run test-backend'
+          TESTCAFE_DEBUG=true npm run test-backend
           echo "Backend tests completed"
-          sudo -u testuser bash -c 'TESTCAFE_DEBUG=true npm run test-frontend'
+          TESTCAFE_DEBUG=true npm run test-frontend
           echo "Frontend tests completed"
           cd ..
 
