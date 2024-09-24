@@ -70,8 +70,8 @@ jobs:
 
       - name: Print versions
         run: |
-          node --version
-          testcafe --version
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
           rustc -V
 
       - name: Build
@@ -89,6 +89,16 @@ jobs:
           # Устанавливаем шаблон для имени core dump
           echo "kernel.core_pattern=${COREDUMP_DIR}/core.%e.%t.%p.%s" | sudo tee /etc/sysctl.d/60-core-pattern.conf
           sudo sysctl --system
+
+      - name: Environment Info
+        run: |
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "TestCafe version: $(testcafe -v)"
+          echo "Firefox version: $(firefox --version)"
+          echo "System info: $(uname -a)"
+          echo "Free disk space: $(df -h)"
+          echo "Free memory: $(free -m)"
 
       - name: Test
         run: |
