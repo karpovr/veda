@@ -54,11 +54,19 @@ jobs:
           apt-get update
           apt-get upgrade -y
           apt-get install -y sudo
-          apt-get install -y dpkg firefox
+          apt-get install -y dpkg
           npm install -g testcafe
           ./tools/install-tarantool.sh
           ./control-install.sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install latest Firefox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository ppa:mozillateam/ppa
+          sudo apt-get update
+          sudo apt-get install -y firefox
 
       - name: Print versions
         run: |
