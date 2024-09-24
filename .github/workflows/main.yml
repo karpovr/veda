@@ -101,14 +101,14 @@ jobs:
           echo "Free memory: $(free -m)"
 
 
-       - name: Set up user for tests
-         run: |
-         sudo useradd testuser
-         sudo chown -R testuser:testuser /github/home
-         sudo -u testuser bash -c 'echo "Running as $(whoami)"'
+      - name: Set up user for tests
+        run: |
+          sudo useradd testuser
+          sudo chown -R testuser:testuser /github/home
+          sudo -u testuser bash -c 'echo "Running as $(whoami)"'
 
-       - name: Run Veda
-         run: |
+      - name: Run Veda
+        run: |
           # Запускаем скрипт
           ./control-start.sh
           sleep 240
