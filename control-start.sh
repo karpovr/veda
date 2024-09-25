@@ -35,7 +35,7 @@ sleep 10
 # Установка переменной LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=./bin/lib
 
- # Устанавливаем путь для core-файлов
+# Устанавливаем путь для core-файлов
 export COREDUMP_DIR=$GITHUB_WORKSPACE/corefiles
 mkdir -p $COREDUMP_DIR
 
@@ -43,21 +43,5 @@ mkdir -p $COREDUMP_DIR
 #export RUST_BACKTRACE=1
 export AUTH_URL=tcp://127.0.0.1:8113
 /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
-/sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/veda-pid --background --startas /bin/bash -- -c "exec ./bin/veda-auth --id=$VEDA_ID no-watchdog>> $PWD/logs/veda-console.log 2>&1"
 
-./bin/veda-mstorage
-if [ $? -eq 139 ]; then
-    echo "Segmentation fault detected. Searching for core dump..."
-    ls ./
-
-    # Поиск core-файлов без расширения
-    CORE_FILE=$(find $COREDUMP_DIR -name "core" 2>/dev/null)
-    if [ -f "$CORE_FILE" ]; then
-        echo "Core file found: $CORE_FILE"
-        gdb ./bin/veda-mstorage "$CORE_FILE" -ex "bt"
-    else
-        echo "Core file not found. Attempting to search in default locations."
-        find / -name "core" -print 2>/dev/null
-    fi
-fi
 exit 0
