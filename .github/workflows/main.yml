@@ -1,126 +1,64 @@
+# This is a basic workflow to help you get started with Actions
+
 name: CI
 
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, CI ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, CI ]
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains a single job called "build"
   build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-20.04
-    container:
-      image: docker.io/library/ubuntu:20.04  # Публичный образ Ubuntu 20.04 из Docker Hub
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-
-      - name: Install Git
-        run: |
-          echo '*** Install Git ***'
-          apt-get update
-          apt-get install -y git
-
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Set up git
-        run: |
-          git config --global --add safe.directory /__w/veda/veda
-          git config --global user.email "ci@example.com"
-          git config --global user.name "CI"
-
-      - name: Verify git status
-        run: |
-          git status
-          git rev-parse HEAD
-
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Set up non-interactive apt
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-          ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-          echo "Etc/UTC" > /etc/timezone
-
+      # Install
       - name: Install
         run: |
-          apt-get clean
-          apt-get update
-          apt-get upgrade -y
-          apt-get install -y sudo
-          apt-get install -y dpkg
+          sudo apt-get clean
+          sudo apt-get update
+          sudo apt-get install dpkg
+          sudo apt-get install firefox
           npm install -g testcafe
-          sudo apt-get install -y nodejs npm
-          npm install -g npm
+          # wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          # sudo dpkg -i --force-depends google-chrome-stable_current_amd64.deb
           ./tools/install-tarantool.sh
           ./control-install.sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          source $HOME/.cargo/env
 
-      - name: Install latest Firefox
+      # Print versions
+      - name: Print versions
         run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository ppa:mozillateam/ppa
-          sudo apt-get update
-          sudo apt-get install -y firefox
-          sudo apt-get install -y dbus-x11 libasound2
-          sudo apt-get install -y xvfb
-          Xvfb :99 -screen 0 1024x768x24 &
-          export DISPLAY=:99
-
-      - name: Create user and configure sudo without password
-        run: |
-          sudo useradd -m testuser
-          echo 'testuser ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/testuser
-          sudo chown -R testuser:testuser /github/home
-
-      - name: Install for testuser
-        run: |
-          sudo -u testuser sudo apt-get install -y firefox
-          sudo -u testuser firefox --version
-          cd ./source-web
-          sudo -u testuser npm install testcafe --save-dev
-
-      - name: Environment Info
-        run: |
+          node --version
+          testcafe --version
           rustc -V
-          echo "Node version: $(node -v)"
-          echo "NPM version: $(npm -v)"
-          echo "TestCafe version: $(testcafe -v)"
-          sudo -u testuser node -v
-          sudo -u testuser npm -v
-          sudo -u testuser testcafe -v
-          echo "System info: $(uname -a)"
-          echo "Free memory: $(free -m)"
 
+      # Build
       - name: Build
         run: |
-          export CARGO_TARGET_DIR=$HOME/target
+          source $HOME/.cargo/env
           ./build.sh
 
-      - name: Run Veda
+      # Test
+      - name: Test
         run: |
-          # Запускаем скрипт
           ./control-start.sh
-          sleep 240
-
-      - name: Run tests
-        run: |
-          cd ./source-web
-          TESTCAFE_DEBUG=true npm run test-backend
-          echo "Backend tests completed"
-          TESTCAFE_DEBUG=true npm run test-frontend
-          echo "Frontend tests completed"
-          cd ..
-
-      - name: Print logs
-        run: |
-          # Выводим логи
-          tail -n +1 ./data/tarantool/tarantool.log
+          sleep 180
           tail -n +1 ./logs/*.log
+          cd ./source-web && npm test
