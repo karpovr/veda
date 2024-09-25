@@ -80,14 +80,13 @@ jobs:
           echo 'testuser ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/testuser
           sudo chown -R testuser:testuser /github/home
 
-      - name: Install and run Firefox
+      - name: Install for testuser
         run: |
           sudo -u testuser sudo apt-get install -y firefox
           sudo -u testuser firefox --version
-
-      - name: Install TestCafe globally
-        run: |
-          sudo npm install -g testcafe
+          sudo -u testuser curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo -u testuser sudo apt-get install -y nodejs
+          sudo -u testuser npm install -g testcafe
 
       - name: Environment Info
         run: |
@@ -95,10 +94,11 @@ jobs:
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
           echo "TestCafe version: $(testcafe -v)"
+          sudo -u testuser node -v
+          sudo -u testuser npm -v
           sudo -u testuser testcafe -v
           echo "System info: $(uname -a)"
           echo "Free memory: $(free -m)"
-          sudo -u testuser testcafe -v
 
       - name: Build
         run: |
