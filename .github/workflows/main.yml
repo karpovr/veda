@@ -100,9 +100,8 @@ jobs:
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
           echo "TestCafe version: $(testcafe -v)"
-          echo "Firefox version: $(firefox --version)"
+          echo "Firefox version: $(firefox --no-sandbox --version)"
           echo "System info: $(uname -a)"
-          echo "Free disk space: $(df -h)"
           echo "Free memory: $(free -m)"
 
       - name: Run Veda
