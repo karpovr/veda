@@ -84,9 +84,8 @@ jobs:
         run: |
           sudo -u testuser sudo apt-get install -y firefox
           sudo -u testuser firefox --version
-          sudo -u testuser curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo -u testuser sudo apt-get install -y nodejs
-          sudo -u testuser npm install -g testcafe
+          cd ./source-web
+          sudo -u testuser npm install testcafe --save-dev
 
       - name: Environment Info
         run: |
