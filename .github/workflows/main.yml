@@ -84,36 +84,25 @@ jobs:
           sudo -u testuser sudo apt-get install -y firefox
           sudo -u testuser firefox --version
 
-      - name: Print versions
-        run: |
-          echo "Node version: $(node -v)"
-          echo "NPM version: $(npm -v)"
-          rustc -V
+      - name: Install TestCafe globally
+         run: |
+           sudo npm install -g testcafe
 
       - name: Build
         run: |
           export CARGO_TARGET_DIR=$HOME/target
           ./build.sh
 
-      - name: Set up core dump configuration
-        run: |
-          # Создаем директорию для core dumps
-          export COREDUMP_DIR=$GITHUB_WORKSPACE/corefiles
-          mkdir -p $COREDUMP_DIR
-          # Включаем создание core dumps
-          ulimit -c unlimited
-          # Устанавливаем шаблон для имени core dump
-          echo "kernel.core_pattern=${COREDUMP_DIR}/core.%e.%t.%p.%s" | sudo tee /etc/sysctl.d/60-core-pattern.conf
-          sudo sysctl --system
-
       - name: Environment Info
         run: |
+          rustc -V
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
           echo "TestCafe version: $(testcafe -v)"
           echo "Firefox version: $(firefox --no-sandbox --version)"
           echo "System info: $(uname -a)"
           echo "Free memory: $(free -m)"
+          sudo -u testuser testcafe -v
 
       - name: Run Veda
         run: |
