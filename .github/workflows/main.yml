@@ -85,13 +85,8 @@ jobs:
           sudo -u testuser firefox --version
 
       - name: Install TestCafe globally
-         run: |
-           sudo npm install -g testcafe
-
-      - name: Build
         run: |
-          export CARGO_TARGET_DIR=$HOME/target
-          ./build.sh
+          sudo npm install -g testcafe
 
       - name: Environment Info
         run: |
@@ -103,6 +98,11 @@ jobs:
           echo "System info: $(uname -a)"
           echo "Free memory: $(free -m)"
           sudo -u testuser testcafe -v
+
+      - name: Build
+        run: |
+          export CARGO_TARGET_DIR=$HOME/target
+          ./build.sh
 
       - name: Run Veda
         run: |
