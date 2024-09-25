@@ -45,6 +45,7 @@ v-s:ProcessPersonnelReserveForm
   rdfs:subClassOf v-s:Labeled ;
   rdfs:subClassOf v-s:UserThing ;
   rdfs:subClassOf v-s:UserSearchableDocument;
+  rdfs:subClassOf v-s:Journaling;
   v-s:labelPattern "{@.v-s:year} {@.v-s:responsibleDepartment.rdfs:label}" ;
   
 .
