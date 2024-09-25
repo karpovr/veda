@@ -56,6 +56,7 @@ jobs:
           apt-get install -y sudo
           apt-get install -y dpkg
           npm install -g testcafe
+          sudo apt-get install -y nodejs npm
           npm install -g npm
           ./tools/install-tarantool.sh
           ./control-install.sh
