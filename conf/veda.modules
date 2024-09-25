@@ -1,3 +1,7 @@
+az-indexer
+    module = az-indexer
+    args = --use_index_format_v2 --db-connection=db-conn-1
+
 mstorage
     module = mstorage
     args = --use_authorization_cache=false
@@ -5,10 +9,6 @@ mstorage
 #ro-storage
 
 auth
-
-az-indexer
-    module = az-indexer
-    args = --use_index_format_v2 --db-connection=db-conn-1
 
 ft-indexer
     module = ft-indexer
