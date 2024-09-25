@@ -73,6 +73,13 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 &
           export DISPLAY=:99
 
+      - name: Create user for Firefox
+        run: |
+          sudo useradd -m testuser
+          sudo chown -R testuser:testuser /github/home
+          sudo -u testuser sudo apt-get install -y firefox
+          sudo -u testuser firefox --version
+
       - name: Print versions
         run: |
           echo "Node version: $(node -v)"
