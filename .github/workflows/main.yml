@@ -95,7 +95,7 @@ jobs:
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
           echo "TestCafe version: $(testcafe -v)"
-          echo "Firefox version: $(firefox --no-sandbox --version)"
+          sudo -u testuser testcafe -v
           echo "System info: $(uname -a)"
           echo "Free memory: $(free -m)"
           sudo -u testuser testcafe -v
