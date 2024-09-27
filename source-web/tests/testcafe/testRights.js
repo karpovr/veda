@@ -25,7 +25,7 @@ test.only('testRights', async (t) => {
   console.log('Шаг 4: Логинимся под bychinat');
   basic.login('bychinat', '123');
   
-  await t.wait(1000);
+  //await t.wait(1000);
   
   console.log(`Шаг 5: Поиск по полному тексту (timeEdwin: ${timeEdwin})`);
   basic.fullTextSearch(timeEdwin, '0');
