@@ -4,7 +4,7 @@ import {Selector} from 'testcafe';
 fixture `test Rights`
   .page `${config.baseUrl}`;
 const basic = new Basic();
-test('testRights', async (t) => {
+test.only('testRights', async (t) => {
   basic.login('karpovrt', '123');
   const timeEdwin = ''+Math.round(+new Date()/1000);
   const timeFillips = ''+Math.round(+new Date()/100);
