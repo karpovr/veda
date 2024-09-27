@@ -10,6 +10,8 @@ const basic = new Basic();
 test.only('testRights', async (t) => {
   console.log('Шаг 1: Логинимся под karpovrt');
   basic.login('karpovrt', '123');
+
+  await t.wait(1000);
   
   const timeEdwin = '' + Math.round(+new Date() / 1000);
   const timeFillips = '' + Math.round(+new Date() / 100);
@@ -25,7 +27,7 @@ test.only('testRights', async (t) => {
   console.log('Шаг 4: Логинимся под bychinat');
   basic.login('bychinat', '123');
   
-  //await t.wait(1000);
+  await t.wait(1000);
   
   console.log(`Шаг 5: Поиск по полному тексту (timeEdwin: ${timeEdwin})`);
   basic.fullTextSearch(timeEdwin, '0');
