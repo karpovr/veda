@@ -61,4 +61,6 @@ jobs:
         with:
           name: testcafe-screenshots
           path: ./source-web/screenshots/  # Путь к папке с сохраненными скриншотами
+        run: |
+          tail -n +1 ./logs/*.log
 
