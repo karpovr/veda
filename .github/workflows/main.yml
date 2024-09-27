@@ -51,9 +51,8 @@ jobs:
           sleep 200
           #tail -n +1 ./data/tarantool/tarantool.log
           #tail -n +1 ./logs/*.log
-          continue-on-error: false
           cd ./source-web && npm test
-        # Добавим шаг для продолжения работы при сбое тестов
+        continue-on-error: false
 
       # Загружаем скриншоты как артефакты (если они есть)
       - name: Upload TestCafe screenshots
