@@ -49,11 +49,10 @@ jobs:
         run: |
           ./control-start.sh
           sleep 200
-          tail -n +1 ./data/tarantool/tarantool.log
-          tail -n +1 ./logs/*.log
+          #tail -n +1 ./data/tarantool/tarantool.log
+          #tail -n +1 ./logs/*.log
           cd ./source-web && npm test
         # Добавим шаг для продолжения работы при сбое тестов
-        continue-on-error: true
 
       # Загружаем скриншоты как артефакты (если они есть)
       - name: Upload TestCafe screenshots
