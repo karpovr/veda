@@ -49,8 +49,8 @@ jobs:
         run: |
           ./control-start.sh
           sleep 200
-          tail -n +1 ./data/tarantool/tarantool.log
-          tail -n +1 ./logs/*.log
+          #tail -n +1 ./data/tarantool/tarantool.log
+          #tail -n +1 ./logs/*.log
           cd ./source-web && npm test
         continue-on-error: false
 
@@ -61,3 +61,10 @@ jobs:
         with:
           name: testcafe-screenshots
           path: ./source-web/screenshots/  # Путь к папке с сохраненными скриншотами
+
+      - name: Upload logs
+        if: failure()  # Runs only when tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: ./logs/  # Path to the logs folder
