@@ -71,15 +71,22 @@ export default class Basic {
       .wait(1000);
   }
 
-  async createTestUiForAttributiveSearch (label, comment, testString, date) {
-    const number = Selector('veda-control[property="v-ui:testInteger"] select.form-control').find('option').withText('2');
-    const checkbox = Selector('veda-control[rel="v-ui:testLink"] div.checkbox').find('label').withText('Спецификация тестового объектного свойства');
+async createTestUiForAttributiveSearch(label, comment, testString, date) {
+  const menuButton = Selector('#menu');
+  const createMenuItem = Selector('li[id="menu"] li[resource="v-s:Create"]');
+  const number = Selector('veda-control[property="v-ui:testInteger"] select.form-control').find('option').withText('2');
+  const checkbox = Selector('veda-control[rel="v-ui:testLink"] div.checkbox').find('label').withText('Спецификация тестового объектного свойства');
+
+  try {
     await t
-      .click('#menu')
-      .click('li[id="menu"] li[resource="v-s:Create"]')
+      .click(menuButton)
+      .expect(createMenuItem.visible).ok({ timeout: 5000 })
+      .click(createMenuItem)
+      .expect(Selector('veda-control.fulltext.dropdown').visible).ok({ timeout: 5000 })
       .click('veda-control.fulltext.dropdown')
       .pressKey('ctrl+a delete')
       .typeText('veda-control.fulltext.dropdown', 'Класс для тестирования интерфейса')
+      .expect(Selector('.suggestion[resource="v-ui:TestUIClass"]').visible).ok({ timeout: 5000 })
       .click('.suggestion[resource="v-ui:TestUIClass"]')
       .typeText('veda-control.-view.edit.search[property="rdfs:label"]', label)
       .wait(1000)
@@ -95,5 +102,17 @@ export default class Basic {
       .typeText('veda-control[property="v-ui:testDatetime"]#date', date)
       .click('button#save')
       .wait(1000);
+
+    // Log success
+    console.log('Test UI for attributive search created successfully');
+  } catch (error) {
+    console.error('Error in createTestUiForAttributiveSearch:', error);
+    
+    // Take a screenshot on error
+    await t.takeScreenshot('error-createTestUiForAttributiveSearch.png');
+    
+    // Re-throw the error to fail the test
+    throw error;
   }
+}
 }
