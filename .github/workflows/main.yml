@@ -62,9 +62,24 @@ jobs:
           name: testcafe-screenshots
           path: ./source-web/screenshots/  # Путь к папке с сохраненными скриншотами
 
+      # Prepare logs for upload
+      - name: Prepare logs for upload
+        if: failure()
+        run: |
+          mkdir sanitized_logs
+          for file in ./logs/*; do
+            # Replace colons with underscores in the filename
+            new_name=$(basename "$file" | tr ':' '_')
+            cp "$file" "./sanitized_logs/$new_name"
+          done
+      # Upload sanitized logs as artifacts
       - name: Upload logs
         if: failure()  # Runs only when tests fail
         uses: actions/upload-artifact@v4
         with:
           name: logs
-          path: ./logs/  # Path to the logs folder
+          path: ./sanitized_logs/
+          if-no-files-found: warn
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
