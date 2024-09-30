@@ -35,6 +35,7 @@ jobs:
         run: |
           node --version
           testcafe --version
+          firefox --version
           rustc -V
 
       # Build the project
