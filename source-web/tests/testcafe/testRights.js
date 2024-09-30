@@ -7,7 +7,7 @@ fixture `test Rights`
 
 const basic = new Basic();
 
-test.only('testRights', async (t) => {
+test('testRights', async (t) => {
   console.log('Шаг 1: Логинимся под karpovrt');
   basic.login('karpovrt', '123');
 
