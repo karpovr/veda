@@ -83,7 +83,7 @@
   "scripts": {
     "test": "npm run test-backend && npm run test-frontend",
     "test-backend": "node ./tests/backend/index.js",
-    "test-frontend": "testcafe -d --concurrency 1 --skip-js-errors --speed 0.7 firefox:headless ./tests/testcafe --screenshots-on-fails --screenshots-path ./screenshots --selector-timeout 600000 --assertion-timeout 600000",
+    "test-frontend": "testcafe -d --concurrency 1 --skip-js-errors --speed 0.7 /usr/bin/firefox:headless ./tests/testcafe --screenshots-on-fails --screenshots-path ./screenshots --selector-timeout 600000 --assertion-timeout 600000",
     "build": "npm run clean && npm run build-browser-scripts && npm run build-templates && npm run build-server-scripts && npm run update-version",
     "clean": "find ../public/* ! -name \"ontology.json*\" -delete 2>/dev/null || true",
     "build-browser-scripts": "babel --config-file ./.babelrc . --out-dir ../public --copy-files",
