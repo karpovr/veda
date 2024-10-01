@@ -36,6 +36,7 @@ jobs:
           node --version
           testcafe --version
           firefox --version
+          whereis firefox
           rustc -V
 
       # Build the project
