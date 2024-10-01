@@ -1,0 +1,82 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix v-s: <http://semantic-machines.com/veda/veda-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d: <http://semantic-machines.com/veda/veda-data/> .
+@prefix cfg: <http://semantic-machines.com/veda/config/> .
+@prefix v-fc: <http://semantic-machines.com/veda/veda-function-create/> .
+@prefix v-ui: <http://semantic-machines.com/veda/veda-ui/> .
+@prefix v-wf: <http://semantic-machines.com/veda/veda-workflow/> .
+
+<http://semantic-machines.com/veda/veda-feedback-schema/>
+  rdf:type owl:Ontology ;
+  rdfs:label "Онтология системы Veda. Обратная связь. Схема."@ru ;
+  rdfs:label "Veda system ontology. Feedback. Schema."@en ;
+  v-s:loadPriority 11 ;
+.
+
+v-s:Feedback
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:UserThing ;
+  rdfs:subClassOf v-s:Journaling ;
+  rdfs:subClassOf v-s:BackwardLink ;
+  # rdfs:subClassOf v-s:Labeled ;
+  rdfs:label "Обратная связь"@ru ;
+  rdfs:label "Feedback"@en ;
+.
+
+# SPECIFICATIONS
+v-s:TS_Feedback
+  rdf:type v-ui:TemplateSpecification;
+  v-s:loadPriority "15"^^xsd:integer;
+  v-ui:defaultTemplate v-s:FeedbackTemplate;
+  v-ui:forClass v-s:Feedback
+.
+
+
+v-s:PS_comment_Feedback
+  rdf:type v-ui:PropertySpecification ;
+  v-ui:forClass v-s:Feedback ;
+  v-ui:forProperty rdfs:comment ;
+  v-ui:placeholder "Напишите обратную связь по процессу или интерфейсу."@ru ;
+  v-ui:placeholder "Write your feedback for process or UI"@en ;
+  rdfs:label "Спецификация rdfs:comment для v-s:Feedback"@ru ;
+  rdfs:label "rdfs:comment property specification for v-s:Feedback class"@en ;
+.
+
+v-s:FeedbackCreate
+  rdf:type v-fc:Create ;
+  rdfs:label "Обратная связь"@ru ;
+  rdfs:label "Feedback"@en ;
+  v-fc:hasBlank v-s:FeedbackBlank ;
+.
+
+v-s:FeedbackBlank
+  a v-fc:Blank ;
+  rdfs:label "Обратная связь"@ru ;
+  rdfs:label "Feedback"@en ;
+  v-fc:targetType v-s:Feedback ;
+  v-ui:hasTemplate v-s:FeedbackTemplate ;
+.
+
+v-s:FeedbackTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для обратной связи по процессу"@ru ;
+  rdfs:label "Template for feedback"@en ;
+  v-ui:template "v-s_FeedbackTemplate.js" ;
+.
+
+v-s:FeedbackListTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для списка обратной связи по процессу"@ru ;
+  rdfs:label "Template for feedbacks list"@en ;
+  v-ui:template "v-s_FeedbackListTemplate.js" ;
+.
+
+
+v-s:FeedbackTooltipBundle
+  rdf:type v-s:Bundle ;
+  rdfs:label "Обратная связь по процессу"@ru ;
+  rdfs:label "Process feedback"@en ;
+.
