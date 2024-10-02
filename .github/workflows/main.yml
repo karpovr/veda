@@ -35,6 +35,7 @@ jobs:
         run: |
           node --version
           testcafe --version
+          testcafe --list-browsers
           firefox --version
           whereis firefox
           rustc -V
