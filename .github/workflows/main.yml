@@ -23,9 +23,10 @@ jobs:
         run: |
           sudo apt-get clean
           sudo apt-get update
+          sudo apt-get install -y xvfb
           sudo apt-get install dpkg
           sudo apt-get install firefox
-          npm install -g testcafe@3.5.0
+          npm install -g testcafe@3.5.0 --save-dev
           ./tools/install-tarantool.sh
           ./control-install.sh
           source $HOME/.cargo/env
