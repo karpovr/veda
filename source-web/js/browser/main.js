@@ -11,7 +11,8 @@ import BrowserUtil from '../browser/util.js';
 import Backend from '../common/backend.js';
 
 // Условие для исключения загрузки install_sw.js в среде CI
-if (!process.env.CI) {
+const isHeadlessBrowser = /HeadlessChrome|Firefox\/.*Headless/.test(window.navigator.userAgent);
+if (!isHeadlessBrowser) {
   import('../browser/install_sw.js');
 }
 
