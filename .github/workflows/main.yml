@@ -16,17 +16,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
       # Install dependencies and other required software
       - name: Install
         run: |
           sudo apt-get clean
           sudo apt-get update
-          sudo apt-get install -y xvfb
           sudo apt-get install dpkg
-          sudo apt-get install firefox
-          npm install -g testcafe@3.5.0 --save-dev
+          npm install -g testcafe --save-dev
           ./tools/install-tarantool.sh
           ./control-install.sh
           source $HOME/.cargo/env
@@ -37,7 +35,7 @@ jobs:
           node --version
           testcafe --version
           testcafe --list-browsers
-          firefox --version
+          chrome --version
           whereis firefox
           rustc -V
 
