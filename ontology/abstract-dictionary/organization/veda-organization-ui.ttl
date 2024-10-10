@@ -212,7 +212,7 @@ v-s:OrganizationUnitModel
       if ( (self.hasValue("v-s:hasChiefDetail") || depth > 16) && self["v-s:hasChiefDetail"][0].id !== chiefId ) {
         return self["v-s:hasChiefDetail"][0];
       } else if ( self.hasValue("v-s:parentUnit") ) {
-        return self.getChief.call(self["v-s:parentUnit"][0], chiefId, depth + 1);
+        return self.getChiefDetail.call(self["v-s:parentUnit"][0], chiefId, depth + 1);
       }
     });
   };
