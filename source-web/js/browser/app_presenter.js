@@ -86,17 +86,11 @@ export default function AppPresenter (manifest) {
           const mainContainer = document.getElementById('main');
           clear(mainContainer);
           await main.present(mainContainer);
-
-          // TODO: remove
-          veda.trigger('mainChanged', main.id);
         }
       } else {
         const mainContainer = document.getElementById('main');
         clear(mainContainer);
         await main.present(mainContainer);
-
-        // TODO: remove
-        veda.trigger('mainChanged', main.id);
       }
 
       const tokens = decodeURI(hash).slice(2).split('/');
@@ -124,18 +118,10 @@ export default function AppPresenter (manifest) {
         if (!individual.scroll) {
           window.scrollTo(0, 0);
         }
-
-        // TODO: remove
-        if (containerEl.id === 'main') {
-          veda.trigger('mainChanged', uri);
-        }
       } else {
         const mainContainer = document.getElementById('main');
         clear(mainContainer);
         await main.present(mainContainer);
-
-        // TODO: remove
-        veda.trigger('mainChanged', main.id);
       }
     }));
   }
@@ -178,15 +164,13 @@ export default function AppPresenter (manifest) {
     const hash = url.searchParams.get('hash');
     if (hash) window.location = new URL(window.location.origin + window.location.pathname + hash);
 
-    const layout_uri = manifest.veda_layout;
-    const main_uri = manifest.veda_main;
-    const {start_url} = manifest;
+    const {veda_layout, veda_main, start_url} = manifest;
     const appContainer = document.getElementById('app');
     clear(appContainer);
-    if (layout_uri && main_uri && start_url) {
-      const layout = new IndividualModel(layout_uri);
+    if (veda_layout && veda_main && start_url) {
+      const layout = new IndividualModel(veda_layout);
       await layout.present(appContainer);
-      const main = new IndividualModel(main_uri);
+      const main = new IndividualModel(veda_main);
       installRouter(main);
       riot.route(window.location.hash || start_url);
     } else {
