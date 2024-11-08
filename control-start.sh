@@ -30,7 +30,7 @@ ulimit -c unlimited
 # start tarantool server
 /sbin/start-stop-daemon --start --verbose --chdir $PWD --make-pidfile --pidfile $PWD/./.pids/tt-pid --background --startas /bin/bash -- -c "exec tarantool ./source-server/source/init_tarantool.lua 2>./logs/tarantool-stderr.log  >./logs/tarantool-stdout.log 2>&1"
 
-sleep 10
+sleep 3
 
 # Установка переменной LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=./bin/lib

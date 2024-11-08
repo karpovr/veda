@@ -1,0 +1,6 @@
+[openai]
+api_key = "key"
+model = "whisper-1"
+
+use_local_model = false
+# Set to true to use local model, false for OpenAI
