@@ -1,6 +1,6 @@
-[openai]
-api_key = "key"
-model = "whisper-1"
-
-use_local_model = false
 # Set to true to use local model, false for OpenAI
+use_local_model = false
+
+[openai]
+api_key = "your-key"
+model = "whisper-1"
