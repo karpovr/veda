@@ -75,6 +75,6 @@ export const html = `
       </thead>
       <tbody about="@" rel="v-s:hasLink" data-embedded="true" data-limit="5" data-more="true" data-template="v-s:LinksListTemplate_inline"></tbody>
     </table>
-    <button class="margin-sm btn btn-success" id="add-link" about="v-s:AddLink" property="rdfs:label"></button>
+    <button class="margin-sm btn btn-success pull-right" id="add-link" about="v-s:AddLink" property="rdfs:label"></button>
   </div>
 `;

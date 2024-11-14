@@ -23,12 +23,12 @@ export const html = `
         </div>
         <div class="col-sm-9 col-xs-7">
           <div class="row">
-            <div class="col-sm-6 col-xs-6">
+            <div class="col-sm-8 col-xs-8">
               <veda-control data-type="link" rel="v-s:creator" class="-view -edit search fulltext"></veda-control>
-              <div about="@" rel="v-s:creator" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
+              <div about="@" rel="v-s:creator" data-template="v-ui:AppointmentLabelTemplate" class="view edit -search"></div>
               <div rel="v-s:creator" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
             </div>
-            <div class="col-sm-6 col-xs-6">
+            <div class="col-sm-4 col-xs-4">
               <veda-control property="v-s:created" data-type="date" class="-view -edit search"></veda-control>
               <div about="@" property="v-s:created" class="view edit -search"></div>
               <div property="v-s:created" class="-view -edit search"></div>
@@ -42,12 +42,12 @@ export const html = `
         </div>
         <div class="col-sm-9 col-xs-7">
           <div class="row">
-            <div class="col-sm-6 col-xs-6">
+            <div class="col-sm-8 col-xs-8">
               <veda-control data-type="link" rel="v-s:lastEditor" class="-view -edit search fulltext"></veda-control>
-              <div about="@" rel="v-s:lastEditor" data-template="v-ui:LabelTemplate" class="view edit -search"></div>
+              <div about="@" rel="v-s:lastEditor" data-template="v-ui:AppointmentLabelTemplate" class="view edit -search"></div>
               <div rel="v-s:lastEditor" data-template="v-ui:LabelTemplate" class="-view -edit search"></div>
             </div>
-            <div class="col-sm-6 col-xs-6">
+            <div class="col-sm-4 col-xs-4">
               <veda-control data-type="date" property="v-s:edited" class="-view -edit search"></veda-control>
               <div about="@" property="v-s:edited" class="view edit -search"></div>
               <div property="v-s:edited" class="-view -edit search"></div>

@@ -61,6 +61,6 @@ export const html = `
     <h3 about="v-s:Comments" property="rdfs:label"></h3>
     <div about="@" rel="v-s:hasComment" data-template="v-s:RecursiveCommentTemplate"></div>
     <div id="new-comment"></div>
-    <button class="margin-sm btn btn-success" id="add-comment" about="v-s:AddComment" property="rdfs:label"></button>
+    <button class="margin-sm btn btn-success pull-right" id="add-comment" about="v-s:AddComment" property="rdfs:label"></button>
   </div>
 `;
