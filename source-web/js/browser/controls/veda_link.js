@@ -13,6 +13,7 @@ $.fn.veda_link = function ( options ) {
   const opts = {...defaults, ...options};
   const control = $(opts.template);
   const template = this.attr('data-template') || '{@.rdfs:label}';
+  const rows = this.attr('rows') || 1;
   const individual = opts.individual;
   const spec = opts.spec;
   const placeholder = this.attr('placeholder') || ( spec && spec.hasValue('v-ui:placeholder') ? spec['v-ui:placeholder'].map(Util.formatValue).join(' ') : new IndividualModel('v-s:StartTypingBundle') );
@@ -229,15 +230,14 @@ $.fn.veda_link = function ( options ) {
       });
     }
 
-    fulltext.on('input change focus blur', function (e) {
+    fulltext.on('input change focus blur', calculateRows);
+    calculateRows();
+    function calculateRows (e) {
       const value = fulltext.val();
-      if (value) {
-        const rows = value.split('\n').length;
-        fulltext.prop('rows', rows);
-      } else {
-        fulltext.prop('rows', 1);
-      }
-    });
+      const valueRows = value.split('\n').length;
+      let fulltextRows = rows > valueRows ? rows: valueRows
+      fulltext.prop('rows', fulltextRows);
+    }
 
     const header = $('.header', control);
     Promise.all([
@@ -305,13 +305,34 @@ $.fn.veda_link = function ( options ) {
             if (converted != value) value += '\n' + converted;
           }
           ftQuery(prefix, value, sort, withDeleted, queryPattern)
-            .then(renderResults)
-            .catch((error) => {
+            .then((results) => {
+              results = mergeFavorite(results);
+              renderResults(results);
+            }).catch((error) => {
               console.error('Fulltext query failed');
             });
         });
       }
     };
+
+    const showFavorite = function () {
+      if (spec.hasValue('v-ui:favoriteValue')) {
+        suggestions.empty();
+        const promises = spec['v-ui:favoriteValue'].map(handleValue);
+        Promise.all(promises).then((renderedList) => {
+          const separator = $('<hr style="margin: 3px 0px 7px 0px; border-color: #ccc" class="separator">');
+          const additionInfo = $('<h4 style="padding: 5px; margin: 0px;"><small>Для выбора других значений начните ввод!</small></h4>');
+          renderedList.forEach(elem => elem.addClass('favorite-value'));
+          renderedList.push(separator, additionInfo)
+          suggestions.append(renderedList);
+          $(document).off('click', clickOutsideMenuHandler);
+          $(document).off('keydown', arrowHandler);
+          fulltextMenu.show();
+          $(document).on('click', clickOutsideMenuHandler);
+          $(document).on('keydown', arrowHandler);
+        });
+      }
+    }
 
     const inputHandler = (() => {
       let timeout;
@@ -347,29 +368,42 @@ $.fn.veda_link = function ( options ) {
     })();
     fulltext.on('keydown', inputHandler);
 
+    const mergeFavorite = function (queryResult) {
+      if (!spec) return queryResult;
+      if (spec.hasValue('v-ui:favoriteValue')) {
+        const favorite = spec['v-ui:favoriteValue'].filter(value => {
+          return queryResult.some(res => {
+            if (res instanceof IndividualModel) {
+              return res.id == value.id
+            } else {
+              return res == value;
+            }
+          });
+        });
+        if (favorite.length != 0) {
+          queryResult = queryResult.filter(res => {
+            return !favorite.some(value => {
+              if (res instanceof IndividualModel) {
+                return res.id == value.id
+              } else {
+                return res == value;
+              }
+            });
+          });
+          favorite.forEach(val => {
+            val.favorite = true;
+          })
+          return [...favorite, "separator", ...queryResult];
+        }
+      }
+      return queryResult;
+    }
+
     const renderResults = function (results) {
       suggestions.empty();
       selected = individual.get(rel_uri);
       if (results.length) {
-        const promises = results.map((value) => {
-          return renderValue(value, template).then((rendered) => {
-            const tmpl = $('<a href=\'#\' class=\'suggestion\'></a>')
-              .text( rendered )
-              .attr('resource', value.id);
-            if (individual.hasValue(rel_uri, value)) {
-              tmpl.addClass('selected');
-            }
-            if (value.hasValue('v-s:deleted', true)) {
-              tmpl.addClass('deleted');
-            }
-            if (value.hasValue('v-s:valid', false) && !value.hasValue('v-s:deleted', true) ) {
-              tmpl.addClass('invalid');
-            }
-            return tmpl;
-          }).catch((error) => {
-            console.log('Error rendering value', error);
-          });
-        });
+        const promises = results.map(handleValue);
         Promise.all(promises).then((renderedList) => {
           suggestions.append(renderedList);
           $(document).off('click', clickOutsideMenuHandler);
@@ -383,6 +417,32 @@ $.fn.veda_link = function ( options ) {
         $(document).off('click', clickOutsideMenuHandler);
         $(document).off('keydown', arrowHandler);
       }
+    };
+
+    const handleValue = function (value) {
+      if (value == "separator") {
+        return $('<hr style="margin: 3px 0px 7px 0px; border-color: #ccc" class="separator">');
+      }
+      return renderValue(value, template).then((rendered) => {
+        const tmpl = $('<a href=\'#\' class=\'suggestion\'></a>')
+          .text( rendered )
+          .attr('resource', value.id);
+        if (value.favorite) {
+          tmpl.addClass('favorite-value');
+        }
+        if (individual.hasValue(rel_uri, value)) {
+          tmpl.addClass('selected');
+        }
+        if (value.hasValue('v-s:deleted', true)) {
+          tmpl.addClass('deleted');
+        }
+        if (value.hasValue('v-s:valid', false) && !value.hasValue('v-s:deleted', true) ) {
+          tmpl.addClass('invalid');
+        }
+        return tmpl;
+      }).catch((error) => {
+        console.log('Error rendering value', error);
+      });
     };
 
     const suggestions = $('.suggestions', control);
@@ -571,10 +631,50 @@ $.fn.veda_link = function ( options ) {
     } else {
       dropdown.remove();
     }
+
+    // favorite feature
+    const favoriteButton = $('.favorite', control);
+    if (this.hasClass('favorite') && !this.hasClass('dropdown') && !this.hasClass('create')) {
+      favoriteButton.on('click keydown', function (e) {
+        if (isSingle && fulltext.val().length != 0) return;
+        if (e.type !== 'click' && e.which !== 13 && e.which !== 32) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        if ( fulltextMenu.is(':visible')) {
+          fulltextMenu.hide();
+          $(document).off('click', clickOutsideMenuHandler);
+          $(document).off('keydown', arrowHandler);
+        } else {
+          if ( suggestions.is(':empty') || isDynamicQueryPrefix ) {
+            showFavorite();
+          } else {
+            $(document).off('click', clickOutsideMenuHandler);
+            $(document).off('keydown', arrowHandler);
+            fulltextMenu.show();
+            $(document).on('click', clickOutsideMenuHandler);
+            $(document).on('keydown', arrowHandler);
+          }
+        }
+      });
+      const downHandler = function (e) {
+        if ( e.which === 40) {
+          e.stopPropagation();
+          favoriteButton.click();
+        }
+      };
+      favoriteButton.on('focus', function (e) {
+        favoriteButton.off('keydown', downHandler).one('keydown', downHandler);
+      });
+    } else {
+      favoriteButton.remove();
+    }
   } else {
     fulltext.remove();
     fulltextMenu.remove();
     $('.dropdown', control).remove();
+    $('.favorite', control).remove();
   }
 
   // Clear feature
@@ -644,6 +744,9 @@ const defaults = {
     <textarea rows="1" class="form-control fulltext"></textarea>
     <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
     <div class="input-group-addon btn btn-default dropdown" tabindex="0">
+      <i class="caret"></i>
+    </div>
+    <div class="input-group-addon btn btn-default favorite" tabindex="0">
       <i class="caret"></i>
     </div>
     <div class="input-group-addon btn btn-default create" tabindex="0">
