@@ -349,6 +349,24 @@ hr.black {
 .checkbox > label > em {
   margin: 0px;
 }
+.label-tiled {
+  display: inline-block;
+  padding: 0.3em 0.6em;
+  border: 1px solid #ddd; /* Add a border similar to Bootstrap's default */
+  border-radius: 0.25em;   /* Apply a slight border radius */
+}
+
+.label-tiled.label-default {
+  border-color: #ccc; /* Alternative border color, similar to Bootstrap's .label-default */
+}
+
+/* Ensure the .label class doesn't affect the color and font weight */
+.label-tiled {
+  font-size: inherit;
+  color: inherit; /* Retain the default text color */
+  font-weight: inherit; /* Retain the default font weight */
+  margin-bottom: 3px;
+}
 .first-letter::first-letter {
   font-size: 140%;
   font-variant: small-caps;
@@ -519,9 +537,13 @@ textarea {
   border: none;
   box-shadow: none;
 }
+.invalid:not(.invalid-header ~ * *) small span {
+  text-decoration: none;
+  color: #a94442;
+}
 .invalid:not(.invalid-header ~ * *), a.invalid, tr.invalid, span.invalid {
   text-decoration: none!important;
-  color: #700000!important;
+  color: #a94442!important;
 }
 .deleted:not(.deleted-header ~ * *), a.deleted, tr.deleted, span.deleted {
   text-decoration: none!important;
@@ -648,6 +670,9 @@ ol.no-marks, ul.no-marks {
   background-color: #eee;
   cursor: pointer;
 }
+.link-control .favorite-value {
+  font-weight: 450;  
+}
 .link-control .input-group > .form-control:first-child {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
@@ -683,6 +708,31 @@ veda-control {
 }
 .form-inline veda-control .checkbox {
   margin-left: 10px;
+}
+veda-control .checkbox:last-child {
+  margin-bottom: 0px;
+}
+.row-attribute .checkbox {
+  margin-top: 5px;
+  margin-bottom: 0px;
+}
+veda-control .checkbox:first-child {
+  margin-top: 0px;
+}
+.row-attribute .radio  {
+  margin-top: 5px;
+  margin-bottom: 0px;
+}
+veda-control .radio:first-child {
+  margin-top: 0px;
+}
+.control-inline .radio {
+  display: inline-block;
+  margin: 0px 20px 0px 0px;
+}
+.control-inline .checkbox {
+  display: inline-block;
+  margin: 0px 20px 0px 0px;
 }
 .value-holder {
   margin-right: 10px;
@@ -1170,8 +1220,8 @@ svg.process-path-highlight path
     position: fixed;
     background-color: #fff;
     bottom: 30px;
-    margin: 0 -40px;
-    padding: 20px 40px 20px 40px;
+    margin: 0 -20px;
+    padding: 10px 20px;
     z-index: 1010;
     box-shadow: 0px 1px 5px rgba(0,0,0,0.7);
     border-radius: 4px;
@@ -1244,20 +1294,52 @@ svg.process-path-highlight path
   content: "\25BC";
 }
 .section-header {
+  padding: 6px 10px;
+  margin: 0px 0px 10px 0px;
+  /* border-bottom: 1px solid #ddd; */
   background-color: #f5f5f5;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  margin-top: 1.5em;
+}
+
+[aria-expanded="true"] .section-header { 
+}
+
+.active-section .section-header {
+  cursor: pointer;
+}
+
+section {
   margin-bottom: 1em;
+}
+
+h3.margin-sm:first-of-type {
+  margin-bottom: 20px;
 }
 
 .row-attribute {
   margin-top: 1em;
 }
+
+.row-attribute .table {
+  margin-bottom: 0px;
+}
+
+section section:first-child {
+  margin-top: 1.5em;
+}
+
+.row-attribute .panel {
+  margin-bottom: 0px;
+}
+
+.row-attribute .alert {
+  margin-bottom: 0px;
+}
+
 .row-attribute > div:first-child {
   text-align: right;
   font-weight: bold;
 }
+
 .row-attribute > div:first-child > label {
   margin-bottom: 0;
 }
