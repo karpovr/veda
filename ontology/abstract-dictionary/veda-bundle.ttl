@@ -450,3 +450,8 @@ v-s:ShowInContactsBundle
   rdfs:label "Показать в контактах"@ru ;
   rdfs:label "Show in Contacts"@en ;
 .
+v-s:NumberBundle
+  rdf:type v-s:Bundle;
+  rdfs:label "Номер"@ru ;
+  rdfs:label "Number"@en ;
+.

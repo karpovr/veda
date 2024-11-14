@@ -279,6 +279,13 @@ v-s:hasStatus
   rdfs:range v-s:Status ;
   rdfs:domain v-s:Thing ;
 .
+v-s:hasReaction
+  rdf:type owl:ObjectProperty ;
+  rdfs:label "Реакция"@ru ;
+  rdfs:label "Reaction"@en ;
+  rdfs:range v-s:Reaction ;
+  rdfs:domain v-s:Thing ;
+.
 v-s:hasVisualStatus
   rdf:type owl:ObjectProperty ;
   rdfs:label "Визуальный статус"@ru ;

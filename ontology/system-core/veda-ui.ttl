@@ -185,6 +185,13 @@ v-ui:optionValue
   rdfs:label "Option value"@en ;
   rdfs:range rdfs:Resource ;
 .
+v-ui:favoriteValue
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-ui:ObjectPropertySpecification ;
+  rdfs:label "Популярное зачение"@ru ;
+  rdfs:label "Favotite value"@en ;
+  rdfs:range rdfs:Resource ;
+.
 
 v-ui:DatatypePropertySpecification
   rdf:type owl:Class ;
@@ -416,7 +423,47 @@ v-ui:rejectMessageType
   rdfs:label "Reject these messages"@en ;
   rdfs:range v-s:MessageType ;
 .
-
+v-ui:TemplateRenderPreferences
+  rdf:type owl:Class ;
+  rdfs:subClassOf v-s:SystemThing, v-s:BackwardLink ;
+  rdfs:label "Особенности отображения шаблона"@ru ;
+  rdfs:label "Template Render Preferences"@en 
+.
+v-ui:hasTemplateRenderPreferences
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-ui:Preferences ;
+  rdfs:range v-ui:TemplateRenderPreferences ;
+  rdfs:label "Особенности отображения шаблона"@ru ;
+  rdfs:label "template render preferences"@en 
+.
+v-ui:forTemplate
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-ui:TemplateRenderPreferences ;
+  rdfs:range v-ui:ClassTemplate ;
+  rdfs:label "предпочтения выбора шаблона"@ru ;
+  rdfs:label "template selection preferences"@en 
+.
+v-ui:selectedTemplate
+  rdf:type owl:ObjectProperty ;
+  rdfs:domain v-ui:TemplateRenderPreferences ;
+  rdfs:range v-ui:ClassTemplate ;
+  rdfs:label "предпочтения выбора шаблона"@ru ;
+  rdfs:label "template selection preferences"@en 
+.
+v-ui:hiddenBlocks
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-ui:TemplateRenderPreferences ;
+  rdfs:range xsd:string ;
+  rdfs:label "Скрытые блоки шаблона"@ru ;
+  rdfs:label "template hidden blocks"@en 
+.
+v-ui:forMode
+  rdf:type owl:DatatypeProperty ;
+  rdfs:domain v-ui:TemplateRenderPreferences ;
+  rdfs:range xsd:string ;
+  rdfs:label "Режим шаблона"@ru ;
+  rdfs:label "Template mode"@en 
+.
 # --------------- System properties template ------------------
 v-ui:ExitButtonTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -614,6 +661,12 @@ v-ui:LabelLinkWithStatusTemplate
   rdfs:label "Template link with label & status"@en ;
   v-ui:template "v-ui_LabelLinkWithStatusTemplate.js" ;
 .
+v-ui:AppointmentLabelTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для всплывающей информации"@ru ;
+  rdfs:label "Template for info popover"@en ;
+  v-ui:template "v-ui_AppointmentLabelTemplate.js" ;
+.
 v-ui:IconModalTemplate
   rdf:type v-ui:ClassTemplate ;
   rdfs:label "Шаблон с меткой и ссылкой"@ru ;
@@ -625,6 +678,12 @@ v-ui:InfoPopoverTemplate
   rdfs:label "Шаблон для всплывающей информации"@ru ;
   rdfs:label "Template for info popover"@en ;
   v-ui:template "v-ui_InfoPopoverTemplate.js" ;
+.
+v-ui:ImagePopoverTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для всплывающей информации"@ru ;
+  rdfs:label "Template for info popover"@en ;
+  v-ui:template "v-ui_ImagePopoverTemplate.js" ;
 .
 v-ui:GenericModalTemplate
   rdf:type v-ui:ClassTemplate ;
@@ -674,7 +733,12 @@ v-ui:SectionHeaderTemplate
   rdfs:label "Template for section header with view's toggle function"@en ;
   v-ui:template "v-ui_SectionHeaderTemplate.js"
 .
-
+v-ui:TableOfContentsTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон оглавления документа"@ru ;
+  rdfs:label "Template for document contents"@en ;
+  v-ui:template "v-ui_TableOfContentsTemplate.js"
+.
 v-ui:PsCommentFile
   rdf:type v-ui:DatatypePropertySpecification ;
   v-ui:forClass v-s:File ;
