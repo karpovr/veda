@@ -21,30 +21,24 @@ export const post = function (individual, template, container, mode, extra) {
     showContent(false);
   }
 
-  // const observerConfig = { attributes: true, subtree: true, childList: true };
-  // const validationHandler = () => {
-  //   const section = template.closest('section');
-  //   if (section.querySelector('.has-error')) {
-  //     header.classList.add('alert-danger');
-  //   } else {
-  //     header.classList.remove('alert-danger');
-  //   }
-  // };
-  // const sectionObserver = new MutationObserver(validationHandler);
-  // sectionObserver.observe(section, observerConfig);
+  const observerConfig = { attributes: true, subtree: true, childList: true };
+  const validationHandler = () => {
+    const section = template.closest('section');
+    if (section.querySelector('.has-error')) {
+      section.classList.add('section-with-error');
+    } else {
+      section.classList.remove('section-with-error');
+    }
+  };
+  const sectionObserver = new MutationObserver(validationHandler);
+  const content = section.querySelector('.section-content');
+  if (content) {
+    sectionObserver.observe(section.querySelector('.section-content'), observerConfig);
+  }
 
-  // template.addEventListener('edit', () => {
-  //   sectionObserver.observe(section, observerConfig);
-  // });
-  // template.addEventListener('view', () => {
-  //   console.log('it is view'); 
-  //   sectionObserver.disconnect();
-  //   header.classList.remove('alert-danger');
-  // });
-
-  // template.addEventListener('remove', () => {
-  //   sectionObserver.disconnect();
-  // });
+  template.addEventListener('remove', () => {
+    sectionObserver.disconnect();
+  });
 
   function hideContent(dispatch = true) {
     section.setAttribute('aria-expanded', 'false');
