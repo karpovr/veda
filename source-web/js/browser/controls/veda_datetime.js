@@ -113,7 +113,7 @@ function veda_dateTime (options) {
   };
 
   this.one('remove', function () {
-    control.data('DateTimePicker').destroy();
+    control.data('DateTimePicker')?.destroy();
   });
 
   return control;

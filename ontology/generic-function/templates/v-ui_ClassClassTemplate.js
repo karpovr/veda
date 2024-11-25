@@ -101,7 +101,7 @@ export const html = `
     <br class="-view edit search" />
     <h4 about="v-s:SuperClassesBundle" property="rdfs:label"></h4>
     <div rel="rdfs:subClassOf" data-template="v-ui:LabelLinkTemplate" class="view edit search"></div>
-    <veda-control rel="rdfs:subClassOf" class="-view edit search fulltext dropdown"></veda-control>
+    <veda-control data-type="link" rel="rdfs:subClassOf" class="-view edit search fulltext dropdown"></veda-control>
     <br />
     <div class="row">
       <div class="col-md-6">
@@ -141,7 +141,7 @@ export const html = `
       <div class="col-md-6">
         <h4 about="v-ui:hasTemplate" property="rdfs:label"></h4>
         <div rel="v-ui:hasTemplate" data-template="v-ui:LabelLinkTemplate" class="view -edit -search"></div>
-        <veda-control rel="v-ui:hasTemplate" class="-view edit search fulltext dropdown"></veda-control>
+        <veda-control data-type="link" rel="v-ui:hasTemplate" class="-view edit search fulltext dropdown"></veda-control>
         <br />
         <button
           type="button"
@@ -153,7 +153,7 @@ export const html = `
       <div class="col-md-6">
         <h4 about="v-ui:hasModel" property="rdfs:label"></h4>
         <div rel="v-ui:hasModel" data-template="v-ui:LabelLinkTemplate" class="view -edit -search"></div>
-        <veda-control rel="v-ui:hasModel" class="-view edit search fulltext dropdown"></veda-control>
+        <veda-control data-type="link" rel="v-ui:hasModel" class="-view edit search fulltext dropdown"></veda-control>
         <br />
         <button
           type="button"
