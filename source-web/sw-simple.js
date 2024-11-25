@@ -237,11 +237,15 @@ self.addEventListener('message', (event) => {
  * Clear cached resources
  */
 self.addEventListener('install', (event) => {
-  this.skipWaiting();
-  console.log(`Service worker updated, veda_version = ${veda_version}, clear cache`);
+  self.skipWaiting();
+  console.log(`Service worker installed, veda_version = ${veda_version}, clear cache`);
   event.waitUntil(
     caches.keys().then((keyList) => Promise.all(keyList.map((key) => caches.delete(key)))),
   );
+});
+
+self.addEventListener('activate', (event) => {
+  console.log(`Service worker activated, veda_version = ${veda_version}`);
 });
 
 self.addEventListener('fetch', function (event) {
@@ -389,17 +393,17 @@ function handleAPIPost (event) {
   const fn = url.pathname.split('/').pop();
   // Fetch only
   if (fn === 'authenticate') {
-  return fetch(event.request)
-    .then((response) => {
-      if (response.status === 0 || response.status === 503) {
+    return fetch(event.request)
+      .then((response) => {
+        if (response.status === 0 || response.status === 503) {
+          ping();
+        }
+        return response;
+      })
+      .catch((error) => {
         ping();
-      }
-      return response;
-    })
-    .catch((error) => {
-      ping();
-      throw error;
-    });
+        throw error;
+      });
   }
   const cloneRequest = event.request.clone();
   // Fetch first
