@@ -1,13 +1,13 @@
+// use lettre 11
 #[macro_use]
 extern crate log;
 
-use lettre::smtp::authentication::{Credentials, Mechanism};
-use lettre::smtp::ConnectionReuseParameters;
-use lettre::{ClientSecurity, SmtpClient, SmtpTransport, Transport};
-use lettre_email::mime::IMAGE_JPEG;
-use lettre_email::{Email, Mailbox};
+use lettre::message::{header, Mailbox, MultiPart, SinglePart};
+use lettre::transport::smtp::PoolConfig;
+use lettre::{Address, Message, SmtpTransport, Transport};
 use std::collections::HashMap;
-use std::path::Path;
+use std::str::FromStr;
+use std::time::Duration;
 use v_common::module::common::load_onto;
 use v_common::module::info::ModuleInfo;
 use v_common::module::module_impl::{get_cmd, get_inner_binobj_as_individual, init_log, wait_load_ontology, Module, PrepareError};
@@ -159,7 +159,8 @@ struct MailAddreses {
 
 impl MailAddreses {
     fn from_indv_addreses(message_info: IndvAddreses, backend: &mut Backend, ctx: &mut Context) -> Self {
-        let mut email_from = Mailbox::new("".to_string());
+        let empty_address = Address::new("postmaster", "localhost").expect("Failed to create empty address");
+        let mut email_from = Mailbox::new(None, empty_address);
 
         if ctx.always_use_mail_sender && !ctx.default_mail_sender.is_empty() && ctx.default_mail_sender.len() > 5 {
             info!("use default mail sender: {}", ctx.default_mail_sender);
@@ -170,7 +171,9 @@ impl MailAddreses {
                     error!("failed to extract email from default_mail_sender {}", ctx.default_mail_sender);
                 }
             } else {
-                email_from = Mailbox::new(ctx.default_mail_sender.to_string());
+                if let Ok(address) = Address::from_str(&ctx.default_mail_sender) {
+                    email_from = Mailbox::new(Some("Veda System".to_string()), address);
+                }
             };
         } else {
             if !message_info.from.is_empty() {
@@ -180,31 +183,31 @@ impl MailAddreses {
                 }
             }
 
-            if (email_from.address.is_empty() || email_from.address.len() < 5) && !ctx.default_mail_sender.is_empty() {
+            if email_from.email.to_string().is_empty() && !ctx.default_mail_sender.is_empty() {
                 let mut emails = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend);
                 if !emails.is_empty() {
                     email_from = emails.pop().unwrap();
                 }
             }
 
-            if (email_from.address.is_empty() || email_from.address.len() < 5) && !message_info.sender_mailbox.is_empty() {
-                email_from = Mailbox::new(message_info.sender_mailbox);
+            if email_from.email.to_string().is_empty() && !message_info.sender_mailbox.is_empty() {
+                if let Ok(address) = Address::from_str(&message_info.sender_mailbox) {
+                    email_from = Mailbox::new(Some("Veda System".to_string()), address);
+                }
             }
-        }
-
-        if email_from.name.is_none() {
-            email_from.name = Some("Veda System".to_owned());
         }
 
         let mut rr_email_to_hash = HashMap::new();
         for elt in message_info.to {
             for r in extract_email(&message_info.has_message_type, &elt, ctx, backend) {
-                rr_email_to_hash.insert(r.address.to_owned(), r);
+                rr_email_to_hash.insert(r.email.to_string(), r);
             }
         }
 
         for el in message_info.recipient_mailbox.unwrap_or_default() {
-            rr_email_to_hash.insert(el.to_string(), Mailbox::new(el));
+            if let Ok(address) = Address::from_str(&el) {
+                rr_email_to_hash.insert(el.to_string(), Mailbox::new(Some("Recipient".to_string()), address));
+            }
         }
 
         //let mut rr_reply_to_hash = HashMap::new();
@@ -247,57 +250,87 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
     {
         let mail_addreses = MailAddreses::from_indv_addreses(message_info, backend, ctx);
         if !mail_addreses.rr_email_to_hash.is_empty() {
-            let mut email = Email::builder();
+            let mut message_builder = Message::builder().from(mail_addreses.email_from);
 
-            for id in attachments.unwrap_or_default().iter() {
-                if let Some(file_info) = backend.get_individual(id, &mut Individual::default()) {
-                    let path = file_info.get_first_literal("v-s:filePath");
-                    let file_uri = file_info.get_first_literal("v-s:fileUri");
-                    let file_name = file_info.get_first_literal("v-s:fileName");
+            for el in mail_addreses.rr_email_to_hash.values() {
+                message_builder = message_builder.to(el.clone());
+            }
 
-                    if let (Some(path), Some(file_uri), Some(file_name)) = (path, file_uri, file_name) {
-                        if !path.is_empty() {
-                            let path = path + "/";
-                            let full_path = ATTACHMENTS_DB_PATH.to_owned() + path.as_ref() + &file_uri;
+            if let Some(s) = subject {
+                message_builder = message_builder.subject(s);
+            }
 
-                            match email.clone().attachment_from_file(Path::new(&full_path), Some(&file_name), &IMAGE_JPEG) {
-                                Ok(att) => email = att,
-                                Err(e) => error!("failed to add attachment {} to email {}, err = {:?}", &full_path, prepared_indv.get_id(), e),
+            // Собираем сообщение в зависимости от наличия вложений
+            let email = if attachments.is_some() {
+                let mut builder = MultiPart::mixed().build();
+
+                // Добавляем тело письма
+                if let Some(body) = message_body {
+                    let body_part = if body.to_lowercase().contains("<html>") {
+                        SinglePart::builder().header(header::ContentType::parse("text/html").unwrap()).body(body)
+                    } else {
+                        SinglePart::builder().header(header::ContentType::parse("text/plain").unwrap()).body(body)
+                    };
+                    builder = builder.singlepart(body_part);
+                }
+
+                // Добавляем вложения
+                for id in attachments.unwrap().iter() {
+                    if let Some(file_info) = backend.get_individual(id, &mut Individual::default()) {
+                        if let (Some(path), Some(file_uri), Some(file_name)) =
+                            (file_info.get_first_literal("v-s:filePath"), file_info.get_first_literal("v-s:fileUri"), file_info.get_first_literal("v-s:fileName"))
+                        {
+                            if !path.is_empty() {
+                                let full_path = format!("{}/{}/{}", ATTACHMENTS_DB_PATH, path, file_uri);
+
+                                match std::fs::read(&full_path) {
+                                    Ok(content) => {
+                                        let mime = mime_guess::from_path(&file_name).first_or_octet_stream();
+                                        let mime_str = mime.essence_str().to_string();
+
+                                        let content_type =
+                                            header::ContentType::parse(&mime_str).unwrap_or_else(|_| header::ContentType::parse("application/octet-stream").unwrap());
+
+                                        let attachment =
+                                            SinglePart::builder().header(content_type).header(header::ContentDisposition::attachment(&file_name)).body(content);
+
+                                        builder = builder.singlepart(attachment);
+                                    },
+                                    Err(e) => {
+                                        error!("failed to read attachment {} for email {}, err = {:?}", &full_path, prepared_indv.get_id(), e);
+                                    },
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            email = email.from(mail_addreses.email_from);
-
-            for el in mail_addreses.rr_email_to_hash.values() {
-                email = email.to(el.clone());
-            }
-
-            if let Some(s) = subject {
-                email = email.subject(s);
-            }
-
-            if let Some(s) = message_body {
-                let sl = s.to_lowercase();
-                if sl.contains("<html>") && sl.contains("</html>") {
-                    email = email.html(s);
+                message_builder.multipart(builder)
+            } else if let Some(body) = message_body {
+                // Если нет вложений, отправляем просто текст
+                if body.to_lowercase().contains("<html>") {
+                    message_builder.header(header::ContentType::parse("text/html").unwrap()).body(body)
                 } else {
-                    email = email.text(s);
+                    message_builder.header(header::ContentType::parse("text/plain").unwrap()).body(body)
                 }
-            }
+            } else {
+                message_builder.body(String::new())
+            };
 
-            match email.build() {
-                Ok(m) => {
-                    if let Some(mailer) = &mut ctx.smtp_client {
-                        if let Err(e) = &mailer.send(m.into()) {
-                            error!("failed to send email, uri = {}, err = {:?}", prepared_indv.get_id(), e);
-                        } else {
-                            info!("message successfully sent, uri = {}", prepared_indv.get_id());
+            match email {
+                Ok(email) => {
+                    if let Some(mailer) = &ctx.smtp_client {
+                        match mailer.send(&email) {
+                            Ok(_) => {
+                                info!("message successfully sent, uri = {}", prepared_indv.get_id());
+                                return ResultCode::Ok;
+                            },
+                            Err(e) => {
+                                error!("failed to send email, uri = {}, err = {:?}", prepared_indv.get_id(), e);
+                            },
                         }
                     } else {
-                        error!("failed to send email, mailer not found, uri = {}, ", prepared_indv.get_id());
+                        error!("failed to send email, mailer not found, uri = {}", prepared_indv.get_id());
                     }
                 },
                 Err(e) => {
@@ -382,24 +415,33 @@ fn get_emails_from_appointment(has_message_type: &Option<String>, ap: &mut Indiv
 
         let mut res = vec![];
         for el in ac.get_literals("v-s:mailbox").unwrap_or_default() {
-            res.push(Mailbox::new_with_name(label.to_string(), el));
+            if let Ok(address) = Address::from_str(&el) {
+                res.push(Mailbox::new(Some(label.clone()), address));
+            } else if let Some((user, domain)) = split_email_address(&el) {
+                if let Ok(address) = Address::new(user, domain) {
+                    res.push(Mailbox::new(Some(label.clone()), address));
+                } else {
+                    error!("failed to create email address: {}", el);
+                }
+            } else {
+                error!("invalid email format: {}", el);
+            }
         }
-
         res
     } else {
-        return vec![];
+        vec![]
     }
 }
 
 fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Context, backend: &mut Backend) -> Vec<Mailbox> {
     let mut res = Vec::new();
-    let label;
+
     if ap_id.is_empty() {
         return vec![];
     }
 
     if let Some(indv) = backend.get_individual(ap_id, &mut Individual::default()) {
-        label = indv.get_first_literal("rdfs:label").unwrap_or_default();
+        let label = indv.get_first_literal("rdfs:label").unwrap_or_default();
 
         if indv.any_exists("rdf:type", &["v-s:Appointment"]) {
             return get_emails_from_appointment(has_message_type, indv, backend);
@@ -424,7 +466,17 @@ fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Conte
                 if let Some(ac) = backend.get_individual(&ac_uri, &mut Individual::default()) {
                     if !ac.is_exists_bool("v-s:delete", true) {
                         for el in ac.get_literals("v-s:mailbox").unwrap_or_default() {
-                            res.push(Mailbox::new_with_name(label.to_owned(), el));
+                            if let Ok(address) = Address::from_str(&el) {
+                                res.push(Mailbox::new(Some(label.clone()), address));
+                            } else if let Some((user, domain)) = split_email_address(&el) {
+                                if let Ok(address) = Address::new(user, domain) {
+                                    res.push(Mailbox::new(Some(label.clone()), address));
+                                } else {
+                                    error!("failed to create email address: {}", el);
+                                }
+                            } else {
+                                error!("invalid email format: {}", el);
+                            }
                         }
                         return res;
                     }
@@ -435,6 +487,15 @@ fn extract_email(has_message_type: &Option<String>, ap_id: &str, ctx: &mut Conte
         }
     }
     res
+}
+
+fn split_email_address(email: &str) -> Option<(String, String)> {
+    let parts: Vec<&str> = email.split('@').collect();
+    if parts.len() == 2 {
+        Some((parts[0].to_string(), parts[1].to_string()))
+    } else {
+        None
+    }
 }
 
 fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
@@ -463,42 +524,97 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
                             ctx.default_mail_sender = connection.get_first_literal("v-s:mailSender").unwrap_or_default();
                             ctx.always_use_mail_sender = connection.get_first_bool("v-s:alwaysUseMailSender").unwrap_or_default();
 
-                            if ctx.always_use_mail_sender {
-                                info!("use always_use_mail_sender parameter");
-                            }
+                            // Формируем URL для SMTP
+                            let mut url = String::new();
 
-                            if !ctx.default_mail_sender.is_empty() {
-                                info!("default mail sender = {:?}", ctx.default_mail_sender);
-                            }
+                            // Определяем протокол и порт по умолчанию
+                            let (protocol, default_port) = match port {
+                                465 => ("smtps://", 465),
+                                587 => ("smtp://", 587),
+                                _ => ("smtp://", 25),
+                            };
 
-                            let client = SmtpClient::new(host.to_owned() + ":" + &port.to_string(), ClientSecurity::None);
-                            if let Err(e) = client {
-                                error!("failed to connect to {}:{}, err = {:?}", host, port, e);
-                                return false;
-                            }
+                            url.push_str(protocol);
 
-                            if let (Some(login), Some(pass)) = (login, pass) {
-                                let auth_type = match connection.get_first_literal("v-s:authType").unwrap_or_default().as_str() {
-                                    "PLAIN" => Mechanism::Plain,
-                                    "LOGIN" => Mechanism::Login,
-                                    _ => Mechanism::Plain,
+                            // Добавляем credentials и механизм аутентификации если есть
+                            if let (Some(login), Some(pass)) = (&login, &pass) {
+                                let auth_mechanism = match connection.get_first_literal("v-s:authType").unwrap_or_default().as_str() {
+                                    "PLAIN" => "AUTH=PLAIN",
+                                    "LOGIN" => "AUTH=LOGIN",
+                                    _ => "AUTH=PLAIN",
                                 };
 
-                                // connect with auth
-                                ctx.smtp_client = Some(
-                                    client
-                                        .unwrap()
-                                        .credentials(Credentials::new(login, pass))
-                                        .smtp_utf8(use_smtp_utf8)
-                                        .authentication_mechanism(auth_type)
-                                        .connection_reuse(ConnectionReuseParameters::ReuseUnlimited)
-                                        .transport(),
-                                );
-                                return true;
+                                url.push_str(&urlencoding::encode(login));
+                                url.push(':');
+                                url.push_str(&urlencoding::encode(pass));
+                                url.push('@');
+
+                                if port != default_port {
+                                    url.push_str(&host);
+                                    url.push(':');
+                                    url.push_str(&port.to_string());
+                                } else {
+                                    url.push_str(&host);
+                                }
+
+                                // Добавляем параметры
+                                url.push('?');
+                                url.push_str(auth_mechanism);
+
+                                if port == 587 {
+                                    url.push_str("&tls=required");
+                                }
+
+                                if use_smtp_utf8 {
+                                    url.push_str("&utf8=yes");
+                                }
                             } else {
-                                // no security connect
-                                ctx.smtp_client = Some(client.unwrap().smtp_utf8(use_smtp_utf8).transport());
-                                return true;
+                                url.push_str(&host);
+                                if port != default_port {
+                                    url.push(':');
+                                    url.push_str(&port.to_string());
+                                }
+
+                                if port == 587 {
+                                    url.push_str("?tls=required");
+                                    if use_smtp_utf8 {
+                                        url.push_str("&utf8=yes");
+                                    }
+                                } else if use_smtp_utf8 {
+                                    url.push_str("?utf8=yes");
+                                }
+                            }
+
+                            info!("Connecting to SMTP server with URL: {}", url);
+
+                            // Создаем конфигурацию пула с разумными значениями по умолчанию
+                            let pool_config = PoolConfig::new()
+                                .max_size(20) // Максимум 20 соединений в пуле
+                                .idle_timeout(Duration::from_secs(300)); // Таймаут простоя 5 минут
+
+                            // Создаем транспорт
+                            match SmtpTransport::from_url(&url) {
+                                Ok(builder) => {
+                                    let transport = builder
+                                        .pool_config(pool_config)
+                                        .timeout(Some(Duration::from_secs(10))) // Таймаут подключения 10 секунд
+                                        .build();
+
+                                    ctx.smtp_client = Some(transport);
+
+                                    if ctx.always_use_mail_sender {
+                                        info!("use always_use_mail_sender parameter");
+                                    }
+                                    if !ctx.default_mail_sender.is_empty() {
+                                        info!("default mail sender = {:?}", ctx.default_mail_sender);
+                                    }
+
+                                    return true;
+                                },
+                                Err(e) => {
+                                    error!("Failed to create SMTP transport from URL {}: {:?}", url, e);
+                                    return false;
+                                },
                             }
                         }
                     }
