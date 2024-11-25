@@ -46,13 +46,13 @@ export const html = `
     <div class="sheet">
       <em about="v-s:title" property="rdfs:label" class="-view edit search"></em>
       <h3 about="@" property="v-s:title" class="margin-md view -edit -search"></h3>
-      <veda-control data-type="string" property="v-s:title" class="-view edit search"></veda-control>
+      <veda-control data-type="augmentedText" property="v-s:title" class="-view edit search"></veda-control>
       <em about="v-s:description" property="rdfs:label" class="-view edit search"></em>
       <i about="@" property="v-s:description" class="markdown view -edit -search"></i>
-      <veda-control data-type="text" rows="3" property="v-s:description" class="-view edit search"></veda-control>
+      <veda-control data-type="augmentedText" rows="3" property="v-s:description" class="-view edit search"></veda-control>
       <em about="v-s:content" property="rdfs:label" class="-view edit search"></em>
       <div about="@" property="v-s:content" class="markdown view -edit -search"></div>
-      <veda-control data-type="text" rows="10" property="v-s:content" class="-view edit search"></veda-control>
+      <veda-control data-type="augmentedText" rows="10" property="v-s:content" class="-view edit search"></veda-control>
       <div about="@" rel="v-s:attachment" data-template="v-ui:FileTemplate" data-embedded="true"></div>
       <veda-control data-type="file" property="v-s:attachment" class="-view edit search"></veda-control>
       <b><small about="@" property="v-s:created" class="view -edit -search"></small></b>
