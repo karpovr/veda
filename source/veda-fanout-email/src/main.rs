@@ -122,6 +122,105 @@ fn prepare(backend: &mut Backend, ctx: &mut Context, queue_element: &mut Individ
     Ok(true)
 }
 
+struct IndvAddreses {
+    has_message_type: Option<String>,
+    from: String,
+    to: Vec<String>,
+    //reply_to: Option<Vec<String>>,
+    sender_mailbox: String,
+    recipient_mailbox: Option<Vec<String>>,
+}
+
+impl IndvAddreses {
+    // Создаем метод для заполнения структуры из объекта `prepared_indv`
+    fn from_prepared_individual(prepared_indv: &mut Individual, ctx: &mut Context) -> Self {
+        let mut from = prepared_indv.get_first_literal("v-wf:from").unwrap_or_default();
+        let sender_mailbox = prepared_indv.get_first_literal("v-s:senderMailbox").unwrap_or_default();
+        if from.is_empty() && sender_mailbox.is_empty() && !ctx.default_mail_sender.is_empty() {
+            from = ctx.default_mail_sender.to_string();
+        }
+
+        IndvAddreses {
+            has_message_type: prepared_indv.get_first_literal("v-s:hasMessageType"),
+            from,
+            to: prepared_indv.get_literals("v-wf:to").unwrap_or_default(),
+            //reply_to: prepared_indv.get_literals("v-wf:replyTo"),
+            sender_mailbox,
+            recipient_mailbox: prepared_indv.get_literals("v-s:recipientMailbox"),
+        }
+    }
+}
+
+struct MailAddreses {
+    email_from: Mailbox,
+    rr_email_to_hash: HashMap<String, Mailbox>,
+    //rr_reply_to_hash: HashMap<String, Mailbox>
+}
+
+impl MailAddreses {
+    fn from_indv_addreses(message_info: IndvAddreses, backend: &mut Backend, ctx: &mut Context) -> Self {
+        let mut email_from = Mailbox::new("".to_string());
+
+        if ctx.always_use_mail_sender && !ctx.default_mail_sender.is_empty() && ctx.default_mail_sender.len() > 5 {
+            info!("use default mail sender: {}", ctx.default_mail_sender);
+            if !ctx.default_mail_sender.contains('@') {
+                if let Some(r) = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend).pop() {
+                    email_from = r;
+                } else {
+                    error!("failed to extract email from default_mail_sender {}", ctx.default_mail_sender);
+                }
+            } else {
+                email_from = Mailbox::new(ctx.default_mail_sender.to_string());
+            };
+        } else {
+            if !message_info.from.is_empty() {
+                info!("extract from: {}", message_info.from);
+                if let Some(r) = extract_email(&None, &message_info.from, ctx, backend).pop() {
+                    email_from = r;
+                }
+            }
+
+            if (email_from.address.is_empty() || email_from.address.len() < 5) && !ctx.default_mail_sender.is_empty() {
+                let mut emails = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend);
+                if !emails.is_empty() {
+                    email_from = emails.pop().unwrap();
+                }
+            }
+
+            if (email_from.address.is_empty() || email_from.address.len() < 5) && !message_info.sender_mailbox.is_empty() {
+                email_from = Mailbox::new(message_info.sender_mailbox);
+            }
+        }
+
+        if email_from.name.is_none() {
+            email_from.name = Some("Veda System".to_owned());
+        }
+
+        let mut rr_email_to_hash = HashMap::new();
+        for elt in message_info.to {
+            for r in extract_email(&message_info.has_message_type, &elt, ctx, backend) {
+                rr_email_to_hash.insert(r.address.to_owned(), r);
+            }
+        }
+
+        for el in message_info.recipient_mailbox.unwrap_or_default() {
+            rr_email_to_hash.insert(el.to_string(), Mailbox::new(el));
+        }
+
+        //let mut rr_reply_to_hash = HashMap::new();
+        //for elt in message_info.reply_to.unwrap_or_default() {
+        //    for r in extract_email(&message_info.has_message_type, &elt, ctx, backend) {
+        //        rr_reply_to_hash.insert(r.address.to_owned(), r);
+        //    }
+        //}
+        MailAddreses {
+            email_from,
+            rr_email_to_hash,
+            //rr_reply_to_hash,
+        }
+    }
+}
+
 fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> ResultCode {
     let is_deleted = prepared_indv.is_exists("v-s:deleted");
 
@@ -137,79 +236,17 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
         return ResultCode::Ok;
     }
 
-    let has_message_type = prepared_indv.get_first_literal("v-s:hasMessageType");
-
-    let mut from = prepared_indv.get_first_literal("v-wf:from").unwrap_or_default();
-    let to = prepared_indv.get_literals("v-wf:to").unwrap_or_default();
     let subject = prepared_indv.get_first_literal("v-s:subject");
-    let reply_to = prepared_indv.get_literals("v-wf:replyTo");
     let message_body = prepared_indv.get_first_literal("v-s:messageBody");
-
-    let sender_mailbox = prepared_indv.get_first_literal("v-s:senderMailbox").unwrap_or_default();
-    let recipient_mailbox = prepared_indv.get_literals("v-s:recipientMailbox");
     let attachments = prepared_indv.get_literals("v-s:attachment");
 
-    if from.is_empty() && sender_mailbox.is_empty() && !ctx.default_mail_sender.is_empty() {
-        from = ctx.default_mail_sender.to_string();
-    }
+    let message_info = IndvAddreses::from_prepared_individual(prepared_indv, ctx);
 
-    if (!from.is_empty() || !sender_mailbox.is_empty() || !ctx.default_mail_sender.is_empty()) && (!to.is_empty() || recipient_mailbox.is_some()) {
-        let mut email_from = Mailbox::new("".to_string());
-
-        if ctx.always_use_mail_sender && !ctx.default_mail_sender.is_empty() && ctx.default_mail_sender.len() > 5 {
-            info!("use default mail sender: {}", ctx.default_mail_sender);
-            if !ctx.default_mail_sender.contains('@') {
-                if let Some(r) = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend).pop() {
-                    email_from = r;
-                } else {
-                    error!("failed to extract email from default_mail_sender {}", ctx.default_mail_sender);
-                }
-            } else {
-                email_from = Mailbox::new(ctx.default_mail_sender.to_string());
-            };
-        } else {
-            if !from.is_empty() {
-                info!("extract from: {}", from);
-                if let Some(r) = extract_email(&None, &from, ctx, backend).pop() {
-                    email_from = r;
-                }
-            }
-
-            if (email_from.address.is_empty() || email_from.address.len() < 5) && !ctx.default_mail_sender.is_empty() {
-                let mut emails = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend);
-                if !emails.is_empty() {
-                    email_from = emails.pop().unwrap();
-                }
-            }
-
-            if (email_from.address.is_empty() || email_from.address.len() < 5) && !sender_mailbox.is_empty() {
-                email_from = Mailbox::new(sender_mailbox);
-            }
-        }
-
-        if email_from.name.is_none() {
-            email_from.name = Some("Veda System".to_owned());
-        }
-
-        let mut rr_email_to_hash = HashMap::new();
-        for elt in to {
-            for r in extract_email(&has_message_type, &elt, ctx, backend) {
-                rr_email_to_hash.insert(r.address.to_owned(), r);
-            }
-        }
-
-        for el in recipient_mailbox.unwrap_or_default() {
-            rr_email_to_hash.insert(el.to_string(), Mailbox::new(el));
-        }
-
-        let mut rr_reply_to_hash = HashMap::new();
-        for elt in reply_to.unwrap_or_default() {
-            for r in extract_email(&has_message_type, &elt, ctx, backend) {
-                rr_reply_to_hash.insert(r.address.to_owned(), r);
-            }
-        }
-
-        if !rr_email_to_hash.is_empty() {
+    if (!message_info.from.is_empty() || !message_info.sender_mailbox.is_empty() || !ctx.default_mail_sender.is_empty())
+        && (!message_info.to.is_empty() || message_info.recipient_mailbox.is_some())
+    {
+        let mail_addreses = MailAddreses::from_indv_addreses(message_info, backend, ctx);
+        if !mail_addreses.rr_email_to_hash.is_empty() {
             let mut email = Email::builder();
 
             for id in attachments.unwrap_or_default().iter() {
@@ -232,9 +269,9 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 }
             }
 
-            email = email.from(email_from);
+            email = email.from(mail_addreses.email_from);
 
-            for el in rr_email_to_hash.values() {
+            for el in mail_addreses.rr_email_to_hash.values() {
                 email = email.to(el.clone());
             }
 
@@ -269,11 +306,11 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
             }
         }
     } else {
-        if from.is_empty() || from.len() < 5 {
-            error!("failed to send email, empty or invalid field from, uri = {}, from = {}", prepared_indv.get_id(), from);
+        if message_info.from.is_empty() || message_info.from.len() < 5 {
+            error!("failed to send email, empty or invalid field from, uri = {}, from = {}", prepared_indv.get_id(), message_info.from);
         }
 
-        if to.is_empty() {
+        if message_info.to.is_empty() {
             error!("failed to send email, empty or invalid field to, uri = {}", prepared_indv.get_id());
         }
     }
