@@ -17,9 +17,10 @@ $.fn.veda_checkbox = function (params) {
   const rangeRestriction = spec && spec.hasValue('v-ui:rangeRestriction') ? spec['v-ui:rangeRestriction'][0] : undefined;
   const range = rangeRestriction ? [rangeRestriction] : (new IndividualModel(property_uri))['rdfs:range'];
   const queryPattern = this.attr('data-query-pattern') ?? (spec && spec.hasValue('v-ui:queryPattern') ? spec['v-ui:queryPattern'][0].toString() : undefined);
-  const queryPrefix = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
+  const queryPrefixDefault = this.attr('data-query-prefix') || ( spec && spec.hasValue('v-ui:queryPrefix') ? spec['v-ui:queryPrefix'][0] : range.map((item) => {
     return '\'rdf:type\'===\'' + item.id + '\'';
   }).join(' || ') );
+  const isDynamicQueryPrefix = this.attr('data-dynamic-query-prefix') == 'true';
   const sort = this.attr('data-sort') || ( spec && spec.hasValue('v-ui:sort') && spec['v-ui:sort'][0].toString() );
   const source = this.attr('data-source') || undefined;
   const template = this.attr('data-template') || '{@.rdfs:label}';
@@ -50,7 +51,14 @@ $.fn.veda_checkbox = function (params) {
         .catch((error) => {
           console.error('Source failed', source);
         });
-    } else if (queryPrefix) {
+    } else if (queryPrefixDefault) {
+      let queryPrefix;
+      if (isDynamicQueryPrefix) {
+          queryPrefix = self.attr('data-query-prefix');
+        }
+        if (queryPrefix == undefined) {
+          queryPrefix = queryPrefixDefault;
+        }
       return interpolate(queryPrefix, individual)
         .then((prefix) => {
           return ftQuery(prefix, undefined, sort, withDeleted, queryPattern);
