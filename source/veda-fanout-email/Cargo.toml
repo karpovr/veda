@@ -6,8 +6,10 @@ edition = "2021"
 
 [dependencies]
 log = "0.4"
-lettre = "0.9.4"
-lettre_email = "0.9.4"
+lettre = "0.11"
+#lettre_email = "0.9.4"
 
 v_common = { package = "v-common", version = "=0.10.6" }
+urlencoding = "2.1.3"
+mime_guess = "2.0.5"
 #v_common = { package = "v-common", path = "../../../v-common" }
