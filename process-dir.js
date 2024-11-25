@@ -62,7 +62,7 @@ async function processDirectory(dir, ...processors) {
         return processDirectory(entryPath, ...processors);
       }
     } catch (err) {
-      console.error('Error stating file.', error);
+      console.error('Error stating file.', err);
       return;
     }
   }
