@@ -22,12 +22,19 @@ $.fn.veda_date = function ( options ) {
 
 const defaults = {
   template: `
-    <div class="input-group date">
-      <span class="input-group-addon">
+  <div class="date-control">
+    <div class="input-group">
+      <span class="input-group-addon btn btn-default date">
         <span class="glyphicon glyphicon-time"></span>
       </span>
       <input type="text" class="form-control" autocomplete="off"/>
+      <div class="input-group-addon btn btn-default clear" tabindex="0">&#10005;</div>
+      <ul class="add-time-list dropdown-menu dropdown-menu-right"></ul>
+      <div class="input-group-addon btn btn-default dropdown-toggle" tabindex="0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="caret"></i>
+      </div>
     </div>
+  </div>
   `,
   parser: function (input) {
     if (input) {
