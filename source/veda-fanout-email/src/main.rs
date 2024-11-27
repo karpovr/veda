@@ -286,7 +286,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
         }
 
         if !mail_addreses.rr_email_to_hash.is_empty() {
-            let mut message_builder = Message::builder().from(mail_addreses.email_from.clone());
+            let mut message_builder = Message::builder().from(mail_addreses.email_from.clone()).header(header::ContentTransferEncoding::QuotedPrintable);
 
             for el in mail_addreses.rr_email_to_hash.values() {
                 message_builder = message_builder.to(el.clone());
@@ -322,9 +322,15 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                     }
 
                     let body_part = if is_html {
-                        SinglePart::builder().header(header::ContentType::parse("text/html").unwrap()).body(body.clone())
+                        SinglePart::builder()
+                            .header(header::ContentType::parse("text/html; charset=utf-8").unwrap())
+                            .header(header::ContentTransferEncoding::QuotedPrintable)
+                            .body(body.clone())
                     } else {
-                        SinglePart::builder().header(header::ContentType::parse("text/plain").unwrap()).body(body.clone())
+                        SinglePart::builder()
+                            .header(header::ContentType::parse("text/plain; charset=utf-8").unwrap())
+                            .header(header::ContentTransferEncoding::QuotedPrintable)
+                            .body(body.clone())
                     };
                     builder = builder.singlepart(body_part);
                 }
@@ -359,8 +365,11 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                                             header::ContentType::parse("application/octet-stream").unwrap()
                                         });
 
-                                        let attachment =
-                                            SinglePart::builder().header(content_type).header(header::ContentDisposition::attachment(&file_name)).body(content);
+                                        let attachment = SinglePart::builder()
+                                            .header(content_type)
+                                            .header(header::ContentDisposition::attachment(&file_name))
+                                            .header(header::ContentTransferEncoding::Base64)
+                                            .body(content);
 
                                         builder = builder.singlepart(attachment);
                                         if debug_logging {
@@ -392,15 +401,24 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 }
 
                 if is_html {
-                    message_builder.header(header::ContentType::parse("text/html").unwrap()).body(body.clone())
+                    message_builder
+                        .header(header::ContentType::parse("text/html; charset=utf-8").unwrap())
+                        .header(header::ContentTransferEncoding::QuotedPrintable)
+                        .body(body.clone())
                 } else {
-                    message_builder.header(header::ContentType::parse("text/plain").unwrap()).body(body.clone())
+                    message_builder
+                        .header(header::ContentType::parse("text/plain; charset=utf-8").unwrap())
+                        .header(header::ContentTransferEncoding::QuotedPrintable)
+                        .body(body.clone())
                 }
             } else {
                 if debug_logging {
                     info!("Creating empty message for {}", prepared_indv.get_id());
                 }
-                message_builder.body(String::new())
+                message_builder
+                    .header(header::ContentType::parse("text/plain; charset=utf-8").unwrap())
+                    .header(header::ContentTransferEncoding::QuotedPrintable)
+                    .body(String::new())
             };
 
             match email {
