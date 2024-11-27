@@ -6,6 +6,7 @@ use lettre::message::{header, Mailbox, MultiPart, SinglePart};
 use lettre::transport::smtp::PoolConfig;
 use lettre::{Address, Message, SmtpTransport, Transport};
 use std::collections::HashMap;
+use std::error::Error;
 use std::str::FromStr;
 use std::time::Duration;
 use v_common::module::common::load_onto;
@@ -225,17 +226,26 @@ impl MailAddreses {
 }
 
 fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> ResultCode {
-    let is_deleted = prepared_indv.is_exists("v-s:deleted");
+    // Проверяем нужно ли подробное логирование
+    let debug_logging = prepared_indv.is_exists("v-s:debugEmail");
 
+    if debug_logging {
+        info!("Starting to prepare deliverable for {}", prepared_indv.get_id());
+    }
+
+    let is_deleted = prepared_indv.is_exists("v-s:deleted");
     if is_deleted {
-        info!("individual {} is deleted, ignore", prepared_indv.get_id());
+        if debug_logging {
+            info!("Individual {} is deleted, ignore", prepared_indv.get_id());
+        }
         return ResultCode::Ok;
     }
 
     let is_draft_of = prepared_indv.get_first_literal("v-s:is_draft_of");
-
     if is_draft_of.is_some() {
-        info!("individual {} is draft, ignore", prepared_indv.get_id());
+        if debug_logging {
+            info!("Individual {} is draft, ignore", prepared_indv.get_id());
+        }
         return ResultCode::Ok;
     }
 
@@ -243,61 +253,122 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
     let message_body = prepared_indv.get_first_literal("v-s:messageBody");
     let attachments = prepared_indv.get_literals("v-s:attachment");
 
+    if debug_logging {
+        info!(
+            "Email details for {}: subject={:?}, has_body={}, attachment_count={:?}",
+            prepared_indv.get_id(),
+            subject,
+            message_body.is_some(),
+            attachments.as_ref().map(|a| a.len())
+        );
+    }
+
     let message_info = IndvAddreses::from_prepared_individual(prepared_indv, ctx);
+
+    if debug_logging {
+        info!(
+            "Address details for {}: from={}, to_count={}, has_sender_mailbox={}, recipient_mailbox_count={:?}",
+            prepared_indv.get_id(),
+            message_info.from,
+            message_info.to.len(),
+            !message_info.sender_mailbox.is_empty(),
+            message_info.recipient_mailbox.as_ref().map(|r| r.len())
+        );
+    }
 
     if (!message_info.from.is_empty() || !message_info.sender_mailbox.is_empty() || !ctx.default_mail_sender.is_empty())
         && (!message_info.to.is_empty() || message_info.recipient_mailbox.is_some())
     {
         let mail_addreses = MailAddreses::from_indv_addreses(message_info, backend, ctx);
+
+        if debug_logging {
+            info!("Resolved email addresses for {}: from={}, to_count={}", prepared_indv.get_id(), mail_addreses.email_from.email, mail_addreses.rr_email_to_hash.len());
+        }
+
         if !mail_addreses.rr_email_to_hash.is_empty() {
-            let mut message_builder = Message::builder().from(mail_addreses.email_from);
+            let mut message_builder = Message::builder().from(mail_addreses.email_from.clone());
 
             for el in mail_addreses.rr_email_to_hash.values() {
                 message_builder = message_builder.to(el.clone());
+                if debug_logging {
+                    info!("Adding recipient for {}: {}", prepared_indv.get_id(), el.email);
+                }
             }
 
-            if let Some(s) = subject {
+            if let Some(s) = subject.clone() {
                 message_builder = message_builder.subject(s);
             }
 
             // Собираем сообщение в зависимости от наличия вложений
             let email = if attachments.is_some() {
+                if debug_logging {
+                    info!("Processing attachments for {}", prepared_indv.get_id());
+                }
                 let mut builder = MultiPart::mixed().build();
 
                 // Добавляем тело письма
-                if let Some(body) = message_body {
-                    let body_part = if body.to_lowercase().contains("<html>") {
-                        SinglePart::builder().header(header::ContentType::parse("text/html").unwrap()).body(body)
+                if let Some(ref body) = message_body {
+                    let is_html = body.to_lowercase().contains("<html>");
+                    if debug_logging {
+                        info!(
+                            "Adding message body for {}, content type: {}",
+                            prepared_indv.get_id(),
+                            if is_html {
+                                "text/html"
+                            } else {
+                                "text/plain"
+                            }
+                        );
+                    }
+
+                    let body_part = if is_html {
+                        SinglePart::builder().header(header::ContentType::parse("text/html").unwrap()).body(body.clone())
                     } else {
-                        SinglePart::builder().header(header::ContentType::parse("text/plain").unwrap()).body(body)
+                        SinglePart::builder().header(header::ContentType::parse("text/plain").unwrap()).body(body.clone())
                     };
                     builder = builder.singlepart(body_part);
                 }
 
                 // Добавляем вложения
-                for id in attachments.unwrap().iter() {
+                for id in attachments.clone().unwrap().iter() {
+                    if debug_logging {
+                        info!("Processing attachment {} for {}", id, prepared_indv.get_id());
+                    }
                     if let Some(file_info) = backend.get_individual(id, &mut Individual::default()) {
                         if let (Some(path), Some(file_uri), Some(file_name)) =
                             (file_info.get_first_literal("v-s:filePath"), file_info.get_first_literal("v-s:fileUri"), file_info.get_first_literal("v-s:fileName"))
                         {
                             if !path.is_empty() {
                                 let full_path = format!("{}/{}/{}", ATTACHMENTS_DB_PATH, path, file_uri);
+                                if debug_logging {
+                                    info!("Reading attachment from {}", full_path);
+                                }
 
                                 match std::fs::read(&full_path) {
                                     Ok(content) => {
                                         let mime = mime_guess::from_path(&file_name).first_or_octet_stream();
                                         let mime_str = mime.essence_str().to_string();
+                                        if debug_logging {
+                                            info!("Attachment {} mime type: {}", file_name, mime_str);
+                                        }
 
-                                        let content_type =
-                                            header::ContentType::parse(&mime_str).unwrap_or_else(|_| header::ContentType::parse("application/octet-stream").unwrap());
+                                        let content_type = header::ContentType::parse(&mime_str).unwrap_or_else(|_| {
+                                            if debug_logging {
+                                                warn!("Failed to parse mime type {}, using octet-stream", mime_str);
+                                            }
+                                            header::ContentType::parse("application/octet-stream").unwrap()
+                                        });
 
                                         let attachment =
                                             SinglePart::builder().header(content_type).header(header::ContentDisposition::attachment(&file_name)).body(content);
 
                                         builder = builder.singlepart(attachment);
+                                        if debug_logging {
+                                            info!("Successfully added attachment {}", file_name);
+                                        }
                                     },
                                     Err(e) => {
-                                        error!("failed to read attachment {} for email {}, err = {:?}", &full_path, prepared_indv.get_id(), e);
+                                        error!("Failed to read attachment {} for email {}, err = {:?}", &full_path, prepared_indv.get_id(), e);
                                     },
                                 }
                             }
@@ -306,45 +377,139 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 }
 
                 message_builder.multipart(builder)
-            } else if let Some(body) = message_body {
-                // Если нет вложений, отправляем просто текст
-                if body.to_lowercase().contains("<html>") {
-                    message_builder.header(header::ContentType::parse("text/html").unwrap()).body(body)
+            } else if let Some(ref body) = message_body {
+                let is_html = body.to_lowercase().contains("<html>");
+                if debug_logging {
+                    info!(
+                        "Creating single part message for {}, content type: {}",
+                        prepared_indv.get_id(),
+                        if is_html {
+                            "text/html"
+                        } else {
+                            "text/plain"
+                        }
+                    );
+                }
+
+                if is_html {
+                    message_builder.header(header::ContentType::parse("text/html").unwrap()).body(body.clone())
                 } else {
-                    message_builder.header(header::ContentType::parse("text/plain").unwrap()).body(body)
+                    message_builder.header(header::ContentType::parse("text/plain").unwrap()).body(body.clone())
                 }
             } else {
+                if debug_logging {
+                    info!("Creating empty message for {}", prepared_indv.get_id());
+                }
                 message_builder.body(String::new())
             };
 
             match email {
                 Ok(email) => {
                     if let Some(mailer) = &ctx.smtp_client {
+                        if debug_logging {
+                            info!("Attempting to send email for {}", prepared_indv.get_id());
+                        }
                         match mailer.send(&email) {
-                            Ok(_) => {
-                                info!("message successfully sent, uri = {}", prepared_indv.get_id());
+                            Ok(response) => {
+                                // Извлекаем message_id из ответа SMTP сервера
+                                let message_id = response.message().collect::<Vec<_>>().first().and_then(|msg| {
+                                    if let Some(start) = msg.find('<') {
+                                        if let Some(end) = msg[start..].find('>') {
+                                            Some(&msg[start..start + end + 1])
+                                        } else {
+                                            None
+                                        }
+                                    } else {
+                                        None
+                                    }
+                                });
+
+                                // Базовый лог для любого случая
+                                info!(
+                                    "Email sent: from={}, to={:?}, smtp_code={}, message_id={}",
+                                    mail_addreses.email_from.email,
+                                    mail_addreses.rr_email_to_hash.values().map(|m| m.email.to_string()).collect::<Vec<_>>(),
+                                    response.code(),
+                                    message_id.unwrap_or("unknown")
+                                );
+
+                                if debug_logging {
+                                    info!("Full SMTP server response: {:?}", response);
+                                }
                                 return ResultCode::Ok;
                             },
                             Err(e) => {
-                                error!("failed to send email, uri = {}, err = {:?}", prepared_indv.get_id(), e);
+                                error!("Failed to send email, uri = {}, error details: {:?}", prepared_indv.get_id(), e);
+
+                                // Определяем тип ошибки и выводим соответствующую информацию
+                                if e.is_permanent() {
+                                    if let Some(code) = e.status() {
+                                        error!("Permanent SMTP error with code {}: {}", code, e);
+                                    } else {
+                                        error!("Permanent SMTP error without code: {}", e);
+                                    }
+                                    error!("This error cannot be resolved by retrying");
+                                } else if e.is_transient() {
+                                    if let Some(code) = e.status() {
+                                        error!("Transient SMTP error with code {}: {}", code, e);
+                                    } else {
+                                        error!("Transient SMTP error without code: {}", e);
+                                    }
+                                    error!("This error might be resolved by retrying later");
+                                } else if e.is_client() {
+                                    error!("SMTP client error: {}", e);
+                                } else if e.is_response() {
+                                    error!("SMTP response error: {}", e);
+                                } else if e.is_timeout() {
+                                    error!("SMTP timeout error: {}", e);
+                                }
+
+                                // Выводим информацию об исходной ошибке, если она есть
+                                if let Some(source) = e.source() {
+                                    error!("Underlying error: {}", source);
+                                    if let Some(io_err) = source.downcast_ref::<std::io::Error>() {
+                                        error!("IO error kind: {:?}", io_err.kind());
+                                        if let Some(os_err) = io_err.raw_os_error() {
+                                            error!("OS error code: {}", os_err);
+                                        }
+                                    }
+                                }
+
+                                // Логируем контекст отправки
+                                error!(
+                                    "Email context: from={}, to={:?}, subject={:?}",
+                                    mail_addreses.email_from.email,
+                                    mail_addreses.rr_email_to_hash.values().map(|m| m.email.to_string()).collect::<Vec<_>>(),
+                                    subject
+                                );
                             },
                         }
                     } else {
-                        error!("failed to send email, mailer not found, uri = {}", prepared_indv.get_id());
+                        error!("Failed to send email, mailer not found, uri = {}", prepared_indv.get_id());
                     }
                 },
                 Err(e) => {
-                    error!("failed to build email, id = {}, err = {:?}", prepared_indv.get_id(), e);
+                    error!("Failed to build email, id = {}, error: {}", prepared_indv.get_id(), e);
+                    error!(
+                        "Email configuration: from={}, to_count={}, has_subject={}, has_body={}, has_attachments={}",
+                        mail_addreses.email_from.email,
+                        mail_addreses.rr_email_to_hash.len(),
+                        subject.is_some(),
+                        message_body.is_some(),
+                        attachments.is_some()
+                    );
                 },
             }
+        } else {
+            error!("No valid recipients found for {}", prepared_indv.get_id());
         }
     } else {
         if message_info.from.is_empty() || message_info.from.len() < 5 {
-            error!("failed to send email, empty or invalid field from, uri = {}, from = {}", prepared_indv.get_id(), message_info.from);
+            error!("Failed to send email, empty or invalid field from, uri = {}, from = {}", prepared_indv.get_id(), message_info.from);
         }
 
         if message_info.to.is_empty() {
-            error!("failed to send email, empty or invalid field to, uri = {}", prepared_indv.get_id());
+            error!("Failed to send email, empty or invalid field to, uri = {}", prepared_indv.get_id());
         }
     }
 
