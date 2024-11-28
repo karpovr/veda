@@ -14,7 +14,7 @@ export const html = `
           <th><span about="v-wf:takenDecision" property="rdfs:label"></span></th>
           <th width="20px"></th>
           <th width="10%" class="orderby" data-orderby="v-s:created" about="v-s:created" property="rdfs:label"></th>
-          <th width="10%" data-orderby="v-wf:takenDecision.v-s:created">
+          <th width="10%" class="orderby" data-orderby="v-wf:takenDecision.v-s:created">
             <span about="v-ft:DecisionDateBundle" property="rdfs:label"></span>
           </th>
           <th width="10%"><span about="v-ft:DecisionCreatorBundle" property="rdfs:label"></span></th>
