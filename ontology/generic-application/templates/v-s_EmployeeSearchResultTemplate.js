@@ -10,7 +10,7 @@ export const html = `
         <th width="10%" class="orderby" data-orderby="v-s:created"><span about="v-s:created" property="rdfs:label"></span></th>
         <th><span about="rdfs:label" property="rdfs:label"></span></th>
         <th><span about="v-s:parentOrganization" property="rdfs:label"></span></th>
-        <th><span about="v-s:login" property="rdfs:label"></span></th>
+        <th class="orderby" data-orderby="v-s:hasAccount"><span about="v-s:login" property="rdfs:label"></span></th>
       </tr>
     </thead>
 
