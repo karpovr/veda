@@ -225,50 +225,50 @@ impl MailAddreses {
     }
 }
 
-fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> ResultCode {
+fn prepare_deliverable(msg_indv: &mut Individual, backend: &mut Backend, ctx: &mut Context) -> ResultCode {
     // Проверяем нужно ли подробное логирование
-    let debug_logging = prepared_indv.is_exists("v-s:debugEmail");
+    let debug_logging = msg_indv.is_exists("v-s:debugEmail");
 
     if debug_logging {
-        info!("Starting to prepare deliverable for {}", prepared_indv.get_id());
+        info!("Starting to prepare deliverable for {}", msg_indv.get_id());
     }
 
-    let is_deleted = prepared_indv.is_exists("v-s:deleted");
+    let is_deleted = msg_indv.is_exists("v-s:deleted");
     if is_deleted {
         if debug_logging {
-            info!("Individual {} is deleted, ignore", prepared_indv.get_id());
+            info!("Individual {} is deleted, ignore", msg_indv.get_id());
         }
         return ResultCode::Ok;
     }
 
-    let is_draft_of = prepared_indv.get_first_literal("v-s:is_draft_of");
+    let is_draft_of = msg_indv.get_first_literal("v-s:is_draft_of");
     if is_draft_of.is_some() {
         if debug_logging {
-            info!("Individual {} is draft, ignore", prepared_indv.get_id());
+            info!("Individual {} is draft, ignore", msg_indv.get_id());
         }
         return ResultCode::Ok;
     }
 
-    let subject = prepared_indv.get_first_literal("v-s:subject");
-    let message_body = prepared_indv.get_first_literal("v-s:messageBody");
-    let attachments = prepared_indv.get_literals("v-s:attachment");
+    let subject = msg_indv.get_first_literal("v-s:subject");
+    let message_body = msg_indv.get_first_literal("v-s:messageBody");
+    let attachments = msg_indv.get_literals("v-s:attachment");
 
     if debug_logging {
         info!(
             "Email details for {}: subject={:?}, has_body={}, attachment_count={:?}",
-            prepared_indv.get_id(),
+            msg_indv.get_id(),
             subject,
             message_body.is_some(),
             attachments.as_ref().map(|a| a.len())
         );
     }
 
-    let message_info = IndvAddreses::from_prepared_individual(prepared_indv, ctx);
+    let message_info = IndvAddreses::from_prepared_individual(msg_indv, ctx);
 
     if debug_logging {
         info!(
             "Address details for {}: from={}, to_count={}, has_sender_mailbox={}, recipient_mailbox_count={:?}",
-            prepared_indv.get_id(),
+            msg_indv.get_id(),
             message_info.from,
             message_info.to.len(),
             !message_info.sender_mailbox.is_empty(),
@@ -282,7 +282,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
         let mail_addreses = MailAddreses::from_indv_addreses(message_info, backend, ctx);
 
         if debug_logging {
-            info!("Resolved email addresses for {}: from={}, to_count={}", prepared_indv.get_id(), mail_addreses.email_from.email, mail_addreses.rr_email_to_hash.len());
+            info!("Resolved email addresses for {}: from={}, to_count={}", msg_indv.get_id(), mail_addreses.email_from.email, mail_addreses.rr_email_to_hash.len());
         }
 
         if !mail_addreses.rr_email_to_hash.is_empty() {
@@ -291,7 +291,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
             for el in mail_addreses.rr_email_to_hash.values() {
                 message_builder = message_builder.to(el.clone());
                 if debug_logging {
-                    info!("Adding recipient for {}: {}", prepared_indv.get_id(), el.email);
+                    info!("Adding recipient for {}: {}", msg_indv.get_id(), el.email);
                 }
             }
 
@@ -302,7 +302,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
             // Собираем сообщение в зависимости от наличия вложений
             let email = if attachments.is_some() {
                 if debug_logging {
-                    info!("Processing attachments for {}", prepared_indv.get_id());
+                    info!("Processing attachments for {}", msg_indv.get_id());
                 }
                 let mut builder = MultiPart::mixed().build();
 
@@ -312,7 +312,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                     if debug_logging {
                         info!(
                             "Adding message body for {}, content type: {}",
-                            prepared_indv.get_id(),
+                            msg_indv.get_id(),
                             if is_html {
                                 "text/html"
                             } else {
@@ -338,7 +338,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 // Добавляем вложения
                 for id in attachments.clone().unwrap().iter() {
                     if debug_logging {
-                        info!("Processing attachment {} for {}", id, prepared_indv.get_id());
+                        info!("Processing attachment {} for {}", id, msg_indv.get_id());
                     }
                     if let Some(file_info) = backend.get_individual(id, &mut Individual::default()) {
                         if let (Some(path), Some(file_uri), Some(file_name)) =
@@ -377,7 +377,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                                         }
                                     },
                                     Err(e) => {
-                                        error!("Failed to read attachment {} for email {}, err = {:?}", &full_path, prepared_indv.get_id(), e);
+                                        error!("Failed to read attachment {} for email {}, err = {:?}", &full_path, msg_indv.get_id(), e);
                                     },
                                 }
                             }
@@ -391,7 +391,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 if debug_logging {
                     info!(
                         "Creating single part message for {}, content type: {}",
-                        prepared_indv.get_id(),
+                        msg_indv.get_id(),
                         if is_html {
                             "text/html"
                         } else {
@@ -413,7 +413,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 }
             } else {
                 if debug_logging {
-                    info!("Creating empty message for {}", prepared_indv.get_id());
+                    info!("Creating empty message for {}", msg_indv.get_id());
                 }
                 message_builder
                     .header(header::ContentType::parse("text/plain; charset=utf-8").unwrap())
@@ -425,7 +425,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 Ok(email) => {
                     if let Some(mailer) = &ctx.smtp_client {
                         if debug_logging {
-                            info!("Attempting to send email for {}", prepared_indv.get_id());
+                            info!("Attempting to send email for {}", msg_indv.get_id());
                         }
                         match mailer.send(&email) {
                             Ok(response) => {
@@ -457,7 +457,7 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                                 return ResultCode::Ok;
                             },
                             Err(e) => {
-                                error!("Failed to send email, uri = {}, error details: {:?}", prepared_indv.get_id(), e);
+                                error!("Failed to send email, uri = {}, error details: {:?}", msg_indv.get_id(), e);
 
                                 // Определяем тип ошибки и выводим соответствующую информацию
                                 if e.is_permanent() {
@@ -503,11 +503,11 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                             },
                         }
                     } else {
-                        error!("Failed to send email, mailer not found, uri = {}", prepared_indv.get_id());
+                        error!("Failed to send email, mailer not found, uri = {}", msg_indv.get_id());
                     }
                 },
                 Err(e) => {
-                    error!("Failed to build email, id = {}, error: {}", prepared_indv.get_id(), e);
+                    error!("Failed to build email, id = {}, error: {}", msg_indv.get_id(), e);
                     error!(
                         "Email configuration: from={}, to_count={}, has_subject={}, has_body={}, has_attachments={}",
                         mail_addreses.email_from.email,
@@ -519,15 +519,15 @@ fn prepare_deliverable(prepared_indv: &mut Individual, backend: &mut Backend, ct
                 },
             }
         } else {
-            error!("No valid recipients found for {}", prepared_indv.get_id());
+            error!("No valid recipients found for {}", msg_indv.get_id());
         }
     } else {
         if message_info.from.is_empty() || message_info.from.len() < 5 {
-            error!("Failed to send email, empty or invalid field from, uri = {}, from = {}", prepared_indv.get_id(), message_info.from);
+            error!("Failed to send email, empty or invalid field from, uri = {}, from = {}", msg_indv.get_id(), message_info.from);
         }
 
         if message_info.to.is_empty() {
-            error!("Failed to send email, empty or invalid field to, uri = {}", prepared_indv.get_id());
+            error!("Failed to send email, empty or invalid field to, uri = {}", msg_indv.get_id());
         }
     }
 
