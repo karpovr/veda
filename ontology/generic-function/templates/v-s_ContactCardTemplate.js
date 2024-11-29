@@ -57,7 +57,7 @@ export const post = function (individual, template, container, mode, extra) {
     const isAppHasComm = individual['v-s:employee'][0].hasValue('v-s:hasCommunicationMean');
     if (isAppHasComm) {
       commMeansPromises = individual['v-s:employee'][0]['v-s:hasCommunicationMean'].map(function (commMean) {
-        return commMean.load();
+        return new IndividualModel(commMean.id, false).load();
       });
     }
     if (!individual['v-s:employee'][0].hasValue('v-s:dateAbsenceTo')) {
@@ -70,7 +70,7 @@ export const post = function (individual, template, container, mode, extra) {
   } else {
     if (individual.hasValue('v-s:hasCommunicationMean')) {
       commMeansPromises = individual['v-s:hasCommunicationMean'].map(function (commMean) {
-        return commMean.load();
+        return new IndividualModel(commMean.id, false).load();
       });
     }
   }

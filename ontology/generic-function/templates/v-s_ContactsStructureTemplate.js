@@ -541,16 +541,16 @@ export const post = function (individual, template, container, mode, extra) {
     const endingPart =
       " GROUP BY target.id, target.rdfs_label_str, target.version HAVING sum(target.sign) > 0 order by arraySort(x -> endsWith(lowerUTF8(x), '@en'), target.rdfs_label_str) asc";
     let basicWherePart = findDeleted ? ' WHERE target.v_s_deleted_int=[1]' : ' WHERE target.v_s_deleted_int=[0] ';
-    const orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org ON org.id=target.`v_s_parentOrganization_str`[1]';
+    const orgJoinPart = ' LEFT JOIN veda_tt.`v-s:Organization` as org FINAL ON org.id=target.`v_s_parentOrganization_str`[1]';
     const conditionForOrg = ' and org.`v_s_actualContacts_int`[1]=1';
     if (findInParentOrg) {
       basicWherePart += " AND target.v_s_parentOrganization_str=['" + individual['v-s:managedOrganization'][0].id + "']";
     }
-    let organizationQuery = selectPart + ' FROM veda_tt.`v-s:Organization` AS target';
-    let departmentQuery = selectPart + ' FROM veda_tt.`v-s:Department` AS target' + orgJoinPart;
+    let organizationQuery = selectPart + ' FROM veda_tt.`v-s:Organization` AS target FINAL';
+    let departmentQuery = selectPart + ' FROM veda_tt.`v-s:Department` AS target FINAL' + orgJoinPart;
     let appointmentQuery =
-      selectPart + ' FROM veda_tt.`v-s:Appointment` as target INNER JOIN veda_tt.`v-s:Person` as per ON target.v_s_employee_str[1] = per.id' + orgJoinPart;
-    let specialPositionQuery = selectPart + ' FROM veda_tt.`v-s:Position` AS target' + orgJoinPart;
+      selectPart + ' FROM veda_tt.`v-s:Appointment` as target FINAL INNER JOIN veda_tt.`v-s:Person` as per FINAL ON target.v_s_employee_str[1] = per.id' + orgJoinPart;
+    let specialPositionQuery = selectPart + ' FROM veda_tt.`v-s:Position` AS target FINAL' + orgJoinPart;
 
     let isCommMeanJoinAdded = false;
     // var isPhoneChannelAdded = false;
@@ -563,13 +563,13 @@ export const post = function (individual, template, container, mode, extra) {
         if (isPhoneSearch || isEmailSearch) {
           if (!isCommMeanJoinAdded) {
             isCommMeanJoinAdded = true;
-            organizationQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [target.id]';
-            departmentQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [target.id]';
-            appointmentQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [per.id]';
-            specialPositionQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [target.id]';
-            // organizationQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [target.id]";
-            // departmentQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [target.id]";
-            // appointmentQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [per.id]";
+            organizationQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [target.id]';
+            departmentQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [target.id]';
+            appointmentQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [per.id]';
+            specialPositionQuery += ' INNER JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [target.id]';
+            // organizationQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [target.id]";
+            // departmentQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [target.id]";
+            // appointmentQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm FINAL ON cm.v_s_backwardTarget_str = [per.id]";
             // specialPositionQuery += " LEFT JOIN veda_tt.`v-s:CommunicationMean` as cm ON cm.v_s_backwardTarget_str = [target.id]";
           }
           // if (isPhoneSearch && !isPhoneChannelAdded) {
