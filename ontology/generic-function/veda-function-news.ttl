@@ -178,3 +178,79 @@ veda.trigger('update');
   """;
   v-s:newsAudience cfg:AllUsersGroup;
 .
+v-s:News_ActualDatesCheck_Daily
+  rdf:type v-s:Event ;
+  v-s:author cfg:VedaSystemAppointment ;
+  rdfs:label "Скрипт, убирающий неактуальные новости из списка публикаций" ;
+  v-s:triggerByUid cfg:daily ;
+  v-s:runAt "V8.LowPriority";
+  v-s:script """
+print("****************************START v-s:News_ActualDatesCheck_Daily******************************");
+
+// Получаем объект уведомлений
+var clientNotification = get_individual(ticket, "cfg:ClientNotification");
+if (!clientNotification || !clientNotification["rdf:value"]) {
+  print("No notifications found");
+  return;
+}
+
+var today = new Date();
+var newsToRemove = [];
+
+// Проверяем каждую новость в списке уведомлений
+for (var i = 0; i < clientNotification["rdf:value"].length; i++) {
+  try {
+    var newsUri = clientNotification["rdf:value"][i].data;
+    var news = get_individual(ticket, newsUri);
+    
+    if (!news) {
+      print("Skip ", newsUri, ": news not found");
+      continue;
+    }
+
+    var shouldRemove = false;
+
+    // Проверяем наличие дат
+    if (!news["v-s:dateTo"] || !news["v-s:dateFrom"]) {
+      // Если даты не указаны, помечаем к удалению
+      shouldRemove = true;
+      print("News has no dates specified: ", newsUri);
+    } else {
+      // Если даты указаны, проверяем интервал
+      var dateTo = new Date(news["v-s:dateTo"][0].data);
+      var dateFrom = new Date(news["v-s:dateFrom"][0].data);
+      
+      // Если текущая дата больше dateTo или меньше dateFrom
+      if (today > dateTo || today < dateFrom) {
+        shouldRemove = true;
+      }
+    }
+
+    if (shouldRemove) {
+      newsToRemove.push(i);
+      
+      // Меняем статус новости на Исполнено
+      var set_in_doc = {
+        "@": newsUri,
+        "v-s:hasStatus": [veda.Util.newUri("v-s:StatusExecuted")]
+      };
+      set_in_individual(ticket, set_in_doc, _event_id);
+      print("News status updated: ", newsUri);
+    }
+  } catch (err) {
+    print("Error processing news ", newsUri, ": ", err);
+  }
+}
+
+// Удаляем новости из списка уведомлений (в обратном порядке)
+if (newsToRemove.length > 0) {
+  for (var j = newsToRemove.length - 1; j >= 0; j--) {
+    clientNotification["rdf:value"].splice(newsToRemove[j], 1);
+  }
+  set_in_individual(ticket, clientNotification, _event_id);
+  print("Removed ", newsToRemove.length, " outdated news from notifications");
+}
+
+print("****************************END v-s:News_ActualDatesCheck_Daily******************************");
+""" ;
+.
