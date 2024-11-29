@@ -364,7 +364,11 @@ today.setMinutes(59);
 //today.setHours(23,59,59,0);
 var queryString = "( 'rdf:type'==='v-s:ScheduledAction' && 'v-s:scriptHandlered'=='false' )";
 var result = query(ticket, queryString).result;
-for (var i=0; i<result.length; i++){
+if (result.length == 0) {
+  print('Warning. query.result.length == 0, stop execution');
+  return;
+}
+for (var i = 0; i < result.length; i++){
   var individ = get_individual(veda.ticket, result[i]);
   // не нужно в случае множественного значения периода
   // if (veda.Util.hasValue(individ, 'v-s:dateToFact')) {
@@ -388,9 +392,11 @@ for (var i=0; i<result.length; i++){
   //print('dateToPlan=', individ['v-s:dateToPlan']);
   var deadline = new Date(individ['v-s:dateToPlan'][0].data);
   var isAll = true;
+  var isNeedUpdate = false;
   var set_in_document = {
     '@': result[i]
   };
+
   for (var j = 0; j < individ['v-s:hasPeriod'].length; j++){
     var period = individ['v-s:hasPeriod'][j].data;
     var delta;
@@ -486,15 +492,22 @@ for (var i=0; i<result.length; i++){
 
     put_individual(veda.ticket, startForm, _event_id);
     set_in_document['v-s:dateToFact'] = veda.Util.newDate(new Date());
+    isNeedUpdate = true;
     print("Created: ", uri, ". For document:", result[i]);
   }
   if (isAll) {
     set_in_document["v-s:hasStatus"] = veda.Util.newUri("v-s:StatusProcessed");
     set_in_document['v-s:scriptHandlered'] = veda.Util.newBool(true);
+    isNeedUpdate = true;
   } else {
-    set_in_document["v-s:hasStatus"] = veda.Util.newUri("v-s:StatusPartiallyProcessed");
+    if (!veda.Util.hasValue(individ, 'v-s:hasStatus', {data: 'v-s:StatusPartiallyProcessed', type: 'Uri'})) {
+      set_in_document["v-s:hasStatus"] = veda.Util.newUri("v-s:StatusPartiallyProcessed");
+      isNeedUpdate = true;
+    }
   }
-  set_in_individual(ticket, set_in_document, _event_id);
+  if (isNeedUpdate) {
+    set_in_individual(ticket, set_in_document, _event_id);
+  }
 }
 scriptInfo['v-s:lastDateOfExecuting'] = veda.Util.newDate(new Date());
 put_individual(ticket, scriptInfo, _event_id);
