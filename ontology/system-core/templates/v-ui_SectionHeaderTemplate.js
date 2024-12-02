@@ -2,7 +2,7 @@ export const post = function (individual, template, container, mode, extra) {
   const header = template.closest('.section-header');
   if (!header) throw Error('section must contain .section-header element')
   const section = header.closest('section');
-  section.classList.add('active-section')
+  section.classList.add('active-section');
   header.addEventListener('click', function (e) {
     e.preventDefault();
     const ariaExpanded = section.getAttribute('aria-expanded');

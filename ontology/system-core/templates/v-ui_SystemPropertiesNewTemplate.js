@@ -16,10 +16,14 @@ export const pre = function (individual, template, container, mode, extra) {
 export const html = `
   <div>
     <section id="SystemProperties">
-      <h4 class="section-header" about="v-ui:SystemPropertiesTemplate" property="rdfs:comment"></h4>
-      <div class="row row-attribute">
-        <div class="col-sm-3 col-xs-5">
-          <label about="v-s:CreatedBundle" property="rdfs:label"></label>
+      <h4 class="section-header">
+        <span about="v-ui:SystemPropertiesTemplate" property="rdfs:comment"></span>
+        <span about="v-ui:SystemPropertiesTemplate" data-template="v-ui:SectionHeaderTemplate"></span>
+      </h4>
+      <div class="section-content">
+        <div class="row row-attribute">
+          <div class="col-sm-3 col-xs-5">
+            <label about="v-s:CreatedBundle" property="rdfs:label"></label>
         </div>
         <div class="col-sm-9 col-xs-7">
           <div class="row">
@@ -66,6 +70,7 @@ export const html = `
             <veda-control property="v-s:deleted" data-type="boolean"></veda-control>
             <strong about="v-s:deleted" property="rdfs:label"></strong>
           </label>
+        </div>
         </div>
       </div>
     </section>
