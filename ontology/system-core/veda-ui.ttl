@@ -739,6 +739,18 @@ v-ui:TableOfContentsTemplate
   rdfs:label "Template for document contents"@en ;
   v-ui:template "v-ui_TableOfContentsTemplate.js"
 .
+v-ui:PropertyCountTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон подсчета обьектов свойства"@ru ;
+  rdfs:label "Template of property object count"@en ;
+  v-ui:template "v-ui_PropertyCountTemplate.js"
+.
+v-ui:BooleanPropertyTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для булевых свойств"@ru ;
+  rdfs:label "Template for boolean properties"@en ;
+  v-ui:template "v-ui_BooleanPropertyTemplate.js"
+.
 v-ui:PsCommentFile
   rdf:type v-ui:DatatypePropertySpecification ;
   v-ui:forClass v-s:File ;
