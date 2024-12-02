@@ -1303,6 +1303,25 @@ svg.process-path-highlight path
 [aria-expanded="true"] .section-header { 
 }
 
+.td-wrapper {
+  max-height: 100px;
+  overflow: hidden;
+  display: inline-block;
+  position: relative;
+}
+
+.td-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 2;
+  border-top: 0 solid transparent;
+  border-right: 0 solid transparent;
+  border-bottom: 7px solid gray;
+  border-left: 7px solid transparent;
+}
+
 .active-section .section-header {
   cursor: pointer;
 }
@@ -1317,6 +1336,14 @@ h3.margin-sm:first-of-type {
 
 .row-attribute {
   margin-top: 1em;
+}
+
+.margin-top {
+  margin-top: 1em !important;
+}
+
+.margin-bottom {
+  margin-bottom: 1em !important;
 }
 
 .row-attribute .table {
