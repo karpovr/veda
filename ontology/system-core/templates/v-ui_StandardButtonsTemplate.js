@@ -192,6 +192,28 @@ export const pre = function (individual, template, container, mode, extra) {
         notify('danger', {message: 'Ошибка выгрузки реестра. Обратитесь в поддержку.'});
       });
   });
+  //find error button
+  template[0].querySelector('#findError').addEventListener('click', function () {
+    const mainContainer = document.querySelector('#main');
+    const errorElement = $('.has-error', mainContainer)[0];
+
+    if (errorElement && window.getComputedStyle(errorElement).visibility == 'hidden') {
+      errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $(errorElement).popover('show');
+    } else {
+      const hiddenErrorSection = $('.section-with-error', mainContainer)[0];
+      if (hiddenErrorSection) {
+        hiddenErrorSection.dispatchEvent(new Event('showRequest'));
+        const ErrorElement = $('.has-error', mainContainer)[0];
+        if (ErrorElement) {
+          ErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          $(ErrorElement).popover('show');
+        }
+      } else {
+        notify('danger', { message: 'Ошибка поиска, обратитесь в службу поддержки.' });
+      }
+    }
+  });
 
   function filePromise (url, name) {
     return new Promise(function (resolve, reject) {
@@ -325,10 +347,13 @@ export const post = function (individual, template, container, mode, extra) {
       $('.action#save', template).removeAttr('disabled');
       $('.action#send', template).removeAttr('disabled');
       $('.action#task-button', template).removeAttr('disabled');
+      $('.action#findError', template).addClass('hidden');
     } else {
       $('.action#save', template).attr('disabled', 'disabled');
       $('.action#send', template).attr('disabled', 'disabled');
       $('.action#task-button', template).attr('disabled', 'disabled');
+      $('.action#findError', template).removeClass('hidden');
+
     }
     e.stopPropagation();
   });
@@ -337,6 +362,7 @@ export const post = function (individual, template, container, mode, extra) {
 export const html = `
   <span>
     <button type="button" class="btn btn-success view -edit -search hidden glyphicon glyphicon-refresh" id="refresh" data-action="refresh"></button>
+    <button type="button" class="rm hidden action btn btn-danger -view edit -search" id="findError" data-action="findError" about="v-s:FindErrorBundle" property="rdfs:label"></button>
     <button type="submit" class="rm hidden action btn btn-warning view edit -search" id="send" data-action="send" about="v-s:Send" property="rdfs:label"></button>
     <button type="button" class="rm hidden action btn btn-primary view -edit -search" id="edit" data-action="edit" about="v-s:Edit" property="rdfs:label"></button>
     <button type="submit" class="rm hidden action btn btn-success -view edit -search" id="save" data-action="save" about="v-s:Save" property="rdfs:label"></button>
