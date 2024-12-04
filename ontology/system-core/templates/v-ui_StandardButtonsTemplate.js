@@ -194,17 +194,18 @@ export const pre = function (individual, template, container, mode, extra) {
   });
   //find error button
   template[0].querySelector('#findError').addEventListener('click', function () {
-    const mainContainer = document.querySelector('#main');
-    const errorElement = $('.has-error', mainContainer)[0];
+    const modalContainer = $('.modal.in')[0];
+    const container = modalContainer || document.querySelector('#main');
+    const errorElement = $('.has-error', container)[0];
 
     if (errorElement && window.getComputedStyle(errorElement).visibility == 'hidden') {
       errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       $(errorElement).popover('show');
     } else {
-      const hiddenErrorSection = $('.section-with-error', mainContainer)[0];
+      const hiddenErrorSection = $('.section-with-error', container)[0];
       if (hiddenErrorSection) {
         hiddenErrorSection.dispatchEvent(new Event('showRequest'));
-        const ErrorElement = $('.has-error', mainContainer)[0];
+        const ErrorElement = $('.has-error', container)[0];
         if (ErrorElement) {
           ErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           $(ErrorElement).popover('show');
