@@ -182,7 +182,7 @@ v-s:News_ActualDatesCheck_Daily
   rdf:type v-s:Event ;
   v-s:author cfg:VedaSystemAppointment ;
   rdfs:label "Скрипт, убирающий неактуальные новости из списка публикаций" ;
-  v-s:triggerByUid cfg:hourly ;
+  v-s:triggerByUid cfg:daily ;
   v-s:runAt "V8.LowPriority";
   v-s:script """
 print("****************************START v-s:News_ActualDatesCheck_Daily******************************");
@@ -203,29 +203,42 @@ print("Initial notifications count: " + initialCount);
 // Проверяем каждую новость в списке уведомлений
 for (var i = 0; i < clientNotification["rdf:value"].length; i++) {
   try {
+    print("==================== Processing news " + (i + 1) + " of " + initialCount + " ====================");
     var newsUri = clientNotification["rdf:value"][i].data;
     var news = get_individual(ticket, newsUri);
     
     if (!news) {
       print("Skip ", newsUri, ": news not found");
+      print("==========================================================");
       continue;
     }
+
+    print("News URI: ", newsUri);
+    print("News title: ", news["v-s:title"] ? news["v-s:title"][0].data : "no title");
 
     var shouldRemove = false;
     var dateInfo = "";
 
     // Проверяем наличие дат
     if (!news["v-s:dateTo"] || !news["v-s:dateFrom"]) {
-      // Если даты не указаны, помечаем к удалению
       shouldRemove = true;
       print("News has no dates specified: ", newsUri);
     } else {
-      // Если даты указаны, проверяем интервал
       var dateTo = new Date(news["v-s:dateTo"][0].data);
       var dateFrom = new Date(news["v-s:dateFrom"][0].data);
       
-      // Если текущая дата больше dateTo или меньше dateFrom
-      if (today > dateTo || today < dateFrom) {
+      print("Checking news: ", newsUri);
+      print("Date From: ", dateFrom);
+      print("Date To: ", dateTo);
+      
+      // Проверяем корректность дат
+      if (dateTo < dateFrom) {
+        shouldRemove = true;
+        dateInfo = " (invalid date range: from " + dateFrom + " to " + dateTo + ")";
+        print("News has invalid date range: ", newsUri, dateInfo);
+      }
+      // Если даты корректны, проверяем интервал
+      else if (today > dateTo || today < dateFrom) {
         shouldRemove = true;
         if (today > dateTo) {
           dateInfo = " (expired on: " + dateTo + ")";
@@ -236,7 +249,11 @@ for (var i = 0; i < clientNotification["rdf:value"].length; i++) {
     }
 
     if (shouldRemove) {
-      newsToRemove.push(i);
+      // Добавляем URI новости в список на удаление
+      newsToRemove.push({
+        index: i,
+        uri: newsUri
+      });
       
       // Меняем статус новости на Исполнено
       var set_in_doc = {
@@ -246,21 +263,40 @@ for (var i = 0; i < clientNotification["rdf:value"].length; i++) {
       set_in_individual(ticket, set_in_doc, _event_id);
       print("News status updated: ", newsUri, dateInfo);
     }
+
+    print("==========================================================");
   } catch (err) {
     print("Error processing news ", newsUri, ": ", err);
+    print("==========================================================");
   }
 }
 
-// Удаляем новости из списка уведомлений (в обратном порядке)
+// Удаляем новости из списка уведомлений
 if (newsToRemove.length > 0) {
-  for (var j = newsToRemove.length - 1; j >= 0; j--) {
-    clientNotification["rdf:value"].splice(newsToRemove[j], 1);
+  print("News to remove: ", newsToRemove.length);
+  
+  // Собираем массив объектов для удаления
+  var valuesToRemove = newsToRemove.map(function(item) {
+    return clientNotification["rdf:value"][item.index];
+  });
+  
+  // Формируем документ для удаления
+  var remove_from_doc = {
+    "@": clientNotification["@"],
+    "rdf:value": valuesToRemove
+  };
+  
+  print("Attempting to remove " + valuesToRemove.length + " notifications");
+  
+  // Удаляем объекты
+  if (remove_from_individual(ticket, remove_from_doc)) {
+    print("Summary:");
+    print("- Removed notifications: " + newsToRemove.length);
+    print("- Values to remove: " + valuesToRemove.length);
+    print("Successfully removed notifications");
+  } else {
+    print("Error: Failed to remove notifications");
   }
-  set_in_individual(ticket, clientNotification, _event_id);
-  var remainingCount = clientNotification["rdf:value"].length;
-  print("Summary:");
-  print("- Removed notifications: " + newsToRemove.length);
-  print("- Remaining notifications: " + remainingCount);
 }
 
 print("****************************END v-s:News_ActualDatesCheck_Daily******************************");
