@@ -216,7 +216,7 @@ function zeroPref (n) {
   return n > 9 ? String(n) : '0' + n;
 }
 
-Util.formatValue = function (value) {
+Util.formatValue = function (value, options = {}) {
   let formatted;
   switch (true) {
   case value instanceof Date:
@@ -224,7 +224,7 @@ Util.formatValue = function (value) {
     break;
   case value instanceof Number:
   case typeof value === 'number':
-    formatted = formatNumber(value);
+    formatted = formatNumber(value, options.unspaceNumber == 'true');
     break;
   case value instanceof String:
   case typeof value === 'string':
@@ -283,11 +283,11 @@ function formatDate (date) {
  * @param {number} n
  * @return {string}
  */
-function formatNumber (n) {
+function formatNumber (n, unspace) {
   return Number(n).toLocaleString('ru-RU', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 20,
-  }).replace(/\s/g, ' ');
+  }).replace(/\s/g, unspace ? '' : ' ');
 }
 
 /*
