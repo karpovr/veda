@@ -1008,7 +1008,10 @@ function processTemplate (individual, container, wrapper, templateMode) {
 function renderPropertyValues (about, isAbout, property_uri, propertyContainer, template, mode) {
   propertyContainer.innerHTML = '';
   about.get(property_uri).map((value) => {
-    const formattedValue = CommonUtil.formatValue(value);
+    const formatingOptions = {
+      unspaceNumber: propertyContainer.getAttribute('unspace'),
+    }
+    const formattedValue = CommonUtil.formatValue(value, formatingOptions);
     if (isAbout) {
       const prevValue = propertyContainer.textContent;
       if (prevValue) {
@@ -1019,7 +1022,7 @@ function renderPropertyValues (about, isAbout, property_uri, propertyContainer, 
     } else {
       const valueHolder = document.createElement('span');
       valueHolder.classList.add('value-holder');
-      valueHolder.textContent = CommonUtil.formatValue(value);
+      valueHolder.textContent = CommonUtil.formatValue(value, formatingOptions);
       propertyContainer.append(valueHolder);
       const btnGroup = document.createElement('div');
       btnGroup.classList.add('prop-actions', 'btn-group', 'btn-group-xs');
