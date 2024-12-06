@@ -58,6 +58,12 @@ $.fn.veda_link = function ( options ) {
   const createValue = function () {
     const newVal = new IndividualModel();
     newVal['rdf:type'] = rangeRestriction ? [rangeRestriction] : [(new IndividualModel(rel_uri))['rdfs:range'][0]];
+    newVal['v-s:backwardTarget'] = [individual];
+    newVal['v-s:backwardProperty'] = [rel_uri];
+    newVal['v-s:parent'] = [individual];
+    newVal['v-s:canRead'] = [true];
+    newVal['v-s:canUpdate'] = [true];
+    newVal['v-s:canDelete'] = [true];
     return newVal;
   };
 
