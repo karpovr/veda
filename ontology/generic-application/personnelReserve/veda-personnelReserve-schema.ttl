@@ -105,7 +105,7 @@ v-s:PersonnelReserve
 ###---Рекомендация---
 v-s:hasRecommendation
   rdf:type owl:ObjectProperty ;
-  rdfs:label "Рекомндация"@ru ;
+  rdfs:label "Рекомендация"@ru ;
   rdfs:label "Recommendations"@en ;
   rdfs:range v-s:Recommendation ;
   rdfs:domain v-s:PersonnelReserve ;
