@@ -1028,4 +1028,22 @@ v-ui:AppointmentSwitchMenuTemplate
   rdfs:label "Template for Main page class"@en ;
   v-ui:template "v-ui_AppointmentSwitchMenuTemplate.js" ;
 .
+v-ui:AttachmentTableTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Табличный шаблон для вложений"@ru ;
+  rdfs:label "Attachment table template"@en ;
+  v-ui:template "v-ui_AttachmentTableTemplate.js" ;
+.
+v-ui:MchdLinkTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для ссылки на МЧД"@ru ;
+  rdfs:label "Template for MCHD link"@en ;
+  v-ui:template "v-ui_MchdLinkTemplate.js" ;
+.
+v-ui:AttachmentTableRowTemplate
+  rdf:type v-ui:ClassTemplate ;
+  rdfs:label "Шаблон для строки таблицы вложений"@ru ;
+  rdfs:label "Template for attachment table row"@en ;
+  v-ui:template "v-ui_AttachmentTableRowTemplate.js" ;
+.
 
