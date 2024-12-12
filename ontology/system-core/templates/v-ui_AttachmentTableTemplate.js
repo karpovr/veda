@@ -118,9 +118,10 @@ export const html = `
           flex: 1;
           display: flex;
           padding: 8px;
+          justify-content: center;
           align-items: center;
           border-right: 1px solid #ddd;
-          max-width: 100px;
+          max-width: 50px;
         } 
     </style>
     <div class="row-container" id="table-header">

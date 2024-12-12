@@ -58,8 +58,8 @@ export const pre = async function (individual, template, container, mode, extra)
 export const html = `
 <div class="row-container">
   <div class="sign-action">
-    <button class="btn btn-primary btn-sm hidden" id="sign-attachments">
-      <i class="bi bi-pen-fill"></i>
+    <button style="font-size: 1.5rem;" class="btn btn-primary btn-xs hidden" id="sign-attachments" title="Подписать">
+      <i class="bi bi-pen"></i>
     </button>
   </div>
   <div class="file">
