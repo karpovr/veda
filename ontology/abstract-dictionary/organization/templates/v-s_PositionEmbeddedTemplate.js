@@ -20,6 +20,12 @@ export const pre = function (individual, template, container, mode, extra) {
         cause: ['v-ui:minCardinality'],
       };
     }
+    if (!individual.hasValue('v-s:title')) {
+      result['v-s:title'] = {
+        state: false,
+        cause: ['v-ui:minCardinality'],
+      };
+    }
     if (!individual.hasValue('v-s:parentOrganization')) {
       result['v-s:parentOrganization'] = {
         state: false,

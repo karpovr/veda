@@ -14,6 +14,12 @@ export const pre = function (individual, template, container, mode, extra) {
         cause: ['v-ui:minCardinality'],
       };
     }
+    if (!individual.hasValue('v-s:title')) {
+      result['v-s:title'] = {
+        state: false,
+        cause: ['v-ui:minCardinality'],
+      };
+    }
     if (!individual.hasValue('v-s:parentOrganization')) {
       result['v-s:parentOrganization'] = {
         state: false,
@@ -62,7 +68,7 @@ export const pre = function (individual, template, container, mode, extra) {
   template.on('edit', handleSuperUserAccess);
   template.on('view', handleSuperUserAccess);
   handleSuperUserAccess();
-  
+
   // для сторонних организаций формируем Полное наименование должности из title и организации
   individual.on('v-s:title', function (values) {
     if (values && values.length && individual.hasValue('v-s:parentOrganization') && individual['v-s:parentOrganization'][0].id !== 'd:org_RU1121003135') {
