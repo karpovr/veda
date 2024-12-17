@@ -65,7 +65,7 @@ export const pre = function (individual, template, container, mode, extra) {
   });
 
   veda.user.isMemberOf('cfg:SuperUser').then(function (isMemberSuperUser) {
-    if (isMemberSuperUser) {
+    if (isMemberSuperUser && template.attr('data-mode') === 'edit') {
       $('#label_edit', template).removeAttr('disabled');
     } else{
       $('#label_edit', template).remove();
