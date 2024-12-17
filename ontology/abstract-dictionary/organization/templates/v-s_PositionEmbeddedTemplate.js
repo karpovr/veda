@@ -64,13 +64,18 @@ export const pre = function (individual, template, container, mode, extra) {
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
 
-  veda.user.isMemberOf('cfg:SuperUser').then(function (isMemberSuperUser) {
+  async function handleSuperUserAccess() {
+    const isMemberSuperUser = await veda.user.isMemberOf('cfg:SuperUser');
     if (isMemberSuperUser && template.attr('data-mode') === 'edit') {
-      $('#label_edit', template).removeAttr('disabled');
-    } else{
-      $('#label_edit', template).remove();
+      $('#label_edit', template).removeClass('hide');
+    } else {
+      $('#label_edit', template).addClass('hide');
     }
-  });
+  }
+  template.on('edit', handleSuperUserAccess);
+  template.on('view', handleSuperUserAccess);
+  handleSuperUserAccess();
+
   // для сторонних организаций формируем Полное наименование должности из title и организации
   individual.on('v-s:title', function (values) {
     if (values && values.length && individual.hasValue('v-s:parentOrganization') && individual['v-s:parentOrganization'][0].id !== 'd:org_RU1121003135') {
@@ -105,7 +110,7 @@ export const html = `
         </div>
         <div class="col-sm-9 col-xs-7">
           <div about="@" property="rdfs:label" class="view edit -search"></div>
-          <veda-control class="disabled" id="label_edit" data-type="multilingualText" property="rdfs:label" class="-view edit search"></veda-control>
+          <veda-control class="hide" id="label_edit" data-type="multilingualText" property="rdfs:label" class="-view edit search"></veda-control>
         </div>
       </div>
       <div class="row row-attribute">
