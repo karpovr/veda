@@ -68,6 +68,22 @@ export const pre = function (individual, template, container, mode, extra) {
     }
     template[0].dispatchEvent(new CustomEvent('validated', {detail: result}));
   });
+
+  veda.user.isMemberOf('cfg:SuperUser').then(function (isMemberSuperUser) {
+    if (isMemberSuperUser) {
+      $('#label_edit', template).removeAttr('disabled');
+    } else{
+      $('#label_edit', template).remove();
+    }
+  });
+// для сторонних организаций формируем Полное наименование должности из title и организации
+  individual.on('v-s:title', function (values) {
+    if (values && values.length && individual.hasValue('v-s:parentOrganization') && individual['v-s:parentOrganization'][0].id !== 'd:org_RU1121003135') {
+      const title = values[0];
+      const orgName = individual['v-s:parentOrganization'][0]['rdfs:label'][0];
+      individual['rdfs:label'] = [`${title}. ${orgName}`];
+    }
+  });   
 };
 
 export const post = function (individual, template, container, mode, extra) {
@@ -126,10 +142,19 @@ export const html = `
           <label about="v-s:title" property="rdfs:label"></label>
         </div>
         <div class="col-sm-9 col-xs-7">
-          <div property="rdfs:label" class="view -edit -search"></div>
-          <veda-control data-type="multilingualText" property="rdfs:label" class="-view edit search"></veda-control>
+          <div property="v-s:title" class="view -edit -search"></div>
+          <veda-control data-type="multilingualText" property="v-s:title" class="-view edit search"></veda-control>
         </div>
       </div>
+      <div class="row row-attribute">
+        <div class="col-sm-3 col-xs-5">
+          <label about="v-s:LabelBundleForPosition" property="rdfs:label"></label>
+        </div>
+        <div class="col-sm-9 col-xs-7">
+          <div about="@" property="rdfs:label" class="view edit -search"></div>
+          <veda-control class="disabled" id="label_edit" data-type="multilingualText" property="rdfs:label" class="-view edit search"></veda-control>
+        </div>
+      </div>      
       <div class="row row-attribute">
         <div class="col-sm-3 col-xs-5">
           <label about="v-s:PositionCode" property="rdfs:label"></label>

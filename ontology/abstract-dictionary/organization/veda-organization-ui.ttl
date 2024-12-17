@@ -138,6 +138,11 @@ v-s:DefaultAppointmentBundle
   rdfs:label "Основное назначение"@ru ;
   rdfs:label "Default appointment"@en ;
 .
+v-s:LabelBundleForPosition
+  rdf:type v-s:Bundle ;
+  rdfs:label "Полное наименование"@ru ;
+  rdfs:label "Full name"@en ;
+.
 
 
 # ------------------------------------------------------------ МОДЕЛИ --
