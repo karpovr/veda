@@ -8,7 +8,7 @@ import Util from '../../common/util.js';
 
 import Backend from '../../common/backend.js';
 
-export {ftQuery, renderValue, interpolate, convertToCyrillic};
+export {ftQuery, storedQuery, renderValue, interpolate, convertToCyrillic, sanitizeInput};
 
 /**
  * Perform full text search query
@@ -87,6 +87,28 @@ function ftQuery (prefix, input, sort, withDeleted, queryPattern = "'*'=='{}'") 
       }
     });
   }
+}
+
+async function storedQuery (query, input = '', sort = '', withDeleted = false) {
+  const queryParams = new IndividualModel();
+  queryParams.set('rdf:type', 'v-s:QueryParams');
+  queryParams.set('v-s:storedQuery', query);
+  queryParams.set('v-s:resultFormat', 'cols');
+  queryParams.set('v-s:content', "%" + input + "%");
+
+  const allData = await Backend.stored_query(veda.ticket, queryParams.properties);
+  if (allData.id) {
+    return allData.id.map((id) => new IndividualModel(id));
+  } else {
+    throw new Error('Bad stored query output, no id column');
+  }
+}
+
+function sanitizeInput(input) {
+  return input.replace(/[\n\r\t]+/g, ' ')
+    .replace(/[^a-zA-Z0-9а-яА-ЯёЁ@. +\-()]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**

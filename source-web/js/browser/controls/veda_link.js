@@ -6,7 +6,7 @@ import IndividualModel from '../../common/individual_model.js';
 
 import Util from '../../common/util.js';
 
-import {interpolate, ftQuery, renderValue, convertToCyrillic} from './veda_control_util.js';
+import {interpolate, ftQuery, storedQuery, renderValue, convertToCyrillic, sanitizeInput} from './veda_control_util.js';
 
 $.fn.veda_link = function ( options ) {
   const self = this;
@@ -30,6 +30,10 @@ $.fn.veda_link = function ( options ) {
   let isSingle = this.attr('data-single') || ( spec && spec.hasValue('v-ui:maxCardinality') ? spec['v-ui:maxCardinality'][0] === 1 : true );
   let withDeleted = this.attr('data-deleted') || false;
 
+  let storedQueryId = spec && spec.hasValue('v-s:storedQuery') ? spec['v-s:storedQuery'][0] : undefined;
+  if (this.attr('data-stored-query')) {
+    storedQueryId = this.attr('data-stored-query');
+  }
   if (isSingle == 'false') isSingle = false;
 
   const tabindex = this.attr('tabindex');
@@ -290,6 +294,44 @@ $.fn.veda_link = function ( options ) {
       }
     });
 
+    function handleQueryResults (results) {
+      results = mergeFavorite(results);
+      renderResults(results);
+    }
+
+    function handleStoredQuery (query, value) {
+      const sanitizedValue = sanitizeInput(value);
+      if (sanitizedValue.length < 3) {
+        return;
+      }
+      storedQuery(query, sanitizedValue)
+        .then(handleQueryResults)
+        .catch((error) => {
+          console.error('Stored query failed, start fulltext');
+          handleFulltextQuery(value);
+        });
+    }
+
+    function handleFulltextQuery (value) {
+      let queryPrefix;
+      if (isDynamicQueryPrefix) {
+        queryPrefix = self.attr('data-query-prefix');
+      }
+      if (queryPrefix == undefined) {
+        queryPrefix = queryPrefixDefault;
+      }
+      interpolate(queryPrefix, individual).then((prefix) => {
+        if (value) {
+          const converted = convertToCyrillic(value);
+          if (converted != value) value += '\n' + converted;
+        }
+        ftQuery(prefix, value, sort, withDeleted, queryPattern).then(handleQueryResults)
+          .catch((error) => {
+            console.error('Fulltext query failed');
+          });
+      });
+    }
+
     const performSearch = function (value) {
       if (source) {
         return Promise.resolve(eval(source))
@@ -298,26 +340,11 @@ $.fn.veda_link = function ( options ) {
             console.error('Source failed', source);
           });
       } else {
-        let queryPrefix;
-        if (isDynamicQueryPrefix) {
-          queryPrefix = self.attr('data-query-prefix');
+        if (storedQueryId) {
+          handleStoredQuery(storedQueryId, value);
+        } else {
+          handleFulltextQuery(value);
         }
-        if (queryPrefix == undefined) {
-          queryPrefix = queryPrefixDefault;
-        }
-        interpolate(queryPrefix, individual).then((prefix) => {
-          if (value) {
-            const converted = convertToCyrillic(value);
-            if (converted != value) value += '\n' + converted;
-          }
-          ftQuery(prefix, value, sort, withDeleted, queryPattern)
-            .then((results) => {
-              results = mergeFavorite(results);
-              renderResults(results);
-            }).catch((error) => {
-              console.error('Fulltext query failed');
-            });
-        });
       }
     };
 
