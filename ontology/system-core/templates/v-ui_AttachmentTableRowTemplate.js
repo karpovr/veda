@@ -3,7 +3,7 @@ import Crypto from '/js/browser/crypto.js';
 import IndividualModel from '/js/common/individual_model.js';
 
 export const pre = async function (individual, template, container, mode, extra) {
-  const crypto = Crypto.getInstance();
+  let crypto = Crypto.getInstance();
   try {
     await crypto.init();
     $('button#sign-attachments', template).removeClass('hidden');
