@@ -4,14 +4,17 @@ import IndividualModel from '/js/common/individual_model.js';
 
 export const pre = async function (individual, template, container, mode, extra) {
   let crypto = Crypto.getInstance();
-  try {
-    await crypto.init();
-    $('button#sign-attachments', template).removeClass('hidden');
-  } catch (error) {
-    console.log(error);
-    $('button#sign-attachments', template).remove();
-    return;
-  }
+  
+  setTimeout(async () => {
+    try {
+      await crypto.init();
+      $('button#sign-attachments', template).removeClass('hidden');
+    } catch (error) {
+      console.log(error);
+      $('button#sign-attachments', template).remove();
+      return;
+    }
+  });
 
   $('#sign-attachments', template).click(async () => {
     try {
@@ -52,7 +55,27 @@ export const pre = async function (individual, template, container, mode, extra)
       $('#sign-attachments', template).attr('disabled', 'disabled');
     }
   }
+
+  async function checkMchdInfo() {
+    if (individual.hasValue('v-s:digitalSignature')) {
+      const sign = individual['v-s:digitalSignature'][0];
+      await sign.load();
+      if (sign.hasValue('v-s:hasMchdInfo')) {
+        $('.sign-description', template).show();
+        return;
+      }
+    }
+    $('.sign-description', template).hide();
+  }
+
+  await checkMchdInfo();
+  individual.on('v-s:digitalSignature', checkMchdInfo);
+  individual.on('v-s:digitalSignature', checkSignatures);
+
   await checkSignatures();
+  individual.on('v-s:digitalSignature', async () => {
+    $(container).trigger('updateRequest');
+  });
 };
 
 export const html = `

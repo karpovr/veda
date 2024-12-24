@@ -38,8 +38,12 @@ export const post = async function (individual, template, container, mode, extra
 
   async function checkVisibility () { 
     if (!await isSignedFiles(individual[targetProperty])) {
-      $('.signatures', template).remove();
-    } 
+      $('.signatures', template).hide();
+      $('.comment', template).addClass('no-border');
+    } else {
+      $('.signatures', template).show();
+      $('.comment', template).removeClass('no-border');
+    }
     if (!withComment) {
       $('.comment', template).remove();
     }
@@ -59,6 +63,7 @@ export const post = async function (individual, template, container, mode, extra
   }
 
   checkVisibility();
+  $('#table-body', template).on('updateRequest', checkVisibility);
   individual.on(targetProperty, checkVisibility);
 };
 
@@ -66,6 +71,9 @@ export const post = async function (individual, template, container, mode, extra
 export const html = `
   <div>
     <style scoped>
+      .no-border {
+        border: none !important;
+      }
       .row-container {
           display: flex;
           border: 1px solid #ddd;
@@ -96,7 +104,8 @@ export const html = `
           max-width: 60px;
           flex: 1;
           padding: 8px;
-          text-align: center;
+          display: flex;
+          align-items: center;
         }
         .signature:last-child, .description:last-child {
           border-right: none;
