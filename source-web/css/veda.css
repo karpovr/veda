@@ -350,22 +350,24 @@ hr.black {
   margin: 0px;
 }
 .label-tiled {
-  display: inline-block;
-  padding: 0.3em 0.6em;
-  border: 1px solid #ddd; /* Add a border similar to Bootstrap's default */
-  border-radius: 0.25em;   /* Apply a slight border radius */
+  padding: .2em .6em .3em;
+  font-size: 85%;
+  font-weight: inherit;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border: 1px solid #ddd;
+  border-radius: 0.25em;
+  color: inherit;
+  margin-bottom: 3px;
 }
-
+.label > .rel-actions.block {
+  position: relative !important;
+  margin: 0 0 0 7px !important;
+}
 .label-tiled.label-default {
   border-color: #ccc; /* Alternative border color, similar to Bootstrap's .label-default */
-}
-
-/* Ensure the .label class doesn't affect the color and font weight */
-.label-tiled {
-  font-size: inherit;
-  color: inherit; /* Retain the default text color */
-  font-weight: inherit; /* Retain the default font weight */
-  margin-bottom: 3px;
 }
 .first-letter::first-letter {
   font-size: 140%;
