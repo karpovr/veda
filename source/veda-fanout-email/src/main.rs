@@ -160,13 +160,15 @@ struct MailAddreses {
 
 impl MailAddreses {
     fn from_indv_addreses(message_info: IndvAddreses, backend: &mut Backend, ctx: &mut Context) -> Option<Self> {
-        // Пробуем получить корректный email отправителя
-        let email_from = if ctx.always_use_mail_sender && !ctx.default_mail_sender.is_empty() && ctx.default_mail_sender.len() > 5 {
-            info!("use default mail sender: {}", ctx.default_mail_sender);
-            if !ctx.default_mail_sender.contains('@') {
-                extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend).pop()
+        let default_sender = ctx.default_mail_sender.clone();
+        let always_use_sender = ctx.always_use_mail_sender;
+
+        let email_from = if always_use_sender && !default_sender.is_empty() && default_sender.len() > 5 {
+            info!("use default mail sender: {}", default_sender);
+            if !default_sender.contains('@') {
+                extract_email(&None, &default_sender, ctx, backend).pop()
             } else {
-                Address::from_str(&ctx.default_mail_sender).ok().map(|address| Mailbox::new(Some("Veda System".to_string()), address))
+                Address::from_str(&default_sender).ok().map(|address| Mailbox::new(Some("Veda System".to_string()), address))
             }
         } else {
             let mut result = None;
@@ -176,10 +178,8 @@ impl MailAddreses {
                 info!("extract from: {}", message_info.from);
                 result = extract_email(&None, &message_info.from, ctx, backend).pop();
             }
-
-            // Если не получилось, пробуем default_mail_sender
-            if result.is_none() && !ctx.default_mail_sender.is_empty() {
-                result = extract_email(&None, &ctx.default_mail_sender.to_string(), ctx, backend).pop();
+            if result.is_none() && !default_sender.is_empty() {
+                result = extract_email(&None, &default_sender, ctx, backend).pop();
             }
 
             // Если всё ещё нет, пробуем sender_mailbox
@@ -209,6 +209,26 @@ impl MailAddreses {
         for el in message_info.recipient_mailbox.unwrap_or_default() {
             if let Ok(address) = Address::from_str(&el) {
                 rr_email_to_hash.insert(el.to_string(), Mailbox::new(Some("Recipient".to_string()), address));
+            }
+        }
+
+        // Проверяем self-email после определения всех адресов
+        if rr_email_to_hash.len() == 1 {
+            let recipient_email = rr_email_to_hash.values().next().unwrap().email.to_string();
+            info!("Checking self-email: from={}, to={}", email_from.email, recipient_email);
+
+            if recipient_email == email_from.email.to_string() && !default_sender.is_empty() && default_sender.len() > 5 {
+                info!("Detected self-email, using default sender");
+                if let Some(new_from) = if !default_sender.contains('@') {
+                    extract_email(&None, &default_sender, ctx, backend).pop()
+                } else {
+                    Address::from_str(&default_sender).ok().map(|address| Mailbox::new(Some("Veda System".to_string()), address))
+                } {
+                    return Some(MailAddreses {
+                        email_from: new_from,
+                        rr_email_to_hash,
+                    });
+                }
             }
         }
 
@@ -421,88 +441,21 @@ fn prepare_deliverable(msg_indv: &mut Individual, backend: &mut Backend, ctx: &m
 
         match email {
             Ok(email) => {
-                if let Some(mailer) = &ctx.smtp_client {
-                    if debug_logging {
-                        info!("Attempting to send email for {}", msg_indv.get_id());
-                    }
-                    match mailer.send(&email) {
-                        Ok(response) => {
-                            // Извлекаем message_id из ответа SMTP сервера
-                            let message_id = response.message().collect::<Vec<_>>().first().and_then(|msg| {
-                                if let Some(start) = msg.find('<') {
-                                    if let Some(end) = msg[start..].find('>') {
-                                        Some(&msg[start..start + end + 1])
-                                    } else {
-                                        None
-                                    }
-                                } else {
-                                    None
-                                }
-                            });
+                if debug_logging {
+                    info!("Attempting to send email for {}", msg_indv.get_id());
+                }
 
-                            // Базовый лог для любого случая
-                            info!(
-                                "Email sent: msg={}, from={}, to={:?}, smtp_code={}, message_id={}",
-                                msg_indv.get_id(),
-                                mail_addreses.email_from.email,
-                                mail_addreses.rr_email_to_hash.values().map(|m| m.email.to_string()).collect::<Vec<_>>(),
-                                response.code(),
-                                message_id.unwrap_or("unknown")
-                            );
-
-                            if debug_logging {
-                                info!("Full SMTP server response: {:?}", response);
-                            }
-                            return ResultCode::Ok;
-                        },
-                        Err(e) => {
-                            error!("Failed to send email, uri = {}, error details: {:?}", msg_indv.get_id(), e);
-
-                            // Определяем тип ошибки и выводим соответствующую информацию
-                            if e.is_permanent() {
-                                if let Some(code) = e.status() {
-                                    error!("Permanent SMTP error with code {}: {}", code, e);
-                                } else {
-                                    error!("Permanent SMTP error without code: {}", e);
-                                }
-                                error!("This error cannot be resolved by retrying");
-                            } else if e.is_transient() {
-                                if let Some(code) = e.status() {
-                                    error!("Transient SMTP error with code {}: {}", code, e);
-                                } else {
-                                    error!("Transient SMTP error without code: {}", e);
-                                }
-                                error!("This error might be resolved by retrying later");
-                            } else if e.is_client() {
-                                error!("SMTP client error: {}", e);
-                            } else if e.is_response() {
-                                error!("SMTP response error: {}", e);
-                            } else if e.is_timeout() {
-                                error!("SMTP timeout error: {}", e);
-                            }
-
-                            // Выводим информацию об исходной ошибке, если она есть
-                            if let Some(source) = e.source() {
-                                error!("Underlying error: {}", source);
-                                if let Some(io_err) = source.downcast_ref::<std::io::Error>() {
-                                    error!("IO error kind: {:?}", io_err.kind());
-                                    if let Some(os_err) = io_err.raw_os_error() {
-                                        error!("OS error code: {}", os_err);
-                                    }
-                                }
-                            }
-
-                            // Логируем контекст отправки
-                            error!(
-                                "Email context: from={}, to={:?}, subject={:?}",
-                                mail_addreses.email_from.email,
-                                mail_addreses.rr_email_to_hash.values().map(|m| m.email.to_string()).collect::<Vec<_>>(),
-                                subject
-                            );
-                        },
-                    }
-                } else {
-                    error!("Failed to send email, mailer not found, uri = {}", msg_indv.get_id());
+                match try_send_email(&email, ctx, backend, msg_indv, &mail_addreses, debug_logging) {
+                    Ok(_) => return ResultCode::Ok,
+                    Err(e) => {
+                        error!("All attempts to send email failed for {}: {}", msg_indv.get_id(), e);
+                        error!(
+                            "Email context: from={}, to={:?}, subject={:?}",
+                            mail_addreses.email_from.email,
+                            mail_addreses.rr_email_to_hash.values().map(|m| m.email.to_string()).collect::<Vec<_>>(),
+                            subject
+                        );
+                    },
                 }
             },
             Err(e) => {
@@ -798,4 +751,87 @@ fn connect_to_smtp(ctx: &mut Context, module: &mut Backend) -> bool {
 
     error!("failed to find connection configuration for smtp server");
     false
+}
+
+fn try_send_email(
+    email: &Message,
+    ctx: &mut Context,
+    backend: &mut Backend,
+    msg_indv: &mut Individual,
+    mail_addreses: &MailAddreses,
+    debug_logging: bool,
+) -> Result<(), Box<dyn Error>> {
+    let max_retries = 3;
+    let retry_delays = [1, 3, 5];
+
+    for attempt in 0..max_retries {
+        if ctx.smtp_client.is_none() {
+            if debug_logging {
+                info!("No SMTP client, attempting to reconnect...");
+            }
+            connect_to_smtp(ctx, backend);
+        }
+
+        if let Some(mailer) = &ctx.smtp_client {
+            match mailer.send(email) {
+                Ok(response) => {
+                    let message_id = response.message().collect::<Vec<_>>().first().and_then(|msg| {
+                        if let Some(start) = msg.find('<') {
+                            if let Some(end) = msg[start..].find('>') {
+                                Some(&msg[start..start + end + 1])
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    });
+
+                    info!(
+                        "Email sent: msg={}, from={}, to={:?}, smtp_code={}, message_id={}",
+                        msg_indv.get_id(),
+                        mail_addreses.email_from.email,
+                        mail_addreses.rr_email_to_hash.values().map(|m| m.email.to_string()).collect::<Vec<_>>(),
+                        response.code(),
+                        message_id.unwrap_or("unknown")
+                    );
+
+                    if debug_logging {
+                        info!("Full SMTP server response: {:?}", response);
+                    }
+                    return Ok(());
+                },
+                Err(e) => {
+                    error!("Attempt {} failed to send email, uri = {}, error details: {:?}", attempt + 1, msg_indv.get_id(), e);
+
+                    if e.is_transient() {
+                        if let Some(code) = e.status() {
+                            error!("Transient SMTP error with code {}: {}", code, e);
+                        }
+
+                        ctx.smtp_client = None;
+
+                        if attempt < max_retries - 1 {
+                            let delay = retry_delays[attempt];
+                            error!("Will retry in {} seconds...", delay);
+                            std::thread::sleep(std::time::Duration::from_secs(delay));
+                            continue;
+                        }
+                    }
+
+                    return Err(Box::new(e));
+                },
+            }
+        } else {
+            error!("Failed to reconnect to SMTP server");
+            if attempt < max_retries - 1 {
+                let delay = retry_delays[attempt];
+                std::thread::sleep(std::time::Duration::from_secs(delay));
+                continue;
+            }
+            return Err("Failed to establish SMTP connection after all retries".into());
+        }
+    }
+
+    Err("Failed to send email after all retries".into())
 }
