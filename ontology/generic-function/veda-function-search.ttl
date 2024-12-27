@@ -66,6 +66,11 @@ v-fs:FilesRegistry
   rdfs:label "Реестр с файлами"@ru ;
   rdfs:label "Registry with files"@en ;
 .
+v-fs:DownloadAllFiles
+  rdf:type v-s:Bundle ;
+  rdfs:label "Скачать все файлы"@ru ;
+  rdfs:label "Download all files"@en ;
+.
 v-fs:SetColumns
   rdf:type v-s:Bundle ;
   rdfs:label "Настроить столбцы"@ru ;

@@ -373,7 +373,7 @@ export const html = `
     <button type="button" class="rm hidden action btn btn-danger view edit -search" id="destroy" data-action="destroy" about="v-s:Destroy" property="rdfs:label"></button>
     <button type="button" class="rm hidden action btn btn-default view -edit -search" id="journal" data-action="journal" about="v-s:ViewJournal" property="rdfs:label"></button>
     <button type="button" class="rm hidden action btn btn-default view -edit -search" id="rights" data-action="rights" about="v-s:Rights" property="rdfs:label"></button>
-    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="files" data-action="files" about="v-fs:FilesRegistry" property="rdfs:label"></button>
+    <button type="button" class="rm hidden action btn btn-default view -edit -search" id="files" data-action="files" about="v-fs:DownloadAllFiles" property="rdfs:label"></button>
     <div class="rm hidden action btn-group dropup view -edit -search" id="task">
       <button class="action btn btn-warning btn-block dropdown-toggle" id="task-button" data-toggle="dropdown">
         <span about="v-s:SendTask" property="rdfs:label"> </span>
